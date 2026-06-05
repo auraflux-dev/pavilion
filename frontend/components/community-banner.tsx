@@ -1,14 +1,10 @@
-import Image from 'next/image'
-
 export function CommunityBanner() {
   return (
     <section className="relative w-full h-48 sm:h-64 md:h-72 overflow-hidden" aria-label="Community photo">
-      <Image
-        src="/placeholder.svg?height=400&width=1440"
+      <img
+        src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1440&h=400&fit=crop&crop=center"
         alt="Stone Hill Middle School PTO community"
-        fill
-        className="object-cover"
-        priority={false}
+        className="w-full h-full object-cover"
       />
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/30" aria-hidden="true" />

@@ -9,12 +9,12 @@ export function Hero() {
       style={{ backgroundColor: '#085508' }}
       aria-label="Welcome banner"
     >
-      {/* Subtle wave pattern overlay */}
+      {/* Subtle diagonal dot pattern — no crosses */}
       <div
-        className="absolute inset-0 opacity-[0.06]"
+        className="absolute inset-0 opacity-[0.05]"
         aria-hidden="true"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='%23ffffff'/%3E%3C/svg%3E")`,
         }}
       />
 
@@ -114,29 +114,24 @@ export function Hero() {
 
           {/* RIGHT COLUMN — 40% */}
           <div className="lg:w-[40%] flex flex-col gap-4">
-            {/* Top image — tall portrait */}
-            <div className="group w-full rounded-xl overflow-hidden shadow-lg ring-2 ring-transparent hover:ring-[#085508] transition-all duration-300">
-              <Image
-                src="/placeholder.svg?height=300&width=400"
-                alt="SHMS students at event"
-                width={400}
-                height={300}
-                className="w-full h-auto object-cover"
-                priority
+            {/* Top image — students */}
+            <div className="group w-full rounded-xl overflow-hidden shadow-lg ring-2 ring-transparent hover:ring-white/50 transition-all duration-300">
+              <img
+                src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&h=400&fit=crop&crop=center"
+                alt="Students at school event"
+                className="w-full h-64 object-cover"
               />
             </div>
 
-            {/* Bottom image — landscape, offset right */}
+            {/* Bottom image — community, offset right */}
             <div
-              className="group w-[90%] rounded-xl overflow-hidden shadow-lg ring-2 ring-transparent hover:ring-[#085508] transition-all duration-300"
+              className="group w-[90%] rounded-xl overflow-hidden shadow-lg ring-2 ring-transparent hover:ring-white/50 transition-all duration-300"
               style={{ marginLeft: 'auto' }}
             >
-              <Image
-                src="/placeholder.svg?height=200&width=400"
-                alt="PTO volunteers"
-                width={400}
-                height={200}
-                className="w-full h-auto object-cover"
+              <img
+                src="https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600&h=300&fit=crop&crop=center"
+                alt="PTO community volunteers"
+                className="w-full h-48 object-cover"
               />
             </div>
           </div>

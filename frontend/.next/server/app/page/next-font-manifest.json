@@ -1,0 +1,11 @@
+{
+  "pages": {},
+  "app": {
+    "[project]/wix-shmspto/frontend/app/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pagesUsingSizeAdjust": false
+}
