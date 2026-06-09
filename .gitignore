@@ -5,3 +5,5 @@ node_modules/
 .wix/
 jsconfig.json
 frontend/.env.local
+data/*.csv
+migration/data/
