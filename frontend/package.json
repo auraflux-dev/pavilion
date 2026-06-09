@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "postinstall": "echo 'skipping wix sync-types in CI'"
+    "postinstall": "echo done"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
