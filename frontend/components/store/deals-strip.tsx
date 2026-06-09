@@ -38,14 +38,23 @@ export function DealsStrip({ items }: DealsStripProps) {
               key={item._id}
               className="snap-start shrink-0 w-44 bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E8E4DC] flex flex-col"
             >
-              {/* Emoji placeholder (until real images uploaded) */}
-              <div
-                className="h-28 flex items-center justify-center text-4xl"
-                style={{ backgroundColor: '#F5F0E8' }}
-                aria-hidden="true"
-              >
-                {CATEGORY_EMOJI[item.category] ?? '🍬'}
-              </div>
+              {/* Product image or emoji fallback */}
+              {item.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="h-28 w-full object-cover"
+                />
+              ) : (
+                <div
+                  className="h-28 flex items-center justify-center text-4xl"
+                  style={{ backgroundColor: '#F5F0E8' }}
+                  aria-hidden="true"
+                >
+                  {CATEGORY_EMOJI[item.category] ?? '🍬'}
+                </div>
+              )}
 
               <div className="p-3 flex flex-col flex-1">
                 <p className="text-[10px] font-bold tracking-wider uppercase text-[#5A6070] mb-0.5">

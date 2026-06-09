@@ -105,14 +105,23 @@ function ItemCard({ item }: { item: StoreItem }) {
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E8E4DC] flex flex-col">
-      {/* Emoji stand-in */}
-      <div
-        className="h-24 flex items-center justify-center text-3xl"
-        style={{ backgroundColor: colors.bg }}
-        aria-hidden="true"
-      >
-        {CATEGORY_EMOJI[item.category] ?? '🍬'}
-      </div>
+      {/* Product image or emoji fallback */}
+      {item.image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={item.image}
+          alt={item.name}
+          className="h-24 w-full object-cover"
+        />
+      ) : (
+        <div
+          className="h-24 flex items-center justify-center text-3xl"
+          style={{ backgroundColor: colors.bg }}
+          aria-hidden="true"
+        >
+          {CATEGORY_EMOJI[item.category] ?? '🍬'}
+        </div>
+      )}
 
       <div className="p-3 flex flex-col flex-1">
         <span

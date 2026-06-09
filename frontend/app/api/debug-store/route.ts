@@ -9,7 +9,7 @@ export async function GET() {
     return NextResponse.json({
       source: 'wix-stores-catalog-v3',
       count: items.length,
-      items: items.map(i => ({ id: i._id, name: i.name, price: i.price, image: i.image ?? null })),
+      items: items.map(i => ({ id: i._id, name: i.name, price: i.price, image: i.image ?? null, featured: i.featured })),
       hasApiKey: !!process.env.WIX_API_KEY,
       hasSiteId: !!process.env.WIX_SITE_ID,
     })
