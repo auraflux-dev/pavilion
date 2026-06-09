@@ -128,7 +128,7 @@ export function ProgramsPreview() {
                     style={{ backgroundColor: program.iconColor }}
                     asChild
                   >
-                    <a href="#programs">
+                    <a href="/programs">
                       Register Now
                       <ArrowRight
                         className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
@@ -145,7 +145,7 @@ export function ProgramsPreview() {
         {/* View all link */}
         <div className="text-center mt-10">
           <a
-            href="#programs"
+            href="/programs"
             className="inline-flex items-center gap-2 text-sm font-semibold hover:underline underline-offset-4 transition-colors"
             style={{ color: '#085508' }}
           >

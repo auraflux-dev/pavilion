@@ -7,10 +7,11 @@ export interface Program {
   fee: number;
   capacity: number;
   registrationOpen: boolean;
-  cheddarupUrl: string;
+  cheddarupUrl?: string;
   requiresWaiver: boolean;
   grades: string;
   category?: string;
+  paymentType?: 'wix' | 'cheddarup_installment' | 'cheddarup_p2p';
 }
 
 export async function getPrograms(): Promise<Program[]> {
