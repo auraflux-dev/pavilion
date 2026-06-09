@@ -76,6 +76,9 @@ function inferCategory(name: string): StoreItem["category"] {
 function mapProduct(raw: Record<string, unknown>): StoreItem {
   const name = (raw.name as string) ?? "";
 
+  // "Deal of the Week" = product has a ribbon set in Wix Dashboard → Catalog → Products
+  const featured = typeof raw.ribbon === "string" && raw.ribbon.trim().length > 0;
+
   // Price lives in variantSummary.minPriceVariant.price.actualPrice.amount
   let price = 0;
   let inStock = false;
@@ -105,7 +108,7 @@ function mapProduct(raw: Record<string, unknown>): StoreItem {
     price,
     category: inferCategory(name),
     inStock,
-    featured: false,                            // no featured flag in Stores catalog; extend later
+    featured,
     image: getProductImage(raw),
   };
 }
@@ -145,10 +148,11 @@ export async function getStoreItems(): Promise<StoreItem[]> {
 }
 
 /**
- * Returns "featured" items — currently the first 3 in-stock products.
- * Extend this once a featured flag or Deal-of-the-Week field is added.
+ * Returns "Deal of the Week" items.
+ * To feature a product: Wix Dashboard → Catalog → Products → open product → set a Ribbon (e.g. "Deal").
+ * To remove it: clear the Ribbon field. No code change needed.
  */
 export async function getFeaturedItems(): Promise<StoreItem[]> {
   const all = await getStoreItems();
-  return all.filter((i) => i.inStock).slice(0, 3);
+  return all.filter((i) => i.featured);
 }
