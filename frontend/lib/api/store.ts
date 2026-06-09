@@ -76,8 +76,9 @@ function inferCategory(name: string): StoreItem["category"] {
 function mapProduct(raw: Record<string, unknown>): StoreItem {
   const name = (raw.name as string) ?? "";
 
-  // "Deal of the Week" = product has a ribbon set in Wix Dashboard → Catalog → Products
-  const featured = typeof raw.ribbon === "string" && raw.ribbon.trim().length > 0;
+  // "Deal of the Week" = product has a ribbon set (ribbon is an object { name: string })
+  const ribbonName = (raw.ribbon as Record<string, unknown> | undefined)?.name;
+  const featured = typeof ribbonName === "string" && ribbonName.trim().length > 0;
 
   // Price lives in variantSummary.minPriceVariant.price.actualPrice.amount
   let price = 0;
