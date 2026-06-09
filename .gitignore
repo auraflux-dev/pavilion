@@ -7,3 +7,4 @@ jsconfig.json
 frontend/.env.local
 data/*.csv
 migration/data/
+.vercel

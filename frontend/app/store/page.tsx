@@ -7,7 +7,7 @@ import { StoreGrid } from '@/components/store/store-grid'
 import { StoreCardCta } from '@/components/store/store-card-cta'
 import { getStoreItems, getFeaturedItems } from '@/lib/api/store'
 
-export const revalidate = 0 // force-dynamic while debugging
+export const revalidate = 300 // 5 min cache
 
 export const metadata = {
   title: 'School Store | SHMS PTO',
