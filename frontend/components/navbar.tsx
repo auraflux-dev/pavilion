@@ -1,17 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Menu, X, GraduationCap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 const navLinks = [
-  { label: 'About', href: '#about' },
-  { label: 'Programs', href: '#programs' },
-  { label: 'Events', href: '#events' },
-  { label: 'Store', href: '#store' },
-  { label: 'Volunteer', href: '#volunteer' },
-  { label: 'Membership', href: '#membership' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Programs', href: '/programs' },
+  { label: 'Events', href: '/events' },
+  { label: 'Store', href: '/store' },
+  { label: 'Volunteer', href: '/volunteer' },
+  { label: 'Membership', href: '/membership' },
+  { label: 'Newsletter', href: '/newsletter' },
 ]
 
 export function Navbar() {
@@ -35,8 +35,8 @@ export function Navbar() {
         aria-label="Main navigation"
       >
         {/* Logo */}
-        <a
-          href="#"
+        <Link
+          href="/"
           className="flex items-center gap-2.5 shrink-0 group"
           aria-label="Stone Hill Middle School PTO Home"
         >
@@ -66,31 +66,33 @@ export function Navbar() {
               SHMS PTO
             </span>
           </div>
-        </a>
+        </Link>
 
         {/* Desktop nav links */}
         <ul className="hidden lg:flex items-center gap-1" role="list">
           {navLinks.map((link) => (
             <li key={link.label}>
-              <a
+              <Link
                 href={link.href}
                 className="px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-[#F3F6FC] text-[#1A1A1A] hover:text-[#085508]"
               >
                 {link.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
 
         {/* Desktop CTA */}
         <div className="hidden lg:flex items-center gap-3">
-          <Button
-            size="sm"
-            className="text-white font-semibold"
-            style={{ backgroundColor: '#085508' }}
-          >
-            Login
-          </Button>
+          <Link href="/auth/login">
+            <Button
+              size="sm"
+              className="text-white font-semibold"
+              style={{ backgroundColor: '#085508' }}
+            >
+              Member Login
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile hamburger */}
@@ -118,22 +120,24 @@ export function Navbar() {
           <ul className="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-1" role="list">
             {navLinks.map((link) => (
               <li key={link.label}>
-                <a
+                <Link
                   href={link.href}
                   className="block px-3 py-2.5 text-sm font-medium rounded-md hover:bg-[#F3F6FC] text-[#1A1A1A] hover:text-[#085508] transition-colors"
                   onClick={() => setMenuOpen(false)}
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
             <li className="pt-2 border-t border-[#D8E0ED] mt-1">
-              <Button
-                className="w-full text-white font-semibold"
-                style={{ backgroundColor: '#085508' }}
-              >
-                Login
-              </Button>
+              <Link href="/auth/login" onClick={() => setMenuOpen(false)}>
+                <Button
+                  className="w-full text-white font-semibold"
+                  style={{ backgroundColor: '#085508' }}
+                >
+                  Member Login
+                </Button>
+              </Link>
             </li>
           </ul>
         </div>

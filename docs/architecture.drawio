@@ -1,0 +1,244 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="IjWozbgDifi1c_bJexRf" name="Page-1">
+    <mxGraphModel dx="1155" dy="775" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1300" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="lane_users" parent="1" style="swimlane;startSize=30;fillColor=#EFF6FF;strokeColor=#93C5FD;fontStyle=1;fontSize=11;fontColor=#1E3A5F;" value="USERS" vertex="1">
+          <mxGeometry height="120" width="1600" x="20" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="u_parents" parent="lane_users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#3B82F6;fontStyle=1;fontSize=11;" value="👨‍👩‍👧 Parents / Families" vertex="1">
+          <mxGeometry height="55" width="200" x="150" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="u_students" parent="lane_users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#3B82F6;fontStyle=1;fontSize=11;" value="🎒 Students (School Store)" vertex="1">
+          <mxGeometry height="55" width="200" x="700" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="u_board" parent="lane_users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#3B82F6;fontStyle=1;fontSize=11;" value="🏫 Board Members (Admin)" vertex="1">
+          <mxGeometry height="55" width="200" x="1250" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_frontend" parent="1" style="swimlane;startSize=30;fillColor=#F0FDF4;strokeColor=#86EFAC;fontStyle=1;fontSize=11;fontColor=#166534;" value="FRONTEND — Next.js 14 on Vercel (shmspto.org)" vertex="1">
+          <mxGeometry height="130" width="1600" x="20" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_nextjs" parent="lane_frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#22C55E;fontStyle=1;fontSize=13;" value="Next.js 14 App" vertex="1">
+          <mxGeometry height="55" width="160" x="690" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p_home" parent="lane_frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#86EFAC;fontSize=10;" value="Home" vertex="1">
+          <mxGeometry height="30" width="80" x="80" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p_programs" parent="lane_frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#86EFAC;fontSize=10;" value="Programs" vertex="1">
+          <mxGeometry height="30" width="80" x="170" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p_events" parent="lane_frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#86EFAC;fontSize=10;" value="Events" vertex="1">
+          <mxGeometry height="30" width="80" x="260" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p_store" parent="lane_frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#86EFAC;fontSize=10;" value="Store" vertex="1">
+          <mxGeometry height="30" width="80" x="350" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p_portal" parent="lane_frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#86EFAC;fontSize=10;" value="Member Portal" vertex="1">
+          <mxGeometry height="30" width="100" x="440" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p_volunteer" parent="lane_frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#86EFAC;fontSize=10;" value="Volunteer" vertex="1">
+          <mxGeometry height="30" width="90" x="900" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p_membership" parent="lane_frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#86EFAC;fontSize=10;" value="Membership" vertex="1">
+          <mxGeometry height="30" width="100" x="1000" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p_newsletter" parent="lane_frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#86EFAC;fontSize=10;" value="Newsletter" vertex="1">
+          <mxGeometry height="30" width="90" x="1110" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p_donate" parent="lane_frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#86EFAC;fontSize=10;" value="Pay / Donate" vertex="1">
+          <mxGeometry height="30" width="100" x="1210" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_wix" parent="1" style="swimlane;startSize=30;fillColor=#FFFBEB;strokeColor=#FCD34D;fontStyle=1;fontSize=11;fontColor=#92400E;" value="WIX BACKEND (headless)" vertex="1">
+          <mxGeometry height="230" width="1600" x="20" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="cms_header" parent="lane_wix" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontStyle=1;fontSize=10;fontColor=#92400E;" value="📊 CMS Collections" vertex="1">
+          <mxGeometry height="20" width="180" x="30" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="cms_students" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#EAB308;fontSize=10;" value="Students" vertex="1">
+          <mxGeometry height="34" width="100" x="30" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="cms_programs" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#EAB308;fontSize=10;" value="Programs" vertex="1">
+          <mxGeometry height="34" width="100" x="140" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="cms_enrollments" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#EAB308;fontSize=10;" value="Enrollments" vertex="1">
+          <mxGeometry height="34" width="100" x="250" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="cms_payments" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#EAB308;fontSize=10;" value="Payments" vertex="1">
+          <mxGeometry height="34" width="100" x="360" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="cms_volunteers" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#EAB308;fontSize=10;" value="Volunteers" vertex="1">
+          <mxGeometry height="34" width="100" x="470" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="cms_newsletter_sub" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#EAB308;fontSize=10;" value="Newsletter Subs" vertex="1">
+          <mxGeometry height="34" width="110" x="580" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="apps_header" parent="lane_wix" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontStyle=1;fontSize=10;fontColor=#92400E;" value="📦 Wix Apps" vertex="1">
+          <mxGeometry height="20" width="120" x="730" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="app_stores" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#EAB308;fontSize=10;" value="Wix Stores&#xa;Spirit Wear + Store Card" vertex="1">
+          <mxGeometry height="34" width="150" x="730" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="app_giftcards" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#EAB308;fontSize=10;" value="Wix Gift Cards&#xa;Student Store Card" vertex="1">
+          <mxGeometry height="34" width="140" x="890" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="app_members" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#EAB308;fontSize=10;" value="Wix Members&#xa;Auth + Portal" vertex="1">
+          <mxGeometry height="34" width="120" x="1040" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="app_events" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#EAB308;fontSize=10;" value="Wix Events&#xa;Calendar" vertex="1">
+          <mxGeometry height="34" width="110" x="1170" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="app_forms" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#EAB308;fontSize=10;" value="Wix Forms&#xa;Data Capture" vertex="1">
+          <mxGeometry height="34" width="110" x="1290" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="velo_header" parent="lane_wix" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontStyle=1;fontSize=10;fontColor=#92400E;" value="⚡ Velo Backend" vertex="1">
+          <mxGeometry height="20" width="150" x="30" y="125" as="geometry" />
+        </mxCell>
+        <mxCell id="velo_http" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FED7AA;strokeColor=#F97316;fontSize=10;" value="http-functions.js&#xa;(Webhooks)" vertex="1">
+          <mxGeometry height="50" width="150" x="30" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="velo_data" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FED7AA;strokeColor=#F97316;fontSize=10;" value="data.js&#xa;(CMS Hooks)" vertex="1">
+          <mxGeometry height="50" width="150" x="200" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="velo_storecard" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FED7AA;strokeColor=#F97316;fontSize=10;" value="storeCard.js&#xa;(Card Balance API)" vertex="1">
+          <mxGeometry height="50" width="160" x="370" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="mig_header" parent="lane_wix" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontStyle=1;fontSize=10;fontColor=#0369A1;" value="🔄 Data Migration" vertex="1">
+          <mxGeometry height="20" width="150" x="1410" y="125" as="geometry" />
+        </mxCell>
+        <mxCell id="mig_jumbula" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0EA5E9;fontSize=10;" value="Jumbula CSV Export" vertex="1">
+          <mxGeometry height="34" width="155" x="1410" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="mig_script" parent="lane_wix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0EA5E9;fontSize=10;" value="Migration Script (Node.js)" vertex="1">
+          <mxGeometry height="34" width="155" x="1410" y="192" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_payments" parent="1" style="swimlane;startSize=30;fillColor=#FDF4FF;strokeColor=#D8B4FE;fontStyle=1;fontSize=11;fontColor=#6B21A8;" value="PAYMENTS" vertex="1">
+          <mxGeometry height="110" width="1600" x="20" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="pay_cheddarup" parent="lane_payments" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E8FF;strokeColor=#A855F7;fontStyle=1;fontSize=11;" value="💳 Cheddarup&#xa;Programs + Fundraisers" vertex="1">
+          <mxGeometry height="55" width="190" x="150" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pay_wix" parent="lane_payments" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E8FF;strokeColor=#A855F7;fontStyle=1;fontSize=11;" value="💳 Wix Payments&#xa;Store + Membership" vertex="1">
+          <mxGeometry height="55" width="190" x="500" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pay_pos" parent="lane_payments" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E8FF;strokeColor=#A855F7;fontStyle=1;fontSize=11;" value="📱 Wix POS&#xa;In-Person Store" vertex="1">
+          <mxGeometry height="55" width="170" x="850" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pay_giftcard" parent="lane_payments" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E8FF;strokeColor=#A855F7;fontStyle=1;fontSize=11;" value="🎁 Gift Cards&#xa;Student Store Card" vertex="1">
+          <mxGeometry height="55" width="170" x="1150" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_ops" parent="1" style="swimlane;startSize=30;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontStyle=1;fontSize=11;fontColor=#334155;" value="BOOKKEEPING + DEVOPS" vertex="1">
+          <mxGeometry height="110" width="1600" x="20" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="bk_sheets" parent="lane_ops" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#64748B;fontStyle=1;fontSize=11;" value="📊 Google Sheets&#xa;Transaction Log" vertex="1">
+          <mxGeometry height="55" width="180" x="150" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="bk_mm" parent="lane_ops" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#64748B;fontStyle=1;fontSize=11;" value="📒 MoneyMinder&#xa;Accounting" vertex="1">
+          <mxGeometry height="55" width="170" x="420" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="dv_github" parent="lane_ops" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#64748B;fontStyle=1;fontSize=11;" value="🐙 GitHub&#xa;auraflux-dev/wix-shmspto" vertex="1">
+          <mxGeometry height="55" width="200" x="950" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="dv_vercel" parent="lane_ops" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#64748B;fontStyle=1;fontSize=11;" value="▲ Vercel&#xa;Auto Deploy on Push" vertex="1">
+          <mxGeometry height="55" width="190" x="1240" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="u_parents" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#3B82F6;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="fe_nextjs" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="u_students" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#A855F7;strokeWidth=2;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="pay_pos" value="shops at store">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="820" y="155" />
+              <mxPoint x="935" y="155" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="u_board" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#3B82F6;strokeWidth=2;fontSize=9;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="app_members" value="admin login">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="fe_nextjs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#16A34A;strokeWidth=2;fontSize=9;fontColor=#166534;align=left;" target="cms_programs" value="Wix Data REST API">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-60" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="fe_nextjs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#16A34A;strokeWidth=2;fontSize=9;fontColor=#166534;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="app_stores" value="Wix Stores REST API">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="60" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="fe_nextjs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#16A34A;strokeWidth=2;fontSize=9;fontColor=#166534;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="app_events" value="Wix Events REST API">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="80" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="fe_nextjs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#16A34A;strokeWidth=2;fontSize=9;fontColor=#166534;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="app_members" value="Headless OAuth">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="fe_nextjs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#A855F7;strokeWidth=2;fontSize=9;fontColor=#D8B4FE;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="pay_cheddarup" value="iframe embed">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-60" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="fe_nextjs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#A855F7;strokeWidth=2;fontSize=9;fontColor=#D8B4FE;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="pay_wix" value="Wix checkout">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="pay_cheddarup" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#F97316;strokeWidth=2;fontSize=9;fontColor=#FED7AA;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="velo_http" value="POST webhook">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint y="20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="velo_http" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#F97316;strokeWidth=2;fontSize=9;fontColor=#FED7AA;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="cms_payments" value="insert record">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint y="-20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="app_stores" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#A855F7;strokeWidth=2;fontSize=9;fontColor=#D8B4FE;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="pay_giftcard" value="generate code">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint y="20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="pay_giftcard" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#A855F7;strokeWidth=2;fontSize=9;fontColor=#D8B4FE;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="pay_pos" value="validate / deduct">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="velo_storecard" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#F97316;strokeWidth=2;fontSize=9;fontColor=#FED7AA;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="cms_students" value="query by parentEmail">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="pay_cheddarup" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#64748B;strokeWidth=2;fontSize=9;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="bk_sheets" value="CSV export">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint y="20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="app_stores" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#64748B;strokeWidth=2;fontSize=9;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="bk_sheets" value="Orders API">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-40" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="bk_sheets" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#64748B;strokeWidth=2;fontSize=9;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="bk_mm" value="CSV import">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="dv_github" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#64748B;strokeWidth=2;fontSize=9;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="dv_vercel" value="auto deploy on push">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="dv_vercel" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#64748B;strokeWidth=2;fontSize=9;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="fe_nextjs" value="deploys">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="mig_jumbula" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#0EA5E9;strokeWidth=2;" target="mig_script" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="mig_script" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#0EA5E9;strokeWidth=2;fontSize=9;fontColor=#7DD3FC;labelBackgroundColor=#1a1a2e;labelBorderColor=none;" target="cms_students" value="import students">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

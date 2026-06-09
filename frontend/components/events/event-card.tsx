@@ -35,7 +35,7 @@ function buildCalendarUrl(event: WixEvent) {
   const end = event.dateAndTimeSettings?.endDate ?? start
   const title = encodeURIComponent(event.title ?? '')
   const location = encodeURIComponent(event.location?.name ?? '')
-  const fmt = (d: string) => d.replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+  const fmt = (d: string) => String(d).replace(/[-:]/g, '').replace(/\.\d{3}/, '')
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(start)}/${fmt(end)}&location=${location}`
 }
 

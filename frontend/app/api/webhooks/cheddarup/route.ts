@@ -1,28 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getWixClient } from "@/lib/wix-client";
-import crypto from "crypto";
-
-// Verify the request came from Cheddarup using HMAC-SHA256 signature
-function verifySignature(body: string, signature: string): boolean {
-  const secret = process.env.CHEDDARUP_WEBHOOK_SECRET;
-  if (!secret) return false;
-  const expected = crypto
-    .createHmac("sha256", secret)
-    .update(body)
-    .digest("hex");
-  return crypto.timingSafeEqual(
-    Buffer.from(expected, "hex"),
-    Buffer.from(signature, "hex")
-  );
-}
 
 export async function POST(req: NextRequest) {
-  const rawBody = await req.text();
-  const signature = req.headers.get("x-cheddarup-signature") ?? "";
-
-  if (!verifySignature(rawBody, signature)) {
-    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  // Token passed as query param since Zapier doesn't sign requests
+  const token = req.nextUrl.searchParams.get("token");
+  if (token !== process.env.CHEDDARUP_WEBHOOK_SECRET) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const rawBody = await req.text();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let payload: Record<string, any>;
