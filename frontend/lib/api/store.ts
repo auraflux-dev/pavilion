@@ -15,6 +15,25 @@ export interface StoreItem {
   image?: string;
 }
 
+/**
+ * IDs of the 12 SHMS school store products created in Wix Stores Catalog V3.
+ * Filters out Wix demo products that ship pre-loaded in new accounts.
+ */
+const SHMS_PRODUCT_IDS = new Set([
+  "90ae23f7-51f4-438d-869c-1fbb28afd381", // Airheads Chewing Gum
+  "96ca63ab-2535-4f91-8ad1-28a5d7d7d7d0", // Nerds Gummy Clusters
+  "ad137b27-cfa1-45ff-b506-c1021bfad12f", // Hubba Bubba Bubble Gum Tape
+  "a3e4a887-ad91-42b2-843d-653a11712544", // Life Savers Swirl Lollipops
+  "530bfb7e-370e-4174-8e2f-4463b5f34642", // Orion Choco Mont Mushroom Biscuits
+  "53d1d89c-74e3-4f41-9988-5594ce2d590b", // Pop Rocks
+  "fac09820-055c-4202-81ac-545639b8e24f", // M&Ms Minis Tubes
+  "03be5162-4928-4c39-b707-6e2de07921e0", // Airheads Xtremes Belts
+  "62b109c8-7b96-4f0d-b09d-fb8d93ff8f9d", // Jolly Rancher Lollipops
+  "fd0bcb5b-6d08-4f0e-bb7c-27bfdc023ae4", // Sour Patch Kids Watermelon
+  "d9ed5b01-324d-4136-809d-21a3211b9d89", // Charms Blow Pops Mini
+  "9e7d4b13-4437-4c51-b63d-4942d18edf64", // Takis Variety Pack (1oz)
+]);
+
 /** Convert a Wix media item id to a usable static URL */
 function wixMediaIdToUrl(mediaId: unknown): string | undefined {
   if (!mediaId || typeof mediaId !== "string") return undefined;
@@ -97,9 +116,6 @@ export async function getStoreItems(): Promise<StoreItem[]> {
     const siteId = process.env.WIX_SITE_ID;
     if (!apiKey || !siteId) return [];
 
-    // Filter to products under the SHMS school store category.
-    // Category id "bed99135-e793-4c5f-815c-9926d0b72546" was the mainCategoryId
-    // on all 12 candy/snack products we created. This excludes Wix demo products.
     const res = await fetch("https://www.wixapis.com/stores/v3/products/query", {
       method: "POST",
       headers: {
@@ -109,11 +125,8 @@ export async function getStoreItems(): Promise<StoreItem[]> {
       },
       body: JSON.stringify({
         query: {
-          filter: {
-            visible: { $eq: true },
-            mainCategoryId: { $eq: "bed99135-e793-4c5f-815c-9926d0b72546" },
-          },
-          paging: { limit: 50 },
+          filter: { visible: { $eq: true } },
+          paging: { limit: 100 },
         },
         fields: ["PLAIN_DESCRIPTION", "MEDIA_ITEMS_INFO", "MIN_PRICE_VARIANT"],
       }),
@@ -122,7 +135,10 @@ export async function getStoreItems(): Promise<StoreItem[]> {
 
     if (!res.ok) return [];
     const data = (await res.json()) as { products?: Record<string, unknown>[] };
-    return (data.products ?? []).map(mapProduct);
+    const all = (data.products ?? []).map(mapProduct);
+    // Keep only the 12 SHMS school store products we created (by catalog ID).
+    // This excludes Wix demo products that come pre-loaded in new accounts.
+    return all.filter((p) => SHMS_PRODUCT_IDS.has(p._id));
   } catch {
     return [];
   }
