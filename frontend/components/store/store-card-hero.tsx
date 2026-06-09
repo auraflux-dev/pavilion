@@ -3,10 +3,10 @@
 import { CreditCard, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { storeCardCheckoutUrl } from '@/lib/wix-checkout'
 
-const DENOMINATIONS: { amount: 10 | 20 | 25; label: string; note: string }[] = [
-  { amount: 10, label: '$10', note: 'Starter' },
-  { amount: 20, label: '$20', note: 'Popular' },
-  { amount: 25, label: '$25', note: 'Best value' },
+const DENOMINATIONS: { amount: 20 | 40 | 50; label: string; note: string }[] = [
+  { amount: 20, label: '$20', note: 'Starter' },
+  { amount: 40, label: '$40', note: 'Popular' },
+  { amount: 50, label: '$50', note: 'Best value' },
 ]
 
 const HOW_IT_WORKS = [
@@ -16,7 +16,7 @@ const HOW_IT_WORKS = [
 ]
 
 export function StoreCardHero() {
-  function handleLoad(amount: 10 | 20 | 25 | null) {
+  function handleLoad(amount: 20 | 40 | 50 | null) {
     window.open(storeCardCheckoutUrl(amount), '_blank', 'noopener,noreferrer')
   }
 

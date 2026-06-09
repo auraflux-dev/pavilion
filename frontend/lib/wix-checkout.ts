@@ -16,7 +16,7 @@ export const STORE_CARD_SLUG = 'pto-store-card'
  * Until Wix Headless checkout is fully configured, this links to the hosted
  * Wix storefront product page where the parent selects the amount and checks out.
  */
-export function storeCardCheckoutUrl(amount: 10 | 20 | 25 | null): string {
+export function storeCardCheckoutUrl(amount: 20 | 40 | 50 | null): string {
   // Wix hosted storefront product page — works before headless checkout is wired
   const base = `https://www.shmspto.org/store/product/${STORE_CARD_SLUG}/${STORE_CARD_PRODUCT_ID}`
   if (!amount) return base
