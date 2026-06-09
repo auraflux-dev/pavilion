@@ -1,5 +1,5 @@
 {
   "buildCommand": "next build",
-  "installCommand": "npm install --ignore-scripts",
+  "installCommand": "npm ci --ignore-scripts",
   "framework": "nextjs"
 }
