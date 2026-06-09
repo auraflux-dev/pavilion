@@ -61,7 +61,7 @@ export function VolunteerSection() {
                 style={{ backgroundColor: '#085508' }}
                 asChild
               >
-                <a href="#volunteer">
+                <a href="/volunteer">
                   Join Today
                   <ArrowRight
                     className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"

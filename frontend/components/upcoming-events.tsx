@@ -70,7 +70,7 @@ export function UpcomingEvents() {
             </h2>
           </div>
           <a
-            href="#events"
+            href="/events"
             className="inline-flex items-center gap-2 text-sm font-semibold shrink-0 hover:underline underline-offset-4"
             style={{ color: '#085508' }}
           >

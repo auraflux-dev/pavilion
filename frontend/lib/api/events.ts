@@ -5,14 +5,13 @@ export interface WixEvent {
   title?: string;
   description?: string;
   location?: { name?: string };
-  scheduling?: {
-    config?: {
-      startDate?: string;
-      endDate?: string;
-    };
+  dateAndTimeSettings?: {
+    startDate?: string;
+    endDate?: string;
   };
   mainImage?: { url?: string };
   slug?: string;
+  tags?: string[];
 }
 
 export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
