@@ -15,6 +15,15 @@ export interface StoreItem {
   image?: string;
 }
 
+export interface SpiritItem {
+  _id: string;
+  name: string;
+  price: number;
+  image?: string;
+  inStock: boolean;
+  slug: string;
+}
+
 /**
  * IDs of the 12 SHMS school store products created in Wix Stores Catalog V3.
  * Filters out Wix demo products that ship pre-loaded in new accounts.
@@ -156,4 +165,68 @@ export async function getStoreItems(): Promise<StoreItem[]> {
 export async function getFeaturedItems(): Promise<StoreItem[]> {
   const all = await getStoreItems();
   return all.filter((i) => i.featured);
+}
+
+const SPIRIT_PRODUCT_IDS = new Set([
+  "82ee7b02-5b3e-4383-8cd8-fcf089b45370", // Stingrays Yard Sign
+  "1c0e1c1c-23f8-4095-8e4d-a9c467e6fef8", // Stingrays Hat
+  "d0bed142-0410-4442-a8e9-f1a5232862ef", // Stingrays Water Bottle
+  "d5730ad6-8d4a-4757-93fa-05aa3ff1e244", // Stingrays Drawstring Bag
+  "e9fbcab5-ae25-418e-a4ac-81889d93acc7", // Stingrays Hoodie
+  "f3eedab0-bfd5-4f30-ad8f-7586b783b78f", // Stingrays Long Sleeve Shirt
+  "791e1007-b926-4416-8a90-24dd641d0887", // Stingrays Spirit T-Shirt
+]);
+
+export async function getSpiritWearItems(): Promise<SpiritItem[]> {
+  try {
+    const apiKey = process.env.WIX_API_KEY;
+    const siteId = process.env.WIX_SITE_ID;
+    if (!apiKey || !siteId) return [];
+
+    const res = await fetch("https://www.wixapis.com/stores/v3/products/query", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: apiKey,
+        "wix-site-id": siteId,
+      },
+      body: JSON.stringify({
+        query: { filter: { visible: { $eq: true } }, paging: { limit: 100 } },
+        fields: ["MEDIA_ITEMS_INFO", "MIN_PRICE_VARIANT"],
+      }),
+      next: { revalidate: 300 },
+    });
+
+    if (!res.ok) return [];
+    const data = (await res.json()) as { products?: Record<string, unknown>[] };
+    return (data.products ?? [])
+      .filter((p) => SPIRIT_PRODUCT_IDS.has(p.id as string))
+      .map((raw) => {
+        let price = 0;
+        let inStock = false;
+        try {
+          const vs = raw.variantSummary as Record<string, unknown> | undefined;
+          const mpv = vs?.minPriceVariant as Record<string, unknown> | undefined;
+          const amt = ((mpv?.price as Record<string, unknown>)?.actualPrice as Record<string, unknown>)?.amount;
+          price = parseFloat((amt as string) ?? "0") || 0;
+          inStock = (mpv?.inventoryStatus as Record<string, unknown>)?.inStock === true;
+        } catch { /* ignore */ }
+        if (price === 0) {
+          try {
+            const apr = raw.actualPriceRange as Record<string, unknown> | undefined;
+            price = parseFloat(((apr?.minValue as Record<string, unknown>)?.amount as string) ?? "0") || 0;
+          } catch { /* ignore */ }
+        }
+        return {
+          _id: (raw.id as string) ?? "",
+          name: (raw.name as string) ?? "",
+          price,
+          image: getProductImage(raw),
+          inStock,
+          slug: (raw.slug as string) ?? "",
+        };
+      });
+  } catch {
+    return [];
+  }
 }
