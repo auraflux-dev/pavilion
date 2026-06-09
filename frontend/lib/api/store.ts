@@ -1,11 +1,7 @@
 /**
- * NOTE: Wix SDK .eq("featured", true) translates to filter on "data.featured"
- * internally which returns 0 results against this CMS collection. The correct
- * REST filter uses the plain field name: { "featured": { "$eq": true } }.
- * Since we only have ~12 items, we fetch all and filter client-side — clean,
- * no SDK internals hacked.
+ * Fetches products from Wix Stores Catalog V3 (not CMS StoreItems).
+ * Products live at: Wix Dashboard → Catalog → Products
  */
-import { getWixClient } from "@/lib/wix-client";
 
 export interface StoreItem {
   _id: string;
@@ -13,58 +9,117 @@ export interface StoreItem {
   brand: string;
   description: string;
   price: number;
-  costPerUnit: number;
   category: "Candy" | "Snacks" | "Drinks";
   inStock: boolean;
   featured: boolean;
-  featuredUntil?: string;
   image?: string;
-  asin?: string;
 }
 
-function mapItem(raw: Record<string, unknown>): StoreItem {
-  // Wix CMS SDK returns fields directly on the item object, not nested under .data
-  const item = (raw.data && typeof raw.data === "object")
-    ? (raw.data as Record<string, unknown>)
-    : raw;
+/** Convert a Wix media item id to a usable static URL */
+function wixMediaIdToUrl(mediaId: unknown): string | undefined {
+  if (!mediaId || typeof mediaId !== "string") return undefined;
+  // Already a full URL
+  if (mediaId.startsWith("http")) return mediaId;
+  // wix:image://v1/ID/filename format
+  const v1Match = mediaId.match(/wix:image:\/\/v1\/([^/]+)\//);
+  if (v1Match) return `https://static.wixstatic.com/media/${v1Match[1]}`;
+  // Raw media id like "abb7d1_xxx~mv2.jpg"
+  if (mediaId.includes("~mv2")) return `https://static.wixstatic.com/media/${mediaId}`;
+  return undefined;
+}
+
+/** Extract a display image URL from a Wix Stores V3 product */
+function getProductImage(product: Record<string, unknown>): string | undefined {
+  try {
+    const media = product.media as Record<string, unknown> | undefined;
+    if (!media) return undefined;
+    const itemsInfo = media.itemsInfo as Record<string, unknown> | undefined;
+    const items = itemsInfo?.items as Array<Record<string, unknown>> | undefined;
+    const first = items?.[0];
+    if (!first) return undefined;
+    // id is the wix media id
+    return wixMediaIdToUrl(first.id) ?? wixMediaIdToUrl(first.url);
+  } catch {
+    return undefined;
+  }
+}
+
+/** Infer category from product name/description — Wix Stores has no custom category field */
+function inferCategory(name: string): StoreItem["category"] {
+  const lower = name.toLowerCase();
+  if (lower.includes("takis") || lower.includes("mushroom") || lower.includes("biscuit")) {
+    return "Snacks";
+  }
+  return "Candy";
+}
+
+/** Map a raw Wix Stores V3 product to our StoreItem shape */
+function mapProduct(raw: Record<string, unknown>): StoreItem {
+  const name = (raw.name as string) ?? "";
+
+  // Price lives in variantsInfo.variants[0].price.actualPrice.amount
+  let price = 0;
+  try {
+    const vi = raw.variantsInfo as Record<string, unknown> | undefined;
+    const variants = vi?.variants as Array<Record<string, unknown>> | undefined;
+    const amount = (variants?.[0]?.price as Record<string, unknown>)
+      ?.actualPrice as Record<string, unknown> | undefined;
+    price = parseFloat((amount?.amount as string) ?? "0") || 0;
+  } catch { /* leave 0 */ }
+
+  // Stock: check inventory managed status — default to true (in stock) if not set
+  const inStock =
+    (raw.stock as Record<string, unknown>)?.inStock !== false;
+
   return {
-    _id: (raw._id as string) ?? "",
-    name: (item.name as string) ?? "",
-    brand: (item.brand as string) ?? "",
-    description: (item.description as string) ?? "",
-    price: (item.price as number) ?? 0,
-    costPerUnit: (item.costPerUnit as number) ?? 0,
-    category: (item.category as StoreItem["category"]) ?? "Snacks",
-    inStock: (item.inStock as boolean) ?? true,
-    featured: (item.featured as boolean) ?? false,
-    featuredUntil: (item.featuredUntil as string) ?? undefined,
-    image: (item.image as string) ?? undefined,
-    asin: (item.asin as string) ?? undefined,
+    _id: (raw.id as string) ?? (raw._id as string) ?? "",
+    name,
+    brand: name.split(" ")[0] ?? "",           // brand not stored separately in Stores catalog
+    description: (raw.plainDescription as string)?.replace(/<[^>]+>/g, "") ?? "",
+    price,
+    category: inferCategory(name),
+    inStock,
+    featured: false,                            // no featured flag in Stores catalog; extend later
+    image: getProductImage(raw),
   };
 }
 
 export async function getStoreItems(): Promise<StoreItem[]> {
   try {
-    const client = getWixClient();
-    const result = await client.items.query("StoreItems").find();
-    return (result.items ?? []).map(mapItem);
+    const apiKey = process.env.WIX_API_KEY;
+    const siteId = process.env.WIX_SITE_ID;
+    if (!apiKey || !siteId) return [];
+
+    const res = await fetch("https://www.wixapis.com/stores/v3/products/query", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: apiKey,
+        "wix-site-id": siteId,
+      },
+      body: JSON.stringify({
+        query: {
+          filter: { visible: { $eq: true } },
+          paging: { limit: 50 },
+        },
+        fields: ["PLAIN_DESCRIPTION", "VARIANTS"],
+      }),
+      next: { revalidate: 300 },
+    });
+
+    if (!res.ok) return [];
+    const data = (await res.json()) as { products?: Record<string, unknown>[] };
+    return (data.products ?? []).map(mapProduct);
   } catch {
     return [];
   }
 }
 
 /**
- * Returns featured items by fetching all and filtering in JS.
- * Avoids the SDK boolean filter bug (prefixes "data." on field names).
+ * Returns "featured" items — currently the first 3 in-stock products.
+ * Extend this once a featured flag or Deal-of-the-Week field is added.
  */
 export async function getFeaturedItems(): Promise<StoreItem[]> {
-  try {
-    const all = await getStoreItems();
-    const today = new Date().toISOString().split("T")[0];
-    return all.filter(
-      (i) => i.featured && (!i.featuredUntil || i.featuredUntil >= today)
-    );
-  } catch {
-    return [];
-  }
+  const all = await getStoreItems();
+  return all.filter((i) => i.inStock).slice(0, 3);
 }
