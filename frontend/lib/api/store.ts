@@ -57,19 +57,26 @@ function inferCategory(name: string): StoreItem["category"] {
 function mapProduct(raw: Record<string, unknown>): StoreItem {
   const name = (raw.name as string) ?? "";
 
-  // Price lives in variantsInfo.variants[0].price.actualPrice.amount
+  // Price lives in variantSummary.minPriceVariant.price.actualPrice.amount
   let price = 0;
+  let inStock = false;
   try {
-    const vi = raw.variantsInfo as Record<string, unknown> | undefined;
-    const variants = vi?.variants as Array<Record<string, unknown>> | undefined;
-    const amount = (variants?.[0]?.price as Record<string, unknown>)
-      ?.actualPrice as Record<string, unknown> | undefined;
-    price = parseFloat((amount?.amount as string) ?? "0") || 0;
-  } catch { /* leave 0 */ }
+    const vs = raw.variantSummary as Record<string, unknown> | undefined;
+    const mpv = vs?.minPriceVariant as Record<string, unknown> | undefined;
+    const priceAmount = ((mpv?.price as Record<string, unknown>)
+      ?.actualPrice as Record<string, unknown>)?.amount;
+    price = parseFloat((priceAmount as string) ?? "0") || 0;
+    inStock = (mpv?.inventoryStatus as Record<string, unknown>)?.inStock === true;
+  } catch { /* leave 0 / false */ }
 
-  // Stock: check inventory managed status — default to true (in stock) if not set
-  const inStock =
-    (raw.stock as Record<string, unknown>)?.inStock !== false;
+  // Also check top-level actualPriceRange as fallback
+  if (price === 0) {
+    try {
+      const apr = raw.actualPriceRange as Record<string, unknown> | undefined;
+      const min = (apr?.minValue as Record<string, unknown>)?.amount;
+      price = parseFloat((min as string) ?? "0") || 0;
+    } catch { /* ignore */ }
+  }
 
   return {
     _id: (raw.id as string) ?? (raw._id as string) ?? "",
@@ -102,7 +109,7 @@ export async function getStoreItems(): Promise<StoreItem[]> {
           filter: { visible: { $eq: true } },
           paging: { limit: 50 },
         },
-        fields: ["PLAIN_DESCRIPTION", "VARIANTS"],
+        fields: ["PLAIN_DESCRIPTION", "MEDIA_ITEMS_INFO", "MIN_PRICE_VARIANT"],
       }),
       next: { revalidate: 300 },
     });
