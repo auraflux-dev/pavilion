@@ -97,6 +97,9 @@ export async function getStoreItems(): Promise<StoreItem[]> {
     const siteId = process.env.WIX_SITE_ID;
     if (!apiKey || !siteId) return [];
 
+    // Filter to products under the SHMS school store category.
+    // Category id "bed99135-e793-4c5f-815c-9926d0b72546" was the mainCategoryId
+    // on all 12 candy/snack products we created. This excludes Wix demo products.
     const res = await fetch("https://www.wixapis.com/stores/v3/products/query", {
       method: "POST",
       headers: {
@@ -106,7 +109,10 @@ export async function getStoreItems(): Promise<StoreItem[]> {
       },
       body: JSON.stringify({
         query: {
-          filter: { visible: { $eq: true } },
+          filter: {
+            visible: { $eq: true },
+            mainCategoryId: { $eq: "bed99135-e793-4c5f-815c-9926d0b72546" },
+          },
           paging: { limit: 50 },
         },
         fields: ["PLAIN_DESCRIPTION", "MEDIA_ITEMS_INFO", "MIN_PRICE_VARIANT"],
