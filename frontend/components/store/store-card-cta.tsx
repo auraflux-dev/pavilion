@@ -20,12 +20,12 @@ export function StoreCardCta() {
           Ready to load your student&apos;s card?
         </h2>
         <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">
-          Most students spend $10–$20 per month. Load online, student taps their card at the window.
+          Most students spend $20–$40 per month. Load online, student taps their card at the window.
           Funds never expire.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          {([10, 20, 25] as const).map((amount) => (
+          {([20, 40, 50] as const).map((amount) => (
             <Button
               key={amount}
               className="font-bold text-[#1A1A1A] group px-8"
