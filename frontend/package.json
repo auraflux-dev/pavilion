@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "postinstall": "echo done"
+    "postinstall": "node -e \"process.exit(0)\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
