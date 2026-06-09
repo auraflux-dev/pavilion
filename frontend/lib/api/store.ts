@@ -22,20 +22,24 @@ export interface StoreItem {
   asin?: string;
 }
 
-function mapItem(item: { _id?: string; data?: Record<string, unknown> }): StoreItem {
+function mapItem(raw: Record<string, unknown>): StoreItem {
+  // Wix CMS SDK returns fields directly on the item object, not nested under .data
+  const item = (raw.data && typeof raw.data === "object")
+    ? (raw.data as Record<string, unknown>)
+    : raw;
   return {
-    _id: (item._id as string) ?? "",
-    name: (item.data?.name as string) ?? "",
-    brand: (item.data?.brand as string) ?? "",
-    description: (item.data?.description as string) ?? "",
-    price: (item.data?.price as number) ?? 0,
-    costPerUnit: (item.data?.costPerUnit as number) ?? 0,
-    category: (item.data?.category as StoreItem["category"]) ?? "Snacks",
-    inStock: (item.data?.inStock as boolean) ?? true,
-    featured: (item.data?.featured as boolean) ?? false,
-    featuredUntil: (item.data?.featuredUntil as string) ?? undefined,
-    image: (item.data?.image as string) ?? undefined,
-    asin: (item.data?.asin as string) ?? undefined,
+    _id: (raw._id as string) ?? "",
+    name: (item.name as string) ?? "",
+    brand: (item.brand as string) ?? "",
+    description: (item.description as string) ?? "",
+    price: (item.price as number) ?? 0,
+    costPerUnit: (item.costPerUnit as number) ?? 0,
+    category: (item.category as StoreItem["category"]) ?? "Snacks",
+    inStock: (item.inStock as boolean) ?? true,
+    featured: (item.featured as boolean) ?? false,
+    featuredUntil: (item.featuredUntil as string) ?? undefined,
+    image: (item.image as string) ?? undefined,
+    asin: (item.asin as string) ?? undefined,
   };
 }
 

@@ -8,9 +8,11 @@ export async function GET() {
     const { getWixClient } = await import('@/lib/wix-client')
     const client = getWixClient()
     const result = await client.items.query('StoreItems').find()
+    const first = result.items?.[0] as Record<string, unknown> | undefined;
     return NextResponse.json({
       allCount: result.items?.length ?? 0,
-      items: result.items?.map((i: Record<string, unknown>) => ({ id: i._id, data: i.data })),
+      firstItemKeys: first ? Object.keys(first) : [],
+      firstItem: first,
     })
   } catch (err: unknown) {
     return NextResponse.json({
