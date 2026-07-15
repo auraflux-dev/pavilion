@@ -5,6 +5,7 @@ import { MemberDashboard } from '@/components/member-portal/member-dashboard'
 import { PageHero } from '@/components/page-hero'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
+import { getPortalCopy } from '@/lib/api/portal-copy'
 import { CONTACT_DEFAULTS } from '@/lib/defaults/page-content'
 
 export const metadata = {
@@ -17,10 +18,10 @@ export const metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function MemberPortalPage() {
-  const [settings, hero, portal] = await Promise.all([
+  const [settings, hero, copy] = await Promise.all([
     getSiteSettings(),
     getPageContent('member-portal'),
-    getPageContent('portal'),
+    getPortalCopy(),
   ])
   const link6 = settings.get('announcement6thLink', '')
   const link7 = settings.get('announcement7thLink', '')
@@ -46,15 +47,7 @@ export default async function MemberPortalPage() {
               link7={link7}
               link8={link8}
               grades={grades}
-              copy={{
-                paidTitle: portal.sectionTitle,
-                paidBody: portal.sectionBody,
-                freeTitle: portal.title,
-                freeBody: portal.body,
-                emptyTitle: portal.bullets[0] || 'Welcome to the SHMS PTO',
-                emptyBody: portal.bullets[1] || '',
-                upgradeBody: portal.bullets[2] || '',
-              }}
+              copy={copy}
             />
           </div>
         </section>

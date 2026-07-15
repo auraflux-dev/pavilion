@@ -203,6 +203,49 @@ const PAGE_ROWS = [
       'Welcome to the SHMS PTO\nYour free parent account is ready. Add a student to track programs, store card balance, and paid membership status.\nPaid members get a pre-loaded store card, free or discounted program registration, and free refreshments at school events.',
     active: true,
   },
+  {
+    page: 'portal-hub',
+    title: 'Member portal UI labels',
+    body: 'Edit keyed bullets (key|text). One key per line. Unknown keys are ignored.',
+    bullets: [
+      'calendarTitle|Calendar & Messages',
+      'accountTitle|My Account',
+      'studentsTitle|My Students',
+      'storeTitle|Store & Purchases',
+      'tabCalendar|Calendar',
+      'tabMessages|Messages',
+      'signOut|Sign out',
+      'refresh|Refresh',
+      'loadError|Could not load your portal.',
+      'calendarEmptyTitle|No dates yet',
+      'calendarEmptyBody|After you enroll a student in a program, session times and school events show up here.',
+      'calendarEmptyCta|Browse programs',
+      'messagesEmptyTitle|Inbox empty',
+      'messagesEmptyBody|Instructors can send updates here after your student is enrolled — class reminders, location changes, and more.',
+      'viewMemberships|View paid memberships',
+      'memberSince|Member since',
+      'studentsLabel|Students',
+      'paidMembershipsLabel|Paid memberships',
+      'whatsappHeading|Grade WhatsApp',
+      'storeCardsLabel|Store cards',
+      'storeCardsHint|CMS balance total',
+      'recentBuysLabel|Recent buys',
+      'recentBuysHint|programs & payments',
+      'ctaLoadCard|Load card',
+      'ctaSpiritWear|Spirit wear',
+      'ctaPrograms|Programs',
+      'purchasesEmpty|Purchases from the site — memberships, programs, store card loads — will list here so you can see what each student is signed up for.',
+      'addStudentCta|Add a student',
+      'addStudentTitle|Add a student',
+      'firstNameLabel|First name',
+      'lastNameLabel|Last name',
+      'gradeLabel|Grade',
+      'addStudentSubmit|Add student',
+      'cancel|Cancel',
+      'addStudentError|Could not add student. Please try again.',
+    ].join('\n'),
+    active: true,
+  },
 ]
 
 async function ensureProgramSessionsCollection() {
@@ -327,6 +370,11 @@ async function upsertSiteSettings() {
   for (const [key, value] of Object.entries(SITE_SETTINGS)) {
     const found = byKey.get(key)
     if (found) {
+      const prev = String(found.data?.value ?? '')
+      if (prev === String(value)) {
+        console.log('Skip SiteSettings (unchanged)', key)
+        continue
+      }
       await wix(`/wix-data/v2/items/${found.id}`, {
         dataCollectionId: 'SiteSettings',
         dataItem: {

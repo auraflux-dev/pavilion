@@ -17,6 +17,10 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
+import {
+  PORTAL_COPY_DEFAULTS,
+  type PortalCopy,
+} from '@/lib/defaults/portal-copy'
 import { StudentCard } from './student-card'
 import { AddStudentForm } from './add-student-form'
 import { PortalQuadrant } from './portal-quadrant'
@@ -41,16 +45,6 @@ interface Student {
   membershipStatus: string
   discountCode: string | null
   storeCardBalance: number
-}
-
-interface PortalCopy {
-  paidTitle: string
-  paidBody: string
-  freeTitle: string
-  freeBody: string
-  emptyTitle: string
-  emptyBody: string
-  upgradeBody: string
 }
 
 interface CalendarItem {
@@ -90,20 +84,6 @@ interface Props {
   copy?: PortalCopy
 }
 
-const DEFAULT_COPY: PortalCopy = {
-  paidTitle: 'Paid PTO membership active',
-  paidBody:
-    'Thanks for supporting SHMS. Your Ruby/Supreme benefits show on each student card below.',
-  freeTitle: 'Free parent account',
-  freeBody:
-    "You're signed in as a free parent member. Add your students here, then upgrade to Ruby or Supreme anytime for paid benefits.",
-  emptyTitle: 'Welcome to the SHMS PTO',
-  emptyBody:
-    'Your free parent account is ready. Add a student to track programs, store card balance, and paid membership status.',
-  upgradeBody:
-    'Paid members get a pre-loaded store card, free or discounted program registration, and free refreshments at school events.',
-}
-
 function fmtMoney(n: number) {
   return `$${Number(n).toFixed(2)}`
 }
@@ -122,7 +102,7 @@ export function MemberDashboard({
   link7 = '',
   link8 = '',
   grades = ['6', '7', '8'],
-  copy = DEFAULT_COPY,
+  copy = PORTAL_COPY_DEFAULTS,
 }: Props) {
   const [member, setMember] = useState<MemberData['member'] | null>(null)
   const [accountType, setAccountType] = useState<'free' | 'paid'>('free')
@@ -191,7 +171,7 @@ export function MemberDashboard({
   if (status === 'error' || !member) {
     return (
       <div className="text-center py-24">
-        <p className="text-[#5A6070] mb-4">Could not load your portal.</p>
+        <p className="text-[#5A6070] mb-4">{copy.loadError}</p>
         <Button onClick={load} variant="outline" size="sm">
           <RefreshCw className="w-4 h-4 mr-2" /> Retry
         </Button>
@@ -219,7 +199,7 @@ export function MemberDashboard({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* D — Calendar & Messages (priority) */}
         <PortalQuadrant
-          title="Calendar & Messages"
+          title={copy.calendarTitle}
           icon={CalendarDays}
           className="order-1 lg:order-4 lg:col-start-2 lg:row-start-2"
           action={
@@ -234,7 +214,7 @@ export function MemberDashboard({
                   familyTab === 'calendar' ? { backgroundColor: '#085508' } : undefined
                 }
               >
-                Calendar
+                {copy.tabCalendar}
               </button>
               <button
                 type="button"
@@ -246,7 +226,7 @@ export function MemberDashboard({
                   familyTab === 'messages' ? { backgroundColor: '#085508' } : undefined
                 }
               >
-                Messages
+                {copy.tabMessages}
                 {messages.length > 0 ? (
                   <span className="ml-1 opacity-80">({messages.length})</span>
                 ) : null}
@@ -258,17 +238,18 @@ export function MemberDashboard({
             calendar.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
                 <CalendarDays className="w-8 h-8 mb-2 text-[#C4C0B8]" />
-                <p className="text-sm font-semibold text-[#1A1A1A] mb-1">No dates yet</p>
+                <p className="text-sm font-semibold text-[#1A1A1A] mb-1">
+                  {copy.calendarEmptyTitle}
+                </p>
                 <p className="text-xs text-[#5A6070] max-w-xs mb-4">
-                  After you enroll a student in a program, session times and school events
-                  show up here.
+                  {copy.calendarEmptyBody}
                 </p>
                 <a
                   href="/programs"
                   className="inline-flex items-center gap-1.5 text-sm font-bold"
                   style={{ color: '#085508' }}
                 >
-                  Browse programs <ArrowRight className="w-3.5 h-3.5" />
+                  {copy.calendarEmptyCta} <ArrowRight className="w-3.5 h-3.5" />
                 </a>
               </div>
             ) : (
@@ -310,11 +291,10 @@ export function MemberDashboard({
           ) : messages.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
               <Mail className="w-8 h-8 mb-2 text-[#C4C0B8]" />
-              <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Inbox empty</p>
-              <p className="text-xs text-[#5A6070] max-w-xs">
-                Instructors can send updates here after your student is enrolled — class
-                reminders, location changes, and more.
+              <p className="text-sm font-semibold text-[#1A1A1A] mb-1">
+                {copy.messagesEmptyTitle}
               </p>
+              <p className="text-xs text-[#5A6070] max-w-xs">{copy.messagesEmptyBody}</p>
             </div>
           ) : (
             <ul className="space-y-3 flex-1 overflow-y-auto max-h-[360px] pr-1">
@@ -344,7 +324,7 @@ export function MemberDashboard({
 
         {/* A — My Account */}
         <PortalQuadrant
-          title="My Account"
+          title={copy.accountTitle}
           icon={User}
           className="order-2 lg:order-1 lg:col-start-1 lg:row-start-1"
           action={
@@ -353,7 +333,7 @@ export function MemberDashboard({
               onClick={handleLogout}
               className="text-xs font-semibold text-[#5A6070] hover:text-red-600 inline-flex items-center gap-1"
             >
-              <LogOut className="w-3.5 h-3.5" /> Sign out
+              <LogOut className="w-3.5 h-3.5" /> {copy.signOut}
             </button>
           }
         >
@@ -398,7 +378,7 @@ export function MemberDashboard({
                 className="inline-flex items-center gap-1 text-xs font-bold mt-2"
                 style={{ color: '#085508' }}
               >
-                View paid memberships <ArrowRight className="w-3 h-3" />
+                {copy.viewMemberships} <ArrowRight className="w-3 h-3" />
               </a>
             )}
           </div>
@@ -406,7 +386,7 @@ export function MemberDashboard({
           <dl className="space-y-2 text-sm mb-4">
             {member.memberSince && (
               <div className="flex justify-between gap-3">
-                <dt className="text-[#5A6070]">Member since</dt>
+                <dt className="text-[#5A6070]">{copy.memberSince}</dt>
                 <dd className="font-semibold text-[#1A1A1A]">
                   {new Date(member.memberSince).toLocaleDateString('en-US', {
                     month: 'long',
@@ -416,11 +396,11 @@ export function MemberDashboard({
               </div>
             )}
             <div className="flex justify-between gap-3">
-              <dt className="text-[#5A6070]">Students</dt>
+              <dt className="text-[#5A6070]">{copy.studentsLabel}</dt>
               <dd className="font-semibold text-[#1A1A1A]">{students.length}</dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-[#5A6070]">Paid memberships</dt>
+              <dt className="text-[#5A6070]">{copy.paidMembershipsLabel}</dt>
               <dd className="font-semibold text-[#1A1A1A]">{paidStudents}</dd>
             </div>
           </dl>
@@ -429,7 +409,7 @@ export function MemberDashboard({
             <div className="mt-auto pt-2 border-t border-[#F0EDE8]">
               <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070] mb-2 flex items-center gap-1.5">
                 <MessageCircle className="w-3.5 h-3.5" style={{ color: '#25D366' }} />
-                Grade WhatsApp
+                {copy.whatsappHeading}
               </p>
               <div className="flex flex-wrap gap-2">
                 {gradeLinks.map(({ grade, href }) => (
@@ -450,7 +430,7 @@ export function MemberDashboard({
 
         {/* B — My Students */}
         <PortalQuadrant
-          title="My Students"
+          title={copy.studentsTitle}
           icon={Users}
           className="order-3 lg:order-2 lg:col-start-2 lg:row-start-1"
           action={
@@ -459,7 +439,7 @@ export function MemberDashboard({
               onClick={load}
               className="text-xs font-semibold text-[#5A6070] hover:text-[#085508] inline-flex items-center gap-1"
             >
-              <RefreshCw className="w-3.5 h-3.5" /> Refresh
+              <RefreshCw className="w-3.5 h-3.5" /> {copy.refresh}
             </button>
           }
         >
@@ -467,7 +447,11 @@ export function MemberDashboard({
             <div className="flex-1 flex flex-col items-center justify-center text-center py-2">
               <p className="font-bold text-[#1A1A1A] mb-1">{copy.emptyTitle}</p>
               <p className="text-xs text-[#5A6070] mb-4 max-w-sm">{copy.emptyBody}</p>
-              <AddStudentForm onAdded={handleStudentAdded} grades={grades} />
+              <AddStudentForm
+                onAdded={handleStudentAdded}
+                grades={grades}
+                labels={copy}
+              />
             </div>
           ) : (
             <div className="space-y-3 flex-1 overflow-y-auto max-h-[420px] pr-1">
@@ -481,33 +465,37 @@ export function MemberDashboard({
                     upgradeBody={copy.upgradeBody}
                   />
                 ))}
-              <AddStudentForm onAdded={handleStudentAdded} grades={grades} />
+              <AddStudentForm
+                onAdded={handleStudentAdded}
+                grades={grades}
+                labels={copy}
+              />
             </div>
           )}
         </PortalQuadrant>
 
         {/* C — Store & Purchases */}
         <PortalQuadrant
-          title="Store & Purchases"
+          title={copy.storeTitle}
           icon={CreditCard}
           className="order-4 lg:order-3 lg:col-start-1 lg:row-start-2"
         >
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="rounded-xl px-3 py-3" style={{ backgroundColor: '#EEF6EE' }}>
               <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
-                Store cards
+                {copy.storeCardsLabel}
               </p>
               <p className="text-xl font-bold text-[#1A1A1A] mt-0.5">
                 {fmtMoney(storeBalanceTotal)}
               </p>
-              <p className="text-[11px] text-[#5A6070]">CMS balance total</p>
+              <p className="text-[11px] text-[#5A6070]">{copy.storeCardsHint}</p>
             </div>
             <div className="rounded-xl px-3 py-3 border border-[#E8E4DC]">
               <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
-                Recent buys
+                {copy.recentBuysLabel}
               </p>
               <p className="text-xl font-bold text-[#1A1A1A] mt-0.5">{purchases.length}</p>
-              <p className="text-[11px] text-[#5A6070]">programs & payments</p>
+              <p className="text-[11px] text-[#5A6070]">{copy.recentBuysHint}</p>
             </div>
           </div>
 
@@ -517,27 +505,24 @@ export function MemberDashboard({
               className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg text-white"
               style={{ backgroundColor: '#085508' }}
             >
-              <CreditCard className="w-3.5 h-3.5" /> Load card
+              <CreditCard className="w-3.5 h-3.5" /> {copy.ctaLoadCard}
             </a>
             <a
               href="/spirit-wear"
               className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#1A1A1A]"
             >
-              <ShoppingBag className="w-3.5 h-3.5" /> Spirit wear
+              <ShoppingBag className="w-3.5 h-3.5" /> {copy.ctaSpiritWear}
             </a>
             <a
               href="/programs"
               className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#1A1A1A]"
             >
-              Programs
+              {copy.ctaPrograms}
             </a>
           </div>
 
           {purchases.length === 0 ? (
-            <p className="text-xs text-[#5A6070] mt-auto">
-              Purchases from the site — memberships, programs, store card loads — will list
-              here so you can see what each student is signed up for.
-            </p>
+            <p className="text-xs text-[#5A6070] mt-auto">{copy.purchasesEmpty}</p>
           ) : (
             <ul className="space-y-2 flex-1 overflow-y-auto max-h-[220px]">
               {purchases.map((p) => (

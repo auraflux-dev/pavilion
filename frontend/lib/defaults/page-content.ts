@@ -2,6 +2,8 @@
  * Fallback marketing copy when PageContent CMS row is missing.
  * Keys match PageContent.page (and SiteSettings portal* keys where noted).
  */
+import { portalHubBulletsDefault } from '@/lib/defaults/portal-copy'
+
 export type PageContentFields = {
   page: string
   eyebrow: string
@@ -124,8 +126,14 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     bullets: [
       'Welcome to the SHMS PTO',
       'Your free parent account is ready. Add a student to track programs, store card balance, and paid membership status.',
-      "Paid members get a pre-loaded store card, free or discounted program registration, and free refreshments at school events.",
+      'Paid members get a pre-loaded store card, free or discounted program registration, and free refreshments at school events.',
     ],
+  }),
+  /** key|text lines — see lib/defaults/portal-copy.ts */
+  'portal-hub': empty('portal-hub', {
+    title: 'Member portal UI labels',
+    body: 'Keyed bullets (key|text) drive portal quadrant titles, empty states, and CTAs.',
+    bullets: portalHubBulletsDefault().split('\n'),
   }),
 }
 

@@ -9,7 +9,7 @@
 | Wix source | What it drives |
 |------------|----------------|
 | **SiteSettings** | Announcement, hero *numbers*, footer hours/email/socials, WhatsApp grade links, membership shared benefits, volunteer benefits, fundraising goals/allocations, **catalog product/variant IDs + store-card amounts**, **portal grades**, **contact emails/address/hours** |
-| **PageContent** | Page heroes / marketing chrome (home, membership, events, programs, volunteer, board, contact, store, spirit-wear, fundraising, meetings, newsletter, member-portal) + portal free/paid copy |
+| **PageContent** | Page heroes / marketing chrome (home, membership, events, programs, volunteer, board, contact, store, spirit-wear, fundraising, meetings, newsletter, member-portal) + portal free/paid copy (`portal`) + portal hub UI labels (`portal-hub` keyed bullets) |
 | **NavLinks** | Navbar + footer labels / order / visibility |
 | **Programs** | Programs list + featured home cards (+ Cheddarup URL) |
 | **MembershipTiers** + **FAQItems** | Membership page tiers/FAQ (marketing) |
@@ -44,7 +44,11 @@ Code fallbacks remain in `frontend/lib/defaults/catalog.ts` if a key is missing.
 
 `page` (slug), `eyebrow`, `title`, `body`, `sectionTitle`, `sectionBody`, `bullets` (newline-separated; store-how uses `step\|title\|body`), `ctaLabel`, `ctaHref`, `active`.
 
-Special pages: `portal` (free/paid + empty-state + upgrade bullets), `store` / `store-how` / `store-cta`.
+Special pages:
+- `member-portal` — hero title/body
+- `portal` — free/paid account blurbs (`title`/`body` = free, `sectionTitle`/`sectionBody` = paid); bullets line 1–3 = empty-student title/body + upgrade blurb
+- `portal-hub` — quadrant titles, empty states, CTAs as `key|text` lines in **Bullets** (e.g. `calendarTitle|Calendar & Messages`)
+- `store` / `store-how` / `store-cta`
 
 **Seed / refresh CMS rows:**
 
