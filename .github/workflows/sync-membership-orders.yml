@@ -1,0 +1,35 @@
+# Polls recent paid Wix orders and applies Ruby/Supreme memberships.
+# Used because this Wix site cannot use Automations / Secrets Manager UI.
+name: Sync membership orders
+
+on:
+  schedule:
+    # Every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call membership order sync cron
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SYNC_URL: https://frontend-six-rho-48.vercel.app/api/cron/sync-membership-orders
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET GitHub secret is not set"
+            exit 1
+          fi
+          curl -fsS -X GET "$SYNC_URL" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -H "Accept: application/json" \
+            -o /tmp/sync-result.json
+          cat /tmp/sync-result.json
+          python3 - <<'PY'
+          import json, sys
+          data = json.load(open("/tmp/sync-result.json"))
+          if not data.get("ok"):
+              sys.exit("sync response missing ok=true")
+          print(f"scanned={data.get('scanned')} applied={len(data.get('applied') or [])}")
+          PY

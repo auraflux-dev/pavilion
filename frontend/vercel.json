@@ -1,5 +1,19 @@
 {
   "buildCommand": "next build",
   "installCommand": "npm install",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/sync-membership-orders",
+      "schedule": "0 14 * * *"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "shmspto.org" }],
+      "destination": "https://www.shmspto.org/:path*",
+      "permanent": true
+    }
+  ]
 }
