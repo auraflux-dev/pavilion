@@ -1,9 +1,25 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CreditCard, User, Star, LogOut, ArrowRight, Loader2, RefreshCw } from 'lucide-react'
+import {
+  LogOut,
+  Loader2,
+  RefreshCw,
+  MessageCircle,
+  User,
+  Users,
+  CreditCard,
+  CalendarDays,
+  Mail,
+  ArrowRight,
+  ShoppingBag,
+  Star,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
+import { StudentCard } from './student-card'
+import { AddStudentForm } from './add-student-form'
+import { PortalQuadrant } from './portal-quadrant'
 
 interface MemberData {
   member: {
@@ -11,46 +27,157 @@ interface MemberData {
     name: string
     email: string
     profileImage: string | null
+    memberSince: string | null
   }
-  storeCards: { balance: number; studentName: string }[]
-  membership: { tier: string; expiresAt: string } | null
+  accountType?: 'free' | 'paid'
 }
 
-const TIER_COLORS: Record<string, { bg: string; text: string; accent: string }> = {
-  ruby: { bg: '#FDF0F0', text: '#8B1A1A', accent: '#8B1A1A' },
-  supreme: { bg: '#EEF2FF', text: '#1A3A5C', accent: '#1A3A5C' },
-  faculty: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+interface Student {
+  id: string
+  firstName: string
+  lastName: string
+  grade: string
+  membershipTier: string
+  membershipStatus: string
+  discountCode: string | null
+  storeCardBalance: number
 }
 
-export function MemberDashboard() {
-  const [data, setData] = useState<MemberData | null>(null)
+interface PortalCopy {
+  paidTitle: string
+  paidBody: string
+  freeTitle: string
+  freeBody: string
+  emptyTitle: string
+  emptyBody: string
+  upgradeBody: string
+}
+
+interface CalendarItem {
+  id: string
+  kind: 'program' | 'event'
+  title: string
+  subtitle: string
+  whenLabel: string
+  href: string
+  studentNames: string[]
+}
+
+interface MessageItem {
+  id: string
+  fromName: string
+  subject: string
+  body: string
+  programName: string
+  studentName: string
+  sentAt: string | null
+}
+
+interface PurchaseItem {
+  id: string
+  label: string
+  amount: number
+  status: string
+  date: string | null
+  studentName: string
+}
+
+interface Props {
+  link6?: string
+  link7?: string
+  link8?: string
+  grades?: string[]
+  copy?: PortalCopy
+}
+
+const DEFAULT_COPY: PortalCopy = {
+  paidTitle: 'Paid PTO membership active',
+  paidBody:
+    'Thanks for supporting SHMS. Your Ruby/Supreme benefits show on each student card below.',
+  freeTitle: 'Free parent account',
+  freeBody:
+    "You're signed in as a free parent member. Add your students here, then upgrade to Ruby or Supreme anytime for paid benefits.",
+  emptyTitle: 'Welcome to the SHMS PTO',
+  emptyBody:
+    'Your free parent account is ready. Add a student to track programs, store card balance, and paid membership status.',
+  upgradeBody:
+    'Paid members get a pre-loaded store card, free or discounted program registration, and free refreshments at school events.',
+}
+
+function fmtMoney(n: number) {
+  return `$${Number(n).toFixed(2)}`
+}
+
+function fmtShortDate(d: string | null) {
+  if (!d) return ''
+  try {
+    return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  } catch {
+    return ''
+  }
+}
+
+export function MemberDashboard({
+  link6 = '',
+  link7 = '',
+  link8 = '',
+  grades = ['6', '7', '8'],
+  copy = DEFAULT_COPY,
+}: Props) {
+  const [member, setMember] = useState<MemberData['member'] | null>(null)
+  const [accountType, setAccountType] = useState<'free' | 'paid'>('free')
+  const [students, setStudents] = useState<Student[]>([])
+  const [calendar, setCalendar] = useState<CalendarItem[]>([])
+  const [messages, setMessages] = useState<MessageItem[]>([])
+  const [purchases, setPurchases] = useState<PurchaseItem[]>([])
   const [status, setStatus] = useState<'loading' | 'error' | 'ok'>('loading')
+  const [familyTab, setFamilyTab] = useState<'calendar' | 'messages'>('calendar')
 
   async function load() {
     setStatus('loading')
     try {
-      const res = await fetch('/api/auth/me')
-      if (!res.ok) throw new Error()
-      setData(await res.json())
+      const [meRes, studentsRes, familyRes] = await Promise.all([
+        fetch('/api/auth/me'),
+        fetch('/api/students'),
+        fetch('/api/portal/family'),
+      ])
+      if (!meRes.ok) throw new Error('auth')
+      const meData = await meRes.json()
+      const studentsData = studentsRes.ok ? await studentsRes.json() : { students: [] }
+      const familyData = familyRes.ok
+        ? await familyRes.json()
+        : { calendar: [], messages: [], purchases: [] }
+
+      setMember(meData.member)
+      setAccountType(meData.accountType === 'paid' ? 'paid' : 'free')
+      setStudents(studentsData.students ?? [])
+      setCalendar(familyData.calendar ?? [])
+      setMessages(familyData.messages ?? [])
+      setPurchases(familyData.purchases ?? [])
       setStatus('ok')
     } catch {
       setStatus('error')
     }
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+  }, [])
 
   async function handleLogout() {
     try {
-      // Clear server-side cookie
       await fetch('/api/auth/logout', { method: 'POST' })
-      // Get Wix logout URL and redirect
       const client = createVisitorClient()
       const { logoutUrl } = await client.auth.logout(window.location.href)
       window.location.href = logoutUrl
     } catch {
       window.location.href = '/'
     }
+  }
+
+  function handleStudentAdded(student: Student) {
+    setStudents((prev) => [...prev, student])
+    load()
   }
 
   if (status === 'loading') {
@@ -61,10 +188,10 @@ export function MemberDashboard() {
     )
   }
 
-  if (status === 'error' || !data) {
+  if (status === 'error' || !member) {
     return (
       <div className="text-center py-24">
-        <p className="text-[#5A6070] mb-4">Could not load your profile.</p>
+        <p className="text-[#5A6070] mb-4">Could not load your portal.</p>
         <Button onClick={load} variant="outline" size="sm">
           <RefreshCw className="w-4 h-4 mr-2" /> Retry
         </Button>
@@ -72,155 +199,371 @@ export function MemberDashboard() {
     )
   }
 
-  const { member, storeCards, membership } = data
-  const tierKey = membership?.tier?.toLowerCase() ?? null
-  const tierColors = tierKey ? TIER_COLORS[tierKey] : null
-  const totalBalance = storeCards.reduce((sum, c) => sum + c.balance, 0)
+  const gradeLinks = [
+    { grade: '6th', href: link6 },
+    { grade: '7th', href: link7 },
+    { grade: '8th', href: link8 },
+  ].filter((g) => g.href)
+
+  const storeBalanceTotal = students.reduce(
+    (sum, s) => sum + (Number(s.storeCardBalance) || 0),
+    0
+  )
+  const paidStudents = students.filter(
+    (s) => s.membershipTier && s.membershipTier !== 'free'
+  ).length
 
   return (
-    <div className="space-y-6">
-
-      {/* Header: name + logout */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {member.profileImage ? (
-            <img
-              src={member.profileImage}
-              alt={member.name}
-              className="w-12 h-12 rounded-full object-cover"
-            />
+    <div className="space-y-4">
+      {/* 2×2 quadrants — D (calendar/messages) first on mobile */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* D — Calendar & Messages (priority) */}
+        <PortalQuadrant
+          title="Calendar & Messages"
+          icon={CalendarDays}
+          className="order-1 lg:order-4 lg:col-start-2 lg:row-start-2"
+          action={
+            <div className="flex rounded-lg border border-[#E8E4DC] overflow-hidden text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setFamilyTab('calendar')}
+                className={`px-2.5 py-1.5 ${
+                  familyTab === 'calendar' ? 'text-white' : 'text-[#5A6070] bg-white'
+                }`}
+                style={
+                  familyTab === 'calendar' ? { backgroundColor: '#085508' } : undefined
+                }
+              >
+                Calendar
+              </button>
+              <button
+                type="button"
+                onClick={() => setFamilyTab('messages')}
+                className={`px-2.5 py-1.5 border-l border-[#E8E4DC] ${
+                  familyTab === 'messages' ? 'text-white' : 'text-[#5A6070] bg-white'
+                }`}
+                style={
+                  familyTab === 'messages' ? { backgroundColor: '#085508' } : undefined
+                }
+              >
+                Messages
+                {messages.length > 0 ? (
+                  <span className="ml-1 opacity-80">({messages.length})</span>
+                ) : null}
+              </button>
+            </div>
+          }
+        >
+          {familyTab === 'calendar' ? (
+            calendar.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
+                <CalendarDays className="w-8 h-8 mb-2 text-[#C4C0B8]" />
+                <p className="text-sm font-semibold text-[#1A1A1A] mb-1">No dates yet</p>
+                <p className="text-xs text-[#5A6070] max-w-xs mb-4">
+                  After you enroll a student in a program, session times and school events
+                  show up here.
+                </p>
+                <a
+                  href="/programs"
+                  className="inline-flex items-center gap-1.5 text-sm font-bold"
+                  style={{ color: '#085508' }}
+                >
+                  Browse programs <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            ) : (
+              <ul className="space-y-3 flex-1 overflow-y-auto max-h-[360px] pr-1">
+                {calendar.map((item) => (
+                  <li key={item.id}>
+                    <a
+                      href={item.href}
+                      className="block rounded-xl border border-[#E8E4DC] px-3.5 py-3 hover:border-[#085508]/40 hover:bg-[#FAFCF9] transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <p className="text-sm font-bold text-[#1A1A1A] leading-snug">
+                          {item.title}
+                        </p>
+                        <span
+                          className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0"
+                          style={{
+                            backgroundColor: item.kind === 'program' ? '#EEF6EE' : '#FFF8E1',
+                            color: item.kind === 'program' ? '#085508' : '#8A6D00',
+                          }}
+                        >
+                          {item.kind === 'program' ? 'Program' : 'Event'}
+                        </span>
+                      </div>
+                      <p className="text-xs font-semibold text-[#085508] mb-0.5">
+                        {item.whenLabel}
+                      </p>
+                      <p className="text-xs text-[#5A6070]">{item.subtitle}</p>
+                      {item.studentNames.length > 0 && (
+                        <p className="text-[11px] text-[#5A6070] mt-1.5">
+                          For: {item.studentNames.join(', ')}
+                        </p>
+                      )}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )
+          ) : messages.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
+              <Mail className="w-8 h-8 mb-2 text-[#C4C0B8]" />
+              <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Inbox empty</p>
+              <p className="text-xs text-[#5A6070] max-w-xs">
+                Instructors can send updates here after your student is enrolled — class
+                reminders, location changes, and more.
+              </p>
+            </div>
           ) : (
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
+            <ul className="space-y-3 flex-1 overflow-y-auto max-h-[360px] pr-1">
+              {messages.map((m) => (
+                <li
+                  key={m.id}
+                  className="rounded-xl border border-[#E8E4DC] px-3.5 py-3"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <p className="text-xs font-bold text-[#085508]">{m.fromName}</p>
+                    <p className="text-[11px] text-[#5A6070]">{fmtShortDate(m.sentAt)}</p>
+                  </div>
+                  <p className="text-sm font-bold text-[#1A1A1A] mb-1">{m.subject}</p>
+                  <p className="text-xs text-[#5A6070] leading-relaxed line-clamp-3">
+                    {m.body}
+                  </p>
+                  {(m.programName || m.studentName) && (
+                    <p className="text-[11px] text-[#8A8680] mt-2">
+                      {[m.programName, m.studentName].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </PortalQuadrant>
+
+        {/* A — My Account */}
+        <PortalQuadrant
+          title="My Account"
+          icon={User}
+          className="order-2 lg:order-1 lg:col-start-1 lg:row-start-1"
+          action={
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="text-xs font-semibold text-[#5A6070] hover:text-red-600 inline-flex items-center gap-1"
+            >
+              <LogOut className="w-3.5 h-3.5" /> Sign out
+            </button>
+          }
+        >
+          <div className="flex items-center gap-3 mb-4">
+            {member.profileImage ? (
+              <img
+                src={member.profileImage}
+                alt={member.name}
+                className="w-12 h-12 rounded-full object-cover"
+              />
+            ) : (
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                style={{ backgroundColor: '#085508' }}
+              >
+                {member.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="font-bold text-[#1A1A1A] truncate">{member.name}</p>
+              <p className="text-xs text-[#5A6070] truncate">{member.email}</p>
+            </div>
+          </div>
+
+          <div
+            className="rounded-xl px-4 py-3 border mb-4"
+            style={{
+              backgroundColor: accountType === 'paid' ? '#EEF6EE' : '#FAFAF8',
+              borderColor: '#E8E4DC',
+            }}
+          >
+            <p className="text-sm font-bold text-[#1A1A1A] flex items-center gap-1.5">
+              {accountType === 'paid' && <Star className="w-3.5 h-3.5" style={{ color: '#085508' }} />}
+              {accountType === 'paid' ? copy.paidTitle : copy.freeTitle}
+            </p>
+            <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
+              {accountType === 'paid' ? copy.paidBody : copy.freeBody}
+            </p>
+            {accountType === 'free' && (
+              <a
+                href="/membership"
+                className="inline-flex items-center gap-1 text-xs font-bold mt-2"
+                style={{ color: '#085508' }}
+              >
+                View paid memberships <ArrowRight className="w-3 h-3" />
+              </a>
+            )}
+          </div>
+
+          <dl className="space-y-2 text-sm mb-4">
+            {member.memberSince && (
+              <div className="flex justify-between gap-3">
+                <dt className="text-[#5A6070]">Member since</dt>
+                <dd className="font-semibold text-[#1A1A1A]">
+                  {new Date(member.memberSince).toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </dd>
+              </div>
+            )}
+            <div className="flex justify-between gap-3">
+              <dt className="text-[#5A6070]">Students</dt>
+              <dd className="font-semibold text-[#1A1A1A]">{students.length}</dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="text-[#5A6070]">Paid memberships</dt>
+              <dd className="font-semibold text-[#1A1A1A]">{paidStudents}</dd>
+            </div>
+          </dl>
+
+          {gradeLinks.length > 0 && (
+            <div className="mt-auto pt-2 border-t border-[#F0EDE8]">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070] mb-2 flex items-center gap-1.5">
+                <MessageCircle className="w-3.5 h-3.5" style={{ color: '#25D366' }} />
+                Grade WhatsApp
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {gradeLinks.map(({ grade, href }) => (
+                  <a
+                    key={grade}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-[#E8E4DC] hover:border-[#25D366] hover:bg-green-50"
+                  >
+                    {grade}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </PortalQuadrant>
+
+        {/* B — My Students */}
+        <PortalQuadrant
+          title="My Students"
+          icon={Users}
+          className="order-3 lg:order-2 lg:col-start-2 lg:row-start-1"
+          action={
+            <button
+              type="button"
+              onClick={load}
+              className="text-xs font-semibold text-[#5A6070] hover:text-[#085508] inline-flex items-center gap-1"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Refresh
+            </button>
+          }
+        >
+          {students.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center py-2">
+              <p className="font-bold text-[#1A1A1A] mb-1">{copy.emptyTitle}</p>
+              <p className="text-xs text-[#5A6070] mb-4 max-w-sm">{copy.emptyBody}</p>
+              <AddStudentForm onAdded={handleStudentAdded} grades={grades} />
+            </div>
+          ) : (
+            <div className="space-y-3 flex-1 overflow-y-auto max-h-[420px] pr-1">
+              {students
+                .sort((a, b) => Number(a.grade) - Number(b.grade))
+                .map((s, i) => (
+                  <StudentCard
+                    key={s.id}
+                    student={s}
+                    defaultOpen={i === 0}
+                    upgradeBody={copy.upgradeBody}
+                  />
+                ))}
+              <AddStudentForm onAdded={handleStudentAdded} grades={grades} />
+            </div>
+          )}
+        </PortalQuadrant>
+
+        {/* C — Store & Purchases */}
+        <PortalQuadrant
+          title="Store & Purchases"
+          icon={CreditCard}
+          className="order-4 lg:order-3 lg:col-start-1 lg:row-start-2"
+        >
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="rounded-xl px-3 py-3" style={{ backgroundColor: '#EEF6EE' }}>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
+                Store cards
+              </p>
+              <p className="text-xl font-bold text-[#1A1A1A] mt-0.5">
+                {fmtMoney(storeBalanceTotal)}
+              </p>
+              <p className="text-[11px] text-[#5A6070]">CMS balance total</p>
+            </div>
+            <div className="rounded-xl px-3 py-3 border border-[#E8E4DC]">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
+                Recent buys
+              </p>
+              <p className="text-xl font-bold text-[#1A1A1A] mt-0.5">{purchases.length}</p>
+              <p className="text-[11px] text-[#5A6070]">programs & payments</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-4">
+            <a
+              href="/store"
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg text-white"
               style={{ backgroundColor: '#085508' }}
             >
-              {member.name.charAt(0).toUpperCase()}
-            </div>
-          )}
-          <div>
-            <p className="font-bold text-[#1A1A1A]">{member.name || 'PTO Member'}</p>
-            <p className="text-sm text-[#5A6070]">{member.email}</p>
-          </div>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-1.5 text-sm text-[#5A6070] hover:text-[#1A1A1A] transition-colors"
-        >
-          <LogOut className="w-4 h-4" />
-          Sign out
-        </button>
-      </div>
-
-      {/* Membership card */}
-      <div
-        className="rounded-2xl p-6"
-        style={{ backgroundColor: tierColors?.bg ?? '#F5F0E8' }}
-      >
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Star className="w-5 h-5" style={{ color: tierColors?.accent ?? '#5A6070' }} />
-            <span
-              className="text-sm font-bold uppercase tracking-wider"
-              style={{ color: tierColors?.text ?? '#5A6070' }}
-            >
-              {membership ? `${membership.tier} Member` : 'No Active Membership'}
-            </span>
-          </div>
-          {membership && (
-            <span className="text-xs text-[#5A6070]">
-              Expires {new Date(membership.expiresAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-            </span>
-          )}
-        </div>
-        {!membership && (
-          <div>
-            <p className="text-sm text-[#5A6070] mb-3">Join the PTO to unlock priority registration, event perks, and more.</p>
+              <CreditCard className="w-3.5 h-3.5" /> Load card
+            </a>
             <a
-              href="/membership"
-              className="inline-flex items-center gap-1.5 text-sm font-bold"
-              style={{ color: '#085508' }}
+              href="/spirit-wear"
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#1A1A1A]"
             >
-              View membership options <ArrowRight className="w-3.5 h-3.5" />
+              <ShoppingBag className="w-3.5 h-3.5" /> Spirit wear
+            </a>
+            <a
+              href="/programs"
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#1A1A1A]"
+            >
+              Programs
             </a>
           </div>
-        )}
-      </div>
 
-      {/* Store card balances */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E8E4DC]">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2">
-            <CreditCard className="w-5 h-5" style={{ color: '#085508' }} />
-            <h2 className="font-bold text-[#1A1A1A]">Store Card Balance</h2>
-          </div>
-          <a
-            href="/store"
-            className="text-xs font-semibold"
-            style={{ color: '#085508' }}
-          >
-            Load more →
-          </a>
-        </div>
-
-        {storeCards.length === 0 ? (
-          <div className="text-center py-6">
-            <p className="text-sm text-[#5A6070] mb-4">No store cards yet. Load a card and your student taps it at the store window.</p>
-            <Button
-              className="font-bold text-[#1A1A1A]"
-              style={{ backgroundColor: '#FFD700' }}
-              onClick={() => window.location.href = '/store'}
-            >
-              Load a Store Card
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {storeCards.map((card, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between py-3 border-b border-[#F5F0E8] last:border-0"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white"
-                    style={{ backgroundColor: '#085508' }}
-                  >
-                    {card.studentName.charAt(0).toUpperCase()}
+          {purchases.length === 0 ? (
+            <p className="text-xs text-[#5A6070] mt-auto">
+              Purchases from the site — memberships, programs, store card loads — will list
+              here so you can see what each student is signed up for.
+            </p>
+          ) : (
+            <ul className="space-y-2 flex-1 overflow-y-auto max-h-[220px]">
+              {purchases.map((p) => (
+                <li
+                  key={p.id}
+                  className="flex items-start justify-between gap-2 py-2 border-b border-[#F0EDE8] last:border-0"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[#1A1A1A] truncate">{p.label}</p>
+                    <p className="text-[11px] text-[#5A6070]">
+                      {[p.studentName, fmtShortDate(p.date)].filter(Boolean).join(' · ')}
+                    </p>
                   </div>
-                  <span className="text-sm font-medium text-[#1A1A1A]">{card.studentName}</span>
-                </div>
-                <span className="text-lg font-bold" style={{ color: '#085508' }}>
-                  ${card.balance.toFixed(2)}
-                </span>
-              </div>
-            ))}
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-sm font-bold text-[#5A6070]">Total balance</span>
-              <span className="text-xl font-bold" style={{ color: '#085508' }}>
-                ${totalBalance.toFixed(2)}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Quick links */}
-      <div className="grid grid-cols-2 gap-3">
-        {[
-          { label: 'Programs', href: '/programs', icon: '📚' },
-          { label: 'Events', href: '/events', icon: '📅' },
-          { label: 'Volunteer', href: '/volunteer', icon: '🙋' },
-          { label: 'Store', href: '/store', icon: '🛒' },
-        ].map(({ label, href, icon }) => (
-          <a
-            key={label}
-            href={href}
-            className="bg-white rounded-xl p-4 border border-[#E8E4DC] flex items-center gap-3 hover:shadow-sm transition-shadow"
-          >
-            <span className="text-xl">{icon}</span>
-            <span className="text-sm font-semibold text-[#1A1A1A]">{label}</span>
-          </a>
-        ))}
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold text-[#1A1A1A]">{fmtMoney(p.amount)}</p>
+                    {p.status ? (
+                      <p className="text-[10px] font-bold text-[#5A6070] uppercase">
+                        {p.status}
+                      </p>
+                    ) : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </PortalQuadrant>
       </div>
     </div>
   )

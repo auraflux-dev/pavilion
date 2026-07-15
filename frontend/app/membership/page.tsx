@@ -3,18 +3,21 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { MembershipTiers } from '@/components/membership/membership-tiers'
 import { MembershipCheckoutHandler } from '@/components/membership/membership-checkout-handler'
+import { PageHero } from '@/components/page-hero'
 import { CheckCircle2, ArrowRight } from 'lucide-react'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getMembershipTiers } from '@/lib/api/membership'
 import { getFAQItems } from '@/lib/api/faq'
+import { getPageContent } from '@/lib/api/page-content'
 
 export const revalidate = 300
 
 export default async function MembershipPage() {
-  const [settings, allTiers, faqItems] = await Promise.all([
+  const [settings, allTiers, faqItems, page] = await Promise.all([
     getSiteSettings(),
     getMembershipTiers(),
     getFAQItems('membership'),
+    getPageContent('membership'),
   ])
 
   const sharedBenefits = settings
@@ -33,36 +36,17 @@ export default async function MembershipPage() {
       <Navbar />
 
       <main id="main-content">
-        {/* Hero */}
-        <section className="py-16 md:py-24" style={{ backgroundColor: '#085508' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div
-              className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
-              style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'white' }}
-            >
-              Join the PTO
-            </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-              PTO Membership
-            </h1>
-            <p className="text-lg text-white/80 max-w-2xl mx-auto leading-relaxed">
-              Your membership directly funds enrichment programs, events, and resources
-              that benefit every student at Stone Hill Middle School.
-            </p>
-          </div>
-        </section>
+        <PageHero content={page} />
 
         {/* Tiers */}
         <section id="tiers" className="py-16 md:py-24" style={{ backgroundColor: '#F5F0E8' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-[#1A1A1A] mb-3">
-                Choose Your Membership
+                {page.sectionTitle}
               </h2>
               <p className="text-[#5A6070] max-w-xl mx-auto">
-                Start with a free parent account (log in / sign up), then purchase Ruby or
-                Supreme for the 2025–26 school year. Paid tiers include voting rights and
-                member perks in your portal.
+                {page.sectionBody}
               </p>
             </div>
             <MembershipCheckoutHandler />

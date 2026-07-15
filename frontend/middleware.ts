@@ -1,40 +1,37 @@
 /**
  * Next.js middleware — runs on every request.
  *
- * Responsibilities:
- * 1. If a visitor has no Wix tokens cookie → generate anonymous visitor tokens
- *    and set them so the Wix SDK can make calls on their behalf.
- * 2. If a request hits /member-portal without member tokens → redirect to /auth/login.
- * 3. Pass tokens through for authenticated requests.
+ * 1. Protect member-only routes with a real member session (not visitor tokens).
+ * 2. Generate anonymous visitor tokens for everyone else.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, OAuthStrategy } from '@wix/sdk'
 import { members } from '@wix/members'
 import { TOKENS_COOKIE, TOKEN_MAX_AGE, isSecure } from '@/lib/auth-cookies'
+import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
 
-/** Routes that require a logged-in member. */
 const PROTECTED_ROUTES = ['/member-portal']
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const res = NextResponse.next()
+  const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
 
-  const tokensCookie = req.cookies.get(TOKENS_COOKIE)?.value
-  let tokens = tokensCookie ? JSON.parse(tokensCookie) : null
-
-  // --- Protect member-only routes ---
   if (PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
-    if (!tokens?.refreshToken?.value) {
-      // Not logged in — send to login, remember where they were going
+    if (!isMemberTokens(tokens)) {
       const loginUrl = req.nextUrl.clone()
       loginUrl.pathname = '/auth/login'
-      loginUrl.searchParams.set('returnTo', pathname)
+      loginUrl.searchParams.set('returnTo', pathname + (req.nextUrl.search || ''))
       return NextResponse.redirect(loginUrl)
     }
     return res
   }
 
-  // --- Ensure visitor token exists for all other routes ---
+  // Skip visitor bootstrap for auth + API routes
+  if (pathname.startsWith('/auth') || pathname.startsWith('/api')) {
+    return res
+  }
+
   if (!tokens) {
     try {
       const client = createClient({
@@ -52,7 +49,7 @@ export async function middleware(req: NextRequest) {
         path: '/',
       })
     } catch {
-      // Non-fatal — page still renders without visitor session
+      // Non-fatal
     }
   }
 
@@ -61,14 +58,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization)
-     * - favicon.ico
-     * - public folder files
-     * - api routes (handled separately)
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

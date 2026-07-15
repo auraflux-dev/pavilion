@@ -3,7 +3,10 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { ProgramCard } from '@/components/programs/program-card'
 import { ProgramsFilter } from '@/components/programs/programs-filter'
+import { PageHero } from '@/components/page-hero'
 import { getAllPrograms, type Program } from '@/lib/api/programs'
+import { getSiteSettings } from '@/lib/api/site-settings'
+import { getPageContent } from '@/lib/api/page-content'
 import { ArrowRight } from 'lucide-react'
 
 export const revalidate = 300 // revalidate every 5 minutes
@@ -11,6 +14,9 @@ export const revalidate = 300 // revalidate every 5 minutes
 export default async function ProgramsPage() {
   let programs: Program[] = []
   let error = false
+
+  const [settings, page] = await Promise.all([getSiteSettings(), getPageContent('programs')])
+  const presidentEmail = settings.get('presidentEmail', 'president@shmspto.org')
 
   try {
     programs = await getAllPrograms()
@@ -24,27 +30,7 @@ export default async function ProgramsPage() {
       <Navbar />
 
       <main id="main-content">
-        {/* Hero */}
-        <section
-          className="py-16 md:py-24"
-          style={{ backgroundColor: '#085508' }}
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div
-              className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
-              style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'white' }}
-            >
-              Student Enrichment
-            </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-              Enrichment Programs
-            </h1>
-            <p className="text-lg text-white/80 max-w-2xl mx-auto leading-relaxed">
-              PTO-funded programs designed to challenge, inspire, and connect
-              students beyond the standard curriculum.
-            </p>
-          </div>
-        </section>
+        <PageHero content={page} />
 
         {/* Programs grid */}
         <section
@@ -91,7 +77,7 @@ export default async function ProgramsPage() {
               Reach out to the PTO board and we&apos;ll get back to you quickly.
             </p>
             <a
-              href="/contact"
+              href={`mailto:${presidentEmail}`}
               className="inline-flex items-center gap-2 font-semibold text-white px-6 py-3 rounded-lg transition-opacity hover:opacity-90"
               style={{ backgroundColor: '#085508' }}
             >

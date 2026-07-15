@@ -11,7 +11,7 @@ export interface StudentRecord {
   storeCardCode?: string;
   storeCardBalance?: number;
   membershipStatus: "none" | "active" | "expired";
-  membershipTier?: "ruby" | "supreme";
+  membershipTier?: "free" | "ruby" | "supreme";
 }
 
 // Called server-side from member portal after OAuth — email comes from Wix session

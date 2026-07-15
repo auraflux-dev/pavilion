@@ -1,8 +1,16 @@
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Users, BookOpen, Heart } from 'lucide-react'
+import { getSiteSettings } from '@/lib/api/site-settings'
+import { getPageContent } from '@/lib/api/page-content'
 
-export function Hero() {
+export async function Hero() {
+  const [settings, content] = await Promise.all([getSiteSettings(), getPageContent('home')])
+  const stats = [
+    { value: settings.get('heroStatFamilies', '500+'),   label: 'Student Families' },
+    { value: settings.get('heroStatPrograms', '12+'),    label: 'Active Programs' },
+    { value: settings.get('heroStatVolunteers', '200+'), label: 'Volunteers' },
+  ]
+
   return (
     <section
       className="relative overflow-hidden py-20 md:py-28 lg:py-36"
@@ -36,26 +44,18 @@ export function Hero() {
           <div className="lg:w-[60%]">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 mb-6">
-              <span className="w-2 h-2 rounded-full bg-[#2A8B7A] animate-pulse" aria-hidden="true" />
+              <span className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse" aria-hidden="true" />
               <span className="text-white/90 text-xs font-semibold tracking-wider uppercase">
-                Ashburn, Virginia · LCPS
+                {content.eyebrow}
               </span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight text-balance mb-6">
-              Welcome to Stone Hill{' '}
-              <span
-                className="block sm:inline"
-                style={{ color: '#a8d5a2' }}
-              >
-                Middle School PTO
-              </span>
+              {content.title}
             </h1>
 
             <p className="text-lg sm:text-xl text-white/85 leading-relaxed mb-10 max-w-2xl text-pretty">
-              An active volunteer organization committed to enriching the academic and social
-              experience for all SHMS students and families.{' '}
-              <span className="font-semibold text-white">Go Stingrays!</span>
+              {content.body}
             </p>
 
             {/* CTA Buttons */}
@@ -63,12 +63,12 @@ export function Hero() {
               <Button
                 size="lg"
                 className="text-white font-bold px-6 sm:px-8 shadow-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#8B1A1A' }}
+                style={{ backgroundColor: '#085508' }}
                 asChild
               >
-                <a href="#membership">
+                <a href={content.ctaHref || '/membership'}>
                   <Users className="w-4 h-4 mr-2" aria-hidden="true" />
-                  Join the PTO
+                  {content.ctaLabel || 'Join the PTO'}
                 </a>
               </Button>
 
@@ -87,7 +87,7 @@ export function Hero() {
               <Button
                 size="lg"
                 className="text-white font-bold px-6 sm:px-8 shadow-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#2A8B7A' }}
+                style={{ backgroundColor: '#085508' }}
                 asChild
               >
                 <a href="#volunteer">
@@ -99,11 +99,7 @@ export function Hero() {
 
             {/* Stats strip */}
             <div className="mt-14 flex flex-wrap gap-8 sm:gap-12">
-              {[
-                { value: '500+', label: 'Student Families' },
-                { value: '12+', label: 'Active Programs' },
-                { value: '200+', label: 'Volunteers' },
-              ].map((stat) => (
+              {stats.map((stat) => (
                 <div key={stat.label}>
                   <div className="text-3xl font-bold text-white">{stat.value}</div>
                   <div className="text-sm text-white/70 mt-0.5">{stat.label}</div>

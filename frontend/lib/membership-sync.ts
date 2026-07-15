@@ -2,18 +2,30 @@
  * Apply paid PTO membership (Ruby / Supreme) onto CMS Students + Memberships.
  */
 import { getWixClient } from '@/lib/wix-client'
-import {
-  MEMBERSHIP_RUBY_PRODUCT_ID,
-  MEMBERSHIP_SUPREME_PRODUCT_ID,
-} from '@/lib/wix-checkout'
+import { getCatalogConfig } from '@/lib/api/catalog-config'
+import { CATALOG_DEFAULTS } from '@/lib/defaults/catalog'
+import type { CatalogConfig } from '@/lib/defaults/catalog'
 
 export type PaidTier = 'ruby' | 'supreme'
 
-export function tierFromProductId(productId: string | undefined | null): PaidTier | null {
+export function tierFromProductId(
+  productId: string | undefined | null,
+  cfg?: Pick<CatalogConfig, 'rubyProductId' | 'supremeProductId'>
+): PaidTier | null {
   if (!productId) return null
-  if (productId === MEMBERSHIP_RUBY_PRODUCT_ID) return 'ruby'
-  if (productId === MEMBERSHIP_SUPREME_PRODUCT_ID) return 'supreme'
+  const ruby = cfg?.rubyProductId ?? CATALOG_DEFAULTS.membershipRubyProductId
+  const supreme = cfg?.supremeProductId ?? CATALOG_DEFAULTS.membershipSupremeProductId
+  if (productId === ruby) return 'ruby'
+  if (productId === supreme) return 'supreme'
   return null
+}
+
+/** Resolve tier using SiteSettings-aware catalog config. */
+export async function tierFromProductIdAsync(
+  productId: string | undefined | null
+): Promise<PaidTier | null> {
+  const cfg = await getCatalogConfig()
+  return tierFromProductId(productId, cfg)
 }
 
 export function tierFromSlugOrName(value: string | undefined | null): PaidTier | null {

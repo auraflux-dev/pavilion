@@ -1,0 +1,136 @@
+import { AnnouncementBar } from '@/components/announcement-bar'
+import { Navbar } from '@/components/navbar'
+import { Footer } from '@/components/footer'
+import { PageHero } from '@/components/page-hero'
+import { getMeetingsByCommittee } from '@/lib/api/meetings'
+import { getPageContent } from '@/lib/api/page-content'
+import { MeetingMonthFilter } from '@/components/meetings/meeting-month-filter'
+import { Users } from 'lucide-react'
+
+export const revalidate = 300
+
+const COMMITTEES = [
+  {
+    key: 'SEAC' as const,
+    label: 'SEAC',
+    full: 'Special Education Advisory Council',
+    description: 'Advisory body ensuring students with disabilities receive a free, appropriate public education.',
+  },
+  {
+    key: 'MSAAC' as const,
+    label: 'MSAAC',
+    full: 'Minority Student Achievement Advisory Council',
+    description: 'Advancing equity and closing achievement gaps for all students.',
+  },
+  {
+    key: 'LEAF' as const,
+    label: 'LEAF',
+    full: 'Learning Enrichment Activities Fund',
+    description: 'Supporting student enrichment, field experiences, and extracurricular learning opportunities.',
+  },
+]
+
+export default async function MeetingsPage() {
+  const [page, ptoMeetings, seacMeetings, msaacMeetings, leafMeetings] = await Promise.all([
+    getPageContent('meetings'),
+    getMeetingsByCommittee('PTO').catch(() => []),
+    getMeetingsByCommittee('SEAC').catch(() => []),
+    getMeetingsByCommittee('MSAAC').catch(() => []),
+    getMeetingsByCommittee('LEAF').catch(() => []),
+  ])
+
+  const pto = ptoMeetings
+  const committeeData = {
+    SEAC: seacMeetings,
+    MSAAC: msaacMeetings,
+    LEAF: leafMeetings,
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <AnnouncementBar />
+      <Navbar />
+
+      <main id="main-content">
+        <PageHero content={page} />
+
+        {/* PTO Section */}
+        <section className="py-16 md:py-20" style={{ backgroundColor: '#F5F0E8' }}>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-3 mb-2">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: '#085508' }}
+              >
+                <Users className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-[#1A1A1A]">PTO Meetings</h2>
+                <p className="text-sm text-[#5A6070]">Parent Teacher Organization</p>
+              </div>
+            </div>
+            <p className="text-sm text-[#5A6070] mb-8 ml-[52px]">
+              Open to all SHMS families. Upcoming meetings include a join link — all minutes are published after each meeting.
+            </p>
+            <MeetingMonthFilter meetings={pto} showJoinLink />
+          </div>
+        </section>
+
+        {/* Committee sections */}
+        <section className="py-16 md:py-20 bg-white border-t border-[#E8E4DC]">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+            <div className="text-center mb-4">
+              <h2 className="text-3xl font-bold text-[#1A1A1A] mb-3">Advisory Committees</h2>
+              <p className="text-[#5A6070] max-w-xl mx-auto">
+                Committee representatives publish summaries and key takeaways after each meeting.
+              </p>
+            </div>
+
+            {COMMITTEES.map((c) => (
+              <div key={c.key}>
+                <div className="flex items-start gap-3 mb-2">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ backgroundColor: '#EEF6EE' }}
+                  >
+                    <span className="text-xs font-bold" style={{ color: '#085508' }}>
+                      {c.key.slice(0, 2)}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-[#1A1A1A]">{c.label}</h3>
+                    <p className="text-sm font-medium text-[#085508]">{c.full}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-[#5A6070] mb-6 ml-[52px]">{c.description}</p>
+                <MeetingMonthFilter meetings={committeeData[c.key]} />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Stay updated CTA */}
+        <section className="py-14 border-t border-[#E8E4DC]" style={{ backgroundColor: '#F5F0E8' }}>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">
+              Get notified when minutes are published
+            </h2>
+            <p className="text-[#5A6070] mb-6 max-w-xl mx-auto text-sm">
+              SHMS PTO members receive an email when new meeting minutes are posted.
+              You can opt out anytime from your member profile.
+            </p>
+            <a
+              href="/membership"
+              className="inline-flex items-center gap-2 font-semibold text-white px-6 py-3 rounded-lg transition-opacity hover:opacity-90"
+              style={{ backgroundColor: '#085508' }}
+            >
+              Join the PTO
+            </a>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  )
+}

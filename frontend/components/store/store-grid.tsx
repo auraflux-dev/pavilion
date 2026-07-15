@@ -16,9 +16,9 @@ const CATEGORY_EMOJI: Record<string, string> = {
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-  Candy: { bg: '#FDF0F0', text: '#8B1A1A' },
-  Snacks: { bg: '#FFF3E0', text: '#E65100' },
-  Drinks: { bg: '#E8F5E9', text: '#1B5E20' },
+  Candy: { bg: '#EEF6EE', text: '#085508' },
+  Snacks: { bg: '#EEF6EE', text: '#085508' },
+  Drinks: { bg: '#EEF6EE', text: '#085508' },
 }
 
 export function StoreGrid({ items }: StoreGridProps) {

@@ -308,30 +308,52 @@ All payment records from Cheddarup and Wix.
 ## Environment Variables (Vercel)
 
 ```env
-# Wix API
-WIX_SITE_ID=52901d5d-08b0-47c1-9cc1-7376d5b70c45
+# Wix API — production headless site (CMS / Stores / Events)
+WIX_SITE_ID=509fda24-8dbf-43c6-aa74-df9f8b63c388
 WIX_API_KEY=your_wix_api_key
+NEXT_PUBLIC_WIX_CLIENT_ID=your_oauth_client_id
+
+# Public site (update to https://www.shmspto.org after DNS cutover)
+NEXT_PUBLIC_SITE_URL=https://www.shmspto.org
+
+# Optional: force store/membership product links onto the custom domain after DNS
+# NEXT_PUBLIC_STORE_BASE_URL=https://www.shmspto.org/product-page
 
 # Cheddarup
 CHEDDARUP_WEBHOOK_SECRET=your_secret
 
-# Next.js
-NEXT_PUBLIC_SITE_URL=https://shmspto.org
+# Square gift cards (use production before go-live)
+SQUARE_ACCESS_TOKEN=
+SQUARE_ENVIRONMENT=production
+SQUARE_LOCATION_ID=
+SQUARE_WEBHOOK_SIGNATURE_KEY=
+SQUARE_NOTIFICATION_URL=https://www.shmspto.org/api/webhooks/square
 ```
+
+> Note: Git Integration (`wix.config.json`) still references site `52901d5d-…`. Confirm with
+> Wix which site is the Git-synced Studio site vs the headless data site before changing it.
 
 ---
 
 ## Open Items / Next Steps
 
-- [ ] Implement Wix Headless OAuth for member portal auth
-- [ ] Wire Wix Stores API to frontend product catalog
-- [ ] Wire Wix Events API to homepage events strip
-- [ ] Complete remaining 11 pages in v0
+### Done in code (as of Jul 2026)
+- [x] Wix Headless OAuth member portal flow (needs production redirect URI + SITE_URL)
+- [x] Wix Stores API → store + spirit wear catalog
+- [x] Wix Events API → events pages
+- [x] Public pages implemented in Next.js (`frontend/`)
+- [x] Membership Join → Wix product pages; store-card links use Wix storefront until DNS
+- [x] Fundraising membership product IDs wired
+
+### Still open (ops / content)
+- [ ] Register OAuth redirect `https://www.shmspto.org/auth/callback` (+ current Vercel URL) in Wix OAuth client
+- [ ] Add `shmspto.org` / `www` to Vercel and point DNS
+- [ ] Set Square **production** envs + webhook; set `SQUARE_LOCATION_ID`
+- [ ] Point Cheddarup webhook at `https://www.shmspto.org/api/webhooks/cheddarup?token=…`
+- [ ] Add Cheddarup URLs on Programs CMS rows that should be open
+- [ ] Delete Wix demo/duplicate store products
 - [ ] Replace Unsplash placeholder images with real SHMS photos
-- [ ] Jumbula CSV export → run migration script
-- [ ] Add real Cheddarup collection URLs to Membership.js and Programs CMS
-- [ ] Set up Google Sheets as transaction log
-- [ ] Cancel Zapier before June 19
-- [ ] Transfer site to treasurer@shmspto.org when ready
-- [ ] Point shmspto.org domain to Vercel
-- [ ] Delete 12 placeholder products from Wix store
+- [ ] Jumbula CSV export → migration scripts
+- [ ] Google Sheets transaction log / MoneyMinder
+- [ ] Cancel Zapier if still active
+- [ ] Confirm Git Integration site ID (`52901d5d`) vs headless site (`509fda24`)

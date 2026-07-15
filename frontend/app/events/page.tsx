@@ -2,7 +2,9 @@ import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { EventCard } from '@/components/events/event-card'
+import { PageHero } from '@/components/page-hero'
 import { getUpcomingEvents, type WixEvent } from '@/lib/api/events'
+import { getPageContent } from '@/lib/api/page-content'
 import { Calendar, ArrowRight } from 'lucide-react'
 
 export const revalidate = 300
@@ -10,6 +12,7 @@ export const revalidate = 300
 export default async function EventsPage() {
   let events: WixEvent[] = []
   let error = false
+  const page = await getPageContent('events')
 
   try {
     events = await getUpcomingEvents(24)
@@ -23,29 +26,12 @@ export default async function EventsPage() {
       <Navbar />
 
       <main id="main-content">
-        {/* Hero */}
-        <section className="py-16 md:py-24" style={{ backgroundColor: '#8B1A1A' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div
-              className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
-              style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'white' }}
-            >
-              Mark Your Calendar
-            </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-              Upcoming Events
-            </h1>
-            <p className="text-lg text-white/80 max-w-2xl mx-auto leading-relaxed">
-              Stay connected with everything happening at Stone Hill Middle School —
-              meetings, celebrations, competitions, and more.
-            </p>
-          </div>
-        </section>
+        <PageHero content={page} />
 
         {/* Events grid */}
         <section
           className="py-16 md:py-24"
-          style={{ backgroundColor: '#F3F6FC' }}
+          style={{ backgroundColor: '#F5F0E8' }}
           aria-labelledby="events-list-heading"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -89,7 +75,7 @@ export default async function EventsPage() {
             <a
               href="/newsletter"
               className="inline-flex items-center gap-2 font-semibold text-white px-6 py-3 rounded-lg transition-opacity hover:opacity-90"
-              style={{ backgroundColor: '#8B1A1A' }}
+              style={{ backgroundColor: '#085508' }}
             >
               Subscribe to Newsletter
               <ArrowRight className="w-4 h-4" aria-hidden="true" />

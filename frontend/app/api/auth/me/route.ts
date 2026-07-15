@@ -1,24 +1,35 @@
 /**
  * GET /api/auth/me
- * Returns the current member's profile + membership status + store card balance.
- * Server-side only — reads tokens from httpOnly cookie.
+ * Returns the current member's profile + free/paid membership summary.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { getWixClient } from '@/lib/wix-client'
+import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractEmail(member: any): string {
+  const emailEntry = member?.contact?.emails?.[0]
+  const fromContact =
+    typeof emailEntry === 'object' && emailEntry !== null && 'email' in emailEntry
+      ? String(emailEntry.email)
+      : typeof emailEntry === 'string'
+        ? emailEntry
+        : ''
+  return String(member?.loginEmail ?? fromContact ?? '')
+    .trim()
+    .toLowerCase()
+}
 
 export async function GET(req: NextRequest) {
   try {
-    const tokensCookie = req.cookies.get(TOKENS_COOKIE)?.value
-    if (!tokensCookie) {
+    const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
+    if (!tokens || !isMemberTokens(tokens)) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    const tokens = JSON.parse(tokensCookie)
     const client = createOAuthClient(tokens)
-
-    // Get current member profile
     const { member } = await client.members.getCurrentMember({
       fieldsets: ['FULL'],
     })
@@ -27,16 +38,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Member not found' }, { status: 404 })
     }
 
-    const emailEntry = member.contact?.emails?.[0]
-    const email =
-      member.loginEmail ??
-      (typeof emailEntry === 'object' && emailEntry !== null && 'email' in emailEntry
-        ? (emailEntry as { email: string }).email
-        : '') ??
-      ''
-
-    // Get store card balance from CMS (admin client)
+    const email = extractEmail(member)
     const adminClient = getWixClient()
+
     let storeCards: { balance: number; studentName: string }[] = []
     try {
       const cardsResult = await adminClient.items
@@ -44,27 +48,77 @@ export async function GET(req: NextRequest) {
         .eq('parentEmail', email)
         .find()
       storeCards = (cardsResult.items ?? []).map((item) => ({
-        balance: item.data?.balance ?? 0,
-        studentName: item.data?.studentName ?? '',
+        balance: (item as { balance?: number }).balance ?? 0,
+        studentName: (item as { studentName?: string }).studentName ?? '',
       }))
     } catch {
-      // StoreCards collection may not have data yet
+      // optional collection
     }
 
-    // Get membership from CMS
-    let membership: { tier: string; expiresAt: string } | null = null
+    let membership: { tier: string; expiresAt: string; status?: string } | null = null
     try {
       const membershipResult = await adminClient.items
         .query('Memberships')
         .eq('email', email)
         .find()
-      const m = membershipResult.items?.[0]?.data
-      if (m) {
-        membership = { tier: m.tier, expiresAt: m.expiresAt }
+      const m = membershipResult.items?.[0] as
+        | { tier?: string; expiresAt?: string; status?: string }
+        | undefined
+      if (m?.tier) {
+        membership = {
+          tier: m.tier,
+          expiresAt: m.expiresAt ?? '',
+          status: m.status,
+        }
       }
     } catch {
-      // No membership record yet
+      // optional
     }
+
+    let students: {
+      id: string
+      firstName: string
+      lastName: string
+      grade: string
+      membershipTier: string
+      membershipStatus: string
+    }[] = []
+    try {
+      const studentsResult = await adminClient.items
+        .query('Students')
+        .eq('parentEmail', email)
+        .find()
+      students = (studentsResult.items ?? []).map((item) => {
+        const s = item as {
+          _id?: string
+          firstName?: string
+          lastName?: string
+          grade?: string
+          membershipTier?: string
+          membershipStatus?: string
+        }
+        return {
+          id: s._id ?? '',
+          firstName: s.firstName ?? '',
+          lastName: s.lastName ?? '',
+          grade: s.grade ?? '',
+          membershipTier: s.membershipTier ?? 'free',
+          membershipStatus: s.membershipStatus ?? 'active',
+        }
+      })
+    } catch {
+      // optional
+    }
+
+    const paidFromStudents = students.some(
+      (s) => s.membershipTier && s.membershipTier !== 'free'
+    )
+    const paidFromMemberships =
+      !!membership?.tier &&
+      membership.tier !== 'free' &&
+      membership.status !== 'expired'
+    const hasPaidMembership = paidFromStudents || paidFromMemberships
+    const accountType: 'free' | 'paid' = hasPaidMembership ? 'paid' : 'free'
 
     return NextResponse.json({
       member: {
@@ -72,9 +126,14 @@ export async function GET(req: NextRequest) {
         name: `${member.contact?.firstName ?? ''} ${member.contact?.lastName ?? ''}`.trim(),
         email,
         profileImage: member.profile?.photo?.url ?? null,
+        memberSince: member._createdDate ?? null,
       },
       storeCards,
       membership,
+      students,
+      studentCount: students.length,
+      hasPaidMembership,
+      accountType,
     })
   } catch (err) {
     console.error('/api/auth/me error:', err)

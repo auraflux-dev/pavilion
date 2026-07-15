@@ -1,0 +1,72 @@
+[
+  {
+    "name": "01-board-members",
+    "url": "https://manage.wix.com/dashboard/509fda24-8dbf-43c6-aa74-df9f8b63c388/cms/BoardMembers",
+    "doc": "01 - How to Manage Board Members v2",
+    "filePath": null,
+    "error": "page.goto: Target page, context or browser has been closed"
+  },
+  {
+    "name": "02-programs",
+    "url": "https://manage.wix.com/dashboard/509fda24-8dbf-43c6-aa74-df9f8b63c388/cms/Programs",
+    "doc": "02 - How to Add or Edit Programs v2",
+    "filePath": null,
+    "error": "page.goto: Target page, context or browser has been closed"
+  },
+  {
+    "name": "03-membership-tiers",
+    "url": "https://manage.wix.com/dashboard/509fda24-8dbf-43c6-aa74-df9f8b63c388/cms/MembershipTiers",
+    "doc": "03 - How to Update Membership Tiers and Perks v2",
+    "filePath": null,
+    "error": "page.goto: Target page, context or browser has been closed"
+  },
+  {
+    "name": "04-site-settings",
+    "url": "https://manage.wix.com/dashboard/509fda24-8dbf-43c6-aa74-df9f8b63c388/cms/SiteSettings",
+    "doc": "04 - How to Update the Announcement Bar v2",
+    "filePath": null,
+    "error": "page.goto: Target page, context or browser has been closed"
+  },
+  {
+    "name": "05-site-settings",
+    "url": "https://manage.wix.com/dashboard/509fda24-8dbf-43c6-aa74-df9f8b63c388/cms/SiteSettings",
+    "doc": "05 - How to Update Fundraising Goals v2",
+    "filePath": null,
+    "error": "page.goto: Target page, context or browser has been closed"
+  },
+  {
+    "name": "06-faq-items",
+    "url": "https://manage.wix.com/dashboard/509fda24-8dbf-43c6-aa74-df9f8b63c388/cms/FAQItems",
+    "doc": "06 - How to Manage the FAQ v2",
+    "filePath": null,
+    "error": "page.goto: Target page, context or browser has been closed"
+  },
+  {
+    "name": "07-events",
+    "url": "https://manage.wix.com/dashboard/509fda24-8dbf-43c6-aa74-df9f8b63c388/events",
+    "doc": "07 - How to Manage Events v2",
+    "filePath": null,
+    "error": "page.goto: Target page, context or browser has been closed"
+  },
+  {
+    "name": "08-spirit-wear",
+    "url": "https://manage.wix.com/dashboard/509fda24-8dbf-43c6-aa74-df9f8b63c388/store/products",
+    "doc": "08 - How to Manage Spirit Wear v2",
+    "filePath": null,
+    "error": "page.goto: Target page, context or browser has been closed"
+  },
+  {
+    "name": "08b-store-inventory",
+    "url": "https://manage.wix.com/dashboard/509fda24-8dbf-43c6-aa74-df9f8b63c388/store/products",
+    "doc": "08b - How to Manage the School Store Inventory v2",
+    "filePath": null,
+    "error": "page.goto: Target page, context or browser has been closed"
+  },
+  {
+    "name": "12b-store-card",
+    "url": "https://manage.wix.com/dashboard/509fda24-8dbf-43c6-aa74-df9f8b63c388/store/products",
+    "doc": "12b - How to Manage the Store Card",
+    "filePath": null,
+    "error": "page.goto: Target page, context or browser has been closed"
+  }
+]

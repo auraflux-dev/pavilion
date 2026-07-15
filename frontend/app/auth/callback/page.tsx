@@ -48,10 +48,16 @@ export default function CallbackPage() {
 
         if (!res.ok) throw new Error('Failed to save session')
 
-        // Redirect to original destination
-        const returnTo = oAuthData.originalUri
-          ? new URL(oAuthData.originalUri).pathname
-          : '/member-portal'
+        // Redirect to original destination (keep query — e.g. ?checkout=ruby)
+        let returnTo = '/member-portal'
+        if (oAuthData.originalUri) {
+          try {
+            const dest = new URL(oAuthData.originalUri)
+            returnTo = `${dest.pathname}${dest.search}`
+          } catch {
+            returnTo = '/member-portal'
+          }
+        }
         router.replace(returnTo)
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Authentication failed'
@@ -66,7 +72,7 @@ export default function CallbackPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F5F0E8' }}>
         <div className="bg-white rounded-2xl p-8 shadow-sm text-center max-w-sm">
-          <p className="text-[#8B1A1A] font-bold mb-2">Login failed</p>
+          <p className="text-[#085508] font-bold mb-2">Login failed</p>
           <p className="text-sm text-[#5A6070] mb-6">{error}</p>
           <a href="/auth/login" className="text-sm font-semibold underline" style={{ color: '#085508' }}>
             Try again

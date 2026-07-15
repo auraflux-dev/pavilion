@@ -1,17 +1,15 @@
-'use client'
+import { CheckCircle2, Star } from 'lucide-react'
+import { getMembershipTiers, type MembershipTier } from '@/lib/api/membership'
+import { MembershipJoinButton } from '@/components/membership/membership-join-button'
 
-import { Button } from '@/components/ui/button'
-import { CheckCircle2, Star, ArrowRight } from 'lucide-react'
-
-const TIERS = [
+// Fallback tiers shown if CMS is unreachable
+const FALLBACK_TIERS: MembershipTier[] = [
   {
-    id: 'ruby',
+    id: 'ruby-fallback',
+    tierId: 'ruby',
     name: 'Ruby',
     price: 50,
     description: 'Full PTO membership with all core benefits for the 2025–26 school year.',
-    accent: '#8B1A1A',
-    bg: '#FDF0F0',
-    popular: false,
     perks: [
       'Digital membership card',
       'Priority enrichment program registration',
@@ -20,15 +18,16 @@ const TIERS = [
       'PTO newsletter & event updates',
       'Name in PTO annual report',
     ],
+    popular: false,
+    sortOrder: 1,
+    active: true,
   },
   {
-    id: 'supreme',
+    id: 'supreme-fallback',
+    tierId: 'supreme',
     name: 'Supreme',
     price: 100,
     description: 'Our top-tier membership with additional recognition and event perks.',
-    accent: '#1A3A5C',
-    bg: '#EEF2FF',
-    popular: true,
     perks: [
       'Everything in Ruby',
       'Two complimentary Dance Night tickets',
@@ -37,24 +36,31 @@ const TIERS = [
       'Access to member portal',
       'Voting rights at PTO meetings',
     ],
+    popular: true,
+    sortOrder: 2,
+    active: true,
   },
 ]
 
-export function MembershipTiers() {
+export async function MembershipTiers() {
+  const allTiers = await getMembershipTiers()
+  // Only show ruby + supreme in the tier cards (faculty handled separately on the page)
+  const tiers = allTiers.filter(t => t.tierId !== 'faculty')
+  const display = tiers.length > 0 ? tiers : FALLBACK_TIERS
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-3xl mx-auto">
-      {TIERS.map((tier) => (
+      {display.map((tier) => (
         <article
           key={tier.id}
           className={`bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col relative ${
-            tier.popular ? 'ring-2' : 'border border-[#E8E4DC]'
+            tier.popular ? 'ring-2 ring-[#085508]' : 'border border-[#E8E4DC]'
           }`}
-          style={tier.popular ? { '--tw-ring-color': tier.accent } as React.CSSProperties : {}}
         >
           {tier.popular && (
             <div
               className="absolute top-4 right-4 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full text-white"
-              style={{ backgroundColor: tier.accent }}
+              style={{ backgroundColor: '#085508' }}
             >
               <Star className="w-3 h-3 fill-current" aria-hidden="true" />
               Most Popular
@@ -62,14 +68,14 @@ export function MembershipTiers() {
           )}
 
           {/* Top bar */}
-          <div className="h-1.5 w-full" style={{ backgroundColor: tier.accent }} aria-hidden="true" />
+          <div className="h-1.5 w-full" style={{ backgroundColor: '#085508' }} aria-hidden="true" />
 
           <div className="p-6 lg:p-8 flex flex-col flex-1">
             {/* Tier name + price */}
             <div className="mb-6">
               <span
                 className="text-xs font-bold tracking-widest uppercase px-2.5 py-1 rounded-full"
-                style={{ backgroundColor: tier.bg, color: tier.accent }}
+                style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
               >
                 {tier.name}
               </span>
@@ -86,7 +92,7 @@ export function MembershipTiers() {
                 <li key={perk} className="flex items-start gap-2.5">
                   <CheckCircle2
                     className="w-4 h-4 mt-0.5 shrink-0"
-                    style={{ color: tier.accent }}
+                    style={{ color: '#085508' }}
                     aria-hidden="true"
                   />
                   <span className="text-sm text-[#1A1A1A]">{perk}</span>
@@ -94,18 +100,7 @@ export function MembershipTiers() {
               ))}
             </ul>
 
-            {/* CTA — will wire to Wix checkout */}
-            <Button
-              className="w-full font-bold text-white group"
-              style={{ backgroundColor: tier.accent }}
-              id={`join-${tier.id}`}
-            >
-              Join {tier.name}
-              <ArrowRight
-                className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
-            </Button>
+            <MembershipJoinButton tierId={tier.tierId} tierName={tier.name} />
           </div>
         </article>
       ))}

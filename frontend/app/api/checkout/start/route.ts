@@ -9,6 +9,7 @@ import {
   productCheckoutRedirectUrl,
   storeCardCheckoutRedirectUrl,
 } from '@/lib/wix-ecom-checkout'
+import { getCatalogConfig, isAllowedStoreCardAmount } from '@/lib/api/catalog-config'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,8 +41,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (body.kind === 'store-card') {
-      const amount = body.amount
-      if (amount !== 10 && amount !== 20 && amount !== 25) {
+      const amount = Number(body.amount)
+      const cfg = await getCatalogConfig()
+      if (!Number.isFinite(amount) || !isAllowedStoreCardAmount(amount, cfg)) {
         return NextResponse.json({ error: 'Invalid amount' }, { status: 400 })
       }
       const checkoutUrl = await storeCardCheckoutRedirectUrl(

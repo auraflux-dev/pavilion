@@ -10,8 +10,13 @@ import {
   tierFromProductId,
   tierFromSlugOrName,
 } from '@/lib/membership-sync'
+import { getCatalogConfig } from '@/lib/api/catalog-config'
+import type { CatalogConfig } from '@/lib/defaults/catalog'
 
-function collectTierFromOrder(order: Record<string, unknown>): {
+function collectTierFromOrder(
+  order: Record<string, unknown>,
+  cfg: CatalogConfig
+): {
   email: string
   tier: 'ruby' | 'supreme' | null
 } {
@@ -49,7 +54,7 @@ function collectTierFromOrder(order: Record<string, unknown>): {
       li.title ??
       ''
     tier =
-      tierFromProductId(typeof productId === 'string' ? productId : null) ??
+      tierFromProductId(typeof productId === 'string' ? productId : null, cfg) ??
       tierFromSlugOrName(String(productName)) ??
       tier
     if (tier) break
@@ -73,7 +78,8 @@ export async function POST(req: NextRequest) {
   }
 
   const order = (payload.data ?? payload.order ?? payload) as Record<string, unknown>
-  const { email, tier } = collectTierFromOrder(order)
+  const cfg = await getCatalogConfig()
+  const { email, tier } = collectTierFromOrder(order, cfg)
 
   if (!email || !tier) {
     return NextResponse.json({

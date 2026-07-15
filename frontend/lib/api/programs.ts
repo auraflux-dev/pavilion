@@ -12,6 +12,13 @@ export interface Program {
   grades: string;
   category?: string;
   paymentType?: 'wix' | 'cheddarup_installment' | 'cheddarup_p2p';
+  // Homepage preview fields (added 2025-06)
+  schedule?: string;
+  detail?: string;
+  tags?: string;
+  featured?: boolean;
+  sortOrder?: number;
+  image?: string;
 }
 
 export async function getPrograms(): Promise<Program[]> {
@@ -28,6 +35,17 @@ export async function getPrograms(): Promise<Program[]> {
 export async function getAllPrograms(): Promise<Program[]> {
   const client = getWixClient();
   const result = await client.items.query("Programs").find();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return result.items.map((item: any) => item as Program);
+}
+
+export async function getFeaturedPrograms(): Promise<Program[]> {
+  const client = getWixClient();
+  const result = await client.items
+    .query("Programs")
+    .eq("featured", true)
+    .ascending("sortOrder")
+    .find();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result.items.map((item: any) => item as Program);
 }

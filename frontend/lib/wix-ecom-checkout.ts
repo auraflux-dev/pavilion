@@ -1,35 +1,13 @@
 /**
  * Headless Wix eCom checkout — creates a checkout + hosted checkout URL.
  * Used because the published Wix site template has no /product-page routes.
+ * Product/variant IDs come from SiteSettings via getCatalogConfig().
  */
 import { createClient, ApiKeyStrategy } from '@wix/sdk'
 import { checkout } from '@wix/ecom'
-import {
-  MEMBERSHIP_RUBY_PRODUCT_ID,
-  MEMBERSHIP_SUPREME_PRODUCT_ID,
-  STORE_CARD_PRODUCT_ID,
-} from '@/lib/wix-checkout'
+import { getCatalogConfig, isAllowedStoreCardAmount } from '@/lib/api/catalog-config'
 
 const STORES_APP_ID = '215238eb-22a5-4c36-9e7b-e7c08025e04e'
-
-/** Catalog V3 default variants (single-variant memberships). */
-const MEMBERSHIP_VARIANTS: Record<'ruby' | 'supreme', { productId: string; variantId: string }> = {
-  ruby: {
-    productId: MEMBERSHIP_RUBY_PRODUCT_ID,
-    variantId: '23ea8122-e8b0-4eea-912f-c4227308193d',
-  },
-  supreme: {
-    productId: MEMBERSHIP_SUPREME_PRODUCT_ID,
-    variantId: '1bfd31dd-32e6-4781-9083-97168e82cb1d',
-  },
-}
-
-/** Store card Amount options currently in Catalog ($10 / $20 / $25). */
-const STORE_CARD_VARIANTS: Record<10 | 20 | 25, string> = {
-  10: 'c30c1bf1-a771-427c-85f9-d67317fe785d',
-  20: 'bddb2f05-4ce4-4d41-848a-f6b3dc9bf478',
-  25: '24000231-2b43-4dee-8434-695f3034858d',
-}
 
 function getAdminClient() {
   const siteId = process.env.WIX_SITE_ID
@@ -125,17 +103,23 @@ export async function membershipCheckoutRedirectUrl(
   tier: 'ruby' | 'supreme',
   postFlowUrl?: string
 ): Promise<string> {
-  const { productId, variantId } = MEMBERSHIP_VARIANTS[tier]
+  const cfg = await getCatalogConfig()
+  const productId = tier === 'supreme' ? cfg.supremeProductId : cfg.rubyProductId
+  const variantId = tier === 'supreme' ? cfg.supremeVariantId : cfg.rubyVariantId
   return createCheckoutUrl({ productId, variantId, postFlowUrl })
 }
 
 export async function storeCardCheckoutRedirectUrl(
-  amount: 10 | 20 | 25,
+  amount: number,
   postFlowUrl?: string
 ): Promise<string> {
+  const cfg = await getCatalogConfig()
+  if (!isAllowedStoreCardAmount(amount, cfg)) {
+    throw new Error(`Unsupported store card amount: ${amount}`)
+  }
   return createCheckoutUrl({
-    productId: STORE_CARD_PRODUCT_ID,
-    variantId: STORE_CARD_VARIANTS[amount],
+    productId: cfg.storeCardProductId,
+    variantId: cfg.storeCardVariantByAmount[amount],
     postFlowUrl:
       postFlowUrl ||
       `${process.env.NEXT_PUBLIC_SITE_URL || 'https://frontend-six-rho-48.vercel.app'}/store`,

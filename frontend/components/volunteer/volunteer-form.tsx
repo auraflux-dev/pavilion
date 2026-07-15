@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react'
+import { MemberGate } from '@/components/member-gate'
 
 const OPPORTUNITIES = [
   'School Store Window',
@@ -178,25 +179,27 @@ export function VolunteerForm() {
         </p>
       )}
 
-      <Button
-        type="submit"
-        size="lg"
-        disabled={status === 'loading'}
-        className="w-full font-bold text-white group"
-        style={{ backgroundColor: '#085508' }}
-      >
-        {status === 'loading' ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Submitting…
-          </>
-        ) : (
-          <>
-            Sign Up to Volunteer
-            <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-          </>
-        )}
-      </Button>
+      <MemberGate label="Log in or create a free account to volunteer">
+        <Button
+          type="submit"
+          size="lg"
+          disabled={status === 'loading'}
+          className="w-full font-bold text-white group"
+          style={{ backgroundColor: '#085508' }}
+        >
+          {status === 'loading' ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Submitting…
+            </>
+          ) : (
+            <>
+              Sign Up to Volunteer
+              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </>
+          )}
+        </Button>
+      </MemberGate>
     </form>
   )
 }

@@ -21,7 +21,7 @@ export function DealsStrip({ items }: DealsStripProps) {
         <div className="flex items-center gap-3 mb-8">
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ backgroundColor: '#FF6B00' }}
+            style={{ backgroundColor: '#085508' }}
           >
             <Zap className="w-5 h-5 text-white fill-current" aria-hidden="true" />
           </div>

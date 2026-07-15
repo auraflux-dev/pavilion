@@ -1,8 +1,9 @@
 import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { PageHero } from '@/components/page-hero'
 import { getSpiritWearItems } from '@/lib/api/store'
-import { ShoppingBag } from 'lucide-react'
+import { getPageContent } from '@/lib/api/page-content'
 import { SpiritWearBuyButton } from '@/components/spirit-wear/spirit-wear-buy-button'
 
 export const revalidate = 300
@@ -13,7 +14,10 @@ export const metadata = {
 }
 
 export default async function SpiritWearPage() {
-  const items = await getSpiritWearItems()
+  const [items, page] = await Promise.all([
+    getSpiritWearItems(),
+    getPageContent('spirit-wear'),
+  ])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -21,25 +25,7 @@ export default async function SpiritWearPage() {
       <Navbar />
 
       <main id="main-content" className="flex-1">
-
-        {/* Hero */}
-        <section className="py-14 md:py-20" style={{ backgroundColor: '#085508' }}>
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div
-              className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase px-3 py-1.5 rounded-full mb-6"
-              style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: '#FFD700' }}
-            >
-              <ShoppingBag className="w-3.5 h-3.5" aria-hidden="true" />
-              Spirit Wear
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-              Stingrays Pride
-            </h1>
-            <p className="text-white/70 text-lg max-w-xl mx-auto">
-              Show your school spirit. All items available year-round — order online and pick up at school.
-            </p>
-          </div>
-        </section>
+        <PageHero content={page} />
 
         {/* Product grid */}
         <section className="py-12 md:py-16" style={{ backgroundColor: '#F5F0E8' }}>

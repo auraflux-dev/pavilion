@@ -5,15 +5,14 @@
 
 :root {
   /* Stone Hill Middle School PTO Brand Colors */
+  /* Primary: #085508 green | #FFD700 gold | #F5F0E8 cream | #1A1A1A near-black | #5A6070 muted gray | #E8E4DC border */
   --brand-green: #085508;
-  --brand-maroon: #8B1A1A;
-  --brand-teal: #2A8B7A;
-  --brand-bg: #F3F6FC;
+  --brand-gold: #FFD700;
   --brand-warm: #F5F0E8;
   --brand-text: #1A1A1A;
 
   /* Semantic tokens */
-  --background: #F3F6FC;
+  --background: #F5F0E8;
   --foreground: #1A1A1A;
   --card: #FFFFFF;
   --card-foreground: #1A1A1A;
@@ -21,20 +20,20 @@
   --popover-foreground: #1A1A1A;
   --primary: #085508;
   --primary-foreground: #FFFFFF;
-  --secondary: #2A8B7A;
-  --secondary-foreground: #FFFFFF;
-  --muted: #E8EDF5;
+  --secondary: #FFD700;
+  --secondary-foreground: #1A1A1A;
+  --muted: #E8E4DC;
   --muted-foreground: #5A6070;
-  --accent: #8B1A1A;
-  --accent-foreground: #FFFFFF;
+  --accent: #FFD700;
+  --accent-foreground: #1A1A1A;
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: #D8E0ED;
-  --input: #D8E0ED;
+  --border: #E8E4DC;
+  --input: #E8E4DC;
   --ring: #085508;
   --chart-1: #085508;
-  --chart-2: #2A8B7A;
-  --chart-3: #8B1A1A;
+  --chart-2: #FFD700;
+  --chart-3: #5A6070;
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.5rem;
@@ -42,9 +41,9 @@
   --sidebar-foreground: #FFFFFF;
   --sidebar-primary: #FFFFFF;
   --sidebar-primary-foreground: #085508;
-  --sidebar-accent: #0a6e0a;
+  --sidebar-accent: #085508;
   --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #0a6e0a;
+  --sidebar-border: #085508;
   --sidebar-ring: #FFFFFF;
 }
 

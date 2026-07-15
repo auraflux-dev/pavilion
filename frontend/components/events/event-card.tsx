@@ -8,11 +8,11 @@ interface EventCardProps {
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; accent: string }> = {
   Meeting:     { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Social:      { bg: '#FDF0F0', text: '#8B1A1A', accent: '#8B1A1A' },
-  Competition: { bg: '#EAF5F3', text: '#2A8B7A', accent: '#2A8B7A' },
-  Fundraiser:  { bg: '#FFF7ED', text: '#9A3412', accent: '#C2410C' },
-  Workshop:    { bg: '#EEF2FF', text: '#3730A3', accent: '#3730A3' },
-  default:     { bg: '#F3F6FC', text: '#1A3A5C', accent: '#1A3A5C' },
+  Social:      { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Competition: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Fundraiser:  { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Workshop:    { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  default:     { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
 }
 
 function getColors(tags?: string[]) {
@@ -46,7 +46,17 @@ export function EventCard({ event }: EventCardProps) {
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col">
-      <div className="h-1.5" style={{ backgroundColor: colors.accent }} aria-hidden="true" />
+      {event.mainImage?.url ? (
+        <div className="h-48 w-full overflow-hidden">
+          <img
+            src={event.mainImage.url}
+            alt={event.title ?? 'Event'}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <div className="h-1.5" style={{ backgroundColor: colors.accent }} aria-hidden="true" />
+      )}
 
       <div className="p-6 flex flex-col flex-1">
         {/* Date badge + category */}

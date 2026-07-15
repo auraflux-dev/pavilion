@@ -76,7 +76,7 @@ export function VolunteerSection() {
                 style={{ borderColor: '#085508', color: '#085508' }}
                 asChild
               >
-                <a href="#contact">Learn More</a>
+                <a href="/volunteer">Learn More</a>
               </Button>
             </div>
           </div>
@@ -112,7 +112,7 @@ export function VolunteerSection() {
             />
             <div
               className="absolute -top-4 -left-4 w-20 h-20 rounded-xl -z-10"
-              style={{ backgroundColor: '#EAF5F3' }}
+              style={{ backgroundColor: '#EEF6EE' }}
               aria-hidden="true"
             />
           </div>

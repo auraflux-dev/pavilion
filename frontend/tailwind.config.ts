@@ -11,9 +11,9 @@ const config = {
   theme: {
     extend: {
       colors: {
-        'pto-green':  '#085508',
-        'pto-maroon': '#8B1A1A',
-        'pto-teal':   '#2A8B7A',
+        'pto-green': '#085508',
+        'pto-gold':  '#FFD700',
+        'pto-cream': '#F5F0E8',
       },
     },
   },

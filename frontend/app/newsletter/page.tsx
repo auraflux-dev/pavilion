@@ -1,7 +1,9 @@
 import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { PageHero } from '@/components/page-hero'
 import { NewsletterSignup } from '@/components/newsletter/newsletter-signup'
+import { getPageContent } from '@/lib/api/page-content'
 import { Mail, Bell, Calendar, BookOpen } from 'lucide-react'
 
 const NEWSLETTER_PERKS = [
@@ -27,31 +29,16 @@ const NEWSLETTER_PERKS = [
   },
 ]
 
-export default function NewsletterPage() {
+export default async function NewsletterPage() {
+  const page = await getPageContent('newsletter')
+
   return (
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
 
       <main id="main-content">
-        {/* Hero */}
-        <section className="py-16 md:py-24" style={{ backgroundColor: '#085508' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div
-              className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
-              style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'white' }}
-            >
-              Stay Connected
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-              SHMS PTO Newsletter
-            </h1>
-            <p className="text-lg text-white/80 max-w-xl mx-auto leading-relaxed">
-              Stay in the loop on everything happening at Stone Hill Middle School —
-              delivered straight to your inbox.
-            </p>
-          </div>
-        </section>
+        <PageHero content={page} />
 
         {/* Sign up + perks */}
         <section className="py-16 md:py-24" style={{ backgroundColor: '#F5F0E8' }}>

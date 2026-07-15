@@ -1,25 +1,25 @@
 /**
- * Wix Stores checkout URL builder.
- * Product IDs are stable — hardcoded here so no extra API call is needed at render time.
- *
- * Until the custom domain DNS points at Vercel (and Wix product routes are wired through
- * that host), we use the live Wix storefront base. After DNS, set
- * NEXT_PUBLIC_STORE_BASE_URL=https://www.shmspto.org/store (or product-page root)
- * in Vercel to flip links to the canonical domain without a code change.
+ * Wix Stores checkout helpers.
+ * Stable UUID defaults live in lib/defaults/catalog.ts — prefer getCatalogConfig()
+ * for runtime so Wix SiteSettings can override without a deploy.
  */
+import { CATALOG_DEFAULTS } from '@/lib/defaults/catalog'
 
 export const WIX_SITE_ID_CANONICAL = '509fda24-8dbf-43c6-aa74-df9f8b63c388'
 
-/** Hosted Wix storefront (transfered headless site) — before primary DNS cutover */
+/** Hosted Wix storefront (transferred headless site) — before primary DNS cutover */
 export const WIX_STORE_BASE_URL = 'https://treasurer7596.wixsite.com/shms-pto-2026'
 
-export const STORE_CARD_PRODUCT_ID = 'eb2a71dc-7f0f-41b4-85bc-76b0869e5d30'
-export const STORE_CARD_SLUG = 'pto-store-card'
+/** @deprecated Prefer getCatalogConfig().storeCardProductId */
+export const STORE_CARD_PRODUCT_ID = CATALOG_DEFAULTS.storeCardProductId
+export const STORE_CARD_SLUG = CATALOG_DEFAULTS.storeCardSlug
 
-export const MEMBERSHIP_RUBY_PRODUCT_ID = '89ad5f10-a4bc-4a31-af4a-22b6add4cad4'
-export const MEMBERSHIP_RUBY_SLUG = 'pto-membership-ruby-1'
-export const MEMBERSHIP_SUPREME_PRODUCT_ID = '58f334f3-32d7-4d38-9639-7e587a38a26f'
-export const MEMBERSHIP_SUPREME_SLUG = 'pto-membership-supreme-1'
+/** @deprecated Prefer getCatalogConfig().rubyProductId */
+export const MEMBERSHIP_RUBY_PRODUCT_ID = CATALOG_DEFAULTS.membershipRubyProductId
+export const MEMBERSHIP_RUBY_SLUG = CATALOG_DEFAULTS.membershipRubySlug
+/** @deprecated Prefer getCatalogConfig().supremeProductId */
+export const MEMBERSHIP_SUPREME_PRODUCT_ID = CATALOG_DEFAULTS.membershipSupremeProductId
+export const MEMBERSHIP_SUPREME_SLUG = CATALOG_DEFAULTS.membershipSupremeSlug
 
 /**
  * Base path for product pages.
@@ -37,13 +37,8 @@ export function productPageUrl(slug: string): string {
   return `${getStorefrontBaseUrl()}/${slug}`
 }
 
-/**
- * Returns the Wix storefront product page URL for a store card variant.
- * Until Wix Headless checkout is fully configured, this links to the hosted
- * Wix storefront product page where the parent selects the amount and checks out.
- */
 /** @deprecated Prefer /api/checkout/start — product-page URLs 404 on this site. */
-export function storeCardCheckoutUrl(amount: 10 | 20 | 25 | null): string {
+export function storeCardCheckoutUrl(amount: number | null): string {
   const base = productPageUrl(STORE_CARD_SLUG)
   if (!amount) return base
   const param = encodeURIComponent(`Amount:$${amount}`)

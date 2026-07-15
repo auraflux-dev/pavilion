@@ -13,10 +13,8 @@ import {
   tierFromSlugOrName,
   type PaidTier,
 } from '@/lib/membership-sync'
-import {
-  MEMBERSHIP_RUBY_PRODUCT_ID,
-  MEMBERSHIP_SUPREME_PRODUCT_ID,
-} from '@/lib/wix-checkout'
+import { getCatalogConfig } from '@/lib/api/catalog-config'
+import type { CatalogConfig } from '@/lib/defaults/catalog'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -28,7 +26,10 @@ function authorize(req: NextRequest): boolean {
   return auth === `Bearer ${secret}`
 }
 
-function tierFromLineItem(li: Record<string, unknown>): PaidTier | null {
+function tierFromLineItem(
+  li: Record<string, unknown>,
+  cfg: CatalogConfig
+): PaidTier | null {
   const catalog = li.catalogReference as { catalogItemId?: string } | undefined
   const catalogId = catalog?.catalogItemId
   const name = String(
@@ -37,15 +38,7 @@ function tierFromLineItem(li: Record<string, unknown>): PaidTier | null {
       li.name ??
       ''
   )
-  return (
-    tierFromProductId(catalogId) ??
-    (catalogId === MEMBERSHIP_RUBY_PRODUCT_ID
-      ? 'ruby'
-      : catalogId === MEMBERSHIP_SUPREME_PRODUCT_ID
-        ? 'supreme'
-        : null) ??
-    tierFromSlugOrName(name)
-  )
+  return tierFromProductId(catalogId, cfg) ?? tierFromSlugOrName(name)
 }
 
 export async function GET(req: NextRequest) {
@@ -54,6 +47,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const cfg = await getCatalogConfig()
     const client = createClient({
       modules: { orders },
       auth: ApiKeyStrategy({
@@ -82,7 +76,7 @@ export async function GET(req: NextRequest) {
 
       let tier: PaidTier | null = null
       for (const li of order.lineItems ?? []) {
-        tier = tierFromLineItem(li)
+        tier = tierFromLineItem(li, cfg)
         if (tier) break
       }
       if (!tier) {
