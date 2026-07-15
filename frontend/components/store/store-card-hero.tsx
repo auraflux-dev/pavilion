@@ -1,12 +1,14 @@
 'use client'
 
-import { CreditCard, ArrowRight, CheckCircle2 } from 'lucide-react'
-import { storeCardCheckoutUrl } from '@/lib/wix-checkout'
+import { useState } from 'react'
+import { CreditCard, CheckCircle2 } from 'lucide-react'
+import { MemberGate } from '@/components/member-gate'
+import { startWixCheckout } from '@/lib/start-checkout'
 
-const DENOMINATIONS: { amount: 20 | 40 | 50; label: string; note: string }[] = [
-  { amount: 20, label: '$20', note: 'Starter' },
-  { amount: 40, label: '$40', note: 'Popular' },
-  { amount: 50, label: '$50', note: 'Best value' },
+const DENOMINATIONS: { amount: 10 | 20 | 25; label: string; note: string }[] = [
+  { amount: 10, label: '$10', note: 'Starter' },
+  { amount: 20, label: '$20', note: 'Popular' },
+  { amount: 25, label: '$25', note: 'Best value' },
 ]
 
 const HOW_IT_WORKS = [
@@ -16,21 +18,28 @@ const HOW_IT_WORKS = [
 ]
 
 export function StoreCardHero() {
-  function handleLoad(amount: 20 | 40 | 50 | null) {
-    window.open(storeCardCheckoutUrl(amount), '_blank', 'noopener,noreferrer')
+  const [busy, setBusy] = useState<number | null>(null)
+
+  async function handleLoad(amount: 10 | 20 | 25) {
+    setBusy(amount)
+    try {
+      await startWixCheckout({
+        kind: 'store-card',
+        amount,
+        postFlowUrl: `${window.location.origin}/store`,
+      })
+    } catch {
+      // ignore — button re-enables
+    } finally {
+      setBusy(null)
+    }
   }
 
   return (
     <>
-      {/* ── Compact banner ── */}
-      <section
-        className="py-8 md:py-10"
-        style={{ backgroundColor: '#085508' }}
-      >
+      <section className="py-8 md:py-10" style={{ backgroundColor: '#085508' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-
-            {/* Left: headline + perks */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <CreditCard className="w-4 h-4 text-yellow-300 shrink-0" aria-hidden="true" />
@@ -49,31 +58,28 @@ export function StoreCardHero() {
               </div>
             </div>
 
-            {/* Right: denomination buttons */}
-            <div className="flex flex-wrap gap-2 shrink-0">
-              {DENOMINATIONS.map(({ amount, label, note }) => (
-                <button
-                  key={amount}
-                  onClick={() => handleLoad(amount)}
-                  className="flex flex-col items-center px-5 py-3 rounded-xl border-2 border-white/30 hover:border-white bg-white/10 hover:bg-white/20 transition-all group"
-                >
-                  <span className="text-xl font-bold text-white">{label}</span>
-                  <span className="text-[10px] text-white/60 group-hover:text-white/80">{note}</span>
-                </button>
-              ))}
-              <button
-                onClick={() => handleLoad(null)}
-                className="flex flex-col items-center px-5 py-3 rounded-xl border-2 border-dashed border-white/25 hover:border-white/60 bg-transparent hover:bg-white/10 transition-all group"
-              >
-                <span className="text-xl font-bold text-white">Other</span>
-                <span className="text-[10px] text-white/60 group-hover:text-white/80">Custom</span>
-              </button>
-            </div>
+            <MemberGate label="Log in or create a free account to load a card">
+              <div className="flex flex-wrap gap-2 shrink-0">
+                {DENOMINATIONS.map(({ amount, label, note }) => (
+                  <button
+                    key={amount}
+                    type="button"
+                    disabled={busy !== null}
+                    onClick={() => handleLoad(amount)}
+                    className="flex flex-col items-center px-5 py-3 rounded-xl border-2 border-white/30 hover:border-white bg-white/10 hover:bg-white/20 transition-all group disabled:opacity-60"
+                  >
+                    <span className="text-xl font-bold text-white">
+                      {busy === amount ? '…' : label}
+                    </span>
+                    <span className="text-[10px] text-white/60 group-hover:text-white/80">{note}</span>
+                  </button>
+                ))}
+              </div>
+            </MemberGate>
           </div>
         </div>
       </section>
 
-      {/* ── How it works — slim 3-step bar ── */}
       <section className="border-b border-[#E8E4DC]" style={{ backgroundColor: '#F0F7F0' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[#D4E8D4]">

@@ -1,19 +1,20 @@
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Calendar, Users, DollarSign, GraduationCap } from 'lucide-react'
 import type { Program } from '@/lib/api/programs'
+import { MemberGate } from '@/components/member-gate'
 
 interface ProgramCardProps {
   program: Program
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; accent: string }> = {
-  Competition:   { bg: '#FDF0F0', text: '#8B1A1A', accent: '#8B1A1A' },
+  Competition:   { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
   Strategy:      { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  'Creative Arts': { bg: '#EAF5F3', text: '#2A8B7A', accent: '#2A8B7A' },
-  STEM:          { bg: '#EEF2FF', text: '#3730A3', accent: '#3730A3' },
-  Music:         { bg: '#FFF7ED', text: '#9A3412', accent: '#9A3412' },
-  Sports:        { bg: '#F0FDF4', text: '#166534', accent: '#166534' },
-  default:       { bg: '#F3F6FC', text: '#1A3A5C', accent: '#1A3A5C' },
+  'Creative Arts': { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  STEM:          { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Music:         { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Sports:        { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  default:       { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
 }
 
 function getColors(category?: string) {
@@ -28,12 +29,21 @@ export function ProgramCard({ program }: ProgramCardProps) {
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
-      {/* Top accent bar */}
-      <div
-        className="h-1.5 w-full"
-        style={{ backgroundColor: colors.accent }}
-        aria-hidden="true"
-      />
+      {program.image ? (
+        <div className="h-48 w-full overflow-hidden">
+          <img
+            src={program.image}
+            alt={program.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <div
+          className="h-1.5 w-full"
+          style={{ backgroundColor: colors.accent }}
+          aria-hidden="true"
+        />
+      )}
 
       <div className="p-6 lg:p-7 flex flex-col flex-1">
         {/* Category tag */}
@@ -73,19 +83,19 @@ export function ProgramCard({ program }: ProgramCardProps) {
         {/* Meta pills */}
         <div className="flex flex-wrap gap-2 mb-6">
           {program.grades && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-[#F3F6FC] text-[#5A6070]">
+            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-[#EEF6EE] text-[#5A6070]">
               <GraduationCap className="w-3 h-3" aria-hidden="true" />
               Grades {program.grades}
             </span>
           )}
           {program.fee != null && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-[#F3F6FC] text-[#5A6070]">
+            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-[#EEF6EE] text-[#5A6070]">
               <DollarSign className="w-3 h-3" aria-hidden="true" />
               {program.fee === 0 ? 'Free' : `$${program.fee}`}
             </span>
           )}
           {program.capacity != null && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-[#F3F6FC] text-[#5A6070]">
+            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-[#EEF6EE] text-[#5A6070]">
               <Users className="w-3 h-3" aria-hidden="true" />
               {program.capacity} spots
             </span>
@@ -104,38 +114,33 @@ export function ProgramCard({ program }: ProgramCardProps) {
 
         {/* CTA button */}
         {program.registrationOpen ? (
-          isCheddarup && program.cheddarupUrl ? (
-            <Button
-              className="w-full font-semibold text-white group"
-              style={{ backgroundColor: colors.accent }}
-              asChild
-            >
-              <a href={program.cheddarupUrl} target="_blank" rel="noopener noreferrer">
-                Register Now
-                <ArrowRight
-                  className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
-                  aria-hidden="true"
-                />
-              </a>
-            </Button>
-          ) : (
-            <Button
-              className="w-full font-semibold text-white group"
-              style={{ backgroundColor: colors.accent }}
-            >
-              Register Now
-              <ArrowRight
-                className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
-            </Button>
-          )
+          <MemberGate label="Log in or create a free account to register">
+            {isCheddarup && program.cheddarupUrl ? (
+              <Button
+                className="w-full font-semibold text-white group"
+                style={{ backgroundColor: colors.accent }}
+                asChild
+              >
+                <a href={program.cheddarupUrl} target="_blank" rel="noopener noreferrer">
+                  Register Now
+                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                </a>
+              </Button>
+            ) : (
+              <Button
+                className="w-full font-semibold text-white group"
+                style={{ backgroundColor: colors.accent }}
+                asChild
+              >
+                <a href="mailto:president@shmspto.org?subject=Program%20registration">
+                  Contact to Register
+                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                </a>
+              </Button>
+            )}
+          </MemberGate>
         ) : (
-          <Button
-            className="w-full font-semibold group"
-            variant="outline"
-            disabled
-          >
+          <Button className="w-full font-semibold group" variant="outline" disabled>
             Registration Closed
           </Button>
         )}

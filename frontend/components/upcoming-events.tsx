@@ -1,54 +1,70 @@
 import { Button } from '@/components/ui/button'
 import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react'
+import { getUpcomingEvents, type WixEvent } from '@/lib/api/events'
 
-const events = [
+function formatEventDate(startDate?: string): { month: string; day: string; time: string } {
+  if (!startDate) return { month: '—', day: '—', time: '' }
+  const d = new Date(startDate)
+  return {
+    month: d.toLocaleString('en-US', { month: 'short', timeZone: 'America/New_York' }),
+    day:   d.toLocaleString('en-US', { day: 'numeric', timeZone: 'America/New_York' }),
+    time:  d.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York' }),
+  }
+}
+
+// Static fallback events shown while Wix Events is being set up
+const FALLBACK_EVENTS = [
   {
-    month: 'Jun',
-    day: '10',
+    id: 'f1',
     title: 'PTO General Meeting',
-    time: '7:00 PM – 8:30 PM',
-    location: 'SHMS Media Center',
-    description:
-      'Join us for our monthly PTO meeting. We will review upcoming events, budget updates, and hear from school administration. All families welcome.',
-    category: 'Meeting',
-    categoryColor: '#085508',
-    categoryBg: '#EEF6EE',
-    accent: '#085508',
+    description: 'Join us for our monthly PTO meeting. We will review upcoming events, budget updates, and hear from school administration. All families welcome.',
+    location: { name: 'SHMS Media Center' },
+    dateAndTimeSettings: { startDate: '2026-06-10T19:00:00', endDate: '2026-06-10T20:30:00' },
+    tags: ['Meeting'],
+    slug: '',
+    mainImage: undefined,
   },
   {
-    month: 'Jun',
-    day: '21',
+    id: 'f2',
     title: 'End of Year Dance Night',
-    time: '6:30 PM – 9:30 PM',
-    location: 'SHMS Gymnasium',
-    description:
-      'Celebrate the end of a fantastic school year at our annual student dance! DJ, refreshments, and plenty of fun. Tickets available at the school store.',
-    category: 'Social',
-    categoryColor: '#8B1A1A',
-    categoryBg: '#FDF0F0',
-    accent: '#8B1A1A',
+    description: 'Celebrate the end of a fantastic school year at our annual student dance! DJ, refreshments, and plenty of fun. Tickets available at the school store.',
+    location: { name: 'SHMS Gymnasium' },
+    dateAndTimeSettings: { startDate: '2026-06-21T18:30:00', endDate: '2026-06-21T21:30:00' },
+    tags: ['Social'],
+    slug: '',
+    mainImage: undefined,
   },
   {
-    month: 'Jul',
-    day: '12',
+    id: 'f3',
     title: 'NOVA Math Tournament',
-    time: '9:00 AM – 3:00 PM',
-    location: 'Thomas Jefferson High School',
-    description:
-      'SHMS Stingrays compete in the Northern Virginia Math Tournament. Come cheer on our students as they showcase their math skills against top schools in the region.',
-    category: 'Competition',
-    categoryColor: '#2A8B7A',
-    categoryBg: '#EAF5F3',
-    accent: '#2A8B7A',
+    description: 'SHMS Stingrays compete in the Northern Virginia Math Tournament. Come cheer on our students as they showcase their math skills against top schools in the region.',
+    location: { name: 'Thomas Jefferson High School' },
+    dateAndTimeSettings: { startDate: '2026-07-12T09:00:00', endDate: '2026-07-12T15:00:00' },
+    tags: ['Competition'],
+    slug: '',
+    mainImage: undefined,
   },
-]
+] satisfies WixEvent[]
 
-export function UpcomingEvents() {
+function formatTimeRange(startDate?: string, endDate?: string): string {
+  if (!startDate) return ''
+  const start = new Date(startDate)
+  const startStr = start.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York' })
+  if (!endDate) return startStr
+  const end = new Date(endDate)
+  const endStr = end.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York' })
+  return `${startStr} – ${endStr}`
+}
+
+export async function UpcomingEvents() {
+  const wixEvents = await getUpcomingEvents(3)
+  const events = wixEvents.length > 0 ? wixEvents : FALLBACK_EVENTS
+
   return (
     <section
       id="events"
       className="py-20 md:py-28"
-      style={{ backgroundColor: '#F3F6FC' }}
+      style={{ backgroundColor: '#F5F0E8' }}
       aria-labelledby="events-heading"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,7 +73,7 @@ export function UpcomingEvents() {
           <div>
             <div
               className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
-              style={{ backgroundColor: '#8B1A1A', color: 'white' }}
+              style={{ backgroundColor: '#085508', color: 'white' }}
             >
               Mark Your Calendar
             </div>
@@ -81,81 +97,85 @@ export function UpcomingEvents() {
 
         {/* Event cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {events.map((event) => (
-            <article
-              key={event.title}
-              className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col"
-            >
-              {/* Colored top bar */}
-              <div
-                className="h-1.5"
-                style={{ backgroundColor: event.accent }}
-                aria-hidden="true"
-              />
+          {events.map((event) => {
+            const { month, day } = formatEventDate(event.dateAndTimeSettings?.startDate)
+            const timeRange = formatTimeRange(event.dateAndTimeSettings?.startDate, event.dateAndTimeSettings?.endDate)
+            const category = event.tags?.[0] ?? 'Event'
 
-              <div className="p-6 flex flex-col flex-1">
-                {/* Date badge + category */}
-                <div className="flex items-start justify-between mb-5">
-                  <div
-                    className="w-14 h-14 rounded-xl flex flex-col items-center justify-center shadow-sm"
-                    style={{ backgroundColor: event.accent }}
-                    aria-label={`${event.month} ${event.day}`}
-                  >
-                    <span className="text-white/80 text-xs font-bold uppercase tracking-wider leading-none">
-                      {event.month}
+            return (
+              <article
+                key={event.id}
+                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col"
+              >
+                {/* Colored top bar */}
+                <div
+                  className="h-1.5"
+                  style={{ backgroundColor: '#085508' }}
+                  aria-hidden="true"
+                />
+
+                <div className="p-6 flex flex-col flex-1">
+                  {/* Date badge + category */}
+                  <div className="flex items-start justify-between mb-5">
+                    <div
+                      className="w-14 h-14 rounded-xl flex flex-col items-center justify-center shadow-sm"
+                      style={{ backgroundColor: '#085508' }}
+                      aria-label={`${month} ${day}`}
+                    >
+                      <span className="text-white/80 text-xs font-bold uppercase tracking-wider leading-none">
+                        {month}
+                      </span>
+                      <span className="text-white text-2xl font-bold leading-tight">
+                        {day}
+                      </span>
+                    </div>
+                    <span
+                      className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
+                    >
+                      {category}
                     </span>
-                    <span className="text-white text-2xl font-bold leading-tight">
-                      {event.day}
-                    </span>
                   </div>
-                  <span
-                    className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                    style={{
-                      backgroundColor: event.categoryBg,
-                      color: event.categoryColor,
-                    }}
+
+                  <h3 className="text-lg font-bold text-[#1A1A1A] mb-3">
+                    {event.title}
+                  </h3>
+
+                  <p className="text-sm text-[#5A6070] leading-relaxed mb-5 flex-1">
+                    {event.description ?? 'Check back for more details.'}
+                  </p>
+
+                  {/* Event meta */}
+                  <div className="space-y-2 mb-6">
+                    {timeRange && (
+                      <div className="flex items-center gap-2 text-xs text-[#5A6070]">
+                        <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <span>{timeRange}</span>
+                      </div>
+                    )}
+                    {event.location?.name && (
+                      <div className="flex items-center gap-2 text-xs text-[#5A6070]">
+                        <MapPin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <span>{event.location.name}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    className="w-full font-semibold border-2 hover:text-white transition-colors"
+                    style={{ borderColor: '#085508', color: '#085508' }}
+                    asChild
                   >
-                    {event.category}
-                  </span>
+                    <a href="/events">
+                      <Calendar className="w-4 h-4 mr-2" aria-hidden="true" />
+                      View Details
+                    </a>
+                  </Button>
                 </div>
-
-                <h3 className="text-lg font-bold text-[#1A1A1A] mb-3">
-                  {event.title}
-                </h3>
-
-                <p className="text-sm text-[#5A6070] leading-relaxed mb-5 flex-1">
-                  {event.description}
-                </p>
-
-                {/* Event meta */}
-                <div className="space-y-2 mb-6">
-                  <div className="flex items-center gap-2 text-xs text-[#5A6070]">
-                    <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                    <span>{event.time}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-[#5A6070]">
-                    <MapPin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                    <span>{event.location}</span>
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  className="w-full font-semibold border-2 hover:text-white transition-colors"
-                  style={{
-                    borderColor: event.accent,
-                    color: event.accent,
-                  }}
-                  asChild
-                >
-                  <a href="#events">
-                    <Calendar className="w-4 h-4 mr-2" aria-hidden="true" />
-                    Add to Calendar
-                  </a>
-                </Button>
-              </div>
-            </article>
-          ))}
+              </article>
+            )
+          })}
         </div>
       </div>
     </section>

@@ -20,8 +20,8 @@ const CONTACT_INFO = [
   {
     icon: MapPin,
     label: 'School Address',
-    value: '100 Stingray Lane, Ashburn, VA 20147',
-    href: 'https://maps.google.com/?q=Stone+Hill+Middle+School+Ashburn+VA',
+    value: '23415 Evergreen Ridge Drive, Ashburn, VA 20148',
+    href: 'https://maps.google.com/?q=23415+Evergreen+Ridge+Drive+Ashburn+VA+20148',
   },
   {
     icon: Clock,

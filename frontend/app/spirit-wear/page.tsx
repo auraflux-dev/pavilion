@@ -3,6 +3,7 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { getSpiritWearItems } from '@/lib/api/store'
 import { ShoppingBag } from 'lucide-react'
+import { SpiritWearBuyButton } from '@/components/spirit-wear/spirit-wear-buy-button'
 
 export const revalidate = 300
 
@@ -87,17 +88,10 @@ export default async function SpiritWearPage() {
                         <span className="text-lg font-bold" style={{ color: '#085508' }}>
                           ${item.price.toFixed(2)}
                         </span>
-                        {item.inStock && (
-                          <a
-                            href={`https://shmspto.wixsite.com/mysite/product-page/${item.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs font-bold px-3 py-1.5 rounded-full transition-colors text-white"
-                            style={{ backgroundColor: '#085508' }}
-                          >
-                            Buy
-                          </a>
-                        )}
+                        <SpiritWearBuyButton
+                          productId={item._id}
+                          disabled={!item.inStock}
+                        />
                       </div>
                     </div>
                   </article>
