@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { MapPin, Mail, Facebook, Twitter, Instagram, Youtube, ArrowRight, Send, Lock } from 'lucide-react'
+import { MapPin, Mail, Facebook, Twitter, Instagram, Youtube, ArrowRight, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { NavLink } from '@/lib/api/nav'
@@ -202,8 +202,8 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
                 </div>
               </div>
 
-              {/* WhatsApp Groups — members only */}
-              {gradeLinks.length > 0 && (
+              {/* WhatsApp — only after free/paid member login (no tease for visitors) */}
+              {status === 'member' && gradeLinks.length > 0 && (
                 <div
                   className="rounded-xl p-3.5 mt-2"
                   style={{ backgroundColor: '#2a2a2a' }}
@@ -211,32 +211,21 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
                   <p className="text-xs font-bold text-white uppercase tracking-wider mb-2">
                     WhatsApp Parent Groups
                   </p>
-                  {status === 'member' ? (
-                    <div className="flex flex-col gap-1.5">
-                      {gradeLinks.map(({ grade, href }) => (
-                        <a
-                          key={grade}
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs transition-colors hover:text-white"
-                          style={{ color: '#5A6070' }}
-                        >
-                          {grade} Grade Parents —{' '}
-                          <span className="underline">Join Here</span>
-                        </a>
-                      ))}
-                    </div>
-                  ) : (
-                    <a
-                      href="/auth/login"
-                      className="flex items-center gap-1.5 text-xs hover:text-white transition-colors"
-                      style={{ color: '#5A6070' }}
-                    >
-                      <Lock className="w-3 h-3 shrink-0" />
-                      Members only — log in to view
-                    </a>
-                  )}
+                  <div className="flex flex-col gap-1.5">
+                    {gradeLinks.map(({ grade, href }) => (
+                      <a
+                        key={grade}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs transition-colors hover:text-white"
+                        style={{ color: '#5A6070' }}
+                      >
+                        {grade} Grade Parents —{' '}
+                        <span className="underline">Join Here</span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               )}
             </address>

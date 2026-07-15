@@ -17,8 +17,10 @@ export function AnnouncementBarClient({ text, link6, link7, link8 }: Props) {
 
   if (dismissed) return null
 
-  const hasGradeLinks = link6 || link7 || link8
-  const isMember = status === 'member'
+  const hasGradeLinks = Boolean(link6 || link7 || link8)
+  const isWhatsAppPromo = hasGradeLinks || /whatsapp/i.test(text)
+  // Free + paid members see grade group links; visitors never see WhatsApp promo.
+  if (isWhatsAppPromo && status !== 'member') return null
 
   return (
     <div
@@ -28,34 +30,41 @@ export function AnnouncementBarClient({ text, link6, link7, link8 }: Props) {
     >
       <p className="text-center pr-8 leading-relaxed">
         {text}
-        {hasGradeLinks && isMember && (
+        {hasGradeLinks && (
           <>
             {' '}
             {link6 && (
-              <a href={link6} target="_blank" rel="noopener noreferrer" className="underline font-bold hover:opacity-80">
+              <a
+                href={link6}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-bold hover:opacity-80"
+              >
                 6th Grade
               </a>
             )}
             {link6 && link7 && <span className="mx-1.5 opacity-40">·</span>}
             {link7 && (
-              <a href={link7} target="_blank" rel="noopener noreferrer" className="underline font-bold hover:opacity-80">
+              <a
+                href={link7}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-bold hover:opacity-80"
+              >
                 7th Grade
               </a>
             )}
             {link7 && link8 && <span className="mx-1.5 opacity-40">·</span>}
             {link8 && (
-              <a href={link8} target="_blank" rel="noopener noreferrer" className="underline font-bold hover:opacity-80">
+              <a
+                href={link8}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-bold hover:opacity-80"
+              >
                 8th Grade
               </a>
             )}
-          </>
-        )}
-        {hasGradeLinks && status === 'visitor' && (
-          <>
-            {' '}
-            <a href="/auth/login?returnTo=%2F" className="underline font-bold hover:opacity-80">
-              Log in or create a free account for group links
-            </a>
           </>
         )}
       </p>
