@@ -383,11 +383,11 @@ export function MemberDashboard({
             )}
           </div>
 
-          <dl className="space-y-2 text-sm mb-4">
+          <dl className="space-y-3 text-sm mb-4">
             {member.memberSince && (
-              <div className="flex justify-between gap-3">
-                <dt className="text-[#5A6070]">{copy.memberSince}</dt>
-                <dd className="font-semibold text-[#1A1A1A]">
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-[#5A6070] m-0">{copy.memberSince}</dt>
+                <dd className="font-semibold text-[#1A1A1A] m-0 text-right">
                   {new Date(member.memberSince).toLocaleDateString('en-US', {
                     month: 'long',
                     year: 'numeric',
@@ -395,13 +395,17 @@ export function MemberDashboard({
                 </dd>
               </div>
             )}
-            <div className="flex justify-between gap-3">
-              <dt className="text-[#5A6070]">{copy.studentsLabel}</dt>
-              <dd className="font-semibold text-[#1A1A1A]">{students.length}</dd>
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-[#5A6070] m-0">{copy.studentsLabel}</dt>
+              <dd className="font-semibold text-[#1A1A1A] m-0 text-right">
+                {students.length}
+              </dd>
             </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-[#5A6070]">{copy.paidMembershipsLabel}</dt>
-              <dd className="font-semibold text-[#1A1A1A]">{paidStudents}</dd>
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-[#5A6070] m-0">{copy.paidMembershipsLabel}</dt>
+              <dd className="font-semibold text-[#1A1A1A] m-0 text-right">
+                {paidStudents}
+              </dd>
             </div>
           </dl>
 
@@ -524,20 +528,22 @@ export function MemberDashboard({
           {purchases.length === 0 ? (
             <p className="text-xs text-[#5A6070] mt-auto">{copy.purchasesEmpty}</p>
           ) : (
-            <ul className="space-y-2 flex-1 overflow-y-auto max-h-[220px]">
+            <ul className="space-y-2 flex-1 overflow-y-auto max-h-[220px] pr-3">
               {purchases.map((p) => (
                 <li
                   key={p.id}
-                  className="flex items-start justify-between gap-2 py-2 border-b border-[#F0EDE8] last:border-0"
+                  className="flex items-start justify-between gap-3 py-2 border-b border-[#F0EDE8] last:border-0"
                 >
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1 pr-2">
                     <p className="text-sm font-semibold text-[#1A1A1A] truncate">{p.label}</p>
                     <p className="text-[11px] text-[#5A6070]">
                       {[p.studentName, fmtShortDate(p.date)].filter(Boolean).join(' · ')}
                     </p>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-[#1A1A1A]">{fmtMoney(p.amount)}</p>
+                  <div className="text-right shrink-0 min-w-[4.5rem] pl-1">
+                    <p className="text-sm font-bold text-[#1A1A1A] tabular-nums">
+                      {fmtMoney(p.amount)}
+                    </p>
                     {p.status ? (
                       <p className="text-[10px] font-bold text-[#5A6070] uppercase">
                         {p.status}
