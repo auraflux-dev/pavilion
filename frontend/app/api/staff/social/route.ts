@@ -14,8 +14,11 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     publishEnabled: config.publishEnabled,
     links: config.links,
+    facebookAccountId: config.facebookAccountId,
     facebookPageId: config.facebookPageId,
     instagramAccountId: config.instagramAccountId,
+    instagramAvailable: config.instagramAvailable,
+    facebookReady: Boolean(config.publishEnabled && config.facebookAccountId && config.facebookPageId),
   })
 }
 

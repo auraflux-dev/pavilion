@@ -42,6 +42,8 @@ export function StaffDashboard() {
   const [socialMsg, setSocialMsg] = useState('')
   const [socialBusy, setSocialBusy] = useState(false)
   const [publishEnabled, setPublishEnabled] = useState(false)
+  const [facebookReady, setFacebookReady] = useState(false)
+  const [instagramAvailable, setInstagramAvailable] = useState(false)
 
   const [msgSubject, setMsgSubject] = useState('')
   const [msgBody, setMsgBody] = useState('')
@@ -65,7 +67,11 @@ export function StaffDashboard() {
     if (!me?.roles.some((r) => r === 'marketing' || r === 'admin')) return
     fetch('/api/staff/social')
       .then((r) => r.json())
-      .then((d) => setPublishEnabled(Boolean(d.publishEnabled)))
+      .then((d) => {
+        setPublishEnabled(Boolean(d.publishEnabled))
+        setFacebookReady(Boolean(d.facebookReady))
+        setInstagramAvailable(Boolean(d.instagramAvailable))
+      })
       .catch(() => undefined)
   }, [me])
 
@@ -137,7 +143,7 @@ export function StaffDashboard() {
         setSocialMsg(saveOnly ? 'Draft saved.' : 'Published.')
         setPostText('')
       } else {
-        setSocialMsg(d.error ?? 'Saved as failed — connect accounts in Wix Social and enable socialPublishEnabled.')
+        setSocialMsg(d.error ?? 'Publish failed — draft saved in SocialPosts.')
       }
     } catch (err) {
       setSocialMsg(err instanceof Error ? err.message : 'Publish failed')
@@ -288,9 +294,14 @@ export function StaffDashboard() {
         <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
           <h2 className="text-lg font-bold">Marketing · Facebook & Instagram</h2>
           <p className="text-xs text-[#5A6070]">
-            Compose from your staff login. Live publish needs Wix Social connected and{' '}
-            <code>socialPublishEnabled=true</code>. You can always save drafts.
-            {publishEnabled ? ' · Live publish enabled.' : ' · Live publish currently off.'}
+            Facebook publish is live through Wix Social. Instagram waits on Wix&apos;s one free social
+            account — connect it later after an upgrade or freeing a slot. You can always save drafts.
+            {facebookReady
+              ? ' · Facebook ready.'
+              : publishEnabled
+                ? ' · Facebook IDs missing in Site Settings.'
+                : ' · Live publish currently off.'}
+            {instagramAvailable ? ' · Instagram ready.' : ' · Instagram not connected.'}
           </p>
           <div className="flex gap-2">
             {(['facebook', 'instagram'] as const).map((p) => (
@@ -300,12 +311,18 @@ export function StaffDashboard() {
                 onClick={() => setPlatform(p)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 ${
                   platform === p ? 'border-[#085508] bg-[#EEF6EE]' : 'border-[#E8E4DC]'
-                }`}
+                } ${p === 'instagram' && !instagramAvailable ? 'opacity-60' : ''}`}
               >
-                {p}
+                {p === 'instagram' && !instagramAvailable ? 'instagram (later)' : p}
               </button>
             ))}
           </div>
+          {platform === 'instagram' && !instagramAvailable ? (
+            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              Instagram publish is disabled until a second Wix social slot is available. Save a draft
+              here, or post from Meta when ready.
+            </p>
+          ) : null}
           <textarea
             value={postText}
             onChange={(e) => setPostText(e.target.value)}
@@ -330,7 +347,12 @@ export function StaffDashboard() {
               Save draft
             </Button>
             <Button
-              disabled={socialBusy || !postText}
+              disabled={
+                socialBusy ||
+                !postText ||
+                (platform === 'instagram' && !instagramAvailable) ||
+                (platform === 'facebook' && !facebookReady)
+              }
               onClick={() => publish(false)}
               className="text-white"
               style={{ backgroundColor: '#085508' }}

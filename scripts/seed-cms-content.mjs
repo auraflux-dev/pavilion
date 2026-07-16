@@ -135,9 +135,10 @@ const SITE_SETTINGS = {
   socialInstagram: '',
   socialTwitter: '',
   socialYoutube: '',
-  socialFacebookPageId: '',
+  socialFacebookAccountId: '122099888691399229',
+  socialFacebookPageId: '1223487774180200',
   socialInstagramAccountId: '',
-  socialPublishEnabled: 'false',
+  socialPublishEnabled: 'true',
 }
 
 const PAGE_ROWS = [

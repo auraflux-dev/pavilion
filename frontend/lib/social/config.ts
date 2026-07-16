@@ -1,5 +1,5 @@
 /**
- * Social publishing config — URLs live now; publish API stubs until FB/IG accounts exist.
+ * Social publishing config — Facebook live via Wix Social Publisher; Instagram deferred (1 free slot).
  */
 import { getSiteSettings } from '@/lib/api/site-settings'
 
@@ -14,14 +14,19 @@ export interface SocialLinks {
 
 export interface SocialPublishConfig {
   links: SocialLinks
-  /** Wix Marketing Social page IDs — fill when accounts are connected */
+  /** Wix Social Publisher Facebook account GUID */
+  facebookAccountId: string
+  /** Facebook Page id used as publishingTarget */
   facebookPageId: string
   instagramAccountId: string
   publishEnabled: boolean
+  /** Instagram blocked until Wix social slot / upgrade */
+  instagramAvailable: boolean
 }
 
 export async function getSocialConfig(): Promise<SocialPublishConfig> {
   const settings = await getSiteSettings()
+  const instagramAccountId = settings.get('socialInstagramAccountId', '')
   return {
     links: {
       facebook: settings.get('socialFacebook', ''),
@@ -29,8 +34,10 @@ export async function getSocialConfig(): Promise<SocialPublishConfig> {
       twitter: settings.get('socialTwitter', ''),
       youtube: settings.get('socialYoutube', ''),
     },
+    facebookAccountId: settings.get('socialFacebookAccountId', ''),
     facebookPageId: settings.get('socialFacebookPageId', ''),
-    instagramAccountId: settings.get('socialInstagramAccountId', ''),
+    instagramAccountId,
     publishEnabled: settings.get('socialPublishEnabled', 'false') === 'true',
+    instagramAvailable: Boolean(instagramAccountId),
   }
 }
