@@ -68,6 +68,8 @@ node --env-file=frontend/.env.local scripts/seed-cms-content.mjs
 
 ## Locked in Vercel today (needs code deploy)
 
+PTO-facing write-up (Google Drive Tech Ops): **22 - Vercel Only — Cursor Code vs Dashboard** — splits (A) Cursor/git changes vs (B) Vercel Dashboard (env, domains, aliases, cron). Short checklist: doc **09 v3**.
+
 ### Member journey
 
 | Piece | Why it’s on Vercel |
