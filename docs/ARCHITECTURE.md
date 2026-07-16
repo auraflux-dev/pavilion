@@ -21,7 +21,7 @@ graph TB
     end
 
     subgraph FRONTEND["🌐 Frontend — Vercel (shmspto.org)"]
-        NX[Next.js 14 App]
+        NX[Next.js 16 App]
         subgraph PAGES["Pages"]
             H[Home]
             AB[About / Board]
@@ -49,23 +49,22 @@ graph TB
         end
         subgraph APPS["📦 Wix Apps"]
             WS[Wix Stores — Spirit Wear + Store Card]
-            WG[Wix Gift Cards — Student Store Card]
             WM[Wix Members — Auth + Portal]
             WE[Wix Events — Calendar]
             WF[Wix Forms — Data Capture]
         end
-        subgraph VELO["⚡ Velo Backend"]
-            HF[http-functions.js — Webhooks]
+        subgraph VELO["⚡ Legacy Velo Backend"]
+            HF[http-functions.js — Legacy CheddarUp webhook]
             DA[data.js — CMS Hooks]
-            SC[storeCard.js — Card Balance API]
+            SC[storeCard.js — Legacy store-card API]
         end
     end
 
     subgraph PAYMENTS["💳 Payment Layer"]
         CH[Cheddarup — Programs + Fundraisers]
         WP[Wix Payments — Store + Membership]
+        SQ[Square — Student Store Card + Saved Cards]
         POS[Wix POS — In-Person Store]
-        GC[Gift Cards — Student Store Card]
     end
 
     subgraph BOOKKEEPING["📒 Bookkeeping"]
@@ -95,10 +94,10 @@ graph TB
     NX --> |Wix Headless OAuth| WM
 
     %% Payment flows
-    NX --> |iframe embed| CH
+    NX --> |program registration links| CH
     NX --> |Wix checkout| WP
-    WS --> GC
-    GC --> POS
+    NX --> |Web Payments SDK + APIs| SQ
+    SQ --> POS
 
     %% Cheddarup webhook
     CH --> |POST webhook| HF
@@ -129,20 +128,20 @@ sequenceDiagram
     participant P as Parent
     participant V as Vercel Site
     participant C as Cheddarup
-    participant W as Wix Velo
+    participant N as Next.js API
     participant CMS as Wix CMS
     participant MM as MoneyMinder
 
     P->>V: Visits /programs page
-    V->>W: GET /programs (CMS query)
-    W-->>V: Returns program list
+    V->>CMS: Query Programs through Wix Data API
+    CMS-->>V: Returns program list
     V-->>P: Shows program cards
-    P->>C: Clicks Register → Cheddarup embed
+    P->>C: Clicks Register → CheddarUp
     C-->>P: Checkout flow
     P->>C: Pays (credit card or eCheck)
-    C->>W: POST /cheddarupWebhook
-    W->>CMS: Insert Payments record
-    W-->>C: 200 OK
+    C->>N: POST /api/webhooks/cheddarup
+    N->>CMS: Insert Payments record
+    N-->>C: 200 OK
     C->>P: Confirmation email + waiver
     Note over CMS,MM: Monthly: export CSV → import to MoneyMinder
 ```
@@ -153,19 +152,17 @@ sequenceDiagram
 sequenceDiagram
     participant PR as Parent (home)
     participant V as Vercel Site
-    participant WS as Wix Stores
-    participant GC as Wix Gift Cards
+    participant SQ as Square Gift Cards
     participant ST as Student (school)
     participant POS as Wix POS App
 
-    PR->>V: Visits /store → buys Store Card
-    V->>WS: Add to cart + checkout
-    WS->>GC: Generate gift card code
-    GC-->>PR: Email with card code
-    PR-->>ST: Shares code (text/screenshot)
-    ST->>POS: Shows code at store window
-    POS->>GC: Validates + deducts balance
-    GC-->>POS: Remaining balance
+    PR->>V: Visits /store → chooses student and amount
+    V->>SQ: Secure Square payment + load gift card
+    SQ-->>V: Payment and updated balance
+    V-->>PR: Reload confirmation
+    ST->>POS: Uses assigned store card at store window
+    POS->>SQ: Validates + deducts balance
+    SQ-->>POS: Remaining balance
     POS-->>ST: Transaction complete
 ```
 
@@ -176,7 +173,7 @@ sequenceDiagram
     participant P as Parent
     participant V as Vercel Site
     participant WM as Wix Members OAuth
-    participant SC as storeCard.js API
+    participant API as Next.js portal APIs
     participant CMS as Wix CMS
 
     P->>V: Visits /member-portal
@@ -185,10 +182,10 @@ sequenceDiagram
     V->>WM: Redirect to Wix login
     P->>WM: Logs in
     WM-->>V: OAuth token
-    V->>SC: GET /storeCardBalance?email=xxx
-    SC->>CMS: Query Students by parentEmail
-    CMS-->>SC: Student records + balances
-    SC-->>V: Student cards + balances
+    V->>API: GET /api/portal/family
+    API->>CMS: Query Students by authenticated parentEmail
+    CMS-->>API: Student records + balances
+    API-->>V: Family and store-card data
     V-->>P: Shows portal dashboard
 ```
 
@@ -198,16 +195,16 @@ sequenceDiagram
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| **Frontend** | Next.js 14, React, Tailwind CSS, shadcn/ui | Public website |
+| **Frontend** | Next.js 16, React, Tailwind CSS, shadcn/ui | Public website |
 | **Hosting** | Vercel | Frontend deployment, auto-deploy from GitHub |
 | **Backend Data** | Wix CMS (headless) | Students, Programs, Enrollments, Payments, Volunteers, Newsletter |
 | **Store** | Wix Stores V3 | Spirit wear, schwag, memberships, store cards |
 | **Payments — Online** | Wix Payments + Cheddarup | Store checkout + enrichment programs/fundraisers |
 | **Payments — In-Person** | Wix POS + Tap to Pay | School store window (volunteer's iPhone) |
-| **Gift Cards** | Wix Gift Cards | Student store card — reloadable, tracks per-student spend |
+| **Gift Cards** | Square Gift Cards + Web Payments SDK | Student store card, secure reloads, saved cards, and auto top-off |
 | **Auth** | Wix Members (headless OAuth) | Parent login, member portal |
 | **Events** | Wix Events | PTO meetings, dance night, NOVA Math |
-| **Code** | Velo (JavaScript) | Webhooks, CMS hooks, store card API |
+| **Code** | Next.js API routes + limited legacy Velo | Canonical webhooks and portal APIs; Wix CMS hooks remain in Velo |
 | **Version Control** | GitHub (auraflux-dev/wix-shmspto) | All code, auto-syncs to Wix Studio + Vercel |
 | **Bookkeeping** | MoneyMinder + Google Sheets | Financial tracking, CSV import from Cheddarup/Wix |
 | **Enrichment Payments** | Cheddarup Team | Programs, waivers, installments, peer-to-peer fundraising |
@@ -316,9 +313,6 @@ NEXT_PUBLIC_WIX_CLIENT_ID=your_oauth_client_id
 # Public site (update to https://www.shmspto.org after DNS cutover)
 NEXT_PUBLIC_SITE_URL=https://www.shmspto.org
 
-# Optional: force store/membership product links onto the custom domain after DNS
-# NEXT_PUBLIC_STORE_BASE_URL=https://www.shmspto.org/product-page
-
 # Cheddarup
 CHEDDARUP_WEBHOOK_SECRET=your_secret
 
@@ -330,8 +324,8 @@ SQUARE_WEBHOOK_SIGNATURE_KEY=
 SQUARE_NOTIFICATION_URL=https://www.shmspto.org/api/webhooks/square
 ```
 
-> Note: Git Integration (`wix.config.json`) still references site `52901d5d-…`. Confirm with
-> Wix which site is the Git-synced Studio site vs the headless data site before changing it.
+> `wix.config.json` and the headless configuration both use site
+> `509fda24-8dbf-43c6-aa74-df9f8b63c388`.
 
 ---
 
@@ -347,8 +341,8 @@ SQUARE_NOTIFICATION_URL=https://www.shmspto.org/api/webhooks/square
 
 ### Still open (ops / content)
 - [ ] Register OAuth redirect `https://www.shmspto.org/auth/callback` (+ current Vercel URL) in Wix OAuth client
-- [ ] Add `shmspto.org` / `www` to Vercel and point DNS
-- [ ] Set Square **production** envs + webhook; set `SQUARE_LOCATION_ID`
+- [~] `shmspto.org` / `www` are attached to Vercel; DNS still points to Wix
+- [~] Square production env names are present; webhook configuration and signed-in E2E remain
 - [ ] Point Cheddarup webhook at `https://www.shmspto.org/api/webhooks/cheddarup?token=…`
 - [ ] Add Cheddarup URLs on Programs CMS rows that should be open
 - [ ] Delete Wix demo/duplicate store products
@@ -356,4 +350,4 @@ SQUARE_NOTIFICATION_URL=https://www.shmspto.org/api/webhooks/square
 - [ ] Jumbula CSV export → migration scripts
 - [ ] Google Sheets transaction log / MoneyMinder
 - [ ] Cancel Zapier if still active
-- [ ] Confirm Git Integration site ID (`52901d5d`) vs headless site (`509fda24`)
+- [x] Confirm Git Integration and headless site ID (`509fda24`)

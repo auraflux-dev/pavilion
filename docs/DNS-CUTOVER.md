@@ -1,7 +1,7 @@
 # DNS cutover + post-DNS checklist
 
 **Canonical site after cutover:** `https://www.shmspto.org`  
-**Pre-DNS site (now):** `https://frontend-six-rho-48.vercel.app`  
+**Pre-DNS site (now):** `https://shmspto.vercel.app`
 **QA plan:** `docs/QA-TEST-PLAN.md`
 
 Do DNS last — after pre-DNS QA and remaining ops below.
@@ -12,9 +12,9 @@ Do DNS last — after pre-DNS QA and remaining ops below.
 
 - [ ] Logged-in QA on Vercel URL (portal, Join membership, Load store card, Buy spirit, claim payment)
 - [ ] Cheddarup webhook pointed at Vercel (temporary):  
-      `https://frontend-six-rho-48.vercel.app/api/webhooks/cheddarup?token=<CHEDDARUP_WEBHOOK_SECRET>`
+      `https://shmspto.vercel.app/api/webhooks/cheddarup?token=<CHEDDARUP_WEBHOOK_SECRET>`
 - [ ] Square webhook subscription URL matches current notification URL:  
-      `https://frontend-six-rho-48.vercel.app/api/webhooks/square`  
+      `https://shmspto.vercel.app/api/webhooks/square`
       Event: `gift_card.activity.created`
 - [ ] Confirm Square is **Production** (`SQUARE_ENVIRONMENT=production` already set)
 
@@ -31,9 +31,9 @@ In the DNS host for `shmspto.org` (currently Wix DNS):
 
 In **Vercel → Project `frontend` → Settings → Domains**:
 
-1. Add `www.shmspto.org` and `shmspto.org`
-2. Complete any TXT verification Vercel shows
-3. Prefer `www` as primary (apex → www redirect already in `vercel.json`)
+1. `www.shmspto.org` and `shmspto.org` are already attached to the Vercel project.
+2. Complete any TXT verification Vercel shows after DNS changes.
+3. Keep `www` as primary (apex → www redirect already in `vercel.json`).
 
 **Ready when:** `dig www.shmspto.org` no longer shows `*.wixdns.net` and the site loads from Vercel.
 

@@ -9,11 +9,13 @@ Covers every gap from the portal / board-roles / social / payments session.
 | Parent member-only portal | Existing + staff link when eligible | TP-M |
 | Admin lookup every member | `/staff` Admin + `/api/staff/members` | TP-A |
 | Admin act-as parent | Act-as cookie + portal banner | TP-A |
+| Admin manages staff access | `/staff` Staff Access + `/api/staff/roles` | TP-R |
 | Marketing FB/IG from portal | `/staff` Marketing compose | TP-K |
 | Legal docs | `/privacy`, `/terms`, `/photo-release` | TP-L |
 | Instructor → parent messaging | `/staff` Programs compose → ParentMessages | TP-I |
 | Board role homes | Staff shell panels per system role | TP-S |
 | Surveys + card-on-file + board Drive docs | Prior session + docs 23–26 | TP-E / TP-C / docs |
+| Survey sharing, review, CSV export | `/staff` Surveys + `/api/staff/surveys` | TP-E |
 
 ---
 
@@ -38,6 +40,16 @@ Covers every gap from the portal / board-roles / social / payments session.
 | A.4 | Act-as banner visible; Exit returns to admin's own portal data | |
 | A.5 | Act-as does not grant staff APIs as the parent (staff session remains admin) | |
 | A.6 | Non-admin cannot set act-as cookie | |
+
+## TP-R — Admin staff access
+
+| # | Test | Pass |
+|---|------|------|
+| R.1 | Admin can list current staff access rows | |
+| R.2 | Admin can assign one or more valid system roles to an `@shmspto.org` email | |
+| R.3 | Personal/non-domain email is rejected | |
+| R.4 | Admin can deactivate and reactivate staff access | |
+| R.5 | Non-admin receives 403 from `/api/staff/roles` | |
 
 ## TP-K — Marketing social compose
 
@@ -81,11 +93,16 @@ Covers every gap from the portal / board-roles / social / payments session.
 |---|------|------|
 | C.1–C.7 | See `docs/PARENT-PORTAL-PLAN.md` TP-C | |
 
-## TP-E — Surveys (prior build)
+## TP-E — Surveys
 
 | # | Test | Pass |
 |---|------|------|
-| E.1–E.5 | See `docs/PARENT-PORTAL-PLAN.md` TP-E | |
+| E.1 | Marketing/secretary/admin can list active surveys | |
+| E.2 | Email, SMS, and WhatsApp actions include the branded survey URL and channel | |
+| E.3 | Response table filters by survey | |
+| E.4 | CSV download includes respondent metadata and all answer columns | |
+| E.5 | Other staff roles receive 403 from `/api/staff/surveys` | |
+| E.6 | Parent submission tests: see `docs/PARENT-PORTAL-PLAN.md` TP-E | |
 
 ## Board role → system role (assignment checklist)
 
@@ -102,4 +119,4 @@ Covers every gap from the portal / board-roles / social / payments session.
 | VP Digital & Retail Sales | retail |
 | Program instructor (non-board) | instructor |
 
-Assign in CMS **StaffRoles** (`email` + comma-separated `roles`).
+Assign in `/staff` → **Admin · Staff access**. Wix CMS `StaffRoles` remains the underlying collection.

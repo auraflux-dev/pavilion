@@ -84,7 +84,7 @@ export async function createCheckoutUrl(opts: {
       callbacks: {
         postFlowUrl:
           opts.postFlowUrl ||
-          `${process.env.NEXT_PUBLIC_SITE_URL || 'https://frontend-six-rho-48.vercel.app'}/membership`,
+          `${process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'}/membership`,
       },
     })
     const fullUrl = red.redirectSession?.fullUrl
@@ -122,7 +122,7 @@ export async function storeCardCheckoutRedirectUrl(
     variantId: cfg.storeCardVariantByAmount[amount],
     postFlowUrl:
       postFlowUrl ||
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://frontend-six-rho-48.vercel.app'}/store`,
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'}/store`,
   })
 }
 
@@ -134,6 +134,6 @@ export async function productCheckoutRedirectUrl(
     productId,
     postFlowUrl:
       postFlowUrl ||
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://frontend-six-rho-48.vercel.app'}/spirit-wear`,
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'}/spirit-wear`,
   })
 }

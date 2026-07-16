@@ -80,7 +80,7 @@ const PLACEMENTS = [
       },
       {
         file: '23-branded-survey-form.png',
-        after: 'Base link: https://shmspto.org/survey/YOUR-SLUG',
+        after: 'Manual fallback: https://shmspto.org/survey/YOUR-SLUG',
         caption: 'Action screenshot — the branded form parents complete on the PTO site.',
       },
     ],

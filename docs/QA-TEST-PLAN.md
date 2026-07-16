@@ -1,7 +1,7 @@
 # SHMS PTO — Full-Site QA Test Plan
 
 **Site:** Stone Hill Middle School PTO  
-**Pre-DNS base URL:** https://frontend-six-rho-48.vercel.app  
+**Pre-DNS base URL:** https://shmspto.vercel.app
 **Production (post-DNS):** https://www.shmspto.org  
 
 **DNS is last.** Do not cut over DNS until Phases 0–6 are green. See [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md).
@@ -16,22 +16,22 @@ Confirm environment and secrets before functional testing.
 
 | # | Check | How | Result |
 |---|-------|-----|--------|
-| 0.1 | Vercel production deploy is healthy | Open base URL; no 5xx on home | `[ ]` |
-| 0.2 | `NEXT_PUBLIC_SITE_URL` points at Vercel URL (pre-DNS) | Vercel → Project → Environment Variables | `[ ]` |
-| 0.3 | Wix API env present (`WIX_API_KEY`, `WIX_SITE_ID`, OAuth client) | Vercel env / deploy logs | `[ ]` |
+| 0.1 | Vercel production deploy is healthy | Open base URL; no 5xx on home | `[x]` |
+| 0.2 | `NEXT_PUBLIC_SITE_URL` points at Vercel URL (pre-DNS) | Vercel → Project → Environment Variables | `[x]` |
+| 0.3 | Wix API env present (`WIX_API_KEY`, `WIX_SITE_ID`, OAuth client) | Vercel env / deploy logs | `[x]` |
 | 0.4 | Contact + newsletter APIs wired (not mocks) | `POST /api/contact`, `POST /api/newsletter` | `[ ]` |
-| 0.5 | Headless checkout route deployed | `POST /api/checkout/start` exists | `[ ]` |
-| 0.6 | Square production tokens ready | Needed for gift-card / POS flows (see D5) | `[ ]` |
+| 0.5 | Headless checkout route deployed | `POST /api/checkout/start` exists | `[x]` |
+| 0.6 | Square production vars present | Credentials exist; signed-in payment E2E still required (see D5) | `[x]` |
 | 0.7 | Cheddarup webhook secret + URL prep | Can point at Vercel URL pre-DNS (see D6) | `[ ]` |
-| 0.8 | `CRON_SECRET` set in Vercel + GitHub Actions | Membership sync cron | `[ ]` |
-| 0.9 | `WIX_ORDERS_WEBHOOK_SECRET` set | Protects `/api/webhooks/wix-orders` | `[ ]` |
+| 0.8 | `CRON_SECRET` set in Vercel + GitHub Actions | Membership sync cron | `[x]` |
+| 0.9 | `WIX_ORDERS_WEBHOOK_SECRET` set | Protects `/api/webhooks/wix-orders` | `[x]` |
 | 0.10 | Test accounts available | Free member + paid Ruby/Supreme if needed | `[ ]` |
 
 ---
 
 ## Phase 1 — Global chrome (navbar / footer)
 
-Test on desktop and mobile (hamburger). Base: `https://frontend-six-rho-48.vercel.app`
+Test on desktop and mobile (hamburger). Base: `https://shmspto.vercel.app`
 
 | # | Check | How | Result |
 |---|-------|-----|--------|
@@ -257,6 +257,8 @@ Follow the full procedure in [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md). Summary:
 
 ## Smoke results (2026-07-15 / 2026-07-16 staging `https://shmspto.vercel.app`)
 
+Automated command: `node scripts/smoke-production.mjs` (or `npm run test:smoke` from `frontend/`).
+
 | Check | Result |
 |-------|--------|
 | All nav routes HTTP 200 | `[x]` |
@@ -275,7 +277,8 @@ Follow the full procedure in [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md). Summary:
 | WhatsApp invite URLs absent from anon HTML (SSR) | `[x]` (2026-07-16; gate via `isMemberRequest`) |
 | PageContent `portal` / `portal-hub` / `member-portal` rows present | `[x]` |
 | ProgramSessions + ParentMessages collections have data | `[x]` |
-| Square prod env | `[!]` need tokens |
+| Automated anonymous/public smoke suite (16 checks) | `[x]` (2026-07-16) |
+| Square production env names present | `[x]` (credential validity still requires signed-in E2E) |
 | Cheddarup webhook pointed at Vercel | `[ ]` ops |
 | Logged-in portal / purchase QA | `[~]` portal grid verified earlier for treasurer; Google SSO still flaky in Cursor browser |
 
@@ -289,7 +292,7 @@ Follow the full procedure in [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md). Summary:
 | D2 | Med | Event detail 404 links | **Fixed** |
 | D3 | Low | Footer newsletter mock API | **Fixed** |
 | D4 | Med | Faculty CTA broken / non-mailto | **Fixed** (mailto) |
-| D5 | High | Square production credentials missing | **Open** — blocked on tokens |
+| D5 | High | Square production path unverified | **Open** — credentials exist; signed-in payment/reload E2E remains |
 | D6 | Med | Cheddarup webhook host | **Open** — ops (use Vercel URL pre-DNS) |
 | D7 | Critical | Product-page 404s on buy/load | **Mitigated** via headless `/api/checkout/start` |
 | D8 | Med | Demo events in Wix | **Filtered** in API; still delete in Wix Events UI |
@@ -300,7 +303,7 @@ Follow the full procedure in [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md). Summary:
 
 ## Remaining before DNS
 
-1. Add Square production secrets to Vercel (D5).  
+1. Confirm Square webhook configuration and complete one signed-in payment/reload E2E (D5).
 2. Point Cheddarup webhook at the Vercel URL and confirm secret (`CHEDDARUP_WEBHOOK_SECRET`) (D6).  
 3. Complete logged-in QA: Join / Load ($10/$20/$25) / Buy spirit / member portal.  
 4. Follow [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md), then re-run this plan on **https://www.shmspto.org**.

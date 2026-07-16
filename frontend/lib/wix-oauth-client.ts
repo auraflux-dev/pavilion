@@ -42,7 +42,7 @@ export function getCallbackUrl(): string {
     return `${site}${CALLBACK_PATH}`
   }
   // Pre-DNS production fallback (never localhost)
-  return `https://frontend-six-rho-48.vercel.app${CALLBACK_PATH}`
+  return `https://shmspto.vercel.app${CALLBACK_PATH}`
 }
 
 /** Create a client with existing tokens (member or visitor). */

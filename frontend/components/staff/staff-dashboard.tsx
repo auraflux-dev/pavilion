@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { SurveyResultsPanel } from '@/components/staff/survey-results-panel'
+import { StaffRoleManager } from '@/components/staff/staff-role-manager'
 
 type StaffHome = {
   role: string
@@ -243,6 +245,8 @@ export function StaffDashboard() {
         </section>
       ) : null}
 
+      {me.isAdmin ? <StaffRoleManager /> : null}
+
       {canMarketing ? (
         <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
           <h2 className="text-lg font-bold">Marketing · Facebook & Instagram</h2>
@@ -304,6 +308,8 @@ export function StaffDashboard() {
           </p>
         </section>
       ) : null}
+
+      {(canMarketing || me.roles.includes('secretary')) ? <SurveyResultsPanel /> : null}
 
       {canMessage ? (
         <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">

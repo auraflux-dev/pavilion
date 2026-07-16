@@ -52,8 +52,10 @@ Decisions from product review, with test plans for execution.
 | Branded `/survey/[slug]` page | **Done** |
 | Portal survey list | **Done** |
 | Board creates survey in CMS (fields JSON) | **Done** — manual CMS for now |
-| Board how-to for marketing (share links) | **Done** — Drive doc 23 |
-| Export/analyze in Wix CMS | **Done** — SurveyResponses collection |
+| Staff share center for email/SMS/WhatsApp | **Done** — `/staff` opens or copies branded channel messages |
+| Review responses in staff portal | **Done** — filterable response table for marketing/secretary/admin |
+| CSV export | **Done** — `/api/staff/surveys?format=csv` |
+| Export/analyze in Wix CMS | **Done** — SurveyResponses collection remains the source of truth |
 
 **Survey share URL:** `https://shmspto.org/survey/{slug}?from=email|sms|whatsapp|portal`
 
