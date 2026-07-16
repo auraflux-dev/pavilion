@@ -255,7 +255,7 @@ Follow the full procedure in [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md). Summary:
 
 ---
 
-## Smoke results (2026-07-15, Vercel base URL)
+## Smoke results (2026-07-15 / 2026-07-16 staging `https://shmspto.vercel.app`)
 
 | Check | Result |
 |-------|--------|
@@ -271,9 +271,13 @@ Follow the full procedure in [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md). Summary:
 | Home event View Details | `[x]` → `/events` |
 | Demo Wix events filtered from API | `[x]` (still delete in Wix UI) |
 | Headless checkout `/api/checkout/start` returns URLs (membership / store / spirit) | `[x]` |
+| Store-card checkout `$10/$20/$25` (`kind: store-card`) | `[x]` (2026-07-16) |
+| WhatsApp invite URLs absent from anon HTML (SSR) | `[~]` fixed in code 2026-07-16 — redeploy then recheck |
+| PageContent `portal` / `portal-hub` / `member-portal` rows present | `[x]` |
+| ProgramSessions + ParentMessages collections have data | `[x]` |
 | Square prod env | `[!]` need tokens |
 | Cheddarup webhook pointed at Vercel | `[ ]` ops |
-| Logged-in portal / purchase QA | `[ ]` |
+| Logged-in portal / purchase QA | `[~]` portal grid verified earlier for treasurer; Google SSO still flaky in Cursor browser |
 
 ---
 

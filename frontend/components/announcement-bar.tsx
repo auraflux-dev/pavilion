@@ -1,4 +1,5 @@
 import { getSiteSettings } from '@/lib/api/site-settings'
+import { isMemberRequest } from '@/lib/is-member-request'
 import { AnnouncementBarClient } from './announcement-bar-client'
 
 export async function AnnouncementBar() {
@@ -6,10 +7,20 @@ export async function AnnouncementBar() {
 
   if (!settings.getBool('announcementEnabled', true)) return null
 
-  const text   = settings.get('announcementText', 'Join your grade WhatsApp group to stay connected!')
-  const link6  = settings.get('announcement6thLink', '')
-  const link7  = settings.get('announcement7thLink', '')
-  const link8  = settings.get('announcement8thLink', '')
+  const text = settings.get(
+    'announcementText',
+    'Join your grade WhatsApp group to stay connected!'
+  )
+  const member = await isMemberRequest()
+
+  // Never put WhatsApp invite URLs in anonymous HTML — members only.
+  const link6 = member ? settings.get('announcement6thLink', '') : ''
+  const link7 = member ? settings.get('announcement7thLink', '') : ''
+  const link8 = member ? settings.get('announcement8thLink', '') : ''
+
+  const hasGradeLinks = Boolean(link6 || link7 || link8)
+  const isWhatsAppPromo = hasGradeLinks || /whatsapp/i.test(text)
+  if (isWhatsAppPromo && !member) return null
 
   return (
     <AnnouncementBarClient
