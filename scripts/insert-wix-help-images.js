@@ -104,8 +104,8 @@ const PLACEMENTS = [
   {
     docTitle: 'SHMS PTO — Image Upload Guide',
     images: [
-      { file: 'media-manager-3.png', after: 'you cannot add these through the Wix dashboard.' },
-      { file: 'stores-add-physical-product-5.png', after: 'Click Add Media and upload the product photo' },
+      { file: 'media-manager-3.png', after: 'Upload → click the file → copy the URL' },
+      { file: 'stores-add-physical-product-5.png', after: 'Click Add Media and upload or replace the photo' },
     ],
   },
   {
