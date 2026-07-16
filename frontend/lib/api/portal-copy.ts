@@ -62,6 +62,9 @@ export async function getPortalCopy(): Promise<PortalCopy> {
     addStudentSubmit: pick('addStudentSubmit'),
     cancel: pick('cancel'),
     addStudentError: pick('addStudentError'),
+    loadCardHelp: pick('loadCardHelp'),
+    paymentMethodsTitle: pick('paymentMethodsTitle'),
+    paymentMethodsBody: pick('paymentMethodsBody'),
   }
 }
 

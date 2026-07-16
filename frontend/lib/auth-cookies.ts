@@ -4,6 +4,8 @@
  */
 
 export const TOKENS_COOKIE = 'wix_tokens'
+/** Admin-only: parent email currently being viewed in the member portal */
+export const ACT_AS_COOKIE = 'shms_act_as'
 export const OAUTH_DATA_COOKIE = 'wix_oauth_data'
 
 /** Cookie max-age in seconds — 30 days (refresh token lifetime). */

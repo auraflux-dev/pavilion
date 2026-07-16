@@ -10,7 +10,7 @@ import { members } from '@wix/members'
 import { TOKENS_COOKIE, TOKEN_MAX_AGE, isSecure } from '@/lib/auth-cookies'
 import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
 
-const PROTECTED_ROUTES = ['/member-portal']
+const PROTECTED_ROUTES = ['/member-portal', '/staff']
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl

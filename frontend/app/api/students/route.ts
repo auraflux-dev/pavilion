@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { getWixClient } from '@/lib/wix-client'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 
 function getMemberEmail(req: NextRequest): { tokens: any; email: string } | null {
   const tokensCookie = req.cookies.get(TOKENS_COOKIE)?.value
@@ -19,16 +20,11 @@ function getMemberEmail(req: NextRequest): { tokens: any; email: string } | null
 }
 
 export async function GET(req: NextRequest) {
-  const tokensCookie = req.cookies.get(TOKENS_COOKIE)?.value
-  if (!tokensCookie) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const effective = await getEffectiveParentEmail(req)
+  if (!effective) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const email = effective.parentEmail
 
   try {
-    const tokens = JSON.parse(tokensCookie)
-    const oauthClient = createOAuthClient(tokens)
-    const { member } = await oauthClient.members.getCurrentMember({ fieldsets: ['FULL'] })
-    const email = member?.loginEmail ?? ''
-    if (!email) return NextResponse.json({ error: 'No email on account' }, { status: 400 })
-
     const adminClient = getWixClient()
     const result = await adminClient.items
       .query('Students')
@@ -46,7 +42,12 @@ export async function GET(req: NextRequest) {
       storeCardBalance: item.storeCardBalance ?? 0,
     }))
 
-    return NextResponse.json({ students })
+    return NextResponse.json({
+      students,
+      actingAs: effective.actingAs,
+      actorEmail: effective.actorEmail,
+      parentEmail: effective.parentEmail,
+    })
   } catch (err) {
     console.error('/api/students GET error:', err)
     return NextResponse.json({ error: 'Failed to load students' }, { status: 500 })

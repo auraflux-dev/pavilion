@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+
 import { CreditCard, CheckCircle2 } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
-import { startWixCheckout } from '@/lib/start-checkout'
+import { StoreCardReload } from '@/components/member-portal/store-card-reload'
 
 export type StoreCardDenomination = { amount: number; label: string; note: string }
 
@@ -52,7 +52,6 @@ export function StoreCardHero({
   perks = ['No cash needed', 'Reload anytime online', 'Funds never expire'],
   howItWorks,
 }: Props) {
-  const [busy, setBusy] = useState<number | null>(null)
   const denominations = defaultDenominations(amounts)
   const steps =
     howItWorks ??
@@ -62,20 +61,6 @@ export function StoreCardHero({
       '3|Tap & go at the window|Cashier taps the card at the PTO store reader — done.',
     ])
 
-  async function handleLoad(amount: number) {
-    setBusy(amount)
-    try {
-      await startWixCheckout({
-        kind: 'store-card',
-        amount,
-        postFlowUrl: `${window.location.origin}/store`,
-      })
-    } catch {
-      // ignore — button re-enables
-    } finally {
-      setBusy(null)
-    }
-  }
 
   return (
     <>
@@ -103,21 +88,12 @@ export function StoreCardHero({
             </div>
 
             <MemberGate label="Log in or create a free account to load a card">
-              <div className="flex flex-wrap gap-2 shrink-0">
-                {denominations.map(({ amount, label, note }) => (
-                  <button
-                    key={amount}
-                    type="button"
-                    disabled={busy !== null}
-                    onClick={() => handleLoad(amount)}
-                    className="flex flex-col items-center px-5 py-3 rounded-xl border-2 border-white/30 hover:border-white bg-white/10 hover:bg-white/20 transition-all group disabled:opacity-60"
-                  >
-                    <span className="text-xl font-bold text-white">
-                      {busy === amount ? '…' : label}
-                    </span>
-                    <span className="text-[10px] text-white/60 group-hover:text-white/80">{note}</span>
-                  </button>
-                ))}
+              <div className="shrink-0 min-w-[260px]">
+                <StoreCardReload
+                  amounts={denominations.map(({ amount }) => amount)}
+                  triggerLabel="Choose student & load card"
+                  triggerClassName="w-full justify-center !bg-white !text-[#085508] px-5 py-3"
+                />
               </div>
             </MemberGate>
           </div>

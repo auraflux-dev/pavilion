@@ -15,7 +15,7 @@ interface Props {
 export function NavbarClient({ links }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const { status, member, accountType } = useAuth()
+  const { status, member, accountType, isStaff } = useAuth()
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 8)
@@ -92,15 +92,24 @@ export function NavbarClient({ links }: Props) {
           {status === 'loading' ? (
             <div className="h-9 w-28 rounded-md bg-[#EEF6EE] animate-pulse" />
           ) : isMember ? (
-            <Link href="/member-portal">
-              <Button
-                size="sm"
-                className="text-white font-semibold"
-                style={{ backgroundColor: '#085508' }}
-              >
-                {portalLabel}
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              {isStaff ? (
+                <Link href="/staff">
+                  <Button size="sm" variant="outline" className="font-semibold">
+                    Staff
+                  </Button>
+                </Link>
+              ) : null}
+              <Link href="/member-portal">
+                <Button
+                  size="sm"
+                  className="text-white font-semibold"
+                  style={{ backgroundColor: '#085508' }}
+                >
+                  {portalLabel}
+                </Button>
+              </Link>
+            </div>
           ) : (
             <Link href="/auth/login?returnTo=%2Fmember-portal">
               <Button
@@ -148,14 +157,23 @@ export function NavbarClient({ links }: Props) {
             ))}
             <li className="pt-2 border-t border-[#E8E4DC] mt-1">
               {isMember ? (
-                <Link href="/member-portal" onClick={() => setMenuOpen(false)}>
-                  <Button
-                    className="w-full text-white font-semibold"
-                    style={{ backgroundColor: '#085508' }}
-                  >
-                    {portalLabel}
-                  </Button>
-                </Link>
+                <div className="space-y-2">
+                  {isStaff ? (
+                    <Link href="/staff" onClick={() => setMenuOpen(false)}>
+                      <Button size="sm" variant="outline" className="w-full font-semibold">
+                        Staff workspace
+                      </Button>
+                    </Link>
+                  ) : null}
+                  <Link href="/member-portal" onClick={() => setMenuOpen(false)}>
+                    <Button
+                      className="w-full text-white font-semibold"
+                      style={{ backgroundColor: '#085508' }}
+                    >
+                      {portalLabel}
+                    </Button>
+                  </Link>
+                </div>
               ) : (
                 <Link
                   href="/auth/login?returnTo=%2Fmember-portal"

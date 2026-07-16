@@ -8,6 +8,7 @@ type Props = {
   action?: ReactNode
   children: ReactNode
   className?: string
+  id?: string
 }
 
 /** Shared chrome for the 2×2 member portal grid. */
@@ -18,9 +19,11 @@ export function PortalQuadrant({
   action,
   children,
   className = '',
+  id,
 }: Props) {
   return (
     <section
+      id={id}
       className={`bg-white rounded-2xl border border-[#E8E4DC] shadow-sm flex flex-col min-h-[280px] ${className}`}
     >
       <header className="flex items-center justify-between gap-3 px-5 py-4 border-b border-[#F0EDE8]">

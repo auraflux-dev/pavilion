@@ -7,6 +7,8 @@ import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { getWixClient } from '@/lib/wix-client'
 import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
+import { getStaffProfile } from '@/lib/staff/roles'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractEmail(member: any): string {
@@ -38,7 +40,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Member not found' }, { status: 404 })
     }
 
-    const email = extractEmail(member)
+    const actorEmail = extractEmail(member)
+    const effective = await getEffectiveParentEmail(req)
+    const email = effective?.parentEmail ?? actorEmail
+    const actingAs = Boolean(effective?.actingAs)
+    const staff = effective?.staff ?? (await getStaffProfile(actorEmail))
     const adminClient = getWixClient()
 
     let storeCards: { balance: number; studentName: string }[] = []
@@ -124,7 +130,7 @@ export async function GET(req: NextRequest) {
       member: {
         id: member._id,
         name: `${member.contact?.firstName ?? ''} ${member.contact?.lastName ?? ''}`.trim(),
-        email,
+        email: actorEmail,
         profileImage: member.profile?.photo?.url ?? null,
         memberSince: member._createdDate ?? null,
       },
@@ -134,6 +140,11 @@ export async function GET(req: NextRequest) {
       studentCount: students.length,
       hasPaidMembership,
       accountType,
+      actingAs,
+      viewingEmail: email,
+      staffRoles: staff?.roles ?? [],
+      boardTitle: staff?.boardTitle ?? '',
+      isStaff: Boolean(staff?.roles?.length),
     })
   } catch (err) {
     console.error('/api/auth/me error:', err)

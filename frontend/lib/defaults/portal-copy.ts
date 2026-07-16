@@ -59,6 +59,9 @@ export type PortalCopy = {
   addStudentSubmit: string
   cancel: string
   addStudentError: string
+  loadCardHelp: string
+  paymentMethodsTitle: string
+  paymentMethodsBody: string
 }
 
 export const PORTAL_COPY_DEFAULTS: PortalCopy = {
@@ -116,6 +119,11 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   addStudentSubmit: 'Add student',
   cancel: 'Cancel',
   addStudentError: 'Could not add student. Please try again.',
+  loadCardHelp:
+    'Choose a student and $10 / $20 / $25. Pay once, or securely save the card with Square for faster reloads and optional auto top-off.',
+  paymentMethodsTitle: 'How you pay',
+  paymentMethodsBody:
+    'Snack window: prepaid student store card. Online reloads: one-time card payment or an optional saved card secured by Square. Membership and spirit wear use checkout separately.',
 }
 
 /** Parse `key|value` lines (store-how style). Value may contain `|`. */
@@ -168,6 +176,9 @@ export function portalHubBulletsDefault(): string {
     'addStudentSubmit',
     'cancel',
     'addStudentError',
+    'loadCardHelp',
+    'paymentMethodsTitle',
+    'paymentMethodsBody',
   ]
   return keys.map((k) => `${k}|${PORTAL_COPY_DEFAULTS[k]}`).join('\n')
 }

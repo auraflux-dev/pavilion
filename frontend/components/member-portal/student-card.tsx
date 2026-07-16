@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp, CreditCard, BookOpen, Receipt, ArrowRight, Star, Tag, Loader2, Plus } from 'lucide-react'
 import { GiftCardSettings } from './gift-card-settings'
+import { EditStudentForm } from './edit-student-form'
 
 interface Enrollment {
   id: string
@@ -38,6 +39,8 @@ interface Props {
   student: Student
   defaultOpen?: boolean
   upgradeBody?: string
+  grades?: string[]
+  onUpdated?: (student: Student) => void
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -82,6 +85,8 @@ export function StudentCard({
   student,
   defaultOpen = false,
   upgradeBody = 'Paid members get a pre-loaded store card, free or discounted program registration, and free refreshments at school events.',
+  grades = ['6', '7', '8'],
+  onUpdated,
 }: Props) {
   const [open, setOpen] = useState(defaultOpen)
   const [history, setHistory] = useState<{ enrollments: Enrollment[]; payments: Payment[] } | null>(null)
@@ -191,6 +196,13 @@ export function StudentCard({
       {/* Expanded history */}
       {open && (
         <div className="border-t border-[#F0EDE8] px-5 py-5 space-y-6">
+          {onUpdated ? (
+            <EditStudentForm
+              student={student}
+              grades={grades}
+              onUpdated={onUpdated}
+            />
+          ) : null}
           {loading && (
             <div className="flex items-center justify-center py-6">
               <Loader2 className="w-5 h-5 animate-spin" style={{ color: '#085508' }} />

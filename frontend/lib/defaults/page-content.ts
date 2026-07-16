@@ -157,6 +157,20 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body: 'Keyed bullets (key|text) drive portal quadrant titles, empty states, and CTAs.',
     bullets: portalHubBulletsDefault().split('\n'),
   }),
+  /** question|answer lines — shown only inside /member-portal */
+  'portal-help': empty('portal-help', {
+    title: 'Portal help',
+    body: 'Parent FAQ — member portal only.',
+    bullets: [
+      'How do I update My Account?|Click Edit profile in My Account. You can change your name and phone here. Email changes go through the PTO treasurer.',
+      'How do I add another student?|Scroll to My Students and tap Add a student at the bottom. Enter first name, last name, and grade.',
+      'How do I fix a student name or grade?|Open the student card (tap the arrow), then Edit student. Save — changes appear within a few minutes.',
+      'How do I reload the store card?|In Store & Purchases, tap Load card. Choose $10, $20, or $25 and pay securely. Balance updates on the student card after purchase.',
+      'Do I need a store card?|The snack window uses a prepaid store card. Memberships and spirit wear pay online at checkout — no store card required.',
+      'Can I save a payment card?|Yes. During a reload, choose Save this card. Square securely stores it; SHMS PTO never receives the card number. You can remove it anytime.',
+      'Where do surveys appear?|Active surveys list below your quadrants. Same branded form we send by email, text, or WhatsApp — always on shmspto.org.',
+    ],
+  }),
 }
 
 /** Contact detail fallbacks (SiteSettings keys preferred). */

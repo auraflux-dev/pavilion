@@ -306,9 +306,14 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
         style={{ borderColor: '#333333' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-[#5A6070] text-center sm:text-left">
-            &copy; 2026 Stone Hill Middle School PTO. All rights reserved.
-          </p>
+          <div className="text-xs text-[#5A6070] text-center sm:text-left space-y-1">
+            <p>&copy; 2026 Stone Hill Middle School PTO. All rights reserved.</p>
+            <p className="flex flex-wrap gap-x-3 gap-y-1 justify-center sm:justify-start">
+              <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+              <a href="/terms" className="hover:text-white transition-colors">Terms</a>
+              <a href="/photo-release" className="hover:text-white transition-colors">Photo release</a>
+            </p>
+          </div>
           <p
             className="text-xs font-bold tracking-wider uppercase"
             style={{ color: '#FFD700' }}

@@ -23,7 +23,12 @@ import {
 } from '@/lib/defaults/portal-copy'
 import { StudentCard } from './student-card'
 import { AddStudentForm } from './add-student-form'
+import { EditAccountForm } from './edit-account-form'
 import { PortalQuadrant } from './portal-quadrant'
+import { PortalHelpPanel } from './portal-help-panel'
+import { PortalSurveys } from './portal-surveys'
+import { StoreCardReload } from './store-card-reload'
+import type { PortalHelpItem } from '@/lib/api/portal-help'
 
 interface MemberData {
   member: {
@@ -82,6 +87,7 @@ interface Props {
   link8?: string
   grades?: string[]
   copy?: PortalCopy
+  portalHelp?: PortalHelpItem[]
 }
 
 function fmtMoney(n: number) {
@@ -103,6 +109,7 @@ export function MemberDashboard({
   link8 = '',
   grades = ['6', '7', '8'],
   copy = PORTAL_COPY_DEFAULTS,
+  portalHelp = [],
 }: Props) {
   const [member, setMember] = useState<MemberData['member'] | null>(null)
   const [accountType, setAccountType] = useState<'free' | 'paid'>('free')
@@ -158,6 +165,14 @@ export function MemberDashboard({
   function handleStudentAdded(student: Student) {
     setStudents((prev) => [...prev, student])
     load()
+  }
+
+  function handleStudentUpdated(student: Student) {
+    setStudents((prev) => prev.map((s) => (s.id === student.id ? student : s)))
+  }
+
+  function handleMemberUpdated(name: string) {
+    setMember((prev) => (prev ? { ...prev, name } : prev))
   }
 
   if (status === 'loading') {
@@ -337,7 +352,7 @@ export function MemberDashboard({
             </button>
           }
         >
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-2">
             {member.profileImage ? (
               <img
                 src={member.profileImage}
@@ -352,11 +367,17 @@ export function MemberDashboard({
                 {member.name.charAt(0).toUpperCase()}
               </div>
             )}
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="font-bold text-[#1A1A1A] truncate">{member.name}</p>
               <p className="text-xs text-[#5A6070] truncate">{member.email}</p>
             </div>
           </div>
+
+          <EditAccountForm
+            initialName={member.name}
+            email={member.email}
+            onUpdated={handleMemberUpdated}
+          />
 
           <div
             className="rounded-xl px-4 py-3 border mb-4"
@@ -399,6 +420,11 @@ export function MemberDashboard({
               <dt className="text-[#5A6070] m-0">{copy.studentsLabel}</dt>
               <dd className="font-semibold text-[#1A1A1A] m-0 text-right">
                 {students.length}
+                {students.length > 0 ? (
+                  <a href="#portal-students" className="block text-[10px] font-bold text-[#085508] mt-0.5">
+                    Manage students ↓
+                  </a>
+                ) : null}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-4">
@@ -408,6 +434,11 @@ export function MemberDashboard({
               </dd>
             </div>
           </dl>
+
+          <div className="rounded-xl px-4 py-3 border border-[#E8E4DC] mb-4 bg-[#FAFCF9]">
+            <p className="text-xs font-bold text-[#1A1A1A] mb-1">{copy.paymentMethodsTitle}</p>
+            <p className="text-[11px] text-[#5A6070] leading-relaxed">{copy.paymentMethodsBody}</p>
+          </div>
 
           {gradeLinks.length > 0 && (
             <div className="mt-auto pt-2 border-t border-[#F0EDE8]">
@@ -434,6 +465,7 @@ export function MemberDashboard({
 
         {/* B — My Students */}
         <PortalQuadrant
+          id="portal-students"
           title={copy.studentsTitle}
           icon={Users}
           className="order-3 lg:order-2 lg:col-start-2 lg:row-start-1"
@@ -467,6 +499,8 @@ export function MemberDashboard({
                     student={s}
                     defaultOpen={i === 0}
                     upgradeBody={copy.upgradeBody}
+                    grades={grades}
+                    onUpdated={handleStudentUpdated}
                   />
                 ))}
               <AddStudentForm
@@ -504,13 +538,10 @@ export function MemberDashboard({
           </div>
 
           <div className="flex flex-wrap gap-2 mb-4">
-            <a
-              href="/store"
-              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg text-white"
-              style={{ backgroundColor: '#085508' }}
-            >
-              <CreditCard className="w-3.5 h-3.5" /> {copy.ctaLoadCard}
-            </a>
+            <StoreCardReload
+              students={students.map(({ id, firstName, lastName }) => ({ id, firstName, lastName }))}
+              onLoaded={load}
+            />
             <a
               href="/spirit-wear"
               className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#1A1A1A]"
@@ -524,6 +555,8 @@ export function MemberDashboard({
               {copy.ctaPrograms}
             </a>
           </div>
+
+          <p className="text-[11px] text-[#5A6070] leading-relaxed mb-4 px-1">{copy.loadCardHelp}</p>
 
           {purchases.length === 0 ? (
             <p className="text-xs text-[#5A6070] mt-auto">{copy.purchasesEmpty}</p>
@@ -556,6 +589,9 @@ export function MemberDashboard({
           )}
         </PortalQuadrant>
       </div>
+
+      <PortalSurveys />
+      <PortalHelpPanel items={portalHelp} />
     </div>
   )
 }

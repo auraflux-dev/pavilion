@@ -90,9 +90,15 @@ const PLACEMENTS = [
     ],
   },
   {
-    docTitle: '12b - How to Manage the Store Card',
+    docTitle: '23 - How to Create and Share a Branded Survey',
     images: [
-      { file: 'stores-inventory-2.png', after: 'Open the product → Variants tab' },
+      { file: 'cms-collections-5.png', after: 'Wix Dashboard → Content Manager → Surveys → + New Item' },
+    ],
+  },
+  {
+    docTitle: '24 - How to Review and Export Survey Responses',
+    images: [
+      { file: 'cms-collections-3.png', after: 'Wix Dashboard → Content Manager → Survey Responses' },
     ],
   },
   {

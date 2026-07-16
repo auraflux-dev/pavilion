@@ -10,6 +10,7 @@ import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { getUpcomingEvents } from '@/lib/api/events'
 import { getAllPrograms } from '@/lib/api/programs'
 import { getUpcomingProgramSessions } from '@/lib/api/program-sessions'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,8 +53,11 @@ export async function GET(req: NextRequest) {
     const tokens = JSON.parse(tokensCookie)
     const oauthClient = createOAuthClient(tokens)
     const { member } = await oauthClient.members.getCurrentMember({ fieldsets: ['FULL'] })
-    const email = (member?.loginEmail ?? '').trim().toLowerCase()
-    if (!email) return NextResponse.json({ error: 'No email' }, { status: 400 })
+    const actorEmail = (member?.loginEmail ?? '').trim().toLowerCase()
+    if (!actorEmail) return NextResponse.json({ error: 'No email' }, { status: 400 })
+    const effective = await getEffectiveParentEmail(req)
+    const email = effective?.parentEmail ?? actorEmail
+    const actingAs = Boolean(effective?.actingAs)
 
     const admin = getWixClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -247,6 +251,10 @@ export async function GET(req: NextRequest) {
       if (parentEmail && parentEmail === email) visible = true
       else if (audience === 'all') visible = true
       else if (audience === 'grade' && grade && grades.has(grade)) visible = true
+      else if (audience === 'program' && m.programName) {
+        const pname = String(m.programName).trim().toLowerCase()
+        visible = Array.from(programCalendar.keys()).some((k) => k.includes(pname) || pname.includes(k))
+      }
       else if (studentId && studentIds.includes(studentId)) visible = true
       else if (!parentEmail && !audience && !studentId && !grade) visible = true // broadcast drafts marked active
 
@@ -304,6 +312,9 @@ export async function GET(req: NextRequest) {
       messages: messages.slice(0, 15),
       purchases: purchases.slice(0, 12),
       studentCount: students.length,
+      actingAs,
+      parentEmail: email,
+      actorEmail,
     })
   } catch (err) {
     console.error('/api/portal/family error:', err)

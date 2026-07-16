@@ -34,11 +34,21 @@ export async function GET(req: NextRequest) {
     if (!student || student.parentEmail !== email) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
+    const methods = await adminClient.items
+      .query('StoredPaymentMethods')
+      .eq('parentEmail', email)
+      .eq('active', true)
+      .find()
+    const method = methods.items?.[0] as any
 
     return NextResponse.json({
       enabled: student.autoTopOff ?? false,
       thresholdDollars: student.topOffThreshold ?? 10,
       reloadDollars: student.topOffAmount ?? 20,
+      hasPaymentMethod: Boolean(method?.squareCardId && method?.squareCustomerId),
+      paymentMethod: method
+        ? { brand: method.brand ?? 'Card', last4: method.last4 ?? '' }
+        : null,
     })
   } catch (err) {
     console.error('/api/gift-card/auto-topoff GET error:', err)
@@ -58,6 +68,21 @@ export async function POST(req: NextRequest) {
     const student = await adminClient.items.get('Students', studentId) as any
     if (!student || student.parentEmail !== email) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+
+    if (enabled) {
+      const methods = await adminClient.items
+        .query('StoredPaymentMethods')
+        .eq('parentEmail', email)
+        .eq('active', true)
+        .find()
+      const method = methods.items?.[0] as any
+      if (!method?.squareCardId || !method?.squareCustomerId) {
+        return NextResponse.json(
+          { error: 'Save a payment card before enabling auto top-off' },
+          { status: 400 }
+        )
+      }
     }
 
     await adminClient.items.update('Students', {

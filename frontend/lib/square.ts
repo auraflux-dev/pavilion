@@ -150,3 +150,73 @@ export async function upsertSquareCustomer(email: string, name: string) {
   })
   return (createResult as any).customer ?? null
 }
+
+
+/** Store a Web Payments SDK token as a reusable Square card on file. */
+export async function createCardOnFile(input: {
+  sourceId: string
+  customerId: string
+  referenceId: string
+  idempotencyKey: string
+}) {
+  const client = getSquareClient()
+  const result = await client.cards.create({
+    idempotencyKey: input.idempotencyKey,
+    sourceId: input.sourceId,
+    card: {
+      customerId: input.customerId,
+      referenceId: input.referenceId,
+    },
+  })
+  return (result as any).card ?? null
+}
+
+/** Charge a one-time token or stored Square card. Returns only completed payments. */
+export async function chargePayment(input: {
+  sourceId: string
+  amountCents: number
+  idempotencyKey: string
+  customerId?: string
+  referenceId?: string
+  buyerEmailAddress?: string
+  note?: string
+}) {
+  if (!Number.isInteger(input.amountCents) || input.amountCents < 100) {
+    throw new Error('Invalid payment amount')
+  }
+
+  const client = getSquareClient()
+  const result = await client.payments.create({
+    sourceId: input.sourceId,
+    idempotencyKey: input.idempotencyKey,
+    amountMoney: { amount: BigInt(input.amountCents), currency: 'USD' },
+    autocomplete: true,
+    locationId: SQUARE_LOCATION_ID,
+    customerId: input.customerId,
+    referenceId: input.referenceId,
+    buyerEmailAddress: input.buyerEmailAddress,
+    note: input.note,
+  })
+  const payment = (result as any).payment ?? null
+  if (!payment || payment.status !== 'COMPLETED') {
+    throw new Error(`Square payment was not completed (${payment?.status ?? 'unknown'})`)
+  }
+  return payment
+}
+
+
+/** Disable a Square card-on-file so it cannot be charged again. */
+export async function disableCardOnFile(cardId: string) {
+  const client = getSquareClient()
+  const result = await client.cards.disable({ cardId })
+  return (result as any).card ?? null
+}
+
+export function getSquareWebPaymentsConfig() {
+  return {
+    applicationId: process.env.SQUARE_APPLICATION_ID ?? '',
+    locationId: SQUARE_LOCATION_ID,
+    environment:
+      process.env.SQUARE_ENVIRONMENT === 'production' ? 'production' : 'sandbox',
+  }
+}

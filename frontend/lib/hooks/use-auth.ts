@@ -20,6 +20,8 @@ export interface AuthInfo {
   accountType: AccountType
   hasPaidMembership: boolean
   studentCount: number
+  isStaff: boolean
+  staffRoles: string[]
   refresh: () => void
 }
 
@@ -34,6 +36,8 @@ export function useAuth(): AuthInfo {
   const [accountType, setAccountType] = useState<AccountType>('none')
   const [hasPaidMembership, setHasPaidMembership] = useState(false)
   const [studentCount, setStudentCount] = useState(0)
+  const [isStaff, setIsStaff] = useState(false)
+  const [staffRoles, setStaffRoles] = useState<string[]>([])
   const [tick, setTick] = useState(0)
 
   const refresh = useCallback(() => setTick((t) => t + 1), [])
@@ -50,6 +54,8 @@ export function useAuth(): AuthInfo {
           setAccountType('none')
           setHasPaidMembership(false)
           setStudentCount(0)
+          setIsStaff(false)
+          setStaffRoles([])
           return
         }
         const data = await r.json()
@@ -58,6 +64,8 @@ export function useAuth(): AuthInfo {
         setAccountType((data.accountType as AccountType) ?? 'free')
         setHasPaidMembership(Boolean(data.hasPaidMembership))
         setStudentCount(Number(data.studentCount ?? 0))
+        setIsStaff(Boolean(data.isStaff))
+        setStaffRoles(Array.isArray(data.staffRoles) ? data.staffRoles : [])
       })
       .catch(() => {
         if (cancelled) return
@@ -66,6 +74,8 @@ export function useAuth(): AuthInfo {
         setAccountType('none')
         setHasPaidMembership(false)
         setStudentCount(0)
+        setIsStaff(false)
+        setStaffRoles([])
       })
     return () => {
       cancelled = true
@@ -78,6 +88,8 @@ export function useAuth(): AuthInfo {
     accountType,
     hasPaidMembership,
     studentCount,
+    isStaff,
+    staffRoles,
     refresh,
   }
 }

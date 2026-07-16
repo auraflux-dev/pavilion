@@ -60,6 +60,27 @@ async function wix(path, body, method = 'POST') {
   return data
 }
 
+
+async function patchDataItem(collectionId, item, values) {
+  const fieldModifications = Object.entries(values)
+    .filter(([key, value]) => JSON.stringify(item.data?.[key] ?? null) !== JSON.stringify(value ?? null))
+    .map(([fieldPath, value]) => ({
+      fieldPath,
+      action: 'SET_FIELD',
+      setFieldOptions: { value },
+    }))
+
+  if (!fieldModifications.length) return false
+  await wix(`/wix-data/v2/items/${item.id}`, {
+    dataCollectionId: collectionId,
+    patch: {
+      dataItemId: item.id,
+      fieldModifications,
+    },
+  }, 'PATCH')
+  return true
+}
+
 const SITE_SETTINGS = {
   membershipRubyProductId: '89ad5f10-a4bc-4a31-af4a-22b6add4cad4',
   membershipRubyVariantId: '23ea8122-e8b0-4eea-912f-c4227308193d',
@@ -110,6 +131,13 @@ const SITE_SETTINGS = {
   contactEmailTreasurer: 'treasurer@shmspto.org',
   contactAddress: '23415 Evergreen Ridge Drive, Ashburn, VA 20148',
   contactStoreHours: 'Open during lunch periods, Mon–Fri',
+  socialFacebook: '',
+  socialInstagram: '',
+  socialTwitter: '',
+  socialYoutube: '',
+  socialFacebookPageId: '',
+  socialInstagramAccountId: '',
+  socialPublishEnabled: 'false',
 }
 
 const PAGE_ROWS = [
@@ -298,6 +326,58 @@ const PAGE_ROWS = [
       'addStudentSubmit|Add student',
       'cancel|Cancel',
       'addStudentError|Could not add student. Please try again.',
+      'loadCardHelp|Choose a student and $10 / $20 / $25. Pay once, or securely save the card with Square for faster reloads and optional auto top-off.',
+      'paymentMethodsTitle|How you pay',
+      'paymentMethodsBody|Snack window: prepaid student store card. Online reloads: one-time card payment or optional Square-secured saved card.',
+    ].join('\n'),
+    active: true,
+  },
+  {
+    page: 'portal-help',
+    title: 'Portal help',
+    body: 'Parent FAQ — member portal only. question|answer per line.',
+    bullets: [
+      'How do I update My Account?|Click Edit profile in My Account. Change name and phone here.',
+      'How do I add another student?|My Students → Add a student at the bottom.',
+      'How do I fix a student name or grade?|Open the student card → Edit student → Save.',
+      'How do I reload the store card?|Store & Purchases → Load card → choose amount and pay.',
+      'Do I need a store card?|Only for the snack window. Memberships and spirit wear pay online.',
+      'Can I save a payment card?|Yes. Save it during a reload. Square secures it; SHMS PTO never receives the card number. Remove it anytime.',
+      'Where do surveys appear?|Below your quadrants — same form we send by email, text, or WhatsApp.',
+    ].join('\n'),
+    active: true,
+  },
+  {
+    page: 'legal-privacy',
+    title: 'Privacy Policy',
+    sectionTitle: 'July 2026',
+    bullets: [
+      'Who we are|Stone Hill Middle School PTO operates shmspto.org. Contact: president@shmspto.org.',
+      'Information we collect|Account details, student grade info, enrollments, payments, survey responses, and messages.',
+      'Payments|Processed by Square and/or Wix Payments. SHMS PTO does not store full card numbers.',
+      'Photos|See /photo-release for event photography rules.',
+    ].join('\n'),
+    active: true,
+  },
+  {
+    page: 'legal-terms',
+    title: 'Terms of Use',
+    sectionTitle: 'July 2026',
+    bullets: [
+      'Agreement|By using shmspto.org you agree to these terms and our Privacy Policy.',
+      'Accounts|Provide accurate information. Parents manage only their household students.',
+      'Purchases|Memberships, spirit wear, store-card reloads, and program fees follow posted pricing.',
+    ].join('\n'),
+    active: true,
+  },
+  {
+    page: 'legal-photo-release',
+    title: 'Photo & Media Release',
+    sectionTitle: 'July 2026',
+    bullets: [
+      'Purpose|SHMS PTO may photograph events to celebrate students and promote programs.',
+      'What we avoid|We do not post student last names on public social channels without explicit permission.',
+      'Opt out|Email president@shmspto.org with student name and grade to opt out of public photo use.',
     ].join('\n'),
     active: true,
   },
@@ -425,19 +505,8 @@ async function upsertSiteSettings() {
   for (const [key, value] of Object.entries(SITE_SETTINGS)) {
     const found = byKey.get(key)
     if (found) {
-      const prev = String(found.data?.value ?? '')
-      if (prev === String(value)) {
-        console.log('Skip SiteSettings (unchanged)', key)
-        continue
-      }
-      await wix(`/wix-data/v2/items/${found.id}`, {
-        dataCollectionId: 'SiteSettings',
-        dataItem: {
-          id: found.id,
-          data: { ...(found.data ?? {}), key, value },
-        },
-      }, 'PATCH')
-      console.log('Updated SiteSettings', key)
+      const changed = await patchDataItem('SiteSettings', found, { key, value })
+      console.log(changed ? 'Updated SiteSettings' : 'Skip SiteSettings (unchanged)', key)
     } else {
       await wix('/wix-data/v2/items', {
         dataCollectionId: 'SiteSettings',
@@ -466,23 +535,8 @@ async function upsertPageContent() {
   for (const row of PAGE_ROWS) {
     const found = byPage.get(row.page)
     if (found) {
-      try {
-        await wix(`/wix-data/v2/items/${found.id}`, {
-          dataCollectionId: 'PageContent',
-          dataItem: {
-            id: found.id,
-            data: { ...(found.data ?? {}), ...row },
-          },
-        }, 'PATCH')
-        console.log('Updated PageContent', row.page)
-      } catch (err) {
-        const msg = err?.data?.message ?? err?.message ?? ''
-        if (String(msg).includes('fieldModifications') || String(msg).includes('Validation failed')) {
-          console.log('Skip PageContent (unchanged)', row.page)
-          continue
-        }
-        throw err
-      }
+      const changed = await patchDataItem('PageContent', found, row)
+      console.log(changed ? 'Updated PageContent' : 'Skip PageContent (unchanged)', row.page)
     } else {
       await wix('/wix-data/v2/items', {
         dataCollectionId: 'PageContent',
@@ -493,12 +547,270 @@ async function upsertPageContent() {
   }
 }
 
+async function ensureSurveysCollection() {
+  try {
+    await wix('/wix-data/v2/collections', {
+      collection: {
+        id: 'Surveys',
+        displayName: 'Surveys',
+        fields: [
+          { key: 'slug', displayName: 'Slug', type: 'TEXT' },
+          { key: 'title', displayName: 'Title', type: 'TEXT' },
+          { key: 'description', displayName: 'Description', type: 'TEXT' },
+          { key: 'intro', displayName: 'Intro', type: 'TEXT' },
+          { key: 'fieldsJson', displayName: 'Fields JSON', type: 'TEXT' },
+          { key: 'brandingJson', displayName: 'Branding JSON', type: 'TEXT' },
+          { key: 'audience', displayName: 'Audience', type: 'TEXT' },
+          { key: 'showInPortal', displayName: 'Show In Portal', type: 'BOOLEAN' },
+          { key: 'requireLogin', displayName: 'Require Login', type: 'BOOLEAN' },
+          { key: 'createdBy', displayName: 'Created By', type: 'TEXT' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+        ],
+        permissions: {
+          insert: 'ADMIN',
+          update: 'ADMIN',
+          remove: 'ADMIN',
+          read: 'ANYONE',
+        },
+      },
+    })
+    console.log('Created Surveys collection')
+  } catch (err) {
+    if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
+      console.log('Surveys collection already exists')
+      return
+    }
+    console.warn('Surveys create skipped:', err.message.slice(0, 200))
+  }
+}
+
+async function ensureSurveyResponsesCollection() {
+  try {
+    await wix('/wix-data/v2/collections', {
+      collection: {
+        id: 'SurveyResponses',
+        displayName: 'Survey Responses',
+        fields: [
+          { key: 'surveyId', displayName: 'Survey ID', type: 'TEXT' },
+          { key: 'surveySlug', displayName: 'Survey Slug', type: 'TEXT' },
+          { key: 'surveyTitle', displayName: 'Survey Title', type: 'TEXT' },
+          { key: 'respondentEmail', displayName: 'Respondent Email', type: 'TEXT' },
+          { key: 'respondentName', displayName: 'Respondent Name', type: 'TEXT' },
+          { key: 'answersJson', displayName: 'Answers JSON', type: 'TEXT' },
+          { key: 'channel', displayName: 'Channel', type: 'TEXT' },
+          { key: 'submittedAt', displayName: 'Submitted At', type: 'DATETIME' },
+        ],
+        permissions: {
+          insert: 'ADMIN',
+          update: 'ADMIN',
+          remove: 'ADMIN',
+          read: 'ADMIN',
+        },
+      },
+    })
+    console.log('Created SurveyResponses collection')
+  } catch (err) {
+    if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
+      console.log('SurveyResponses collection already exists')
+      return
+    }
+    console.warn('SurveyResponses create skipped:', err.message.slice(0, 200))
+  }
+}
+
+async function ensureStoredPaymentMethodsCollection() {
+  try {
+    await wix('/wix-data/v2/collections', {
+      collection: {
+        id: 'StoredPaymentMethods',
+        displayName: 'Stored Payment Methods',
+        fields: [
+          { key: 'parentEmail', displayName: 'Parent Email', type: 'TEXT' },
+          { key: 'wixMemberId', displayName: 'Wix Member ID', type: 'TEXT' },
+          { key: 'squareCustomerId', displayName: 'Square Customer ID', type: 'TEXT' },
+          { key: 'squareCardId', displayName: 'Square Card ID', type: 'TEXT' },
+          { key: 'brand', displayName: 'Card Brand', type: 'TEXT' },
+          { key: 'last4', displayName: 'Last 4', type: 'TEXT' },
+          { key: 'expMonth', displayName: 'Expiration Month', type: 'NUMBER' },
+          { key: 'expYear', displayName: 'Expiration Year', type: 'NUMBER' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+          { key: 'updatedAt', displayName: 'Updated At', type: 'DATETIME' },
+        ],
+        permissions: {
+          insert: 'ADMIN',
+          update: 'ADMIN',
+          remove: 'ADMIN',
+          read: 'ADMIN',
+        },
+      },
+    })
+    console.log('Created StoredPaymentMethods collection')
+  } catch (err) {
+    if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
+      console.log('StoredPaymentMethods collection already exists')
+      return
+    }
+    console.warn('StoredPaymentMethods create skipped:', err.message.slice(0, 200))
+  }
+}
+
+async function upsertSurveys() {
+  const rows = [
+    {
+      slug: 'spring-feedback',
+      title: 'Spring PTO Feedback',
+      description: 'Share what is working and what you would like the PTO to focus on next.',
+      intro: 'Your feedback helps the PTO plan programs, events, communications, and family support.',
+      fieldsJson: JSON.stringify([
+        {
+          id: 'comments',
+          type: 'textarea',
+          label: 'Your feedback',
+          required: true,
+        },
+      ]),
+      brandingJson: JSON.stringify({
+        accentColor: '#085508',
+        thankYouMessage: 'Thank you — your feedback was sent to the SHMS PTO team.',
+      }),
+      audience: 'all',
+      showInPortal: true,
+      requireLogin: false,
+      createdBy: 'SHMS PTO',
+      active: true,
+    },
+  ]
+
+  const existing = await wix('/wix-data/v2/items/query', {
+    dataCollectionId: 'Surveys',
+    query: { paging: { limit: 100 } },
+  })
+  const items = existing.dataItems ?? existing.items ?? []
+
+  for (const row of rows) {
+    const found = items.find((item) => item.data?.slug === row.slug)
+    if (found) {
+      const changed = await patchDataItem('Surveys', found, row)
+      console.log(changed ? 'Updated Survey' : 'Skip Survey (unchanged)', row.slug)
+    } else {
+      await wix('/wix-data/v2/items', {
+        dataCollectionId: 'Surveys',
+        dataItem: { data: row },
+      })
+      console.log('Inserted Survey', row.slug)
+    }
+  }
+}
+
+async function ensureStaffRolesCollection() {
+  try {
+    await wix('/wix-data/v2/collections', {
+      collection: {
+        id: 'StaffRoles',
+        displayName: 'Staff Roles',
+        fields: [
+          { key: 'email', displayName: 'Email', type: 'TEXT' },
+          { key: 'name', displayName: 'Name', type: 'TEXT' },
+          { key: 'boardTitle', displayName: 'Board Title', type: 'TEXT' },
+          { key: 'roles', displayName: 'System Roles', type: 'TEXT' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+        ],
+        permissions: {
+          insert: 'ADMIN',
+          update: 'ADMIN',
+          remove: 'ADMIN',
+          read: 'ADMIN',
+        },
+      },
+    })
+    console.log('Created StaffRoles collection')
+  } catch (err) {
+    if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
+      console.log('StaffRoles collection already exists')
+      return
+    }
+    console.warn('StaffRoles create skipped:', err.message.slice(0, 200))
+  }
+}
+
+async function ensureSocialPostsCollection() {
+  try {
+    await wix('/wix-data/v2/collections', {
+      collection: {
+        id: 'SocialPosts',
+        displayName: 'Social Posts',
+        fields: [
+          { key: 'platform', displayName: 'Platform', type: 'TEXT' },
+          { key: 'text', displayName: 'Text', type: 'TEXT' },
+          { key: 'imageUrl', displayName: 'Image URL', type: 'TEXT' },
+          { key: 'linkUrl', displayName: 'Link URL', type: 'TEXT' },
+          { key: 'createdByEmail', displayName: 'Created By Email', type: 'TEXT' },
+          { key: 'createdByName', displayName: 'Created By Name', type: 'TEXT' },
+          { key: 'status', displayName: 'Status', type: 'TEXT' },
+          { key: 'resultMessage', displayName: 'Result Message', type: 'TEXT' },
+          { key: 'createdAt', displayName: 'Created At', type: 'DATETIME' },
+        ],
+        permissions: {
+          insert: 'ADMIN',
+          update: 'ADMIN',
+          remove: 'ADMIN',
+          read: 'ADMIN',
+        },
+      },
+    })
+    console.log('Created SocialPosts collection')
+  } catch (err) {
+    if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
+      console.log('SocialPosts collection already exists')
+      return
+    }
+    console.warn('SocialPosts create skipped:', err.message.slice(0, 200))
+  }
+}
+
+async function upsertStaffRoles() {
+  const rows = [
+    {
+      email: 'gregory.robert.c@gmail.com',
+      name: 'Robert Gregory',
+      boardTitle: 'President',
+      roles: 'admin',
+      active: true,
+    },
+  ]
+  const existing = await wix('/wix-data/v2/items/query', {
+    dataCollectionId: 'StaffRoles',
+    query: { paging: { limit: 100 } },
+  })
+  const items = existing.dataItems ?? []
+  for (const row of rows) {
+    const found = items.find((item) => String(item.data?.email ?? '').toLowerCase() === row.email)
+    if (found) {
+      const changed = await patchDataItem('StaffRoles', found, row)
+      console.log(changed ? 'Updated StaffRoles' : 'Skip StaffRoles (unchanged)', row.email)
+    } else {
+      await wix('/wix-data/v2/items', {
+        dataCollectionId: 'StaffRoles',
+        dataItem: { data: row },
+      })
+      console.log('Inserted StaffRoles', row.email)
+    }
+  }
+}
+
 async function main() {
   await ensurePageContentCollection()
   await ensureParentMessagesCollection()
   await ensureProgramSessionsCollection()
+  await ensureSurveysCollection()
+  await ensureSurveyResponsesCollection()
+  await ensureStoredPaymentMethodsCollection()
+  await ensureStaffRolesCollection()
+  await ensureSocialPostsCollection()
   await upsertSiteSettings()
   await upsertPageContent()
+  await upsertSurveys()
+  await upsertStaffRoles()
   console.log('Done.')
 }
 

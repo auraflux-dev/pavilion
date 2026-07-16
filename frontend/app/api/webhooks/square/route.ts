@@ -7,8 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac } from 'crypto'
 import { getWixClient } from '@/lib/wix-client'
-import { loadGiftCard, getGiftCardByGan } from '@/lib/square'
-import { randomUUID } from 'crypto'
+import { chargePayment, loadGiftCard } from '@/lib/square'
 
 const SQUARE_WEBHOOK_SIGNATURE_KEY = process.env.SQUARE_WEBHOOK_SIGNATURE_KEY ?? ''
 const SQUARE_NOTIFICATION_URL = process.env.SQUARE_NOTIFICATION_URL ?? ''
@@ -37,7 +36,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  // Only handle gift card activity created events
   if (event.type !== 'gift_card.activity.created') {
     return NextResponse.json({ ok: true })
   }
@@ -48,52 +46,93 @@ export async function POST(req: NextRequest) {
   }
 
   const gan = activity.gift_card_gan
-  const balanceCents = activity.gift_card_balance_money?.amount ?? 0
-
+  const balanceCents = Number(activity.gift_card_balance_money?.amount ?? 0)
   if (!gan) return NextResponse.json({ ok: true })
 
   try {
     const adminClient = getWixClient()
-
-    // Find student with this GAN
     const result = await adminClient.items
       .query('Students')
       .eq('squareGiftCardGan', gan)
       .find()
-
     const student = result.items?.[0] as any
     if (!student) return NextResponse.json({ ok: true })
 
-    const autoTopOff = student.autoTopOff
-    const thresholdCents = (student.topOffThreshold ?? 10) * 100
-    const reloadCents = (student.topOffAmount ?? 20) * 100
-
-    if (!autoTopOff || balanceCents > thresholdCents) {
+    const thresholdCents = Number(student.topOffThreshold ?? 10) * 100
+    const reloadCents = Number(student.topOffAmount ?? 20) * 100
+    if (!student.autoTopOff || balanceCents > thresholdCents) {
       return NextResponse.json({ ok: true })
     }
 
-    // Balance is at or below threshold — fire auto top-off
-    console.log(`Auto top-off triggered for ${student.firstName} ${student.lastName}: balance $${balanceCents / 100}, reloading $${reloadCents / 100}`)
+    const parentEmail = String(student.parentEmail ?? '').trim().toLowerCase()
+    const methods = await adminClient.items
+      .query('StoredPaymentMethods')
+      .eq('parentEmail', parentEmail)
+      .eq('active', true)
+      .find()
+    const method = methods.items?.[0] as any
+    if (!method?.squareCardId || !method?.squareCustomerId) {
+      await adminClient.items.update('Students', {
+        ...student,
+        autoTopOff: false,
+      })
+      await adminClient.items.insert('Payments', {
+        studentId: student._id,
+        programName: 'Auto Top-Off — Store Card',
+        amount: reloadCents / 100,
+        status: 'Disabled — No Payment Method',
+        paymentDate: new Date().toISOString(),
+        paymentMethod: 'Auto Top-Off',
+        transactionId: event.event_id ?? activity.id ?? '',
+        source: 'square_auto_topoff_no_payment_method',
+      })
+      return NextResponse.json({ ok: true, disabled: true })
+    }
 
-    const idempotencyKey = `topoff-${student._id}-${randomUUID()}`
-    await loadGiftCard(gan, reloadCents, idempotencyKey)
-
-    // Log the auto top-off in Wix for treasurer records
-    await adminClient.items.insert('Payments', {
-      studentId: student._id,
-      programName: 'Auto Top-Off — Store Card',
-      amount: reloadCents / 100,
-      status: 'Paid',
-      paymentDate: new Date().toISOString(),
-      paymentMethod: 'Auto Top-Off',
-      transactionId: idempotencyKey,
-      source: 'square_auto_topoff',
+    const eventKey = String(event.event_id ?? activity.id ?? `${student._id}-${activity.created_at}`)
+      .replace(/[^a-zA-Z0-9_-]/g, '')
+      .slice(-30)
+    const paymentKey = `topoff-pay-${eventKey}`.slice(0, 45)
+    const payment = await chargePayment({
+      sourceId: method.squareCardId,
+      amountCents: reloadCents,
+      idempotencyKey: paymentKey,
+      customerId: method.squareCustomerId,
+      referenceId: `topoff:${student._id}`,
+      buyerEmailAddress: parentEmail,
+      note: `SHMS auto top-off for ${student.firstName ?? ''} ${student.lastName ?? ''}`.trim(),
     })
 
-    console.log(`Auto top-off complete for ${student.firstName} ${student.lastName}`)
+    const loadKey = `topoff-load-${eventKey}`.slice(0, 45)
+    try {
+      await loadGiftCard(gan, reloadCents, loadKey)
+      await adminClient.items.insert('Payments', {
+        studentId: student._id,
+        programName: 'Auto Top-Off — Store Card',
+        amount: reloadCents / 100,
+        status: 'Paid',
+        paymentDate: new Date().toISOString(),
+        paymentMethod: `${method.brand ?? 'Card'} •••• ${method.last4 ?? ''}`,
+        transactionId: payment.id ?? paymentKey,
+        source: 'square_auto_topoff',
+      })
+      console.log(`Auto top-off complete for ${student.firstName} ${student.lastName}`)
+    } catch (loadError) {
+      await adminClient.items.insert('Payments', {
+        studentId: student._id,
+        programName: 'Auto Top-Off — Store Card',
+        amount: reloadCents / 100,
+        status: 'Needs Reconciliation',
+        paymentDate: new Date().toISOString(),
+        paymentMethod: `${method.brand ?? 'Card'} •••• ${method.last4 ?? ''}`,
+        transactionId: payment.id ?? paymentKey,
+        source: 'square_auto_topoff_load_failed',
+      })
+      console.error('Auto top-off payment completed but gift card load failed:', loadError)
+    }
   } catch (err) {
     console.error('Square webhook auto top-off error:', err)
-    // Return 200 so Square doesn't retry — we log the error
+    return NextResponse.json({ error: 'Auto top-off failed' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })
