@@ -16,6 +16,7 @@ type StudentRow = {
   lastName?: string
   parentEmail?: string
   squareGiftCardGan?: string
+  archived?: boolean
 }
 
 type StoredMethod = {
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     const client = getWixClient()
     const student = (await client.items.get('Students', studentId)) as StudentRow
-    if (!student || student.parentEmail?.trim().toLowerCase() !== session.email) {
+    if (!student || student.archived === true || student.parentEmail?.trim().toLowerCase() !== session.email) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
     if (!student.squareGiftCardGan) {

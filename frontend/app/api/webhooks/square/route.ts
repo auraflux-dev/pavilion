@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       .eq('squareGiftCardGan', gan)
       .find()
     const student = result.items?.[0] as any
-    if (!student) return NextResponse.json({ ok: true })
+    if (!student || student.archived === true) return NextResponse.json({ ok: true })
 
     const thresholdCents = Number(student.topOffThreshold ?? 10) * 100
     const reloadCents = Number(student.topOffAmount ?? 20) * 100

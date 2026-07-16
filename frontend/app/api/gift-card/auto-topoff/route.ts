@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
   try {
     const adminClient = getWixClient()
     const student = await adminClient.items.get('Students', studentId) as any
-    if (!student || student.parentEmail !== email) {
+    if (!student || student.archived === true || student.parentEmail !== email) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
     const methods = await adminClient.items
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
     const adminClient = getWixClient()
     const student = await adminClient.items.get('Students', studentId) as any
-    if (!student || student.parentEmail !== email) {
+    if (!student || student.archived === true || student.parentEmail !== email) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 

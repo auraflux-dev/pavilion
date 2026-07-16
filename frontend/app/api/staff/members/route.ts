@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
       string,
       {
         parentEmail: string
-        students: { id: string; firstName: string; lastName: string; grade: string; membershipTier: string }[]
+        students: { id: string; firstName: string; lastName: string; grade: string; membershipTier: string; archived: boolean }[]
       }
     >()
 
@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
         lastName?: string
         grade?: string
         membershipTier?: string
+        archived?: boolean
       }
       const parentEmail = String(s.parentEmail ?? '').trim().toLowerCase()
       if (!parentEmail) continue
@@ -44,6 +45,7 @@ export async function GET(req: NextRequest) {
         lastName: s.lastName ?? '',
         grade: s.grade ?? '',
         membershipTier: s.membershipTier ?? 'free',
+        archived: s.archived === true,
       })
       byEmail.set(parentEmail, entry)
     }

@@ -40,6 +40,9 @@ Covers every gap from the portal / board-roles / social / payments session.
 | A.4 | Act-as banner visible; Exit returns to admin's own portal data | |
 | A.5 | Act-as does not grant staff APIs as the parent (staff session remains admin) | |
 | A.6 | Non-admin cannot set act-as cookie | |
+| A.7 | Admin archives a student; student disappears from parent portal but remains searchable as Archived | |
+| A.8 | Archive disables auto top-off and blocks reload/balance/settings APIs | |
+| A.9 | Admin restores a student; student returns to parent portal | |
 
 ## TP-R — Admin staff access
 

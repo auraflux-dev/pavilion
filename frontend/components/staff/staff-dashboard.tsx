@@ -24,7 +24,7 @@ type StaffMe = {
 
 type MemberHit = {
   parentEmail: string
-  students: { id: string; firstName: string; lastName: string; grade: string; membershipTier: string }[]
+  students: { id: string; firstName: string; lastName: string; grade: string; membershipTier: string; archived: boolean }[]
 }
 
 export function StaffDashboard() {
@@ -97,6 +97,29 @@ export function StaffDashboard() {
       return
     }
     window.location.href = '/member-portal'
+  }
+
+  async function setStudentArchived(studentId: string, archived: boolean) {
+    if (archived && !window.confirm('Archive this student? They will be hidden from the parent portal, but all history will be preserved.')) return
+    setActAsStatus('')
+    try {
+      const response = await fetch(`/api/staff/students/${studentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ archived }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error ?? 'Could not update student')
+      setMembers((current) => current.map((member) => ({
+        ...member,
+        students: member.students.map((student) =>
+          student.id === studentId ? { ...student, archived } : student,
+        ),
+      })))
+      setActAsStatus(archived ? 'Student archived; history preserved.' : 'Student restored to the parent portal.')
+    } catch (err) {
+      setActAsStatus(err instanceof Error ? err.message : 'Could not update student')
+    }
   }
 
   async function publish(saveOnly: boolean) {
@@ -227,9 +250,23 @@ export function StaffDashboard() {
               <div key={m.parentEmail} className="flex items-start justify-between gap-3 border-t border-[#F0EBE3] pt-2">
                 <div>
                   <p className="text-sm font-semibold">{m.parentEmail}</p>
-                  <p className="text-xs text-[#5A6070]">
-                    {m.students.map((s) => `${s.firstName} ${s.lastName} (G${s.grade})`).join(' · ')}
-                  </p>
+                  <div className="mt-1 space-y-1">
+                    {m.students.map((student) => (
+                      <div key={student.id} className="flex flex-wrap items-center gap-2 text-xs text-[#5A6070]">
+                        <span className={student.archived ? 'line-through opacity-60' : ''}>
+                          {student.firstName} {student.lastName} (G{student.grade})
+                          {student.archived ? ' · Archived' : ''}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setStudentArchived(student.id, !student.archived)}
+                          className="font-bold underline text-[#085508]"
+                        >
+                          {student.archived ? 'Restore' : 'Archive'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <button
                   type="button"

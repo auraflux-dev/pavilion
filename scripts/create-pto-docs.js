@@ -864,6 +864,7 @@ const DOCS = [
   },
   {
     folder: 'wix',
+    update: true,
     title: '17 - How to Manage Students, Enrollments, and Payments',
     content: [
       { type: 'title', text: 'How to Manage Students, Enrollments, and Payments' },
@@ -873,6 +874,11 @@ const DOCS = [
       { type: 'body',  text: 'Content Manager → Students' },
       { type: 'body',  text: 'Key fields: firstName, lastName, grade, parentEmail (must match the parent\'s login email), membershipTier, storeCardBalance' },
       { type: 'body',  text: 'parentEmail is how the portal finds "my kids." Typos = empty student list.' },
+      { type: 'h1',   text: 'Archive or restore a student (admin only)' },
+      { type: 'body',  text: '1. Sign in with an admin @shmspto.org account → Staff → Admin · Member lookup & act-as.' },
+      { type: 'body',  text: '2. Search by parent email or student name.' },
+      { type: 'body',  text: '3. Select Archive beside the student and confirm. The student disappears from the parent portal and auto top-off is disabled, but payments, enrollments, and history remain.' },
+      { type: 'body',  text: '4. To reverse it, search again and select Restore.' },
       { type: 'h1',   text: 'Enrollments' },
       { type: 'body',  text: 'Content Manager → Enrollments' },
       { type: 'body',  text: 'Links a student to a program (name/status/amount). Drives calendar placeholders and purchase history.' },
@@ -882,7 +888,7 @@ const DOCS = [
       { type: 'h1',   text: 'Memberships' },
       { type: 'body',  text: 'Paid Ruby/Supreme usually sync from Wix orders (webhook/cron). If a paid parent still shows as free, check Students.membershipTier and Memberships for that email, then ask Rob if sync failed.' },
       { type: 'h1',   text: 'Do not' },
-      { type: 'body',  text: 'Delete live student rows casually — recreate carefully with the same parentEmail if needed.' },
+      { type: 'body',  text: 'Do not delete live student rows in Wix. Use the Staff workspace Archive action so historical records remain connected.' },
     ],
   },
   {

@@ -7,6 +7,7 @@ const checks = [
   { name: 'member portal requires login', path: '/member-portal', expected: 307, redirectIncludes: '/auth/login' },
   { name: 'anonymous auth API rejected', path: '/api/auth/me', expected: 401 },
   { name: 'anonymous staff API rejected', path: '/api/staff/me', expected: 401 },
+  { name: 'student archive requires admin', path: '/api/staff/students/not-a-student', method: 'PATCH', expected: 403 },
   { name: 'Wix webhook rejects missing token', path: '/api/webhooks/wix-orders', method: 'POST', expected: 401 },
   { name: 'CheddarUp webhook rejects missing token', path: '/api/webhooks/cheddarup', method: 'POST', expected: 401 },
   { name: 'Square webhook rejects missing signature', path: '/api/webhooks/square', method: 'POST', expected: 401 },

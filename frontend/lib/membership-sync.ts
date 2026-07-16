@@ -54,7 +54,9 @@ export async function applyPaidMembership(opts: {
     `${new Date().getFullYear() + (new Date().getMonth() >= 6 ? 1 : 0)}-06-30T23:59:59.000Z`
 
   const students = await client.items.query('Students').eq('parentEmail', email).find()
-  const items = students.items ?? []
+  const items = (students.items ?? []).filter(
+    (student) => (student as { archived?: boolean }).archived !== true,
+  )
 
   let targets = items
   if (opts.studentId) {

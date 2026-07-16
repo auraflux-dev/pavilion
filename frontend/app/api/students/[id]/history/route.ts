@@ -25,7 +25,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     // Verify student belongs to this parent
     const studentRes = await adminClient.items.get('Students', id)
     const student = studentRes as any
-    if (!student || student.parentEmail !== email) {
+    if (!student || student.archived === true || student.parentEmail !== email) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 

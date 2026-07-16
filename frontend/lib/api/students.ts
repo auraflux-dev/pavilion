@@ -25,5 +25,7 @@ export async function getStudentsByParentEmail(
     .find();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.items.map((item: any) => item as StudentRecord);
+  return result.items
+    .filter((item: any) => item.archived !== true)
+    .map((item: any) => item as StudentRecord);
 }

@@ -94,7 +94,9 @@ export async function GET(req: NextRequest) {
         .query('Students')
         .eq('parentEmail', email)
         .find()
-      students = (studentsResult.items ?? []).map((item) => {
+      students = (studentsResult.items ?? [])
+        .filter((item) => (item as { archived?: boolean }).archived !== true)
+        .map((item) => {
         const s = item as {
           _id?: string
           firstName?: string

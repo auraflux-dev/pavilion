@@ -31,16 +31,18 @@ export async function GET(req: NextRequest) {
       .eq('parentEmail', email)
       .find()
 
-    const students = (result.items ?? []).map((item: any) => ({
-      id: item._id,
-      firstName: item.firstName ?? '',
-      lastName: item.lastName ?? '',
-      grade: item.grade ?? '',
-      membershipTier: item.membershipTier ?? 'free',
-      membershipStatus: item.membershipStatus ?? 'active',
-      discountCode: item.discountCode ?? null,
-      storeCardBalance: item.storeCardBalance ?? 0,
-    }))
+    const students = (result.items ?? [])
+      .filter((item: any) => item.archived !== true)
+      .map((item: any) => ({
+        id: item._id,
+        firstName: item.firstName ?? '',
+        lastName: item.lastName ?? '',
+        grade: item.grade ?? '',
+        membershipTier: item.membershipTier ?? 'free',
+        membershipStatus: item.membershipStatus ?? 'active',
+        discountCode: item.discountCode ?? null,
+        storeCardBalance: item.storeCardBalance ?? 0,
+      }))
 
     return NextResponse.json({
       students,

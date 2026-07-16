@@ -733,6 +733,25 @@ async function ensureStaffRolesCollection() {
   }
 }
 
+async function ensureStudentArchiveFields() {
+  const collection = await wix('/wix-data/v2/collections/Students', undefined, 'GET')
+  const existing = new Set((collection.collection?.fields ?? []).map((field) => field.key))
+  const fields = [
+    { key: 'archived', displayName: 'Archived', type: 'BOOLEAN' },
+    { key: 'archivedAt', displayName: 'Archived At', type: 'DATETIME' },
+    { key: 'archivedBy', displayName: 'Archived By', type: 'TEXT' },
+  ]
+
+  for (const field of fields) {
+    if (existing.has(field.key)) continue
+    await wix('/wix-data/v2/collections/create-field', {
+      dataCollectionId: 'Students',
+      field,
+    })
+    console.log('Created Students field', field.key)
+  }
+}
+
 async function ensureSocialPostsCollection() {
   try {
     await wix('/wix-data/v2/collections', {
@@ -818,6 +837,7 @@ async function main() {
   await ensureSurveyResponsesCollection()
   await ensureStoredPaymentMethodsCollection()
   await ensureStaffRolesCollection()
+  await ensureStudentArchiveFields()
   await ensureSocialPostsCollection()
   await upsertSiteSettings()
   await upsertPageContent()

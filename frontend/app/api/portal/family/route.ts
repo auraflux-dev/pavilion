@@ -68,7 +68,9 @@ export async function GET(req: NextRequest) {
       .catch(() => ({ items: [] }))
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const students = (studentsRes.items ?? []).map((s: any) => ({
+    const students = (studentsRes.items ?? [])
+      .filter((s: any) => s.archived !== true)
+      .map((s: any) => ({
       id: s._id as string,
       firstName: String(s.firstName ?? ''),
       lastName: String(s.lastName ?? ''),

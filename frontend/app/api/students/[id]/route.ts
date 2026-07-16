@@ -37,7 +37,7 @@ export async function PATCH(
 
     const adminClient = getWixClient()
     const student = (await adminClient.items.get('Students', id)) as StudentRow
-    if (!student || student.parentEmail?.toLowerCase() !== session.email) {
+    if (!student || (student as StudentRow & { archived?: boolean }).archived === true || student.parentEmail?.toLowerCase() !== session.email) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 
