@@ -8,6 +8,7 @@
   "scripts": {
     "postinstall": "node -e \"if (process.env.VERCEL || process.env.CI) { console.log('skip wix sync-types on CI/Vercel'); process.exit(0) } require('child_process').execSync('wix sync-types', {stdio:'inherit'})\"",
     "sync-types": "wix sync-types",
+    "vercel-build": "npm run build --prefix frontend",
     "dev": "wix dev",
     "lint": "eslint ."
   }
