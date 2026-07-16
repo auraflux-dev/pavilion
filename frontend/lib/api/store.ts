@@ -1,7 +1,9 @@
 /**
  * Fetches products from Wix Stores Catalog V3 (not CMS StoreItems).
  * Products live at: Wix Dashboard → Catalog → Products
+ * Which IDs appear on /store and /spirit-wear: SiteSettings storeProductIds / spiritWearProductIds
  */
+import { getCatalogConfig } from '@/lib/api/catalog-config'
 
 export interface StoreItem {
   _id: string;
@@ -23,25 +25,6 @@ export interface SpiritItem {
   inStock: boolean;
   slug: string;
 }
-
-/**
- * IDs of the 12 SHMS school store products created in Wix Stores Catalog V3.
- * Filters out Wix demo products that ship pre-loaded in new accounts.
- */
-const SHMS_PRODUCT_IDS = new Set([
-  "90ae23f7-51f4-438d-869c-1fbb28afd381", // Airheads Chewing Gum
-  "96ca63ab-2535-4f91-8ad1-28a5d7d7d7d0", // Nerds Gummy Clusters
-  "ad137b27-cfa1-45ff-b506-c1021bfad12f", // Hubba Bubba Bubble Gum Tape
-  "a3e4a887-ad91-42b2-843d-653a11712544", // Life Savers Swirl Lollipops
-  "530bfb7e-370e-4174-8e2f-4463b5f34642", // Orion Choco Mont Mushroom Biscuits
-  "53d1d89c-74e3-4f41-9988-5594ce2d590b", // Pop Rocks
-  "fac09820-055c-4202-81ac-545639b8e24f", // M&Ms Minis Tubes
-  "03be5162-4928-4c39-b707-6e2de07921e0", // Airheads Xtremes Belts
-  "62b109c8-7b96-4f0d-b09d-fb8d93ff8f9d", // Jolly Rancher Lollipops
-  "fd0bcb5b-6d08-4f0e-bb7c-27bfdc023ae4", // Sour Patch Kids Watermelon
-  "d9ed5b01-324d-4136-809d-21a3211b9d89", // Charms Blow Pops Mini
-  "9e7d4b13-4437-4c51-b63d-4942d18edf64", // Takis Variety Pack (1oz)
-]);
 
 /** Convert a Wix media item id to a usable static URL */
 function wixMediaIdToUrl(mediaId: unknown): string | undefined {
@@ -149,9 +132,9 @@ export async function getStoreItems(): Promise<StoreItem[]> {
     if (!res.ok) return [];
     const data = (await res.json()) as { products?: Record<string, unknown>[] };
     const all = (data.products ?? []).map(mapProduct);
-    // Keep only the 12 SHMS school store products we created (by catalog ID).
-    // This excludes Wix demo products that come pre-loaded in new accounts.
-    return all.filter((p) => SHMS_PRODUCT_IDS.has(p._id));
+    const { storeProductIds } = await getCatalogConfig();
+    // SiteSettings storeProductIds — excludes Wix demo catalog junk.
+    return all.filter((p) => storeProductIds.has(p._id));
   } catch {
     return [];
   }
@@ -166,16 +149,6 @@ export async function getFeaturedItems(): Promise<StoreItem[]> {
   const all = await getStoreItems();
   return all.filter((i) => i.featured);
 }
-
-const SPIRIT_PRODUCT_IDS = new Set([
-  "82ee7b02-5b3e-4383-8cd8-fcf089b45370", // Stingrays Yard Sign
-  "1c0e1c1c-23f8-4095-8e4d-a9c467e6fef8", // Stingrays Hat
-  "d0bed142-0410-4442-a8e9-f1a5232862ef", // Stingrays Water Bottle
-  "d5730ad6-8d4a-4757-93fa-05aa3ff1e244", // Stingrays Drawstring Bag
-  "e9fbcab5-ae25-418e-a4ac-81889d93acc7", // Stingrays Hoodie
-  "f3eedab0-bfd5-4f30-ad8f-7586b783b78f", // Stingrays Long Sleeve Shirt
-  "791e1007-b926-4416-8a90-24dd641d0887", // Stingrays Spirit T-Shirt
-]);
 
 export async function getSpiritWearItems(): Promise<SpiritItem[]> {
   try {
@@ -199,8 +172,9 @@ export async function getSpiritWearItems(): Promise<SpiritItem[]> {
 
     if (!res.ok) return [];
     const data = (await res.json()) as { products?: Record<string, unknown>[] };
+    const { spiritWearProductIds } = await getCatalogConfig();
     return (data.products ?? [])
-      .filter((p) => SPIRIT_PRODUCT_IDS.has(p.id as string))
+      .filter((p) => spiritWearProductIds.has(p.id as string))
       .map((raw) => {
         let price = 0;
         let inStock = false;

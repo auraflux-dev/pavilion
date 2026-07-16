@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 
-const OPPORTUNITIES = [
+/** Used only when VolunteerOpportunities CMS returns no active rows */
+const FALLBACK_OPPORTUNITIES = [
   'School Store Window',
   'Event Setup / Breakdown',
   'Enrichment Program Chaperone',
@@ -15,7 +16,17 @@ const OPPORTUNITIES = [
   'General Volunteering',
 ]
 
-export function VolunteerForm() {
+type VolunteerFormProps = {
+  /** Titles from Wix VolunteerOpportunities (active, sorted) */
+  opportunities?: string[]
+}
+
+export function VolunteerForm({ opportunities }: VolunteerFormProps) {
+  const options =
+    opportunities && opportunities.length > 0
+      ? opportunities
+      : FALLBACK_OPPORTUNITIES
+
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [form, setForm] = useState({
     firstName: '',
@@ -151,7 +162,7 @@ export function VolunteerForm() {
           className="w-full px-3.5 py-2.5 rounded-lg border border-[#E8E4DC] text-sm focus:outline-none focus:ring-2 focus:ring-[#085508]/20 focus:border-[#085508] transition-colors bg-white"
         >
           <option value="">Select an opportunity…</option>
-          {OPPORTUNITIES.map((o) => (
+          {options.map((o) => (
             <option key={o} value={o}>{o}</option>
           ))}
         </select>

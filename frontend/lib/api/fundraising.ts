@@ -4,11 +4,13 @@
  * Strategy:
  *  1. Fetch all PAID orders for the current school year (Aug 1 → Jul 31).
  *  2. Walk every line item and match its catalogReference.catalogItemId
- *     against the product-ID sets for each initiative.
- *  3. Sum totals per initiative and return alongside the hardcoded goals.
+ *     against SiteSettings product-ID lists (storeProductIds / spiritWearProductIds).
+ *  3. Sum totals per initiative and return alongside CMS goals.
  *
- * Volunteer hours remain manual — stored in VOLUNTEER_HOURS below.
+ * Volunteer hours remain manual — SiteSettings volunteerHoursRaised/Goal.
  */
+
+import { getCatalogConfig } from '@/lib/api/catalog-config'
 
 // ─── School-year window ───────────────────────────────────────────────────────
 const SCHOOL_YEAR_START = '2025-08-01T00:00:00.000Z'
@@ -28,47 +30,15 @@ export const GOALS_DEFAULT = {
   other:       1000,
 }
 
-// ─── Product ID → initiative mapping ─────────────────────────────────────────
-// Add product IDs here as you create them in Wix Stores.
-// Store / candy items
-const STORE_IDS = new Set([
-  '90ae23f7-51f4-438d-869c-1fbb28afd381',
-  '96ca63ab-2535-4f91-8ad1-28a5d7d7d7d0',
-  'ad137b27-cfa1-45ff-b506-c1021bfad12f',
-  'a3e4a887-ad91-42b2-843d-653a11712544',
-  '530bfb7e-370e-4174-8e2f-4463b5f34642',
-  '53d1d89c-74e3-4f41-9988-5594ce2d590b',
-  'fac09820-055c-4202-81ac-545639b8e24f',
-  '03be5162-4928-4c39-b707-6e2de07921e0',
-  '62b109c8-7b96-4f0d-b09d-fb8d93ff8f9d',
-  'fd0bcb5b-6d08-4f0e-bb7c-27bfdc023ae4',
-  'd9ed5b01-324d-4136-809d-21a3211b9d89',
-  '9e7d4b13-4437-4c51-b63d-4942d18edf64',
-])
-
-// Spirit wear items
-const SPIRIT_IDS = new Set([
-  '82ee7b02-5b3e-4383-8cd8-fcf089b45370',
-  '1c0e1c1c-23f8-4095-8e4d-a9c467e6fef8',
-  'd0bed142-0410-4442-a8e9-f1a5232862ef',
-  'd5730ad6-8d4a-4757-93fa-05aa3ff1e244',
-  'e9fbcab5-ae25-418e-a4ac-81889d93acc7',
-  'f3eedab0-bfd5-4f30-ad8f-7586b783b78f',
-  '791e1007-b926-4416-8a90-24dd641d0887',
-])
-
-// Membership products (current + earlier duplicate catalog entries)
-const MEMBERSHIP_IDS = new Set<string>([
-  '89ad5f10-a4bc-4a31-af4a-22b6add4cad4', // PTO Membership — Ruby
-  '58f334f3-32d7-4d38-9639-7e587a38a26f', // PTO Membership — Supreme
-  '7dee12b4-ecaf-4070-9682-b01b0a9eaf8d', // Ruby (earlier slug)
-  '5f3c7265-7433-4213-b8e0-75a7fab2a06c', // Supreme (earlier slug)
-])
-
-// Event tickets — not yet created as Wix store products
+// Event tickets — not yet created as Wix store products (can move to SiteSettings later)
 const DANCE_NIGHT_IDS = new Set<string>([])
-
 const NOVA_MATH_IDS = new Set<string>([])
+
+/** Older duplicate membership catalog entries still counted toward membership totals */
+const LEGACY_MEMBERSHIP_IDS = new Set<string>([
+  '7dee12b4-ecaf-4070-9682-b01b0a9eaf8d',
+  '5f3c7265-7433-4213-b8e0-75a7fab2a06c',
+])
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export interface InitiativeTotals {
@@ -207,9 +177,16 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
     other:      0,
   }
 
-  const [settingsData, orders] = await Promise.all([
+  const [settingsData, orders, catalog] = await Promise.all([
     fetchSiteSettingsGoals(),
     fetchAllPaidOrders(),
+    getCatalogConfig(),
+  ])
+
+  const membershipIds = new Set<string>([
+    catalog.rubyProductId,
+    catalog.supremeProductId,
+    ...Array.from(LEGACY_MEMBERSHIP_IDS),
   ])
 
   try {
@@ -218,12 +195,12 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
         const productId = item.catalogReference?.catalogItemId ?? ''
         const revenue   = lineItemRevenue(item)
 
-        if (MEMBERSHIP_IDS.has(productId))       totals.membership  += revenue
-        else if (STORE_IDS.has(productId))       totals.store       += revenue
-        else if (SPIRIT_IDS.has(productId))      totals.spiritWear  += revenue
-        else if (DANCE_NIGHT_IDS.has(productId)) totals.danceNight  += revenue
-        else if (NOVA_MATH_IDS.has(productId))   totals.novaMath    += revenue
-        else                                     totals.other       += revenue
+        if (membershipIds.has(productId))            totals.membership  += revenue
+        else if (catalog.storeProductIds.has(productId)) totals.store       += revenue
+        else if (catalog.spiritWearProductIds.has(productId)) totals.spiritWear  += revenue
+        else if (DANCE_NIGHT_IDS.has(productId))     totals.danceNight  += revenue
+        else if (NOVA_MATH_IDS.has(productId))       totals.novaMath    += revenue
+        else                                         totals.other       += revenue
       }
     }
   } catch {

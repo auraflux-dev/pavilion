@@ -37,6 +37,28 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     ctaLabel: 'Join the PTO',
     ctaHref: '/membership',
   }),
+  /** Home page block below programs — Wix PageContent page = home-volunteer */
+  'home-volunteer': empty('home-volunteer', {
+    eyebrow: 'Get Involved',
+    title: 'Volunteer With Us',
+    body: 'Every hour you volunteer helps create a richer, more vibrant experience for every student at Stone Hill Middle School. Whether you can give an hour a month or a few hours a week, your time makes a real difference.',
+    bullets: [
+      'Make a direct impact on student enrichment',
+      'Connect with other SHMS families',
+      'Flexible time commitments for every schedule',
+      'Be part of school events and celebrations',
+    ],
+    ctaLabel: 'Join Today',
+    ctaHref: '/volunteer',
+    sectionTitle:
+      'Volunteering with SHMS PTO has been one of the most rewarding experiences of our family\'s school year.',
+    sectionBody: '— SHMS Parent, 2025–2026',
+  }),
+  /** Home page community strip — Wix PageContent page = home-community */
+  'home-community': empty('home-community', {
+    title: 'Building community together — Go Stingrays!',
+    body: '',
+  }),
   membership: empty('membership', {
     eyebrow: 'Join the PTO',
     title: 'PTO Membership',

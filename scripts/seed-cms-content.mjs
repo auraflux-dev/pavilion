@@ -73,6 +73,38 @@ const SITE_SETTINGS = {
   storeCardSlug: 'pto-store-card',
   membershipRubySlug: 'pto-membership-ruby-1',
   membershipSupremeSlug: 'pto-membership-supreme-1',
+  /** Comma-separated Catalog product UUIDs for /store (+ fundraising store totals) */
+  storeProductIds: [
+    '90ae23f7-51f4-438d-869c-1fbb28afd381',
+    '96ca63ab-2535-4f91-8ad1-28a5d7d7d7d0',
+    'ad137b27-cfa1-45ff-b506-c1021bfad12f',
+    'a3e4a887-ad91-42b2-843d-653a11712544',
+    '530bfb7e-370e-4174-8e2f-4463b5f34642',
+    '53d1d89c-74e3-4f41-9988-5594ce2d590b',
+    'fac09820-055c-4202-81ac-545639b8e24f',
+    '03be5162-4928-4c39-b707-6e2de07921e0',
+    '62b109c8-7b96-4f0d-b09d-fb8d93ff8f9d',
+    'fd0bcb5b-6d08-4f0e-bb7c-27bfdc023ae4',
+    'd9ed5b01-324d-4136-809d-21a3211b9d89',
+    '9e7d4b13-4437-4c51-b63d-4942d18edf64',
+  ].join(','),
+  /** Comma-separated Catalog product UUIDs for /spirit-wear (+ fundraising spirit totals) */
+  spiritWearProductIds: [
+    '82ee7b02-5b3e-4383-8cd8-fcf089b45370',
+    '1c0e1c1c-23f8-4095-8e4d-a9c467e6fef8',
+    'd0bed142-0410-4442-a8e9-f1a5232862ef',
+    'd5730ad6-8d4a-4757-93fa-05aa3ff1e244',
+    'e9fbcab5-ae25-418e-a4ac-81889d93acc7',
+    'f3eedab0-bfd5-4f30-ad8f-7586b783b78f',
+    '791e1007-b926-4416-8a90-24dd641d0887',
+  ].join(','),
+  homeVolunteerImageUrl: '/placeholder.svg?height=450&width=600',
+  homeVolunteerImageAlt:
+    'SHMS students and parent volunteers working together at a school event',
+  homeVolunteerSecondaryCta: 'Learn More',
+  homeCommunityImageUrl:
+    'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1440&h=400&fit=crop&crop=center',
+  homeCommunityImageAlt: 'Stone Hill Middle School PTO community',
   portalGrades: '6,7,8',
   contactEmailGeneral: 'info@shmspto.org',
   contactEmailTreasurer: 'treasurer@shmspto.org',
@@ -88,6 +120,29 @@ const PAGE_ROWS = [
     body: 'An active volunteer organization committed to enriching the academic and social experience for all SHMS students and families. Go Stingrays!',
     ctaLabel: 'Join the PTO',
     ctaHref: '/membership',
+    active: true,
+  },
+  {
+    page: 'home-volunteer',
+    eyebrow: 'Get Involved',
+    title: 'Volunteer With Us',
+    body: 'Every hour you volunteer helps create a richer, more vibrant experience for every student at Stone Hill Middle School. Whether you can give an hour a month or a few hours a week, your time makes a real difference.',
+    bullets: [
+      'Make a direct impact on student enrichment',
+      'Connect with other SHMS families',
+      'Flexible time commitments for every schedule',
+      'Be part of school events and celebrations',
+    ].join('\n'),
+    ctaLabel: 'Join Today',
+    ctaHref: '/volunteer',
+    sectionTitle:
+      'Volunteering with SHMS PTO has been one of the most rewarding experiences of our family\'s school year.',
+    sectionBody: '— SHMS Parent, 2025–2026',
+    active: true,
+  },
+  {
+    page: 'home-community',
+    title: 'Building community together — Go Stingrays!',
     active: true,
   },
   {
@@ -411,14 +466,23 @@ async function upsertPageContent() {
   for (const row of PAGE_ROWS) {
     const found = byPage.get(row.page)
     if (found) {
-      await wix(`/wix-data/v2/items/${found.id}`, {
-        dataCollectionId: 'PageContent',
-        dataItem: {
-          id: found.id,
-          data: { ...(found.data ?? {}), ...row },
-        },
-      }, 'PATCH')
-      console.log('Updated PageContent', row.page)
+      try {
+        await wix(`/wix-data/v2/items/${found.id}`, {
+          dataCollectionId: 'PageContent',
+          dataItem: {
+            id: found.id,
+            data: { ...(found.data ?? {}), ...row },
+          },
+        }, 'PATCH')
+        console.log('Updated PageContent', row.page)
+      } catch (err) {
+        const msg = err?.data?.message ?? err?.message ?? ''
+        if (String(msg).includes('fieldModifications') || String(msg).includes('Validation failed')) {
+          console.log('Skip PageContent (unchanged)', row.page)
+          continue
+        }
+        throw err
+      }
     } else {
       await wix('/wix-data/v2/items', {
         dataCollectionId: 'PageContent',

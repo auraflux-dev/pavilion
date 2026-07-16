@@ -19,6 +19,16 @@ function parseAmounts(raw: string, fallback: string): number[] {
     : [10, 20, 25]
 }
 
+function parseIdList(raw: string, fallback: string): Set<string> {
+  const source = raw.trim() || fallback
+  return new Set(
+    source
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+  )
+}
+
 export async function getCatalogConfig(): Promise<CatalogConfig> {
   const settings = await getSiteSettings()
   const d = CATALOG_DEFAULTS
@@ -60,6 +70,14 @@ export async function getCatalogConfig(): Promise<CatalogConfig> {
     supremeSlug: settings.get('membershipSupremeSlug', d.membershipSupremeSlug),
     storeCardAmounts: amounts,
     storeCardVariantByAmount: variantByAmount,
+    storeProductIds: parseIdList(
+      settings.get('storeProductIds', d.storeProductIds),
+      d.storeProductIds
+    ),
+    spiritWearProductIds: parseIdList(
+      settings.get('spiritWearProductIds', d.spiritWearProductIds),
+      d.spiritWearProductIds
+    ),
   }
 }
 
