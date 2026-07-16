@@ -272,7 +272,7 @@ Follow the full procedure in [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md). Summary:
 | Demo Wix events filtered from API | `[x]` (still delete in Wix UI) |
 | Headless checkout `/api/checkout/start` returns URLs (membership / store / spirit) | `[x]` |
 | Store-card checkout `$10/$20/$25` (`kind: store-card`) | `[x]` (2026-07-16) |
-| WhatsApp invite URLs absent from anon HTML (SSR) | `[~]` fixed in code 2026-07-16 — redeploy then recheck |
+| WhatsApp invite URLs absent from anon HTML (SSR) | `[x]` (2026-07-16; gate via `isMemberRequest`) |
 | PageContent `portal` / `portal-hub` / `member-portal` rows present | `[x]` |
 | ProgramSessions + ParentMessages collections have data | `[x]` |
 | Square prod env | `[!]` need tokens |
