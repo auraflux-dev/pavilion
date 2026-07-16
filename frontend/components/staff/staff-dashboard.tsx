@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { SurveyResultsPanel } from '@/components/staff/survey-results-panel'
 import { StaffRoleManager } from '@/components/staff/staff-role-manager'
+import { SocialComposePanel } from '@/components/staff/social-compose-panel'
 
 type StaffHome = {
   role: string
@@ -35,16 +36,6 @@ export function StaffDashboard() {
   const [lookupBusy, setLookupBusy] = useState(false)
   const [actAsStatus, setActAsStatus] = useState('')
 
-  const [platform, setPlatform] = useState<'facebook' | 'instagram'>('facebook')
-  const [postText, setPostText] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [linkUrl, setLinkUrl] = useState('')
-  const [socialMsg, setSocialMsg] = useState('')
-  const [socialBusy, setSocialBusy] = useState(false)
-  const [publishEnabled, setPublishEnabled] = useState(false)
-  const [facebookReady, setFacebookReady] = useState(false)
-  const [instagramAvailable, setInstagramAvailable] = useState(false)
-
   const [msgSubject, setMsgSubject] = useState('')
   const [msgBody, setMsgBody] = useState('')
   const [msgEmail, setMsgEmail] = useState('')
@@ -62,18 +53,6 @@ export function StaffDashboard() {
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Not authorized'))
   }, [])
-
-  useEffect(() => {
-    if (!me?.roles.some((r) => r === 'marketing' || r === 'admin')) return
-    fetch('/api/staff/social')
-      .then((r) => r.json())
-      .then((d) => {
-        setPublishEnabled(Boolean(d.publishEnabled))
-        setFacebookReady(Boolean(d.facebookReady))
-        setInstagramAvailable(Boolean(d.instagramAvailable))
-      })
-      .catch(() => undefined)
-  }, [me])
 
   async function lookup() {
     setLookupBusy(true)
@@ -125,30 +104,6 @@ export function StaffDashboard() {
       setActAsStatus(archived ? 'Student archived; history preserved.' : 'Student restored to the parent portal.')
     } catch (err) {
       setActAsStatus(err instanceof Error ? err.message : 'Could not update student')
-    }
-  }
-
-  async function publish(saveOnly: boolean) {
-    setSocialBusy(true)
-    setSocialMsg('')
-    try {
-      const r = await fetch('/api/staff/social', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ platform, text: postText, imageUrl, linkUrl, saveOnly }),
-      })
-      const d = await r.json()
-      if (!r.ok) throw new Error(d.error ?? 'Publish failed')
-      if (d.ok) {
-        setSocialMsg(saveOnly ? 'Draft saved.' : 'Published.')
-        setPostText('')
-      } else {
-        setSocialMsg(d.error ?? 'Publish failed — draft saved in SocialPosts.')
-      }
-    } catch (err) {
-      setSocialMsg(err instanceof Error ? err.message : 'Publish failed')
-    } finally {
-      setSocialBusy(false)
     }
   }
 
@@ -290,83 +245,7 @@ export function StaffDashboard() {
 
       {me.isAdmin ? <StaffRoleManager /> : null}
 
-      {canMarketing ? (
-        <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
-          <h2 className="text-lg font-bold">Marketing · Facebook & Instagram</h2>
-          <p className="text-xs text-[#5A6070]">
-            Facebook publish is live through Wix Social. Instagram waits on Wix&apos;s one free social
-            account — connect it later after an upgrade or freeing a slot. You can always save drafts.
-            {facebookReady
-              ? ' · Facebook ready.'
-              : publishEnabled
-                ? ' · Facebook IDs missing in Site Settings.'
-                : ' · Live publish currently off.'}
-            {instagramAvailable ? ' · Instagram ready.' : ' · Instagram not connected.'}
-          </p>
-          <div className="flex gap-2">
-            {(['facebook', 'instagram'] as const).map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setPlatform(p)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 ${
-                  platform === p ? 'border-[#085508] bg-[#EEF6EE]' : 'border-[#E8E4DC]'
-                } ${p === 'instagram' && !instagramAvailable ? 'opacity-60' : ''}`}
-              >
-                {p === 'instagram' && !instagramAvailable ? 'instagram (later)' : p}
-              </button>
-            ))}
-          </div>
-          {platform === 'instagram' && !instagramAvailable ? (
-            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-              Instagram publish is disabled until a second Wix social slot is available. Save a draft
-              here, or post from Meta when ready.
-            </p>
-          ) : null}
-          <textarea
-            value={postText}
-            onChange={(e) => setPostText(e.target.value)}
-            rows={4}
-            placeholder="Post text"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
-          />
-          <input
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder="Image URL (optional)"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
-          />
-          <input
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            placeholder="Link URL (Facebook; Instagram use bio/story)"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
-          />
-          <div className="flex flex-wrap gap-2">
-            <Button disabled={socialBusy || !postText} onClick={() => publish(true)} variant="outline">
-              Save draft
-            </Button>
-            <Button
-              disabled={
-                socialBusy ||
-                !postText ||
-                (platform === 'instagram' && !instagramAvailable) ||
-                (platform === 'facebook' && !facebookReady)
-              }
-              onClick={() => publish(false)}
-              className="text-white"
-              style={{ backgroundColor: '#085508' }}
-            >
-              {socialBusy ? '…' : 'Publish'}
-            </Button>
-          </div>
-          {socialMsg ? <p className="text-xs text-[#5A6070]">{socialMsg}</p> : null}
-          <p className="text-xs">
-            Surveys: <Link href="/survey/spring-feedback" className="underline">open sample</Link> · manage in Wix CMS
-            Surveys
-          </p>
-        </section>
-      ) : null}
+      {canMarketing ? <SocialComposePanel enabled /> : null}
 
       {(canMarketing || me.roles.includes('secretary')) ? <SurveyResultsPanel /> : null}
 
