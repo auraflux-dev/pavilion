@@ -19,6 +19,17 @@ export const STAFF_ROLES = [
 
 export type StaffRole = (typeof STAFF_ROLES)[number]
 
+/**
+ * Staff tools require an official PTO login. Board members use their
+ * personal email for the parent portal (students, store cards) and their
+ * @shmspto.org email for /staff.
+ */
+export const STAFF_EMAIL_DOMAIN = 'shmspto.org'
+
+export function isStaffEmail(email: string): boolean {
+  return email.trim().toLowerCase().endsWith(`@${STAFF_EMAIL_DOMAIN}`)
+}
+
 export type StaffProfile = {
   email: string
   roles: StaffRole[]
@@ -43,6 +54,9 @@ function parseRoles(raw: unknown): StaffRole[] {
 export async function getStaffProfile(email: string): Promise<StaffProfile | null> {
   const normalized = email.trim().toLowerCase()
   if (!normalized) return null
+  // Staff roles are only honored on @shmspto.org logins, even if a
+  // personal email accidentally has a StaffRoles row.
+  if (!isStaffEmail(normalized)) return null
 
   try {
     const client = getWixClient()

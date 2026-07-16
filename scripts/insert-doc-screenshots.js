@@ -23,12 +23,14 @@ const SHOTS_DIR = path.join(__dirname, 'shots')
 const PLACEMENTS = [
   {
     docTitle: '08b - How to Manage the School Store Inventory v2',
+    legacy: true,
     images: [
       { file: '21-store-products.png', after: 'Wix Dashboard → Store / Catalog → Products' },
     ],
   },
   {
     docTitle: '21 - How to Show a New Store or Spirit Product',
+    legacy: true,
     images: [
       { file: '21-store-products.png', after: '1. Wix Dashboard → Store → Products → create (or open) the product → Publish' },
       { file: '21-site-settings.png', after: '3. Content Manager → Site Settings → open storeProductIds or spiritWearProductIds' },
@@ -36,14 +38,116 @@ const PLACEMENTS = [
   },
   {
     docTitle: '13 - How to Edit Page Heroes and Marketing Copy (PageContent)',
+    legacy: true,
     images: [
       { file: '13-pagecontent.png', after: 'Wix Dashboard → Content Manager → Page Content' },
     ],
   },
   {
     docTitle: '19 - How to Manage Volunteer Opportunities and Meeting Minutes',
+    legacy: true,
     images: [
       { file: '19-volunteer-opps.png', after: 'Content Manager → Volunteer Opportunities' },
+    ],
+  },
+  {
+    docTitle: '12b - How to Manage the Store Card',
+    images: [
+      {
+        file: '12b-reload-card.png',
+        after: '1. Parent signs in → Store & Purchases → Load card (or /store).',
+        caption: 'Action screenshot — choose the student, amount, and secure Square payment.',
+      },
+    ],
+  },
+  {
+    docTitle: '16 - How to Send Parent Messages (Portal Inbox)',
+    images: [
+      {
+        file: '26-instructor-messages.png',
+        after: '4. Select Send to inbox. The message appears inside the parent portal.',
+        caption: 'Action screenshot — staff message composer and audience targeting.',
+      },
+    ],
+  },
+  {
+    docTitle: '23 - How to Create and Share a Branded Survey',
+    images: [
+      {
+        file: '23-portal-survey.png',
+        after: '3. Set active = true. Set showInPortal = true to list it inside the member portal.',
+        caption: 'Action screenshot — active surveys appear inside the parent portal.',
+      },
+      {
+        file: '23-branded-survey-form.png',
+        after: 'Base link: https://shmspto.org/survey/YOUR-SLUG',
+        caption: 'Action screenshot — the branded form parents complete on the PTO site.',
+      },
+    ],
+  },
+  {
+    docTitle: '25 - How to Publish to Facebook and Instagram from Wix',
+    images: [
+      {
+        file: '26-marketing-compose-top.png',
+        after: 'Recommended board workflow: sign in to shmspto.org → Staff → Marketing · Facebook & Instagram.',
+        caption: 'Action screenshot — choose networks, compose, save a draft, or publish.',
+      },
+    ],
+  },
+  {
+    docTitle: '26 - Staff Roles & Portal Workspaces',
+    images: [
+      {
+        file: '26-role-home.png',
+        after: 'Each role home shows what that position owns and a short This Week checklist.',
+        caption: 'Action screenshot — role-specific ownership and weekly priorities.',
+      },
+      {
+        file: '26-admin-lookup.png',
+        after: 'Admin searches a parent, clicks Act as, lands in that parent portal view (read-oriented). Exit act-as returns to /staff.',
+        caption: 'Action screenshot — admin member lookup and act-as troubleshooting.',
+      },
+      {
+        file: '26-marketing-compose-top.png',
+        after: 'Choose Facebook and/or Instagram, write the post, add optional image/link URLs, then Save draft or Publish when live publishing is enabled.',
+        caption: 'Action screenshot — marketing social post workspace.',
+      },
+      {
+        file: '26-instructor-messages.png',
+        after: 'Write the subject and message, target a parent, grade, or program, then Send to inbox. Parents read it without leaving the portal.',
+        caption: 'Action screenshot — program and instructor parent messaging.',
+      },
+    ],
+  },
+  {
+    docTitle: '27 - Member Portal Parent Support Guide',
+    images: [
+      {
+        file: '14-my-account.png',
+        after: 'The My Account panel shows the signed-in email, membership summary, student count, payment explanation, and grade WhatsApp links.',
+        caption: 'Action screenshot — the parent My Account home panel.',
+      },
+      {
+        file: '14-edit-account.png',
+        after: 'To update a name or mobile phone: select Edit profile, make the change, then Save. The sign-in email is not editable here.',
+        caption: 'Action screenshot — edit the parent name or mobile phone.',
+      },
+      {
+        file: '14-edit-student.png',
+        after: 'To fix a student name or grade: open the student card, select Edit student, make the change, then Save.',
+        caption: 'Action screenshot — edit student name and grade.',
+      },
+      {
+        file: '12b-reload-card.png',
+        after: 'In Store & Purchases, select Load card, choose the student and $10 / $20 / $25, then enter payment details.',
+        caption: 'Action screenshot — reload a selected student store card.',
+      },
+      {
+        file: '23-portal-survey.png',
+        after: 'Active Surveys for you appear below the portal panels. The parent opens and submits the branded survey without leaving the PTO site.',
+        caption: 'Action screenshot — in-portal survey placement.',
+      },
     ],
   },
 ]
@@ -117,8 +221,11 @@ function paragraphEndIndexByText(doc, text) {
   return null
 }
 
-function docHasImage(doc) {
-  return Object.keys(doc.inlineObjects ?? {}).length > 0
+function documentText(doc) {
+  return (doc.body?.content ?? [])
+    .flatMap((el) => el.paragraph?.elements ?? [])
+    .map((el) => el.textRun?.content ?? '')
+    .join('')
 }
 
 async function main() {
@@ -142,23 +249,32 @@ async function main() {
     const docId = await findDoc(drive, placement.docTitle)
     if (!docId) { console.log('SKIP (not found):', placement.docTitle); continue }
     let doc = (await docs.documents.get({ documentId: docId })).data
-    if (docHasImage(doc)) { console.log('SKIP (already has images):', placement.docTitle); continue }
+    if (placement.legacy && Object.keys(doc.inlineObjects ?? {}).length > 0) {
+      console.log('SKIP (legacy images already present):', placement.docTitle)
+      continue
+    }
+    const existingText = documentText(doc)
 
     // Resolve anchor indices, insert bottom-up so earlier indices stay valid.
     const inserts = []
     for (const img of placement.images) {
+      const caption = img.caption ?? `Action screenshot — ${img.file}`
+      if (existingText.includes(caption)) {
+        console.log('  skip existing:', caption)
+        continue
+      }
       const idx = paragraphEndIndexByText(doc, img.after)
       if (idx == null) { console.log('  ! anchor not found:', img.after); continue }
       const { width, height } = pngSize(path.join(SHOTS_DIR, img.file))
       const w = 420
       const h = Math.round((height / width) * w)
-      inserts.push({ idx, uri: uriByFile[img.file], w, h })
+      inserts.push({ idx, uri: uriByFile[img.file], w, h, caption })
     }
     inserts.sort((a, b) => b.idx - a.idx)
 
     const requests = []
     for (const ins of inserts) {
-      requests.push({ insertText: { location: { index: ins.idx }, text: '\n' } })
+      requests.push({ insertText: { location: { index: ins.idx }, text: `\n${ins.caption}\n` } })
       requests.push({
         insertInlineImage: {
           location: { index: ins.idx },

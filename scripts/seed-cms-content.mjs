@@ -769,9 +769,11 @@ async function ensureSocialPostsCollection() {
 }
 
 async function upsertStaffRoles() {
+  // Policy: staff logins must be @shmspto.org. Board members use their
+  // personal email only for the parent portal (students, store cards).
   const rows = [
     {
-      email: 'gregory.robert.c@gmail.com',
+      email: 'treasurer@shmspto.org',
       name: 'Robert Gregory',
       boardTitle: 'President',
       roles: 'admin',
@@ -783,6 +785,16 @@ async function upsertStaffRoles() {
     query: { paging: { limit: 100 } },
   })
   const items = existing.dataItems ?? []
+
+  // Deactivate any active staff row that is not on the official domain.
+  for (const item of items) {
+    const email = String(item.data?.email ?? '').toLowerCase()
+    if (item.data?.active && email && !email.endsWith('@shmspto.org')) {
+      await patchDataItem('StaffRoles', item, { active: false })
+      console.log('Deactivated non-domain StaffRoles', email)
+    }
+  }
+
   for (const row of rows) {
     const found = items.find((item) => String(item.data?.email ?? '').toLowerCase() === row.email)
     if (found) {
