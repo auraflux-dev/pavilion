@@ -8,10 +8,26 @@ Staging: https://shmspto.vercel.app/staff
 | Audience | Where | Top nav |
 |----------|--------|---------|
 | **Visitor** | Public pages | Marketing CMS nav + Log in |
-| **Free / paid member** | `/member-portal` | Member shell (My portal, Upgrade/Membership, Store, Programs) — not marketing nav |
+| **Free / paid member** | `/member-portal` | Member shell (My portal, Upgrade/Membership, Store, Programs) — labeled Free or Paid |
 | **Staff** | `/staff` | Staff shell (Home, Projects, Members…) — dark green bar, workspaces as tabs |
 
 Browsing the public site while logged in still uses the marketing nav (with a Free/Paid/Visitor hint). Portal and Staff never reuse that bar.
+
+## Staff workspaces (in Staff, not Wix)
+
+| View | Roles | What |
+|------|-------|------|
+| Projects | Everyone | Year board / assign tasks |
+| Members / Staff access | Admin | Lookup, act-as, archive, roles |
+| Social | Marketing | Facebook publish |
+| Surveys | Marketing / secretary | **Create**, share, review, CSV |
+| Messages | Programs / instructor / secretary | Parent portal inbox |
+| Minutes | Secretary | Publish meeting minutes |
+| Programs | Programs / instructor | Registration toggles + sessions |
+| Payments | Treasurer | Needs Reconciliation + retry load |
+| Events | Events (+ related) | Upcoming list + link to Wix Events |
+| Store & spirit | Retail | Product ID allowlists |
+| Page copy | Marketing / secretary | PageContent heroes |
 
 ## Staff portal — start here
 
@@ -32,12 +48,9 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **25** | Marketing | Facebook publish from Staff (IG when second social slot) |
 | **12b** | Treasurer / support | Store card, auto top-off, Needs Reconciliation |
 
-## Gaps this set closes (July 17, 2026)
+## Next up
 
-- Year project board with swimlanes + person assignment (was missing; now doc 29)
-- Staff “START HERE” map of `/staff` panels (doc 30)
-- Admin archive / act-as how-to as its own guide (doc 31)
-- Index lists Staff docs separately from Tech Ops / Wix CMS guides
+Memberships — tier names, 3 tiers, pricing, and what’s included (in Staff + site).
 
 ## Publish / refresh Drive
 

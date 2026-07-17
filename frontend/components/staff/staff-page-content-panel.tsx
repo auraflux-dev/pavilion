@@ -1,0 +1,173 @@
+'use client'
+
+import { useCallback, useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
+
+type PageRow = {
+  id: string
+  page: string
+  eyebrow: string
+  title: string
+  body: string
+  sectionTitle: string
+  sectionBody: string
+  bullets: string
+  ctaLabel: string
+  ctaHref: string
+  active: boolean
+  fromDefault?: boolean
+}
+
+export function StaffPageContentPanel() {
+  const [pages, setPages] = useState<PageRow[]>([])
+  const [selected, setSelected] = useState('')
+  const [form, setForm] = useState<PageRow | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [status, setStatus] = useState('')
+
+  const load = useCallback(async () => {
+    try {
+      const r = await fetch('/api/staff/page-content')
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Load failed')
+      const list = (d.pages ?? []) as PageRow[]
+      setPages(list)
+      if (!selected && list[0]) {
+        setSelected(list[0].page)
+        setForm(list[0])
+      } else if (selected) {
+        const row = list.find((p) => p.page === selected)
+        if (row) setForm(row)
+      }
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Load failed')
+    }
+  }, [selected])
+
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  function pick(page: string) {
+    setSelected(page)
+    const row = pages.find((p) => p.page === page)
+    if (row) setForm({ ...row })
+  }
+
+  async function save() {
+    if (!form) return
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/page-content', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Save failed')
+      setStatus(`Saved ${form.page}.`)
+      await load()
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Save failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+      <div>
+        <h2 className="text-lg font-bold">Page copy</h2>
+        <p className="text-xs text-[#5A6070]">
+          Edit heroes and section copy without Wix CMS. Changes show after refresh / ~5 minutes.
+        </p>
+      </div>
+      <select
+        value={selected}
+        onChange={(e) => pick(e.target.value)}
+        className="w-full sm:max-w-md border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+      >
+        {pages.map((p) => (
+          <option key={p.page} value={p.page}>
+            {p.page}
+            {p.fromDefault ? ' (defaults)' : ''}
+          </option>
+        ))}
+      </select>
+
+      {form ? (
+        <div className="grid sm:grid-cols-2 gap-2">
+          <input
+            value={form.eyebrow}
+            onChange={(e) => setForm({ ...form, eyebrow: e.target.value })}
+            placeholder="Eyebrow"
+            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          />
+          <input
+            value={form.ctaLabel}
+            onChange={(e) => setForm({ ...form, ctaLabel: e.target.value })}
+            placeholder="CTA label"
+            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          />
+          <input
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            placeholder="Title"
+            className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          />
+          <textarea
+            value={form.body}
+            onChange={(e) => setForm({ ...form, body: e.target.value })}
+            rows={3}
+            placeholder="Body"
+            className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          />
+          <input
+            value={form.sectionTitle}
+            onChange={(e) => setForm({ ...form, sectionTitle: e.target.value })}
+            placeholder="Section title"
+            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          />
+          <input
+            value={form.ctaHref}
+            onChange={(e) => setForm({ ...form, ctaHref: e.target.value })}
+            placeholder="CTA href"
+            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          />
+          <textarea
+            value={form.sectionBody}
+            onChange={(e) => setForm({ ...form, sectionBody: e.target.value })}
+            rows={2}
+            placeholder="Section body"
+            className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          />
+          <textarea
+            value={form.bullets}
+            onChange={(e) => setForm({ ...form, bullets: e.target.value })}
+            rows={4}
+            placeholder="Bullets (one per line)"
+            className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          />
+          <label className="inline-flex items-center gap-1.5 text-xs sm:col-span-2">
+            <input
+              type="checkbox"
+              checked={form.active}
+              onChange={(e) => setForm({ ...form, active: e.target.checked })}
+            />
+            Active (off = use code defaults)
+          </label>
+          <Button
+            disabled={busy}
+            onClick={() => void save()}
+            className="text-white sm:col-span-2"
+            style={{ backgroundColor: '#085508' }}
+          >
+            {busy ? 'Saving…' : 'Save page copy'}
+          </Button>
+        </div>
+      ) : null}
+      {status ? <p className="text-xs text-[#5A6070]">{status}</p> : null}
+    </section>
+  )
+}

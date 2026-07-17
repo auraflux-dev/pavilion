@@ -8,6 +8,12 @@ import { SurveyResultsPanel } from '@/components/staff/survey-results-panel'
 import { StaffRoleManager } from '@/components/staff/staff-role-manager'
 import { SocialComposePanel } from '@/components/staff/social-compose-panel'
 import { StaffTasksPanel } from '@/components/staff/staff-tasks-panel'
+import { StaffMinutesPanel } from '@/components/staff/staff-minutes-panel'
+import { StaffProgramsPanel } from '@/components/staff/staff-programs-panel'
+import { StaffPaymentsPanel } from '@/components/staff/staff-payments-panel'
+import { StaffEventsPanel } from '@/components/staff/staff-events-panel'
+import { StaffRetailPanel } from '@/components/staff/staff-retail-panel'
+import { StaffPageContentPanel } from '@/components/staff/staff-page-content-panel'
 import { StaffShell } from '@/components/shells/staff-shell'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 
@@ -47,6 +53,12 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'social',
   'surveys',
   'messages',
+  'minutes',
+  'programs',
+  'payments',
+  'events',
+  'retail',
+  'content',
   'help',
 ]
 
@@ -94,6 +106,22 @@ export function StaffDashboard() {
         me.roles.includes('secretary') ||
         me.isAdmin),
   )
+  const canMinutes = Boolean(me && (me.roles.includes('secretary') || me.isAdmin))
+  const canPrograms = Boolean(
+    me && (me.roles.includes('programs') || me.roles.includes('instructor') || me.isAdmin),
+  )
+  const canPayments = Boolean(me && (me.roles.includes('treasurer') || me.isAdmin))
+  const canEvents = Boolean(
+    me &&
+      (me.roles.includes('events') ||
+        me.roles.includes('secretary') ||
+        me.roles.includes('marketing') ||
+        me.isAdmin),
+  )
+  const canRetail = Boolean(me && (me.roles.includes('retail') || me.isAdmin))
+  const canContent = Boolean(
+    me && (me.roles.includes('marketing') || me.roles.includes('secretary') || me.isAdmin),
+  )
 
   const navItems = useMemo(() => {
     if (!me) return []
@@ -110,9 +138,26 @@ export function StaffDashboard() {
     if (canMarketing) items.push({ id: 'social', label: STAFF_WORKSPACE_LABEL.social })
     if (canSurveys) items.push({ id: 'surveys', label: STAFF_WORKSPACE_LABEL.surveys })
     if (canMessage) items.push({ id: 'messages', label: STAFF_WORKSPACE_LABEL.messages })
+    if (canMinutes) items.push({ id: 'minutes', label: STAFF_WORKSPACE_LABEL.minutes })
+    if (canPrograms) items.push({ id: 'programs', label: STAFF_WORKSPACE_LABEL.programs })
+    if (canPayments) items.push({ id: 'payments', label: STAFF_WORKSPACE_LABEL.payments })
+    if (canEvents) items.push({ id: 'events', label: STAFF_WORKSPACE_LABEL.events })
+    if (canRetail) items.push({ id: 'retail', label: STAFF_WORKSPACE_LABEL.retail })
+    if (canContent) items.push({ id: 'content', label: STAFF_WORKSPACE_LABEL.content })
     items.push({ id: 'help', label: STAFF_WORKSPACE_LABEL.help })
     return items
-  }, [me, canMarketing, canSurveys, canMessage])
+  }, [
+    me,
+    canMarketing,
+    canSurveys,
+    canMessage,
+    canMinutes,
+    canPrograms,
+    canPayments,
+    canEvents,
+    canRetail,
+    canContent,
+  ])
 
   const active: StaffWorkspace = useMemo(() => {
     const fromUrl = parseWorkspace(searchParams.get('view'))
@@ -265,19 +310,23 @@ export function StaffDashboard() {
                   >
                     <p className="text-sm font-bold text-[#1A1A1A]">{item.label}</p>
                     <p className="text-xs text-[#5A6070] mt-1">
-                      {item.id === 'projects'
-                        ? 'Year board, assign tasks'
-                        : item.id === 'members'
-                          ? 'Lookup, act-as, archive'
-                          : item.id === 'access'
-                            ? 'Assign @shmspto.org roles'
-                            : item.id === 'social'
-                              ? 'Facebook from Staff'
-                              : item.id === 'surveys'
-                                ? 'Create, share, review, CSV'
-                                : item.id === 'messages'
-                                  ? 'Parent portal inbox'
-                                  : 'Drive how-tos'}
+                      {(
+                        {
+                          projects: 'Year board, assign tasks',
+                          members: 'Lookup, act-as, archive',
+                          access: 'Assign @shmspto.org roles',
+                          social: 'Facebook from Staff',
+                          surveys: 'Create, share, review, CSV',
+                          messages: 'Parent portal inbox',
+                          minutes: 'Publish meeting minutes',
+                          programs: 'Registration & sessions',
+                          payments: 'Needs Reconciliation',
+                          events: 'Upcoming + manage in Wix',
+                          retail: 'Store & spirit product lists',
+                          content: 'Page heroes & marketing copy',
+                          help: 'Drive how-tos',
+                        } as Partial<Record<StaffWorkspace, string>>
+                      )[item.id] ?? 'Open workspace'}
                     </p>
                   </button>
                 ))}
@@ -437,6 +486,13 @@ export function StaffDashboard() {
             {msgStatus ? <p className="text-xs text-[#5A6070]">{msgStatus}</p> : null}
           </section>
         ) : null}
+
+        {active === 'minutes' && canMinutes ? <StaffMinutesPanel /> : null}
+        {active === 'programs' && canPrograms ? <StaffProgramsPanel /> : null}
+        {active === 'payments' && canPayments ? <StaffPaymentsPanel /> : null}
+        {active === 'events' && canEvents ? <StaffEventsPanel /> : null}
+        {active === 'retail' && canRetail ? <StaffRetailPanel /> : null}
+        {active === 'content' && canContent ? <StaffPageContentPanel /> : null}
 
         {active === 'help' ? (
           <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3">
