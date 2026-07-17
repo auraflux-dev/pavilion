@@ -37,6 +37,7 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **26 - Staff Roles & Portal Workspaces** | Everyone / admin | `@shmspto.org` vs personal email, roles, self-registration |
 | **29 - Staff Year Project Board** | Everyone | Year swimlanes, projects, assign tasks to people |
 | **31 - Admin Lookup, Act-as & Student Archive** | Admin | Search parents, act-as, archive/restore students |
+| **32 - Staff Workspaces Map (Role Tools)** | Everyone | Which role sees which top-nav workspace |
 | **27 - Member Portal Parent Support Guide** | Everyone helping parents | Walk a parent through portal screens |
 
 ## Role-specific on Staff
@@ -47,6 +48,7 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **23–24** | Marketing / secretary | Surveys **create**, share, review, CSV |
 | **25** | Marketing | Facebook publish from Staff (IG when second social slot) |
 | **12b** | Treasurer / support | Store card, auto top-off, Needs Reconciliation |
+| **13 / 15 / 19 / 21** | Marketing / programs / secretary / retail | Page copy, sessions, minutes, store & spirit UUID lists |
 
 ## Next up
 
@@ -56,4 +58,5 @@ Memberships — tier names, 3 tiers, pricing, and what’s included (in Staff + 
 
 ```bash
 node --env-file=frontend/.env.local scripts/create-pto-docs.js
+node scripts/insert-doc-screenshots.js
 ```
