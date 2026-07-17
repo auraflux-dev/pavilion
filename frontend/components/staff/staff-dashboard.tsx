@@ -244,7 +244,7 @@ export function StaffDashboard() {
         </section>
       ) : null}
 
-      <StaffTasksPanel myRoles={me.roles} isAdmin={me.isAdmin} />
+      <StaffTasksPanel myRoles={me.roles} isAdmin={me.isAdmin} myEmail={me.email} />
 
       {me.isAdmin ? <StaffRoleManager /> : null}
 

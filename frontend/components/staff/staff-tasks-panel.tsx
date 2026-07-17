@@ -2,12 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import type { StaffTask, TaskSource, TaskStatus } from '@/lib/staff/tasks'
+import { currentSchoolYear, type StaffDirectoryPerson, type StaffProject } from '@/lib/staff/projects'
+import type { StaffTask, TaskStatus } from '@/lib/staff/tasks'
 
 type Props = {
   myRoles: string[]
   isAdmin: boolean
+  myEmail?: string
 }
+
+type ViewMode = 'year' | 'mine' | 'project'
 
 const STATUS_LABEL: Record<TaskStatus, string> = {
   triage: 'Triage',
@@ -16,80 +20,205 @@ const STATUS_LABEL: Record<TaskStatus, string> = {
   done: 'Done',
 }
 
-export function StaffTasksPanel({ myRoles, isAdmin }: Props) {
+function dueLabel(dueAt: string | null) {
+  if (!dueAt) return 'No due date'
+  const t = Date.parse(dueAt)
+  if (Number.isNaN(t)) return 'No due date'
+  const days = Math.ceil((t - Date.now()) / 86400000)
+  const date = new Date(t).toLocaleDateString()
+  if (days < 0) return `Overdue · ${date}`
+  if (days === 0) return `Due today · ${date}`
+  if (days === 1) return `Due tomorrow · ${date}`
+  return `Due in ${days}d · ${date}`
+}
+
+function personLabel(p: StaffDirectoryPerson) {
+  return p.name ? `${p.name} (${p.boardTitle || p.roles.join(', ')})` : p.email
+}
+
+export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Props) {
+  const [view, setView] = useState<ViewMode>('year')
+  const [schoolYear, setSchoolYear] = useState(currentSchoolYear())
+  const [projects, setProjects] = useState<StaffProject[]>([])
+  const [directory, setDirectory] = useState<StaffDirectoryPerson[]>([])
   const [tasks, setTasks] = useState<StaffTask[]>([])
-  const [roles, setRoles] = useState<string[]>([])
-  const [filterRole, setFilterRole] = useState('')
+  const [selectedProjectId, setSelectedProjectId] = useState('')
   const [includeDone, setIncludeDone] = useState(false)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
+  const [myEmail, setMyEmail] = useState(myEmailProp || '')
 
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [ownerRole, setOwnerRole] = useState(myRoles[0] || 'admin')
-  const [dueLocal, setDueLocal] = useState('')
-  const [requestedBy, setRequestedBy] = useState('')
-  const [source, setSource] = useState<TaskSource>('board')
-  const [blockedByNote, setBlockedByNote] = useState('')
-  const [blockedByTaskId, setBlockedByTaskId] = useState('')
+  // New project form
+  const [projTitle, setProjTitle] = useState('')
+  const [projDesc, setProjDesc] = useState('')
+  const [projLeadRole, setProjLeadRole] = useState(myRoles[0] || 'admin')
+  const [projMembers, setProjMembers] = useState<string[]>([])
+
+  // New task form
+  const [taskTitle, setTaskTitle] = useState('')
+  const [taskDesc, setTaskDesc] = useState('')
+  const [taskProjectId, setTaskProjectId] = useState('')
+  const [taskAssignee, setTaskAssignee] = useState('')
+  const [taskDueLocal, setTaskDueLocal] = useState('')
+  const [taskOwnerRole, setTaskOwnerRole] = useState(myRoles[0] || 'admin')
+
+  const selectedProject = useMemo(
+    () => projects.find((p) => p.id === selectedProjectId) || null,
+    [projects, selectedProjectId],
+  )
+
+  const loadProjects = useCallback(async () => {
+    const params = new URLSearchParams({ schoolYear })
+    if (includeDone) params.set('includeDone', 'true')
+    const r = await fetch(`/api/staff/projects?${params}`)
+    const d = await r.json()
+    if (!r.ok) throw new Error(d.error ?? 'Could not load projects')
+    setProjects(d.projects ?? [])
+    setDirectory(d.directory ?? [])
+    if (d.myEmail) setMyEmail(d.myEmail)
+    if (d.schoolYear) setSchoolYear(d.schoolYear)
+  }, [schoolYear, includeDone])
+
+  const loadTasks = useCallback(async () => {
+    const params = new URLSearchParams()
+    if (view === 'mine') params.set('view', 'mine')
+    else if (view === 'project' && selectedProjectId) {
+      params.set('view', 'project')
+      params.set('projectId', selectedProjectId)
+    } else {
+      params.set('view', 'year')
+    }
+    if (includeDone) params.set('includeDone', 'true')
+    const r = await fetch(`/api/staff/tasks?${params}`)
+    const d = await r.json()
+    if (!r.ok) throw new Error(d.error ?? 'Could not load tasks')
+    setTasks(d.tasks ?? [])
+    if (d.myEmail) setMyEmail(d.myEmail)
+  }, [view, selectedProjectId, includeDone])
 
   const load = useCallback(async () => {
     setLoading(true)
+    setStatus('')
     try {
-      const params = new URLSearchParams()
-      if (filterRole) params.set('role', filterRole)
-      if (includeDone) params.set('includeDone', 'true')
-      const r = await fetch(`/api/staff/tasks?${params}`)
-      const d = await r.json()
-      if (!r.ok) throw new Error(d.error ?? 'Could not load tasks')
-      setTasks(d.tasks ?? [])
-      setRoles(d.roles ?? [])
+      await Promise.all([loadProjects(), loadTasks()])
     } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Could not load tasks')
+      setStatus(err instanceof Error ? err.message : 'Could not load board')
     } finally {
       setLoading(false)
     }
-  }, [filterRole, includeDone])
+  }, [loadProjects, loadTasks])
 
   useEffect(() => {
     void load()
   }, [load])
 
-  const openChoices = useMemo(
-    () => tasks.filter((t) => t.status !== 'done').map((t) => ({ id: t.id, label: `${t.title} (${t.ownerRole})` })),
-    [tasks],
-  )
+  useEffect(() => {
+    if (selectedProjectId && !taskProjectId) setTaskProjectId(selectedProjectId)
+  }, [selectedProjectId, taskProjectId])
+
+  const tasksByProject = useMemo(() => {
+    const map = new Map<string, StaffTask[]>()
+    for (const t of tasks) {
+      const key = t.projectId || '__none__'
+      const list = map.get(key) ?? []
+      list.push(t)
+      map.set(key, list)
+    }
+    return map
+  }, [tasks])
+
+  const assigneeChoices = useMemo(() => {
+    const project = projects.find((p) => p.id === (taskProjectId || selectedProjectId))
+    if (!project) return directory
+    const memberSet = new Set([project.leadEmail, ...project.memberEmails])
+    const members = directory.filter((d) => memberSet.has(d.email))
+    // Also show full directory so you can assign after talking to someone not yet on the project
+    const extras = directory.filter((d) => !memberSet.has(d.email))
+    return [...members, ...extras]
+  }, [directory, projects, taskProjectId, selectedProjectId])
+
+  async function createProject() {
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: projTitle,
+          description: projDesc,
+          schoolYear,
+          leadRole: projLeadRole,
+          memberEmails: projMembers,
+        }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not create project')
+      setProjTitle('')
+      setProjDesc('')
+      setProjMembers([])
+      setStatus('Project added to the year board.')
+      setSelectedProjectId(d.project?.id ?? '')
+      setView('project')
+      await load()
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Could not create project')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function patchProject(id: string, body: Record<string, unknown>) {
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch(`/api/staff/projects/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not update project')
+      await load()
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Could not update project')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   async function createTask() {
     setBusy(true)
     setStatus('')
     try {
+      const person = directory.find((d) => d.email === taskAssignee)
       const r = await fetch('/api/staff/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title,
-          description,
-          ownerRole,
-          status: source === 'faculty' || source === 'admin' ? 'triage' : 'open',
-          dueAt: dueLocal ? new Date(dueLocal).toISOString() : null,
-          requestedBy,
-          source,
-          blockedByNote,
-          blockedByTaskId,
+          title: taskTitle,
+          description: taskDesc,
+          projectId: taskProjectId || selectedProjectId || undefined,
+          ownerRole: taskOwnerRole,
+          assigneeEmail: taskAssignee || undefined,
+          assigneeName: person?.name || undefined,
+          dueAt: taskDueLocal ? new Date(taskDueLocal).toISOString() : null,
+          status: 'open',
+          source: 'board',
         }),
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Could not create task')
-      setTitle('')
-      setDescription('')
-      setDueLocal('')
-      setRequestedBy('')
-      setBlockedByNote('')
-      setBlockedByTaskId('')
-      setSource('board')
-      setStatus('Task added.')
+      setTaskTitle('')
+      setTaskDesc('')
+      setTaskDueLocal('')
+      setTaskAssignee('')
+      setStatus(
+        taskAssignee
+          ? 'Task added — it shows on the year board, this project, and their board.'
+          : 'Task added to the project / year board.',
+      )
       await load()
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Could not create task')
@@ -117,41 +246,153 @@ export function StaffTasksPanel({ myRoles, isAdmin }: Props) {
     }
   }
 
-  function dueLabel(dueAt: string | null) {
-    if (!dueAt) return 'No due date'
-    const t = Date.parse(dueAt)
-    if (Number.isNaN(t)) return 'No due date'
-    const days = Math.ceil((t - Date.now()) / 86400000)
-    const date = new Date(t).toLocaleDateString()
-    if (days < 0) return `Overdue · ${date}`
-    if (days === 0) return `Due today · ${date}`
-    if (days === 1) return `Due tomorrow · ${date}`
-    return `Due in ${days}d · ${date}`
+  function toggleMember(email: string) {
+    setProjMembers((prev) =>
+      prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email],
+    )
   }
+
+  function renderTaskCard(task: StaffTask, projectTitle?: string) {
+    const overdue = Boolean(task.dueAt && Date.parse(task.dueAt) < Date.now() && task.status !== 'done')
+    return (
+      <div key={task.id} className="border border-[#E8E4DC] rounded-lg p-3 space-y-2 bg-white">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold">{task.title}</p>
+            <p className="text-xs text-[#5A6070]">
+              {projectTitle ? `${projectTitle} · ` : ''}
+              {STATUS_LABEL[task.status]}
+              {task.assigneeName || task.assigneeEmail
+                ? ` · → ${task.assigneeName || task.assigneeEmail}`
+                : ' · Unassigned'}
+            </p>
+            <p className={`text-xs ${overdue ? 'text-amber-800 font-semibold' : 'text-[#5A6070]'}`}>
+              {dueLabel(task.dueAt)}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {task.status !== 'done' ? (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={busy}
+                onClick={() => void patchTask(task.id, { status: 'done', blockedByNote: '', blockedByTaskId: '' })}
+              >
+                Done
+              </Button>
+            ) : null}
+            {task.status === 'blocked' ? (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={busy}
+                onClick={() => void patchTask(task.id, { status: 'open', blockedByNote: '', blockedByTaskId: '' })}
+              >
+                Unblock
+              </Button>
+            ) : null}
+          </div>
+        </div>
+        {task.description ? (
+          <p className="text-xs text-[#5A6070] whitespace-pre-wrap">{task.description}</p>
+        ) : null}
+        {task.status !== 'done' ? (
+          <select
+            className="w-full border border-[#E8E4DC] rounded-lg px-2 py-1.5 text-xs"
+            value={task.assigneeEmail}
+            disabled={busy}
+            onChange={(e) => {
+              const email = e.target.value
+              const person = directory.find((d) => d.email === email)
+              void patchTask(task.id, {
+                assigneeEmail: email,
+                assigneeName: person?.name || email,
+              })
+            }}
+          >
+            <option value="">Assign after you&apos;ve talked…</option>
+            {directory.map((p) => (
+              <option key={p.email} value={p.email}>
+                {personLabel(p)}
+              </option>
+            ))}
+          </select>
+        ) : null}
+        {task.blockedByNote ? (
+          <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">
+            Waiting on: {task.blockedByNote}
+          </p>
+        ) : null}
+      </div>
+    )
+  }
+
+  const yearOptions = useMemo(() => {
+    const cur = currentSchoolYear()
+    const [a] = cur.split('-').map(Number)
+    return [`${a - 1}-${a}`, cur, `${a + 1}-${a + 2}`]
+  }, [])
 
   return (
     <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
       <div>
-        <h2 className="text-lg font-bold">Staff · Work by role</h2>
+        <h2 className="text-lg font-bold">Staff · Year project board</h2>
         <p className="text-xs text-[#5A6070]">
-          Simple ownership board — not a project-management suite. Assign to a role, set a due date,
-          note what it&apos;s waiting on. Faculty/admin asks go to Triage for the president.
+          Each VP / president adds projects for the school year. Everyone sees the swimlanes.
+          Assign a task to a member after you&apos;ve talked — it shows on the year board, the
+          project, and their board.
         </p>
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
+        <div className="inline-flex rounded-lg border border-[#E8E4DC] overflow-hidden text-sm">
+          {(
+            [
+              ['year', 'Year board'],
+              ['mine', 'My board'],
+              ['project', 'Project'],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              className={`px-3 py-1.5 ${view === id ? 'bg-[#085508] text-white' : 'bg-white text-[#1A1A2E]'}`}
+              onClick={() => {
+                setView(id)
+                if (id === 'project' && !selectedProjectId && projects[0]) {
+                  setSelectedProjectId(projects[0].id)
+                }
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <select
-          value={filterRole}
-          onChange={(e) => setFilterRole(e.target.value)}
+          value={schoolYear}
+          onChange={(e) => setSchoolYear(e.target.value)}
           className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
         >
-          <option value="">My roles{isAdmin ? ' / all (admin)' : ''}</option>
-          {(isAdmin ? roles : myRoles).map((role) => (
-            <option key={role} value={role}>
-              {role}
+          {yearOptions.map((y) => (
+            <option key={y} value={y}>
+              {y}
             </option>
           ))}
         </select>
+        {view === 'project' ? (
+          <select
+            value={selectedProjectId}
+            onChange={(e) => setSelectedProjectId(e.target.value)}
+            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm min-w-[12rem]"
+          >
+            <option value="">Pick a project…</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.title} · {p.leadName || p.leadRole}
+              </option>
+            ))}
+          </select>
+        ) : null}
         <label className="inline-flex items-center gap-1.5 text-xs">
           <input
             type="checkbox"
@@ -162,75 +403,127 @@ export function StaffTasksPanel({ myRoles, isAdmin }: Props) {
         </label>
       </div>
 
+      {/* Add project */}
+      <details className="rounded-lg border border-[#E8E4DC] p-3 bg-[#FAFAF8]">
+        <summary className="text-xs font-bold text-[#5A6070] cursor-pointer">
+          Add a project (your swimlane on the year board)
+        </summary>
+        <div className="mt-3 space-y-2">
+          <input
+            value={projTitle}
+            onChange={(e) => setProjTitle(e.target.value)}
+            placeholder="Project name (e.g. Fall Festival, Spirit Wear drop)"
+            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          />
+          <textarea
+            value={projDesc}
+            onChange={(e) => setProjDesc(e.target.value)}
+            rows={2}
+            placeholder="What this project covers (optional)"
+            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          />
+          <select
+            value={projLeadRole}
+            onChange={(e) => setProjLeadRole(e.target.value)}
+            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          >
+            {(isAdmin ? ['admin', 'marketing', 'secretary', 'treasurer', 'events', 'programs', 'retail', 'membership', 'wellness'] : myRoles).map(
+              (role) => (
+                <option key={role} value={role}>
+                  Lead role: {role}
+                </option>
+              ),
+            )}
+          </select>
+          <div>
+            <p className="text-xs text-[#5A6070] mb-1">Project members (who can add / get assigned work)</p>
+            <div className="flex flex-wrap gap-2 max-h-28 overflow-y-auto">
+              {directory.map((p) => (
+                <label key={p.email} className="inline-flex items-center gap-1 text-xs border border-[#E8E4DC] rounded-full px-2 py-1">
+                  <input
+                    type="checkbox"
+                    checked={projMembers.includes(p.email)}
+                    onChange={() => toggleMember(p.email)}
+                  />
+                  {p.name || p.email}
+                </label>
+              ))}
+            </div>
+          </div>
+          <Button
+            disabled={busy || !projTitle.trim()}
+            onClick={() => void createProject()}
+            className="text-white"
+            style={{ backgroundColor: '#085508' }}
+          >
+            {busy ? '…' : 'Add project'}
+          </Button>
+        </div>
+      </details>
+
+      {/* Add task */}
       <div className="rounded-lg border border-[#E8E4DC] p-3 space-y-2 bg-[#FAFAF8]">
-        <p className="text-xs font-bold text-[#5A6070]">Add work</p>
+        <p className="text-xs font-bold text-[#5A6070]">Add a task under a project</p>
         <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          value={taskTitle}
+          onChange={(e) => setTaskTitle(e.target.value)}
           placeholder="What needs to happen?"
           className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
         />
         <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          value={taskDesc}
+          onChange={(e) => setTaskDesc(e.target.value)}
           rows={2}
           placeholder="Details (optional)"
           className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
         />
         <div className="grid sm:grid-cols-2 gap-2">
           <select
-            value={ownerRole}
-            onChange={(e) => setOwnerRole(e.target.value)}
+            value={taskProjectId || selectedProjectId}
+            onChange={(e) => setTaskProjectId(e.target.value)}
             className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
           >
-            {(isAdmin ? roles : Array.from(new Set([...myRoles, 'admin']))).map((role) => (
-              <option key={role} value={role}>
-                Owner: {role}
+            <option value="">Project…</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.title}
               </option>
             ))}
           </select>
-          <input
-            type="datetime-local"
-            value={dueLocal}
-            onChange={(e) => setDueLocal(e.target.value)}
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
-          />
           <select
-            value={source}
-            onChange={(e) => setSource(e.target.value as TaskSource)}
+            value={taskAssignee}
+            onChange={(e) => setTaskAssignee(e.target.value)}
             className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
           >
-            <option value="board">From board</option>
-            <option value="faculty">From faculty</option>
-            <option value="admin">From SHMS admin</option>
+            <option value="">Assign later (after you talk)</option>
+            {assigneeChoices.map((p) => (
+              <option key={p.email} value={p.email}>
+                {personLabel(p)}
+              </option>
+            ))}
+          </select>
+          <select
+            value={taskOwnerRole}
+            onChange={(e) => setTaskOwnerRole(e.target.value)}
+            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          >
+            {Array.from(new Set([...myRoles, 'admin', 'marketing', 'events', 'programs', 'treasurer', 'secretary', 'retail', 'membership', 'wellness'])).map(
+              (role) => (
+                <option key={role} value={role}>
+                  Role lane: {role}
+                </option>
+              ),
+            )}
           </select>
           <input
-            value={requestedBy}
-            onChange={(e) => setRequestedBy(e.target.value)}
-            placeholder="Requested by (name)"
+            type="datetime-local"
+            value={taskDueLocal}
+            onChange={(e) => setTaskDueLocal(e.target.value)}
             className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
           />
         </div>
-        <input
-          value={blockedByNote}
-          onChange={(e) => setBlockedByNote(e.target.value)}
-          placeholder="Waiting on… (optional note)"
-          className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
-        />
-        <select
-          value={blockedByTaskId}
-          onChange={(e) => setBlockedByTaskId(e.target.value)}
-          className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
-        >
-          <option value="">Blocked by another task? (optional)</option>
-          {openChoices.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.label}
-            </option>
-          ))}
-        </select>
         <Button
-          disabled={busy || !title.trim()}
+          disabled={busy || !taskTitle.trim() || !(taskProjectId || selectedProjectId)}
           onClick={() => void createTask()}
           className="text-white"
           style={{ backgroundColor: '#085508' }}
@@ -240,101 +533,156 @@ export function StaffTasksPanel({ myRoles, isAdmin }: Props) {
       </div>
 
       {loading ? <p className="text-xs text-[#5A6070]">Loading…</p> : null}
-      {!loading && tasks.length === 0 ? (
-        <p className="text-xs text-[#5A6070]">No open tasks for this filter.</p>
-      ) : null}
 
-      <div className="space-y-3">
-        {tasks.map((task) => (
-          <div key={task.id} className="border border-[#E8E4DC] rounded-lg p-3 space-y-2">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p className="text-sm font-semibold">{task.title}</p>
-                <p className="text-xs text-[#5A6070]">
-                  {task.ownerRole} · {STATUS_LABEL[task.status]} · {task.source}
-                  {task.requestedBy ? ` · from ${task.requestedBy}` : ''}
-                </p>
-                <p
-                  className={`text-xs ${
-                    task.dueAt && Date.parse(task.dueAt) < Date.now() && task.status !== 'done'
-                      ? 'text-amber-800 font-semibold'
-                      : 'text-[#5A6070]'
-                  }`}
+      {/* Year swimlanes */}
+      {!loading && view === 'year' ? (
+        <div className="space-y-3">
+          {projects.length === 0 ? (
+            <p className="text-xs text-[#5A6070]">No projects yet for {schoolYear}. Add one above.</p>
+          ) : null}
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {projects.map((project) => {
+              const laneTasks = tasksByProject.get(project.id) ?? []
+              const canEdit =
+                isAdmin || project.leadEmail === myEmail || project.memberEmails.includes(myEmail)
+              return (
+                <div
+                  key={project.id}
+                  className="min-w-[260px] max-w-[300px] flex-shrink-0 rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] p-3 space-y-2"
                 >
-                  {dueLabel(task.dueAt)}
-                </p>
+                  <button
+                    type="button"
+                    className="text-left w-full"
+                    onClick={() => {
+                      setSelectedProjectId(project.id)
+                      setView('project')
+                    }}
+                  >
+                    <p className="text-sm font-bold">{project.title}</p>
+                    <p className="text-[11px] text-[#5A6070]">
+                      {project.leadName || project.leadEmail} · {project.leadRole}
+                    </p>
+                  </button>
+                  {laneTasks.length === 0 ? (
+                    <p className="text-[11px] text-[#5A6070]">No open tasks</p>
+                  ) : null}
+                  <div className="space-y-2">{laneTasks.map((t) => renderTaskCard(t))}</div>
+                  {canEdit ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full text-xs"
+                      onClick={() => {
+                        setSelectedProjectId(project.id)
+                        setTaskProjectId(project.id)
+                        setView('project')
+                      }}
+                    >
+                      Open project
+                    </Button>
+                  ) : null}
+                </div>
+              )
+            })}
+            {(tasksByProject.get('__none__') ?? []).length > 0 ? (
+              <div className="min-w-[260px] max-w-[300px] flex-shrink-0 rounded-xl border border-dashed border-[#E8E4DC] bg-white p-3 space-y-2">
+                <p className="text-sm font-bold">Unassigned / triage</p>
+                <div className="space-y-2">
+                  {(tasksByProject.get('__none__') ?? []).map((t) => renderTaskCard(t))}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-1">
-                {task.status === 'triage' && isAdmin ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={busy}
-                    onClick={() => void patchTask(task.id, { status: 'open' })}
-                  >
-                    Accept
-                  </Button>
-                ) : null}
-                {task.status !== 'done' ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={busy}
-                    onClick={() =>
-                      void patchTask(task.id, {
-                        status: 'done',
-                        blockedByNote: '',
-                        blockedByTaskId: '',
-                      })
-                    }
-                  >
-                    Done
-                  </Button>
-                ) : null}
-                {task.status === 'blocked' ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={busy}
-                    onClick={() =>
-                      void patchTask(task.id, {
-                        status: 'open',
-                        blockedByNote: '',
-                        blockedByTaskId: '',
-                      })
-                    }
-                  >
-                    Unblock
-                  </Button>
-                ) : null}
-                {task.status !== 'done' && isAdmin ? (
-                  <select
-                    className="border border-[#E8E4DC] rounded-lg px-2 py-1 text-xs"
-                    value={task.ownerRole}
-                    disabled={busy}
-                    onChange={(e) => void patchTask(task.id, { ownerRole: e.target.value, status: 'open' })}
-                  >
-                    {roles.map((role) => (
-                      <option key={role} value={role}>
-                        → {role}
-                      </option>
-                    ))}
-                  </select>
-                ) : null}
-              </div>
-            </div>
-            {task.description ? <p className="text-xs text-[#5A6070] whitespace-pre-wrap">{task.description}</p> : null}
-            {task.blockedByNote || task.blockedByTaskId ? (
-              <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">
-                Waiting on: {task.blockedByNote || 'linked task'}
-                {task.blockedByTaskId
-                  ? ` (${tasks.find((t) => t.id === task.blockedByTaskId)?.title || task.blockedByTaskId})`
-                  : ''}
-              </p>
             ) : null}
           </div>
-        ))}
-      </div>
+        </div>
+      ) : null}
+
+      {/* My board */}
+      {!loading && view === 'mine' ? (
+        <div className="space-y-3">
+          <p className="text-xs text-[#5A6070]">
+            Tasks assigned to you, that you created, or on projects you lead.
+          </p>
+          {tasks.length === 0 ? (
+            <p className="text-xs text-[#5A6070]">Nothing on your board right now.</p>
+          ) : null}
+          <div className="space-y-2">
+            {tasks.map((t) =>
+              renderTaskCard(t, projects.find((p) => p.id === t.projectId)?.title),
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Single project */}
+      {!loading && view === 'project' ? (
+        <div className="space-y-3">
+          {!selectedProject ? (
+            <p className="text-xs text-[#5A6070]">Pick a project above, or add one.</p>
+          ) : (
+            <>
+              <div className="rounded-lg border border-[#E8E4DC] p-3 space-y-2">
+                <div className="flex flex-wrap justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-bold">{selectedProject.title}</p>
+                    <p className="text-xs text-[#5A6070]">
+                      Lead: {selectedProject.leadName || selectedProject.leadEmail} ·{' '}
+                      {selectedProject.memberEmails.length} members
+                    </p>
+                  </div>
+                  {(isAdmin || selectedProject.leadEmail === myEmail) && selectedProject.status === 'active' ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={() => void patchProject(selectedProject.id, { status: 'done' })}
+                    >
+                      Mark project done
+                    </Button>
+                  ) : null}
+                </div>
+                {selectedProject.description ? (
+                  <p className="text-xs text-[#5A6070] whitespace-pre-wrap">{selectedProject.description}</p>
+                ) : null}
+                {(isAdmin || selectedProject.leadEmail === myEmail) ? (
+                  <div>
+                    <p className="text-xs font-bold text-[#5A6070] mb-1">Members</p>
+                    <div className="flex flex-wrap gap-2">
+                      {directory.map((p) => {
+                        const on = selectedProject.memberEmails.includes(p.email) || selectedProject.leadEmail === p.email
+                        return (
+                          <label
+                            key={p.email}
+                            className="inline-flex items-center gap-1 text-xs border border-[#E8E4DC] rounded-full px-2 py-1"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={on}
+                              disabled={busy || p.email === selectedProject.leadEmail}
+                              onChange={() => {
+                                const next = on
+                                  ? selectedProject.memberEmails.filter((e) => e !== p.email)
+                                  : [...selectedProject.memberEmails, p.email]
+                                void patchProject(selectedProject.id, { memberEmails: next })
+                              }}
+                            />
+                            {p.name || p.email}
+                          </label>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+              <div className="space-y-2">
+                {(tasksByProject.get(selectedProject.id) ?? []).length === 0 ? (
+                  <p className="text-xs text-[#5A6070]">No tasks yet — add one above.</p>
+                ) : null}
+                {(tasksByProject.get(selectedProject.id) ?? []).map((t) => renderTaskCard(t))}
+              </div>
+            </>
+          )}
+        </div>
+      ) : null}
 
       {status ? <p className="text-xs text-[#5A6070]">{status}</p> : null}
     </section>

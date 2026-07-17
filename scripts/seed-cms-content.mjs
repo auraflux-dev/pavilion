@@ -753,6 +753,45 @@ async function ensureStudentArchiveFields() {
   }
 }
 
+async function ensureStaffProjectsCollection() {
+  try {
+    await wix('/wix-data/v2/collections', {
+      collection: {
+        id: 'StaffProjects',
+        displayName: 'Staff Projects',
+        fields: [
+          { key: 'title', displayName: 'Title', type: 'TEXT' },
+          { key: 'description', displayName: 'Description', type: 'TEXT' },
+          { key: 'schoolYear', displayName: 'School Year', type: 'TEXT' },
+          { key: 'leadEmail', displayName: 'Lead Email', type: 'TEXT' },
+          { key: 'leadName', displayName: 'Lead Name', type: 'TEXT' },
+          { key: 'leadRole', displayName: 'Lead Role', type: 'TEXT' },
+          { key: 'memberEmails', displayName: 'Member Emails', type: 'TEXT' },
+          { key: 'status', displayName: 'Status', type: 'TEXT' },
+          { key: 'sortOrder', displayName: 'Sort Order', type: 'NUMBER' },
+          { key: 'createdByEmail', displayName: 'Created By Email', type: 'TEXT' },
+          { key: 'createdAt', displayName: 'Created At', type: 'DATETIME' },
+          { key: 'updatedAt', displayName: 'Updated At', type: 'DATETIME' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+        ],
+        permissions: {
+          insert: 'ADMIN',
+          update: 'ADMIN',
+          remove: 'ADMIN',
+          read: 'ADMIN',
+        },
+      },
+    })
+    console.log('Created StaffProjects collection')
+  } catch (err) {
+    if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
+      console.log('StaffProjects collection already exists')
+      return
+    }
+    console.warn('StaffProjects create skipped:', err.message.slice(0, 200))
+  }
+}
+
 async function ensureStaffTasksCollection() {
   try {
     await wix('/wix-data/v2/collections', {
@@ -762,7 +801,10 @@ async function ensureStaffTasksCollection() {
         fields: [
           { key: 'title', displayName: 'Title', type: 'TEXT' },
           { key: 'description', displayName: 'Description', type: 'TEXT' },
+          { key: 'projectId', displayName: 'Project Id', type: 'TEXT' },
           { key: 'ownerRole', displayName: 'Owner Role', type: 'TEXT' },
+          { key: 'assigneeEmail', displayName: 'Assignee Email', type: 'TEXT' },
+          { key: 'assigneeName', displayName: 'Assignee Name', type: 'TEXT' },
           { key: 'status', displayName: 'Status', type: 'TEXT' },
           { key: 'dueAt', displayName: 'Due At', type: 'DATETIME' },
           { key: 'blockedByTaskId', displayName: 'Blocked By Task Id', type: 'TEXT' },
@@ -787,9 +829,30 @@ async function ensureStaffTasksCollection() {
   } catch (err) {
     if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
       console.log('StaffTasks collection already exists')
-      return
+    } else {
+      console.warn('StaffTasks create skipped:', err.message.slice(0, 200))
     }
-    console.warn('StaffTasks create skipped:', err.message.slice(0, 200))
+  }
+
+  // Add project/assignee fields if collection already existed without them
+  try {
+    const collection = await wix('/wix-data/v2/collections/StaffTasks', undefined, 'GET')
+    const existing = new Set((collection.collection?.fields ?? []).map((field) => field.key))
+    const fields = [
+      { key: 'projectId', displayName: 'Project Id', type: 'TEXT' },
+      { key: 'assigneeEmail', displayName: 'Assignee Email', type: 'TEXT' },
+      { key: 'assigneeName', displayName: 'Assignee Name', type: 'TEXT' },
+    ]
+    for (const field of fields) {
+      if (existing.has(field.key)) continue
+      await wix('/wix-data/v2/collections/create-field', {
+        dataCollectionId: 'StaffTasks',
+        field,
+      })
+      console.log('Created StaffTasks field', field.key)
+    }
+  } catch (err) {
+    console.warn('StaffTasks field ensure skipped:', String(err.message || err).slice(0, 200))
   }
 }
 
@@ -880,6 +943,7 @@ async function main() {
   await ensureStaffRolesCollection()
   await ensureStudentArchiveFields()
   await ensureSocialPostsCollection()
+  await ensureStaffProjectsCollection()
   await ensureStaffTasksCollection()
   await upsertSiteSettings()
   await upsertPageContent()

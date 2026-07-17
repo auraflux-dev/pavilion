@@ -1,6 +1,6 @@
 /**
- * StaffTasks — lightweight role-owned work items for the staff portal.
- * Not a full PM suite: title, owner role, due date, status, optional blocker.
+ * StaffTasks — work items under a StaffProject, assignable to a person.
+ * Still supports role ownership + triage for faculty/admin asks.
  */
 
 export const TASK_STATUSES = ['triage', 'open', 'blocked', 'done'] as const
@@ -13,7 +13,10 @@ export type StaffTask = {
   id: string
   title: string
   description: string
+  projectId: string
   ownerRole: string
+  assigneeEmail: string
+  assigneeName: string
   status: TaskStatus
   dueAt: string | null
   blockedByTaskId: string
