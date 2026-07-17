@@ -1,7 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
+import { getWixClient } from '@/lib/wix-client'
 import { requireStaffRole } from '@/lib/staff/session'
 import { getStaffProfile, isStaffEmail, ROLE_HOME_COPY, STAFF_EMAIL_DOMAIN, type StaffRole } from '@/lib/staff/roles'
+
+/**
+ * Self-registration: first @shmspto.org login creates a StaffRoles row with no
+ * roles so admins just assign roles in Staff → Admin · Staff access (no preload).
+ */
+async function ensureStaffRegistration(email: string, displayName: string) {
+  try {
+    const client = getWixClient()
+    const existing = await client.items.query('StaffRoles').eq('email', email).limit(1).find()
+    if (existing.items.length > 0) return
+    await client.items.insert('StaffRoles', {
+      email,
+      name: displayName,
+      boardTitle: '',
+      roles: '',
+      active: true,
+    })
+  } catch (err) {
+    console.warn('StaffRoles self-registration failed:', err)
+  }
+}
 
 export async function GET(req: NextRequest) {
   const session = await getMemberSession(req)
@@ -20,9 +42,12 @@ export async function GET(req: NextRequest) {
 
   const staff = await getStaffProfile(session.email)
   if (!staff) {
+    const displayName = `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim()
+    await ensureStaffRegistration(session.email.trim().toLowerCase(), displayName)
     return NextResponse.json(
       {
-        error: `No staff role is assigned to ${session.email} yet. Ask the PTO admin to add you in Content Manager → StaffRoles.`,
+        error: `You're registered as ${session.email}, but no role is assigned yet. Ask the PTO admin to assign your role in Staff → Admin · Staff access.`,
+        registered: true,
       },
       { status: 403 },
     )

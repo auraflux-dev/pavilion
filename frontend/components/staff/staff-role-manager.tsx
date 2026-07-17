@@ -74,7 +74,9 @@ export function StaffRoleManager() {
       <div>
         <h2 className="text-lg font-bold">Admin · Staff access</h2>
         <p className="text-xs text-[#5A6070]">
-          Assign staff tools only to official @shmspto.org accounts. Personal family accounts remain separate.
+          Assign staff tools only to official @shmspto.org accounts. Personal family accounts remain
+          separate. Anyone who signs in once with their @shmspto.org email appears below automatically
+          with no roles — click their row and check the roles to activate them.
         </p>
       </div>
 
