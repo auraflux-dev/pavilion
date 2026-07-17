@@ -274,7 +274,7 @@ export function StaffDashboard() {
                             : item.id === 'social'
                               ? 'Facebook from Staff'
                               : item.id === 'surveys'
-                                ? 'Responses & CSV'
+                                ? 'Create, share, review, CSV'
                                 : item.id === 'messages'
                                   ? 'Parent portal inbox'
                                   : 'Drive how-tos'}

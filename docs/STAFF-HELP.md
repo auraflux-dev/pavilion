@@ -28,7 +28,7 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | Doc | Role | What |
 |-----|------|------|
 | **16** | Programs / instructor / secretary | Parent portal inbox messages |
-| **23–24** | Marketing / secretary | Surveys create, share, review, CSV |
+| **23–24** | Marketing / secretary | Surveys **create**, share, review, CSV |
 | **25** | Marketing | Facebook publish from Staff (IG when second social slot) |
 | **12b** | Treasurer / support | Store card, auto top-off, Needs Reconciliation |
 
