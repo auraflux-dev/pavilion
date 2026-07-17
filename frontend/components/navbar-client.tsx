@@ -30,6 +30,15 @@ export function NavbarClient({ links }: Props) {
       : member?.name
         ? 'My Account'
         : 'Member Portal'
+  // Public marketing nav — for browsing the site. Portal/Staff use their own shells.
+  const audienceHint =
+    status === 'loading'
+      ? null
+      : isMember
+        ? accountType === 'paid'
+          ? 'Paid member'
+          : 'Free member'
+        : 'Visitor'
 
   return (
     <header
@@ -89,6 +98,11 @@ export function NavbarClient({ links }: Props) {
         </ul>
 
         <div className="hidden lg:flex items-center gap-3">
+          {audienceHint ? (
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
+              {audienceHint}
+            </span>
+          ) : null}
           {status === 'loading' ? (
             <div className="h-9 w-28 rounded-md bg-[#EEF6EE] animate-pulse" />
           ) : isMember ? (

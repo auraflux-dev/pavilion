@@ -1,12 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { SurveyResultsPanel } from '@/components/staff/survey-results-panel'
 import { StaffRoleManager } from '@/components/staff/staff-role-manager'
 import { SocialComposePanel } from '@/components/staff/social-compose-panel'
 import { StaffTasksPanel } from '@/components/staff/staff-tasks-panel'
+import { StaffShell } from '@/components/shells/staff-shell'
+import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 
 type StaffHome = {
   role: string
@@ -26,10 +29,35 @@ type StaffMe = {
 
 type MemberHit = {
   parentEmail: string
-  students: { id: string; firstName: string; lastName: string; grade: string; membershipTier: string; archived: boolean }[]
+  students: {
+    id: string
+    firstName: string
+    lastName: string
+    grade: string
+    membershipTier: string
+    archived: boolean
+  }[]
+}
+
+const WORKSPACE_IDS: StaffWorkspace[] = [
+  'home',
+  'projects',
+  'members',
+  'access',
+  'social',
+  'surveys',
+  'messages',
+  'help',
+]
+
+function parseWorkspace(raw: string | null): StaffWorkspace | null {
+  if (!raw) return null
+  return (WORKSPACE_IDS as string[]).includes(raw) ? (raw as StaffWorkspace) : null
 }
 
 export function StaffDashboard() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [me, setMe] = useState<StaffMe | null>(null)
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
@@ -54,6 +82,51 @@ export function StaffDashboard() {
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Not authorized'))
   }, [])
+
+  const canMarketing = Boolean(me && (me.roles.includes('marketing') || me.isAdmin))
+  const canSurveys = Boolean(
+    me && (me.roles.includes('marketing') || me.roles.includes('secretary') || me.isAdmin),
+  )
+  const canMessage = Boolean(
+    me &&
+      (me.roles.includes('programs') ||
+        me.roles.includes('instructor') ||
+        me.roles.includes('secretary') ||
+        me.isAdmin),
+  )
+
+  const navItems = useMemo(() => {
+    if (!me) return []
+    const items: { id: StaffWorkspace; label: string }[] = [
+      { id: 'home', label: STAFF_WORKSPACE_LABEL.home },
+      { id: 'projects', label: STAFF_WORKSPACE_LABEL.projects },
+    ]
+    if (me.isAdmin) {
+      items.push(
+        { id: 'members', label: STAFF_WORKSPACE_LABEL.members },
+        { id: 'access', label: STAFF_WORKSPACE_LABEL.access },
+      )
+    }
+    if (canMarketing) items.push({ id: 'social', label: STAFF_WORKSPACE_LABEL.social })
+    if (canSurveys) items.push({ id: 'surveys', label: STAFF_WORKSPACE_LABEL.surveys })
+    if (canMessage) items.push({ id: 'messages', label: STAFF_WORKSPACE_LABEL.messages })
+    items.push({ id: 'help', label: STAFF_WORKSPACE_LABEL.help })
+    return items
+  }, [me, canMarketing, canSurveys, canMessage])
+
+  const active: StaffWorkspace = useMemo(() => {
+    const fromUrl = parseWorkspace(searchParams.get('view'))
+    if (fromUrl && navItems.some((i) => i.id === fromUrl)) return fromUrl
+    return 'home'
+  }, [searchParams, navItems])
+
+  function go(id: StaffWorkspace) {
+    const params = new URLSearchParams(searchParams.toString())
+    if (id === 'home') params.delete('view')
+    else params.set('view', id)
+    const q = params.toString()
+    router.replace(q ? `/staff?${q}` : '/staff', { scroll: false })
+  }
 
   async function lookup() {
     setLookupBusy(true)
@@ -86,7 +159,14 @@ export function StaffDashboard() {
   }
 
   async function setStudentArchived(studentId: string, archived: boolean) {
-    if (archived && !window.confirm('Archive this student? They will be hidden from the parent portal, but all history will be preserved.')) return
+    if (
+      archived &&
+      !window.confirm(
+        'Archive this student? They will be hidden from the parent portal, but all history will be preserved.',
+      )
+    ) {
+      return
+    }
     setActAsStatus('')
     try {
       const response = await fetch(`/api/staff/students/${studentId}`, {
@@ -96,12 +176,14 @@ export function StaffDashboard() {
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error ?? 'Could not update student')
-      setMembers((current) => current.map((member) => ({
-        ...member,
-        students: member.students.map((student) =>
-          student.id === studentId ? { ...student, archived } : student,
-        ),
-      })))
+      setMembers((current) =>
+        current.map((member) => ({
+          ...member,
+          students: member.students.map((student) =>
+            student.id === studentId ? { ...student, archived } : student,
+          ),
+        })),
+      )
       setActAsStatus(archived ? 'Student archived; history preserved.' : 'Student restored to the parent portal.')
     } catch (err) {
       setActAsStatus(err instanceof Error ? err.message : 'Could not update student')
@@ -152,193 +234,254 @@ export function StaffDashboard() {
     return <p className="text-center py-16 text-sm text-[#5A6070]">Loading staff workspace…</p>
   }
 
-  const canMarketing = me.roles.includes('marketing') || me.isAdmin
-  const canMessage =
-    me.roles.includes('programs') ||
-    me.roles.includes('instructor') ||
-    me.roles.includes('secretary') ||
-    me.isAdmin
-
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-8">
-      <header>
-        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#085508' }}>
-          Staff workspace
-        </p>
-        <h1 className="text-3xl font-bold text-[#1A1A1A] mt-1">
-          {me.name || 'Board member'}
-          {me.boardTitle ? <span className="text-lg font-semibold text-[#5A6070]"> · {me.boardTitle}</span> : null}
-        </h1>
-        <p className="text-sm text-[#5A6070] mt-2">
-          Roles: {me.roles.join(', ')} · <Link href="/member-portal" className="underline">Parent portal</Link>
-        </p>
-      </header>
-
-      <section className="grid gap-4 md:grid-cols-2">
-        {me.homes.map((home) => (
-          <div key={home.role} className="rounded-xl border border-[#E8E4DC] bg-white p-5">
-            <h2 className="text-lg font-bold text-[#1A1A1A]">{home.title}</h2>
-            <p className="text-xs text-[#5A6070] mt-1 mb-3">{home.owns}</p>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#085508] mb-2">This week</p>
-            <ul className="space-y-1.5">
-              {home.thisWeek.map((item) => (
-                <li key={item} className="text-sm text-[#1A1A1A]">• {item}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </section>
-
-      {me.isAdmin ? (
-        <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
-          <h2 className="text-lg font-bold">Admin · Member lookup & act-as</h2>
-          <p className="text-xs text-[#5A6070]">
-            Search parents by email or student name, then open their portal view to troubleshoot.
-          </p>
-          <div className="flex gap-2">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="email or student name"
-              className="flex-1 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
-            />
-            <Button onClick={lookup} disabled={lookupBusy} className="text-white" style={{ backgroundColor: '#085508' }}>
-              {lookupBusy ? '…' : 'Search'}
-            </Button>
-          </div>
-          {actAsStatus ? <p className="text-xs text-red-600">{actAsStatus}</p> : null}
-          <div className="space-y-2">
-            {members.map((m) => (
-              <div key={m.parentEmail} className="flex items-start justify-between gap-3 border-t border-[#F0EBE3] pt-2">
-                <div>
-                  <p className="text-sm font-semibold">{m.parentEmail}</p>
-                  <div className="mt-1 space-y-1">
-                    {m.students.map((student) => (
-                      <div key={student.id} className="flex flex-wrap items-center gap-2 text-xs text-[#5A6070]">
-                        <span className={student.archived ? 'line-through opacity-60' : ''}>
-                          {student.firstName} {student.lastName} (G{student.grade})
-                          {student.archived ? ' · Archived' : ''}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setStudentArchived(student.id, !student.archived)}
-                          className="font-bold underline text-[#085508]"
-                        >
-                          {student.archived ? 'Restore' : 'Archive'}
-                        </button>
-                      </div>
+    <StaffShell
+      name={me.name}
+      boardTitle={me.boardTitle}
+      email={me.email}
+      items={navItems}
+      active={active}
+      onNavigate={go}
+    >
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {active === 'home' ? (
+          <section className="space-y-4">
+            <div>
+              <h1 className="text-2xl font-bold text-[#1A1A1A]">Home</h1>
+              <p className="text-sm text-[#5A6070] mt-1">
+                Roles: {me.roles.join(', ')}. Open a workspace from the top nav — only what you need for
+                that job.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {navItems
+                .filter((i) => i.id !== 'home')
+                .map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => go(item.id)}
+                    className="text-left rounded-xl border border-[#E8E4DC] bg-white p-4 hover:border-[#085508] transition-colors"
+                  >
+                    <p className="text-sm font-bold text-[#1A1A1A]">{item.label}</p>
+                    <p className="text-xs text-[#5A6070] mt-1">
+                      {item.id === 'projects'
+                        ? 'Year board, assign tasks'
+                        : item.id === 'members'
+                          ? 'Lookup, act-as, archive'
+                          : item.id === 'access'
+                            ? 'Assign @shmspto.org roles'
+                            : item.id === 'social'
+                              ? 'Facebook from Staff'
+                              : item.id === 'surveys'
+                                ? 'Responses & CSV'
+                                : item.id === 'messages'
+                                  ? 'Parent portal inbox'
+                                  : 'Drive how-tos'}
+                    </p>
+                  </button>
+                ))}
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {me.homes.map((home) => (
+                <div key={home.role} className="rounded-xl border border-[#E8E4DC] bg-white p-4">
+                  <h2 className="text-base font-bold text-[#1A1A1A]">{home.title}</h2>
+                  <p className="text-xs text-[#5A6070] mt-1 mb-2">{home.owns}</p>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#085508] mb-1.5">
+                    This week
+                  </p>
+                  <ul className="space-y-1">
+                    {home.thisWeek.map((item) => (
+                      <li key={item} className="text-sm text-[#1A1A1A]">
+                        • {item}
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => actAs(m.parentEmail)}
-                  className="text-xs font-bold px-3 py-1.5 rounded-lg text-white shrink-0"
-                  style={{ backgroundColor: '#085508' }}
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {active === 'projects' ? (
+          <StaffTasksPanel myRoles={me.roles} isAdmin={me.isAdmin} myEmail={me.email} />
+        ) : null}
+
+        {active === 'members' && me.isAdmin ? (
+          <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+            <div>
+              <h1 className="text-xl font-bold">Members</h1>
+              <p className="text-xs text-[#5A6070] mt-1">
+                Search parents, open their portal view, or archive / restore a student.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') void lookup()
+                }}
+                placeholder="email or student name"
+                className="flex-1 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              />
+              <Button
+                onClick={() => void lookup()}
+                disabled={lookupBusy}
+                className="text-white"
+                style={{ backgroundColor: '#085508' }}
+              >
+                {lookupBusy ? '…' : 'Search'}
+              </Button>
+            </div>
+            {actAsStatus ? <p className="text-xs text-[#5A6070]">{actAsStatus}</p> : null}
+            <div className="space-y-2">
+              {members.map((m) => (
+                <div
+                  key={m.parentEmail}
+                  className="flex items-start justify-between gap-3 border-t border-[#F0EBE3] pt-2"
                 >
-                  Act as
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : null}
+                  <div>
+                    <p className="text-sm font-semibold">{m.parentEmail}</p>
+                    <div className="mt-1 space-y-1">
+                      {m.students.map((student) => (
+                        <div
+                          key={student.id}
+                          className="flex flex-wrap items-center gap-2 text-xs text-[#5A6070]"
+                        >
+                          <span className={student.archived ? 'line-through opacity-60' : ''}>
+                            {student.firstName} {student.lastName} (G{student.grade})
+                            {student.archived ? ' · Archived' : ''}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => void setStudentArchived(student.id, !student.archived)}
+                            className="font-bold underline text-[#085508]"
+                          >
+                            {student.archived ? 'Restore' : 'Archive'}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void actAs(m.parentEmail)}
+                    className="text-xs font-bold px-3 py-1.5 rounded-lg text-white shrink-0"
+                    style={{ backgroundColor: '#085508' }}
+                  >
+                    Act as
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
-      <StaffTasksPanel myRoles={me.roles} isAdmin={me.isAdmin} myEmail={me.email} />
+        {active === 'access' && me.isAdmin ? <StaffRoleManager /> : null}
 
-      {me.isAdmin ? <StaffRoleManager /> : null}
+        {active === 'social' && canMarketing ? <SocialComposePanel enabled /> : null}
 
-      {canMarketing ? <SocialComposePanel enabled /> : null}
+        {active === 'surveys' && canSurveys ? <SurveyResultsPanel /> : null}
 
-      {(canMarketing || me.roles.includes('secretary')) ? <SurveyResultsPanel /> : null}
-
-      {canMessage ? (
-        <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
-          <h2 className="text-lg font-bold">Programs / Instructor · Message parents</h2>
-          <p className="text-xs text-[#5A6070]">
-            Messages appear in the parent portal inbox. Leave email blank and set grade or program to broadcast.
-          </p>
-          <input
-            value={msgSubject}
-            onChange={(e) => setMsgSubject(e.target.value)}
-            placeholder="Subject"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
-          />
-          <textarea
-            value={msgBody}
-            onChange={(e) => setMsgBody(e.target.value)}
-            rows={4}
-            placeholder="Message body"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
-          />
-          <div className="grid sm:grid-cols-3 gap-2">
+        {active === 'messages' && canMessage ? (
+          <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+            <div>
+              <h1 className="text-xl font-bold">Messages</h1>
+              <p className="text-xs text-[#5A6070] mt-1">
+                Appear in the parent portal inbox. Leave email blank and set grade or program to
+                broadcast.
+              </p>
+            </div>
             <input
-              value={msgEmail}
-              onChange={(e) => setMsgEmail(e.target.value)}
-              placeholder="Parent email (optional)"
-              className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              value={msgSubject}
+              onChange={(e) => setMsgSubject(e.target.value)}
+              placeholder="Subject"
+              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
             />
-            <input
-              value={msgGrade}
-              onChange={(e) => setMsgGrade(e.target.value)}
-              placeholder="Grade e.g. 6"
-              className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            <textarea
+              value={msgBody}
+              onChange={(e) => setMsgBody(e.target.value)}
+              rows={4}
+              placeholder="Message body"
+              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
             />
-            <input
-              value={msgProgram}
-              onChange={(e) => setMsgProgram(e.target.value)}
-              placeholder="Program name"
-              className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
-          <Button
-            disabled={msgBusy || !msgSubject || !msgBody}
-            onClick={sendMessage}
-            className="text-white"
-            style={{ backgroundColor: '#085508' }}
-          >
-            {msgBusy ? 'Sending…' : 'Send to inbox'}
-          </Button>
-          {msgStatus ? <p className="text-xs text-[#5A6070]">{msgStatus}</p> : null}
-        </section>
-      ) : null}
+            <div className="grid sm:grid-cols-3 gap-2">
+              <input
+                value={msgEmail}
+                onChange={(e) => setMsgEmail(e.target.value)}
+                placeholder="Parent email (optional)"
+                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              />
+              <input
+                value={msgGrade}
+                onChange={(e) => setMsgGrade(e.target.value)}
+                placeholder="Grade e.g. 6"
+                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              />
+              <input
+                value={msgProgram}
+                onChange={(e) => setMsgProgram(e.target.value)}
+                placeholder="Program name"
+                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              />
+            </div>
+            <Button
+              disabled={msgBusy || !msgSubject || !msgBody}
+              onClick={() => void sendMessage()}
+              className="text-white"
+              style={{ backgroundColor: '#085508' }}
+            >
+              {msgBusy ? 'Sending…' : 'Send to inbox'}
+            </Button>
+            {msgStatus ? <p className="text-xs text-[#5A6070]">{msgStatus}</p> : null}
+          </section>
+        ) : null}
 
-      <section className="rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-5 space-y-3">
-        <div>
-          <h2 className="text-lg font-bold mb-1">Staff help docs</h2>
-          <p className="text-xs text-[#5A6070]">
-            Full guides live in Google Drive → SHMS PTO Platform Docs. Start with{' '}
-            <span className="font-semibold">30 - Staff Portal Quick Start</span>.
-          </p>
-        </div>
-        <ul className="text-sm space-y-1.5 text-[#1A1A1A]">
-          <li><span className="font-semibold">30</span> — Staff Portal Quick Start (everyone)</li>
-          <li><span className="font-semibold">26</span> — Roles, @shmspto.org login, which panels you see</li>
-          <li><span className="font-semibold">29</span> — Year project board (swimlanes &amp; assign tasks)</li>
-          {me.isAdmin ? (
-            <li><span className="font-semibold">31</span> — Lookup, act-as, archive / restore students</li>
-          ) : null}
-          <li><span className="font-semibold">27</span> — Helping a parent in the member portal</li>
-          {canMessage ? <li><span className="font-semibold">16</span> — Parent portal inbox messages</li> : null}
-          {canMarketing ? (
-            <>
-              <li><span className="font-semibold">23–24</span> — Surveys create / review / CSV</li>
-              <li><span className="font-semibold">25</span> — Publish to Facebook from Staff</li>
-            </>
-          ) : null}
-        </ul>
-        <div>
-          <h3 className="text-sm font-bold mb-2">Site links</h3>
-          <div className="flex flex-wrap gap-3 text-sm">
-            <Link href="/privacy" className="underline">Privacy</Link>
-            <Link href="/terms" className="underline">Terms</Link>
-            <Link href="/photo-release" className="underline">Photo release</Link>
-            <Link href="/board" className="underline">Public board page</Link>
-            <Link href="/programs" className="underline">Programs</Link>
-            <Link href="/store" className="underline">Store</Link>
-          </div>
-        </div>
-      </section>
-    </div>
+        {active === 'help' ? (
+          <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3">
+            <h1 className="text-xl font-bold">Help</h1>
+            <p className="text-xs text-[#5A6070]">
+              Full guides: Google Drive → SHMS PTO Platform Docs. Start with{' '}
+              <span className="font-semibold">30 - Staff Portal Quick Start</span>.
+            </p>
+            <ul className="text-sm space-y-1.5 text-[#1A1A1A]">
+              <li>
+                <span className="font-semibold">30</span> — Staff Portal Quick Start
+              </li>
+              <li>
+                <span className="font-semibold">26</span> — Roles & @shmspto.org login
+              </li>
+              <li>
+                <span className="font-semibold">29</span> — Year project board
+              </li>
+              {me.isAdmin ? (
+                <li>
+                  <span className="font-semibold">31</span> — Lookup, act-as, archive
+                </li>
+              ) : null}
+              <li>
+                <span className="font-semibold">27</span> — Helping a parent in the portal
+              </li>
+              {canMessage ? (
+                <li>
+                  <span className="font-semibold">16</span> — Parent inbox messages
+                </li>
+              ) : null}
+              {canMarketing ? (
+                <>
+                  <li>
+                    <span className="font-semibold">23–24</span> — Surveys
+                  </li>
+                  <li>
+                    <span className="font-semibold">25</span> — Facebook from Staff
+                  </li>
+                </>
+              ) : null}
+            </ul>
+          </section>
+        ) : null}
+      </div>
+    </StaffShell>
   )
 }

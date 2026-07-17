@@ -1,6 +1,5 @@
 import { AnnouncementBar } from '@/components/announcement-bar'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
+import { MemberShell } from '@/components/shells/member-shell'
 import { MemberDashboard } from '@/components/member-portal/member-dashboard'
 import { ActAsBanner } from '@/components/staff/act-as-banner'
 import { PageHero } from '@/components/page-hero'
@@ -36,10 +35,9 @@ export default async function MemberPortalPage() {
     .filter(Boolean)
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <MemberShell>
       <AnnouncementBar />
       <ActAsBanner />
-      <Navbar />
 
       <main id="main-content" className="flex-1" style={{ backgroundColor: '#F5F0E8' }}>
         <PageHero content={hero} compact />
@@ -57,8 +55,6 @@ export default async function MemberPortalPage() {
           </div>
         </section>
       </main>
-
-      <Footer />
-    </div>
+    </MemberShell>
   )
 }

@@ -3,6 +3,16 @@
 Canonical copies live in Google Drive → **SHMS PTO Platform Docs**.  
 Staging: https://shmspto.vercel.app/staff
 
+## Audience shells (who you are)
+
+| Audience | Where | Top nav |
+|----------|--------|---------|
+| **Visitor** | Public pages | Marketing CMS nav + Log in |
+| **Free / paid member** | `/member-portal` | Member shell (My portal, Upgrade/Membership, Store, Programs) — not marketing nav |
+| **Staff** | `/staff` | Staff shell (Home, Projects, Members…) — dark green bar, workspaces as tabs |
+
+Browsing the public site while logged in still uses the marketing nav (with a Free/Paid/Visitor hint). Portal and Staff never reuse that bar.
+
 ## Staff portal — start here
 
 | Doc | Who | What |

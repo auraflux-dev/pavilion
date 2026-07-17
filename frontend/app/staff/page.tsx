@@ -1,17 +1,12 @@
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
+import { Suspense } from 'react'
 import { StaffDashboard } from '@/components/staff/staff-dashboard'
 
 export const dynamic = 'force-dynamic'
 
 export default function StaffPage() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F5F0E8' }}>
-      <Navbar />
-      <main id="main-content" className="flex-1">
-        <StaffDashboard />
-      </main>
-      <Footer />
-    </div>
+    <Suspense fallback={<p className="text-center py-16 text-sm text-[#5A6070]">Loading staff…</p>}>
+      <StaffDashboard />
+    </Suspense>
   )
 }
