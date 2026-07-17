@@ -31,8 +31,12 @@ export async function POST(req: NextRequest) {
 
   try {
     if (body.kind === 'membership') {
-      const tier = body.tier === 'supreme' ? 'supreme' : body.tier === 'ruby' ? 'ruby' : null
-      if (!tier) return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
+      const tier = String(body.tier ?? '')
+        .trim()
+        .toLowerCase()
+      if (!tier || tier === 'faculty' || tier === 'free') {
+        return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
+      }
       const checkoutUrl = await membershipCheckoutRedirectUrl(
         tier,
         body.postFlowUrl || `${origin}/membership`

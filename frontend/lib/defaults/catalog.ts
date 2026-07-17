@@ -7,6 +7,13 @@ export const CATALOG_DEFAULTS = {
   membershipRubyVariantId: '23ea8122-e8b0-4eea-912f-c4227308193d',
   membershipSupremeProductId: '58f334f3-32d7-4d38-9639-7e587a38a26f',
   membershipSupremeVariantId: '1bfd31dd-32e6-4781-9083-97168e82cb1d',
+  /** Pearl (3rd paid tier) — paste Wix Catalog product/variant IDs in Site Settings when created */
+  membershipPearlProductId: '',
+  membershipPearlVariantId: '',
+  /** Default Square gift-card credits by tier (CMS giftCardCredit overrides) */
+  membershipRubyGiftCardCredit: '10',
+  membershipSupremeGiftCardCredit: '25',
+  membershipPearlGiftCardCredit: '50',
   storeCardProductId: 'eb2a71dc-7f0f-41b4-85bc-76b0869e5d30',
   storeCardVariant10: 'c30c1bf1-a771-427c-85f9-d67317fe785d',
   storeCardVariant20: 'bddb2f05-4ce4-4d41-848a-f6b3dc9bf478',
@@ -16,6 +23,7 @@ export const CATALOG_DEFAULTS = {
   storeCardSlug: 'pto-store-card',
   membershipRubySlug: 'pto-membership-ruby-1',
   membershipSupremeSlug: 'pto-membership-supreme-1',
+  membershipPearlSlug: 'pto-membership-pearl-1',
   /** Comma-separated Wix Catalog product UUIDs shown on /store */
   storeProductIds: [
     '90ae23f7-51f4-438d-869c-1fbb28afd381',
@@ -43,15 +51,29 @@ export const CATALOG_DEFAULTS = {
   ].join(','),
 } as const
 
+export type MembershipProductEntry = {
+  tierId: string
+  productId: string
+  variantId: string
+  slug: string
+  /** Fallback gift-card dollars when CMS giftCardCredit is empty */
+  giftCardCredit: number
+}
+
 export type CatalogConfig = {
   rubyProductId: string
   rubyVariantId: string
   supremeProductId: string
   supremeVariantId: string
+  pearlProductId: string
+  pearlVariantId: string
   storeCardProductId: string
   storeCardSlug: string
   rubySlug: string
   supremeSlug: string
+  pearlSlug: string
+  /** Paid membership products keyed by tierId (ruby / supreme / pearl / …) */
+  membershipByTier: Record<string, MembershipProductEntry>
   /** Sorted unique amounts with matching variantIds */
   storeCardAmounts: number[]
   storeCardVariantByAmount: Record<number, string>

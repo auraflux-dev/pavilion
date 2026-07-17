@@ -53,21 +53,68 @@ export async function getCatalogConfig(): Promise<CatalogConfig> {
     if (id) variantByAmount[amount] = id
   }
 
+  const rubyProductId = settings.get('membershipRubyProductId', d.membershipRubyProductId)
+  const rubyVariantId = settings.get('membershipRubyVariantId', d.membershipRubyVariantId)
+  const supremeProductId = settings.get(
+    'membershipSupremeProductId',
+    d.membershipSupremeProductId
+  )
+  const supremeVariantId = settings.get(
+    'membershipSupremeVariantId',
+    d.membershipSupremeVariantId
+  )
+  const pearlProductId = settings.get('membershipPearlProductId', d.membershipPearlProductId)
+  const pearlVariantId = settings.get('membershipPearlVariantId', d.membershipPearlVariantId)
+  const rubySlug = settings.get('membershipRubySlug', d.membershipRubySlug)
+  const supremeSlug = settings.get('membershipSupremeSlug', d.membershipSupremeSlug)
+  const pearlSlug = settings.get('membershipPearlSlug', d.membershipPearlSlug)
+
+  const membershipByTier: CatalogConfig['membershipByTier'] = {
+    ruby: {
+      tierId: 'ruby',
+      productId: rubyProductId,
+      variantId: rubyVariantId,
+      slug: rubySlug,
+      giftCardCredit: parseInt(
+        settings.get('membershipRubyGiftCardCredit', d.membershipRubyGiftCardCredit),
+        10
+      ) || 0,
+    },
+    supreme: {
+      tierId: 'supreme',
+      productId: supremeProductId,
+      variantId: supremeVariantId,
+      slug: supremeSlug,
+      giftCardCredit: parseInt(
+        settings.get('membershipSupremeGiftCardCredit', d.membershipSupremeGiftCardCredit),
+        10
+      ) || 0,
+    },
+    pearl: {
+      tierId: 'pearl',
+      productId: pearlProductId,
+      variantId: pearlVariantId,
+      slug: pearlSlug,
+      giftCardCredit: parseInt(
+        settings.get('membershipPearlGiftCardCredit', d.membershipPearlGiftCardCredit),
+        10
+      ) || 0,
+    },
+  }
+
   return {
-    rubyProductId: settings.get('membershipRubyProductId', d.membershipRubyProductId),
-    rubyVariantId: settings.get('membershipRubyVariantId', d.membershipRubyVariantId),
-    supremeProductId: settings.get(
-      'membershipSupremeProductId',
-      d.membershipSupremeProductId
-    ),
-    supremeVariantId: settings.get(
-      'membershipSupremeVariantId',
-      d.membershipSupremeVariantId
-    ),
+    rubyProductId,
+    rubyVariantId,
+    supremeProductId,
+    supremeVariantId,
+    pearlProductId,
+    pearlVariantId,
     storeCardProductId: settings.get('storeCardProductId', d.storeCardProductId),
     storeCardSlug: settings.get('storeCardSlug', d.storeCardSlug),
-    rubySlug: settings.get('membershipRubySlug', d.membershipRubySlug),
-    supremeSlug: settings.get('membershipSupremeSlug', d.membershipSupremeSlug),
+    rubySlug,
+    supremeSlug,
+    pearlSlug,
+    membershipByTier,
     storeCardAmounts: amounts,
     storeCardVariantByAmount: variantByAmount,
     storeProductIds: parseIdList(

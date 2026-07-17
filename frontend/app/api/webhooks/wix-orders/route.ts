@@ -18,7 +18,7 @@ function collectTierFromOrder(
   cfg: CatalogConfig
 ): {
   email: string
-  tier: 'ruby' | 'supreme' | null
+  tier: string | null
 } {
   const buyer = (order.buyerInfo ?? order.buyer ?? {}) as {
     email?: string
@@ -36,7 +36,7 @@ function collectTierFromOrder(
     .trim()
     .toLowerCase()
 
-  let tier: 'ruby' | 'supreme' | null = null
+  let tier: string | null = null
   const flatTier = String(order.tier ?? order.membershipTier ?? order.productName ?? '')
   tier = tierFromSlugOrName(flatTier)
 
@@ -90,7 +90,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const result = await applyPaidMembership({ parentEmail: email, tier })
+    const result = await applyPaidMembership({
+      parentEmail: email,
+      tier,
+      orderId: String(order.id ?? order.orderId ?? '') || null,
+    })
     return NextResponse.json({ ok: true, email, tier, ...result })
   } catch (err) {
     console.error('wix-orders webhook error:', err)

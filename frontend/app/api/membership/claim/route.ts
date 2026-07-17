@@ -1,6 +1,6 @@
 /**
  * POST /api/membership/claim
- * Logged-in parent confirms a paid membership purchase and applies tier to Students.
+ * Logged-in parent confirms a paid membership purchase and applies tier to Students + gift card.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createOAuthClient } from '@/lib/wix-oauth-client'
@@ -15,10 +15,16 @@ import {
 import { createClient, ApiKeyStrategy } from '@wix/sdk'
 import { orders } from '@wix/ecom'
 import { getCatalogConfig } from '@/lib/api/catalog-config'
+import { getPaidMembershipTiers } from '@/lib/api/membership'
 
-async function findRecentPaidTier(email: string): Promise<PaidTier | null> {
+async function findRecentPaidMembership(
+  email: string
+): Promise<{ tier: PaidTier; orderId?: string } | null> {
   try {
-    const cfg = await getCatalogConfig()
+    const [cfg, cmsTiers] = await Promise.all([
+      getCatalogConfig(),
+      getPaidMembershipTiers(),
+    ])
     const client = createClient({
       modules: { orders },
       auth: ApiKeyStrategy({
@@ -43,9 +49,12 @@ async function findRecentPaidTier(email: string): Promise<PaidTier | null> {
       for (const li of order.lineItems ?? []) {
         const catalogId = li.catalogReference?.catalogItemId as string | undefined
         const name = String(li.productName?.original ?? li.productName ?? '')
+        const fromCms = cmsTiers.find((t) => t.productId && t.productId === catalogId)
         const tier =
-          tierFromProductId(catalogId, cfg) ?? tierFromSlugOrName(name)
-        if (tier) return tier
+          fromCms?.tierId ??
+          tierFromProductId(catalogId, cfg) ??
+          tierFromSlugOrName(name)
+        if (tier) return { tier, orderId: order.id }
       }
     }
   } catch (err) {
@@ -69,18 +78,26 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json().catch(() => ({}))
-    const requestedTier =
-      body.tier === 'supreme' || body.tier === 'ruby' ? (body.tier as PaidTier) : null
+    const requestedTier = String(body.tier ?? '')
+      .trim()
+      .toLowerCase()
     const studentId = (body.studentId as string | undefined) || null
+    const parentName =
+      [member?.contact?.firstName, member?.contact?.lastName].filter(Boolean).join(' ') ||
+      null
 
-    const fromOrders = await findRecentPaidTier(email)
-    const tier = fromOrders ?? requestedTier
+    const fromOrders = await findRecentPaidMembership(email)
+    const tier =
+      fromOrders?.tier ||
+      (requestedTier && requestedTier !== 'faculty' && requestedTier !== 'free'
+        ? requestedTier
+        : null)
 
     if (!tier) {
       return NextResponse.json(
         {
           error:
-            'No Ruby/Supreme membership found yet. Finish checkout on the Wix page, wait a moment, then confirm again.',
+            'No paid membership found yet. Finish checkout on the Wix page, wait a moment, then confirm again.',
         },
         { status: 404 }
       )
@@ -90,9 +107,16 @@ export async function POST(req: NextRequest) {
       parentEmail: email,
       tier,
       studentId,
+      orderId: fromOrders?.orderId ?? null,
+      parentName,
     })
 
-    return NextResponse.json({ ok: true, tier, verifiedFromOrders: !!fromOrders, ...result })
+    return NextResponse.json({
+      ok: true,
+      tier,
+      verifiedFromOrders: !!fromOrders,
+      ...result,
+    })
   } catch (err) {
     console.error('/api/membership/claim error:', err)
     return NextResponse.json({ error: 'Failed to apply membership' }, { status: 500 })

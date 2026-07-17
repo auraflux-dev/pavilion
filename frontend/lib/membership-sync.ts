@@ -1,84 +1,272 @@
 /**
- * Apply paid PTO membership (Ruby / Supreme) onto CMS Students + Memberships.
+ * Apply paid PTO membership onto CMS Students + Memberships,
+ * and load the tier's Square gift-card credit onto the student store card.
  */
 import { getWixClient } from '@/lib/wix-client'
 import { getCatalogConfig } from '@/lib/api/catalog-config'
 import { CATALOG_DEFAULTS } from '@/lib/defaults/catalog'
 import type { CatalogConfig } from '@/lib/defaults/catalog'
+import {
+  getMembershipTierById,
+  getPaidMembershipTiers,
+} from '@/lib/api/membership'
+import { createOrLoadStudentGiftCard, upsertSquareCustomer } from '@/lib/square'
 
-export type PaidTier = 'ruby' | 'supreme'
+/** Any paid tier slug (ruby / supreme / pearl / future). */
+export type PaidTier = string
 
 export function tierFromProductId(
   productId: string | undefined | null,
-  cfg?: Pick<CatalogConfig, 'rubyProductId' | 'supremeProductId'>
+  cfg?: CatalogConfig
 ): PaidTier | null {
   if (!productId) return null
+  const map = cfg?.membershipByTier
+  if (map) {
+    for (const [tierId, entry] of Object.entries(map)) {
+      if (entry.productId && entry.productId === productId) return tierId
+    }
+  }
   const ruby = cfg?.rubyProductId ?? CATALOG_DEFAULTS.membershipRubyProductId
   const supreme = cfg?.supremeProductId ?? CATALOG_DEFAULTS.membershipSupremeProductId
+  const pearl = cfg?.pearlProductId ?? CATALOG_DEFAULTS.membershipPearlProductId
   if (productId === ruby) return 'ruby'
   if (productId === supreme) return 'supreme'
+  if (pearl && productId === pearl) return 'pearl'
   return null
 }
 
-/** Resolve tier using SiteSettings-aware catalog config. */
+/** Resolve tier using SiteSettings-aware catalog config + CMS productId overrides. */
 export async function tierFromProductIdAsync(
   productId: string | undefined | null
 ): Promise<PaidTier | null> {
-  const cfg = await getCatalogConfig()
+  if (!productId) return null
+  const [cfg, tiers] = await Promise.all([getCatalogConfig(), getPaidMembershipTiers()])
+  for (const t of tiers) {
+    if (t.productId && t.productId === productId) return t.tierId
+  }
   return tierFromProductId(productId, cfg)
 }
 
 export function tierFromSlugOrName(value: string | undefined | null): PaidTier | null {
   if (!value) return null
   const v = value.toLowerCase()
+  if (v.includes('pearl')) return 'pearl'
   if (v.includes('supreme')) return 'supreme'
   if (v.includes('ruby')) return 'ruby'
+  // Match exact slug tokens like "pto-membership-pearl-1"
+  const slugMatch = v.match(/(?:membership[-_])?(pearl|supreme|ruby)\b/)
+  return slugMatch?.[1] ?? null
+}
+
+async function resolveGiftCardCredit(tier: PaidTier): Promise<number> {
+  const cms = await getMembershipTierById(tier)
+  if (cms && cms.giftCardCredit > 0) return cms.giftCardCredit
+  const cfg = await getCatalogConfig()
+  const entry = cfg.membershipByTier[tier]
+  return entry?.giftCardCredit ?? 0
+}
+
+async function resolveCheckoutProduct(
+  tier: PaidTier
+): Promise<{ productId: string; variantId: string } | null> {
+  const cms = await getMembershipTierById(tier)
+  if (cms?.productId) {
+    return { productId: cms.productId, variantId: cms.variantId || '' }
+  }
+  const cfg = await getCatalogConfig()
+  const entry = cfg.membershipByTier[tier]
+  if (entry?.productId) {
+    return { productId: entry.productId, variantId: entry.variantId || '' }
+  }
   return null
+}
+
+export async function getMembershipCheckoutProduct(tier: PaidTier) {
+  return resolveCheckoutProduct(tier)
 }
 
 /**
  * Upgrade a specific student, or the parent's first free student if studentId omitted.
- * Also upserts the parent-level Memberships CMS row (legacy source).
+ * Also upserts the parent-level Memberships CMS row and loads Square gift-card credit.
  */
 export async function applyPaidMembership(opts: {
   parentEmail: string
   tier: PaidTier
   studentId?: string | null
   expiresAt?: string | null
-}): Promise<{ updatedStudentIds: string[]; membershipUpserted: boolean }> {
+  orderId?: string | null
+  parentName?: string | null
+}): Promise<{
+  updatedStudentIds: string[]
+  membershipUpserted: boolean
+  giftCard?: {
+    studentId: string
+    gan: string
+    creditDollars: number
+    status: 'loaded' | 'skipped' | 'failed'
+    error?: string
+  }
+}> {
   const email = opts.parentEmail.trim().toLowerCase()
+  const tier = opts.tier.trim().toLowerCase()
   const client = getWixClient()
   const expiresAt =
     opts.expiresAt ??
-    // End of next June (typical school-year membership)
     `${new Date().getFullYear() + (new Date().getMonth() >= 6 ? 1 : 0)}-06-30T23:59:59.000Z`
 
   const students = await client.items.query('Students').eq('parentEmail', email).find()
   const items = (students.items ?? []).filter(
-    (student) => (student as { archived?: boolean }).archived !== true,
+    (student) => (student as { archived?: boolean }).archived !== true
   )
 
   let targets = items
   if (opts.studentId) {
     targets = items.filter((s) => s._id === opts.studentId)
   } else {
-    // Prefer upgrading a free (or missing tier) student first
     const free = items.filter((s) => {
-      const tier = String((s as { membershipTier?: string }).membershipTier ?? 'free')
-      return tier === 'free' || !tier
+      const t = String((s as { membershipTier?: string }).membershipTier ?? 'free')
+      return t === 'free' || !t
     })
     targets = free.length > 0 ? [free[0]] : items.slice(0, 1)
   }
 
   const updatedStudentIds: string[] = []
+  let giftCardResult:
+    | {
+        studentId: string
+        gan: string
+        creditDollars: number
+        status: 'loaded' | 'skipped' | 'failed'
+        error?: string
+      }
+    | undefined
+
   for (const student of targets) {
     if (!student._id) continue
+    const previousTier = String(
+      (student as { membershipTier?: string }).membershipTier ?? 'free'
+    )
     await client.items.update('Students', {
       ...student,
-      membershipTier: opts.tier,
+      membershipTier: tier,
       membershipStatus: 'active',
     })
     updatedStudentIds.push(student._id)
+
+    // Gift-card credit once per order (or once when moving free → paid without orderId)
+    if (!giftCardResult) {
+      const creditDollars = await resolveGiftCardCredit(tier)
+      const shouldLoad =
+        creditDollars > 0 &&
+        (opts.orderId
+          ? true
+          : previousTier === 'free' || previousTier === '' || previousTier !== tier)
+
+      if (!shouldLoad || creditDollars <= 0) {
+        giftCardResult = {
+          studentId: student._id,
+          gan: String((student as { squareGiftCardGan?: string }).squareGiftCardGan ?? ''),
+          creditDollars,
+          status: 'skipped',
+        }
+      } else {
+        try {
+          if (opts.orderId) {
+            const existingPay = await client.items
+              .query('Payments')
+              .eq('source', 'membership_gift_card')
+              .eq('orderId', opts.orderId)
+              .limit(1)
+              .find()
+            if ((existingPay.items ?? []).length > 0) {
+              giftCardResult = {
+                studentId: student._id,
+                gan: String(
+                  (student as { squareGiftCardGan?: string }).squareGiftCardGan ?? ''
+                ),
+                creditDollars,
+                status: 'skipped',
+              }
+              continue
+            }
+          }
+
+          let customerId: string | undefined
+          try {
+            const customer = await upsertSquareCustomer(
+              email,
+              opts.parentName || email.split('@')[0]
+            )
+            customerId = customer?.id
+          } catch {
+            // optional
+          }
+
+          const idempotencyKey = opts.orderId
+            ? `membership-gc-${opts.orderId}`
+            : `membership-gc-${student._id}-${tier}-${expiresAt.slice(0, 10)}`
+
+          const card = await createOrLoadStudentGiftCard({
+            amountCents: Math.round(creditDollars * 100),
+            idempotencyKey,
+            existingGan: (student as { squareGiftCardGan?: string }).squareGiftCardGan,
+            customerId,
+          })
+
+          await client.items.update('Students', {
+            ...student,
+            membershipTier: tier,
+            membershipStatus: 'active',
+            squareGiftCardGan: card.gan,
+            squareGiftCardId: card.giftCardId,
+            storeCardBalance: creditDollars,
+          })
+
+          try {
+            await client.items.insert('Payments', {
+              parentEmail: email,
+              studentId: student._id,
+              amount: creditDollars,
+              status: 'Paid',
+              source: 'membership_gift_card',
+              orderId: opts.orderId || idempotencyKey,
+              notes: `Membership ${tier} store-card credit`,
+            })
+          } catch {
+            // Payments insert is best-effort for ledger / idempotency
+          }
+
+          giftCardResult = {
+            studentId: student._id,
+            gan: card.gan,
+            creditDollars,
+            status: 'loaded',
+          }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Gift card load failed'
+          try {
+            await client.items.insert('Payments', {
+              parentEmail: email,
+              studentId: student._id,
+              amount: creditDollars,
+              status: 'Needs Reconciliation',
+              source: 'membership_gift_card',
+              orderId: opts.orderId || `membership-gc-fail-${student._id}-${Date.now()}`,
+              notes: message,
+            })
+          } catch {
+            // ignore
+          }
+          giftCardResult = {
+            studentId: student._id,
+            gan: '',
+            creditDollars,
+            status: 'failed',
+            error: message,
+          }
+        }
+      }
+    }
   }
 
   // Upsert parent Memberships row
@@ -90,14 +278,14 @@ export async function applyPaidMembership(opts: {
       await client.items.update('Memberships', {
         ...row,
         email,
-        tier: opts.tier,
+        tier,
         expiresAt,
         status: 'active',
       })
     } else {
       await client.items.insert('Memberships', {
         email,
-        tier: opts.tier,
+        tier,
         expiresAt,
         status: 'active',
       })
@@ -107,5 +295,5 @@ export async function applyPaidMembership(opts: {
     // Memberships collection may be missing or permissioned differently
   }
 
-  return { updatedStudentIds, membershipUpserted }
+  return { updatedStudentIds, membershipUpserted, giftCard: giftCardResult }
 }

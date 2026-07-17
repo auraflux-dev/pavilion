@@ -52,7 +52,9 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 
 ## Next up
 
-Memberships — tier names, 3 tiers, pricing, and what’s included (in Staff + site).
+After you create the Pearl Wix Stores product and paste its Product ID onto the Pearl Membership Tiers row, we can test Join → checkout → claim → portal + Square card credit.
+
+Gift-card defaults (editable in CMS `giftCardCredit`): Ruby $10 · Supreme $25 · Pearl $50.
 
 ## Publish / refresh Drive
 

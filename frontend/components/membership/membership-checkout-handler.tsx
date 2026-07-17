@@ -23,7 +23,7 @@ function HandlerInner() {
 
   useEffect(() => {
     if (status !== 'member') return
-    if (!checkout || (checkout !== 'ruby' && checkout !== 'supreme')) return
+    if (!checkout || checkout === 'faculty' || checkout === 'free') return
 
     let cancelled = false
     ;(async () => {
@@ -69,7 +69,7 @@ function HandlerInner() {
       } catch {
         pending = {}
       }
-      const tier = pending.tier || (checkout === 'supreme' ? 'supreme' : 'ruby')
+      const tier = pending.tier || checkout || ''
       const res = await fetch('/api/membership/claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -86,9 +86,13 @@ function HandlerInner() {
         // ignore
       }
       setClaimStatus('ok')
+      const giftNote =
+        data.giftCard?.status === 'loaded'
+          ? ` Store card credited $${data.giftCard.creditDollars}.`
+          : ''
       setClaimMsg(
         data.updatedStudentIds?.length
-          ? 'Membership applied to your student. Opening your portal…'
+          ? `Membership applied to your student.${giftNote} Opening your portal…`
           : 'Membership recorded. Add a student in the portal to finish setup.'
       )
       refresh()
@@ -109,8 +113,8 @@ function HandlerInner() {
         <p className="font-bold text-[#1A1A1A] mb-1">Finished checkout?</p>
         <p className="text-sm text-[#5A6070]">
           After you pay on the Wix checkout page, confirm here so we link your paid membership
-          (Ruby/Supreme) to your free parent account
-          {studentId ? ' and selected student' : ''}.
+          to your parent account, update the portal, and load the tier&apos;s store card credit
+          {studentId ? ' for the selected student' : ''}.
         </p>
         {claimMsg && (
           <p

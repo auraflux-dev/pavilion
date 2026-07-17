@@ -1,6 +1,6 @@
 /**
  * GET /api/cron/sync-membership-orders
- * Vercel Cron + manual ops: scan recent paid Wix orders and apply Ruby/Supreme.
+ * Vercel Cron + manual ops: scan recent paid Wix orders and apply paid memberships.
  *
  * Auth: Authorization: Bearer $CRON_SECRET (Vercel Cron sends this automatically)
  */
@@ -92,7 +92,11 @@ export async function GET(req: NextRequest) {
         continue
       }
 
-      await applyPaidMembership({ parentEmail: email, tier })
+      await applyPaidMembership({
+        parentEmail: email,
+        tier,
+        orderId: order.id ?? null,
+      })
       applied.push({ email, tier, orderId: order.id })
     }
 

@@ -100,13 +100,21 @@ export async function createCheckoutUrl(opts: {
 }
 
 export async function membershipCheckoutRedirectUrl(
-  tier: 'ruby' | 'supreme',
+  tier: string,
   postFlowUrl?: string
 ): Promise<string> {
-  const cfg = await getCatalogConfig()
-  const productId = tier === 'supreme' ? cfg.supremeProductId : cfg.rubyProductId
-  const variantId = tier === 'supreme' ? cfg.supremeVariantId : cfg.rubyVariantId
-  return createCheckoutUrl({ productId, variantId, postFlowUrl })
+  const { getMembershipCheckoutProduct } = await import('@/lib/membership-sync')
+  const product = await getMembershipCheckoutProduct(tier)
+  if (!product?.productId) {
+    throw new Error(
+      `No Wix product configured for membership tier "${tier}". Set productId on the Membership Tiers CMS row or membership*ProductId in Site Settings.`
+    )
+  }
+  return createCheckoutUrl({
+    productId: product.productId,
+    variantId: product.variantId || null,
+    postFlowUrl,
+  })
 }
 
 export async function storeCardCheckoutRedirectUrl(

@@ -32,7 +32,7 @@ function JoinInner({ tierId, tierName }: Props) {
       )
       await startWixCheckout({
         kind: 'membership',
-        tier: tierId === 'supreme' ? 'supreme' : 'ruby',
+        tier: tierId,
         postFlowUrl: `${window.location.origin}/membership`,
       })
     } catch (err) {

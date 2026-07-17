@@ -132,6 +132,75 @@ export async function linkGiftCardToCustomer(giftCardId: string, customerId: str
   return (result as any).giftCard ?? null
 }
 
+/**
+ * Create a digital Square gift card (PENDING), then ACTIVATE (or LOAD if already active)
+ * with the given amount. Returns gan + giftCardId.
+ */
+export async function createOrLoadStudentGiftCard(opts: {
+  amountCents: number
+  idempotencyKey: string
+  existingGan?: string | null
+  customerId?: string | null
+}): Promise<{ gan: string; giftCardId: string; activated: boolean }> {
+  if (!Number.isInteger(opts.amountCents) || opts.amountCents < 0) {
+    throw new Error('Invalid gift card amount')
+  }
+  if (!SQUARE_LOCATION_ID) throw new Error('SQUARE_LOCATION_ID is not set')
+
+  const client = getSquareClient()
+  let gan = String(opts.existingGan ?? '').trim()
+  let giftCardId = ''
+  let state = ''
+
+  if (gan) {
+    const existing = await getGiftCardByGan(gan)
+    giftCardId = existing?.id ?? ''
+    state = String(existing?.state ?? '')
+    if (!giftCardId) gan = ''
+  }
+
+  if (!gan) {
+    const created = await client.giftCards.create({
+      idempotencyKey: `${opts.idempotencyKey}-create`,
+      locationId: SQUARE_LOCATION_ID,
+      giftCard: { type: 'DIGITAL' },
+    })
+    const card = (created as any).giftCard
+    gan = String(card?.gan ?? '')
+    giftCardId = String(card?.id ?? '')
+    state = String(card?.state ?? 'PENDING')
+    if (!gan || !giftCardId) throw new Error('Square did not return a gift card GAN')
+
+    if (opts.customerId) {
+      try {
+        await linkGiftCardToCustomer(giftCardId, opts.customerId)
+      } catch {
+        // Linking is best-effort — card still usable by GAN
+      }
+    }
+  }
+
+  if (opts.amountCents > 0) {
+    const activityType = state === 'ACTIVE' ? 'LOAD' : 'ACTIVATE'
+    const detailsKey =
+      activityType === 'LOAD' ? 'loadActivityDetails' : 'activateActivityDetails'
+    await client.giftCards.activities.create({
+      idempotencyKey: `${opts.idempotencyKey}-${activityType.toLowerCase()}`,
+      giftCardActivity: {
+        type: activityType,
+        locationId: SQUARE_LOCATION_ID,
+        giftCardId,
+        [detailsKey]: {
+          amountMoney: { amount: BigInt(opts.amountCents), currency: 'USD' },
+          referenceId: opts.idempotencyKey,
+        },
+      },
+    })
+  }
+
+  return { gan, giftCardId, activated: true }
+}
+
 /** Create or find a Square customer record (one per parent email). */
 export async function upsertSquareCustomer(email: string, name: string) {
   const client = getSquareClient()

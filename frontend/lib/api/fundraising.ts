@@ -184,8 +184,9 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
   ])
 
   const membershipIds = new Set<string>([
-    catalog.rubyProductId,
-    catalog.supremeProductId,
+    ...Object.values(catalog.membershipByTier)
+      .map((e) => e.productId)
+      .filter(Boolean),
     ...Array.from(LEGACY_MEMBERSHIP_IDS),
   ])
 
