@@ -303,15 +303,40 @@ export function StaffDashboard() {
         </section>
       ) : null}
 
-      <section className="rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-5">
-        <h2 className="text-lg font-bold mb-2">Quick links for your role</h2>
-        <div className="flex flex-wrap gap-3 text-sm">
-          <Link href="/privacy" className="underline">Privacy</Link>
-          <Link href="/terms" className="underline">Terms</Link>
-          <Link href="/photo-release" className="underline">Photo release</Link>
-          <Link href="/board" className="underline">Public board page</Link>
-          <Link href="/programs" className="underline">Programs</Link>
-          <Link href="/store" className="underline">Store</Link>
+      <section className="rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-5 space-y-3">
+        <div>
+          <h2 className="text-lg font-bold mb-1">Staff help docs</h2>
+          <p className="text-xs text-[#5A6070]">
+            Full guides live in Google Drive → SHMS PTO Platform Docs. Start with{' '}
+            <span className="font-semibold">30 - Staff Portal Quick Start</span>.
+          </p>
+        </div>
+        <ul className="text-sm space-y-1.5 text-[#1A1A1A]">
+          <li><span className="font-semibold">30</span> — Staff Portal Quick Start (everyone)</li>
+          <li><span className="font-semibold">26</span> — Roles, @shmspto.org login, which panels you see</li>
+          <li><span className="font-semibold">29</span> — Year project board (swimlanes &amp; assign tasks)</li>
+          {me.isAdmin ? (
+            <li><span className="font-semibold">31</span> — Lookup, act-as, archive / restore students</li>
+          ) : null}
+          <li><span className="font-semibold">27</span> — Helping a parent in the member portal</li>
+          {canMessage ? <li><span className="font-semibold">16</span> — Parent portal inbox messages</li> : null}
+          {canMarketing ? (
+            <>
+              <li><span className="font-semibold">23–24</span> — Surveys create / review / CSV</li>
+              <li><span className="font-semibold">25</span> — Publish to Facebook from Staff</li>
+            </>
+          ) : null}
+        </ul>
+        <div>
+          <h3 className="text-sm font-bold mb-2">Site links</h3>
+          <div className="flex flex-wrap gap-3 text-sm">
+            <Link href="/privacy" className="underline">Privacy</Link>
+            <Link href="/terms" className="underline">Terms</Link>
+            <Link href="/photo-release" className="underline">Photo release</Link>
+            <Link href="/board" className="underline">Public board page</Link>
+            <Link href="/programs" className="underline">Programs</Link>
+            <Link href="/store" className="underline">Store</Link>
+          </div>
         </div>
       </section>
     </div>
