@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { SurveyResultsPanel } from '@/components/staff/survey-results-panel'
 import { StaffRoleManager } from '@/components/staff/staff-role-manager'
 import { SocialComposePanel } from '@/components/staff/social-compose-panel'
+import { StaffTasksPanel } from '@/components/staff/staff-tasks-panel'
 
 type StaffHome = {
   role: string
@@ -242,6 +243,8 @@ export function StaffDashboard() {
           </div>
         </section>
       ) : null}
+
+      <StaffTasksPanel myRoles={me.roles} isAdmin={me.isAdmin} />
 
       {me.isAdmin ? <StaffRoleManager /> : null}
 

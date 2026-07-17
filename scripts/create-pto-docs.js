@@ -1224,6 +1224,26 @@ const DOCS = [
     ],
   },
 
+  {
+    folder: 'wix',
+    update: true,
+    title: '29 - Staff Work Board (Tasks by Role)',
+    content: [
+      { type: 'title', text: 'Staff Work Board (Tasks by Role)' },
+      { type: 'body', text: 'SHMS PTO — Wix Admin Guide  |  Last updated: July 17, 2026' },
+      { type: 'body', text: 'Built into Staff (/staff) — no Asana/Trello. Simple ownership, due dates, and “waiting on” notes.' },
+      { type: 'h1', text: 'Where to go' },
+      { type: 'body', text: 'Sign in with your @shmspto.org email → Staff → Staff · Work by role.' },
+      { type: 'h1', text: 'How to use it' },
+      { type: 'body', text: '1. Add work: title, owner role (marketing, events, treasurer…), due date.' },
+      { type: 'body', text: '2. Faculty or SHMS admin asks: set Source to From faculty / From SHMS admin and Requested by. It lands in Triage for the president to Accept and reassign.' },
+      { type: 'body', text: '3. If you are stuck: fill Waiting on… or link another task. Status becomes Blocked until you Unblock or mark Done.' },
+      { type: 'body', text: '4. Mark Done when finished. Admins can reassign the owner role from the card.' },
+      { type: 'h1', text: 'What it is not' },
+      { type: 'body', text: 'Not Gantt charts, sprints, or time tracking. Just role-owned work with dates and blockers so board members who are not project managers can stay aligned.' },
+    ],
+  },
+
   // ── DNS cutover ───────────────────────────────────────────────────────────
   {
     folder: 'techops',
@@ -1372,6 +1392,7 @@ const DOCS = [
       { type: 'body',  text: '10 - Environment Variables Reference' },
       { type: 'body',  text: '11 - Money Minder Manual Sync (Interim)' },
       { type: 'body',  text: '28 - DNS Cutover & Post-DNS Update Checklist (Rob)' },
+      { type: 'body',  text: '29 - Staff Work Board (Tasks by Role)' },
       { type: 'h1',   text: 'CheddarUp' },
       { type: 'body',  text: '12 - CheddarUp Setup Guide' },
       { type: 'h1',   text: 'Who Can Edit What' },

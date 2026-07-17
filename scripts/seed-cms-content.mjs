@@ -753,6 +753,46 @@ async function ensureStudentArchiveFields() {
   }
 }
 
+async function ensureStaffTasksCollection() {
+  try {
+    await wix('/wix-data/v2/collections', {
+      collection: {
+        id: 'StaffTasks',
+        displayName: 'Staff Tasks',
+        fields: [
+          { key: 'title', displayName: 'Title', type: 'TEXT' },
+          { key: 'description', displayName: 'Description', type: 'TEXT' },
+          { key: 'ownerRole', displayName: 'Owner Role', type: 'TEXT' },
+          { key: 'status', displayName: 'Status', type: 'TEXT' },
+          { key: 'dueAt', displayName: 'Due At', type: 'DATETIME' },
+          { key: 'blockedByTaskId', displayName: 'Blocked By Task Id', type: 'TEXT' },
+          { key: 'blockedByNote', displayName: 'Blocked By Note', type: 'TEXT' },
+          { key: 'requestedBy', displayName: 'Requested By', type: 'TEXT' },
+          { key: 'source', displayName: 'Source', type: 'TEXT' },
+          { key: 'createdByEmail', displayName: 'Created By Email', type: 'TEXT' },
+          { key: 'createdByName', displayName: 'Created By Name', type: 'TEXT' },
+          { key: 'createdAt', displayName: 'Created At', type: 'DATETIME' },
+          { key: 'updatedAt', displayName: 'Updated At', type: 'DATETIME' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+        ],
+        permissions: {
+          insert: 'ADMIN',
+          update: 'ADMIN',
+          remove: 'ADMIN',
+          read: 'ADMIN',
+        },
+      },
+    })
+    console.log('Created StaffTasks collection')
+  } catch (err) {
+    if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
+      console.log('StaffTasks collection already exists')
+      return
+    }
+    console.warn('StaffTasks create skipped:', err.message.slice(0, 200))
+  }
+}
+
 async function ensureSocialPostsCollection() {
   try {
     await wix('/wix-data/v2/collections', {
@@ -840,6 +880,7 @@ async function main() {
   await ensureStaffRolesCollection()
   await ensureStudentArchiveFields()
   await ensureSocialPostsCollection()
+  await ensureStaffTasksCollection()
   await upsertSiteSettings()
   await upsertPageContent()
   await upsertSurveys()
