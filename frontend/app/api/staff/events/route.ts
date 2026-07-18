@@ -64,11 +64,12 @@ export async function POST(req: NextRequest) {
     const startDate = toDate(startRaw)
     const endDate = endRaw ? toDate(endRaw) : startDate
 
+    // Wix Events description is rich-content (object), not a plain string.
+    // Create without it, then patch a simple paragraph if copy was provided.
     const client = getWixClient()
     const created = await client.wixEventsV2.createEvent(
       {
         title,
-        description: description || undefined,
         location: {
           type: 'VENUE',
           name: locationName,
@@ -85,9 +86,29 @@ export async function POST(req: NextRequest) {
       { draft },
     )
 
+    const id = (created as { _id?: string })._id ?? ''
+    if (id && description) {
+      try {
+        await client.wixEventsV2.updateEvent(id, {
+          event: {
+            description: {
+              nodes: [
+                {
+                  type: 'PARAGRAPH',
+                  nodes: [{ type: 'TEXT', textData: { text: description } }],
+                },
+              ],
+            },
+          },
+        } as unknown as Parameters<typeof client.wixEventsV2.updateEvent>[1])
+      } catch (err) {
+        console.warn('/api/staff/events description update skipped', err)
+      }
+    }
+
     return NextResponse.json({
       ok: true,
-      id: (created as { _id?: string })._id ?? '',
+      id,
       slug: (created as { slug?: string }).slug ?? '',
       status: (created as { status?: string }).status ?? '',
       draft,
