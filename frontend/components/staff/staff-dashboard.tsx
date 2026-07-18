@@ -17,6 +17,8 @@ import { StaffDiscountsPanel } from '@/components/staff/staff-discounts-panel'
 import { StaffMembershipPanel } from '@/components/staff/staff-membership-panel'
 import { StaffWorkspaceHub } from '@/components/staff/staff-workspace-hub'
 import { StaffPageContentPanel } from '@/components/staff/staff-page-content-panel'
+import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-panel'
+import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection-panel'
 import { StaffShell } from '@/components/shells/staff-shell'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 
@@ -63,10 +65,18 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'retail',
   'discounts',
   'membership',
+  'tiers',
   'inbox',
   'calendar',
   'docs',
   'content',
+  'site',
+  'board',
+  'nav',
+  'faq',
+  'volunteers',
+  'fundraising',
+  'wellness',
   'help',
 ]
 
@@ -137,6 +147,40 @@ export function StaffDashboard() {
   const canContent = Boolean(
     me && (me.roles.includes('marketing') || me.roles.includes('secretary') || me.isAdmin),
   )
+  const canSite = Boolean(
+    me &&
+      (me.isAdmin ||
+        me.roles.some((r) =>
+          ['marketing', 'secretary', 'membership', 'programs', 'treasurer', 'events', 'retail', 'wellness'].includes(
+            r,
+          ),
+        )),
+  )
+  const canBoard = Boolean(me && (me.roles.includes('secretary') || me.isAdmin))
+  const canNav = Boolean(
+    me && (me.roles.includes('marketing') || me.roles.includes('secretary') || me.isAdmin),
+  )
+  const canFaq = Boolean(
+    me &&
+      (me.roles.includes('marketing') ||
+        me.roles.includes('membership') ||
+        me.roles.includes('secretary') ||
+        me.isAdmin),
+  )
+  const canVolunteers = Boolean(
+    me && (me.roles.includes('events') || me.roles.includes('secretary') || me.isAdmin),
+  )
+  const canFundraising = Boolean(
+    me &&
+      (me.roles.includes('programs') ||
+        me.roles.includes('treasurer') ||
+        me.roles.includes('marketing') ||
+        me.isAdmin),
+  )
+  const canTiers = Boolean(
+    me && (me.roles.includes('membership') || me.roles.includes('secretary') || me.isAdmin),
+  )
+  const canWellness = Boolean(me && (me.roles.includes('wellness') || me.roles.includes('events') || me.isAdmin))
 
   const navItems = useMemo(() => {
     if (!me) return []
@@ -163,7 +207,15 @@ export function StaffDashboard() {
     if (canRetail) items.push({ id: 'retail', label: STAFF_WORKSPACE_LABEL.retail })
     if (canDiscounts) items.push({ id: 'discounts', label: STAFF_WORKSPACE_LABEL.discounts })
     if (canMembership) items.push({ id: 'membership', label: STAFF_WORKSPACE_LABEL.membership })
+    if (canTiers) items.push({ id: 'tiers', label: STAFF_WORKSPACE_LABEL.tiers })
     if (canContent) items.push({ id: 'content', label: STAFF_WORKSPACE_LABEL.content })
+    if (canSite) items.push({ id: 'site', label: STAFF_WORKSPACE_LABEL.site })
+    if (canBoard) items.push({ id: 'board', label: STAFF_WORKSPACE_LABEL.board })
+    if (canNav) items.push({ id: 'nav', label: STAFF_WORKSPACE_LABEL.nav })
+    if (canFaq) items.push({ id: 'faq', label: STAFF_WORKSPACE_LABEL.faq })
+    if (canVolunteers) items.push({ id: 'volunteers', label: STAFF_WORKSPACE_LABEL.volunteers })
+    if (canFundraising) items.push({ id: 'fundraising', label: STAFF_WORKSPACE_LABEL.fundraising })
+    if (canWellness) items.push({ id: 'wellness', label: STAFF_WORKSPACE_LABEL.wellness })
     items.push({ id: 'help', label: STAFF_WORKSPACE_LABEL.help })
     return items
   }, [
@@ -178,7 +230,15 @@ export function StaffDashboard() {
     canRetail,
     canDiscounts,
     canMembership,
+    canTiers,
     canContent,
+    canSite,
+    canBoard,
+    canNav,
+    canFaq,
+    canVolunteers,
+    canFundraising,
+    canWellness,
   ])
 
   const active: StaffWorkspace = useMemo(() => {
@@ -525,7 +585,34 @@ export function StaffDashboard() {
         {active === 'calendar' ? <StaffWorkspaceHub tab="calendar" /> : null}
         {active === 'docs' ? <StaffWorkspaceHub tab="docs" /> : null}
         {active === 'content' && canContent ? <StaffPageContentPanel /> : null}
-
+        {active === 'site' && canSite ? <StaffSiteSettingsPanel /> : null}
+        {active === 'board' && canBoard ? (
+          <StaffCmsCollectionPanel collection="BoardMembers" title="Board roster" />
+        ) : null}
+        {active === 'nav' && canNav ? (
+          <StaffCmsCollectionPanel collection="NavLinks" title="Nav & footer links" />
+        ) : null}
+        {active === 'faq' && canFaq ? (
+          <StaffCmsCollectionPanel collection="FAQItems" title="FAQs" />
+        ) : null}
+        {active === 'volunteers' && canVolunteers ? (
+          <StaffCmsCollectionPanel collection="VolunteerOpportunities" title="Volunteer opportunities" />
+        ) : null}
+        {active === 'fundraising' && canFundraising ? (
+          <div className="space-y-4">
+            <StaffCmsCollectionPanel collection="FundraisingCTAs" title="Fundraising CTAs" />
+            <StaffSiteSettingsPanel
+              title="Fundraising goals (Site settings)"
+              groupIds={['fundraising']}
+            />
+          </div>
+        ) : null}
+        {active === 'tiers' && canTiers ? (
+          <StaffCmsCollectionPanel collection="MembershipTiers" title="Membership tiers" />
+        ) : null}
+        {active === 'wellness' && canWellness ? (
+          <StaffSiteSettingsPanel title="Teacher & staff wellness" groupIds={['wellness']} />
+        ) : null}
         {active === 'help' ? (
           <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3">
             <h1 className="text-xl font-bold">Help</h1>
@@ -573,6 +660,12 @@ export function StaffDashboard() {
               {canDiscounts ? (
                 <li>
                   <span className="font-semibold">36</span> — Discount codes & spirit coupons
+                </li>
+              ) : null}
+              {canSite ? (
+                <li>
+                  <span className="font-semibold">Site settings / CMS lists</span> — Announcement,
+                  board, nav, FAQs, volunteers, fundraising, tiers, wellness (by role)
                 </li>
               ) : null}
               {canMarketing ? (

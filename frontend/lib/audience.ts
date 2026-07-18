@@ -28,6 +28,14 @@ export type StaffWorkspace =
   | 'calendar'
   | 'docs'
   | 'content'
+  | 'site'
+  | 'board'
+  | 'nav'
+  | 'faq'
+  | 'volunteers'
+  | 'fundraising'
+  | 'tiers'
+  | 'wellness'
   | 'help'
 
 export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
@@ -49,5 +57,13 @@ export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
   calendar: 'My calendar',
   docs: 'Docs',
   content: 'Page copy',
+  site: 'Site settings',
+  board: 'Board roster',
+  nav: 'Nav & footer',
+  faq: 'FAQs',
+  volunteers: 'Volunteer ops',
+  fundraising: 'Fundraising',
+  tiers: 'Membership tiers',
+  wellness: 'Wellness',
   help: 'Help',
 }

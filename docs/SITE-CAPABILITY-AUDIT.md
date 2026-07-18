@@ -24,30 +24,30 @@ Audience shells: **visitor** · **free member** · **paid member** · **staff (b
 
 ### P0
 
-| ID | Gap | Surface |
-|----|-----|---------|
-| G-P0-1 | **wellness** role has ROLE_HOME_COPY (appreciation / wish list) but **no gated Staff workspace** | Staff |
+| ID | Gap | Surface | Status |
+|----|-----|---------|--------|
+| G-P0-1 | **wellness** role had no gated Staff workspace | Staff | **COVERED** — Wellness workspace (SiteSettings wish list / notes) |
 
 ### P1
 
-| ID | Gap | Surface |
-|----|-----|---------|
-| G-P1-1 | `/board` BoardMembers roster — CMS_ONLY | Visitor |
-| G-P1-2 | `/volunteer` VolunteerOpportunities — CMS_ONLY | Visitor |
-| G-P1-3 | `/fundraising` goals/CTAs — CMS_ONLY / NONE | Visitor |
-| G-P1-4 | SiteSettings (announcement, contact, WhatsApp grade links) — Staff only edits store/spirit product IDs today | Visitor + Memberships |
-| G-P1-5 | Membership **tier prices/perks** — CMS_ONLY (roster/outreach COVERED) | Visitor |
-| G-P1-6 | Events create/edit — WIX_ONLY (Staff = list + manage link) | Visitor |
-| G-P1-7 | Marketing newsletter list/send — no Staff UI | Visitor |
+| ID | Gap | Surface | Status |
+|----|-----|---------|--------|
+| G-P1-1 | `/board` BoardMembers roster | Visitor | **COVERED** — Board roster |
+| G-P1-2 | `/volunteer` VolunteerOpportunities | Visitor | **COVERED** — Volunteer ops |
+| G-P1-3 | `/fundraising` goals/CTAs | Visitor | **COVERED** — Fundraising workspace |
+| G-P1-4 | SiteSettings (announcement, contact, WhatsApp, …) | Visitor | **COVERED** — Site settings (role-scoped) |
+| G-P1-5 | Membership tier map / Catalog link | Visitor | **COVERED** — Membership tiers (paid display still Catalog) |
+| G-P1-6 | Events create/edit | Visitor | **WIX_ONLY** (Staff = list + manage link) |
+| G-P1-7 | Marketing newsletter list/send | Visitor | **NONE** — still no Staff send UI |
 
 ### P2
 
-| ID | Gap | Surface |
-|----|-----|---------|
-| G-P2-1 | NavLinks — CMS_ONLY | Visitor |
-| G-P2-2 | Parents cannot archive/remove students (admin Staff only) | Portal |
-| G-P2-3 | Membership FAQItems — CMS_ONLY | Visitor |
-| G-P2-4 | Legal PageContent rows may be missing from Page copy defaults | Visitor |
+| ID | Gap | Surface | Status |
+|----|-----|---------|--------|
+| G-P2-1 | NavLinks | Visitor | **COVERED** — Nav & footer |
+| G-P2-2 | Parents cannot archive/remove students (admin Staff only) | Portal | INTENTIONAL / policy |
+| G-P2-3 | Membership FAQItems | Visitor | **COVERED** — FAQs |
+| G-P2-4 | Legal PageContent rows may be missing from Page copy defaults | Visitor | PARTIAL |
 
 ---
 
@@ -59,15 +59,15 @@ Audience shells: **visitor** · **free member** · **paid member** · **staff (b
 | Role | Extra workspaces |
 |------|------------------|
 | admin | Members, Staff access, + all gated |
-| marketing | Social, Surveys, Events, Page copy |
-| secretary | Surveys, Messages, Minutes, Memberships, Events, Page copy |
-| treasurer | Payments |
-| events | Events |
-| programs | Messages, Programs |
+| marketing | Social, Surveys, Events, Page copy, Site settings, Nav & footer, FAQs, Fundraising |
+| secretary | Surveys, Messages, Minutes, Memberships, Tiers, Events, Page copy, Site settings, Board, Nav, FAQs, Volunteers |
+| treasurer | Payments, Fundraising |
+| events | Events, Volunteers, Wellness |
+| programs | Messages, Programs, Fundraising |
 | instructor | Messages, Programs |
-| retail | Store & spirit, Discounts |
-| membership | Messages, Memberships, Discounts |
-| wellness | *(none — G-P0-1)* |
+| retail | Store & spirit, Discounts, Site settings (retail keys) |
+| membership | Messages, Memberships, Tiers, Discounts, Site settings, FAQs |
+| wellness | Wellness |
 
 ---
 
@@ -75,18 +75,18 @@ Audience shells: **visitor** · **free member** · **paid member** · **staff (b
 
 | Page | Sources | Staff manage? |
 |------|---------|---------------|
-| `/` | PageContent, announcement, Nav, Programs, Events | Page copy PARTIAL; announcement/nav CMS_ONLY |
-| `/membership` | Tiers, PageContent, FAQ | Page copy; tiers/FAQ CMS_ONLY |
+| `/` | PageContent, announcement, Nav, Programs, Events | Page copy + Site settings + Nav COVERED; Events PARTIAL |
+| `/membership` | Tiers, PageContent, FAQ | Page copy + Tiers + FAQs COVERED |
 | `/events` | Wix Events | PARTIAL → Wix CRUD |
 | `/programs` | Programs | COVERED |
 | `/store` `/spirit-wear` | Allowlists, coupons | Retail + Discounts COVERED |
 | `/meetings` | Minutes | COVERED |
-| `/board` | BoardMembers | CMS_ONLY |
-| `/volunteer` | Opportunities | CMS_ONLY |
-| `/fundraising` | Goals/CTAs | CMS_ONLY |
+| `/board` | BoardMembers | COVERED |
+| `/volunteer` | Opportunities | COVERED |
+| `/fundraising` | Goals/CTAs | COVERED |
 | `/survey/[slug]` | Surveys | COVERED |
 | Legal pages | PageContent | Page copy COVERED |
-| Nav/footer | NavLinks | CMS_ONLY |
+| Nav/footer | NavLinks | COVERED |
 
 ---
 

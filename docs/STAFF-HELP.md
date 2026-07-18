@@ -33,6 +33,14 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **Memberships** | membership / secretary / admin | Roster, mass email, WhatsApp compose |
 | **Discounts** | retail / related | Coupon codes for checkout / spirit |
 | Page copy | Marketing / secretary | PageContent heroes |
+| **Site settings** | Role-scoped | Announcement, contact, WhatsApp grades, goals, social URLs, retail allowlists |
+| **Board roster** | Secretary / admin | BoardMembers add/edit |
+| **Nav & footer** | Marketing / secretary | NavLinks |
+| **FAQs** | Marketing / membership / secretary | FAQItems |
+| **Volunteer ops** | Events / secretary | VolunteerOpportunities |
+| **Fundraising** | Programs / treasurer / marketing | FundraisingCTAs + goal SiteSettings |
+| **Membership tiers** | Membership / secretary | MembershipTiers map (Catalog still owns paid display copy) |
+| **Wellness** | Wellness / events | Wish list & appreciation notes |
 | **Help** | Everyone | Links to Drive how-tos for your role |
 
 ## Staff portal — start here
