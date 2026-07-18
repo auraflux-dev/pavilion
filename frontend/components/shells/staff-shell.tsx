@@ -245,7 +245,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
           <Link href="/terms" className="underline">
             Terms
           </Link>
-          <span className="text-[#9AA0A6]">Drive docs 26–31 for how-tos</span>
+          <span className="text-[#9AA0A6]">Drive docs 26–36 for how-tos (33–36 pending review)</span>
         </div>
       </footer>
     </div>

@@ -531,7 +531,9 @@ export function StaffDashboard() {
             <h1 className="text-xl font-bold">Help</h1>
             <p className="text-xs text-[#5A6070]">
               Full guides: Google Drive → SHMS PTO Platform Docs. Start with{' '}
-              <span className="font-semibold">30 - Staff Portal Quick Start</span>.
+              <span className="font-semibold">30 - Staff Portal Quick Start</span>. New how-tos for
+              review:{' '}
+              <span className="font-semibold">Pending Review — July 2026</span> (docs 33–36).
             </p>
             <ul className="text-sm space-y-1.5 text-[#1A1A1A]">
               <li>
@@ -549,6 +551,9 @@ export function StaffDashboard() {
                 </li>
               ) : null}
               <li>
+                <span className="font-semibold">33</span> — Inbox, Calendar & Docs (Connect Google)
+              </li>
+              <li>
                 <span className="font-semibold">27</span> — Helping a parent in the portal
               </li>
               {canMessage ? (
@@ -558,7 +563,12 @@ export function StaffDashboard() {
               ) : null}
               {canMembership ? (
                 <li>
-                  <span className="font-semibold">Memberships</span> — roster, mass email, WhatsApp
+                  <span className="font-semibold">34</span> — Memberships roster, mass email, WhatsApp
+                </li>
+              ) : null}
+              {canDiscounts ? (
+                <li>
+                  <span className="font-semibold">36</span> — Discount codes & spirit coupons
                 </li>
               ) : null}
               {canMarketing ? (

@@ -3,6 +3,8 @@
 Canonical copies live in Google Drive → **SHMS PTO Platform Docs**.  
 Staging: https://shmspto.vercel.app/staff
 
+**Pending review:** Drive folder [Pending Review — July 2026](https://drive.google.com/drive/folders/1O9hFCYQ4fQNYkAi5Sq-00L4zWBpdV83i) (`@shmspto.org` can comment).
+
 ## Audience shells (who you are)
 
 | Audience | Where | Top nav |
@@ -22,11 +24,14 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | Social | Marketing | Facebook publish |
 | Surveys | Marketing / secretary | **Create**, share, review, CSV |
 | Messages | Programs / instructor / secretary | Parent portal inbox |
+| **Inbox / Calendar / Docs** | Everyone (Connect Google) | Your `@shmspto.org` Gmail threads, folders, calendar, Drive |
 | Minutes | Secretary | Publish meeting minutes |
 | Programs | Programs / instructor | Registration toggles + sessions |
 | Payments | Treasurer | Needs Reconciliation + retry load |
 | Events | Events (+ related) | Upcoming list + link to Wix Events |
 | Store & spirit | Retail | Product ID allowlists |
+| **Memberships** | membership / secretary / admin | Roster, mass email, WhatsApp compose |
+| **Discounts** | retail / related | Coupon codes for checkout / spirit |
 | Page copy | Marketing / secretary | PageContent heroes |
 
 ## Staff portal — start here
@@ -38,7 +43,17 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **29 - Staff Year Project Board** | Everyone | Year swimlanes, projects, assign tasks to people |
 | **31 - Admin Lookup, Act-as & Student Archive** | Admin | Search parents, act-as, archive/restore students |
 | **32 - Staff Workspaces Map (Role Tools)** | Everyone | Which role sees which top-nav workspace |
+| **33 - Staff Inbox, Calendar & Docs** | Everyone | Connect Google, threads, folders, Sapling, signature |
+| **34 - Memberships Workspace** | VP Memberships / secretary / admin | Roster, mass email, WhatsApp |
+| **36 - Discount Codes & Spirit Coupons** | Retail / treasurer | Coupon tools |
 | **27 - Member Portal Parent Support Guide** | Everyone helping parents | Walk a parent through portal screens |
+
+## Parents / families
+
+| Doc | Who | What |
+|-----|-----|------|
+| **35 - Membership Tiers Reef · Lagoon · Tide** | Parents (board review) | Join/upgrade naming and portal tips |
+| Portal Help panel | Members | In-app FAQ on `/member-portal` |
 
 ## Role-specific on Staff
 
@@ -46,15 +61,16 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 |-----|------|------|
 | **16** | Programs / instructor / secretary | Parent portal inbox messages |
 | **23–24** | Marketing / secretary | Surveys **create**, share, review, CSV |
-| **25** | Marketing | Facebook publish from Staff (IG when second social slot) |
+| **25** | Marketing | Facebook publish from Staff |
 | **12b** | Treasurer / support | Store card, auto top-off, Needs Reconciliation |
 | **13 / 15 / 19 / 21** | Marketing / programs / secretary / retail | Page copy, sessions, minutes, store & spirit UUID lists |
+| **03 v2** | Board / CMS | Membership tier CMS fields (display names Reef/Lagoon/Tide) |
 
-## Next up
+## Admin one-time
 
-After you create the Pearl Wix Stores product and paste its Product ID onto the Pearl Membership Tiers row, we can test Join → checkout → claim → portal + Square card credit.
-
-Gift-card defaults (editable in CMS `giftCardCredit`): Ruby $10 · Supreme $25 · Pearl $50.
+| Doc | Who | What |
+|-----|-----|------|
+| **Connect Google Workspace (setup)** | Workspace admin | OAuth Web client, Vercel env, StaffGoogleTokens |
 
 ## Publish / refresh Drive
 
