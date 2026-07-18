@@ -42,7 +42,7 @@ export function StoreCardCta({
         </MemberGate>
 
         <p className="text-white/30 text-xs mt-6">
-          Pay with your own credit or debit card on this site. Funds apply to the student store card within minutes.
+          Free or paid parents can reload online anytime. Funds apply to the student store card within minutes — spending at the snack window is in person during Cove hours.
         </p>
       </div>
     </section>
