@@ -35,7 +35,7 @@ export function PortalPayPalButtons({ payBody, onPaid, onError, active }: Props)
     let cancelled = false
 
     async function boot() {
-      const cfgRes = await fetch('/api/checkout/paypal/create-order')
+      const cfgRes = await fetch('/api/checkout/paypal/config')
       const cfg = await cfgRes.json()
       if (!cfg.configured || !cfg.clientId) {
         setMissing(true)

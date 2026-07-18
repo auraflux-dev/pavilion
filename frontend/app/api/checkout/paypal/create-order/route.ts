@@ -5,11 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
 import { resolveCheckoutIntent, type CheckoutIntent } from '@/lib/checkout-fulfill'
-import { createPayPalOrder, getPayPalPublicConfig, isPayPalConfigured } from '@/lib/paypal'
-
-export async function GET() {
-  return NextResponse.json(getPayPalPublicConfig())
-}
+import { createPayPalOrder, isPayPalConfigured } from '@/lib/paypal'
 
 export async function POST(req: NextRequest) {
   const session = await getMemberSession(req)
