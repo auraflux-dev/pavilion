@@ -39,6 +39,10 @@ export async function createCheckoutUrl(opts: {
   variantId?: string | null
   quantity?: number
   postFlowUrl?: string
+  /** Applied at create; empty = none. Store-card checkouts should omit and lock. */
+  couponCode?: string | null
+  /** When true, shopper cannot add/change coupons on the hosted checkout page. */
+  lockCouponCode?: boolean
 }): Promise<string> {
   const client = getAdminClient()
   const variantId = opts.variantId || (await resolveFirstVariantId(opts.productId))
@@ -54,6 +58,7 @@ export async function createCheckoutUrl(opts: {
     catalogReference.options = { variantId }
   }
 
+  const coupon = (opts.couponCode ?? '').trim().toUpperCase()
   const created = await client.checkout.createCheckout({
     lineItems: [
       {
@@ -62,6 +67,10 @@ export async function createCheckoutUrl(opts: {
       },
     ],
     channelType: 'WEB',
+    ...(coupon ? { couponCode: coupon } : {}),
+    ...(opts.lockCouponCode
+      ? { customSettings: { lockCouponCode: true } }
+      : {}),
   })
   const checkoutEntity = (created as { checkout?: { _id?: string }; _id?: string }).checkout ?? created
   const checkoutId =
@@ -114,6 +123,8 @@ export async function membershipCheckoutRedirectUrl(
     productId: product.productId,
     variantId: product.variantId || null,
     postFlowUrl,
+    // Discount codes are for enrichment programs later — not membership checkout
+    lockCouponCode: true,
   })
 }
 
@@ -131,17 +142,21 @@ export async function storeCardCheckoutRedirectUrl(
     postFlowUrl:
       postFlowUrl ||
       `${process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'}/store`,
+    // Never allow discount codes on store-card purchases
+    lockCouponCode: true,
   })
 }
 
 export async function productCheckoutRedirectUrl(
   productId: string,
-  postFlowUrl?: string
+  postFlowUrl?: string,
+  couponCode?: string | null
 ): Promise<string> {
   return createCheckoutUrl({
     productId,
     postFlowUrl:
       postFlowUrl ||
       `${process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'}/spirit-wear`,
+    couponCode,
   })
 }

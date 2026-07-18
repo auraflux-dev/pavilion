@@ -13,6 +13,9 @@ import { StaffProgramsPanel } from '@/components/staff/staff-programs-panel'
 import { StaffPaymentsPanel } from '@/components/staff/staff-payments-panel'
 import { StaffEventsPanel } from '@/components/staff/staff-events-panel'
 import { StaffRetailPanel } from '@/components/staff/staff-retail-panel'
+import { StaffDiscountsPanel } from '@/components/staff/staff-discounts-panel'
+import { StaffMembershipPanel } from '@/components/staff/staff-membership-panel'
+import { StaffWorkspaceHub } from '@/components/staff/staff-workspace-hub'
 import { StaffPageContentPanel } from '@/components/staff/staff-page-content-panel'
 import { StaffShell } from '@/components/shells/staff-shell'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
@@ -58,6 +61,11 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'payments',
   'events',
   'retail',
+  'discounts',
+  'membership',
+  'inbox',
+  'calendar',
+  'docs',
   'content',
   'help',
 ]
@@ -104,7 +112,11 @@ export function StaffDashboard() {
       (me.roles.includes('programs') ||
         me.roles.includes('instructor') ||
         me.roles.includes('secretary') ||
+        me.roles.includes('membership') ||
         me.isAdmin),
+  )
+  const canMembership = Boolean(
+    me && (me.roles.includes('membership') || me.roles.includes('secretary') || me.isAdmin),
   )
   const canMinutes = Boolean(me && (me.roles.includes('secretary') || me.isAdmin))
   const canPrograms = Boolean(
@@ -119,6 +131,9 @@ export function StaffDashboard() {
         me.isAdmin),
   )
   const canRetail = Boolean(me && (me.roles.includes('retail') || me.isAdmin))
+  const canDiscounts = Boolean(
+    me && (me.roles.includes('retail') || me.roles.includes('membership') || me.isAdmin),
+  )
   const canContent = Boolean(
     me && (me.roles.includes('marketing') || me.roles.includes('secretary') || me.isAdmin),
   )
@@ -127,6 +142,9 @@ export function StaffDashboard() {
     if (!me) return []
     const items: { id: StaffWorkspace; label: string }[] = [
       { id: 'home', label: STAFF_WORKSPACE_LABEL.home },
+      { id: 'inbox', label: STAFF_WORKSPACE_LABEL.inbox },
+      { id: 'calendar', label: STAFF_WORKSPACE_LABEL.calendar },
+      { id: 'docs', label: STAFF_WORKSPACE_LABEL.docs },
       { id: 'projects', label: STAFF_WORKSPACE_LABEL.projects },
     ]
     if (me.isAdmin) {
@@ -143,6 +161,8 @@ export function StaffDashboard() {
     if (canPayments) items.push({ id: 'payments', label: STAFF_WORKSPACE_LABEL.payments })
     if (canEvents) items.push({ id: 'events', label: STAFF_WORKSPACE_LABEL.events })
     if (canRetail) items.push({ id: 'retail', label: STAFF_WORKSPACE_LABEL.retail })
+    if (canDiscounts) items.push({ id: 'discounts', label: STAFF_WORKSPACE_LABEL.discounts })
+    if (canMembership) items.push({ id: 'membership', label: STAFF_WORKSPACE_LABEL.membership })
     if (canContent) items.push({ id: 'content', label: STAFF_WORKSPACE_LABEL.content })
     items.push({ id: 'help', label: STAFF_WORKSPACE_LABEL.help })
     return items
@@ -156,6 +176,8 @@ export function StaffDashboard() {
     canPayments,
     canEvents,
     canRetail,
+    canDiscounts,
+    canMembership,
     canContent,
   ])
 
@@ -312,6 +334,9 @@ export function StaffDashboard() {
                     <p className="text-xs text-[#5A6070] mt-1">
                       {(
                         {
+                          inbox: 'Workspace mail + reply',
+                          calendar: 'Your Google Calendar',
+                          docs: 'Drive Docs to read/edit',
                           projects: 'Year board, assign tasks',
                           members: 'Lookup, act-as, archive',
                           access: 'Assign @shmspto.org roles',
@@ -323,6 +348,8 @@ export function StaffDashboard() {
                           payments: 'Needs Reconciliation',
                           events: 'Upcoming + manage in Wix',
                           retail: 'Store & spirit product lists',
+                          discounts: 'Named & member discount codes',
+                          membership: 'Roster, email, WhatsApp groups',
                           content: 'Page heroes & marketing copy',
                           help: 'Drive how-tos',
                         } as Partial<Record<StaffWorkspace, string>>
@@ -492,6 +519,11 @@ export function StaffDashboard() {
         {active === 'payments' && canPayments ? <StaffPaymentsPanel /> : null}
         {active === 'events' && canEvents ? <StaffEventsPanel /> : null}
         {active === 'retail' && canRetail ? <StaffRetailPanel /> : null}
+        {active === 'discounts' && canDiscounts ? <StaffDiscountsPanel /> : null}
+        {active === 'membership' && canMembership ? <StaffMembershipPanel /> : null}
+        {active === 'inbox' ? <StaffWorkspaceHub tab="inbox" /> : null}
+        {active === 'calendar' ? <StaffWorkspaceHub tab="calendar" /> : null}
+        {active === 'docs' ? <StaffWorkspaceHub tab="docs" /> : null}
         {active === 'content' && canContent ? <StaffPageContentPanel /> : null}
 
         {active === 'help' ? (
@@ -522,6 +554,11 @@ export function StaffDashboard() {
               {canMessage ? (
                 <li>
                   <span className="font-semibold">16</span> — Parent inbox messages
+                </li>
+              ) : null}
+              {canMembership ? (
+                <li>
+                  <span className="font-semibold">Memberships</span> — roster, mass email, WhatsApp
                 </li>
               ) : null}
               {canMarketing ? (

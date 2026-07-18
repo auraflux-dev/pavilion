@@ -2,81 +2,56 @@ import { CheckCircle2, Star } from 'lucide-react'
 import { getMembershipTiers, type MembershipTier } from '@/lib/api/membership'
 import { MembershipJoinButton } from '@/components/membership/membership-join-button'
 
-// Fallback tiers shown if CMS is unreachable
+/** Fallback only if CMS + Catalog are unreachable. */
 const FALLBACK_TIERS: MembershipTier[] = [
   {
-    id: 'ruby-fallback',
-    tierId: 'ruby',
-    name: 'Ruby',
-    price: 50,
-    description: 'Full PTO membership with all core benefits for the school year.',
-    perks: [
-      'Digital membership card',
-      'Priority enrichment program registration',
-      'Access to member portal',
-      'Voting rights at PTO meetings',
-      'PTO newsletter & event updates',
-      '$10 school store card credit',
-    ],
+    id: 'reef-fallback',
+    tierId: 'reef',
+    name: 'Reef',
+    price: 49,
+    description: '',
+    perks: [],
     popular: false,
     sortOrder: 1,
     active: true,
-    giftCardCredit: 10,
+    giftCardCredit: 0,
     productId: '',
     variantId: '',
   },
   {
-    id: 'supreme-fallback',
-    tierId: 'supreme',
-    name: 'Supreme',
-    price: 100,
-    description: 'Our mid-tier membership with additional recognition and event perks.',
-    perks: [
-      'Everything in Ruby',
-      'Two complimentary Dance Night tickets',
-      'Prominent listing in PTO annual report',
-      'Exclusive recognition at PTO events',
-      '$25 school store card credit',
-    ],
+    id: 'lagoon-fallback',
+    tierId: 'lagoon',
+    name: 'Lagoon',
+    price: 149,
+    description: '',
+    perks: [],
     popular: true,
     sortOrder: 2,
     active: true,
-    giftCardCredit: 25,
+    giftCardCredit: 0,
     productId: '',
     variantId: '',
   },
   {
-    id: 'pearl-fallback',
-    tierId: 'pearl',
-    name: 'Pearl',
-    price: 150,
-    description: 'Our highest membership with maximum store-card credit and recognition.',
-    perks: [
-      'Everything in Supreme',
-      'Highest recognition in PTO annual report',
-      '$50 school store card credit',
-    ],
+    id: 'tide-fallback',
+    tierId: 'tide',
+    name: 'Tide',
+    price: 249,
+    description: '',
+    perks: [],
     popular: false,
     sortOrder: 3,
     active: true,
-    giftCardCredit: 50,
+    giftCardCredit: 0,
     productId: '',
     variantId: '',
   },
 ]
 
-function withGiftCardPerk(tier: MembershipTier): MembershipTier {
-  if (tier.giftCardCredit <= 0) return tier
-  const creditLine = `$${tier.giftCardCredit} school store card credit`
-  if (tier.perks.some((p) => /store card credit/i.test(p))) return tier
-  return { ...tier, perks: [...tier.perks, creditLine] }
-}
-
 export async function MembershipTiers() {
   const allTiers = await getMembershipTiers()
-  // Paid / public cards only (faculty handled separately on the page)
   const tiers = allTiers.filter((t) => t.tierId !== 'faculty')
-  const display = (tiers.length > 0 ? tiers : FALLBACK_TIERS).map(withGiftCardPerk)
+  const display = tiers.length > 0 ? tiers : FALLBACK_TIERS
   const cols =
     display.length >= 3
       ? 'md:grid-cols-3 max-w-5xl'
@@ -115,21 +90,24 @@ export async function MembershipTiers() {
                 <span className="text-4xl font-bold text-[#1A1A1A]">${tier.price}</span>
                 <span className="text-[#5A6070] text-sm mb-1">/ school year</span>
               </div>
-              <p className="text-sm text-[#5A6070] mt-2 leading-relaxed">{tier.description}</p>
             </div>
 
-            <ul className="space-y-3 mb-8 flex-1" aria-label={`${tier.name} membership benefits`}>
-              {tier.perks.map((perk) => (
-                <li key={perk} className="flex items-start gap-2.5">
-                  <CheckCircle2
-                    className="w-4 h-4 mt-0.5 shrink-0"
-                    style={{ color: '#085508' }}
-                    aria-hidden="true"
-                  />
-                  <span className="text-sm text-[#1A1A1A]">{perk}</span>
-                </li>
-              ))}
-            </ul>
+            {tier.perks.length > 0 ? (
+              <ul className="space-y-3 mb-8 flex-1" aria-label={`${tier.name} membership benefits`}>
+                {tier.perks.map((perk) => (
+                  <li key={perk} className="flex items-start gap-2.5">
+                    <CheckCircle2
+                      className="w-4 h-4 mt-0.5 shrink-0"
+                      style={{ color: '#085508' }}
+                      aria-hidden="true"
+                    />
+                    <span className="text-sm text-[#1A1A1A]">{perk}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="flex-1 mb-8" />
+            )}
 
             <MembershipJoinButton tierId={tier.tierId} tierName={tier.name} />
           </div>

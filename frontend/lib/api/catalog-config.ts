@@ -69,37 +69,57 @@ export async function getCatalogConfig(): Promise<CatalogConfig> {
   const supremeSlug = settings.get('membershipSupremeSlug', d.membershipSupremeSlug)
   const pearlSlug = settings.get('membershipPearlSlug', d.membershipPearlSlug)
 
+  const reefCredit =
+    parseInt(settings.get('membershipRubyGiftCardCredit', d.membershipRubyGiftCardCredit), 10) || 0
+  const lagoonCredit =
+    parseInt(
+      settings.get('membershipSupremeGiftCardCredit', d.membershipSupremeGiftCardCredit),
+      10
+    ) || 0
+  const tideCredit =
+    parseInt(settings.get('membershipPearlGiftCardCredit', d.membershipPearlGiftCardCredit), 10) ||
+    0
+
+  const reefEntry = {
+    tierId: 'reef',
+    productId: settings.get('membershipReefProductId', rubyProductId),
+    variantId: settings.get('membershipReefVariantId', rubyVariantId),
+    slug: settings.get('membershipReefSlug', rubySlug),
+    giftCardCredit: reefCredit,
+  }
+  const lagoonEntry = {
+    tierId: 'lagoon',
+    productId: settings.get('membershipLagoonProductId', supremeProductId),
+    variantId: settings.get('membershipLagoonVariantId', supremeVariantId),
+    slug: settings.get('membershipLagoonSlug', supremeSlug),
+    giftCardCredit: lagoonCredit,
+  }
+  const tideEntry = {
+    tierId: 'tide',
+    productId: settings.get(
+      'membershipTideProductId',
+      settings.get('membershipTrenchProductId', pearlProductId)
+    ),
+    variantId: settings.get(
+      'membershipTideVariantId',
+      settings.get('membershipTrenchVariantId', pearlVariantId)
+    ),
+    slug: settings.get(
+      'membershipTideSlug',
+      settings.get('membershipTrenchSlug', pearlSlug)
+    ),
+    giftCardCredit: tideCredit,
+  }
+
+  // Current ocean names + legacy aliases (same product IDs)
   const membershipByTier: CatalogConfig['membershipByTier'] = {
-    ruby: {
-      tierId: 'ruby',
-      productId: rubyProductId,
-      variantId: rubyVariantId,
-      slug: rubySlug,
-      giftCardCredit: parseInt(
-        settings.get('membershipRubyGiftCardCredit', d.membershipRubyGiftCardCredit),
-        10
-      ) || 0,
-    },
-    supreme: {
-      tierId: 'supreme',
-      productId: supremeProductId,
-      variantId: supremeVariantId,
-      slug: supremeSlug,
-      giftCardCredit: parseInt(
-        settings.get('membershipSupremeGiftCardCredit', d.membershipSupremeGiftCardCredit),
-        10
-      ) || 0,
-    },
-    pearl: {
-      tierId: 'pearl',
-      productId: pearlProductId,
-      variantId: pearlVariantId,
-      slug: pearlSlug,
-      giftCardCredit: parseInt(
-        settings.get('membershipPearlGiftCardCredit', d.membershipPearlGiftCardCredit),
-        10
-      ) || 0,
-    },
+    reef: reefEntry,
+    lagoon: lagoonEntry,
+    tide: tideEntry,
+    trench: { ...tideEntry, tierId: 'trench' },
+    ruby: { ...reefEntry, tierId: 'ruby' },
+    supreme: { ...lagoonEntry, tierId: 'supreme' },
+    pearl: { ...tideEntry, tierId: 'pearl' },
   }
 
   return {

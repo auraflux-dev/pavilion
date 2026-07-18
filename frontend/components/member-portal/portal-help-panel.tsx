@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { HelpCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import type { PortalHelpItem } from '@/lib/api/portal-help'
 
@@ -12,26 +12,48 @@ export function PortalHelpPanel({ items }: Props) {
   const [open, setOpen] = useState(false)
   const [expanded, setExpanded] = useState<number | null>(0)
 
+  useEffect(() => {
+    function openFromHash() {
+      if (typeof window === 'undefined') return
+      if (window.location.hash === '#help') {
+        setOpen(true)
+        document.getElementById('help')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }
+    openFromHash()
+    window.addEventListener('hashchange', openFromHash)
+    return () => window.removeEventListener('hashchange', openFromHash)
+  }, [])
+
   if (!items.length) return null
 
   return (
-    <section className="mt-8 rounded-2xl border border-[#E8E4DC] bg-white overflow-hidden shadow-sm">
+    <section
+      id="help"
+      className="mt-8 scroll-mt-20 rounded-2xl border border-[#E8E4DC] bg-white overflow-hidden shadow-sm"
+    >
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#FAFCF9]"
+        aria-expanded={open}
       >
         <span className="flex items-center gap-2 font-bold text-[#1A1A1A]">
           <HelpCircle className="w-5 h-5" style={{ color: '#085508' }} />
           Portal help — your home base
         </span>
-        {open ? <ChevronUp className="w-5 h-5 text-[#5A6070]" /> : <ChevronDown className="w-5 h-5 text-[#5A6070]" />}
+        {open ? (
+          <ChevronUp className="w-5 h-5 text-[#5A6070]" />
+        ) : (
+          <ChevronDown className="w-5 h-5 text-[#5A6070]" />
+        )}
       </button>
 
       {open && (
         <div className="px-5 pb-5 border-t border-[#F0EDE8]">
           <p className="text-xs text-[#5A6070] py-3">
-            Everything below stays inside the portal — edit your profile, manage students, load store cards, and answer surveys without leaving this page.
+            Everything below stays inside the portal — edit your profile, manage students, load store
+            cards, and answer surveys without leaving this page.
           </p>
           <ul className="space-y-2">
             {items.map((item, i) => (

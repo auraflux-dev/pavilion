@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "test:smoke": "node ../scripts/smoke-production.mjs",
+    "test:membership": "npx tsx ../scripts/test-membership-outreach.mjs",
+    "gmail:oauth": "node ../scripts/gmail-oauth-setup.mjs",
     "postinstall": "node -e \"process.exit(0)\""
   },
   "dependencies": {

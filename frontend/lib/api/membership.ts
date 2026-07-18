@@ -1,15 +1,17 @@
 /**
- * Membership tiers — fetched from Wix CMS MembershipTiers collection.
- * Admins manage in: Wix Dashboard → Content Manager → Membership Tiers
+ * Membership tiers for the public page + checkout wiring.
  *
- * Perks are stored as newline-separated text and split into arrays here.
- * giftCardCredit = Square store-card dollars loaded when this tier is purchased.
- * productId / variantId = optional Wix Catalog IDs for checkout (Site Settings used as fallback).
+ * Display copy (name, price, description, perk bullets) comes from the linked
+ * Wix Stores Catalog product description — edit products in Catalog, not a
+ * duplicate CMS table.
+ *
+ * MembershipTiers CMS is only the thin map: tierId → productId, sortOrder,
+ * popular, and operational fields (giftCardCredit override, discountPercent).
  */
 
 export interface MembershipTier {
   id: string
-  tierId: string // 'ruby' | 'supreme' | 'pearl' | 'faculty' | any future paid slug
+  tierId: string // 'reef' | 'lagoon' | 'tide' | 'faculty' | legacy aliases
   name: string
   price: number
   description: string
@@ -19,10 +21,12 @@ export interface MembershipTier {
   active: boolean
   /** Dollars loaded onto the student's Square gift card at purchase (0 = no load). */
   giftCardCredit: number
-  /** Optional Wix Catalog product UUID for this tier's checkout. */
+  /** Wix Catalog product UUID for this tier's checkout. */
   productId: string
   /** Optional Wix Catalog variant UUID. */
   variantId: string
+  /** Default checkout discount % when issuing codes to members on this tier (5–75). */
+  discountPercent?: number
 }
 
 interface WixDataItem {
@@ -40,10 +44,132 @@ interface WixDataItem {
     giftCardCredit?: number
     productId?: string
     variantId?: string
+    discountPercent?: number
   }
 }
 
-export async function getMembershipTiers(): Promise<MembershipTier[]> {
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function stripHtml(html: string): string {
+  return decodeEntities(html.replace(/<[^>]+>/g, ' '))
+}
+
+/** Parse Catalog product HTML description → blurb + bullet list. */
+/** ES5-safe global regex capture (avoids matchAll / downlevelIteration). */
+function matchCaptures(input: string, re: RegExp): string[] {
+  const out: string[] = []
+  const flags = re.flags.includes('g') ? re.flags : `${re.flags}g`
+  const global = new RegExp(re.source, flags)
+  let m: RegExpExecArray | null
+  while ((m = global.exec(input)) !== null) {
+    out.push(m[1] ?? '')
+    if (m[0].length === 0) global.lastIndex += 1
+  }
+  return out
+}
+
+export function parseProductDescriptionHtml(html: string): {
+  description: string
+  perks: string[]
+} {
+  if (!html) return { description: '', perks: [] }
+  const perks = matchCaptures(html, /<li\b[^>]*>([\s\S]*?)<\/li>/gi)
+    .map((inner) => stripHtml(inner))
+    .filter(Boolean)
+  const paragraphs = matchCaptures(html, /<p\b[^>]*>([\s\S]*?)<\/p>/gi)
+    .map((inner) => stripHtml(inner))
+    .filter(Boolean)
+  const description =
+    paragraphs.find((p) => !/membership\s*[—\-–]\s*\$?\d+/i.test(p) && p.length > 24) ??
+    paragraphs[1] ??
+    ''
+  return { description, perks }
+}
+
+function displayNameFromProduct(productName: string, fallback: string): string {
+  const cleaned = productName
+    .replace(/^PTO\s+Membership\s*[—\-–:]\s*/i, '')
+    .replace(/\s+Membership$/i, '')
+    .trim()
+  return cleaned || fallback
+}
+
+function giftCardFromPerks(perks: string[], cmsFallback: number): number {
+  for (const perk of perks) {
+    const m = perk.match(/\$(\d+)\s*(?:prepaid|pto\s*card|store\s*card)/i)
+    if (m) return Number(m[1])
+  }
+  return cmsFallback
+}
+
+async function fetchCatalogProduct(productId: string): Promise<{
+  name: string
+  price: number
+  descriptionHtml: string
+  variantId: string
+} | null> {
+  const apiKey = process.env.WIX_API_KEY
+  const siteId = process.env.WIX_SITE_ID
+  if (!apiKey || !siteId || !productId) return null
+
+  try {
+    const res = await fetch(`https://www.wixapis.com/stores-reader/v1/products/${productId}`, {
+      headers: {
+        Authorization: apiKey,
+        'wix-site-id': siteId,
+      },
+      next: { revalidate: 60 },
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    const product = data.product as {
+      name?: string
+      description?: string
+      price?: { price?: number | string }
+      priceData?: { price?: number | string }
+      variants?: Array<{ id?: string; _id?: string }>
+    }
+    if (!product) return null
+    const price = Number(product.price?.price ?? product.priceData?.price ?? 0) || 0
+    const variantId = String(product.variants?.[0]?.id ?? product.variants?.[0]?._id ?? '')
+    return {
+      name: String(product.name ?? ''),
+      price,
+      descriptionHtml: String(product.description ?? ''),
+      variantId,
+    }
+  } catch {
+    return null
+  }
+}
+
+type CmsTier = {
+  id: string
+  tierId: string
+  name: string
+  price: number
+  description: string
+  perks: string[]
+  popular: boolean
+  sortOrder: number
+  active: boolean
+  giftCardCredit: number
+  productId: string
+  variantId: string
+  discountPercent?: number
+}
+
+async function fetchCmsTiers(): Promise<CmsTier[]> {
   const apiKey = process.env.WIX_API_KEY
   const siteId = process.env.WIX_SITE_ID
   if (!apiKey || !siteId) return []
@@ -86,10 +212,44 @@ export async function getMembershipTiers(): Promise<MembershipTier[]> {
       giftCardCredit: Number(item.data?.giftCardCredit ?? 0) || 0,
       productId: String(item.data?.productId ?? '').trim(),
       variantId: String(item.data?.variantId ?? '').trim(),
+      discountPercent: Number(item.data?.discountPercent ?? 0) || undefined,
     }))
   } catch {
     return []
   }
+}
+
+/**
+ * Paid tiers: Catalog product is source of truth for name, price, description, bullets.
+ * Faculty (and rows without productId) keep CMS copy.
+ */
+export async function getMembershipTiers(): Promise<MembershipTier[]> {
+  const cmsTiers = await fetchCmsTiers()
+  if (!cmsTiers.length) return []
+
+  return Promise.all(
+    cmsTiers.map(async (tier) => {
+      if (tier.tierId === 'faculty' || !tier.productId) {
+        return tier
+      }
+
+      const product = await fetchCatalogProduct(tier.productId)
+      if (!product) return tier
+
+      const { description, perks } = parseProductDescriptionHtml(product.descriptionHtml)
+      const giftCardCredit = giftCardFromPerks(perks, tier.giftCardCredit)
+
+      return {
+        ...tier,
+        name: displayNameFromProduct(product.name, tier.name),
+        price: product.price || tier.price,
+        description: description || tier.description,
+        perks: perks.length ? perks : tier.perks,
+        giftCardCredit,
+        variantId: tier.variantId || product.variantId,
+      }
+    })
+  )
 }
 
 /** Paid (purchasable) tiers only — excludes faculty / blank. */

@@ -49,7 +49,7 @@ async function fetchNavLinks(): Promise<NavLink[]> {
           paging: { limit: 30 },
         },
       }),
-      next: { revalidate: 300 },
+      next: { revalidate: 60 },
     })
 
     if (!res.ok) return []
@@ -70,16 +70,17 @@ async function fetchNavLinks(): Promise<NavLink[]> {
 
 // Fallback used if CMS is unreachable — site still navigable
 const FALLBACK_NAV: NavLink[] = [
-  { id: 'f1', label: 'Programs',    href: '/programs',    sortOrder: 1, showInNav: true,  showInFooter: true,  active: true },
-  { id: 'f2', label: 'Events',      href: '/events',      sortOrder: 2, showInNav: true,  showInFooter: true,  active: true },
-  { id: 'f3', label: 'Fundraising', href: '/fundraising', sortOrder: 3, showInNav: true,  showInFooter: true,  active: true },
-  { id: 'f4', label: 'Store',       href: '/store',       sortOrder: 4, showInNav: true,  showInFooter: true,  active: true },
-  { id: 'f5', label: 'Spirit Wear', href: '/spirit-wear', sortOrder: 5, showInNav: true,  showInFooter: true,  active: true },
-  { id: 'f6', label: 'Volunteer',   href: '/volunteer',   sortOrder: 6, showInNav: true,  showInFooter: true,  active: true },
-  { id: 'f7', label: 'Membership',  href: '/membership',  sortOrder: 7, showInNav: true,  showInFooter: true,  active: true },
-  { id: 'f8', label: 'Board',       href: '/board',       sortOrder: 8, showInNav: true,  showInFooter: true,  active: true },
-  { id: 'f10', label: 'Meetings',   href: '/meetings',    sortOrder: 9, showInNav: true,  showInFooter: true,  active: true },
-  { id: 'f9', label: 'Parent Login',href: '/auth/login',  sortOrder: 10, showInNav: false, showInFooter: true,  active: true },
+  { id: 'f1', label: 'Programs', href: '/programs', sortOrder: 1, showInNav: true, showInFooter: true, active: true },
+  { id: 'f2', label: 'Events', href: '/events', sortOrder: 2, showInNav: true, showInFooter: true, active: true },
+  { id: 'f7', label: 'Membership', href: '/membership', sortOrder: 3, showInNav: true, showInFooter: true, active: true },
+  { id: 'f4', label: 'Store', href: '/store', sortOrder: 4, showInNav: true, showInFooter: true, active: true },
+  { id: 'f6', label: 'Volunteer', href: '/volunteer', sortOrder: 5, showInNav: true, showInFooter: true, active: true },
+  // Footer / More — kept off the top bar to reduce clutter
+  { id: 'f3', label: 'Fundraising', href: '/fundraising', sortOrder: 6, showInNav: false, showInFooter: true, active: true },
+  { id: 'f5', label: 'Spirit Wear', href: '/spirit-wear', sortOrder: 7, showInNav: false, showInFooter: true, active: true },
+  { id: 'f8', label: 'Board', href: '/board', sortOrder: 8, showInNav: false, showInFooter: true, active: true },
+  { id: 'f10', label: 'Meetings', href: '/meetings', sortOrder: 9, showInNav: false, showInFooter: true, active: true },
+  { id: 'f9', label: 'Parent Login', href: '/auth/login', sortOrder: 10, showInNav: false, showInFooter: true, active: true },
 ]
 
 export async function getNavLinks(): Promise<NavLink[]> {

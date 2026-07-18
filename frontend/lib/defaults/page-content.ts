@@ -65,7 +65,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body: 'Your membership directly funds enrichment programs, events, and resources that benefit every student at Stone Hill Middle School.',
     sectionTitle: 'Choose Your Membership',
     sectionBody:
-      'Start with a free parent account (log in / sign up), then purchase Ruby or Supreme for the 2025–26 school year. Paid tiers include voting rights and member perks in your portal.',
+      'Start with a free parent account (log in / sign up), then choose Reef, Lagoon, or Tide for the school year. Paid tiers unlock PTO card credit and member perks in your portal.',
   }),
   events: empty('events', {
     eyebrow: 'Mark Your Calendar',
@@ -142,9 +142,9 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   portal: empty('portal', {
     sectionTitle: 'Paid PTO membership active',
     sectionBody:
-      'Thanks for supporting SHMS. Your Ruby/Supreme benefits show on each student card below.',
+      'Thanks for supporting SHMS. Your paid membership benefits show on each student card below.',
     title: 'Free parent account',
-    body: "You're signed in as a free parent member. Add your students here, then upgrade to Ruby or Supreme anytime for paid benefits.",
+    body: "You're signed in as a free parent member. Add your students here, then upgrade to Reef, Lagoon, or Tide anytime for paid benefits.",
     bullets: [
       'Welcome to the SHMS PTO',
       'Your free parent account is ready. Add a student to track programs, store card balance, and paid membership status.',

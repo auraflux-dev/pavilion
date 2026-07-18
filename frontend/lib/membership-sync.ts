@@ -29,9 +29,9 @@ export function tierFromProductId(
   const ruby = cfg?.rubyProductId ?? CATALOG_DEFAULTS.membershipRubyProductId
   const supreme = cfg?.supremeProductId ?? CATALOG_DEFAULTS.membershipSupremeProductId
   const pearl = cfg?.pearlProductId ?? CATALOG_DEFAULTS.membershipPearlProductId
-  if (productId === ruby) return 'ruby'
-  if (productId === supreme) return 'supreme'
-  if (pearl && productId === pearl) return 'pearl'
+  if (productId === ruby) return 'reef'
+  if (productId === supreme) return 'lagoon'
+  if (pearl && productId === pearl) return 'tide'
   return null
 }
 
@@ -50,12 +50,26 @@ export async function tierFromProductIdAsync(
 export function tierFromSlugOrName(value: string | undefined | null): PaidTier | null {
   if (!value) return null
   const v = value.toLowerCase()
-  if (v.includes('pearl')) return 'pearl'
-  if (v.includes('supreme')) return 'supreme'
-  if (v.includes('ruby')) return 'ruby'
-  // Match exact slug tokens like "pto-membership-pearl-1"
-  const slugMatch = v.match(/(?:membership[-_])?(pearl|supreme|ruby)\b/)
-  return slugMatch?.[1] ?? null
+  // Current ocean names
+  if (v.includes('tide')) return 'tide'
+  if (v.includes('lagoon')) return 'lagoon'
+  if (v.includes('reef')) return 'reef'
+  // Legacy names (orders / students created before rename)
+  if (v.includes('trench') || v.includes('pearl')) return 'tide'
+  if (v.includes('supreme')) return 'lagoon'
+  if (v.includes('ruby')) return 'reef'
+  const slugMatch = v.match(
+    /(?:membership[-_])?(tide|trench|lagoon|reef|pearl|supreme|ruby)\b/
+  )
+  if (!slugMatch?.[1]) return null
+  const legacy: Record<string, string> = {
+    trench: 'tide',
+    pearl: 'tide',
+    supreme: 'lagoon',
+    ruby: 'reef',
+  }
+  const id = slugMatch[1]
+  return legacy[id] ?? id
 }
 
 async function resolveGiftCardCredit(tier: PaidTier): Promise<number> {

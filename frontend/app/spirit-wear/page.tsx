@@ -5,6 +5,7 @@ import { PageHero } from '@/components/page-hero'
 import { getSpiritWearItems } from '@/lib/api/store'
 import { getPageContent } from '@/lib/api/page-content'
 import { SpiritWearBuyButton } from '@/components/spirit-wear/spirit-wear-buy-button'
+import { SpiritWearCouponBar } from '@/components/spirit-wear/spirit-wear-coupon-bar'
 
 export const revalidate = 300
 
@@ -30,6 +31,7 @@ export default async function SpiritWearPage() {
         {/* Product grid */}
         <section className="py-12 md:py-16" style={{ backgroundColor: '#F5F0E8' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <SpiritWearCouponBar />
 
             {items.length === 0 ? (
               <p className="text-center text-[#5A6070] py-20">

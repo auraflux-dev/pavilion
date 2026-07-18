@@ -30,15 +30,14 @@ export function NavbarClient({ links }: Props) {
       : member?.name
         ? 'My Account'
         : 'Member Portal'
-  // Public marketing nav — for browsing the site. Portal/Staff use their own shells.
+  // Only show audience when logged in — visitors get no role label in the nav.
+  // Auth status still tracks visitor until free/paid member (or staff) session exists.
   const audienceHint =
-    status === 'loading'
-      ? null
-      : isMember
-        ? accountType === 'paid'
-          ? 'Paid member'
-          : 'Free member'
-        : 'Visitor'
+    status === 'member'
+      ? accountType === 'paid'
+        ? 'Paid member'
+        : 'Free member'
+      : null
 
   return (
     <header
@@ -95,6 +94,16 @@ export function NavbarClient({ links }: Props) {
               </Link>
             </li>
           ))}
+          {isMember ? (
+            <li>
+              <Link
+                href="/member-portal#help"
+                className="px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508]"
+              >
+                Help
+              </Link>
+            </li>
+          ) : null}
         </ul>
 
         <div className="hidden lg:flex items-center gap-3">
@@ -169,6 +178,17 @@ export function NavbarClient({ links }: Props) {
                 </Link>
               </li>
             ))}
+            {isMember ? (
+              <li>
+                <Link
+                  href="/member-portal#help"
+                  className="block px-3 py-2.5 text-sm font-medium rounded-md hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508] transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Help
+                </Link>
+              </li>
+            ) : null}
             <li className="pt-2 border-t border-[#E8E4DC] mt-1">
               {isMember ? (
                 <div className="space-y-2">

@@ -4,13 +4,14 @@ import { Footer } from '@/components/footer'
 import { MembershipTiers } from '@/components/membership/membership-tiers'
 import { MembershipCheckoutHandler } from '@/components/membership/membership-checkout-handler'
 import { PageHero } from '@/components/page-hero'
-import { CheckCircle2, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getMembershipTiers } from '@/lib/api/membership'
 import { getFAQItems } from '@/lib/api/faq'
 import { getPageContent } from '@/lib/api/page-content'
+import { MembershipPortalCallouts } from '@/components/membership/membership-portal-callouts'
 
-export const revalidate = 300
+export const revalidate = 60
 
 export default async function MembershipPage() {
   const [settings, allTiers, faqItems, page] = await Promise.all([
@@ -54,26 +55,7 @@ export default async function MembershipPage() {
           </div>
         </section>
 
-        {/* All benefits */}
-        <section className="py-16 bg-white border-t border-[#E8E4DC]">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-bold text-[#1A1A1A] mb-8 text-center">
-              All Members Receive
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {sharedBenefits.map((b) => (
-                <div key={b} className="flex items-start gap-3">
-                  <CheckCircle2
-                    className="w-5 h-5 mt-0.5 shrink-0"
-                    style={{ color: '#085508' }}
-                    aria-hidden="true"
-                  />
-                  <span className="text-[#1A1A1A] text-sm sm:text-base">{b}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <MembershipPortalCallouts lines={sharedBenefits} />
 
         {/* Faculty membership */}
         <section className="py-14" style={{ backgroundColor: '#F5F0E8' }}>

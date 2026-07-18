@@ -2,7 +2,7 @@
  * Site Settings — key/value pairs managed in Wix CMS.
  *
  * Admins update values in: Wix Dashboard → Content Manager → Site Settings
- * Changes are live within 5 minutes (revalidate = 300).
+ * Changes are live within about a minute (revalidate = 60).
  *
  * Usage:
  *   const settings = await getSiteSettings()
@@ -39,7 +39,8 @@ async function fetchAllSettings(): Promise<Record<string, string>> {
         dataCollectionId: 'SiteSettings',
         query: { paging: { limit: 200 } },
       }),
-      next: { revalidate: 300 },
+      // Always fresh — board edits membershipSharedBenefits / nav often
+      cache: 'no-store',
     })
 
     if (!res.ok) return {}

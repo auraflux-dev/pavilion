@@ -22,6 +22,11 @@ export type StaffWorkspace =
   | 'payments'
   | 'events'
   | 'retail'
+  | 'discounts'
+  | 'membership'
+  | 'inbox'
+  | 'calendar'
+  | 'docs'
   | 'content'
   | 'help'
 
@@ -38,6 +43,11 @@ export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
   payments: 'Payments',
   events: 'Events',
   retail: 'Store & spirit',
+  discounts: 'Discounts',
+  membership: 'Memberships',
+  inbox: 'Inbox',
+  calendar: 'My calendar',
+  docs: 'Docs',
   content: 'Page copy',
   help: 'Help',
 }

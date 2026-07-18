@@ -35,6 +35,8 @@ export type StaffProfile = {
   roles: StaffRole[]
   boardTitle: string
   name: string
+  /** Plain-text email signature appended to portal replies */
+  emailSignature: string
 }
 
 const ROLE_SET = new Set<string>(STAFF_ROLES)
@@ -72,6 +74,7 @@ export async function getStaffProfile(email: string): Promise<StaffProfile | nul
           roles?: string
           boardTitle?: string
           name?: string
+          emailSignature?: string
           active?: boolean
         }
       | undefined
@@ -83,6 +86,7 @@ export async function getStaffProfile(email: string): Promise<StaffProfile | nul
       roles,
       boardTitle: String(row.boardTitle ?? ''),
       name: String(row.name ?? ''),
+      emailSignature: String(row.emailSignature ?? ''),
     }
   } catch {
     return null
@@ -159,17 +163,17 @@ export const ROLE_HOME_COPY: Record<
     owns: 'Spirit wear, inventory, pop-ups, e-com drops',
     thisWeek: [
       'Review low-stock products',
+      'Create or issue discount codes for members',
       'Schedule next spirit drop with Marketing',
-      'Prep pop-up kit for next event',
     ],
   },
   membership: {
     title: 'Membership Experience',
-    owns: 'Onboarding, 6th-grade comfort, upgrades, retention',
+    owns: 'Roster, onboarding, upgrades, retention, parent outreach',
     thisWeek: [
-      'Welcome new free members',
-      'Flag upgrade candidates',
-      'Plan Middle School 101 touchpoint',
+      'Review free vs paid roster and missing phones',
+      'Send welcome / upgrade touch via portal or email',
+      'Post Middle School 101 note in grade WhatsApp groups',
     ],
   },
   wellness: {

@@ -34,6 +34,7 @@ export function MemberShell({ children }: Props) {
     { href: '/membership', label: isPaid ? 'Membership' : 'Upgrade' },
     { href: '/store', label: 'Store' },
     { href: '/programs', label: 'Programs' },
+    { href: '/member-portal#help', label: 'Help' },
   ]
 
   return (
@@ -58,6 +59,11 @@ export function MemberShell({ children }: Props) {
                 key={link.href}
                 href={link.href}
                 className="px-2.5 py-1.5 rounded-md text-xs font-semibold text-[#1A1A1A] hover:bg-[#EEF6EE]"
+                onClick={() => {
+                  if (link.href.includes('#help') && window.location.pathname === '/member-portal') {
+                    window.dispatchEvent(new HashChangeEvent('hashchange'))
+                  }
+                }}
               >
                 {link.label}
               </Link>

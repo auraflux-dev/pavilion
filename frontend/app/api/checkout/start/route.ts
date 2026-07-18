@@ -1,7 +1,9 @@
 /**
  * POST /api/checkout/start
- * Body: { kind: 'membership'|'store-card'|'product', tier?, amount?, productId? }
+ * Body: { kind: 'membership'|'store-card'|'product', tier?, amount?, productId?, couponCode? }
  * Returns: { checkoutUrl }
+ *
+ * couponCode: products only (e.g. spirit wear). Never applied to membership or store-card.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import {
@@ -20,6 +22,7 @@ export async function POST(req: NextRequest) {
     amount?: number
     productId?: string
     postFlowUrl?: string
+    couponCode?: string
   }
   try {
     body = await req.json()
@@ -28,6 +31,7 @@ export async function POST(req: NextRequest) {
   }
 
   const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'
+  const couponCode = String(body.couponCode ?? '').trim() || null
 
   try {
     if (body.kind === 'membership') {
@@ -37,6 +41,7 @@ export async function POST(req: NextRequest) {
       if (!tier || tier === 'faculty' || tier === 'free') {
         return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
       }
+      // Membership purchases never accept discount codes (codes are for enrichment later)
       const checkoutUrl = await membershipCheckoutRedirectUrl(
         tier,
         body.postFlowUrl || `${origin}/membership`
@@ -63,7 +68,8 @@ export async function POST(req: NextRequest) {
       }
       const checkoutUrl = await productCheckoutRedirectUrl(
         body.productId,
-        body.postFlowUrl || `${origin}/spirit-wear`
+        body.postFlowUrl || `${origin}/spirit-wear`,
+        couponCode
       )
       return NextResponse.json({ checkoutUrl })
     }

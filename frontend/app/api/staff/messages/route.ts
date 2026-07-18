@@ -4,7 +4,15 @@ import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
 
 export async function POST(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!requireStaffRole(session?.staff ?? null, ['programs', 'instructor', 'secretary', 'admin'])) {
+  if (
+    !requireStaffRole(session?.staff ?? null, [
+      'programs',
+      'instructor',
+      'secretary',
+      'membership',
+      'admin',
+    ])
+  ) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

@@ -87,7 +87,7 @@ async function fetchPageRow(page: string): Promise<Partial<PageContentFields> | 
           paging: { limit: 1 },
         },
       }),
-      next: { revalidate: 300 },
+      cache: 'no-store',
     })
 
     if (!res.ok) return null
