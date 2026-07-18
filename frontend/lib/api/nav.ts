@@ -68,24 +68,48 @@ async function fetchNavLinks(): Promise<NavLink[]> {
   }
 }
 
-// Fallback used if CMS is unreachable — site still navigable
+// Fallback used if CMS is unreachable — site still navigable (off-season defaults)
 const FALLBACK_NAV: NavLink[] = [
-  { id: 'f1', label: 'Programs', href: '/programs', sortOrder: 1, showInNav: true, showInFooter: true, active: true },
-  { id: 'f2', label: 'Events', href: '/events', sortOrder: 2, showInNav: true, showInFooter: true, active: true },
-  { id: 'f7', label: 'Membership', href: '/membership', sortOrder: 3, showInNav: true, showInFooter: true, active: true },
-  { id: 'f4', label: 'Store', href: '/store', sortOrder: 4, showInNav: true, showInFooter: true, active: true },
-  { id: 'f6', label: 'Volunteer', href: '/volunteer', sortOrder: 5, showInNav: true, showInFooter: true, active: true },
-  // Footer / More — kept off the top bar to reduce clutter
-  { id: 'f3', label: 'Fundraising', href: '/fundraising', sortOrder: 6, showInNav: false, showInFooter: true, active: true },
-  { id: 'f5', label: 'Spirit Wear', href: '/spirit-wear', sortOrder: 7, showInNav: false, showInFooter: true, active: true },
-  { id: 'f8', label: 'Board', href: '/board', sortOrder: 8, showInNav: false, showInFooter: true, active: true },
-  { id: 'f10', label: 'Meetings', href: '/meetings', sortOrder: 9, showInNav: false, showInFooter: true, active: true },
-  { id: 'f9', label: 'Parent Login', href: '/auth/login', sortOrder: 10, showInNav: false, showInFooter: true, active: true },
+  { id: 'f7', label: 'Membership', href: '/membership', sortOrder: 1, showInNav: true, showInFooter: true, active: true },
+  { id: 'f4', label: 'The Cove', href: '/cove', sortOrder: 2, showInNav: true, showInFooter: true, active: true },
+  { id: 'f6', label: 'Volunteer', href: '/volunteer', sortOrder: 3, showInNav: true, showInFooter: true, active: true },
+  { id: 'f3', label: 'Fundraising', href: '/fundraising', sortOrder: 4, showInNav: false, showInFooter: true, active: true },
+  { id: 'f8', label: 'Board', href: '/board', sortOrder: 5, showInNav: false, showInFooter: true, active: true },
+  { id: 'f10', label: 'Meetings', href: '/meetings', sortOrder: 6, showInNav: false, showInFooter: true, active: true },
+  { id: 'f9', label: 'Parent Login', href: '/auth/login', sortOrder: 7, showInNav: false, showInFooter: true, active: true },
+  // In-session only (shown when schoolInSession=true)
+  { id: 'f1', label: 'Programs', href: '/programs', sortOrder: 10, showInNav: true, showInFooter: true, active: true },
+  { id: 'f2', label: 'Events', href: '/events', sortOrder: 11, showInNav: true, showInFooter: true, active: true },
 ]
 
+function normalizeCommerceNav(links: NavLink[]): NavLink[] {
+  const commerce = links.filter(
+    (l) => l.href === '/store' || l.href === '/spirit-wear' || l.href === '/cove',
+  )
+  const rest = links.filter(
+    (l) => l.href !== '/store' && l.href !== '/spirit-wear' && l.href !== '/cove',
+  )
+  if (commerce.length === 0) return rest
+
+  const cove: NavLink = {
+    id: commerce[0].id || 'cove',
+    label: 'The Cove',
+    href: '/cove',
+    sortOrder: Math.min(...commerce.map((l) => l.sortOrder)),
+    showInNav: commerce.some((l) => l.showInNav),
+    showInFooter: commerce.some((l) => l.showInFooter),
+    active: true,
+  }
+  return [...rest, cove].sort((a, b) => a.sortOrder - b.sortOrder)
+}
+
 export async function getNavLinks(): Promise<NavLink[]> {
-  const links = await fetchNavLinks()
-  return links.length > 0 ? links : FALLBACK_NAV
+  const { isSchoolInSession, OFF_SEASON_HIDDEN_PATHS } = await import('@/lib/api/visitor-season')
+  const inSession = await isSchoolInSession()
+  const raw = await fetchNavLinks()
+  const links = normalizeCommerceNav(raw.length > 0 ? raw : FALLBACK_NAV)
+  if (inSession) return links
+  return links.filter((l) => !OFF_SEASON_HIDDEN_PATHS.has(l.href))
 }
 
 export async function getTopNavLinks(): Promise<NavLink[]> {

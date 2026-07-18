@@ -12,10 +12,15 @@ export const revalidate = 300
 export default async function EventsPage() {
   let events: WixEvent[] = []
   let error = false
-  const page = await getPageContent('events')
+  const [{ getSiteSettings }, page] = await Promise.all([
+    import('@/lib/api/site-settings'),
+    getPageContent('events'),
+  ])
+  const settings = await getSiteSettings()
+  const inSession = settings.getBool('schoolInSession', false)
 
   try {
-    events = await getUpcomingEvents(24)
+    events = inSession ? await getUpcomingEvents(24) : []
   } catch {
     error = true
   }
@@ -26,7 +31,20 @@ export default async function EventsPage() {
       <Navbar />
 
       <main id="main-content">
-        <PageHero content={page} />
+        <PageHero
+          content={{
+            ...page,
+            ...(inSession
+              ? {}
+              : {
+                  eyebrow: 'Off season',
+                  title: 'Events resume with the school year',
+                  body: 'No public events are scheduled while school is out of session. Membership and The Cove stay open year-round.',
+                  ctaLabel: 'Shop The Cove',
+                  ctaHref: '/cove',
+                }),
+          }}
+        />
 
         {/* Events grid */}
         <section

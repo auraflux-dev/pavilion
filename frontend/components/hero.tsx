@@ -5,9 +5,12 @@ import { getPageContent } from '@/lib/api/page-content'
 
 export async function Hero() {
   const [settings, content] = await Promise.all([getSiteSettings(), getPageContent('home')])
+  const inSession = settings.getBool('schoolInSession', false)
   const stats = [
-    { value: settings.get('heroStatFamilies', '500+'),   label: 'Student Families' },
-    { value: settings.get('heroStatPrograms', '12+'),    label: 'Active Programs' },
+    { value: settings.get('heroStatFamilies', '500+'), label: 'Student Families' },
+    ...(inSession
+      ? [{ value: settings.get('heroStatPrograms', '12+'), label: 'Active Programs' }]
+      : [{ value: 'Year-round', label: 'The Cove shop' }]),
     { value: settings.get('heroStatVolunteers', '200+'), label: 'Volunteers' },
   ]
 
@@ -78,9 +81,9 @@ export async function Hero() {
                 className="font-bold px-6 sm:px-8 border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#085508] transition-colors"
                 asChild
               >
-                <a href="#programs">
+                <a href="/cove">
                   <BookOpen className="w-4 h-4 mr-2" aria-hidden="true" />
-                  View Programs
+                  Shop The Cove
                 </a>
               </Button>
 

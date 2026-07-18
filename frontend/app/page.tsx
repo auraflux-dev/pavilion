@@ -6,17 +6,20 @@ import { VolunteerSection } from '@/components/volunteer-section'
 import { UpcomingEvents } from '@/components/upcoming-events'
 import { CommunityBanner } from '@/components/community-banner'
 import { Footer } from '@/components/footer'
+import { isSchoolInSession } from '@/lib/api/visitor-season'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const inSession = await isSchoolInSession()
+
   return (
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
       <main id="main-content">
         <Hero />
-        <ProgramsPreview />
+        {inSession ? <ProgramsPreview /> : null}
         <VolunteerSection />
-        <UpcomingEvents />
+        {inSession ? <UpcomingEvents /> : null}
         <CommunityBanner />
       </main>
       <Footer />

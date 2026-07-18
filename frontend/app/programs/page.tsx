@@ -17,9 +17,10 @@ export default async function ProgramsPage() {
 
   const [settings, page] = await Promise.all([getSiteSettings(), getPageContent('programs')])
   const presidentEmail = settings.get('presidentEmail', 'president@shmspto.org')
+  const inSession = settings.getBool('schoolInSession', false)
 
   try {
-    programs = await getAllPrograms()
+    programs = inSession ? await getAllPrograms() : []
   } catch {
     error = true
   }
@@ -30,7 +31,20 @@ export default async function ProgramsPage() {
       <Navbar />
 
       <main id="main-content">
-        <PageHero content={page} />
+        <PageHero
+          content={{
+            ...page,
+            ...(inSession
+              ? {}
+              : {
+                  eyebrow: 'Off season',
+                  title: 'Programs resume with the school year',
+                  body: 'Enrichment programs are paused while school is out of session. Check back in the fall, or visit The Cove and Membership anytime.',
+                  ctaLabel: 'Shop The Cove',
+                  ctaHref: '/cove',
+                }),
+          }}
+        />
 
         {/* Programs grid */}
         <section

@@ -141,6 +141,7 @@ export const SITE_SETTING_GROUPS: {
     label: 'Announcement bar & WhatsApp grade links',
     roles: ['marketing', 'secretary', 'membership', 'admin'],
     keys: [
+      { key: 'schoolInSession', label: 'School in session (true/false) — shows Programs & Events' },
       { key: 'announcementEnabled', label: 'Enabled (true/false)' },
       { key: 'announcementText', label: 'Banner text', multiline: true },
       { key: 'announcement6thLink', label: '6th grade WhatsApp invite URL' },
@@ -230,7 +231,7 @@ export const SITE_SETTING_GROUPS: {
   },
   {
     id: 'retail',
-    label: 'Store & spirit product allowlists',
+    label: 'The Cove product allowlists',
     roles: ['retail', 'admin'],
     keys: [
       { key: 'storeProductIds', label: 'Store product IDs (comma or newline)', multiline: true },

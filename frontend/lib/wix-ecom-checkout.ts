@@ -141,7 +141,7 @@ export async function storeCardCheckoutRedirectUrl(
     variantId: cfg.storeCardVariantByAmount[amount],
     postFlowUrl:
       postFlowUrl ||
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'}/store`,
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'}/cove`,
     // Never allow discount codes on store-card purchases
     lockCouponCode: true,
   })
@@ -156,7 +156,7 @@ export async function productCheckoutRedirectUrl(
     productId,
     postFlowUrl:
       postFlowUrl ||
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'}/spirit-wear`,
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'}/cove`,
     couponCode,
   })
 }

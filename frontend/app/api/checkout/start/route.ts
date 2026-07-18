@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       }
       const checkoutUrl = await storeCardCheckoutRedirectUrl(
         amount,
-        body.postFlowUrl || `${origin}/store`
+        body.postFlowUrl || `${origin}/cove`
       )
       return NextResponse.json({ checkoutUrl })
     }
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
       }
       const checkoutUrl = await productCheckoutRedirectUrl(
         body.productId,
-        body.postFlowUrl || `${origin}/spirit-wear`,
+        body.postFlowUrl || `${origin}/cove`,
         couponCode
       )
       return NextResponse.json({ checkoutUrl })

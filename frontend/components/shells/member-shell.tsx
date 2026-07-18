@@ -32,7 +32,7 @@ export function MemberShell({ children }: Props) {
   const links = [
     { href: '/member-portal', label: 'My portal' },
     { href: '/membership', label: isPaid ? 'Membership' : 'Upgrade' },
-    { href: '/store', label: 'Store' },
+    { href: '/cove', label: 'The Cove' },
     { href: '/programs', label: 'Programs' },
     { href: '/member-portal#help', label: 'Help' },
   ]

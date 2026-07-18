@@ -418,7 +418,7 @@ export function StaffDashboard() {
                           programs: 'Registration & sessions',
                           payments: 'Needs Reconciliation',
                           events: 'Create, edit, cancel events',
-                          retail: 'Store & spirit product lists',
+                          retail: 'The Cove product lists',
                           discounts: 'Named & member discount codes',
                           membership: 'Roster, email, WhatsApp groups',
                           tiers: 'Tier map & Catalog product IDs',

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react'
-import { getUpcomingEvents, type WixEvent } from '@/lib/api/events'
+import { getUpcomingEvents } from '@/lib/api/events'
 
 function formatEventDate(startDate?: string): { month: string; day: string; time: string } {
   if (!startDate) return { month: '—', day: '—', time: '' }
@@ -11,40 +11,6 @@ function formatEventDate(startDate?: string): { month: string; day: string; time
     time:  d.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York' }),
   }
 }
-
-// Static fallback events shown while Wix Events is being set up
-const FALLBACK_EVENTS = [
-  {
-    id: 'f1',
-    title: 'PTO General Meeting',
-    description: 'Join us for our monthly PTO meeting. We will review upcoming events, budget updates, and hear from school administration. All families welcome.',
-    location: { name: 'SHMS Media Center' },
-    dateAndTimeSettings: { startDate: '2026-06-10T19:00:00', endDate: '2026-06-10T20:30:00' },
-    tags: ['Meeting'],
-    slug: '',
-    mainImage: undefined,
-  },
-  {
-    id: 'f2',
-    title: 'End of Year Dance Night',
-    description: 'Celebrate the end of a fantastic school year at our annual student dance! DJ, refreshments, and plenty of fun. Tickets available at the school store.',
-    location: { name: 'SHMS Gymnasium' },
-    dateAndTimeSettings: { startDate: '2026-06-21T18:30:00', endDate: '2026-06-21T21:30:00' },
-    tags: ['Social'],
-    slug: '',
-    mainImage: undefined,
-  },
-  {
-    id: 'f3',
-    title: 'NOVA Math Tournament',
-    description: 'SHMS Stingrays compete in the Northern Virginia Math Tournament. Come cheer on our students as they showcase their math skills against top schools in the region.',
-    location: { name: 'Thomas Jefferson High School' },
-    dateAndTimeSettings: { startDate: '2026-07-12T09:00:00', endDate: '2026-07-12T15:00:00' },
-    tags: ['Competition'],
-    slug: '',
-    mainImage: undefined,
-  },
-] satisfies WixEvent[]
 
 function formatTimeRange(startDate?: string, endDate?: string): string {
   if (!startDate) return ''
@@ -57,8 +23,8 @@ function formatTimeRange(startDate?: string, endDate?: string): string {
 }
 
 export async function UpcomingEvents() {
-  const wixEvents = await getUpcomingEvents(3)
-  const events = wixEvents.length > 0 ? wixEvents : FALLBACK_EVENTS
+  const events = await getUpcomingEvents(3)
+  if (events.length === 0) return null
 
   return (
     <section

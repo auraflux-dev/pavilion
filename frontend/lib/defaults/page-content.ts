@@ -96,7 +96,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
       'The SHMS PTO is run entirely by parent volunteers. We try to respond to all messages within one business day during the school year.',
   }),
   store: empty('store', {
-    eyebrow: 'SHMS Store Card',
+    eyebrow: 'The Cove',
     title: 'Load a card, your student handles the rest.',
     body: '',
     bullets: ['No cash needed', 'Reload anytime online', 'Funds never expire'],
@@ -116,9 +116,9 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body: 'Most students spend $20–$40 per month. Load online, student taps their card at the window. Funds never expire.',
   }),
   'spirit-wear': empty('spirit-wear', {
-    eyebrow: 'Spirit Wear',
-    title: 'Stingrays Pride',
-    body: 'Show your school spirit. All items available year-round — order online and pick up at school.',
+    eyebrow: 'The Cove · Shop',
+    title: 'Spirit wear & merchandise',
+    body: 'Show your Stingrays pride. Order online year-round — pick up at school when the window is open.',
   }),
   fundraising: empty('fundraising', {
     eyebrow: '2025–26 School Year · Live',

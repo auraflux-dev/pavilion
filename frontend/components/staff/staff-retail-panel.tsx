@@ -48,10 +48,11 @@ export function StaffRetailPanel() {
   return (
     <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
       <div>
-        <h2 className="text-lg font-bold">Store & spirit wear</h2>
+        <h2 className="text-lg font-bold">The Cove</h2>
+        <p className="text-xs text-[#5A6070]">Visitor page: /cove (store snacks + spirit merchandise).</p>
         <p className="text-xs text-[#5A6070]">
           Paste Wix Catalog product UUIDs (one per line). Create products in Wix Stores first, then
-          list IDs here to show them on /store or /spirit-wear. Remove an ID to hide it.
+          list IDs here to show them on The Cove (/cove). Remove an ID to hide it.
         </p>
       </div>
       <label className="block text-xs font-bold text-[#5A6070]">
