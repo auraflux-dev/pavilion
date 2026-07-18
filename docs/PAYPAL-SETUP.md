@@ -6,7 +6,7 @@ Use this when you want **PayPal (and optionally Venmo)** next to personal credit
 - Paid membership (Reef / Lagoon / Tide)
 - Student store-card reloads
 
-Card payments already run **in-portal via Square**. PayPal is the next provider on the same screens.
+Card payments already run **in-portal via Square**. Card + PayPal both run on the same in-portal checkout screens (membership, The Cove, store-card).
 
 ---
 

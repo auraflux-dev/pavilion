@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { CreditCard, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { PortalPayPalButtons } from '@/components/checkout/portal-paypal-buttons'
 
 type StoredCard = {
   brand: string
@@ -249,8 +250,20 @@ export function PortalCardCheckout({
             </>
           )}
         </Button>
+
+        <PortalPayPalButtons
+          active={open && !busy && !success}
+          payBody={payBody}
+          onPaid={(data) => {
+            setSuccess('PayPal payment successful — thank you!')
+            onPaid?.(data)
+            setTimeout(() => onClose(), 1200)
+          }}
+          onError={(message) => setError(message)}
+        />
+
         <p className="text-[10px] text-[#5A6070] text-center">
-          Secured by Square. PayPal coming next — same checkout screen.
+          Card secured by Square · PayPal processed by PayPal. Free and paid parents can use either.
         </p>
       </div>
     </div>
