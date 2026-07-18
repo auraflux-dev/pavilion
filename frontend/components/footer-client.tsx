@@ -129,17 +129,20 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
             )}
           </div>
 
-          {/* Col 2: Quick Links */}
-          <div>
+          {/* Col 2: Quick Links — centered two-column grid */}
+          <div className="flex flex-col items-center text-center">
             <h3 className="text-white font-bold text-sm tracking-wider uppercase mb-5">
               Quick Links
             </h3>
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5" role="list">
+            <ul
+              className="grid grid-cols-2 gap-x-6 gap-y-2.5 w-full max-w-[16rem] justify-items-center"
+              role="list"
+            >
               {footerLinks.map((link) => (
-                <li key={link.id}>
+                <li key={link.id} className="w-full">
                   <a
                     href={link.href}
-                    className="text-sm text-[#5A6070] hover:text-white transition-colors flex items-center gap-1.5 group"
+                    className="text-sm text-[#5A6070] hover:text-white transition-colors inline-flex items-center justify-center gap-1.5 group"
                   >
                     <ArrowRight
                       className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all shrink-0"

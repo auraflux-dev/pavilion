@@ -30,14 +30,9 @@ export function NavbarClient({ links }: Props) {
       : member?.name
         ? 'My Account'
         : 'Member Portal'
-  // Only show audience when logged in — visitors get no role label in the nav.
-  // Auth status still tracks visitor until free/paid member (or staff) session exists.
+  // Do not show “Free member” in the public top nav. Paid badge stays subtle; free stays blank.
   const audienceHint =
-    status === 'member'
-      ? accountType === 'paid'
-        ? 'Paid member'
-        : 'Free member'
-      : null
+    status === 'member' && accountType === 'paid' ? 'Paid member' : null
 
   return (
     <header
