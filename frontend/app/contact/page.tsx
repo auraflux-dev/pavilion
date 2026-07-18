@@ -53,8 +53,8 @@ export default async function ContactPage() {
     },
     {
       icon: Clock,
-      label: 'Store Window Hours',
-      value: storeHours,
+      label: 'The Cove — in-person snack window',
+      value: `${storeHours} · Online shopping and store-card reloads available anytime with a free or paid parent login.`,
       href: null as string | null,
     },
   ]

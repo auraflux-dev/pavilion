@@ -186,6 +186,6 @@ export const CONTACT_DEFAULTS = {
   contactEmailGeneral: 'info@shmspto.org',
   contactEmailTreasurer: 'treasurer@shmspto.org',
   contactAddress: '23415 Evergreen Ridge Drive, Ashburn, VA 20148',
-  contactStoreHours: 'Open during lunch periods, Mon–Fri',
+  contactStoreHours: 'Mon–Fri · lunch periods (in person only)',
   portalGrades: '6,7,8',
 }

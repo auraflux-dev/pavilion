@@ -158,8 +158,8 @@ export const SITE_SETTING_GROUPS: {
       { key: 'contactEmailTreasurer', label: 'Treasurer email' },
       { key: 'presidentEmail', label: 'President email' },
       { key: 'contactAddress', label: 'Address', multiline: true },
-      { key: 'contactStoreHours', label: 'Store hours' },
-      { key: 'storeHours', label: 'Store hours (alt key)' },
+      { key: 'contactStoreHours', label: 'The Cove in-person snack window hours' },
+      { key: 'storeHours', label: 'The Cove in-person hours (footer / alt)' },
     ],
   },
   {

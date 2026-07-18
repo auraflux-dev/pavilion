@@ -283,16 +283,19 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
               </form>
             )}
 
-            {/* School store hours — from CMS */}
+            {/* In-person snack window only — online checkout is 24/7 for free or paid parents */}
             <div
               className="mt-4 rounded-lg p-3 border"
               style={{ backgroundColor: '#2a2a2a', borderColor: '#333333' }}
             >
               <p className="text-xs font-semibold" style={{ color: '#FFD700' }}>
-                The Cove hours
+                The Cove — in person
               </p>
               <p className="text-xs text-[#5A6070] mt-0.5">
-                {storeHours}
+                Snack window: {storeHours}
+              </p>
+              <p className="text-xs text-[#5A6070] mt-1.5 leading-relaxed">
+                Online (membership, shop, store-card reload): anytime with a free or paid parent login.
               </p>
             </div>
           </div>
