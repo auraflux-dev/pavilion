@@ -173,6 +173,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
       'Do I need a store card?|The snack window uses a prepaid store card. Memberships and spirit wear pay online at checkout — no store card required.',
       'Can I save a payment card?|Yes. During a reload, choose Save this card. Square securely stores it; SHMS PTO never receives the card number. You can remove it anytime.',
       'Where do surveys appear?|Active surveys list below your quadrants. Same branded form we send by email, text, or WhatsApp — always on shmspto.org.',
+      'Can I remove a student from my account?|Parents can add and edit students. To archive or remove a student, contact the PTO (membership@shmspto.org) so Staff can update the record safely.',
     ],
   }),
 }

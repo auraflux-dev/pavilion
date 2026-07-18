@@ -47,6 +47,8 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **33 - Staff Inbox, Calendar & Docs** | Everyone | Connect Google, threads, folders, Sapling, signature |
 | **34 - Memberships Workspace** | VP Memberships / secretary / admin | Roster, mass email, WhatsApp |
 | **36 - Discount Codes & Spirit Coupons** | Retail / treasurer | Coupon tools |
+| **37 - Site Capability Audit & Test Plans** | Everyone / QA | Visitor · portal · staff gaps + TP checklists |
+| **38 - Parent Portal Checklist** | Staff helping parents | Free vs paid what parents can do |
 | **27 - Member Portal Parent Support Guide** | Everyone helping parents | Walk a parent through portal screens |
 
 ## Member portal (free & paid parents)
@@ -55,6 +57,7 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 |---------|-----|------|
 | **Portal help** panel | Free & paid members | In-app FAQ (account, students, store card, Reef/Lagoon/Tide, upgrade, coupons) |
 | **35 - Membership Tiers Reef · Lagoon · Tide** | Parents (Drive) | Longer join/upgrade guide |
+| **38 - Parent Portal Checklist** | Parents (Drive) | Free vs paid capability checklist |
 | Public `/membership` | Visitors + members | Tier cards and checkout |
 
 ## Role-specific on Staff

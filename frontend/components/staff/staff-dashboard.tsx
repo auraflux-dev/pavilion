@@ -552,7 +552,13 @@ export function StaffDashboard() {
                 <span className="font-semibold">33</span> — Inbox, Calendar & Docs (Connect Google)
               </li>
               <li>
+                <span className="font-semibold">37</span> — Site capability audit & test plans
+              </li>
+              <li>
                 <span className="font-semibold">27</span> — Helping a parent in the portal
+              </li>
+              <li>
+                <span className="font-semibold">38</span> — Parent portal checklist (free & paid)
               </li>
               {canMessage ? (
                 <li>
