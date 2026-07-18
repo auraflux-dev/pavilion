@@ -18,7 +18,7 @@ const SCHOOL_YEAR_END   = '2026-07-31T23:59:59.999Z'
 
 // ─── Goals & volunteer hours — loaded from Wix SiteSettings CMS at runtime ───
 // Fallback values used when CMS is unreachable or keys are missing.
-export const VOLUNTEER_HOURS_RAISED_DEFAULT = 320
+export const VOLUNTEER_HOURS_RAISED_DEFAULT = 0
 export const VOLUNTEER_HOURS_GOAL_DEFAULT   = 500
 
 export const GOALS_DEFAULT = {

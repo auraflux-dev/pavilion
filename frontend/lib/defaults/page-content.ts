@@ -83,14 +83,14 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body: 'Every hour you give helps create a richer experience for every student at Stone Hill Middle School.',
   }),
   board: empty('board', {
-    eyebrow: '2025–26 School Year',
+    eyebrow: 'SHMS PTO Board',
     title: 'Meet the Board',
     body: 'Your SHMS PTO is run entirely by parent volunteers. Every event, program, and fundraiser starts here.',
   }),
   contact: empty('contact', {
     eyebrow: 'Get in Touch',
     title: 'Contact the PTO',
-    body: "Questions about programs, the school store, volunteering, or membership? We'll get back to you within one business day.",
+    body: "Questions about programs, The Cove, volunteering, or membership? We'll get back to you within one business day.",
     sectionTitle: 'About the PTO Board',
     sectionBody:
       'The SHMS PTO is run entirely by parent volunteers. We try to respond to all messages within one business day during the school year.',
@@ -121,9 +121,9 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body: 'Show your Stingrays pride. Order online year-round — pick up at school when the window is open.',
   }),
   fundraising: empty('fundraising', {
-    eyebrow: '2025–26 School Year · Live',
+    eyebrow: 'Goals · Live',
     title: 'Fundraising Tracker',
-    body: 'Every Wix purchase — online or in-store — counts here automatically.',
+    body: 'Membership, The Cove, and event purchases count here automatically.',
   }),
   meetings: empty('meetings', {
     eyebrow: 'Transparency & Communication',
@@ -169,7 +169,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
       'What are Reef, Lagoon, and Tide?|Those are the paid PTO membership levels on the website. Free accounts can upgrade anytime from Membership / Upgrade. Paid members see their tier in the portal after checkout syncs.',
       'How do I join or upgrade membership?|Open Membership (or Upgrade in this portal), pick Reef, Lagoon, or Tide, and complete checkout. After payment, refresh the portal — your tier and store-card credit appear once sync finishes.',
       'I am a paid member — where is my store card credit?|Store & Purchases on this portal shows balances. Membership gift-card credit loads after purchase (refresh if it is still catching up). Use Load card anytime to add more.',
-      'Do paid members get Spirit Wear coupons?|Often yes — when signed in as a paid member, look for the coupon bar on Spirit Wear / checkout. If a code fails, wait a minute and refresh, or email membership@shmspto.org.',
+      'Do paid members get Cove coupons?|Often yes — when signed in as a paid member, look for the coupon bar on The Cove shop / checkout. If a code fails, wait a minute and refresh, or email membership@shmspto.org.',
       'How do I reload the store card?|In Store & Purchases, tap Load card. Choose $10, $20, or $25 and pay securely. Balance updates on the student card after purchase.',
       'Do I need a store card?|The snack window uses a prepaid store card. Memberships and spirit wear pay online at checkout — no store card required.',
       'Can I pay with my own credit card?|Yes. Free and paid parents pay with their own credit or debit card in the portal for membership, The Cove, and store-card reloads. PayPal is next.',

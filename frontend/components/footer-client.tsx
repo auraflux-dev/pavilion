@@ -134,7 +134,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
             <h3 className="text-white font-bold text-sm tracking-wider uppercase mb-5">
               Quick Links
             </h3>
-            <ul className="space-y-2.5" role="list">
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5" role="list">
               {footerLinks.map((link) => (
                 <li key={link.id}>
                   <a
@@ -142,7 +142,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
                     className="text-sm text-[#5A6070] hover:text-white transition-colors flex items-center gap-1.5 group"
                   >
                     <ArrowRight
-                      className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                      className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all shrink-0"
                       aria-hidden="true"
                     />
                     {link.label}
@@ -289,7 +289,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
               style={{ backgroundColor: '#2a2a2a', borderColor: '#333333' }}
             >
               <p className="text-xs font-semibold" style={{ color: '#FFD700' }}>
-                School Store Hours
+                The Cove hours
               </p>
               <p className="text-xs text-[#5A6070] mt-0.5">
                 {storeHours}

@@ -15,7 +15,7 @@ export const revalidate = 3600 // refresh totals every hour
 
 export const metadata = {
   title: 'Fundraising | SHMS PTO',
-  description: 'Every purchase, membership, and event ticket directly funds SHMS student enrichment. See our live 2025–26 goals.',
+  description: 'Every purchase, membership, and Cove sale directly funds SHMS student enrichment. Track live goals here.',
 }
 
 function pct(raised: number, goal: number) {
@@ -41,7 +41,7 @@ export default async function FundraisingPage() {
     { label: 'Student Enrichment Programs', pct: settings.getNumber('allocStudentEnrichment', 45), amount: '' },
     { label: 'School Events & Celebrations', pct: settings.getNumber('allocSchoolEvents', 25),    amount: '' },
     { label: 'Teacher & Classroom Support',  pct: settings.getNumber('allocTeacherSupport', 15),  amount: '' },
-    { label: 'School Store Operations',      pct: settings.getNumber('allocStoreOps', 10),         amount: '' },
+    { label: 'The Cove Operations',          pct: settings.getNumber('allocStoreOps', 10),         amount: '' },
     { label: 'PTO Admin & Communications',   pct: settings.getNumber('allocPTOAdmin', 5),          amount: '' },
   ].map(a => ({ ...a, amount: fmtDollars(ANNUAL_GOAL * a.pct / 100) }))
 
@@ -54,7 +54,7 @@ export default async function FundraisingPage() {
       id: 'membership',
       icon: Star,
       label: 'Memberships',
-      description: 'Annual PTO memberships (Ruby & Supreme tiers) are our largest revenue source, funding enrichment programs directly.',
+      description: 'Annual PTO memberships (Reef, Lagoon, Tide) are our largest revenue source, funding enrichment programs directly.',
       raised: totals.membership,
       goal:   goals.membership,
       href: '/membership',
@@ -63,22 +63,22 @@ export default async function FundraisingPage() {
     {
       id: 'store',
       icon: ShoppingBag,
-      label: 'School Store',
-      description: 'Daily store window sales — candy, snacks, and drinks purchased by students using their store cards.',
+      label: 'The Cove — store card',
+      description: 'Student snack-window sales via prepaid store cards at The Cove.',
       raised: totals.store,
       goal:   goals.store,
-      href: '/store',
+      href: '/cove',
       cta: 'Load a Card',
     },
     {
       id: 'spiritWear',
       icon: Heart,
-      label: 'Spirit Wear',
-      description: 'Year-round Stingrays apparel sales — t-shirts, hoodies, hats, and accessories.',
+      label: 'The Cove — shop',
+      description: 'Year-round Stingrays apparel and merchandise from The Cove.',
       raised: totals.spiritWear,
       goal:   goals.spiritWear,
-      href: '/spirit-wear',
-      cta: 'Shop Spirit Wear',
+      href: '/cove#shop',
+      cta: 'Shop The Cove',
     },
     {
       id: 'danceNight',
@@ -324,7 +324,7 @@ export default async function FundraisingPage() {
             </div>
 
             <p className="text-center text-xs text-[#5A6070] mt-8">
-              Based on projected 2025–26 annual budget of {fmtDollars(ANNUAL_GOAL)}. Actuals updated quarterly.
+              Based on the current annual goal of {fmtDollars(ANNUAL_GOAL)}. Totals refresh hourly from paid orders.
             </p>
           </div>
         </section>
