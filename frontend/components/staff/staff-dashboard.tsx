@@ -19,6 +19,7 @@ import { StaffWorkspaceHub } from '@/components/staff/staff-workspace-hub'
 import { StaffPageContentPanel } from '@/components/staff/staff-page-content-panel'
 import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-panel'
 import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection-panel'
+import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
 import { StaffShell } from '@/components/shells/staff-shell'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 
@@ -77,6 +78,7 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'volunteers',
   'fundraising',
   'wellness',
+  'newsletter',
   'help',
 ]
 
@@ -181,6 +183,13 @@ export function StaffDashboard() {
     me && (me.roles.includes('membership') || me.roles.includes('secretary') || me.isAdmin),
   )
   const canWellness = Boolean(me && (me.roles.includes('wellness') || me.roles.includes('events') || me.isAdmin))
+  const canNewsletter = Boolean(
+    me &&
+      (me.roles.includes('marketing') ||
+        me.roles.includes('secretary') ||
+        me.roles.includes('membership') ||
+        me.isAdmin),
+  )
 
   const navItems = useMemo(() => {
     if (!me) return []
@@ -216,6 +225,7 @@ export function StaffDashboard() {
     if (canVolunteers) items.push({ id: 'volunteers', label: STAFF_WORKSPACE_LABEL.volunteers })
     if (canFundraising) items.push({ id: 'fundraising', label: STAFF_WORKSPACE_LABEL.fundraising })
     if (canWellness) items.push({ id: 'wellness', label: STAFF_WORKSPACE_LABEL.wellness })
+    if (canNewsletter) items.push({ id: 'newsletter', label: STAFF_WORKSPACE_LABEL.newsletter })
     items.push({ id: 'help', label: STAFF_WORKSPACE_LABEL.help })
     return items
   }, [
@@ -239,6 +249,7 @@ export function StaffDashboard() {
     canVolunteers,
     canFundraising,
     canWellness,
+    canNewsletter,
   ])
 
   const active: StaffWorkspace = useMemo(() => {
@@ -613,6 +624,7 @@ export function StaffDashboard() {
         {active === 'wellness' && canWellness ? (
           <StaffSiteSettingsPanel title="Teacher & staff wellness" groupIds={['wellness']} />
         ) : null}
+        {active === 'newsletter' && canNewsletter ? <StaffNewsletterPanel /> : null}
         {active === 'help' ? (
           <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3">
             <h1 className="text-xl font-bold">Help</h1>

@@ -37,8 +37,8 @@ Audience shells: **visitor** · **free member** · **paid member** · **staff (b
 | G-P1-3 | `/fundraising` goals/CTAs | Visitor | **COVERED** — Fundraising workspace |
 | G-P1-4 | SiteSettings (announcement, contact, WhatsApp, …) | Visitor | **COVERED** — Site settings (role-scoped) |
 | G-P1-5 | Membership tier map / Catalog link | Visitor | **COVERED** — Membership tiers (paid display still Catalog) |
-| G-P1-6 | Events create/edit | Visitor | **WIX_ONLY** (Staff = list + manage link) |
-| G-P1-7 | Marketing newsletter list/send | Visitor | **NONE** — still no Staff send UI |
+| G-P1-6 | Events create/edit | Visitor | **COVERED** — Staff Events create/edit/cancel (Wix Events API) |
+| G-P1-7 | Marketing newsletter list/send | Visitor | **COVERED** — Newsletter workspace (Gmail + WhatsApp + portal; free/paid members) |
 
 ### P2
 

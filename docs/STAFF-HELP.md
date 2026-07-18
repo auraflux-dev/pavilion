@@ -28,7 +28,8 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | Minutes | Secretary | Publish meeting minutes |
 | Programs | Programs / instructor | Registration toggles + sessions |
 | Payments | Treasurer | Needs Reconciliation + retry load |
-| Events | Events (+ related) | Upcoming list + link to Wix Events |
+| Events | Events (+ related) | Create / edit / cancel + public /events |
+| **Newsletter** | Marketing / secretary / membership | Member email (free/paid) + WhatsApp grade groups |
 | Store & spirit | Retail | Product ID allowlists |
 | **Memberships** | membership / secretary / admin | Roster, mass email, WhatsApp compose |
 | **Discounts** | retail / related | Coupon codes for checkout / spirit |
