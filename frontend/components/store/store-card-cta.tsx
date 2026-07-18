@@ -42,7 +42,7 @@ export function StoreCardCta({
         </MemberGate>
 
         <p className="text-white/30 text-xs mt-6">
-          Secure checkout via Wix Payments. Funds applied to student account within minutes.
+          Pay with your own credit or debit card on this site. Funds apply to the student store card within minutes.
         </p>
       </div>
     </section>

@@ -3,44 +3,20 @@
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { MemberGate } from '@/components/member-gate'
-import { startWixCheckout } from '@/lib/start-checkout'
+import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
 
 interface Props {
   tierId: string
   tierName: string
+  price: number
 }
 
-function JoinInner({ tierId, tierName }: Props) {
+function JoinInner({ tierId, tierName, price }: Props) {
   const searchParams = useSearchParams()
   const studentId = searchParams.get('studentId')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  async function startCheckout() {
-    setBusy(true)
-    setError(null)
-    try {
-      sessionStorage.setItem(
-        'pendingMembership',
-        JSON.stringify({
-          tier: tierId,
-          studentId: studentId ?? null,
-          startedAt: Date.now(),
-        })
-      )
-      await startWixCheckout({
-        kind: 'membership',
-        tier: tierId,
-        postFlowUrl: `${window.location.origin}/membership`,
-      })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Checkout failed')
-    } finally {
-      setBusy(false)
-    }
-  }
+  const [open, setOpen] = useState(false)
 
   return (
     <MemberGate
@@ -53,18 +29,27 @@ function JoinInner({ tierId, tierName }: Props) {
           style={{ backgroundColor: '#085508' }}
           id={`join-${tierId}`}
           type="button"
-          disabled={busy}
-          onClick={startCheckout}
+          onClick={() => setOpen(true)}
         >
-          {busy ? 'Opening checkout…' : `Join ${tierName}`}
-          {!busy && (
-            <ArrowRight
-              className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
-              aria-hidden="true"
-            />
-          )}
+          Join {tierName} · ${price.toFixed(0)}
+          <ArrowRight
+            className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
+            aria-hidden="true"
+          />
         </Button>
-        {error && <p className="text-xs text-red-600 text-center">{error}</p>}
+        <PortalCardCheckout
+          open={open}
+          onClose={() => setOpen(false)}
+          amount={price}
+          title={`Join ${tierName}`}
+          subtitle="Pay with your own card on this page — free parent accounts can upgrade here"
+          payBody={{ kind: 'membership', tier: tierId, studentId }}
+          containerId={`membership-pay-${tierId}`}
+          onPaid={() => {
+            sessionStorage.removeItem('pendingMembership')
+            window.location.href = '/member-portal?membership=success'
+          }}
+        />
       </div>
     </MemberGate>
   )

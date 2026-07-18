@@ -59,8 +59,8 @@ export function StoreCardReload({
     environment: string
   } | null>(null)
   const [storedCard, setStoredCard] = useState<StoredCard | null>(null)
-  const [useStored, setUseStored] = useState(true)
-  const [saveCard, setSaveCard] = useState(true)
+  const [useStored, setUseStored] = useState(false)
+  const [saveCard, setSaveCard] = useState(false)
   const [busy, setBusy] = useState(false)
   const [ready, setReady] = useState(false)
   const [error, setError] = useState('')
@@ -84,7 +84,8 @@ export function StoreCardReload({
       .then((data) => {
         setConfig(data)
         setStoredCard(data.paymentMethod ?? null)
-        setUseStored(Boolean(data.paymentMethod))
+        // Own CC first — saved card is optional, never required
+        setUseStored(false)
       })
       .catch(() => setError('Payment settings could not be loaded.'))
   }, [open])
@@ -273,7 +274,7 @@ export function StoreCardReload({
               checked={!useStored}
               onChange={() => setUseStored(false)}
             />
-            Use a different card
+            Enter my credit or debit card
           </label>
           <button
             type="button"
@@ -325,7 +326,7 @@ export function StoreCardReload({
         {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : `Pay & load $${amount}`}
       </Button>
       <p className="text-[10px] text-[#5A6070] text-center">
-        Secure payment and card vault provided by Square.
+        Use any credit or debit card. Saving a card is optional (for faster reloads).
       </p>
     </div>
   )

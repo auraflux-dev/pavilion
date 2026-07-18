@@ -1,25 +1,33 @@
 'use client'
 
 /**
- * After login/signup return to /membership?checkout=ruby&studentId=…
- * auto-opens Wix checkout and offers a "I've completed payment" claim.
+ * After login return to /membership?checkout=reef&studentId=…
+ * opens in-portal Square card pay (own CC — free or paid parent).
  */
 import { Suspense, useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { startWixCheckout } from '@/lib/start-checkout'
+import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/use-auth'
-import { Button } from '@/components/ui/button'
-import { CheckCircle2, Loader2 } from 'lucide-react'
+import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
+
+const TIER_LABELS: Record<string, string> = {
+  reef: 'Reef',
+  lagoon: 'Lagoon',
+  tide: 'Tide',
+}
+
+const PRICE_FALLBACK: Record<string, number> = {
+  reef: 49,
+  lagoon: 149,
+  tide: 249,
+}
 
 function HandlerInner() {
   const searchParams = useSearchParams()
-  const router = useRouter()
-  const { status, refresh } = useAuth()
+  const { status } = useAuth()
   const checkout = searchParams.get('checkout')
   const studentId = searchParams.get('studentId')
-  const purchased = searchParams.get('purchased')
-  const [claimStatus, setClaimStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
-  const [claimMsg, setClaimMsg] = useState('')
+  const [open, setOpen] = useState(false)
+  const [price, setPrice] = useState(0)
 
   useEffect(() => {
     if (status !== 'member') return
@@ -36,112 +44,47 @@ function HandlerInner() {
         // ignore
       }
 
+      // Prefer live CMS/catalog prices from the membership page context when possible
+      let dollars = PRICE_FALLBACK[checkout] ?? 0
       try {
-        await startWixCheckout({
-          kind: 'membership',
-          tier: checkout,
-          postFlowUrl: `${window.location.origin}/membership`,
+        const res = await fetch('/api/checkout/quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kind: 'membership', tier: checkout }),
         })
+        const data = await res.json()
+        if (res.ok && typeof data.amount === 'number') dollars = data.amount
       } catch {
-        // claim banner still shown after redirect
+        // fallback prices
       }
 
-      if (cancelled) return
-      const next = new URLSearchParams(searchParams.toString())
-      next.delete('checkout')
-      next.set('purchased', '1')
-      if (studentId) next.set('studentId', studentId)
-      router.replace(`/membership?${next.toString()}`)
+      if (!cancelled && dollars > 0) {
+        setPrice(dollars)
+        setOpen(true)
+      }
     })()
 
     return () => {
       cancelled = true
     }
-  }, [status, checkout, studentId, router, searchParams])
+  }, [status, checkout, studentId])
 
-  async function claimPurchase() {
-    setClaimStatus('loading')
-    setClaimMsg('')
-    try {
-      let pending: { tier?: string; studentId?: string | null } = {}
-      try {
-        pending = JSON.parse(sessionStorage.getItem('pendingMembership') || '{}')
-      } catch {
-        pending = {}
-      }
-      const tier = pending.tier || checkout || ''
-      const res = await fetch('/api/membership/claim', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tier,
-          studentId: pending.studentId ?? studentId,
-        }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error || 'Could not confirm membership')
-      try {
-        sessionStorage.removeItem('pendingMembership')
-      } catch {
-        // ignore
-      }
-      setClaimStatus('ok')
-      const giftNote =
-        data.giftCard?.status === 'loaded'
-          ? ` Store card credited $${data.giftCard.creditDollars}.`
-          : ''
-      setClaimMsg(
-        data.updatedStudentIds?.length
-          ? `Membership applied to your student.${giftNote} Opening your portal…`
-          : 'Membership recorded. Add a student in the portal to finish setup.'
-      )
-      refresh()
-      setTimeout(() => {
-        window.location.href = '/member-portal'
-      }, 1200)
-    } catch (err) {
-      setClaimStatus('error')
-      setClaimMsg(err instanceof Error ? err.message : 'Claim failed')
-    }
-  }
-
-  if (status !== 'member' || purchased !== '1') return null
+  if (status !== 'member' || !checkout || !open || price <= 0) return null
 
   return (
-    <div className="max-w-3xl mx-auto mb-8 rounded-2xl border border-[#E8E4DC] bg-white p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-      <div className="flex-1">
-        <p className="font-bold text-[#1A1A1A] mb-1">Finished checkout?</p>
-        <p className="text-sm text-[#5A6070]">
-          After you pay on the Wix checkout page, confirm here so we link your paid membership
-          to your parent account, update the portal, and load the tier&apos;s store card credit
-          {studentId ? ' for the selected student' : ''}.
-        </p>
-        {claimMsg && (
-          <p
-            className={`text-sm mt-2 ${claimStatus === 'error' ? 'text-red-600' : 'text-[#085508]'}`}
-          >
-            {claimMsg}
-          </p>
-        )}
-      </div>
-      <Button
-        type="button"
-        onClick={claimPurchase}
-        disabled={claimStatus === 'loading' || claimStatus === 'ok'}
-        className="font-semibold text-white shrink-0"
-        style={{ backgroundColor: '#085508' }}
-      >
-        {claimStatus === 'loading' ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : claimStatus === 'ok' ? (
-          <>
-            <CheckCircle2 className="w-4 h-4 mr-2" /> Done
-          </>
-        ) : (
-          "I've completed payment"
-        )}
-      </Button>
-    </div>
+    <PortalCardCheckout
+      open={open}
+      onClose={() => setOpen(false)}
+      amount={price}
+      title={`Join ${TIER_LABELS[checkout] ?? checkout}`}
+      subtitle="Pay with your own credit or debit card on this page"
+      payBody={{ kind: 'membership', tier: checkout, studentId }}
+      containerId={`membership-return-${checkout}`}
+      onPaid={() => {
+        sessionStorage.removeItem('pendingMembership')
+        window.location.href = '/member-portal?membership=success'
+      }}
+    />
   )
 }
 

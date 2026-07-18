@@ -4,18 +4,21 @@ import { useState } from 'react'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { usePathname } from 'next/navigation'
 import { Lock } from 'lucide-react'
-import { startWixCheckout } from '@/lib/start-checkout'
+import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 
 interface Props {
   productId: string
+  /** List price from catalog (server-rendered). */
+  price: number
+  productName?: string
   disabled?: boolean
 }
 
-/** Spirit wear buys require a free parent account so orders attach to a known member. */
-export function SpiritWearBuyButton({ productId, disabled }: Props) {
+/** Cove / spirit buys — free or paid member, own CC in portal via Square. */
+export function SpiritWearBuyButton({ productId, price, productName, disabled }: Props) {
   const { status } = useAuth()
   const pathname = usePathname()
-  const [busy, setBusy] = useState(false)
+  const [open, setOpen] = useState(false)
 
   if (disabled) {
     return (
@@ -52,25 +55,27 @@ export function SpiritWearBuyButton({ productId, disabled }: Props) {
   }
 
   return (
-    <button
-      type="button"
-      disabled={busy}
-      onClick={async () => {
-        setBusy(true)
-        try {
-          await startWixCheckout({
-            kind: 'product',
-            productId,
-            postFlowUrl: `${window.location.origin}/spirit-wear`,
-          })
-        } finally {
-          setBusy(false)
-        }
-      }}
-      className="text-xs font-bold px-3 py-1.5 rounded-full transition-colors text-white disabled:opacity-60"
-      style={{ backgroundColor: '#085508' }}
-    >
-      {busy ? '…' : 'Buy'}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="text-xs font-bold px-3 py-1.5 rounded-full transition-colors text-white"
+        style={{ backgroundColor: '#085508' }}
+      >
+        Buy
+      </button>
+      <PortalCardCheckout
+        open={open}
+        onClose={() => setOpen(false)}
+        amount={price}
+        title={productName || 'The Cove'}
+        subtitle="Pay with your credit or debit card — stays on shmspto.org"
+        payBody={{ kind: 'product', productId }}
+        containerId={`cove-pay-${productId.slice(0, 8)}`}
+        onPaid={() => {
+          window.dispatchEvent(new CustomEvent('cove-purchase'))
+        }}
+      />
+    </>
   )
 }

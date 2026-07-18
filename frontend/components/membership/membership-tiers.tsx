@@ -109,7 +109,7 @@ export async function MembershipTiers() {
               <div className="flex-1 mb-8" />
             )}
 
-            <MembershipJoinButton tierId={tier.tierId} tierName={tier.name} />
+            <MembershipJoinButton tierId={tier.tierId} tierName={tier.name} price={tier.price} />
           </div>
         </article>
       ))}

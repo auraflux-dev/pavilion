@@ -120,10 +120,10 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   cancel: 'Cancel',
   addStudentError: 'Could not add student. Please try again.',
   loadCardHelp:
-    'Choose a student and $10 / $20 / $25. Pay once, or securely save the card with Square for faster reloads and optional auto top-off.',
+    'Choose a student and $10 / $20 / $25. Pay with your own credit or debit card. Saving a card with Square is optional for faster reloads and auto top-off.',
   paymentMethodsTitle: 'How you pay',
   paymentMethodsBody:
-    'Snack window: prepaid student store card. Online reloads: one-time card payment or an optional saved card secured by Square. Membership and spirit wear use checkout separately.',
+    'Snack window: prepaid student store card. Online: pay with your own credit/debit card in this portal (membership, The Cove, and store-card reloads). Saving a card is optional.',
 }
 
 /** Parse `key|value` lines (store-how style). Value may contain `|`. */

@@ -129,6 +129,8 @@ export default async function CovePage() {
                         </span>
                         <SpiritWearBuyButton
                           productId={item._id}
+                          price={item.price}
+                          productName={item.name}
                           disabled={!item.inStock}
                         />
                       </div>

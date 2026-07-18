@@ -1,0 +1,258 @@
+'use client'
+
+/**
+ * In-portal Square card checkout — personal credit/debit card for any ecommerce.
+ * Free and paid members. Saved card is optional convenience, never required.
+ */
+import { useEffect, useRef, useState } from 'react'
+import { CreditCard, Loader2, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+
+type StoredCard = {
+  brand: string
+  last4: string
+}
+
+type SquareCard = {
+  attach(selector: string): Promise<void>
+  tokenize(): Promise<{ status: string; token?: string; errors?: { message?: string }[] }>
+  destroy(): Promise<void>
+}
+
+declare global {
+  interface Window {
+    Square?: {
+      payments(applicationId: string, locationId: string): Promise<{
+        card(): Promise<SquareCard>
+      }>
+    }
+  }
+}
+
+export type PortalPayBody =
+  | { kind: 'membership'; tier: string; studentId?: string | null }
+  | { kind: 'product'; productId: string }
+  | { kind: 'store-card'; studentId: string; amountCents: number }
+
+interface Props {
+  open: boolean
+  onClose: () => void
+  /** Dollars shown in the pay button */
+  amount: number
+  title: string
+  subtitle?: string
+  payBody: PortalPayBody
+  onPaid?: (data: Record<string, unknown>) => void
+  /** Unique DOM id so multiple forms can mount */
+  containerId?: string
+}
+
+export function PortalCardCheckout({
+  open,
+  onClose,
+  amount,
+  title,
+  subtitle,
+  payBody,
+  onPaid,
+  containerId = 'portal-square-card',
+}: Props) {
+  const [config, setConfig] = useState<{
+    configured: boolean
+    applicationId: string
+    locationId: string
+    environment: string
+  } | null>(null)
+  const [storedCard, setStoredCard] = useState<StoredCard | null>(null)
+  const [useStored, setUseStored] = useState(false)
+  const [saveCard, setSaveCard] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [ready, setReady] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const cardRef = useRef<SquareCard | null>(null)
+
+  useEffect(() => {
+    if (!open) return
+    setError('')
+    setSuccess('')
+    fetch('/api/gift-card/payment-method')
+      .then((r) => r.json())
+      .then((data) => {
+        setConfig(data)
+        setStoredCard(data.paymentMethod ?? null)
+        // Prefer typing your own card; saved is an option, not the default gate
+        setUseStored(false)
+        setSaveCard(false)
+      })
+      .catch(() => setError('Payment settings could not be loaded.'))
+  }, [open])
+
+  useEffect(() => {
+    if (!open || !config?.configured || useStored) return
+    let cancelled = false
+
+    async function setup() {
+      const src =
+        config?.environment === 'production'
+          ? 'https://web.squarecdn.com/v1/square.js'
+          : 'https://sandbox.web.squarecdn.com/v1/square.js'
+      let script = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`)
+      if (!script) {
+        script = document.createElement('script')
+        script.src = src
+        script.async = true
+        document.head.appendChild(script)
+        await new Promise<void>((resolve, reject) => {
+          script!.onload = () => resolve()
+          script!.onerror = () => reject(new Error('Square payment form failed to load'))
+        })
+      } else if (!window.Square) {
+        await new Promise<void>((resolve) => {
+          script!.addEventListener('load', () => resolve(), { once: true })
+        })
+      }
+
+      if (cancelled || !window.Square || !config) return
+      await cardRef.current?.destroy().catch(() => undefined)
+      const payments = await window.Square.payments(config.applicationId, config.locationId)
+      const card = await payments.card()
+      await card.attach(`#${containerId}`)
+      cardRef.current = card
+      setReady(true)
+    }
+
+    setup().catch((err) => setError(err instanceof Error ? err.message : 'Payment form unavailable'))
+    return () => {
+      cancelled = true
+      cardRef.current?.destroy().catch(() => undefined)
+      cardRef.current = null
+      setReady(false)
+    }
+  }, [open, config, useStored, containerId])
+
+  async function submit() {
+    setBusy(true)
+    setError('')
+    setSuccess('')
+    try {
+      let sourceId: string | undefined
+      if (!useStored) {
+        if (!cardRef.current || !ready) throw new Error('Card form is not ready yet.')
+        const tokenized = await cardRef.current.tokenize()
+        if (tokenized.status !== 'OK' || !tokenized.token) {
+          throw new Error(tokenized.errors?.[0]?.message ?? 'Card details could not be verified.')
+        }
+        sourceId = tokenized.token
+      }
+
+      const response = await fetch('/api/checkout/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...payBody,
+          sourceId,
+          useStoredCard: useStored,
+          saveCard: !useStored && saveCard,
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error ?? 'Payment failed.')
+
+      setSuccess('Payment successful — thank you!')
+      onPaid?.(data)
+      setTimeout(() => onClose(), 1200)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Payment failed.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!open) return null
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={`${containerId}-title`}
+    >
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl border border-[#E8E4DC] p-5 space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p id={`${containerId}-title`} className="text-base font-bold text-[#1A1A1A]">
+              {title}
+            </p>
+            {subtitle ? <p className="text-xs text-[#5A6070] mt-1">{subtitle}</p> : null}
+            <p className="text-sm font-bold mt-2" style={{ color: '#085508' }}>
+              ${amount.toFixed(2)}
+            </p>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close checkout">
+            <X className="w-4 h-4 text-[#5A6070]" />
+          </button>
+        </div>
+
+        <p className="text-xs text-[#5A6070]">
+          Pay with your own credit or debit card. Free and paid parent accounts can checkout here —
+          you do not need a saved Square card.
+        </p>
+
+        {storedCard ? (
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs text-[#1A1A1A]">
+              <input type="radio" checked={!useStored} onChange={() => setUseStored(false)} />
+              Enter a card
+            </label>
+            <label className="flex items-center gap-2 text-xs text-[#1A1A1A]">
+              <input type="radio" checked={useStored} onChange={() => setUseStored(true)} />
+              Use saved {storedCard.brand} ending in {storedCard.last4}
+            </label>
+          </div>
+        ) : null}
+
+        {!useStored ? (
+          <>
+            <div id={containerId} className="min-h-12 rounded-lg border border-[#E8E4DC] bg-white px-2 py-1" />
+            <label className="flex items-start gap-2 text-xs text-[#5A6070]">
+              <input
+                type="checkbox"
+                checked={saveCard}
+                onChange={(e) => setSaveCard(e.target.checked)}
+                className="mt-0.5"
+              />
+              Optionally save this card with Square for faster reloads later (never required).
+            </label>
+          </>
+        ) : null}
+
+        {config && !config.configured ? (
+          <p className="text-xs text-amber-700">Card payments are temporarily unavailable.</p>
+        ) : null}
+        {error ? <p className="text-xs text-red-600">{error}</p> : null}
+        {success ? <p className="text-xs font-semibold text-green-700">{success}</p> : null}
+
+        <Button
+          type="button"
+          onClick={submit}
+          disabled={busy || !config?.configured || (!useStored && !ready)}
+          className="w-full text-white font-bold"
+          style={{ backgroundColor: '#085508' }}
+        >
+          {busy ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <>
+              <CreditCard className="w-4 h-4 mr-2" />
+              Pay ${amount.toFixed(2)}
+            </>
+          )}
+        </Button>
+        <p className="text-[10px] text-[#5A6070] text-center">
+          Secured by Square. PayPal coming next — same checkout screen.
+        </p>
+      </div>
+    </div>
+  )
+}
