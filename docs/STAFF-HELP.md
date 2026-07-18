@@ -55,9 +55,12 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **32 - Staff Workspaces Map (Role Tools)** | Everyone | Which role sees which top-nav workspace |
 | **33 - Staff Inbox, Calendar & Docs** | Everyone | Connect Google, threads, folders, Sapling, signature |
 | **34 - Memberships Workspace** | VP Memberships / secretary / admin | Roster, mass email, WhatsApp |
+| **35 - Membership Tiers Reef · Lagoon · Tide** | Parents + staff | Join/upgrade + Staff tiers map |
 | **36 - Discount Codes & Spirit Coupons** | Retail / treasurer | Coupon tools |
 | **37 - Site Capability Audit & Test Plans** | Everyone / QA | Visitor · portal · staff gaps + TP checklists |
 | **38 - Parent Portal Checklist** | Staff helping parents | Free vs paid what parents can do |
+| **39 - Member Newsletter** | Marketing / secretary / membership | Email + WhatsApp to free/paid members |
+| **40 - Visitor Site Content from Staff** | Role-scoped | Site settings, board, nav, FAQs, volunteers… |
 | **27 - Member Portal Parent Support Guide** | Everyone helping parents | Walk a parent through portal screens |
 
 ## Member portal (free & paid parents)
@@ -89,6 +92,6 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 ## Publish / refresh Drive
 
 ```bash
-node --env-file=frontend/.env.local scripts/create-pto-docs.js
+node scripts/close-help-gaps.js
 node scripts/insert-doc-screenshots.js
 ```

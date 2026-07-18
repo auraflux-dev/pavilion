@@ -417,11 +417,20 @@ export function StaffDashboard() {
                           minutes: 'Publish meeting minutes',
                           programs: 'Registration & sessions',
                           payments: 'Needs Reconciliation',
-                          events: 'Upcoming + manage in Wix',
+                          events: 'Create, edit, cancel events',
                           retail: 'Store & spirit product lists',
                           discounts: 'Named & member discount codes',
                           membership: 'Roster, email, WhatsApp groups',
+                          tiers: 'Tier map & Catalog product IDs',
                           content: 'Page heroes & marketing copy',
+                          site: 'Announcement, contact, goals…',
+                          board: 'Public /board roster',
+                          nav: 'Top nav & footer links',
+                          faq: 'Membership & volunteer FAQs',
+                          volunteers: 'Volunteer opportunity cards',
+                          fundraising: 'CTAs & fundraising goals',
+                          wellness: 'Wish list & appreciation',
+                          newsletter: 'Member email & WhatsApp',
                           help: 'Drive how-tos',
                         } as Partial<Record<StaffWorkspace, string>>
                       )[item.id] ?? 'Open workspace'}
@@ -674,6 +683,10 @@ export function StaffDashboard() {
                   <span className="font-semibold">36</span> — Discount codes & spirit coupons
                 </li>
               ) : null}
+              <li>
+                <span className="font-semibold">33–40</span> — Inbox/Docs, Memberships, Tiers,
+                Discounts, Newsletter, Site CMS by role, Parent checklist
+              </li>
               {canSite ? (
                 <li>
                   <span className="font-semibold">Site settings / CMS lists</span> — Announcement,

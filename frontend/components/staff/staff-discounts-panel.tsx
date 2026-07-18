@@ -209,7 +209,7 @@ export function StaffDiscountsPanel() {
           <h3 className="text-base font-bold">Issue to member</h3>
           <p className="text-xs text-[#5A6070]">
             Generates a unique code for a parent email. Default % from their highest paid tier
-            (Ruby 5 / Supreme 10 / Pearl 15 unless CMS override). Leave override blank to use tier.
+            (Reef 5 / Lagoon 10 / Tide 15 unless CMS override). Leave override blank to use tier.
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">

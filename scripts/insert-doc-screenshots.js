@@ -42,9 +42,14 @@ const PLACEMENTS = [
     docTitle: '07 - How to Manage Events v2',
     images: [
       {
-        file: '13-staff-events.png',
-        after: 'Recommended view: Staff top nav → Events — shows upcoming events and a Manage in Wix Events button.',
-        caption: 'Action screenshot — Staff → Events list and Manage in Wix Events shortcut.',
+        file: '33-staff-events.png',
+        after: '1. Sign in with @shmspto.org → Staff top nav → Events.',
+        caption: 'Action screenshot — Staff → Events list (July 2026 create UI).',
+      },
+      {
+        file: '33-staff-events-form.png',
+        after: '2. Click New event.',
+        caption: 'Action screenshot — Staff → Events create form (RSVP / Ticketed / draft).',
       },
     ],
   },
@@ -102,9 +107,9 @@ const PLACEMENTS = [
     docTitle: '19 - How to Manage Volunteer Opportunities and Meeting Minutes',
     images: [
       {
-        file: '19-volunteer-opps.png',
-        after: 'Content Manager → Volunteer Opportunities',
-        caption: 'Action screenshot — Volunteer Opportunities in Content Manager.',
+        file: '40-staff-volunteers.png',
+        after: '1. Staff top nav → Volunteer ops.',
+        caption: 'Action screenshot — Staff → Volunteer ops CMS editor.',
       },
       {
         file: '31-staff-minutes.png',
@@ -168,7 +173,7 @@ const PLACEMENTS = [
     images: [
       {
         file: '30-staff-home.png',
-        after: 'Each role home shows what that position owns and a short This Week checklist.',
+        after: 'Map: doc 32. Quick start: doc 30. Inbox/Docs: doc 33. Memberships: doc 34. Newsletter: doc 39. Visitor CMS lists: doc 40.',
         caption: 'Action screenshot — Staff Home with role cards and This Week.',
       },
       {
@@ -221,6 +226,11 @@ const PLACEMENTS = [
         after: 'Active Surveys for you appear below the portal panels. The parent opens and submits the branded survey without leaving the PTO site.',
         caption: 'Action screenshot — in-portal survey placement.',
       },
+      {
+        file: '38-portal-help.png',
+        after: 'Parents open Help in the member top nav (or #help). FAQ covers account, students, Reef/Lagoon/Tide, store card, coupons, and surveys.',
+        caption: 'Action screenshot — Portal help FAQ (free & paid).',
+      },
     ],
   },
   {
@@ -260,6 +270,81 @@ const PLACEMENTS = [
         file: '30-staff-home.png',
         after: 'Everyone on Staff. Role home cards + This Week checklist. Doc 26, 30.',
         caption: 'Action screenshot — Staff Home workspace map entry point.',
+      },
+    ],
+  },
+  {
+    docTitle: '33 - Staff Inbox, Calendar & Docs',
+    images: [
+      {
+        file: '33-staff-inbox.png',
+        after: '1. Staff → Inbox (or Calendar / Docs).',
+        caption: 'Action screenshot — Staff → Inbox / Connect Google workspace hub.',
+      },
+    ],
+  },
+  {
+    docTitle: '34 - Memberships Workspace',
+    images: [
+      {
+        file: '34-staff-memberships.png',
+        after: '1. Staff → Memberships.',
+        caption: 'Action screenshot — Staff → Memberships roster and outreach.',
+      },
+    ],
+  },
+  {
+    docTitle: '35 - Membership Tiers Reef · Lagoon · Tide',
+    images: [
+      {
+        file: '35-staff-tiers.png',
+        after: '1. Staff → Membership tiers to edit the CMS map (product IDs, sort, popular, discounts).',
+        caption: 'Action screenshot — Staff → Membership tiers editor.',
+      },
+    ],
+  },
+  {
+    docTitle: '36 - Discount Codes & Spirit Coupons',
+    images: [
+      {
+        file: '36-staff-discounts.png',
+        after: '1. Staff → Discounts.',
+        caption: 'Action screenshot — Staff → Discounts workspace.',
+      },
+    ],
+  },
+  {
+    docTitle: '38 - Parent Portal Checklist',
+    images: [
+      {
+        file: '38-portal-help.png',
+        after: 'Member portal → Help opens the Portal help FAQ for the signed-in parent.',
+        caption: 'Action screenshot — Member portal Portal help FAQ.',
+      },
+    ],
+  },
+  {
+    docTitle: '39 - Member Newsletter (Email & WhatsApp)',
+    images: [
+      {
+        file: '39-staff-newsletter.png',
+        after: '1. Staff → Newsletter.',
+        caption: 'Action screenshot — Staff → Newsletter email & WhatsApp send.',
+      },
+    ],
+  },
+  {
+    docTitle: '40 - Visitor Site Content from Staff (CMS by Role)',
+    images: [
+      {
+        file: '40-staff-site-settings.png',
+        after: '1. Staff → Site settings.',
+        caption: 'Action screenshot — Staff → Site settings (role-scoped groups).',
+      },
+      {
+        file: '40-staff-board.png',
+        after: 'Board roster · Nav & footer · FAQs · Volunteer ops · Fundraising CTAs · Membership tiers — add / edit / deactivate (Active flag).',
+        caption: 'Action screenshot — Staff → Board roster editor.',
       },
     ],
   },
