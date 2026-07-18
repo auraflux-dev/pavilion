@@ -1,17 +1,17 @@
 # Staff help docs (July 2026)
 
-Canonical copies live in Google Drive → **SHMS PTO Platform Docs**.  
+Canonical copies live in Google Drive → **SHMS PTO Platform Docs** → **Wix Admin Guides**.  
 Staging: https://shmspto.vercel.app/staff
 
-**Pending review:** Drive folder [Pending Review — July 2026](https://drive.google.com/drive/folders/1O9hFCYQ4fQNYkAi5Sq-00L4zWBpdV83i) (`@shmspto.org` can comment).
+Parent / free / paid member FAQs live in the **Member portal** (`/member-portal` → Portal help), not Staff.
 
 ## Audience shells (who you are)
 
 | Audience | Where | Top nav |
 |----------|--------|---------|
 | **Visitor** | Public pages | Marketing CMS nav + Log in |
-| **Free / paid member** | `/member-portal` | Member shell (My portal, Upgrade/Membership, Store, Programs) — labeled Free or Paid |
-| **Staff** | `/staff` | Staff shell (Home, Projects, Members…) — dark green bar, workspaces as tabs |
+| **Free / paid member** | `/member-portal` | Member shell + Portal help FAQ |
+| **Staff** | `/staff` | Staff shell → Help tab + Drive docs |
 
 Browsing the public site while logged in still uses the marketing nav (with a Free/Paid/Visitor hint). Portal and Staff never reuse that bar.
 
@@ -33,6 +33,7 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **Memberships** | membership / secretary / admin | Roster, mass email, WhatsApp compose |
 | **Discounts** | retail / related | Coupon codes for checkout / spirit |
 | Page copy | Marketing / secretary | PageContent heroes |
+| **Help** | Everyone | Links to Drive how-tos for your role |
 
 ## Staff portal — start here
 
@@ -48,12 +49,13 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **36 - Discount Codes & Spirit Coupons** | Retail / treasurer | Coupon tools |
 | **27 - Member Portal Parent Support Guide** | Everyone helping parents | Walk a parent through portal screens |
 
-## Parents / families
+## Member portal (free & paid parents)
 
-| Doc | Who | What |
-|-----|-----|------|
-| **35 - Membership Tiers Reef · Lagoon · Tide** | Parents (board review) | Join/upgrade naming and portal tips |
-| Portal Help panel | Members | In-app FAQ on `/member-portal` |
+| Surface | Who | What |
+|---------|-----|------|
+| **Portal help** panel | Free & paid members | In-app FAQ (account, students, store card, Reef/Lagoon/Tide, upgrade, coupons) |
+| **35 - Membership Tiers Reef · Lagoon · Tide** | Parents (Drive) | Longer join/upgrade guide |
+| Public `/membership` | Visitors + members | Tier cards and checkout |
 
 ## Role-specific on Staff
 
