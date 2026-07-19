@@ -189,6 +189,8 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
 export const CONTACT_DEFAULTS = {
   contactEmailGeneral: 'info@shmspto.org',
   contactEmailTreasurer: 'treasurer@shmspto.org',
+  /** Co-VPs Fundraising & Programs (board sheet) */
+  contactEmailPrograms: 'fundraising@shmspto.org',
   contactAddress: '23415 Evergreen Ridge Drive, Ashburn, VA 20148',
   contactStoreHours: 'Mon–Fri · lunch periods (in person only)',
   portalGrades: '6,7,8',

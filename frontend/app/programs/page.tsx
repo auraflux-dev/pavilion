@@ -4,10 +4,10 @@ import { Footer } from '@/components/footer'
 import { ProgramCard } from '@/components/programs/program-card'
 import { ProgramsFilter } from '@/components/programs/programs-filter'
 import { PageHero } from '@/components/page-hero'
+import { ProgramsContactForm } from '@/components/programs/programs-contact-form'
 import { getAllPrograms, type Program } from '@/lib/api/programs'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
-import { ArrowRight } from 'lucide-react'
 
 export const revalidate = 300 // revalidate every 5 minutes
 
@@ -16,7 +16,7 @@ export default async function ProgramsPage() {
   let error = false
 
   const [settings, page] = await Promise.all([getSiteSettings(), getPageContent('programs')])
-  const presidentEmail = settings.get('presidentEmail', 'president@shmspto.org')
+  const programsEmail = settings.get('contactEmailPrograms', 'fundraising@shmspto.org')
   const inSession = settings.getBool('schoolInSession', false)
 
   try {
@@ -81,23 +81,25 @@ export default async function ProgramsPage() {
           </div>
         </section>
 
-        {/* Questions CTA */}
-        <section className="py-14 bg-white border-t border-[#E8E4DC]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">
-              Questions about a program?
-            </h2>
-            <p className="text-[#5A6070] mb-6 max-w-xl mx-auto">
-              Reach out to the PTO board and we&apos;ll get back to you quickly.
-            </p>
-            <a
-              href={`mailto:${presidentEmail}`}
-              className="inline-flex items-center gap-2 font-semibold text-white px-6 py-3 rounded-lg transition-opacity hover:opacity-90"
-              style={{ backgroundColor: '#085508' }}
-            >
-              Contact Us
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </a>
+        {/* Questions → VP of Programs */}
+        <section
+          id="programs-contact"
+          className="border-t border-[#E8E4DC] bg-white py-14 md:py-20"
+          aria-labelledby="programs-contact-heading"
+        >
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-8 text-center">
+              <h2
+                id="programs-contact-heading"
+                className="mb-3 text-2xl font-bold text-[#1A1A1A] sm:text-3xl"
+              >
+                Questions about a program?
+              </h2>
+              <p className="mx-auto max-w-xl text-[#5A6070]">
+                Message the VP of Programs — Co-VPs Fundraising &amp; Programs will follow up.
+              </p>
+            </div>
+            <ProgramsContactForm toEmail={programsEmail} />
           </div>
         </section>
       </main>
