@@ -70,6 +70,7 @@ async function fetchNavLinks(): Promise<NavLink[]> {
 
 // Fallback used if CMS is unreachable — site still navigable
 const FALLBACK_NAV: NavLink[] = [
+  { id: 'f0', label: 'Home', href: '/', sortOrder: 0, showInNav: true, showInFooter: true, active: true },
   { id: 'f1', label: 'Programs', href: '/programs', sortOrder: 1, showInNav: true, showInFooter: true, active: true },
   { id: 'f2', label: 'Events', href: '/events', sortOrder: 2, showInNav: true, showInFooter: true, active: true },
   { id: 'f7', label: 'Membership', href: '/membership', sortOrder: 3, showInNav: true, showInFooter: true, active: true },
@@ -102,10 +103,34 @@ function normalizeCommerceNav(links: NavLink[]): NavLink[] {
   return [...rest, cove].sort((a, b) => a.sortOrder - b.sortOrder)
 }
 
+function ensureHomeLink(links: NavLink[]): NavLink[] {
+  if (links.some((l) => l.href === '/' || l.label.toLowerCase() === 'home')) {
+    return links
+      .map((l) =>
+        l.href === '/' || l.label.toLowerCase() === 'home'
+          ? { ...l, label: 'Home', href: '/', showInNav: true, active: true, sortOrder: Math.min(0, l.sortOrder) }
+          : l,
+      )
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+  }
+  return [
+    {
+      id: 'home',
+      label: 'Home',
+      href: '/',
+      sortOrder: 0,
+      showInNav: true,
+      showInFooter: true,
+      active: true,
+    },
+    ...links,
+  ].sort((a, b) => a.sortOrder - b.sortOrder)
+}
+
 export async function getNavLinks(): Promise<NavLink[]> {
   const raw = await fetchNavLinks()
   // Always use CMS active links; home sections still gate Programs/Events via schoolInSession.
-  return normalizeCommerceNav(raw.length > 0 ? raw : FALLBACK_NAV)
+  return ensureHomeLink(normalizeCommerceNav(raw.length > 0 ? raw : FALLBACK_NAV))
 }
 
 export async function getTopNavLinks(): Promise<NavLink[]> {

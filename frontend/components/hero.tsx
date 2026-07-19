@@ -21,25 +21,25 @@ export async function Hero() {
   ]
 
   const topImage = resolveHomeImage(
-    settings.get('homeHeroImageTopUrl', '/home/hero-top.jpg'),
-    '/home/hero-top.jpg'
+    settings.get('homeHeroImageTopUrl', '/home/hero-a.jpg'),
+    '/home/hero-a.jpg'
   )
   const bottomImage = resolveHomeImage(
-    settings.get('homeHeroImageBottomUrl', '/home/hero-bottom.jpg'),
-    '/home/hero-bottom.jpg'
+    settings.get('homeHeroImageBottomUrl', '/home/hero-b.jpg'),
+    '/home/hero-b.jpg'
   )
   const topAlt = settings.get(
     'homeHeroImageTopAlt',
-    'Students learning together in a classroom'
+    'Middle school students collaborating on a project'
   )
   const bottomAlt = settings.get(
     'homeHeroImageBottomAlt',
-    'SHMS students engaged in learning'
+    'Students focused together in class'
   )
 
   return (
     <section
-      className="relative overflow-hidden py-16 md:py-24 lg:py-28"
+      className="relative overflow-hidden pt-14 pb-20 md:pt-20 md:pb-24"
       style={{ backgroundColor: '#085508' }}
       aria-label="Welcome banner"
     >
@@ -62,8 +62,8 @@ export async function Hero() {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-          <div className="lg:col-span-7">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          <div className="lg:col-span-6 xl:col-span-7">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 mb-6">
               <span className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse" aria-hidden="true" />
               <span className="text-white/90 text-xs font-semibold tracking-wider uppercase">
@@ -117,7 +117,7 @@ export async function Hero() {
               </Button>
             </div>
 
-            <div className="mt-12 flex flex-wrap gap-8 sm:gap-12">
+            <div className="mt-10 flex flex-wrap gap-8 sm:gap-12">
               {stats.map((stat) => (
                 <div key={stat.label}>
                   <div className="text-3xl font-bold text-white">{stat.value}</div>
@@ -127,29 +127,32 @@ export async function Hero() {
             </div>
           </div>
 
-          <div className="lg:col-span-5 flex flex-col gap-4">
-            <div className="w-full rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/15 aspect-[3/2] bg-white/10">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={topImage}
-                alt={topAlt}
-                className="w-full h-full object-cover object-center"
-                width={900}
-                height={600}
-                loading="eager"
-              />
-            </div>
+          {/* Photo stack — full column width, tight gap, consistent radii */}
+          <div className="lg:col-span-6 xl:col-span-5">
+            <div className="grid grid-cols-1 gap-3 sm:gap-3.5">
+              <div className="relative w-full overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/20 aspect-[4/3] bg-white/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={topImage}
+                  alt={topAlt}
+                  className="absolute inset-0 h-full w-full object-cover object-center"
+                  width={1200}
+                  height={900}
+                  loading="eager"
+                />
+              </div>
 
-            <div className="w-[92%] ml-auto rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/15 aspect-[16/9] bg-white/10">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={bottomImage}
-                alt={bottomAlt}
-                className="w-full h-full object-cover object-center"
-                width={900}
-                height={500}
-                loading="lazy"
-              />
+              <div className="relative w-full overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/20 aspect-[16/10] bg-white/10 sm:w-[94%] sm:justify-self-end">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={bottomImage}
+                  alt={bottomAlt}
+                  className="absolute inset-0 h-full w-full object-cover object-[center_30%]"
+                  width={1200}
+                  height={750}
+                  loading="lazy"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -160,7 +163,7 @@ export async function Hero() {
           viewBox="0 0 1440 60"
           xmlns="http://www.w3.org/2000/svg"
           preserveAspectRatio="none"
-          className="w-full h-10 sm:h-14"
+          className="w-full h-8 sm:h-12"
         >
           <path
             d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z"
