@@ -17,6 +17,11 @@ import {
   loadGiftCard,
   upsertSquareCustomer,
 } from '@/lib/square'
+import { getSiteSettings } from '@/lib/api/site-settings'
+import {
+  getStoreCardBonusPercent,
+  storeCardLoadCents,
+} from '@/lib/store-card-bonus'
 
 type Kind = 'membership' | 'product' | 'store-card'
 
@@ -265,14 +270,20 @@ export async function POST(req: NextRequest) {
     })
 
     try {
+      const settings = await getSiteSettings()
+      const bonusPercent = getStoreCardBonusPercent(settings.get('storeCardBonusPercent', '10'))
+      const loadCents = storeCardLoadCents(amountCents, bonusPercent)
       const activity = await loadGiftCard(
         student.squareGiftCardGan,
-        amountCents,
+        loadCents,
         `reload-${payment.id ?? paymentKey}`.slice(0, 45)
       )
       await client.items.insert('Payments', {
         studentId,
-        programName: 'Store Card Reload',
+        programName:
+          bonusPercent > 0
+            ? `Store Card Reload (+${bonusPercent}% bonus)`
+            : 'Store Card Reload',
         amount,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
@@ -284,6 +295,9 @@ export async function POST(req: NextRequest) {
         ok: true,
         kind,
         paymentId: payment.id,
+        paidCents: amountCents,
+        loadedCents: loadCents,
+        bonusPercent,
         newBalance: activity?.giftCardBalanceMoney
           ? Number(activity.giftCardBalanceMoney.amount) / 100
           : null,

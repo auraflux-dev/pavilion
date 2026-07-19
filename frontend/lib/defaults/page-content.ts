@@ -97,23 +97,27 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   }),
   store: empty('store', {
     eyebrow: 'The Cove',
-    title: 'Load a card, your student handles the rest.',
+    title: 'Become a free member, then load a Cove card.',
     body: '',
-    bullets: ['No cash needed', 'Reload anytime online', 'Funds never expire'],
+    bullets: [
+      'Free parent membership required',
+      '10% bonus on every reload',
+      'Funds never expire',
+    ],
     sectionTitle: '',
     sectionBody: '',
   }),
   'store-how': empty('store-how', {
     bullets: [
-      '1|Parent loads the card|Choose an amount and pay securely online — card or Apple Pay.',
-      '2|Student uses their card|The balance is on the physical store card your student carries.',
-      '3|Tap & go at the window|Cashier taps the card at the PTO store reader — done.',
+      '1|Become a free member|Create a free parent account — then choose an amount and pay online.',
+      '2|Get 10% extra on the card|Pay $50, get $55 loaded. Member bonus on every reload.',
+      '3|Student taps at The Cove|Balance lives on their physical card at the snack window.',
     ],
   }),
   'store-cta': empty('store-cta', {
-    eyebrow: 'Store Card',
-    title: "Ready to load your student's card?",
-    body: 'Most students spend $20–$40 per month. Load online, student taps their card at the window. Funds never expire.',
+    eyebrow: 'Cove Card · Members',
+    title: 'Free member? Load a card and get 10% extra.',
+    body: 'Pay what you choose online — we add 10% bonus to the balance. Example: pay $50, get $55 on the card. Funds never expire.',
   }),
   'spirit-wear': empty('spirit-wear', {
     eyebrow: 'The Cove · Shop',

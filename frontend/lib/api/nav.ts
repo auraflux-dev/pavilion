@@ -78,7 +78,7 @@ const FALLBACK_NAV: NavLink[] = [
   { id: 'f3', label: 'Fundraising', href: '/fundraising', sortOrder: 6, showInNav: true, showInFooter: true, active: true },
   { id: 'f8', label: 'Board', href: '/board', sortOrder: 7, showInNav: true, showInFooter: true, active: true },
   { id: 'f10', label: 'Meetings', href: '/meetings', sortOrder: 8, showInNav: true, showInFooter: true, active: true },
-  { id: 'f9', label: 'Parent Login', href: '/auth/login', sortOrder: 9, showInNav: false, showInFooter: true, active: true },
+  { id: 'f9', label: 'Become a member', href: '/membership', sortOrder: 9, showInNav: false, showInFooter: true, active: true },
 ]
 
 function normalizeCommerceNav(links: NavLink[]): NavLink[] {

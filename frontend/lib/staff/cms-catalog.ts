@@ -206,6 +206,10 @@ export const SITE_SETTING_GROUPS: {
       { key: 'homeVolunteerImageAlt', label: 'Volunteer image alt' },
       { key: 'homeCommunityImageUrl', label: 'Community section image URL' },
       { key: 'homeCommunityImageAlt', label: 'Community image alt' },
+      { key: 'homeHeroImageTopUrl', label: 'Home hero top image URL' },
+      { key: 'homeHeroImageTopAlt', label: 'Home hero top image alt' },
+      { key: 'homeHeroImageBottomUrl', label: 'Home hero bottom image URL' },
+      { key: 'homeHeroImageBottomAlt', label: 'Home hero bottom image alt' },
     ],
   },
   {
@@ -236,6 +240,10 @@ export const SITE_SETTING_GROUPS: {
     keys: [
       { key: 'storeProductIds', label: 'Store product IDs (comma or newline)', multiline: true },
       { key: 'spiritWearProductIds', label: 'Spirit wear product IDs (comma or newline)', multiline: true },
+      {
+        key: 'storeCardBonusPercent',
+        label: 'Cove card reload bonus % (e.g. 10 = pay $50, load $55)',
+      },
     ],
   },
 ]

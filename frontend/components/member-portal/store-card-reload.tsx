@@ -39,6 +39,8 @@ interface Props {
   onLoaded?: () => void
   triggerLabel?: string
   triggerClassName?: string
+  /** Member reload bonus % (pay $50 → load $55 at 10). */
+  bonusPercent?: number
 }
 
 export function StoreCardReload({
@@ -47,6 +49,7 @@ export function StoreCardReload({
   onLoaded,
   triggerLabel = 'Load card',
   triggerClassName = '',
+  bonusPercent = 10,
 }: Props) {
   const [studentList, setStudentList] = useState(students)
   const [open, setOpen] = useState(false)
@@ -168,7 +171,11 @@ export function StoreCardReload({
 
       setSuccess(
         data.newBalance == null
-          ? `$${amount} was loaded successfully.`
+          ? `$${amount} paid${
+              bonusPercent > 0
+                ? ` · $${(amount * (1 + bonusPercent / 100)).toFixed(2).replace(/\.00$/, '')} loaded`
+                : ' loaded'
+            } successfully.`
           : `Loaded successfully. New balance: $${Number(data.newBalance).toFixed(2)}`
       )
       if (data.paymentMethod) {
@@ -239,7 +246,7 @@ export function StoreCardReload({
       </div>
 
       <div>
-        <p className="text-xs font-semibold text-[#5A6070] mb-1.5">Amount</p>
+        <p className="text-xs font-semibold text-[#5A6070] mb-1.5">Amount you pay</p>
         <div className="flex gap-2">
           {amounts.map((value) => (
             <button
@@ -256,6 +263,13 @@ export function StoreCardReload({
             </button>
           ))}
         </div>
+        {bonusPercent > 0 ? (
+          <p className="mt-2 text-[11px] text-[#085508] font-semibold">
+            Member bonus: pay ${amount} · get $
+            {(amount * (1 + bonusPercent / 100)).toFixed(2).replace(/\.00$/, '')} on the card (
+            {bonusPercent}%)
+          </p>
+        ) : null}
       </div>
 
       {storedCard ? (
@@ -323,10 +337,16 @@ export function StoreCardReload({
         className="w-full text-white font-bold"
         style={{ backgroundColor: '#085508' }}
       >
-        {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : `Pay & load $${amount}`}
+        {busy ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : bonusPercent > 0 ? (
+          `Pay $${amount} · load $${(amount * (1 + bonusPercent / 100)).toFixed(2).replace(/\.00$/, '')}`
+        ) : (
+          `Pay & load $${amount}`
+        )}
       </Button>
       <p className="text-[10px] text-[#5A6070] text-center">
-        Use any credit or debit card. Saving a card is optional (for faster reloads).
+        Free members get {bonusPercent}% bonus on Cove card loads. Saving a card is optional.
       </p>
     </div>
   )

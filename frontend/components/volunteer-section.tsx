@@ -3,8 +3,14 @@ import { CheckCircle2, ArrowRight } from 'lucide-react'
 import { getPageContent } from '@/lib/api/page-content'
 import { getSiteSettings } from '@/lib/api/site-settings'
 
-const DEFAULT_IMAGE = '/placeholder.svg?height=450&width=600'
-const DEFAULT_SECONDARY = 'Learn More'
+const DEFAULT_IMAGE = '/home/volunteer.jpg'
+
+function resolveHomeImageUrl(raw: string, fallback: string): string {
+  const url = (raw || '').trim()
+  if (!url) return fallback
+  if (url.includes('placeholder.svg') || url.includes('height=450&width=600')) return fallback
+  return url
+}
 
 export async function VolunteerSection() {
   const [content, settings] = await Promise.all([
@@ -12,14 +18,15 @@ export async function VolunteerSection() {
     getSiteSettings(),
   ])
 
-  const imageUrl = settings.get('homeVolunteerImageUrl', DEFAULT_IMAGE)
+  const imageUrl = resolveHomeImageUrl(
+    settings.get('homeVolunteerImageUrl', DEFAULT_IMAGE),
+    DEFAULT_IMAGE
+  )
   const imageAlt = settings.get(
     'homeVolunteerImageAlt',
     'SHMS students and parent volunteers working together at a school event'
   )
-  const secondaryLabel = settings.get('homeVolunteerSecondaryCta', DEFAULT_SECONDARY)
-  const href = content.ctaHref || '/volunteer'
-  const primaryLabel = content.ctaLabel || 'Join Today'
+  const primaryLabel = content.ctaLabel || 'Volunteer with us'
   const quote = content.sectionTitle
   const attribution = content.sectionBody
 
@@ -68,41 +75,34 @@ export async function VolunteerSection() {
               </ul>
             ) : null}
 
-            <div className="flex flex-wrap gap-3">
+            <div>
               <Button
                 size="lg"
                 className="text-white font-bold group"
                 style={{ backgroundColor: '#085508' }}
                 asChild
               >
-                <a href={href}>
-                  {primaryLabel}
+                <a href="/volunteer">
+                  {primaryLabel || 'Volunteer with us'}
                   <ArrowRight
                     className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
                     aria-hidden="true"
                   />
                 </a>
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="font-semibold border-2"
-                style={{ borderColor: '#085508', color: '#085508' }}
-                asChild
-              >
-                <a href={href}>{secondaryLabel}</a>
-              </Button>
             </div>
           </div>
 
-          <div className="relative">
-            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] shadow-xl">
+          <div className="relative lg:pl-4">
+            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#EEF6EE] shadow-[0_20px_40px_-20px_rgba(8,85,8,0.35)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageUrl}
                 alt={imageAlt}
-                className="w-full h-full object-cover"
-                width={600}
-                height={450}
+                className="absolute inset-0 w-full h-full object-cover object-center"
+                width={1200}
+                height={900}
+                loading="lazy"
               />
               {quote ? (
                 <div

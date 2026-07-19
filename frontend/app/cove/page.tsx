@@ -8,6 +8,8 @@ import { StoreCardCta } from '@/components/store/store-card-cta'
 import { getStoreItems, getFeaturedItems, getSpiritWearItems } from '@/lib/api/store'
 import { getCatalogConfig } from '@/lib/api/catalog-config'
 import { getPageContent } from '@/lib/api/page-content'
+import { getSiteSettings } from '@/lib/api/site-settings'
+import { getStoreCardBonusPercent } from '@/lib/store-card-bonus'
 import { SpiritWearBuyButton } from '@/components/spirit-wear/spirit-wear-buy-button'
 import { SpiritWearCouponBar } from '@/components/spirit-wear/spirit-wear-coupon-bar'
 
@@ -30,7 +32,7 @@ function parseHowSteps(bullets: string[]) {
 }
 
 export default async function CovePage() {
-  const [allItems, featuredItems, spiritItems, catalog, storeCopy, howCopy, ctaCopy, spiritCopy] =
+  const [allItems, featuredItems, spiritItems, catalog, storeCopy, howCopy, ctaCopy, spiritCopy, settings] =
     await Promise.all([
       getStoreItems(),
       getFeaturedItems(),
@@ -40,7 +42,10 @@ export default async function CovePage() {
       getPageContent('store-how'),
       getPageContent('store-cta'),
       getPageContent('spirit-wear'),
+      getSiteSettings(),
     ])
+
+  const bonusPercent = getStoreCardBonusPercent(settings.get('storeCardBonusPercent', '10'))
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -51,9 +56,18 @@ export default async function CovePage() {
         <StoreCardHero
           amounts={catalog.storeCardAmounts}
           eyebrow={storeCopy.eyebrow || 'The Cove'}
-          title={storeCopy.title || 'Shop The Cove'}
-          perks={storeCopy.bullets}
+          title={storeCopy.title || 'Become a free member, then load a Cove card.'}
+          perks={
+            storeCopy.bullets.length
+              ? storeCopy.bullets
+              : [
+                  'Free parent membership required',
+                  `${bonusPercent}% bonus on every reload`,
+                  'Funds never expire',
+                ]
+          }
           howItWorks={parseHowSteps(howCopy.bullets)}
+          bonusPercent={bonusPercent}
         />
 
         <DealsStrip items={featuredItems} />
@@ -147,6 +161,7 @@ export default async function CovePage() {
           eyebrow={ctaCopy.eyebrow}
           title={ctaCopy.title}
           body={ctaCopy.body}
+          bonusPercent={bonusPercent}
         />
       </main>
 

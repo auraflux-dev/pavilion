@@ -1,8 +1,14 @@
 import { getPageContent } from '@/lib/api/page-content'
 import { getSiteSettings } from '@/lib/api/site-settings'
 
-const DEFAULT_IMAGE =
-  'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1440&h=400&fit=crop&crop=center'
+const DEFAULT_IMAGE = '/home/community.jpg'
+
+function resolveHomeImageUrl(raw: string, fallback: string): string {
+  const url = (raw || '').trim()
+  if (!url) return fallback
+  if (url.includes('placeholder.svg')) return fallback
+  return url
+}
 
 export async function CommunityBanner() {
   const [content, settings] = await Promise.all([
@@ -10,7 +16,10 @@ export async function CommunityBanner() {
     getSiteSettings(),
   ])
 
-  const imageUrl = settings.get('homeCommunityImageUrl', DEFAULT_IMAGE)
+  const imageUrl = resolveHomeImageUrl(
+    settings.get('homeCommunityImageUrl', DEFAULT_IMAGE),
+    DEFAULT_IMAGE
+  )
   const imageAlt = settings.get(
     'homeCommunityImageAlt',
     'Stone Hill Middle School PTO community'

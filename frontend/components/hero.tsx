@@ -3,6 +3,12 @@ import { Users, BookOpen, Heart } from 'lucide-react'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 
+function resolveHomeImage(raw: string, fallback: string): string {
+  const url = (raw || '').trim()
+  if (!url || url.includes('placeholder.svg')) return fallback
+  return url
+}
+
 export async function Hero() {
   const [settings, content] = await Promise.all([getSiteSettings(), getPageContent('home')])
   const inSession = settings.getBool('schoolInSession', false)
@@ -14,13 +20,29 @@ export async function Hero() {
     { value: settings.get('heroStatVolunteers', '200+'), label: 'Volunteers' },
   ]
 
+  const topImage = resolveHomeImage(
+    settings.get('homeHeroImageTopUrl', '/home/hero-top.jpg'),
+    '/home/hero-top.jpg'
+  )
+  const bottomImage = resolveHomeImage(
+    settings.get('homeHeroImageBottomUrl', '/home/hero-bottom.jpg'),
+    '/home/hero-bottom.jpg'
+  )
+  const topAlt = settings.get(
+    'homeHeroImageTopAlt',
+    'Students learning together in a classroom'
+  )
+  const bottomAlt = settings.get(
+    'homeHeroImageBottomAlt',
+    'SHMS students engaged in learning'
+  )
+
   return (
     <section
-      className="relative overflow-hidden py-20 md:py-28 lg:py-36"
+      className="relative overflow-hidden py-16 md:py-24 lg:py-28"
       style={{ backgroundColor: '#085508' }}
       aria-label="Welcome banner"
     >
-      {/* Subtle diagonal dot pattern — no crosses */}
       <div
         className="absolute inset-0 opacity-[0.05]"
         aria-hidden="true"
@@ -29,7 +51,6 @@ export async function Hero() {
         }}
       />
 
-      {/* Stingray silhouette decorative element */}
       <div
         className="absolute right-0 bottom-0 w-96 h-96 opacity-[0.04] translate-x-1/4 translate-y-1/4"
         aria-hidden="true"
@@ -41,11 +62,8 @@ export async function Hero() {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row lg:items-center gap-12 lg:gap-16">
-
-          {/* LEFT COLUMN — 60% */}
-          <div className="lg:w-[60%]">
-            {/* Badge */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          <div className="lg:col-span-7">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 mb-6">
               <span className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse" aria-hidden="true" />
               <span className="text-white/90 text-xs font-semibold tracking-wider uppercase">
@@ -53,25 +71,24 @@ export async function Hero() {
               </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight text-balance mb-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight text-balance mb-5">
               {content.title}
             </h1>
 
-            <p className="text-lg sm:text-xl text-white/85 leading-relaxed mb-10 max-w-2xl text-pretty">
+            <p className="text-lg sm:text-xl text-white/85 leading-relaxed mb-8 max-w-2xl text-pretty">
               {content.body}
             </p>
 
-            {/* CTA Buttons */}
             <div className="flex flex-wrap gap-3 sm:gap-4">
               <Button
                 size="lg"
                 className="text-white font-bold px-6 sm:px-8 shadow-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#085508' }}
+                style={{ backgroundColor: '#064206' }}
                 asChild
               >
                 <a href={content.ctaHref || '/membership'}>
                   <Users className="w-4 h-4 mr-2" aria-hidden="true" />
-                  {content.ctaLabel || 'Join the PTO'}
+                  {content.ctaLabel || 'Become a member'}
                 </a>
               </Button>
 
@@ -90,18 +107,17 @@ export async function Hero() {
               <Button
                 size="lg"
                 className="text-white font-bold px-6 sm:px-8 shadow-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#085508' }}
+                style={{ backgroundColor: '#064206' }}
                 asChild
               >
-                <a href="#volunteer">
+                <a href="/volunteer">
                   <Heart className="w-4 h-4 mr-2" aria-hidden="true" />
                   Volunteer
                 </a>
               </Button>
             </div>
 
-            {/* Stats strip */}
-            <div className="mt-14 flex flex-wrap gap-8 sm:gap-12">
+            <div className="mt-12 flex flex-wrap gap-8 sm:gap-12">
               {stats.map((stat) => (
                 <div key={stat.label}>
                   <div className="text-3xl font-bold text-white">{stat.value}</div>
@@ -111,34 +127,34 @@ export async function Hero() {
             </div>
           </div>
 
-          {/* RIGHT COLUMN — 40% */}
-          <div className="lg:w-[40%] flex flex-col gap-4">
-            {/* Top image — students */}
-            <div className="group w-full rounded-xl overflow-hidden shadow-lg ring-2 ring-transparent hover:ring-white/50 transition-all duration-300">
+          <div className="lg:col-span-5 flex flex-col gap-4">
+            <div className="w-full rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/15 aspect-[3/2] bg-white/10">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&h=400&fit=crop&crop=center"
-                alt="Students at school event"
-                className="w-full h-64 object-cover"
+                src={topImage}
+                alt={topAlt}
+                className="w-full h-full object-cover object-center"
+                width={900}
+                height={600}
+                loading="eager"
               />
             </div>
 
-            {/* Bottom image — community, offset right */}
-            <div
-              className="group w-[90%] rounded-xl overflow-hidden shadow-lg ring-2 ring-transparent hover:ring-white/50 transition-all duration-300"
-              style={{ marginLeft: 'auto' }}
-            >
+            <div className="w-[92%] ml-auto rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/15 aspect-[16/9] bg-white/10">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600&h=300&fit=crop&crop=center"
-                alt="PTO community volunteers"
-                className="w-full h-48 object-cover"
+                src={bottomImage}
+                alt={bottomAlt}
+                className="w-full h-full object-cover object-center"
+                width={900}
+                height={500}
+                loading="lazy"
               />
             </div>
           </div>
-
         </div>
       </div>
 
-      {/* Bottom wave divider */}
       <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-none" aria-hidden="true">
         <svg
           viewBox="0 0 1440 60"

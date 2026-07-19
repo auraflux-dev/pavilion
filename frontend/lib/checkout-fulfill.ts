@@ -5,8 +5,13 @@ import { getCatalogConfig, isAllowedStoreCardAmount } from '@/lib/api/catalog-co
 import { getPaidMembershipTiers } from '@/lib/api/membership'
 import { fetchCatalogProductPrice } from '@/lib/catalog-price'
 import { applyPaidMembership } from '@/lib/membership-sync'
+import { getSiteSettings } from '@/lib/api/site-settings'
 import { getWixClient } from '@/lib/wix-client'
 import { loadGiftCard } from '@/lib/square'
+import {
+  getStoreCardBonusPercent,
+  storeCardLoadCents,
+} from '@/lib/store-card-bonus'
 
 export type CheckoutKind = 'membership' | 'product' | 'store-card'
 
@@ -171,14 +176,20 @@ export async function fulfillPaidCheckout(opts: {
 
   const studentId = resolved.meta.studentId
   try {
+    const settings = await getSiteSettings()
+    const bonusPercent = getStoreCardBonusPercent(settings.get('storeCardBonusPercent', '10'))
+    const loadCents = storeCardLoadCents(resolved.amountCents, bonusPercent)
     const activity = await loadGiftCard(
       resolved.meta.gan,
-      resolved.amountCents,
+      loadCents,
       `reload-${transactionId}`.slice(0, 45)
     )
     await client.items.insert('Payments', {
       studentId,
-      programName: 'Store Card Reload',
+      programName:
+        bonusPercent > 0
+          ? `Store Card Reload (+${bonusPercent}% bonus)`
+          : 'Store Card Reload',
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),

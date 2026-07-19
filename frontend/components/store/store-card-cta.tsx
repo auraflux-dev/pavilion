@@ -9,13 +9,15 @@ type Props = {
   eyebrow?: string
   title?: string
   body?: string
+  bonusPercent?: number
 }
 
 export function StoreCardCta({
   amounts,
-  eyebrow = 'Store Card',
-  title = "Ready to load your student's card?",
-  body = 'Most students spend $20–$40 per month. Load online, student taps their card at the window. Funds never expire.',
+  eyebrow = 'Cove Card · Members',
+  title = 'Free member? Load a card and get 10% extra.',
+  body = 'Pay what you choose online — we add a member bonus to the balance. Funds never expire.',
+  bonusPercent = 10,
 }: Props) {
   return (
     <section className="py-14 md:py-20" style={{ backgroundColor: '#1A1A1A' }}>
@@ -31,18 +33,19 @@ export function StoreCardCta({
         <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">{title}</h2>
         <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">{body}</p>
 
-        <MemberGate label="Log in or create a free account to load a card">
+        <MemberGate label="Become a free member to load a card">
           <div className="max-w-sm mx-auto">
             <StoreCardReload
               amounts={amounts}
-              triggerLabel="Choose student & reload"
+              bonusPercent={bonusPercent}
+              triggerLabel="Choose student & load card"
               triggerClassName="w-full justify-center !bg-[#FFD700] !text-[#1A1A1A] px-8 py-3"
             />
           </div>
         </MemberGate>
 
         <p className="text-white/30 text-xs mt-6">
-          Free or paid parents can reload online anytime. Funds apply to the student store card within minutes — spending at the snack window is in person during Cove hours.
+          Free membership unlocks Cove card loads with a {bonusPercent}% bonus. Spending at the snack window is in person during Cove hours.
         </p>
       </div>
     </section>

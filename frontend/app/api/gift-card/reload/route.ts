@@ -2,7 +2,12 @@ import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
 import { getCatalogConfig, isAllowedStoreCardAmount } from '@/lib/api/catalog-config'
+import { getSiteSettings } from '@/lib/api/site-settings'
 import { getWixClient } from '@/lib/wix-client'
+import {
+  getStoreCardBonusPercent,
+  storeCardLoadCents,
+} from '@/lib/store-card-bonus'
 import {
   chargePayment,
   createCardOnFile,
@@ -136,15 +141,22 @@ export async function POST(req: NextRequest) {
       note: `SHMS store card reload for ${student.firstName ?? ''} ${student.lastName ?? ''}`.trim(),
     })
 
+    const settings = await getSiteSettings()
+    const bonusPercent = getStoreCardBonusPercent(settings.get('storeCardBonusPercent', '10'))
+    const loadCents = storeCardLoadCents(amountCents, bonusPercent)
+
     try {
       const activity = await loadGiftCard(
         student.squareGiftCardGan,
-        amountCents,
+        loadCents,
         `reload-${payment.id ?? paymentKey}`.slice(0, 45)
       )
       await client.items.insert('Payments', {
         studentId,
-        programName: 'Store Card Reload',
+        programName:
+          bonusPercent > 0
+            ? `Store Card Reload (+${bonusPercent}% bonus)`
+            : 'Store Card Reload',
         amount,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
@@ -155,6 +167,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         ok: true,
         paymentId: payment.id,
+        paidCents: amountCents,
+        loadedCents: loadCents,
+        bonusPercent,
         newBalance: activity?.giftCardBalanceMoney
           ? Number(activity.giftCardBalanceMoney.amount) / 100
           : null,

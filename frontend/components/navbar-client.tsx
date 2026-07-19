@@ -129,13 +129,13 @@ export function NavbarClient({ links }: Props) {
               </Link>
             </div>
           ) : (
-            <Link href="/auth/login?returnTo=%2Fmember-portal">
+            <Link href="/auth/login?returnTo=%2Fmembership">
               <Button
                 size="sm"
                 className="text-white font-semibold"
                 style={{ backgroundColor: '#085508' }}
               >
-                Log in / Sign up
+                Become a member
               </Button>
             </Link>
           )}
@@ -205,14 +205,14 @@ export function NavbarClient({ links }: Props) {
                 </div>
               ) : (
                 <Link
-                  href="/auth/login?returnTo=%2Fmember-portal"
+                  href="/auth/login?returnTo=%2Fmembership"
                   onClick={() => setMenuOpen(false)}
                 >
                   <Button
                     className="w-full text-white font-semibold"
                     style={{ backgroundColor: '#085508' }}
                   >
-                    Log in / Sign up
+                    Become a member
                   </Button>
                 </Link>
               )}

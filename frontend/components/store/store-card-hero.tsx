@@ -1,9 +1,9 @@
 'use client'
 
-
 import { CreditCard, CheckCircle2 } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 import { StoreCardReload } from '@/components/member-portal/store-card-reload'
+import { formatStoreCardBonusExample } from '@/lib/store-card-bonus'
 
 export type StoreCardDenomination = { amount: number; label: string; note: string }
 
@@ -15,12 +15,14 @@ type Props = {
   title?: string
   perks?: string[]
   howItWorks?: HowStep[]
+  bonusPercent?: number
 }
 
 const DEFAULT_NOTES: Record<number, string> = {
   10: 'Starter',
   20: 'Popular',
   25: 'Best value',
+  50: 'Popular',
 }
 
 function defaultDenominations(amounts: number[]): StoreCardDenomination[] {
@@ -47,55 +49,64 @@ function parseHowSteps(bullets: string[]): HowStep[] {
 
 export function StoreCardHero({
   amounts,
-  eyebrow = 'SHMS Store Card',
-  title = 'Load a card, your student handles the rest.',
-  perks = ['No cash needed', 'Reload anytime online', 'Funds never expire'],
+  eyebrow = 'The Cove',
+  title = 'Become a free member, then load a Cove card.',
+  perks = ['Free parent membership required', '10% bonus on every reload', 'Funds never expire'],
   howItWorks,
+  bonusPercent = 10,
 }: Props) {
   const denominations = defaultDenominations(amounts)
   const steps =
     howItWorks ??
     parseHowSteps([
-      '1|Parent loads the card|Choose an amount and pay securely online — card or Apple Pay.',
-      '2|Student uses their card|The balance is on the physical store card your student carries.',
-      '3|Tap & go at the window|Cashier taps the card at the PTO store reader — done.',
+      '1|Become a free member|Create a free parent account — then choose an amount and pay online.',
+      `2|Get ${bonusPercent}% extra on the card|${formatStoreCardBonusExample(50, bonusPercent)}.`,
+      '3|Student taps at The Cove|Balance lives on their physical card at the snack window.',
     ])
-
 
   return (
     <>
-      <section className="py-8 md:py-10" style={{ backgroundColor: '#085508' }}>
+      <section className="py-12 md:py-16" style={{ backgroundColor: '#085508' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            <div className="lg:col-span-7">
+              <div className="flex items-center gap-2 mb-3">
                 <CreditCard className="w-4 h-4 text-yellow-300 shrink-0" aria-hidden="true" />
                 <span className="text-xs font-bold tracking-widest uppercase text-white/70">
                   {eyebrow}
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white leading-tight mb-3">
+              <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-white leading-tight tracking-tight max-w-xl">
                 {title}
-              </h2>
-              <div className="flex flex-wrap gap-x-4 gap-y-1">
+              </h1>
+              <ul className="mt-5 flex flex-col sm:flex-row sm:flex-wrap gap-x-5 gap-y-2">
                 {perks.map((p) => (
-                  <span key={p} className="flex items-center gap-1.5 text-xs text-white/80">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-green-300 shrink-0" aria-hidden="true" />
+                  <li key={p} className="flex items-center gap-1.5 text-sm text-white/85">
+                    <CheckCircle2 className="w-4 h-4 text-green-300 shrink-0" aria-hidden="true" />
                     {p}
-                  </span>
+                  </li>
                 ))}
-              </div>
+              </ul>
+              <p className="mt-4 text-sm text-white/65 max-w-lg">
+                {formatStoreCardBonusExample(50, bonusPercent)}. Card or Apple Pay.
+              </p>
             </div>
 
-            <MemberGate label="Log in or create a free account to load a card">
-              <div className="shrink-0 min-w-[260px]">
-                <StoreCardReload
-                  amounts={denominations.map(({ amount }) => amount)}
-                  triggerLabel="Choose student & load card"
-                  triggerClassName="w-full justify-center !bg-white !text-[#085508] px-5 py-3"
-                />
-              </div>
-            </MemberGate>
+            <div className="lg:col-span-5">
+              <MemberGate label="Become a free member to load a card">
+                <div className="w-full max-w-md lg:ml-auto rounded-2xl bg-white/10 border border-white/15 p-4 sm:p-5 backdrop-blur-sm">
+                  <p className="text-xs font-bold tracking-widest uppercase text-white/70 mb-3">
+                    Load a Cove card
+                  </p>
+                  <StoreCardReload
+                    amounts={denominations.map(({ amount }) => amount)}
+                    bonusPercent={bonusPercent}
+                    triggerLabel="Choose student & load card"
+                    triggerClassName="w-full justify-center !bg-white !text-[#085508] px-5 py-3"
+                  />
+                </div>
+              </MemberGate>
+            </div>
           </div>
         </div>
       </section>
@@ -104,7 +115,7 @@ export function StoreCardHero({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[#D4E8D4]">
             {steps.map(({ step, title: stepTitle, body }) => (
-              <div key={step} className="flex items-start gap-3 py-4 px-2 sm:px-6">
+              <div key={step} className="flex items-start gap-3 py-5 px-2 sm:px-6">
                 <div
                   className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-xs mt-0.5"
                   style={{ backgroundColor: '#085508', color: 'white' }}
