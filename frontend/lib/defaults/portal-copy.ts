@@ -123,7 +123,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
     'Choose a student and $10 / $20 / $25. Pay with your own credit or debit card. Saving a card with Square is optional for faster reloads and auto top-off.',
   paymentMethodsTitle: 'How you pay',
   paymentMethodsBody:
-    'Snack window: prepaid student store card. Online: pay with your own credit/debit card in this portal (membership, The Cove, and store-card reloads). Saving a card is optional.',
+    'Snack window: prepaid student store card. Online: pay with credit/debit card or PayPal in this portal (membership, The Cove, and store-card reloads). Saving a card is optional.',
 }
 
 /** Parse `key|value` lines (store-how style). Value may contain `|`. */

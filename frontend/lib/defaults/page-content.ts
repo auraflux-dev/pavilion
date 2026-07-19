@@ -109,7 +109,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   }),
   'store-how': empty('store-how', {
     bullets: [
-      '1|Become a free member|Create a free parent account — then choose an amount and pay online.',
+      '1|Become a free member|Create a free parent account — then choose an amount and pay online with card or PayPal.',
       '2|Get 10% extra on the card|Pay $50, get $55 loaded. Member bonus on every reload.',
       '3|Student taps at The Cove|Balance lives on their physical card at the snack window.',
     ],
@@ -176,7 +176,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
       'Do paid members get Cove coupons?|Often yes — when signed in as a paid member, look for the coupon bar on The Cove shop / checkout. If a code fails, wait a minute and refresh, or email membership@shmspto.org.',
       'How do I reload the store card?|In Store & Purchases, tap Load card. Choose $10, $20, or $25 and pay securely. Balance updates on the student card after purchase.',
       'Do I need a store card?|The snack window uses a prepaid store card. Memberships and spirit wear pay online at checkout — no store card required.',
-      'Can I pay with my own credit card?|Yes. Free and paid parents pay with their own credit or debit card in the portal for membership, The Cove, and store-card reloads. PayPal is next.',
+      'Can I pay with my own credit card?|Yes. Free and paid parents can pay with a credit or debit card (Square) or PayPal in the portal for membership, The Cove, and store-card reloads.',
       'Can I save a payment card?|Optional. During checkout you can save a card with Square for faster reloads — never required. SHMS PTO never receives the card number.',
       'Where do surveys appear?|Active surveys list below your quadrants. Same branded form we send by email, text, or WhatsApp — always on shmspto.org.',
       'Where is Portal help?|Tap Help in the member top nav (or scroll to Portal help). FAQs stay inside this portal.',

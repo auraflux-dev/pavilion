@@ -88,7 +88,7 @@ export function StoreCardHero({
                 ))}
               </ul>
               <p className="mt-4 text-sm text-white/65 max-w-lg">
-                {formatStoreCardBonusExample(50, bonusPercent)}. Card or Apple Pay.
+                {formatStoreCardBonusExample(50, bonusPercent)}. Pay with credit/debit card or PayPal.
               </p>
             </div>
 

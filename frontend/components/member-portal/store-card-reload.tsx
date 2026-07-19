@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { CreditCard, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { PortalPayPalButtons } from '@/components/checkout/portal-paypal-buttons'
 
 type Student = {
   id: string
@@ -340,13 +341,35 @@ export function StoreCardReload({
         {busy ? (
           <Loader2 className="w-4 h-4 animate-spin" />
         ) : bonusPercent > 0 ? (
-          `Pay $${amount} · load $${(amount * (1 + bonusPercent / 100)).toFixed(2).replace(/\.00$/, '')}`
+          `Pay $${amount} with card · load $${(amount * (1 + bonusPercent / 100)).toFixed(2).replace(/\.00$/, '')}`
         ) : (
-          `Pay & load $${amount}`
+          `Pay & load $${amount} with card`
         )}
       </Button>
+
+      {studentId ? (
+        <PortalPayPalButtons
+          active={!busy}
+          payBody={{ kind: 'store-card', studentId, amountCents: amount * 100 }}
+          onPaid={(data) => {
+            setSuccess(
+              data.newBalance == null
+                ? `PayPal paid $${amount}${
+                    bonusPercent > 0
+                      ? ` · $${(amount * (1 + bonusPercent / 100)).toFixed(2).replace(/\.00$/, '')} loaded`
+                      : ' loaded'
+                  }.`
+                : `PayPal paid. New balance: $${Number(data.newBalance).toFixed(2)}`
+            )
+            onLoaded?.()
+          }}
+          onError={(msg) => setError(msg)}
+        />
+      ) : null}
+
       <p className="text-[10px] text-[#5A6070] text-center">
-        Free members get {bonusPercent}% bonus on Cove card loads. Saving a card is optional.
+        Pay with credit/debit card or PayPal. Free members get {bonusPercent}% bonus on Cove card
+        loads. Saving a card is optional.
       </p>
     </div>
   )
