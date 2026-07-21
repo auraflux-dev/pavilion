@@ -49,11 +49,33 @@ async function proxyToWix(req: NextRequest, wixPath: string) {
     ) {
       return
     }
+    // Authorize carries sessionToken in the query string. App session cookies
+    // (and stale Wix cookies) can make Wix return error=unknown_error.
+    if (lower === 'cookie') {
+      const filtered = value
+        .split(';')
+        .map((c) => c.trim())
+        .filter((c) => /^(svSession|smSession|recent-writes|XSRF-TOKEN|_wixCIDX|consent-policy)=/i.test(c))
+        .join('; ')
+      if (filtered) incomingHeaders.cookie = filtered
+      return
+    }
     incomingHeaders[key] = value
   })
   incomingHeaders.host = PUBLIC_HOST
   incomingHeaders['x-forwarded-host'] = PUBLIC_HOST
   incomingHeaders['x-forwarded-proto'] = 'https'
+  // Ensure Wix sees a normal browser navigation context
+  if (!incomingHeaders['user-agent']) {
+    incomingHeaders['user-agent'] =
+      'Mozilla/5.0 (compatible; SHMSPTO-AuthProxy/1.0)'
+  }
+  if (!incomingHeaders.accept) {
+    incomingHeaders.accept = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+  }
+  if (!incomingHeaders.referer) {
+    incomingHeaders.referer = `https://${PUBLIC_HOST}/auth/login`
+  }
 
   const upstream = await new Promise<{
     status: number

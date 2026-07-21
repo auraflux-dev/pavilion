@@ -14,6 +14,15 @@ const PROTECTED_ROUTES = ['/member-portal', '/staff']
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
+
+  // Wix login paths must reach the Node proxy (Host-preserved to Wix edge).
+  // Do this in middleware so it always wins over filesystem 404s on Vercel.
+  if (pathname.startsWith('/_api/') || pathname.startsWith('/__auth/')) {
+    const rewriteUrl = req.nextUrl.clone()
+    rewriteUrl.pathname = `/api/wix-auth-proxy${pathname}`
+    return NextResponse.rewrite(rewriteUrl)
+  }
+
   const res = NextResponse.next()
   const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
 
