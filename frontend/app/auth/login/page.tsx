@@ -1,17 +1,11 @@
 'use client'
 
 /**
- * /auth/login — initiates the Wix OAuth login flow.
- * Generates PKCE OAuth data, stores it in a cookie, then redirects
- * the user to the Wix-managed login page.
- *
- * useSearchParams() must be inside a Suspense boundary in Next.js 14+.
+ * /auth/login — hands off to /api/auth/wix-login for a single server-side
+ * authorize URL (avoids Strict Mode double-start + stale cookie races).
  */
 import { Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { createVisitorClient, CALLBACK_PATH } from '@/lib/wix-oauth-client'
-import { OAUTH_DATA_COOKIE } from '@/lib/auth-cookies'
-import Cookies from 'js-cookie'
 
 function LoginInner() {
   const searchParams = useSearchParams()
@@ -19,38 +13,8 @@ function LoginInner() {
   const returnTo = rawReturn.startsWith('/') ? rawReturn : `/${rawReturn}`
 
   useEffect(() => {
-    let cancelled = false
-
-    async function startLogin() {
-      try {
-        const client = createVisitorClient()
-        // Always use the live browser origin — never a baked-in localhost SITE_URL
-        const callbackUrl = `${window.location.origin}${CALLBACK_PATH}`
-
-        const oAuthData = client.auth.generateOAuthData(
-          callbackUrl,
-          `${window.location.origin}${returnTo}`
-        )
-
-        Cookies.set(OAUTH_DATA_COOKIE, JSON.stringify(oAuthData), {
-          expires: 1 / 24, // 1 hour
-          sameSite: 'lax',
-        })
-
-        const { authUrl } = await client.auth.getAuthUrl(oAuthData)
-        if (cancelled) return
-        // Full navigation — prevents React Strict Mode double-start from racing two auth URLs
-        window.location.replace(authUrl)
-      } catch (err) {
-        console.error('Login initiation failed:', err)
-        if (!cancelled) window.location.href = '/'
-      }
-    }
-
-    startLogin()
-    return () => {
-      cancelled = true
-    }
+    const url = `/api/auth/wix-login?returnTo=${encodeURIComponent(returnTo)}`
+    window.location.replace(url)
   }, [returnTo])
 
   return (

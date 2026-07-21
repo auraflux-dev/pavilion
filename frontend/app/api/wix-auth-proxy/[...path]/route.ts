@@ -49,13 +49,16 @@ async function proxyToWix(req: NextRequest, wixPath: string) {
     ) {
       return
     }
-    // Authorize carries sessionToken in the query string. App session cookies
-    // (and stale Wix cookies) can make Wix return error=unknown_error.
+    // Never forward browser cookies on authorize — a stale svSession makes Wix
+    // redirect to /auth/callback?error=unknown_error. Login pages may keep Wix cookies.
     if (lower === 'cookie') {
+      if (wixPath.startsWith('/_api/oauth2/authorize')) return
       const filtered = value
         .split(';')
         .map((c) => c.trim())
-        .filter((c) => /^(svSession|smSession|recent-writes|XSRF-TOKEN|_wixCIDX|consent-policy)=/i.test(c))
+        .filter((c) =>
+          /^(svSession|smSession|recent-writes|XSRF-TOKEN|_wixCIDX|consent-policy)=/i.test(c)
+        )
         .join('; ')
       if (filtered) incomingHeaders.cookie = filtered
       return
