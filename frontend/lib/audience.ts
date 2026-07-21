@@ -37,6 +37,7 @@ export type StaffWorkspace =
   | 'tiers'
   | 'wellness'
   | 'newsletter'
+  | 'expenses'
   | 'help'
 
 export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
@@ -67,5 +68,6 @@ export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
   tiers: 'Membership tiers',
   wellness: 'Wellness',
   newsletter: 'Newsletter',
+  expenses: 'Expenses',
   help: 'Help',
 }

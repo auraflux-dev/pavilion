@@ -20,6 +20,7 @@ import { StaffPageContentPanel } from '@/components/staff/staff-page-content-pan
 import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-panel'
 import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection-panel'
 import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
+import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
 import { StaffShell } from '@/components/shells/staff-shell'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 
@@ -79,6 +80,7 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'fundraising',
   'wellness',
   'newsletter',
+  'expenses',
   'help',
 ]
 
@@ -117,7 +119,11 @@ export function StaffDashboard() {
 
   const canMarketing = Boolean(me && (me.roles.includes('marketing') || me.isAdmin))
   const canSurveys = Boolean(
-    me && (me.roles.includes('marketing') || me.roles.includes('secretary') || me.isAdmin),
+    me &&
+      (me.roles.includes('marketing') ||
+        me.roles.includes('secretary') ||
+        me.roles.includes('wellness') ||
+        me.isAdmin),
   )
   const canMessage = Boolean(
     me &&
@@ -199,6 +205,7 @@ export function StaffDashboard() {
       { id: 'calendar', label: STAFF_WORKSPACE_LABEL.calendar },
       { id: 'docs', label: STAFF_WORKSPACE_LABEL.docs },
       { id: 'projects', label: STAFF_WORKSPACE_LABEL.projects },
+      { id: 'expenses', label: STAFF_WORKSPACE_LABEL.expenses },
     ]
     if (me.isAdmin) {
       items.push(
@@ -431,6 +438,7 @@ export function StaffDashboard() {
                           fundraising: 'CTAs & fundraising goals',
                           wellness: 'Wish list & appreciation',
                           newsletter: 'Member email & WhatsApp',
+                          expenses: 'Submit & track reimbursements',
                           help: 'Drive how-tos',
                         } as Partial<Record<StaffWorkspace, string>>
                       )[item.id] ?? 'Open workspace'}
@@ -634,6 +642,7 @@ export function StaffDashboard() {
           <StaffSiteSettingsPanel title="Teacher & staff wellness" groupIds={['wellness']} />
         ) : null}
         {active === 'newsletter' && canNewsletter ? <StaffNewsletterPanel /> : null}
+        {active === 'expenses' ? <StaffExpensesPanel /> : null}
         {active === 'help' ? (
           <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3">
             <h1 className="text-xl font-bold">Help</h1>
