@@ -30,9 +30,6 @@ export function NavbarClient({ links }: Props) {
       : member?.name
         ? 'My Account'
         : 'Member Portal'
-  // Do not show “Free member” in the public top nav. Paid badge stays subtle; free stays blank.
-  const audienceHint =
-    status === 'member' && accountType === 'paid' ? 'Paid member' : null
 
   return (
     <header
@@ -78,12 +75,12 @@ export function NavbarClient({ links }: Props) {
           </div>
         </Link>
 
-        <ul className="hidden lg:flex items-center gap-1" role="list">
+        <ul className="hidden xl:flex items-center gap-0.5" role="list">
           {links.map((link) => (
             <li key={link.id}>
               <Link
                 href={link.href}
-                className="px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508]"
+                className="px-2.5 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508]"
               >
                 {link.label}
               </Link>
@@ -93,7 +90,7 @@ export function NavbarClient({ links }: Props) {
             <li>
               <Link
                 href="/member-portal#help"
-                className="px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508]"
+                className="px-2.5 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508]"
               >
                 Help
               </Link>
@@ -101,12 +98,7 @@ export function NavbarClient({ links }: Props) {
           ) : null}
         </ul>
 
-        <div className="hidden lg:flex items-center gap-3">
-          {audienceHint ? (
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
-              {audienceHint}
-            </span>
-          ) : null}
+        <div className="hidden xl:flex items-center gap-2 shrink-0">
           {status === 'loading' ? (
             <div className="h-9 w-28 rounded-md bg-[#EEF6EE] animate-pulse" />
           ) : isMember ? (
@@ -142,7 +134,7 @@ export function NavbarClient({ links }: Props) {
         </div>
 
         <button
-          className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#085508]"
+          className="xl:hidden p-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#085508]"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
@@ -159,7 +151,7 @@ export function NavbarClient({ links }: Props) {
       {menuOpen && (
         <div
           id="mobile-menu"
-          className="lg:hidden border-t border-[#E8E4DC] bg-white"
+          className="xl:hidden border-t border-[#E8E4DC] bg-white"
         >
           <ul className="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-1" role="list">
             {links.map((link) => (
