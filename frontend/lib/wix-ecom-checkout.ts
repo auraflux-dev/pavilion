@@ -93,7 +93,7 @@ export async function createCheckoutUrl(opts: {
       callbacks: {
         postFlowUrl:
           opts.postFlowUrl ||
-          `${process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'}/membership`,
+          `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org'}/membership`,
       },
     })
     const fullUrl = red.redirectSession?.fullUrl
@@ -141,7 +141,7 @@ export async function storeCardCheckoutRedirectUrl(
     variantId: cfg.storeCardVariantByAmount[amount],
     postFlowUrl:
       postFlowUrl ||
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'}/cove`,
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org'}/cove`,
     // Never allow discount codes on store-card purchases
     lockCouponCode: true,
   })
@@ -156,7 +156,7 @@ export async function productCheckoutRedirectUrl(
     productId,
     postFlowUrl:
       postFlowUrl ||
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'}/cove`,
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org'}/cove`,
     couponCode,
   })
 }

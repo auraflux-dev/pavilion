@@ -14,10 +14,14 @@ function redirectBase(req: NextRequest) {
   if (host.includes('localhost') || host.startsWith('127.0.0.1')) {
     return `http://${host}`
   }
-  if (host.endsWith('.vercel.app') || host === 'shmspto.vercel.app') {
+  if (
+    host === 'www.shmspto.org' ||
+    host === 'shmspto.org' ||
+    host.endsWith('.vercel.app')
+  ) {
     return `https://${host}`
   }
-  return 'https://shmspto.vercel.app'
+  return 'https://www.shmspto.org'
 }
 
 export async function GET(req: NextRequest) {

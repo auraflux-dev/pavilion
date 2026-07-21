@@ -19,12 +19,16 @@ function redirectBase(req: NextRequest) {
   if (host.includes('localhost') || host.startsWith('127.0.0.1')) {
     return `http://${host}`
   }
-  // Prefer the host the staffer is actually on when it's our Vercel app
-  if (host.endsWith('.vercel.app') || host === 'shmspto.vercel.app') {
+  // Prefer the host the staffer is actually on when it's one of our hosts
+  if (
+    host === 'www.shmspto.org' ||
+    host === 'shmspto.org' ||
+    host.endsWith('.vercel.app')
+  ) {
     return `https://${host}`
   }
-  // .org may still hit Wix — never use it for Google OAuth until DNS points here
-  return 'https://shmspto.vercel.app'
+  // Canonical fallback
+  return 'https://www.shmspto.org'
 }
 
 /** Start Google OAuth for this staffer (when domain-wide delegation is not used). */

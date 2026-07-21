@@ -41,8 +41,8 @@ export function getCallbackUrl(): string {
   if (site && !site.includes('localhost')) {
     return `${site}${CALLBACK_PATH}`
   }
-  // Pre-DNS production fallback (never localhost)
-  return `https://shmspto.vercel.app${CALLBACK_PATH}`
+  // Production fallback (never localhost)
+  return `https://www.shmspto.org${CALLBACK_PATH}`
 }
 
 /** Create a client with existing tokens (member or visitor). */

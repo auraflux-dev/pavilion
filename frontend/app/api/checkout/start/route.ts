@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://shmspto.vercel.app'
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org'
   const couponCode = String(body.couponCode ?? '').trim() || null
 
   try {

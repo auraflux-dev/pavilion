@@ -1,4 +1,4 @@
-const baseUrl = (process.env.SMOKE_BASE_URL || 'https://shmspto.vercel.app').replace(/\/$/, '')
+const baseUrl = (process.env.SMOKE_BASE_URL || 'https://www.shmspto.org').replace(/\/$/, '')
 
 const checks = [
   ...['/', '/programs', '/events', '/fundraising', '/volunteer', '/board', '/meetings', '/cove', '/membership'].map(

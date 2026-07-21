@@ -37,7 +37,7 @@ export function surveyShareUrl(slug: string, channel?: string): string {
   const base =
     typeof window !== 'undefined'
       ? window.location.origin
-      : (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://shmspto.vercel.app').replace(/\/$/, '')
+      : (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.shmspto.org').replace(/\/$/, '')
   const url = `${base}/survey/${slug}`
   return channel ? `${url}?from=${channel}` : url
 }

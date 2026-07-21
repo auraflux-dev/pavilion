@@ -15,7 +15,7 @@ jobs:
       - name: Call membership order sync cron
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SYNC_URL: https://shmspto.vercel.app/api/cron/sync-membership-orders
+          SYNC_URL: https://www.shmspto.org/api/cron/sync-membership-orders
         run: |
           if [ -z "$CRON_SECRET" ]; then
             echo "CRON_SECRET GitHub secret is not set"
