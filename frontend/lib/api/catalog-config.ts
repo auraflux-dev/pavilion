@@ -137,6 +137,14 @@ export async function getCatalogConfig(): Promise<CatalogConfig> {
     membershipByTier,
     storeCardAmounts: amounts,
     storeCardVariantByAmount: variantByAmount,
+    storeCardMinAmount: Math.max(
+      1,
+      parseInt(settings.get('storeCardMinAmount', d.storeCardMinAmount), 10) || 10
+    ),
+    storeCardMaxAmount: Math.max(
+      10,
+      parseInt(settings.get('storeCardMaxAmount', d.storeCardMaxAmount), 10) || 500
+    ),
     storeProductIds: parseIdList(
       settings.get('storeProductIds', d.storeProductIds),
       d.storeProductIds
@@ -148,9 +156,21 @@ export async function getCatalogConfig(): Promise<CatalogConfig> {
   }
 }
 
+/** Wix ecom catalog path — amount must have a matching product variant. */
 export function isAllowedStoreCardAmount(
   amount: number,
   cfg: CatalogConfig
 ): boolean {
   return cfg.storeCardAmounts.includes(amount) && Boolean(cfg.storeCardVariantByAmount[amount])
+}
+
+/**
+ * Square / PayPal in-portal loads: whole dollars from min–max (default $10–$500).
+ */
+export function isAllowedStoreCardLoadAmount(
+  amount: number,
+  cfg: CatalogConfig
+): boolean {
+  if (!Number.isInteger(amount)) return false
+  return amount >= cfg.storeCardMinAmount && amount <= cfg.storeCardMaxAmount
 }

@@ -1,9 +1,10 @@
 const baseUrl = (process.env.SMOKE_BASE_URL || 'https://shmspto.vercel.app').replace(/\/$/, '')
 
 const checks = [
-  ...['/', '/programs', '/events', '/fundraising', '/volunteer', '/board', '/meetings', '/store', '/membership'].map(
+  ...['/', '/programs', '/events', '/fundraising', '/volunteer', '/board', '/meetings', '/cove', '/membership'].map(
     (path) => ({ name: `GET ${path}`, path, expected: 200 }),
   ),
+  { name: 'legacy /store redirects to /cove', path: '/store', expected: 308, redirectIncludes: '/cove' },
   { name: 'member portal requires login', path: '/member-portal', expected: 307, redirectIncludes: '/auth/login' },
   { name: 'anonymous auth API rejected', path: '/api/auth/me', expected: 401 },
   { name: 'anonymous staff API rejected', path: '/api/staff/me', expected: 401 },

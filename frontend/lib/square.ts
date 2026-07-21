@@ -28,7 +28,7 @@ export async function getGiftCardByGan(gan: string) {
 /** Retrieve a gift card by Square internal ID. */
 export async function getGiftCardById(id: string) {
   const client = getSquareClient()
-  const result = await client.giftCards.get({ giftCardId: id } as any)
+  const result = await client.giftCards.get({ id } as any)
   return (result as any).giftCard ?? null
 }
 
@@ -46,7 +46,9 @@ export async function getGiftCardActivities(giftCardId: string) {
     giftCardId,
     locationId: SQUARE_LOCATION_ID,
   })
-  const activities: any[] = (result as any).giftCardActivities ?? []
+  // SDK returns a paginated Page: items live under `.data` (older shapes used `.giftCardActivities`).
+  const activities: any[] =
+    (result as any).data ?? (result as any).giftCardActivities ?? []
   return activities.map((a: any) => ({
     id: a.id,
     type: a.type,
@@ -73,7 +75,8 @@ export async function getGiftCardActivities(giftCardId: string) {
 export async function loadGiftCard(
   gan: string,
   amountCents: number,
-  idempotencyKey: string
+  idempotencyKey: string,
+  buyerPaymentInstrumentIds: string[] = ['store-card-load']
 ) {
   const card = await getGiftCardByGan(gan)
   if (!card?.id) throw new Error(`Gift card not found for GAN: ${gan}`)
@@ -87,6 +90,8 @@ export async function loadGiftCard(
       giftCardId: card.id,
       loadActivityDetails: {
         amountMoney: { amount: BigInt(amountCents), currency: 'USD' },
+        // Required by Square for custom (non-Orders-API) processing; used for compliance checks.
+        buyerPaymentInstrumentIds,
         referenceId: idempotencyKey,
       },
     },
@@ -141,6 +146,7 @@ export async function createOrLoadStudentGiftCard(opts: {
   idempotencyKey: string
   existingGan?: string | null
   customerId?: string | null
+  buyerPaymentInstrumentIds?: string[]
 }): Promise<{ gan: string; giftCardId: string; activated: boolean }> {
   if (!Number.isInteger(opts.amountCents) || opts.amountCents < 0) {
     throw new Error('Invalid gift card amount')
@@ -192,6 +198,8 @@ export async function createOrLoadStudentGiftCard(opts: {
         giftCardId,
         [detailsKey]: {
           amountMoney: { amount: BigInt(opts.amountCents), currency: 'USD' },
+          // Required by Square for custom (non-Orders-API) processing; used for compliance checks.
+          buyerPaymentInstrumentIds: opts.buyerPaymentInstrumentIds ?? ['gift-card-provision'],
           referenceId: opts.idempotencyKey,
         },
       },

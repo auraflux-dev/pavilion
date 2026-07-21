@@ -62,12 +62,13 @@ export default async function CovePage() {
               ? storeCopy.bullets
               : [
                   'Free parent membership required',
-                  `${bonusPercent}% bonus on every reload`,
-                  'Funds never expire',
+                  'One family Cove card & balance',
+                  `${bonusPercent}% on first load · up to $500`,
                 ]
           }
           howItWorks={parseHowSteps(howCopy.bullets)}
           bonusPercent={bonusPercent}
+          maxAmount={catalog.storeCardMaxAmount}
         />
 
         <DealsStrip items={featuredItems} />
@@ -162,6 +163,7 @@ export default async function CovePage() {
           title={ctaCopy.title}
           body={ctaCopy.body}
           bonusPercent={bonusPercent}
+          maxAmount={catalog.storeCardMaxAmount}
         />
       </main>
 

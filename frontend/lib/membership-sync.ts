@@ -10,6 +10,16 @@ import {
   getMembershipTierById,
   getPaidMembershipTiers,
 } from '@/lib/api/membership'
+import { getSiteSettings } from '@/lib/api/site-settings'
+import {
+  listFamilyStudents,
+  resolveFamilyGiftCard,
+  syncFamilyStoreCard,
+} from '@/lib/family-store-card'
+import {
+  getStoreCardBonusPercent,
+  storeCardLoadCents,
+} from '@/lib/store-card-bonus'
 import { createOrLoadStudentGiftCard, upsertSquareCustomer } from '@/lib/square'
 
 /** Any paid tier slug (ruby / supreme / pearl / future). */
@@ -220,20 +230,37 @@ export async function applyPaidMembership(opts: {
             ? `membership-gc-${opts.orderId}`
             : `membership-gc-${student._id}-${tier}-${expiresAt.slice(0, 10)}`
 
+          const settings = await getSiteSettings()
+          const bonusPercent = getStoreCardBonusPercent(
+            settings.get('storeCardBonusPercent', '10')
+          )
+          const creditCents = Math.round(creditDollars * 100)
+          const loadCents = storeCardLoadCents(creditCents, bonusPercent)
+          const loadedDollars = loadCents / 100
+
+          const family = await listFamilyStudents(email)
+          const familyCard = resolveFamilyGiftCard(family)
+          const existingGan =
+            familyCard.gan ||
+            String((student as { squareGiftCardGan?: string }).squareGiftCardGan ?? '')
+
           const card = await createOrLoadStudentGiftCard({
-            amountCents: Math.round(creditDollars * 100),
+            amountCents: loadCents,
             idempotencyKey,
-            existingGan: (student as { squareGiftCardGan?: string }).squareGiftCardGan,
+            existingGan: existingGan || null,
             customerId,
+            buyerPaymentInstrumentIds: [opts.orderId || 'membership-provision'],
           })
 
-          await client.items.update('Students', {
-            ...student,
-            membershipTier: tier,
-            membershipStatus: 'active',
-            squareGiftCardGan: card.gan,
-            squareGiftCardId: card.giftCardId,
-            storeCardBalance: creditDollars,
+          const balanceDollars = existingGan
+            ? familyCard.balance + loadedDollars
+            : loadedDollars
+
+          await syncFamilyStoreCard({
+            parentEmail: email,
+            gan: card.gan,
+            giftCardId: card.giftCardId,
+            balanceDollars,
           })
 
           try {
@@ -244,7 +271,10 @@ export async function applyPaidMembership(opts: {
               status: 'Paid',
               source: 'membership_gift_card',
               orderId: opts.orderId || idempotencyKey,
-              notes: `Membership ${tier} store-card credit`,
+              notes:
+                bonusPercent > 0
+                  ? `Membership ${tier} family Cove credit $${creditDollars} → $${loadedDollars.toFixed(2)} (+${bonusPercent}%)`
+                  : `Membership ${tier} family Cove credit`,
             })
           } catch {
             // Payments insert is best-effort for ledger / idempotency
@@ -253,7 +283,7 @@ export async function applyPaidMembership(opts: {
           giftCardResult = {
             studentId: student._id,
             gan: card.gan,
-            creditDollars,
+            creditDollars: loadedDollars,
             status: 'loaded',
           }
         } catch (err) {

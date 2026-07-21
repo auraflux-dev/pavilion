@@ -1,6 +1,10 @@
 import { CheckCircle2, Star } from 'lucide-react'
 import { getMembershipTiers, type MembershipTier } from '@/lib/api/membership'
 import { MembershipJoinButton } from '@/components/membership/membership-join-button'
+import { getSiteSettings } from '@/lib/api/site-settings'
+import { getStoreCardBonusPercent } from '@/lib/store-card-bonus'
+
+const fmtDollars = (n: number): string => (Number.isInteger(n) ? String(n) : n.toFixed(2))
 
 /** Fallback only if CMS + Catalog are unreachable. */
 const FALLBACK_TIERS: MembershipTier[] = [
@@ -52,6 +56,8 @@ export async function MembershipTiers() {
   const allTiers = await getMembershipTiers()
   const tiers = allTiers.filter((t) => t.tierId !== 'faculty')
   const display = tiers.length > 0 ? tiers : FALLBACK_TIERS
+  const settings = await getSiteSettings()
+  const bonusPercent = getStoreCardBonusPercent(settings.get('storeCardBonusPercent', '10'))
   const cols =
     display.length >= 3
       ? 'md:grid-cols-3 max-w-5xl'
@@ -91,6 +97,22 @@ export async function MembershipTiers() {
                 <span className="text-[#5A6070] text-sm mb-1">/ school year</span>
               </div>
             </div>
+
+            {bonusPercent > 0 && tier.giftCardCredit > 0 ? (
+              <div className="mb-6 rounded-lg border border-[#F0D9A0] bg-[#FFF7E6] px-3 py-2">
+                <p className="text-xs font-bold text-[#8A6400]">
+                  Limited-time bonus · first 30 days
+                </p>
+                <p className="text-xs text-[#8A6400]">
+                  Get an extra {bonusPercent}% on your PTO card — $
+                  {tier.giftCardCredit} becomes{' '}
+                  <span className="font-bold">
+                    ${fmtDollars(tier.giftCardCredit * (1 + bonusPercent / 100))}
+                  </span>{' '}
+                  loaded.
+                </p>
+              </div>
+            ) : null}
 
             {tier.perks.length > 0 ? (
               <ul className="space-y-3 mb-8 flex-1" aria-label={`${tier.name} membership benefits`}>

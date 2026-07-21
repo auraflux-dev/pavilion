@@ -101,8 +101,8 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body: '',
     bullets: [
       'Free parent membership required',
-      '10% bonus on every reload',
-      'Funds never expire',
+      '10% bonus on first load (not reloads)',
+      'Load any amount up to $500',
     ],
     sectionTitle: '',
     sectionBody: '',
@@ -110,14 +110,14 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   'store-how': empty('store-how', {
     bullets: [
       '1|Become a free member|Create a free parent account — then choose an amount and pay online with card or PayPal.',
-      '2|Get 10% extra on the card|Pay $50, get $55 loaded. Member bonus on every reload.',
-      '3|Student taps at The Cove|Balance lives on their physical card at the snack window.',
+      '2|First load gets 10% extra|Pay $50, get $55 on first load or membership credit. Reloads are dollar-for-dollar.',
+      '3|Student taps at The Cove|PTO issues one physical family card linked to the same Square balance for the snack window.',
     ],
   }),
   'store-cta': empty('store-cta', {
     eyebrow: 'Cove Card · Members',
-    title: 'Free member? Load a card and get 10% extra.',
-    body: 'Pay what you choose online — we add 10% bonus to the balance. Example: pay $50, get $55 on the card. Funds never expire.',
+    title: 'Free member? First load gets 10% extra.',
+    body: 'One family Cove card and balance (up to $500 per load). 10% on first load or membership credit — reloads 1:1. Pick up one plastic card from PTO for the snack window.',
   }),
   'spirit-wear': empty('spirit-wear', {
     eyebrow: 'The Cove · Shop',
@@ -174,8 +174,10 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
       'How do I join or upgrade membership?|Open Membership (or Upgrade in this portal), pick Reef, Lagoon, or Tide, and complete checkout. After payment, refresh the portal — your tier and store-card credit appear once sync finishes.',
       'I am a paid member — where is my store card credit?|Store & Purchases on this portal shows balances. Membership gift-card credit loads after purchase (refresh if it is still catching up). Use Load card anytime to add more.',
       'Do paid members get Cove coupons?|Often yes — when signed in as a paid member, look for the coupon bar on The Cove shop / checkout. If a code fails, wait a minute and refresh, or email membership@shmspto.org.',
-      'How do I reload the store card?|In Store & Purchases, tap Load card. Choose $10, $20, or $25 and pay securely. Balance updates on the student card after purchase.',
-      'Do I need a store card?|The snack window uses a prepaid store card. Memberships and spirit wear pay online at checkout — no store card required.',
+      'How do I reload the store card?|In Store & Purchases, tap Load family card. One card / one balance for the family. Presets or any whole dollar up to $500. 10% on first load only (or membership credit); reloads are 1:1.',
+      'What is the family Cove code?|In Store & Purchases you will see a 6-digit Family Cove code. Give that number to your student(s). At the snack window they tell staff the code so the family balance can be charged. You can reset the code anytime if it is shared or lost.',
+      'Do I need a store card?|Each family has one Cove card and one balance. Kids use the family Cove code (or a physical card later) at the snack window. Spirit wear and other Cove merch checkout online with card or PayPal (separate purchase).',
+      'How do I get a physical card for the snack window?|Loading online creates the family Square balance and Cove code. Plastic cards are optional for faster tapping — until then staff lookup by family code works at the register.',
       'Can I pay with my own credit card?|Yes. Free and paid parents can pay with a credit or debit card (Square) or PayPal in the portal for membership, The Cove, and store-card reloads.',
       'Can I save a payment card?|Optional. During checkout you can save a card with Square for faster reloads — never required. SHMS PTO never receives the card number.',
       'Where do surveys appear?|Active surveys list below your quadrants. Same branded form we send by email, text, or WhatsApp — always on shmspto.org.',

@@ -28,6 +28,7 @@ import { PortalQuadrant } from './portal-quadrant'
 import { PortalHelpPanel } from './portal-help-panel'
 import { PortalSurveys } from './portal-surveys'
 import { StoreCardReload } from './store-card-reload'
+import { CoveFamilyCodeCard } from './cove-family-code-card'
 import type { PortalHelpItem } from '@/lib/api/portal-help'
 
 interface MemberData {
@@ -201,7 +202,7 @@ export function MemberDashboard({
   ].filter((g) => g.href)
 
   const storeBalanceTotal = students.reduce(
-    (sum, s) => sum + (Number(s.storeCardBalance) || 0),
+    (max, s) => Math.max(max, Number(s.storeCardBalance) || 0),
     0
   )
   const paidStudents = students.filter(
@@ -536,6 +537,8 @@ export function MemberDashboard({
               <p className="text-[11px] text-[#5A6070]">{copy.recentBuysHint}</p>
             </div>
           </div>
+
+          <CoveFamilyCodeCard />
 
           <div className="flex flex-wrap gap-2 mb-4">
             <StoreCardReload

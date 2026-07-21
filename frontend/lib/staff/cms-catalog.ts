@@ -90,6 +90,21 @@ export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
       { key: 'active', label: 'Active', type: 'boolean' },
     ],
   },
+  CoveInventory: {
+    id: 'CoveInventory',
+    label: 'Cove window inventory',
+    roles: ['retail', 'admin'],
+    sortField: 'name',
+    activeField: 'active',
+    fields: [
+      { key: 'productId', label: 'Wix product ID', type: 'text', required: true },
+      { key: 'variantId', label: 'Wix variant ID (optional)', type: 'text' },
+      { key: 'name', label: 'Display name', type: 'text', required: true },
+      { key: 'sku', label: 'Barcode / SKU (scanner)', type: 'text' },
+      { key: 'quantity', label: 'Quantity on hand', type: 'number', required: true },
+      { key: 'active', label: 'Active', type: 'boolean' },
+    ],
+  },
   FundraisingCTAs: {
     id: 'FundraisingCTAs',
     label: 'Fundraising CTAs',
@@ -246,7 +261,20 @@ export const SITE_SETTING_GROUPS: {
       { key: 'spiritWearProductIds', label: 'Spirit wear product IDs (comma or newline)', multiline: true },
       {
         key: 'storeCardBonusPercent',
-        label: 'Cove card reload bonus % (e.g. 10 = pay $50, load $55)',
+        label:
+          'Cove card first-load / membership bonus % (not on reloads; e.g. 10 = pay $50, load $55)',
+      },
+      {
+        key: 'storeCardAmounts',
+        label: 'Cove card preset amounts (comma-separated, e.g. 10,20,25,50,100,200,500)',
+      },
+      {
+        key: 'storeCardMinAmount',
+        label: 'Cove card minimum load ($)',
+      },
+      {
+        key: 'storeCardMaxAmount',
+        label: 'Cove card maximum load ($)',
       },
     ],
   },

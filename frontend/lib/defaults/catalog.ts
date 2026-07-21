@@ -10,16 +10,20 @@ export const CATALOG_DEFAULTS = {
   /** Pearl (3rd paid tier) — paste Wix Catalog product/variant IDs in Site Settings when created */
   membershipPearlProductId: '',
   membershipPearlVariantId: '',
-  /** Default Square gift-card credits by tier (CMS giftCardCredit overrides) */
-  membershipRubyGiftCardCredit: '10',
-  membershipSupremeGiftCardCredit: '25',
-  membershipPearlGiftCardCredit: '50',
+  /** Default Square gift-card credits by tier (CMS giftCardCredit overrides).
+   *  Must match the amounts advertised on /membership (Reef $20 / Lagoon $40 / Tide $75). */
+  membershipRubyGiftCardCredit: '20',
+  membershipSupremeGiftCardCredit: '40',
+  membershipPearlGiftCardCredit: '75',
   storeCardProductId: 'eb2a71dc-7f0f-41b4-85bc-76b0869e5d30',
   storeCardVariant10: 'c30c1bf1-a771-427c-85f9-d67317fe785d',
   storeCardVariant20: 'bddb2f05-4ce4-4d41-848a-f6b3dc9bf478',
   storeCardVariant25: '24000231-2b43-4dee-8434-695f3034858d',
-  /** Comma-separated amounts that must match Catalog store-card variants */
-  storeCardAmounts: '10,20,25',
+  /** Suggested new-card load amounts shown in UI (tier-aligned). Refills can be any
+   *  whole dollar via the custom field (Square path allows $min–$max). */
+  storeCardAmounts: '20,40,75',
+  storeCardMinAmount: '1',
+  storeCardMaxAmount: '500',
   storeCardSlug: 'pto-store-card',
   membershipRubySlug: 'pto-membership-ruby-1',
   membershipSupremeSlug: 'pto-membership-supreme-1',
@@ -74,9 +78,12 @@ export type CatalogConfig = {
   pearlSlug: string
   /** Paid membership products keyed by tierId (ruby / supreme / pearl / …) */
   membershipByTier: Record<string, MembershipProductEntry>
-  /** Sorted unique amounts with matching variantIds */
+  /** Sorted unique preset amounts for UI + Wix catalog variants when present */
   storeCardAmounts: number[]
   storeCardVariantByAmount: Record<number, string>
+  /** Whole-dollar min/max for Square/PayPal loads (not Wix catalog) */
+  storeCardMinAmount: number
+  storeCardMaxAmount: number
   /** Product UUIDs allowed on /store (and fundraising store totals) */
   storeProductIds: Set<string>
   /** Product UUIDs allowed on /spirit-wear (and fundraising spirit totals) */

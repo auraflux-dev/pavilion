@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
 
     const loadKey = `topoff-load-${eventKey}`.slice(0, 45)
     try {
-      await loadGiftCard(gan, reloadCents, loadKey)
+      await loadGiftCard(gan, reloadCents, loadKey, [payment.id ?? paymentKey])
       await adminClient.items.insert('Payments', {
         studentId: student._id,
         programName: 'Auto Top-Off — Store Card',

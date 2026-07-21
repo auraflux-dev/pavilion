@@ -6,20 +6,27 @@
 import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
-import { getCatalogConfig, isAllowedStoreCardAmount } from '@/lib/api/catalog-config'
+import { getCatalogConfig, isAllowedStoreCardLoadAmount } from '@/lib/api/catalog-config'
 import { getPaidMembershipTiers } from '@/lib/api/membership'
 import { fetchCatalogProductPrice } from '@/lib/catalog-price'
 import { applyPaidMembership } from '@/lib/membership-sync'
+import {
+  listFamilyStudents,
+  resolveFamilyGiftCard,
+  syncFamilyStoreCard,
+} from '@/lib/family-store-card'
 import { getWixClient } from '@/lib/wix-client'
 import {
   chargePayment,
   createCardOnFile,
+  createOrLoadStudentGiftCard,
   loadGiftCard,
   upsertSquareCustomer,
 } from '@/lib/square'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import {
   getStoreCardBonusPercent,
+  resolveParentLoadBonusPercent,
   storeCardLoadCents,
 } from '@/lib/store-card-bonus'
 
@@ -234,29 +241,33 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // ── Store card reload ───────────────────────────────────────
+    // ── Family Cove card load / reload ──────────────────────────
     const studentId = String(body.studentId ?? '').trim()
     const amountCents = Number(body.amountCents)
     const amount = amountCents / 100
     const cfg = await getCatalogConfig()
-    if (!studentId || !Number.isInteger(amountCents) || !isAllowedStoreCardAmount(amount, cfg)) {
-      return NextResponse.json({ error: 'Invalid student or amount' }, { status: 400 })
-    }
-
-    const student = (await client.items.get('Students', studentId)) as StudentRow
-    if (
-      !student ||
-      student.archived === true ||
-      student.parentEmail?.trim().toLowerCase() !== session.email
-    ) {
-      return NextResponse.json({ error: 'Student not found' }, { status: 404 })
-    }
-    if (!student.squareGiftCardGan) {
+    if (!Number.isInteger(amountCents) || !isAllowedStoreCardLoadAmount(amount, cfg)) {
       return NextResponse.json(
-        { error: 'This student does not have a linked store card yet. Contact the PTO.' },
+        {
+          error: `Invalid amount (use whole dollars $${cfg.storeCardMinAmount}–$${cfg.storeCardMaxAmount})`,
+        },
         { status: 400 }
       )
     }
+
+    const family = await listFamilyStudents(session.email)
+    if (family.length === 0) {
+      return NextResponse.json(
+        { error: 'Add a student before loading the family Cove card.' },
+        { status: 400 }
+      )
+    }
+    const student =
+      (studentId ? family.find((s) => s._id === studentId) : undefined) ?? family[0]
+    if (!student?._id) {
+      return NextResponse.json({ error: 'Student not found' }, { status: 404 })
+    }
+    const familyCard = resolveFamilyGiftCard(family)
 
     const paymentKey = randomUUID()
     const payment = await chargePayment({
@@ -264,32 +275,68 @@ export async function POST(req: NextRequest) {
       amountCents,
       idempotencyKey: paymentKey,
       customerId,
-      referenceId: `store-card:${studentId}`,
+      referenceId: `store-card:${session.email}`,
       buyerEmailAddress: session.email,
-      note: `SHMS store card reload for ${student.firstName ?? ''} ${student.lastName ?? ''}`.trim(),
+      note: 'SHMS family Cove card load',
     })
 
     try {
       const settings = await getSiteSettings()
-      const bonusPercent = getStoreCardBonusPercent(settings.get('storeCardBonusPercent', '10'))
+      const configuredBonus = getStoreCardBonusPercent(settings.get('storeCardBonusPercent', '10'))
+      const bonusPercent = await resolveParentLoadBonusPercent(session.email, configuredBonus)
       const loadCents = storeCardLoadCents(amountCents, bonusPercent)
-      const activity = await loadGiftCard(
-        student.squareGiftCardGan,
-        loadCents,
-        `reload-${payment.id ?? paymentKey}`.slice(0, 45)
-      )
+      const isFirstLoad = bonusPercent > 0
+
+      let gan = familyCard.gan
+      let giftCardId = familyCard.giftCardId
+      let activity: Awaited<ReturnType<typeof loadGiftCard>> | null = null
+      let newBalance: number | null = null
+
+      if (!gan) {
+        const card = await createOrLoadStudentGiftCard({
+          amountCents: loadCents,
+          idempotencyKey: `first-load-${payment.id ?? paymentKey}`.slice(0, 45),
+          customerId,
+          buyerPaymentInstrumentIds: [payment.id ?? paymentKey],
+        })
+        gan = card.gan
+        giftCardId = card.giftCardId
+        newBalance = loadCents / 100
+      } else {
+        activity = await loadGiftCard(
+          gan,
+          loadCents,
+          `reload-${payment.id ?? paymentKey}`.slice(0, 45),
+          [payment.id ?? paymentKey]
+        )
+        newBalance = activity?.giftCardBalanceMoney
+          ? Number(activity.giftCardBalanceMoney.amount) / 100
+          : familyCard.balance + loadCents / 100
+      }
+
+      await syncFamilyStoreCard({
+        parentEmail: session.email,
+        gan,
+        giftCardId,
+        balanceDollars: newBalance ?? loadCents / 100,
+      })
+
       await client.items.insert('Payments', {
-        studentId,
-        programName:
-          bonusPercent > 0
-            ? `Store Card Reload (+${bonusPercent}% bonus)`
-            : 'Store Card Reload',
+        studentId: student._id,
+        parentEmail: session.email,
+        programName: isFirstLoad
+          ? `Family Cove Card First Load (+${bonusPercent}% bonus)`
+          : 'Family Cove Card Reload',
         amount,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
         paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
         transactionId: payment.id ?? paymentKey,
         source: 'square_store_card_reload',
+        notes:
+          bonusPercent > 0
+            ? `Paid $${amount}; loaded $${(loadCents / 100).toFixed(2)} (+${bonusPercent}%) on family card`
+            : 'Family Cove card load',
       })
       return NextResponse.json({
         ok: true,
@@ -298,17 +345,16 @@ export async function POST(req: NextRequest) {
         paidCents: amountCents,
         loadedCents: loadCents,
         bonusPercent,
-        newBalance: activity?.giftCardBalanceMoney
-          ? Number(activity.giftCardBalanceMoney.amount) / 100
-          : null,
+        newBalance,
         paymentMethod: stored
           ? { brand: stored.brand, last4: stored.last4 }
           : null,
       })
     } catch (loadError) {
       await client.items.insert('Payments', {
-        studentId,
-        programName: 'Store Card Reload',
+        studentId: student._id,
+        parentEmail: session.email,
+        programName: 'Family Cove Card Reload',
         amount,
         status: 'Needs Reconciliation',
         paymentDate: new Date().toISOString(),

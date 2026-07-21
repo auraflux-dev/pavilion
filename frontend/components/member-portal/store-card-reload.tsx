@@ -37,16 +37,19 @@ declare global {
 interface Props {
   students?: Student[]
   amounts?: number[]
+  /** Max whole-dollar load (default 500). */
+  maxAmount?: number
   onLoaded?: () => void
   triggerLabel?: string
   triggerClassName?: string
-  /** Member reload bonus % (pay $50 → load $55 at 10). */
+  /** Configured first-load / membership bonus % (reloads are 1:1). */
   bonusPercent?: number
 }
 
 export function StoreCardReload({
   students = [],
-  amounts = [10, 20, 25],
+  amounts = [20, 40, 75],
+  maxAmount = 500,
   onLoaded,
   triggerLabel = 'Load card',
   triggerClassName = '',
@@ -56,6 +59,8 @@ export function StoreCardReload({
   const [open, setOpen] = useState(false)
   const [studentId, setStudentId] = useState(students[0]?.id ?? '')
   const [amount, setAmount] = useState(amounts[0] ?? 10)
+  const [customAmount, setCustomAmount] = useState('')
+  const [appliedBonus, setAppliedBonus] = useState(0)
   const [config, setConfig] = useState<{
     configured: boolean
     applicationId: string
@@ -92,6 +97,26 @@ export function StoreCardReload({
         setUseStored(false)
       })
       .catch(() => setError('Payment settings could not be loaded.'))
+  }, [open])
+
+  useEffect(() => {
+    if (!open) {
+      setAppliedBonus(0)
+      return
+    }
+    let cancelled = false
+    fetch('/api/gift-card/bonus')
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return
+        setAppliedBonus(Number(data.bonusPercent ?? 0) || 0)
+      })
+      .catch(() => {
+        if (!cancelled) setAppliedBonus(0)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [open])
 
   useEffect(() => {
@@ -138,8 +163,13 @@ export function StoreCardReload({
   }, [open, config, storedCard, useStored])
 
   async function submit() {
-    if (!studentId) {
-      setError('Choose a student first.')
+    const loadStudentId = studentId || studentList[0]?.id || ''
+    if (!loadStudentId) {
+      setError('Add a student in the portal before loading the family card.')
+      return
+    }
+    if (!Number.isInteger(amount) || amount < 1 || amount > maxAmount) {
+      setError(`Enter a whole-dollar amount from $1 to $${maxAmount}.`)
       return
     }
     setBusy(true)
@@ -160,7 +190,7 @@ export function StoreCardReload({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          studentId,
+          studentId: loadStudentId,
           amountCents: amount * 100,
           sourceId,
           useStoredCard: useStored,
@@ -170,11 +200,13 @@ export function StoreCardReload({
       const data = await response.json()
       if (!response.ok) throw new Error(data.error ?? 'Payment failed.')
 
+      const loadedBonus = Number(data.bonusPercent ?? appliedBonus) || 0
+      setAppliedBonus(0)
       setSuccess(
         data.newBalance == null
           ? `$${amount} paid${
-              bonusPercent > 0
-                ? ` · $${(amount * (1 + bonusPercent / 100)).toFixed(2).replace(/\.00$/, '')} loaded`
+              loadedBonus > 0
+                ? ` · $${(amount * (1 + loadedBonus / 100)).toFixed(2).replace(/\.00$/, '')} loaded`
                 : ' loaded'
             } successfully.`
           : `Loaded successfully. New balance: $${Number(data.newBalance).toFixed(2)}`
@@ -225,37 +257,40 @@ export function StoreCardReload({
   return (
     <div className="w-full rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] p-4 space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-bold text-[#1A1A1A]">Load a student store card</p>
+        <p className="text-sm font-bold text-[#1A1A1A]">Load the family Cove card</p>
         <button type="button" onClick={() => setOpen(false)} aria-label="Close reload form">
           <X className="w-4 h-4 text-[#5A6070]" />
         </button>
       </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-[#5A6070] mb-1">Student</label>
-        <select
-          value={studentId}
-          onChange={(event) => setStudentId(event.target.value)}
-          className="w-full px-3 py-2 text-sm border border-[#E8E4DC] rounded-lg bg-white"
-        >
-          {studentList.map((student) => (
-            <option key={student.id} value={student.id}>
-              {student.firstName} {student.lastName}
-            </option>
-          ))}
-        </select>
-      </div>
+      {studentList.length > 1 ? (
+        <p className="text-[11px] text-[#5A6070]">
+          One card and one balance for your family
+          {studentList.length
+            ? ` (${studentList.map((s) => s.firstName).filter(Boolean).join(', ')})`
+            : ''}
+          .
+        </p>
+      ) : null}
+
+      {/* Keep studentId for payment attribution; UI no longer asks parents to pick a card. */}
+      {studentList.length === 0 ? (
+        <p className="text-xs text-amber-700">Add a student in the portal before loading the card.</p>
+      ) : null}
 
       <div>
         <p className="text-xs font-semibold text-[#5A6070] mb-1.5">Amount you pay</p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {amounts.map((value) => (
             <button
               key={value}
               type="button"
-              onClick={() => setAmount(value)}
-              className={`flex-1 rounded-lg border-2 py-2 text-sm font-bold ${
-                amount === value
+              onClick={() => {
+                setAmount(value)
+                setCustomAmount('')
+              }}
+              className={`min-w-[3.5rem] rounded-lg border-2 px-2 py-2 text-sm font-bold ${
+                amount === value && !customAmount
                   ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
                   : 'border-[#E8E4DC] bg-white text-[#5A6070]'
               }`}
@@ -264,11 +299,34 @@ export function StoreCardReload({
             </button>
           ))}
         </div>
-        {bonusPercent > 0 ? (
+        <label className="mt-2 block text-[11px] text-[#5A6070]">
+          Or enter any whole dollar up to ${maxAmount}
+          <input
+            type="number"
+            min={1}
+            max={maxAmount}
+            step={1}
+            value={customAmount}
+            onChange={(event) => {
+              const raw = event.target.value
+              setCustomAmount(raw)
+              const n = parseInt(raw, 10)
+              if (Number.isInteger(n) && n >= 1 && n <= maxAmount) setAmount(n)
+            }}
+            placeholder={`e.g. 75`}
+            className="mt-1 w-full px-3 py-2 text-sm border border-[#E8E4DC] rounded-lg bg-white"
+          />
+        </label>
+        {appliedBonus > 0 ? (
           <p className="mt-2 text-[11px] text-[#085508] font-semibold">
-            Member bonus: pay ${amount} · get $
-            {(amount * (1 + bonusPercent / 100)).toFixed(2).replace(/\.00$/, '')} on the card (
-            {bonusPercent}%)
+            First-load bonus: pay ${amount} · get $
+            {(amount * (1 + appliedBonus / 100)).toFixed(2).replace(/\.00$/, '')} on the family card (
+            {appliedBonus}%). Reloads after this are dollar-for-dollar.
+          </p>
+        ) : bonusPercent > 0 ? (
+          <p className="mt-2 text-[11px] text-[#5A6070]">
+            Reloads are dollar-for-dollar. The {bonusPercent}% bonus applies only on your family&apos;s
+            first load (or membership Cove credit).
           </p>
         ) : null}
       </div>
@@ -340,8 +398,8 @@ export function StoreCardReload({
       >
         {busy ? (
           <Loader2 className="w-4 h-4 animate-spin" />
-        ) : bonusPercent > 0 ? (
-          `Pay $${amount} with card · load $${(amount * (1 + bonusPercent / 100)).toFixed(2).replace(/\.00$/, '')}`
+        ) : appliedBonus > 0 ? (
+          `Pay $${amount} with card · load $${(amount * (1 + appliedBonus / 100)).toFixed(2).replace(/\.00$/, '')}`
         ) : (
           `Pay & load $${amount} with card`
         )}
@@ -352,11 +410,13 @@ export function StoreCardReload({
           active={!busy}
           payBody={{ kind: 'store-card', studentId, amountCents: amount * 100 }}
           onPaid={(data) => {
+            const loadedBonus = Number(data.bonusPercent ?? appliedBonus) || 0
+            setAppliedBonus(0)
             setSuccess(
               data.newBalance == null
                 ? `PayPal paid $${amount}${
-                    bonusPercent > 0
-                      ? ` · $${(amount * (1 + bonusPercent / 100)).toFixed(2).replace(/\.00$/, '')} loaded`
+                    loadedBonus > 0
+                      ? ` · $${(amount * (1 + loadedBonus / 100)).toFixed(2).replace(/\.00$/, '')} loaded`
                       : ' loaded'
                   }.`
                 : `PayPal paid. New balance: $${Number(data.newBalance).toFixed(2)}`
@@ -368,8 +428,8 @@ export function StoreCardReload({
       ) : null}
 
       <p className="text-[10px] text-[#5A6070] text-center">
-        Pay with credit/debit card or PayPal. Free members get {bonusPercent}% bonus on Cove card
-        loads. Saving a card is optional.
+        Pay with credit/debit card or PayPal. One family Cove card and balance. {bonusPercent}% on
+        first load or membership credit only — reloads are 1:1. Saving a card is optional.
       </p>
     </div>
   )

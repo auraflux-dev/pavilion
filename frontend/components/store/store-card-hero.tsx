@@ -16,6 +16,7 @@ type Props = {
   perks?: string[]
   howItWorks?: HowStep[]
   bonusPercent?: number
+  maxAmount?: number
 }
 
 const DEFAULT_NOTES: Record<number, string> = {
@@ -23,6 +24,9 @@ const DEFAULT_NOTES: Record<number, string> = {
   20: 'Popular',
   25: 'Best value',
   50: 'Popular',
+  100: 'Family',
+  200: 'Bulk',
+  500: 'Max',
 }
 
 function defaultDenominations(amounts: number[]): StoreCardDenomination[] {
@@ -51,17 +55,22 @@ export function StoreCardHero({
   amounts,
   eyebrow = 'The Cove',
   title = 'Become a free member, then load a Cove card.',
-  perks = ['Free parent membership required', '10% bonus on every reload', 'Funds never expire'],
+  perks = [
+    'Free parent membership required',
+    'One family Cove card & balance',
+    '10% on first load · up to $500',
+  ],
   howItWorks,
   bonusPercent = 10,
+  maxAmount = 500,
 }: Props) {
   const denominations = defaultDenominations(amounts)
   const steps =
     howItWorks ??
     parseHowSteps([
       '1|Become a free member|Create a free parent account — then choose an amount and pay online.',
-      `2|Get ${bonusPercent}% extra on the card|${formatStoreCardBonusExample(50, bonusPercent)}.`,
-      '3|Student taps at The Cove|Balance lives on their physical card at the snack window.',
+      `2|First load gets ${bonusPercent}% extra|${formatStoreCardBonusExample(50, bonusPercent)}. Reloads are dollar-for-dollar.`,
+      '3|Tap at The Cove|One physical family card from PTO — same Square balance for every student in the household.',
     ])
 
   return (
@@ -88,7 +97,8 @@ export function StoreCardHero({
                 ))}
               </ul>
               <p className="mt-4 text-sm text-white/65 max-w-lg">
-                {formatStoreCardBonusExample(50, bonusPercent)}. Pay with credit/debit card or PayPal.
+                {formatStoreCardBonusExample(50, bonusPercent)} on first load or membership credit —
+                reloads are 1:1. Load any whole dollar up to ${maxAmount}. Pay with card or PayPal.
               </p>
             </div>
 
@@ -101,6 +111,7 @@ export function StoreCardHero({
                   <StoreCardReload
                     amounts={denominations.map(({ amount }) => amount)}
                     bonusPercent={bonusPercent}
+                    maxAmount={maxAmount}
                     triggerLabel="Choose student & load card"
                     triggerClassName="w-full justify-center !bg-white !text-[#085508] px-5 py-3"
                   />

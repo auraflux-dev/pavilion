@@ -101,11 +101,11 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   paidMembershipsLabel: 'Paid memberships',
   whatsappHeading: 'Grade WhatsApp',
 
-  storeCardsLabel: 'Store cards',
-  storeCardsHint: 'CMS balance total',
+  storeCardsLabel: 'Family Cove card',
+  storeCardsHint: 'One balance for the whole family',
   recentBuysLabel: 'Recent buys',
   recentBuysHint: 'programs & payments',
-  ctaLoadCard: 'Load card',
+  ctaLoadCard: 'Load family card',
   ctaSpiritWear: 'Spirit wear',
   ctaPrograms: 'Programs',
   purchasesEmpty:
