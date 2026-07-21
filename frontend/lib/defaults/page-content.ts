@@ -110,7 +110,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   'store-how': empty('store-how', {
     bullets: [
       '1|Become a free member|Create a free parent account — then choose an amount and pay online with card or PayPal.',
-      '2|First load gets 10% extra|Pay $50, get $55 on first load or membership credit. Reloads are dollar-for-dollar.',
+      '2|First load gets 10% extra|Pay $20, get $22 on first load or membership credit. Reloads are dollar-for-dollar.',
       '3|Student taps at The Cove|PTO issues one physical family card linked to the same Square balance for the snack window.',
     ],
   }),

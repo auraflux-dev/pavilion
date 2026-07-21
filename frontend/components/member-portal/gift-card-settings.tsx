@@ -9,7 +9,7 @@ interface Props {
 }
 
 const THRESHOLD_OPTIONS = [5, 10, 15, 20]
-const RELOAD_OPTIONS = [10, 20, 25]
+const RELOAD_OPTIONS = [20, 40, 75]
 
 export function GiftCardSettings({ studentId, studentName }: Props) {
   const [open, setOpen] = useState(false)

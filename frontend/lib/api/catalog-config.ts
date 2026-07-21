@@ -16,7 +16,7 @@ function parseAmounts(raw: string, fallback: string): number[] {
     .filter((n) => Number.isFinite(n) && n > 0)
   return amounts.length
     ? Array.from(new Set(amounts)).sort((a, b) => a - b)
-    : [10, 20, 25]
+    : [20, 40, 75]
 }
 
 function parseIdList(raw: string, fallback: string): Set<string> {
@@ -165,7 +165,7 @@ export function isAllowedStoreCardAmount(
 }
 
 /**
- * Square / PayPal in-portal loads: whole dollars from min–max (default $10–$500).
+ * Square / PayPal in-portal loads: whole dollars from min–max (default $1–$500).
  */
 export function isAllowedStoreCardLoadAmount(
   amount: number,

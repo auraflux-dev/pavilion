@@ -266,7 +266,7 @@ export const SITE_SETTING_GROUPS: {
       },
       {
         key: 'storeCardAmounts',
-        label: 'Cove card preset amounts (comma-separated, e.g. 10,20,25,50,100,200,500)',
+        label: 'Cove card preset amounts (comma-separated, e.g. 20,40,75)',
       },
       {
         key: 'storeCardMinAmount',
