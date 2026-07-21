@@ -39,8 +39,16 @@ async function proxyToWix(req: NextRequest, wixPath: string) {
   req.headers.forEach((value, key) => {
     const lower = key.toLowerCase()
     if (HOP_BY_HOP.has(lower)) return
-    // Don't forward Vercel/compressed encodings that can confuse upstream
-    if (lower === 'accept-encoding') return
+    // Don't forward hop/proxy noise that can confuse Wix auth
+    if (
+      lower === 'accept-encoding' ||
+      lower.startsWith('x-vercel-') ||
+      lower.startsWith('x-forwarded-') ||
+      lower === 'forwarded' ||
+      lower === 'via'
+    ) {
+      return
+    }
     incomingHeaders[key] = value
   })
   incomingHeaders.host = PUBLIC_HOST

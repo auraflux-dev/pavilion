@@ -19,6 +19,8 @@ function LoginInner() {
   const returnTo = rawReturn.startsWith('/') ? rawReturn : `/${rawReturn}`
 
   useEffect(() => {
+    let cancelled = false
+
     async function startLogin() {
       try {
         const client = createVisitorClient()
@@ -36,14 +38,19 @@ function LoginInner() {
         })
 
         const { authUrl } = await client.auth.getAuthUrl(oAuthData)
-        window.location.href = authUrl
+        if (cancelled) return
+        // Full navigation — prevents React Strict Mode double-start from racing two auth URLs
+        window.location.replace(authUrl)
       } catch (err) {
         console.error('Login initiation failed:', err)
-        window.location.href = '/'
+        if (!cancelled) window.location.href = '/'
       }
     }
 
     startLogin()
+    return () => {
+      cancelled = true
+    }
   }, [returnTo])
 
   return (
