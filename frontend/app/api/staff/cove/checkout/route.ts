@@ -56,6 +56,28 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Idempotency guard: a retry/double-tap with the same key must not redeem or
+    // decrement inventory twice. Replay the prior sale result instead.
+    const client = getWixClient()
+    const priorSale = await client.items
+      .query('Payments')
+      .eq('transactionId', idempotencyKey)
+      .eq('source', 'cove_register_redeem')
+      .limit(1)
+      .find()
+    if ((priorSale.items ?? []).length > 0) {
+      const prior = priorSale.items[0] as { amount?: number }
+      const liveBalance = await getGiftCardBalance(family.gan)
+      return NextResponse.json({
+        ok: true,
+        total: Number(prior.amount) || 0,
+        newBalance: liveBalance,
+        alreadyProcessed: true,
+        parentEmail: family.parentEmail,
+        coveFamilyCode: family.coveFamilyCode,
+      })
+    }
+
     const catalog = flattenRegisterProducts(await listStaffCoveProducts())
     const byKey = new Map(
       catalog.map((p) => [`${p.id}:${p.variantId || ''}`, p] as const)
@@ -145,7 +167,6 @@ export async function POST(req: NextRequest) {
       balanceDollars: newBalance,
     })
 
-    const client = getWixClient()
     const studentId = family.students[0]?.id
     const lineSummary = priced.map((l) => `${l.qty}× ${l.name}`).join(', ')
 
