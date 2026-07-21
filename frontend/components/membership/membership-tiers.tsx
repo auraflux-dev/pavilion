@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { CheckCircle2, Star } from 'lucide-react'
 import { getMembershipTiers, type MembershipTier } from '@/lib/api/membership'
 import { MembershipJoinButton } from '@/components/membership/membership-join-button'
@@ -5,6 +6,20 @@ import { getSiteSettings } from '@/lib/api/site-settings'
 import { getStoreCardBonusPercent } from '@/lib/store-card-bonus'
 
 const fmtDollars = (n: number): string => (Number.isInteger(n) ? String(n) : n.toFixed(2))
+
+/** Bold $amounts, percentages, and standalone counts in perk copy. */
+function emphasizeNumbers(text: string): ReactNode {
+  const parts = text.split(/(\$\d+(?:\.\d+)?|\d+(?:\.\d+)?%|\b\d+\b)/g)
+  return parts.map((part, i) =>
+    /^(\$\d+(?:\.\d+)?|\d+(?:\.\d+)?%|\d+)$/.test(part) ? (
+      <strong key={i} className="font-bold text-[#085508]">
+        {part}
+      </strong>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  )
+}
 
 /** Fallback only if CMS + Catalog are unreachable. */
 const FALLBACK_TIERS: MembershipTier[] = [
@@ -101,14 +116,20 @@ export async function MembershipTiers() {
             {bonusPercent > 0 && tier.giftCardCredit > 0 ? (
               <div className="mb-6 rounded-lg border border-[#F0D9A0] bg-[#FFF7E6] px-3 py-2">
                 <p className="text-xs font-bold text-[#8A6400]">
-                  Limited-time bonus · first 30 days
+                  Limited-time bonus · first{' '}
+                  <strong className="font-bold">30</strong> days
                 </p>
                 <p className="text-xs text-[#8A6400]">
-                  Get an extra {bonusPercent}% on your PTO card — $
-                  {tier.giftCardCredit} becomes{' '}
-                  <span className="font-bold">
+                  Get an extra{' '}
+                  <strong className="font-bold text-[#085508]">{bonusPercent}%</strong> on
+                  your PTO card —{' '}
+                  <strong className="font-bold text-[#085508]">
+                    ${tier.giftCardCredit}
+                  </strong>{' '}
+                  becomes{' '}
+                  <strong className="font-bold text-[#085508]">
                     ${fmtDollars(tier.giftCardCredit * (1 + bonusPercent / 100))}
-                  </span>{' '}
+                  </strong>{' '}
                   loaded.
                 </p>
               </div>
@@ -123,7 +144,9 @@ export async function MembershipTiers() {
                       style={{ color: '#085508' }}
                       aria-hidden="true"
                     />
-                    <span className="text-sm text-[#1A1A1A]">{perk}</span>
+                    <span className="text-sm text-[#1A1A1A] text-left">
+                      {emphasizeNumbers(perk)}
+                    </span>
                   </li>
                 ))}
               </ul>
