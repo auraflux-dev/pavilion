@@ -18,15 +18,19 @@ import {
   resolveParentLoadBonusPercent,
   storeCardLoadCents,
 } from '@/lib/store-card-bonus'
+import { enrollInProgram } from '@/lib/program-enroll'
+import type { ConsentAck } from '@/lib/checkout-consent'
 
-export type CheckoutKind = 'membership' | 'product' | 'store-card'
+export type CheckoutKind = 'membership' | 'product' | 'store-card' | 'program'
 
 export type CheckoutIntent = {
   kind: CheckoutKind
   tier?: string
   studentId?: string | null
   productId?: string
+  programId?: string
   amountCents?: number
+  consents?: import('@/lib/checkout-consent').ConsentAck[]
 }
 
 export type ResolvedCheckout = {
@@ -92,6 +96,29 @@ export async function resolveCheckoutIntent(
     }
   }
 
+  if (kind === 'program') {
+    const { getProgramById } = await import('@/lib/api/programs')
+    const programId = String(intent.programId ?? '').trim()
+    const studentId = String(intent.studentId ?? '').trim()
+    if (!programId || !studentId) throw new Error('Program and student required')
+    const program = await getProgramById(programId)
+    if (!program || !program.registrationOpen) throw new Error('Program not open for registration')
+    const fee = Number(program.fee ?? 0)
+    if (fee <= 0) throw new Error('This program does not require payment — use free registration')
+    return {
+      kind,
+      amount: fee,
+      amountCents: Math.round(fee * 100),
+      description: `Enrichment — ${program.name}`,
+      customId: `program:${programId.slice(0, 36)}`,
+      meta: {
+        programId,
+        programName: program.name,
+        studentId,
+      },
+    }
+  }
+
   const studentId = String(intent.studentId ?? '').trim()
   const amountCents = Number(intent.amountCents)
   const amount = amountCents / 100
@@ -133,9 +160,39 @@ export async function fulfillPaidCheckout(opts: {
   transactionId: string
   paymentMethod: string
   sourcePrefix: 'square' | 'paypal'
+  consents?: ConsentAck[]
 }): Promise<Record<string, unknown>> {
-  const { resolved, parentEmail, parentName, transactionId, paymentMethod, sourcePrefix } = opts
+  const { resolved, parentEmail, parentName, transactionId, paymentMethod, sourcePrefix, consents } =
+    opts
   const client = getWixClient()
+
+  if (resolved.kind === 'program') {
+    const enrolled = await enrollInProgram({
+      parentEmail,
+      programId: resolved.meta.programId,
+      studentId: resolved.meta.studentId,
+      consents: consents ?? [],
+      transactionId,
+      feePaid: resolved.amount,
+    })
+    await client.items.insert('Payments', {
+      programName: `Enrichment — ${resolved.meta.programName}`,
+      amount: resolved.amount,
+      status: 'Paid',
+      paymentDate: new Date().toISOString(),
+      paymentMethod,
+      transactionId,
+      source: `${sourcePrefix}_program`,
+      parentEmail,
+      studentId: resolved.meta.studentId,
+      notes: resolved.meta.programId,
+    })
+    return {
+      kind: 'program',
+      ...enrolled,
+      paymentId: transactionId,
+    }
+  }
 
   if (resolved.kind === 'membership') {
     const tier = resolved.meta.tier

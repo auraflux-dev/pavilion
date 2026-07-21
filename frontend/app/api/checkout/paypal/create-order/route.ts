@@ -6,6 +6,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
 import { resolveCheckoutIntent, type CheckoutIntent } from '@/lib/checkout-fulfill'
 import { createPayPalOrder, isPayPalConfigured } from '@/lib/paypal'
+import {
+  validateConsentAcks,
+  type CheckoutConsentKind,
+  type ConsentAck,
+} from '@/lib/checkout-consent'
 
 export async function POST(req: NextRequest) {
   const session = await getMemberSession(req)
@@ -16,9 +21,14 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const intent = body as CheckoutIntent
-    if (!intent.kind || !['membership', 'product', 'store-card'].includes(intent.kind)) {
+    const intent = body as CheckoutIntent & { consents?: ConsentAck[] }
+    if (!intent.kind || !['membership', 'product', 'store-card', 'program'].includes(intent.kind)) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
+    }
+
+    const consentCheck = validateConsentAcks(intent.kind as CheckoutConsentKind, intent.consents)
+    if (!consentCheck.ok) {
+      return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }
 
     const resolved = await resolveCheckoutIntent(intent, session.email)

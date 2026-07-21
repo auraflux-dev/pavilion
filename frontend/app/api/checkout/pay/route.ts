@@ -29,8 +29,14 @@ import {
   resolveParentLoadBonusPercent,
   storeCardLoadCents,
 } from '@/lib/store-card-bonus'
+import {
+  recordConsentAcknowledgments,
+  validateConsentAcks,
+  type ConsentAck,
+  type CheckoutConsentKind,
+} from '@/lib/checkout-consent'
 
-type Kind = 'membership' | 'product' | 'store-card'
+type Kind = 'membership' | 'product' | 'store-card' | 'program'
 
 type StudentRow = {
   _id: string
@@ -73,9 +79,15 @@ export async function POST(req: NextRequest) {
     const sourceId = typeof body.sourceId === 'string' ? body.sourceId : undefined
     const useStoredCard = Boolean(body.useStoredCard)
     const saveCard = Boolean(body.saveCard)
+    const consents = body.consents as ConsentAck[] | undefined
 
-    if (!kind || !['membership', 'product', 'store-card'].includes(kind)) {
+    if (!kind || !['membership', 'product', 'store-card', 'program'].includes(kind)) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
+    }
+
+    const consentCheck = validateConsentAcks(kind as CheckoutConsentKind, consents)
+    if (!consentCheck.ok) {
+      return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }
 
     const name =
@@ -134,6 +146,37 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // ── Enrichment program ──────────────────────────────────────
+    if (kind === 'program') {
+      const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
+      const programId = String(body.programId ?? '').trim()
+      const studentId = String(body.studentId ?? '').trim()
+      const resolved = await resolveCheckoutIntent(
+        { kind: 'program', programId, studentId },
+        session.email
+      )
+      const paymentKey = randomUUID()
+      const payment = await chargePayment({
+        sourceId: paymentSource,
+        amountCents: resolved.amountCents,
+        idempotencyKey: paymentKey,
+        customerId,
+        referenceId: resolved.customId,
+        buyerEmailAddress: session.email,
+        note: resolved.description,
+      })
+      const result = await fulfillPaidCheckout({
+        resolved,
+        parentEmail: session.email,
+        parentName: name,
+        transactionId: payment.id ?? paymentKey,
+        paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
+        sourcePrefix: 'square',
+        consents: consentCheck.acks,
+      })
+      return NextResponse.json({ ok: true, ...result })
+    }
+
     // ── Membership ──────────────────────────────────────────────
     if (kind === 'membership') {
       const tier = String(body.tier ?? '').trim().toLowerCase()
@@ -172,6 +215,14 @@ export async function POST(req: NextRequest) {
         transactionId: payment.id ?? paymentKey,
         source: 'square_membership',
         parentEmail: session.email,
+      })
+
+      await recordConsentAcknowledgments({
+        parentEmail: session.email,
+        kind: 'membership',
+        transactionId: payment.id ?? paymentKey,
+        studentId,
+        acks: consentCheck.acks,
       })
 
       return NextResponse.json({

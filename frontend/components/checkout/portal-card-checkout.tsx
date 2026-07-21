@@ -4,10 +4,12 @@
  * In-portal Square card checkout — personal credit/debit card for any ecommerce.
  * Free and paid members. Saved card is optional convenience, never required.
  */
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { CreditCard, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PortalPayPalButtons } from '@/components/checkout/portal-paypal-buttons'
+import { CheckoutConsent } from '@/components/checkout/checkout-consent'
+import type { ConsentAck, CheckoutConsentKind } from '@/lib/checkout-consent'
 
 type StoredCard = {
   brand: string
@@ -31,9 +33,15 @@ declare global {
 }
 
 export type PortalPayBody =
-  | { kind: 'membership'; tier: string; studentId?: string | null }
-  | { kind: 'product'; productId: string }
-  | { kind: 'store-card'; studentId: string; amountCents: number }
+  | { kind: 'membership'; tier: string; studentId?: string | null; consents?: ConsentAck[] }
+  | { kind: 'product'; productId: string; consents?: ConsentAck[] }
+  | { kind: 'store-card'; studentId: string; amountCents: number; consents?: ConsentAck[] }
+  | {
+      kind: 'program'
+      programId: string
+      studentId: string
+      consents?: ConsentAck[]
+    }
 
 interface Props {
   open: boolean
@@ -46,6 +54,8 @@ interface Props {
   onPaid?: (data: Record<string, unknown>) => void
   /** Unique DOM id so multiple forms can mount */
   containerId?: string
+  /** When consents were already collected (e.g. program register), skip the checkbox UI */
+  prefilledConsents?: ConsentAck[]
 }
 
 export function PortalCardCheckout({
@@ -57,6 +67,7 @@ export function PortalCardCheckout({
   payBody,
   onPaid,
   containerId = 'portal-square-card',
+  prefilledConsents,
 }: Props) {
   const [config, setConfig] = useState<{
     configured: boolean
@@ -71,7 +82,28 @@ export function PortalCardCheckout({
   const [ready, setReady] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [consents, setConsents] = useState<ConsentAck[] | null>(prefilledConsents ?? null)
+  const [consentComplete, setConsentComplete] = useState(Boolean(prefilledConsents?.length))
   const cardRef = useRef<SquareCard | null>(null)
+
+  const consentKind: CheckoutConsentKind =
+    payBody.kind === 'membership' || payBody.kind === 'program'
+      ? payBody.kind
+      : 'product'
+  const needsConsent = payBody.kind === 'membership' || payBody.kind === 'program'
+  const showConsentUi = needsConsent && !prefilledConsents?.length
+
+  const onConsentChange = useCallback((acks: ConsentAck[] | null, complete: boolean) => {
+    setConsents(acks)
+    setConsentComplete(complete)
+  }, [])
+
+  useEffect(() => {
+    if (prefilledConsents?.length) {
+      setConsents(prefilledConsents)
+      setConsentComplete(true)
+    }
+  }, [prefilledConsents, open])
 
   useEffect(() => {
     if (!open) return
@@ -137,6 +169,9 @@ export function PortalCardCheckout({
     setError('')
     setSuccess('')
     try {
+      if (needsConsent && (!consentComplete || !consents)) {
+        throw new Error('Please review and accept the required terms before paying.')
+      }
       let sourceId: string | undefined
       if (!useStored) {
         if (!cardRef.current || !ready) throw new Error('Card form is not ready yet.')
@@ -152,6 +187,7 @@ export function PortalCardCheckout({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...payBody,
+          consents: needsConsent ? consents : undefined,
           sourceId,
           useStoredCard: useStored,
           saveCard: !useStored && saveCard,
@@ -228,6 +264,10 @@ export function PortalCardCheckout({
           </>
         ) : null}
 
+        {showConsentUi ? (
+          <CheckoutConsent kind={consentKind} onChange={onConsentChange} />
+        ) : null}
+
         {config && !config.configured ? (
           <p className="text-xs text-amber-700">Card payments are temporarily unavailable.</p>
         ) : null}
@@ -237,7 +277,12 @@ export function PortalCardCheckout({
         <Button
           type="button"
           onClick={submit}
-          disabled={busy || !config?.configured || (!useStored && !ready)}
+          disabled={
+            busy ||
+            !config?.configured ||
+            (!useStored && !ready) ||
+            (needsConsent && !consentComplete)
+          }
           className="w-full text-white font-bold"
           style={{ backgroundColor: '#085508' }}
         >
@@ -252,8 +297,11 @@ export function PortalCardCheckout({
         </Button>
 
         <PortalPayPalButtons
-          active={open && !busy && !success}
-          payBody={payBody}
+          active={open && !busy && !success && (!needsConsent || consentComplete)}
+          payBody={{
+            ...payBody,
+            consents: needsConsent ? consents ?? undefined : undefined,
+          }}
           onPaid={(data) => {
             setSuccess('PayPal payment successful — thank you!')
             onPaid?.(data)

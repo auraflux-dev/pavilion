@@ -42,6 +42,21 @@ export async function GET(req: NextRequest) {
         membershipStatus: item.membershipStatus ?? 'active',
         discountCode: item.discountCode ?? null,
         storeCardBalance: item.storeCardBalance ?? 0,
+        parentPhone: item.parentPhone ?? '',
+        secondaryPhone: item.secondaryPhone ?? '',
+        emergencyContact: item.emergencyContact ?? '',
+        emergencyPhone: item.emergencyPhone ?? '',
+        allergies: item.allergies ?? '',
+        medicalConditions: item.medicalConditions ?? '',
+        medications: item.medications ?? '',
+        pickupAuthorized: item.pickupAuthorized ?? '',
+        selfRelease: Boolean(item.selfRelease),
+        photoMediaConsent:
+          item.photoMediaConsent === true
+            ? true
+            : item.photoMediaConsent === false
+              ? false
+              : null,
       }))
 
     return NextResponse.json({
@@ -86,10 +101,21 @@ export async function POST(req: NextRequest) {
       storeCardBalance: 0,
       discountCode: null,
       jumbulaSid: '',
-      allergies: '',
-      emergencyContact: '',
-      emergencyPhone: '',
-      parentPhone: '',
+      allergies: String(body.allergies ?? '').trim(),
+      emergencyContact: String(body.emergencyContact ?? '').trim(),
+      emergencyPhone: String(body.emergencyPhone ?? '').trim(),
+      parentPhone: String(body.parentPhone ?? '').trim(),
+      secondaryPhone: String(body.secondaryPhone ?? '').trim(),
+      medicalConditions: String(body.medicalConditions ?? '').trim(),
+      medications: String(body.medications ?? '').trim(),
+      pickupAuthorized: String(body.pickupAuthorized ?? '').trim(),
+      selfRelease: Boolean(body.selfRelease),
+      photoMediaConsent:
+        body.photoMediaConsent === true
+          ? true
+          : body.photoMediaConsent === false
+            ? false
+            : null,
     })
 
     return NextResponse.json({
@@ -102,6 +128,21 @@ export async function POST(req: NextRequest) {
         membershipStatus: 'active',
         discountCode: null,
         storeCardBalance: 0,
+        parentPhone: String(body.parentPhone ?? '').trim(),
+        secondaryPhone: String(body.secondaryPhone ?? '').trim(),
+        emergencyContact: String(body.emergencyContact ?? '').trim(),
+        emergencyPhone: String(body.emergencyPhone ?? '').trim(),
+        allergies: String(body.allergies ?? '').trim(),
+        medicalConditions: String(body.medicalConditions ?? '').trim(),
+        medications: String(body.medications ?? '').trim(),
+        pickupAuthorized: String(body.pickupAuthorized ?? '').trim(),
+        selfRelease: Boolean(body.selfRelease),
+        photoMediaConsent:
+          body.photoMediaConsent === true
+            ? true
+            : body.photoMediaConsent === false
+              ? false
+              : null,
       },
     })
   } catch (err) {

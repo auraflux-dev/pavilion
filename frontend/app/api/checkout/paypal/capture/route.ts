@@ -10,6 +10,12 @@ import {
   type CheckoutIntent,
 } from '@/lib/checkout-fulfill'
 import { capturePayPalOrder, isPayPalConfigured } from '@/lib/paypal'
+import {
+  recordConsentAcknowledgments,
+  validateConsentAcks,
+  type CheckoutConsentKind,
+  type ConsentAck,
+} from '@/lib/checkout-consent'
 
 export async function POST(req: NextRequest) {
   const session = await getMemberSession(req)
@@ -21,10 +27,15 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const orderId = String(body.orderId ?? '').trim()
-    const intent = body as CheckoutIntent & { orderId?: string }
+    const intent = body as CheckoutIntent & { orderId?: string; consents?: ConsentAck[] }
     if (!orderId) return NextResponse.json({ error: 'Missing PayPal order' }, { status: 400 })
-    if (!intent.kind || !['membership', 'product', 'store-card'].includes(intent.kind)) {
+    if (!intent.kind || !['membership', 'product', 'store-card', 'program'].includes(intent.kind)) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
+    }
+
+    const consentCheck = validateConsentAcks(intent.kind as CheckoutConsentKind, intent.consents)
+    if (!consentCheck.ok) {
+      return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }
 
     const resolved = await resolveCheckoutIntent(intent, session.email)
@@ -39,14 +50,27 @@ export async function POST(req: NextRequest) {
     const name =
       `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim()
 
+    const transactionId = captured.captureId || captured.id
     const result = await fulfillPaidCheckout({
       resolved,
       parentEmail: session.email,
       parentName: name,
-      transactionId: captured.captureId || captured.id,
+      transactionId,
       paymentMethod: 'PayPal',
       sourcePrefix: 'paypal',
+      consents: consentCheck.acks,
     })
+
+    // Program enroll records its own consents; membership/other need this trail here.
+    if (intent.kind !== 'program') {
+      await recordConsentAcknowledgments({
+        parentEmail: session.email,
+        kind: intent.kind as CheckoutConsentKind,
+        transactionId,
+        studentId: intent.studentId,
+        acks: consentCheck.acks,
+      })
+    }
 
     return NextResponse.json({ ok: true, ...result })
   } catch (err) {
