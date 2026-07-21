@@ -17,6 +17,20 @@ const nextConfig = {
       },
     ]
   },
+  async rewrites() {
+    return [
+      // After DNS cutover, Wix login still expects /_api and /__auth on www.
+      // Proxy those paths to Wix (via Node route) so OAuth works on Vercel.
+      {
+        source: '/_api/:path*',
+        destination: '/api/wix-auth-proxy/_api/:path*',
+      },
+      {
+        source: '/__auth/:path*',
+        destination: '/api/wix-auth-proxy/__auth/:path*',
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

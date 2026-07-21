@@ -27,8 +27,13 @@ export async function middleware(req: NextRequest) {
     return res
   }
 
-  // Skip visitor bootstrap for auth + API routes
-  if (pathname.startsWith('/auth') || pathname.startsWith('/api')) {
+  // Skip visitor bootstrap for auth + API + Wix login proxy paths
+  if (
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_api') ||
+    pathname.startsWith('/__auth')
+  ) {
     return res
   }
 
