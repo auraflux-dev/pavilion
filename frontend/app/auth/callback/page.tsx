@@ -20,6 +20,18 @@ export default function CallbackPage() {
       try {
         const client = createVisitorClient()
 
+        // Wix success returns code in the hash; some failures use query (?error=)
+        const query = new URLSearchParams(window.location.search)
+        const queryError = query.get('error')
+        if (queryError) {
+          throw new Error(
+            query.get('error_description') ||
+              (queryError === 'unknown_error'
+                ? 'Wix login could not start. Please try again (hard refresh if it keeps failing).'
+                : queryError)
+          )
+        }
+
         // Parse code + state from URL hash/params
         const returnedOAuthData = client.auth.parseFromUrl()
         if ('error' in returnedOAuthData && returnedOAuthData.error) {
