@@ -25,71 +25,88 @@ export interface AuthInfo {
   refresh: () => void
 }
 
+type AuthSnapshot = Omit<AuthInfo, 'refresh'>
+
+/** Survives navbar remounts when each page renders its own <Navbar />. */
+let cachedAuth: AuthSnapshot | null = null
+let inflight: Promise<AuthSnapshot> | null = null
+
+async function fetchAuth(): Promise<AuthSnapshot> {
+  const visitor: AuthSnapshot = {
+    status: 'visitor',
+    member: null,
+    accountType: 'none',
+    hasPaidMembership: false,
+    studentCount: 0,
+    isStaff: false,
+    staffRoles: [],
+  }
+  try {
+    const r = await fetch('/api/auth/me', { credentials: 'include' })
+    if (!r.ok) return visitor
+    const data = await r.json()
+    return {
+      status: 'member',
+      member: data.member ?? null,
+      accountType: (data.accountType as AccountType) ?? 'free',
+      hasPaidMembership: Boolean(data.hasPaidMembership),
+      studentCount: Number(data.studentCount ?? 0),
+      isStaff: Boolean(data.isStaff),
+      staffRoles: Array.isArray(data.staffRoles) ? data.staffRoles : [],
+    }
+  } catch {
+    return visitor
+  }
+}
+
+function loadAuth(force = false): Promise<AuthSnapshot> {
+  if (!force && cachedAuth && cachedAuth.status !== 'loading') {
+    return Promise.resolve(cachedAuth)
+  }
+  if (!force && inflight) return inflight
+  inflight = fetchAuth().then((snap) => {
+    cachedAuth = snap
+    inflight = null
+    return snap
+  })
+  return inflight
+}
+
 /**
  * Site login state + free vs paid membership summary.
  * - member/free: has Wix account (parent), may not have purchased Ruby/Supreme
  * - member/paid: purchased membership applied to Students and/or Memberships CMS
  */
 export function useAuth(): AuthInfo {
-  const [status, setStatus] = useState<AuthStatus>('loading')
-  const [member, setMember] = useState<MemberProfile | null>(null)
-  const [accountType, setAccountType] = useState<AccountType>('none')
-  const [hasPaidMembership, setHasPaidMembership] = useState(false)
-  const [studentCount, setStudentCount] = useState(0)
-  const [isStaff, setIsStaff] = useState(false)
-  const [staffRoles, setStaffRoles] = useState<string[]>([])
+  const [snap, setSnap] = useState<AuthSnapshot>(
+    () =>
+      cachedAuth ?? {
+        status: 'loading',
+        member: null,
+        accountType: 'none',
+        hasPaidMembership: false,
+        studentCount: 0,
+        isStaff: false,
+        staffRoles: [],
+      }
+  )
   const [tick, setTick] = useState(0)
 
-  const refresh = useCallback(() => setTick((t) => t + 1), [])
+  const refresh = useCallback(() => {
+    cachedAuth = null
+    setTick((t) => t + 1)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
-    setStatus('loading')
-    fetch('/api/auth/me', { credentials: 'include' })
-      .then(async (r) => {
-        if (cancelled) return
-        if (!r.ok) {
-          setStatus('visitor')
-          setMember(null)
-          setAccountType('none')
-          setHasPaidMembership(false)
-          setStudentCount(0)
-          setIsStaff(false)
-          setStaffRoles([])
-          return
-        }
-        const data = await r.json()
-        setStatus('member')
-        setMember(data.member ?? null)
-        setAccountType((data.accountType as AccountType) ?? 'free')
-        setHasPaidMembership(Boolean(data.hasPaidMembership))
-        setStudentCount(Number(data.studentCount ?? 0))
-        setIsStaff(Boolean(data.isStaff))
-        setStaffRoles(Array.isArray(data.staffRoles) ? data.staffRoles : [])
-      })
-      .catch(() => {
-        if (cancelled) return
-        setStatus('visitor')
-        setMember(null)
-        setAccountType('none')
-        setHasPaidMembership(false)
-        setStudentCount(0)
-        setIsStaff(false)
-        setStaffRoles([])
-      })
+    const force = tick > 0
+    loadAuth(force).then((next) => {
+      if (!cancelled) setSnap(next)
+    })
     return () => {
       cancelled = true
     }
   }, [tick])
 
-  return {
-    status,
-    member,
-    accountType,
-    hasPaidMembership,
-    studentCount,
-    isStaff,
-    staffRoles,
-    refresh,
-  }
+  return { ...snap, refresh }
 }

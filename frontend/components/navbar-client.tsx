@@ -38,12 +38,12 @@ export function NavbarClient({ links }: Props) {
       }`}
     >
       <nav
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3"
         aria-label="Main navigation"
       >
         <Link
           href="/"
-          className="flex items-center gap-2.5 shrink-0 group"
+          className="flex items-center gap-2.5 shrink-0 group justify-self-start"
           aria-label="Stone Hill Middle School PTO Home"
         >
           <Image
@@ -75,7 +75,7 @@ export function NavbarClient({ links }: Props) {
           </div>
         </Link>
 
-        <ul className="hidden xl:flex items-center gap-0.5" role="list">
+        <ul className="hidden xl:flex items-center gap-0.5 justify-self-center" role="list">
           {links.map((link) => (
             <li key={link.id}>
               <Link
@@ -98,9 +98,9 @@ export function NavbarClient({ links }: Props) {
           ) : null}
         </ul>
 
-        <div className="hidden xl:flex items-center gap-2 shrink-0">
+        <div className="hidden xl:flex items-center gap-2 shrink-0 justify-self-end min-w-[9.5rem] justify-end">
           {status === 'loading' ? (
-            <div className="h-9 w-28 rounded-md bg-[#EEF6EE] animate-pulse" />
+            <div className="h-9 w-[9.5rem] rounded-md bg-[#EEF6EE] animate-pulse" />
           ) : isMember ? (
             <div className="flex items-center gap-2">
               {isStaff ? (
@@ -134,7 +134,7 @@ export function NavbarClient({ links }: Props) {
         </div>
 
         <button
-          className="xl:hidden p-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#085508]"
+          className="xl:hidden p-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#085508] justify-self-end col-start-3"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
