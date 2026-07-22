@@ -33,7 +33,7 @@ export function StoreGrid({ items }: StoreGridProps) {
   const outOfStock = filtered.filter((i) => !i.inStock)
 
   return (
-    <section className="py-8 md:py-12" style={{ backgroundColor: '#F5F0E8' }}>
+    <section id="menu" className="py-8 md:py-12 scroll-mt-28" style={{ backgroundColor: '#F5F0E8' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section header */}

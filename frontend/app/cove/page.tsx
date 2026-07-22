@@ -1,6 +1,7 @@
 import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { CoveSectionNav } from '@/components/store/cove-section-nav'
 import { StoreCardHero } from '@/components/store/store-card-hero'
 import { DealsStrip } from '@/components/store/deals-strip'
 import { StoreGrid } from '@/components/store/store-grid'
@@ -53,6 +54,8 @@ export default async function CovePage() {
       <Navbar />
 
       <main id="main-content">
+        <CoveSectionNav />
+
         <StoreCardHero
           amounts={catalog.storeCardAmounts}
           eyebrow={storeCopy.eyebrow || 'The Cove'}
@@ -71,13 +74,9 @@ export default async function CovePage() {
           maxAmount={catalog.storeCardMaxAmount}
         />
 
-        <DealsStrip items={featuredItems} />
-
-        <StoreGrid items={allItems} />
-
         <section
           id="shop"
-          className="py-12 md:py-16"
+          className="py-12 md:py-16 scroll-mt-28"
           style={{ backgroundColor: '#F5F0E8' }}
           aria-labelledby="cove-shop-heading"
         >
@@ -156,6 +155,10 @@ export default async function CovePage() {
             )}
           </div>
         </section>
+
+        <DealsStrip items={featuredItems} />
+
+        <StoreGrid items={allItems} />
 
         <StoreCardCta
           amounts={catalog.storeCardAmounts}

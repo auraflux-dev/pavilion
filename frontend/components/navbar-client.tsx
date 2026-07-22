@@ -7,6 +7,7 @@ import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { NavLink } from '@/lib/api/nav'
 import { useAuth } from '@/lib/hooks/use-auth'
+import { PortalReturnBar } from '@/components/portal-return-bar'
 
 interface Props {
   links: NavLink[]
@@ -15,7 +16,7 @@ interface Props {
 export function NavbarClient({ links }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const { status, member, accountType, isStaff } = useAuth()
+  const { status, isStaff } = useAuth()
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 8)
@@ -29,12 +30,12 @@ export function NavbarClient({ links }: Props) {
 
   return (
     <header
-      className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${
+      className={`sticky top-0 z-50 bg-white transition-shadow duration-300 overflow-x-clip ${
         scrolled ? 'shadow-md' : 'shadow-sm'
       }`}
     >
       <nav
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 overflow-hidden"
         aria-label="Main navigation"
       >
         <Link
@@ -58,7 +59,7 @@ export function NavbarClient({ links }: Props) {
               Stone Hill Middle School
             </span>
             <span
-              className="text-xs font-semibold tracking-widest uppercase"
+              className="text-xs font-semibold tracking-wide uppercase whitespace-nowrap"
               style={{ color: '#FFD700' }}
             >
               PTO · Go Stingrays!
@@ -208,6 +209,8 @@ export function NavbarClient({ links }: Props) {
           </ul>
         </div>
       )}
+
+      <PortalReturnBar />
     </header>
   )
 }

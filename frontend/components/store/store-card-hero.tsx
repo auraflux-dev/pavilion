@@ -97,7 +97,7 @@ export function StoreCardHero({
 
   return (
     <>
-      <section className="py-12 md:py-16" style={{ backgroundColor: '#085508' }}>
+      <section id="card" className="py-12 md:py-16 scroll-mt-28" style={{ backgroundColor: '#085508' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {isMember ? (
             <div className="mb-6">
