@@ -1,5 +1,6 @@
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { isMemberRequest } from '@/lib/is-member-request'
+import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 import { AnnouncementBarClient } from './announcement-bar-client'
 
 /**
@@ -12,7 +13,7 @@ export async function AnnouncementBar() {
 
   if (!settings.getBool('announcementEnabled', false)) return null
 
-  const text = settings.get('announcementText', '').trim()
+  const text = humanizePublicCopy(settings.get('announcementText', '').trim())
   if (!text) return null
 
   // WhatsApp / grade-group invites stay out of the top bar

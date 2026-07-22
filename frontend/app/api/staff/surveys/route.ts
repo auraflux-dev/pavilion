@@ -239,10 +239,15 @@ export async function POST(req: NextRequest) {
     const audience = requireLogin || body.audience === 'members' ? 'members' : 'all'
     const active = body.active !== false
 
+    const powrEmbedHtml = String(body.powrEmbedHtml ?? '').trim()
+
     if (!slug) return NextResponse.json({ error: 'Slug is required' }, { status: 400 })
     if (!title) return NextResponse.json({ error: 'Title is required' }, { status: 400 })
-    if (!fields.length) {
-      return NextResponse.json({ error: 'Add at least one question' }, { status: 400 })
+    if (!fields.length && !powrEmbedHtml) {
+      return NextResponse.json(
+        { error: 'Add at least one question, or paste a POWR embed' },
+        { status: 400 },
+      )
     }
 
     const client = getWixClient()
@@ -263,6 +268,7 @@ export async function POST(req: NextRequest) {
       requireLogin,
       createdBy: session.staff.name || session.email,
       active,
+      powrEmbedHtml: powrEmbedHtml || null,
     }
 
     const inserted = await client.items.insert('Surveys', row)
@@ -318,8 +324,16 @@ export async function PATCH(req: NextRequest) {
               }
             })(),
           )
-    if (!fields.length) {
-      return NextResponse.json({ error: 'Add at least one question' }, { status: 400 })
+    const powrEmbedHtml =
+      body.powrEmbedHtml != null
+        ? String(body.powrEmbedHtml).trim()
+        : String(existing.powrEmbedHtml ?? '').trim()
+
+    if (!fields.length && !powrEmbedHtml) {
+      return NextResponse.json(
+        { error: 'Add at least one question, or paste a POWR embed' },
+        { status: 400 },
+      )
     }
 
     const branding =
@@ -357,6 +371,7 @@ export async function PATCH(req: NextRequest) {
         body.showInPortal != null ? body.showInPortal !== false : existing.showInPortal !== false,
       requireLogin,
       active: body.active != null ? body.active !== false : existing.active !== false,
+      powrEmbedHtml: powrEmbedHtml || null,
     }
 
     await client.items.update('Surveys', updates as Parameters<typeof client.items.update>[1])

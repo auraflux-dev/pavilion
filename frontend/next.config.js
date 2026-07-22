@@ -1,4 +1,37 @@
 /** @type {import('next').NextConfig} */
+const securityHeaders = [
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  {
+    key: 'Permissions-Policy',
+    value: 'camera=(), microphone=(), geolocation=(), payment=(self)',
+  },
+  {
+    key: 'Strict-Transport-Security',
+    value: 'max-age=63072000; includeSubDomains; preload',
+  },
+  {
+    key: 'Content-Security-Policy',
+    // HTTPS third-parties (Wix OAuth, Square, PayPal, POWR, Google) are allowed;
+    // frame-ancestors/object-src still block clickjacking and plugin vectors.
+    value: [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "form-action 'self' https:",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data: https:",
+      "style-src 'self' 'unsafe-inline' https:",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+      "connect-src 'self' https: wss:",
+      "frame-src 'self' https:",
+      'upgrade-insecure-requests',
+    ].join('; '),
+  },
+]
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -6,9 +39,16 @@ const nextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
   },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: securityHeaders,
+      },
+    ]
+  },
   async redirects() {
     return [
-      // Canonical host: apex → www (keeps OAuth callbacks + canonical URLs on one origin)
       {
         source: '/:path*',
         has: [{ type: 'host', value: 'shmspto.org' }],
@@ -19,8 +59,6 @@ const nextConfig = {
   },
   async rewrites() {
     return [
-      // After DNS cutover, Wix login still expects these paths on www.
-      // Proxy them to Wix (via Node route) so OAuth / Google login work on Vercel.
       {
         source: '/_api/:path*',
         destination: '/api/wix-auth-proxy/_api/:path*',

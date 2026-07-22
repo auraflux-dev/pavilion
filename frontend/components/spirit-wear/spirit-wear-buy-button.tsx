@@ -43,7 +43,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
     const returnTo = encodeURIComponent(pathname)
     return (
       <a
-        href={`/auth/login?returnTo=${returnTo}`}
+        href={`/auth/join?returnTo=${returnTo}`}
         className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full border-2 transition-colors"
         style={{ borderColor: '#085508', color: '#085508' }}
         title="Create a free parent account or log in to buy"

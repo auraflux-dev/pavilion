@@ -21,6 +21,7 @@ function mapRow(item: Record<string, unknown>) {
     bullets: String(item.bullets ?? ''),
     ctaLabel: String(item.ctaLabel ?? ''),
     ctaHref: String(item.ctaHref ?? ''),
+    flyerImage: String(item.flyerImage ?? ''),
     active: item.active !== false,
   }
 }
@@ -47,6 +48,7 @@ export async function GET(req: NextRequest) {
           bullets: d.bullets.join('\n'),
           ctaLabel: d.ctaLabel,
           ctaHref: d.ctaHref,
+          flyerImage: d.flyerImage ?? '',
           active: true,
           fromDefault: true,
         }
@@ -77,6 +79,7 @@ export async function PATCH(req: NextRequest) {
         : String(body.bullets ?? '').trim(),
       ctaLabel: String(body.ctaLabel ?? '').trim(),
       ctaHref: String(body.ctaHref ?? '').trim(),
+      flyerImage: String(body.flyerImage ?? '').trim(),
       active: body.active !== false,
     }
 

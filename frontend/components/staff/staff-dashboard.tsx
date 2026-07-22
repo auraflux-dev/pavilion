@@ -21,6 +21,7 @@ import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-p
 import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection-panel'
 import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
 import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
+import { StaffTimesheetsPanel } from '@/components/staff/staff-timesheets-panel'
 import { StaffShell } from '@/components/shells/staff-shell'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 
@@ -81,6 +82,7 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'wellness',
   'newsletter',
   'expenses',
+  'timesheets',
   'help',
 ]
 
@@ -129,6 +131,7 @@ export function StaffDashboard() {
     me &&
       (me.roles.includes('programs') ||
         me.roles.includes('instructor') ||
+        me.roles.includes('coordinator') ||
         me.roles.includes('secretary') ||
         me.roles.includes('membership') ||
         me.isAdmin),
@@ -138,7 +141,18 @@ export function StaffDashboard() {
   )
   const canMinutes = Boolean(me && (me.roles.includes('secretary') || me.isAdmin))
   const canPrograms = Boolean(
-    me && (me.roles.includes('programs') || me.roles.includes('instructor') || me.isAdmin),
+    me &&
+      (me.roles.includes('programs') ||
+        me.roles.includes('instructor') ||
+        me.roles.includes('coordinator') ||
+        me.isAdmin),
+  )
+  const canTimesheets = Boolean(
+    me &&
+      (me.roles.includes('instructor') ||
+        me.roles.includes('coordinator') ||
+        me.roles.includes('programs') ||
+        me.isAdmin),
   )
   const canPayments = Boolean(me && (me.roles.includes('treasurer') || me.isAdmin))
   const canEvents = Boolean(
@@ -218,6 +232,7 @@ export function StaffDashboard() {
     if (canMessage) items.push({ id: 'messages', label: STAFF_WORKSPACE_LABEL.messages })
     if (canMinutes) items.push({ id: 'minutes', label: STAFF_WORKSPACE_LABEL.minutes })
     if (canPrograms) items.push({ id: 'programs', label: STAFF_WORKSPACE_LABEL.programs })
+    if (canTimesheets) items.push({ id: 'timesheets', label: STAFF_WORKSPACE_LABEL.timesheets })
     if (canPayments) items.push({ id: 'payments', label: STAFF_WORKSPACE_LABEL.payments })
     if (canEvents) items.push({ id: 'events', label: STAFF_WORKSPACE_LABEL.events })
     if (canRetail) items.push({ id: 'retail', label: STAFF_WORKSPACE_LABEL.retail })
@@ -242,6 +257,7 @@ export function StaffDashboard() {
     canMessage,
     canMinutes,
     canPrograms,
+    canTimesheets,
     canPayments,
     canEvents,
     canRetail,
@@ -604,8 +620,17 @@ export function StaffDashboard() {
 
         {active === 'minutes' && canMinutes ? <StaffMinutesPanel /> : null}
         {active === 'programs' && canPrograms ? <StaffProgramsPanel /> : null}
+        {active === 'timesheets' && canTimesheets ? <StaffTimesheetsPanel /> : null}
         {active === 'payments' && canPayments ? <StaffPaymentsPanel /> : null}
-        {active === 'events' && canEvents ? <StaffEventsPanel /> : null}
+        {active === 'events' && canEvents ? (
+          <div className="space-y-4">
+            <StaffEventsPanel />
+            <StaffCmsCollectionPanel
+              collection="PortalCalendarEvents"
+              title="Portal calendar events (member portal)"
+            />
+          </div>
+        ) : null}
         {active === 'retail' && canRetail ? <StaffRetailPanel /> : null}
         {active === 'discounts' && canDiscounts ? <StaffDiscountsPanel /> : null}
         {active === 'membership' && canMembership ? <StaffMembershipPanel /> : null}
@@ -629,6 +654,7 @@ export function StaffDashboard() {
         {active === 'fundraising' && canFundraising ? (
           <div className="space-y-4">
             <StaffCmsCollectionPanel collection="FundraisingCTAs" title="Fundraising CTAs" />
+            <StaffCmsCollectionPanel collection="Sponsors" title="Sponsors (public list)" />
             <StaffSiteSettingsPanel
               title="Fundraising goals (Site settings)"
               groupIds={['fundraising']}
@@ -641,7 +667,15 @@ export function StaffDashboard() {
         {active === 'wellness' && canWellness ? (
           <StaffSiteSettingsPanel title="Teacher & staff wellness" groupIds={['wellness']} />
         ) : null}
-        {active === 'newsletter' && canNewsletter ? <StaffNewsletterPanel /> : null}
+        {active === 'newsletter' && canNewsletter ? (
+          <div className="space-y-4">
+            <StaffNewsletterPanel />
+            <StaffCmsCollectionPanel
+              collection="Newsletters"
+              title="Newsletter archive → portal Messages"
+            />
+          </div>
+        ) : null}
         {active === 'expenses' ? <StaffExpensesPanel /> : null}
         {active === 'help' ? (
           <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3">

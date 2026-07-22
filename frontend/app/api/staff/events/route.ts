@@ -33,9 +33,10 @@ export async function GET(req: NextRequest) {
         startDate: e.dateAndTimeSettings?.startDate ?? '',
         endDate: e.dateAndTimeSettings?.endDate ?? '',
         slug: e.slug ?? '',
+        image: e.mainImage?.url ?? '',
       })),
       manageUrl: `https://manage.wix.com/dashboard/${siteId}/events`,
-      note: 'Create, publish, or cancel events here. They appear on the public /events page.',
+      note: 'Create, publish, or cancel events here. Upload a flyer so /events shows an image. They appear on the public /events page.',
     })
   } catch (err) {
     console.error('/api/staff/events GET', err)
@@ -160,6 +161,10 @@ export async function PATCH(req: NextRequest) {
         ...(endDate ? { endDate } : {}),
         timeZoneId: 'America/New_York',
       }
+    }
+    if (body.image != null) {
+      const url = String(body.image).trim()
+      event.mainImage = url ? { url } : null
     }
 
     await client.wixEventsV2.updateEvent(id, { event } as unknown as Parameters<

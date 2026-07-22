@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
 
 type PageRow = {
   id: string
@@ -14,6 +15,7 @@ type PageRow = {
   bullets: string
   ctaLabel: string
   ctaHref: string
+  flyerImage: string
   active: boolean
   fromDefault?: boolean
 }
@@ -149,6 +151,17 @@ export function StaffPageContentPanel() {
             placeholder="Bullets (one per line)"
             className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
           />
+          <div className="sm:col-span-2">
+            <StaffFlyerUpload
+              label="Page flyer / hero image"
+              currentUrl={form.flyerImage}
+              disabled={busy}
+              onUploaded={(url) => setForm({ ...form, flyerImage: url })}
+            />
+            <p className="text-[11px] text-[#5A6070] mt-1">
+              Upload then click Save page copy so the flyer sticks on this page.
+            </p>
+          </div>
           <label className="inline-flex items-center gap-1.5 text-xs sm:col-span-2">
             <input
               type="checkbox"

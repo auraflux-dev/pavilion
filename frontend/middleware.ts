@@ -3,12 +3,14 @@
  *
  * 1. Protect member-only routes with a real member session (not visitor tokens).
  * 2. Generate anonymous visitor tokens for everyone else.
+ * 3. Same-origin CSRF guard for mutating API routes.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, OAuthStrategy } from '@wix/sdk'
 import { members } from '@wix/members'
 import { TOKENS_COOKIE, TOKEN_MAX_AGE, isSecure } from '@/lib/auth-cookies'
 import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
+import { isSameOriginRequest } from '@/lib/security/csrf'
 
 const PROTECTED_ROUTES = ['/member-portal', '/staff']
 
@@ -28,13 +30,18 @@ export async function middleware(req: NextRequest) {
     return NextResponse.rewrite(rewriteUrl)
   }
 
+  if (pathname.startsWith('/api/') && !isSameOriginRequest(req)) {
+    return NextResponse.json({ error: 'Forbidden origin' }, { status: 403 })
+  }
+
   const res = NextResponse.next()
   const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
 
   if (PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
     if (!isMemberTokens(tokens)) {
       const loginUrl = req.nextUrl.clone()
-      loginUrl.pathname = '/auth/login'
+      loginUrl.pathname = '/auth/join'
+      loginUrl.searchParams.set('mode', 'login')
       loginUrl.searchParams.set('returnTo', pathname + (req.nextUrl.search || ''))
       return NextResponse.redirect(loginUrl)
     }

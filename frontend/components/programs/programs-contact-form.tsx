@@ -4,15 +4,76 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, Loader2, ArrowRight } from 'lucide-react'
 
+type Variant = 'programs' | 'events' | 'sponsorship'
+
 type Props = {
-  /** Destination inbox for VP of Programs (CMS: contactEmailPrograms) */
+  /** Destination inbox (CMS contactEmail*) */
   toEmail: string
+  variant: Variant
 }
 
-export function ProgramsContactForm({ toEmail }: Props) {
+const COPY: Record<
+  Variant,
+  {
+    department: string
+    topic: string
+    eyebrow: string
+    title: string
+    intro: string
+    optionalLabel: string
+    optionalPlaceholder: string
+    messagePlaceholder: string
+    submitLabel: string
+    successBody: string
+  }
+> = {
+  programs: {
+    department: 'programs',
+    topic: 'Programs & Registration',
+    eyebrow: 'VP of Programs',
+    title: 'Ask about a program',
+    intro: 'Questions go to',
+    optionalLabel: 'Program name',
+    optionalPlaceholder: 'e.g. Chess Club, NOVA Math',
+    messagePlaceholder: 'What would you like to know?',
+    submitLabel: 'Send to VP of Programs',
+    successBody:
+      'Thanks. Our VP of Programs will get back to you within one business day during the school year.',
+  },
+  events: {
+    department: 'events',
+    topic: 'Event idea',
+    eyebrow: 'VP of Events',
+    title: 'Share an event idea',
+    intro: 'Ideas go to',
+    optionalLabel: 'Event name or theme',
+    optionalPlaceholder: 'e.g. Family Fun Night, Dance Night theme',
+    messagePlaceholder: 'Tell us your idea, preferred timing, and how you might help.',
+    submitLabel: 'Send to VP of Events',
+    successBody:
+      'Thanks. Our VP of Events will review your idea and follow up within one business day during the school year.',
+  },
+  sponsorship: {
+    department: 'sponsorship',
+    topic: 'Sponsorship inquiry',
+    eyebrow: 'VP of Initiatives',
+    title: 'Become a sponsor',
+    intro: 'Sponsorship requests go to',
+    optionalLabel: 'Business or organization',
+    optionalPlaceholder: 'e.g. Local restaurant, family business',
+    messagePlaceholder:
+      'Tell us about your business, how you would like to support SHMS PTO, and the best way to reach you.',
+    submitLabel: 'Send sponsorship request',
+    successBody:
+      'Thanks. Our VP of Initiatives will review your sponsorship interest and follow up soon.',
+  },
+}
+
+export function DepartmentContactForm({ toEmail, variant }: Props) {
+  const copy = COPY[variant]
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [programName, setProgramName] = useState('')
+  const [optional, setOptional] = useState('')
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
@@ -20,17 +81,23 @@ export function ProgramsContactForm({ toEmail }: Props) {
     e.preventDefault()
     setStatus('loading')
     try {
+      const prefix =
+        variant === 'programs'
+          ? 'Program'
+          : variant === 'events'
+            ? 'Event idea'
+            : 'Organization'
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
           email,
-          topic: 'Programs & Registration',
-          message: programName.trim()
-            ? `Program: ${programName.trim()}\n\n${message}`
+          topic: copy.topic,
+          message: optional.trim()
+            ? `${prefix}: ${optional.trim()}\n\n${message}`
             : message,
-          department: 'programs',
+          department: copy.department,
           assignedTo: toEmail,
         }),
       })
@@ -51,13 +118,12 @@ export function ProgramsContactForm({ toEmail }: Props) {
           <CheckCircle2 className="h-7 w-7" style={{ color: '#085508' }} aria-hidden="true" />
         </div>
         <h3 className="mb-2 text-xl font-bold text-[#1A1A1A]">Message sent</h3>
-        <p className="text-sm text-[#5A6070]">
-          Thanks — our VP of Programs will get back to you within one business day
-          during the school year.
-        </p>
+        <p className="text-sm text-[#5A6070]">{copy.successBody}</p>
       </div>
     )
   }
+
+  const idPrefix = `dept-${variant}`
 
   return (
     <form
@@ -66,21 +132,21 @@ export function ProgramsContactForm({ toEmail }: Props) {
     >
       <div className="text-left">
         <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#085508' }}>
-          VP of Programs
+          {copy.eyebrow}
         </p>
-        <h3 className="mt-1 text-xl font-bold text-[#1A1A1A]">Ask about a program</h3>
+        <h3 className="mt-1 text-xl font-bold text-[#1A1A1A]">{copy.title}</h3>
         <p className="mt-1 text-sm text-[#5A6070]">
-          Questions go to {toEmail}. We usually reply within one business day.
+          {copy.intro} {toEmail}. We usually reply within one business day.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="programs-contact-name" className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
+          <label htmlFor={`${idPrefix}-name`} className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
             Your name <span className="text-red-500">*</span>
           </label>
           <input
-            id="programs-contact-name"
+            id={`${idPrefix}-name`}
             type="text"
             required
             value={name}
@@ -89,11 +155,11 @@ export function ProgramsContactForm({ toEmail }: Props) {
           />
         </div>
         <div>
-          <label htmlFor="programs-contact-email" className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
+          <label htmlFor={`${idPrefix}-email`} className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
             Email <span className="text-red-500">*</span>
           </label>
           <input
-            id="programs-contact-email"
+            id={`${idPrefix}-email`}
             type="email"
             required
             value={email}
@@ -104,30 +170,30 @@ export function ProgramsContactForm({ toEmail }: Props) {
       </div>
 
       <div>
-        <label htmlFor="programs-contact-program" className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
-          Program name <span className="text-[#5A6070]">(optional)</span>
+        <label htmlFor={`${idPrefix}-optional`} className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
+          {copy.optionalLabel} <span className="text-[#5A6070]">(optional)</span>
         </label>
         <input
-          id="programs-contact-program"
+          id={`${idPrefix}-optional`}
           type="text"
-          value={programName}
-          onChange={(e) => setProgramName(e.target.value)}
-          placeholder="e.g. Chess Club, NOVA Math"
+          value={optional}
+          onChange={(e) => setOptional(e.target.value)}
+          placeholder={copy.optionalPlaceholder}
           className="w-full rounded-lg border border-[#E8E4DC] px-3.5 py-2.5 text-sm focus:border-[#085508] focus:outline-none focus:ring-2 focus:ring-[#085508]/20"
         />
       </div>
 
       <div>
-        <label htmlFor="programs-contact-message" className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
+        <label htmlFor={`${idPrefix}-message`} className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
           Message <span className="text-red-500">*</span>
         </label>
         <textarea
-          id="programs-contact-message"
+          id={`${idPrefix}-message`}
           required
           rows={4}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="What would you like to know?"
+          placeholder={copy.messagePlaceholder}
           className="w-full resize-none rounded-lg border border-[#E8E4DC] px-3.5 py-2.5 text-sm focus:border-[#085508] focus:outline-none focus:ring-2 focus:ring-[#085508]/20"
         />
       </div>
@@ -155,11 +221,16 @@ export function ProgramsContactForm({ toEmail }: Props) {
           </>
         ) : (
           <>
-            Send to VP of Programs
+            {copy.submitLabel}
             <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
           </>
         )}
       </Button>
     </form>
   )
+}
+
+/** @deprecated Prefer DepartmentContactForm variant="programs" */
+export function ProgramsContactForm({ toEmail }: { toEmail: string }) {
+  return <DepartmentContactForm toEmail={toEmail} variant="programs" />
 }

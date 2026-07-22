@@ -10,6 +10,8 @@ import { getMembershipTiers } from '@/lib/api/membership'
 import { getFAQItems } from '@/lib/api/faq'
 import { getPageContent } from '@/lib/api/page-content'
 import { MembershipPortalCallouts } from '@/components/membership/membership-portal-callouts'
+import { BrandImageWash } from '@/components/brand/brand-image-wash'
+import { EmphasizedCopy } from '@/components/emphasized-copy'
 
 export const revalidate = 60
 
@@ -40,14 +42,19 @@ export default async function MembershipPage() {
         <PageHero content={page} />
 
         {/* Tiers */}
-        <section id="tiers" className="py-16 md:py-24" style={{ backgroundColor: '#F5F0E8' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section
+          id="tiers"
+          className="relative overflow-hidden py-16 md:py-24"
+          style={{ backgroundColor: '#F5F0E8' }}
+        >
+          <BrandImageWash src="/home/community.jpg" side="right" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-[#1A1A1A] mb-3">
                 {page.sectionTitle}
               </h2>
               <p className="text-[#5A6070] max-w-xl mx-auto">
-                {page.sectionBody}
+                <EmphasizedCopy text={page.sectionBody} />
               </p>
             </div>
             <MembershipCheckoutHandler />

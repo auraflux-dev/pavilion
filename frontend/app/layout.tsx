@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Inter, Merriweather } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const _inter = Inter({ subsets: ['latin'] })
@@ -21,10 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-background">
-      <body className="font-sans antialiased text-foreground">
-        {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
-      </body>
+      <body className="font-sans antialiased text-foreground">{children}</body>
     </html>
   )
 }

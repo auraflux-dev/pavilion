@@ -9,6 +9,7 @@ type StaffRow = {
   name: string
   boardTitle: string
   roles: string[]
+  assignedProgramIds: string[]
   active: boolean
 }
 
@@ -19,6 +20,7 @@ export function StaffRoleManager() {
   const [name, setName] = useState('')
   const [boardTitle, setBoardTitle] = useState('')
   const [roles, setRoles] = useState<string[]>([])
+  const [assignedProgramIds, setAssignedProgramIds] = useState('')
   const [active, setActive] = useState(true)
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
@@ -40,6 +42,7 @@ export function StaffRoleManager() {
     setName(row.name)
     setBoardTitle(row.boardTitle)
     setRoles(row.roles)
+    setAssignedProgramIds((row.assignedProgramIds ?? []).join(', '))
     setActive(row.active)
     setStatus(`Editing ${row.email}`)
   }
@@ -51,7 +54,14 @@ export function StaffRoleManager() {
       const response = await fetch('/api/staff/roles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name, boardTitle, roles, active }),
+        body: JSON.stringify({
+          email,
+          name,
+          boardTitle,
+          roles,
+          assignedProgramIds,
+          active,
+        }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error ?? 'Could not save staff role')
@@ -60,6 +70,7 @@ export function StaffRoleManager() {
       setName('')
       setBoardTitle('')
       setRoles([])
+      setAssignedProgramIds('')
       setActive(true)
       setStatus('Staff access saved.')
     } catch (err) {
@@ -123,6 +134,17 @@ export function StaffRoleManager() {
         </label>
       </div>
 
+      <input
+        value={assignedProgramIds}
+        onChange={(event) => setAssignedProgramIds(event.target.value)}
+        placeholder="Assigned program IDs (comma-separated) — required for instructor/coordinator"
+        className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+      />
+      <p className="text-[11px] text-[#5A6070]">
+        Copy program IDs from Staff → Programs (open a program in Wix CMS, or ask admin). Instructors and
+        coordinators only see assigned programs.
+      </p>
+
       <Button
         disabled={busy || !email || roles.length === 0}
         onClick={save}
@@ -143,7 +165,12 @@ export function StaffRoleManager() {
           >
             <span>
               <span className="block text-sm font-semibold">{row.name || row.email}</span>
-              <span className="block text-xs text-[#5A6070]">{row.email} · {row.roles.join(', ')}</span>
+              <span className="block text-xs text-[#5A6070]">
+                {row.email} · {row.roles.join(', ')}
+                {(row.assignedProgramIds ?? []).length
+                  ? ` · ${row.assignedProgramIds.length} program(s)`
+                  : ''}
+              </span>
             </span>
             <span className={`text-xs font-bold ${row.active ? 'text-[#085508]' : 'text-[#8A4B00]'}`}>
               {row.active ? 'Active' : 'Inactive'}

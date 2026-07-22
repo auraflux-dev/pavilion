@@ -45,6 +45,7 @@ async function fetchAuth(): Promise<AuthSnapshot> {
     const r = await fetch('/api/auth/me', { credentials: 'include' })
     if (!r.ok) return visitor
     const data = await r.json()
+    if (data.status === 'visitor' || !data.member) return visitor
     return {
       status: 'member',
       member: data.member ?? null,

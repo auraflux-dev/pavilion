@@ -25,6 +25,27 @@ export type CmsCollectionConfig = {
 }
 
 export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
+  Sponsors: {
+    id: 'Sponsors',
+    label: 'Sponsors (fundraising)',
+    roles: ['programs', 'marketing', 'secretary', 'admin'],
+    sortField: 'sortOrder',
+    activeField: 'active',
+    fields: [
+      { key: 'name', label: 'Sponsor name', type: 'text', required: true },
+      { key: 'blurb', label: 'Short blurb', type: 'textarea' },
+      { key: 'logoUrl', label: 'Logo URL', type: 'text' },
+      { key: 'websiteUrl', label: 'Website URL', type: 'text' },
+      {
+        key: 'tier',
+        label: 'Tier',
+        type: 'select',
+        options: ['Title', 'Gold', 'Silver', 'Community'],
+      },
+      { key: 'sortOrder', label: 'Sort order', type: 'number' },
+      { key: 'active', label: 'Active / show publicly', type: 'boolean' },
+    ],
+  },
   BoardMembers: {
     id: 'BoardMembers',
     label: 'Board members',
@@ -142,6 +163,51 @@ export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
       { key: 'active', label: 'Active', type: 'boolean' },
     ],
   },
+  Newsletters: {
+    id: 'Newsletters',
+    label: 'Member newsletters',
+    roles: ['marketing', 'secretary', 'membership', 'admin'],
+    sortField: 'publishedAt',
+    activeField: 'active',
+    fields: [
+      { key: 'title', label: 'Subject / title', type: 'text', required: true },
+      { key: 'body', label: 'Body', type: 'textarea', required: true },
+      { key: 'fromName', label: 'From name', type: 'text' },
+      {
+        key: 'audience',
+        label: 'Audience',
+        type: 'select',
+        options: ['all', 'free', 'paid', 'grade'],
+        required: true,
+      },
+      { key: 'grade', label: 'Grade (if audience=grade)', type: 'select', options: ['6', '7', '8'] },
+      { key: 'publishedAt', label: 'Published at (ISO date)', type: 'text' },
+      { key: 'active', label: 'Show in portal Messages', type: 'boolean' },
+    ],
+  },
+  PortalCalendarEvents: {
+    id: 'PortalCalendarEvents',
+    label: 'Portal calendar events',
+    roles: ['events', 'secretary', 'marketing', 'programs', 'admin'],
+    sortField: 'startAt',
+    activeField: 'active',
+    fields: [
+      { key: 'title', label: 'Title', type: 'text', required: true },
+      { key: 'subtitle', label: 'Subtitle / location', type: 'text' },
+      { key: 'startAt', label: 'Start (ISO datetime)', type: 'text', required: true },
+      { key: 'endAt', label: 'End (ISO datetime)', type: 'text' },
+      { key: 'href', label: 'Link (e.g. /events)', type: 'text' },
+      {
+        key: 'audience',
+        label: 'Audience',
+        type: 'select',
+        options: ['all', 'grade'],
+        required: true,
+      },
+      { key: 'grade', label: 'Grade (if audience=grade)', type: 'select', options: ['6', '7', '8'] },
+      { key: 'active', label: 'Active on portal calendar', type: 'boolean' },
+    ],
+  },
 }
 
 /** SiteSettings keys grouped for role-scoped editing (visitor-facing). */
@@ -169,11 +235,27 @@ export const SITE_SETTING_GROUPS: {
     label: 'Contact & store hours',
     roles: ['marketing', 'secretary', 'admin'],
     keys: [
-      { key: 'contactEmailGeneral', label: 'General email' },
+      { key: 'contactEmailGeneral', label: 'General email (contact form inbox)' },
       { key: 'contactEmailTreasurer', label: 'Treasurer email' },
       {
         key: 'contactEmailPrograms',
         label: 'VP Programs email (programs contact form)',
+      },
+      {
+        key: 'contactEmailEvents',
+        label: 'VP Events email (event idea form)',
+      },
+      {
+        key: 'contactEmailSponsorship',
+        label: 'VP Initiatives email (sponsorship form)',
+      },
+      {
+        key: 'contactEmailVolunteer',
+        label: 'Volunteer signup inbox (events / volunteer VP)',
+      },
+      {
+        key: 'contactEmailMarketing',
+        label: 'Marketing inbox (newsletter + survey alerts)',
       },
       { key: 'presidentEmail', label: 'President email' },
       { key: 'contactAddress', label: 'Address', multiline: true },
@@ -198,14 +280,40 @@ export const SITE_SETTING_GROUPS: {
     label: 'Fundraising goals & hours',
     roles: ['programs', 'treasurer', 'admin'],
     keys: [
-      { key: 'fundraisingAnnualGoal', label: 'Annual goal ($)' },
-      { key: 'goalMembership', label: 'Goal — Membership ($)' },
-      { key: 'goalStore', label: 'Goal — The Cove store card ($)' },
-      { key: 'goalSpiritWear', label: 'Goal — The Cove shop ($)' },
-      { key: 'goalDanceNight', label: 'Goal — Dance night ($)' },
-      { key: 'goalNovaMath', label: 'Goal — Nova Math ($)' },
+      {
+        key: 'fundraisingAnnualGoal',
+        label: 'Public annual goal ($) — shown on fundraising hero',
+      },
+      {
+        key: 'goalMembership',
+        label: 'Internal goal — Membership ($) (staff only, not public)',
+      },
+      {
+        key: 'goalStore',
+        label: 'Internal goal — The Cove store card ($) (staff only)',
+      },
+      {
+        key: 'goalSpiritWear',
+        label: 'Internal goal — The Cove shop ($) (staff only)',
+      },
+      {
+        key: 'goalDanceNight',
+        label: 'Internal goal — Dance night ($) (staff only)',
+      },
+      {
+        key: 'goalNovaMath',
+        label: 'Internal goal — Nova Math ($) (staff only)',
+      },
+      {
+        key: 'goalSponsorship',
+        label: 'Internal goal — Sponsorships ($) (staff only)',
+      },
+      { key: 'sponsorshipRaised', label: 'Sponsorships raised (manual $)' },
       { key: 'volunteerHoursRaised', label: 'Volunteer hours raised' },
-      { key: 'volunteerHoursGoal', label: 'Volunteer hours goal' },
+      {
+        key: 'volunteerHoursGoal',
+        label: 'Internal goal — Volunteer hours (staff only)',
+      },
       { key: 'allocStudentEnrichment', label: 'Alloc % student enrichment' },
       { key: 'allocSchoolEvents', label: 'Alloc % school events' },
       { key: 'allocTeacherSupport', label: 'Alloc % teacher support' },

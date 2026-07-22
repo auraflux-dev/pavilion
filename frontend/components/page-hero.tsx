@@ -1,13 +1,15 @@
 import type { PageContentFields } from '@/lib/api/page-content'
 
 type Props = {
-  content: Pick<PageContentFields, 'eyebrow' | 'title' | 'body'>
+  content: Pick<PageContentFields, 'eyebrow' | 'title' | 'body' | 'flyerImage'>
   /** Tighter padding for portal-style pages */
   compact?: boolean
 }
 
 /** Shared green marketing hero driven by PageContent / defaults. */
 export function PageHero({ content, compact }: Props) {
+  const flyer = content.flyerImage?.trim()
+
   return (
     <section
       className={compact ? 'py-12 md:py-16' : 'py-16 md:py-24'}
@@ -37,6 +39,16 @@ export function PageHero({ content, compact }: Props) {
           >
             {content.body}
           </p>
+        ) : null}
+        {flyer ? (
+          <div className="mt-8 mx-auto max-w-3xl overflow-hidden rounded-xl border border-white/20 bg-black/10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={flyer}
+              alt=""
+              className="w-full max-h-[420px] object-contain bg-white/5"
+            />
+          </div>
         ) : null}
       </div>
     </section>

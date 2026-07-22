@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
 
 type EventRow = {
   id: string
@@ -11,6 +12,7 @@ type EventRow = {
   startDate: string
   endDate: string
   slug: string
+  image: string
 }
 
 const emptyForm = {
@@ -134,6 +136,26 @@ export function StaffEventsPanel() {
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Cancel failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function setEventImage(id: string, url: string) {
+    setBusy(true)
+    setError('')
+    try {
+      const r = await fetch('/api/staff/events', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, image: url }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not save flyer')
+      setStatus('Event flyer updated.')
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save flyer')
     } finally {
       setBusy(false)
     }
@@ -264,34 +286,44 @@ export function StaffEventsPanel() {
         {events.map((e) => (
           <div
             key={e.id || e.title}
-            className="border-t border-[#F0EBE3] pt-3 flex flex-wrap justify-between gap-2"
+            className="border-t border-[#F0EBE3] pt-3 space-y-2"
           >
-            <div>
-              <p className="text-sm font-semibold">{e.title}</p>
-              <p className="text-xs text-[#5A6070]">
-                {e.startDate ? new Date(e.startDate).toLocaleString() : 'Date TBA'}
-                {e.location ? ` · ${e.location}` : ''}
-              </p>
-              {e.description ? (
-                <p className="text-xs text-[#5A6070] mt-1 line-clamp-2">{e.description}</p>
-              ) : null}
-            </div>
-            <div className="flex flex-wrap gap-2 shrink-0">
-              <Button type="button" variant="outline" className="text-xs" onClick={() => startEdit(e)}>
-                Edit
-              </Button>
-              {e.id ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="text-xs text-red-700"
-                  disabled={busy}
-                  onClick={() => void cancelEvent(e.id)}
-                >
-                  Cancel event
+            <div className="flex flex-wrap justify-between gap-2">
+              <div>
+                <p className="text-sm font-semibold">{e.title}</p>
+                <p className="text-xs text-[#5A6070]">
+                  {e.startDate ? new Date(e.startDate).toLocaleString() : 'Date TBA'}
+                  {e.location ? ` · ${e.location}` : ''}
+                </p>
+                {e.description ? (
+                  <p className="text-xs text-[#5A6070] mt-1 line-clamp-2">{e.description}</p>
+                ) : null}
+              </div>
+              <div className="flex flex-wrap gap-2 shrink-0">
+                <Button type="button" variant="outline" className="text-xs" onClick={() => startEdit(e)}>
+                  Edit
                 </Button>
-              ) : null}
+                {e.id ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="text-xs text-red-700"
+                    disabled={busy}
+                    onClick={() => void cancelEvent(e.id)}
+                  >
+                    Cancel event
+                  </Button>
+                ) : null}
+              </div>
             </div>
+            {e.id ? (
+              <StaffFlyerUpload
+                label="Event flyer"
+                currentUrl={e.image}
+                disabled={busy}
+                onUploaded={(url) => void setEventImage(e.id, url)}
+              />
+            ) : null}
           </div>
         ))}
       </div>

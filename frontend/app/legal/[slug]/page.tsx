@@ -11,6 +11,7 @@ const SLUGS = new Set<LegalDocSlug>([
   'membership-terms',
   'enrichment-waiver',
   'enrichment-medical',
+  'data-security',
 ])
 
 export default async function LegalSlugPage({

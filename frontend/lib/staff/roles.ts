@@ -15,6 +15,7 @@ export const STAFF_ROLES = [
   'membership',
   'wellness',
   'instructor',
+  'coordinator',
 ] as const
 
 export type StaffRole = (typeof STAFF_ROLES)[number]
@@ -37,6 +38,8 @@ export type StaffProfile = {
   name: string
   /** Plain-text email signature appended to portal replies */
   emailSignature: string
+  /** Comma-separated Program CMS ids — scopes instructor/coordinator views */
+  assignedProgramIds: string[]
 }
 
 const ROLE_SET = new Set<string>(STAFF_ROLES)
@@ -51,6 +54,13 @@ function parseRoles(raw: unknown): StaffRole[] {
     if (ROLE_SET.has(part)) unique.add(part as StaffRole)
   }
   return Array.from(unique)
+}
+
+function parseAssignedProgramIds(raw: unknown): string[] {
+  return String(raw ?? '')
+    .split(/[,|;]/)
+    .map((id) => id.trim())
+    .filter(Boolean)
 }
 
 export async function getStaffProfile(email: string): Promise<StaffProfile | null> {
@@ -75,6 +85,7 @@ export async function getStaffProfile(email: string): Promise<StaffProfile | nul
           boardTitle?: string
           name?: string
           emailSignature?: string
+          assignedProgramIds?: string
           active?: boolean
         }
       | undefined
@@ -87,6 +98,7 @@ export async function getStaffProfile(email: string): Promise<StaffProfile | nul
       boardTitle: String(row.boardTitle ?? ''),
       name: String(row.name ?? ''),
       emailSignature: String(row.emailSignature ?? ''),
+      assignedProgramIds: parseAssignedProgramIds(row.assignedProgramIds),
     }
   } catch {
     return null
@@ -98,6 +110,31 @@ export function hasStaffRole(profile: StaffProfile | null, role: StaffRole | Sta
   const needed = Array.isArray(role) ? role : [role]
   if (profile.roles.includes('admin')) return true
   return needed.some((r) => profile.roles.includes(r))
+}
+
+/** Full programs catalog (VP Programs / admin) vs scoped instructor/coordinator. */
+export function canManageAllPrograms(profile: StaffProfile | null): boolean {
+  if (!profile) return false
+  if (profile.roles.includes('admin') || profile.roles.includes('programs')) return true
+  return false
+}
+
+export function scopedProgramIds(profile: StaffProfile | null): string[] | null {
+  if (!profile) return []
+  if (canManageAllPrograms(profile)) return null // null = no filter
+  if (
+    profile.roles.includes('instructor') ||
+    profile.roles.includes('coordinator')
+  ) {
+    return profile.assignedProgramIds
+  }
+  return []
+}
+
+export function canAccessProgram(profile: StaffProfile | null, programId: string): boolean {
+  const scope = scopedProgramIds(profile)
+  if (scope === null) return true
+  return scope.includes(programId)
 }
 
 export const ROLE_HOME_COPY: Record<
@@ -187,11 +224,20 @@ export const ROLE_HOME_COPY: Record<
   },
   instructor: {
     title: 'Program Instructor',
-    owns: 'Communicate with your enrollees and their parents',
+    owns: 'Your assigned classes — roster, sessions, parent messages, timesheets',
     thisWeek: [
-      'Send session reminders',
+      'Submit timesheet hours to VP Programs',
+      'Send session reminders to your class',
       'Share supply or schedule updates',
-      'Flag attendance issues to Programs VP',
+    ],
+  },
+  coordinator: {
+    title: 'Class Coordinator',
+    owns: 'Parent liaison for assigned programs (roster + messaging + hours)',
+    thisWeek: [
+      'Confirm roster and waitlist with instructor',
+      'Submit coordinator hours if contracted',
+      'Escalate issues to Programs VP',
     ],
   },
 }

@@ -28,7 +28,7 @@ export async function CommunityBanner() {
 
   return (
     <section
-      className="relative w-full h-48 sm:h-64 md:h-72 overflow-hidden"
+      className="relative w-full h-44 sm:h-56 md:h-64 overflow-hidden"
       aria-label="Community photo"
     >
       <img
@@ -36,10 +36,17 @@ export async function CommunityBanner() {
         alt={imageAlt}
         className="w-full h-full object-cover"
       />
-      <div className="absolute inset-0 bg-black/30" aria-hidden="true" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(90deg, #F5F0E8 0%, rgba(245,240,232,0.55) 28%, rgba(245,240,232,0.2) 55%, transparent 100%), linear-gradient(0deg, rgba(8,85,8,0.25), rgba(8,85,8,0.15))',
+        }}
+        aria-hidden="true"
+      />
       {headline ? (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <p className="text-white text-2xl sm:text-3xl md:text-4xl font-bold text-center px-4 drop-shadow-lg">
+        <div className="absolute inset-0 flex items-center justify-center md:justify-start">
+          <p className="text-white text-2xl sm:text-3xl md:text-4xl font-bold text-center md:text-left px-6 md:px-16 drop-shadow-md max-w-3xl">
             {headline}
           </p>
         </div>

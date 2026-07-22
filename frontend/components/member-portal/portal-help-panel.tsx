@@ -1,23 +1,21 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { HelpCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { HelpCircle, BookOpen } from 'lucide-react'
 import type { PortalHelpItem } from '@/lib/api/portal-help'
 
 interface Props {
   items: PortalHelpItem[]
 }
 
+/** Parent help docs — full answers, always readable (not a collapsed FAQ tease). */
 export function PortalHelpPanel({ items }: Props) {
-  const [open, setOpen] = useState(false)
-  const [expanded, setExpanded] = useState<number | null>(0)
+  const [focusId, setFocusId] = useState<string | null>(null)
 
   useEffect(() => {
     function openFromHash() {
       if (typeof window === 'undefined') return
       if (window.location.hash !== '#help') return
-      setOpen(true)
-      // Wait for expand so scroll lands on the open panel under the sticky header
       window.requestAnimationFrame(() => {
         window.setTimeout(() => {
           document.getElementById('help')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -36,49 +34,63 @@ export function PortalHelpPanel({ items }: Props) {
       id="help"
       className="mt-8 scroll-mt-28 rounded-2xl border border-[#E8E4DC] bg-white overflow-hidden shadow-sm"
     >
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#FAFCF9]"
-        aria-expanded={open}
-      >
-        <span className="flex items-center gap-2 font-bold text-[#1A1A1A]">
-          <HelpCircle className="w-5 h-5" style={{ color: '#085508' }} />
-          Portal help — your home base
-        </span>
-        {open ? (
-          <ChevronUp className="w-5 h-5 text-[#5A6070]" />
-        ) : (
-          <ChevronDown className="w-5 h-5 text-[#5A6070]" />
-        )}
-      </button>
-
-      {open && (
-        <div className="px-5 pb-5 border-t border-[#F0EDE8]">
-          <p className="text-xs text-[#5A6070] py-3">
-            Everything below stays inside the portal — edit your profile, manage students, load store
-            cards, and answer surveys without leaving this page.
+      <header className="px-5 py-4 border-b border-[#F0EDE8] flex items-start gap-3">
+        <HelpCircle className="w-5 h-5 mt-0.5 shrink-0" style={{ color: '#085508' }} />
+        <div>
+          <h2 className="font-bold text-[#1A1A1A] text-base">Portal help</h2>
+          <p className="text-sm text-[#5A6070] mt-1 leading-relaxed">
+            Short guides for your account, students, membership, The Cove, and surveys. Everything
+            stays on this site — no outside links required.
           </p>
-          <ul className="space-y-2">
-            {items.map((item, i) => (
-              <li key={item.question} className="rounded-xl border border-[#E8E4DC] overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => setExpanded(expanded === i ? null : i)}
-                  className="w-full text-left px-4 py-3 text-sm font-semibold text-[#1A1A1A] hover:bg-[#FAFCF9]"
-                >
-                  {item.question}
-                </button>
-                {expanded === i && (
-                  <p className="px-4 pb-3 text-xs text-[#5A6070] leading-relaxed whitespace-pre-line">
-                    {item.answer}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ul>
         </div>
-      )}
+      </header>
+
+      <div className="px-5 py-5 space-y-5">
+        <nav aria-label="Help topics" className="flex flex-wrap gap-2">
+          {items.map((item, i) => {
+            const id = `help-topic-${i}`
+            return (
+              <a
+                key={id}
+                href={`#${id}`}
+                onClick={() => setFocusId(id)}
+                className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors ${
+                  focusId === id
+                    ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
+                    : 'border-[#E8E4DC] text-[#5A6070] hover:border-[#085508]/40'
+                }`}
+              >
+                {item.question.replace(/\?$/, '')}
+              </a>
+            )
+          })}
+        </nav>
+
+        <ol className="space-y-6">
+          {items.map((item, i) => {
+            const id = `help-topic-${i}`
+            return (
+              <li
+                key={id}
+                id={id}
+                className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] px-4 py-4"
+              >
+                <h3 className="text-sm font-bold text-[#1A1A1A] flex items-start gap-2">
+                  <BookOpen
+                    className="w-4 h-4 mt-0.5 shrink-0"
+                    style={{ color: '#085508' }}
+                    aria-hidden="true"
+                  />
+                  {item.question}
+                </h3>
+                <div className="mt-2.5 pl-6 text-sm text-[#5A6070] leading-relaxed whitespace-pre-line">
+                  {item.answer}
+                </div>
+              </li>
+            )
+          })}
+        </ol>
+      </div>
     </section>
   )
 }

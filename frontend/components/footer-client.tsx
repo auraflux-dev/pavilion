@@ -129,20 +129,20 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
             )}
           </div>
 
-          {/* Col 2: Quick Links — title centered; columns left-aligned */}
-          <div className="flex flex-col items-center">
+          {/* Col 2: Quick Links — centered on mobile */}
+          <div className="flex flex-col items-center w-full">
             <h3 className="text-white font-bold text-sm tracking-wider uppercase mb-5 text-center">
               Quick Links
             </h3>
             <ul
-              className="grid grid-cols-2 gap-x-8 gap-y-2.5 w-max max-w-full text-left"
+              className="grid grid-cols-2 gap-x-6 gap-y-2.5 w-full max-w-[17rem] mx-auto text-center"
               role="list"
             >
               {footerLinks.map((link) => (
-                <li key={link.id}>
+                <li key={link.id} className="min-w-0">
                   <a
                     href={link.href}
-                    className="text-sm text-[#5A6070] hover:text-white transition-colors inline-flex items-center gap-1 group"
+                    className="text-sm text-[#5A6070] hover:text-white transition-colors inline-flex items-center justify-center gap-1 group text-center leading-snug"
                   >
                     {link.label}
                     <ArrowRight
@@ -224,7 +224,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
                         className="text-xs transition-colors hover:text-white"
                         style={{ color: '#5A6070' }}
                       >
-                        {grade} Grade Parents —{' '}
+                        {grade} Grade Parents:{' '}
                         <span className="underline">Join Here</span>
                       </a>
                     ))}
@@ -292,7 +292,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
               style={{ backgroundColor: '#2a2a2a', borderColor: '#333333' }}
             >
               <p className="text-xs font-semibold" style={{ color: '#FFD700' }}>
-                The Cove — in person
+                The Cove (in person)
               </p>
               <p className="text-xs text-[#5A6070] mt-0.5">
                 Snack window: {storeHours}
@@ -317,6 +317,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
             <p className="flex flex-wrap gap-x-3 gap-y-1 justify-center sm:justify-start">
               <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
               <a href="/terms" className="hover:text-white transition-colors">Terms</a>
+              <a href="/data-security" className="hover:text-white transition-colors">Data security</a>
               <a href="/photo-release" className="hover:text-white transition-colors">Photo release</a>
             </p>
           </div>

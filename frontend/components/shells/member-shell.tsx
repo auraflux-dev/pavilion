@@ -149,6 +149,7 @@ export function MemberShell({ children }: Props) {
           <span>{audienceLabel} · SHMS PTO</span>
           <Link href="/privacy" className="underline">Privacy</Link>
           <Link href="/terms" className="underline">Terms</Link>
+          <Link href="/data-security" className="underline">Data security</Link>
           <Link href="/photo-release" className="underline">Photo release</Link>
         </div>
       </footer>

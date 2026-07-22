@@ -26,6 +26,8 @@ export interface SurveyDefinition {
   showInPortal: boolean
   requireLogin: boolean
   createdBy: string
+  /** POWR embed HTML (or iframe src) — when set, portal/page shows POWR instead of built-in fields */
+  powrEmbedHtml?: string
 }
 
 export interface SurveyResponsePayload {

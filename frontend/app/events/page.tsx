@@ -3,6 +3,7 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { EventCard } from '@/components/events/event-card'
 import { PageHero } from '@/components/page-hero'
+import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
 import { getUpcomingEvents, type WixEvent } from '@/lib/api/events'
 import { getPageContent } from '@/lib/api/page-content'
 import { Calendar, ArrowRight } from 'lucide-react'
@@ -18,6 +19,7 @@ export default async function EventsPage() {
   ])
   const settings = await getSiteSettings()
   const inSession = settings.getBool('schoolInSession', false)
+  const eventsEmail = settings.get('contactEmailEvents', 'vp-events@shmspto.org')
 
   try {
     events = inSession ? await getUpcomingEvents(24) : []
@@ -46,7 +48,6 @@ export default async function EventsPage() {
           }}
         />
 
-        {/* Events grid */}
         <section
           className="py-16 md:py-24"
           style={{ backgroundColor: '#F5F0E8' }}
@@ -67,7 +68,7 @@ export default async function EventsPage() {
               <div className="text-center py-16">
                 <Calendar className="w-12 h-12 mx-auto mb-4 text-[#C4BAA8]" />
                 <p className="text-[#5A6070] text-lg font-medium">No upcoming events scheduled.</p>
-                <p className="text-[#5A6070] text-sm mt-2">Check back soon — events are added regularly.</p>
+                <p className="text-[#5A6070] text-sm mt-2">Check back soon. Events are added regularly.</p>
               </div>
             )}
 
@@ -81,7 +82,28 @@ export default async function EventsPage() {
           </div>
         </section>
 
-        {/* Subscribe CTA */}
+        <section
+          id="event-ideas"
+          className="scroll-mt-28 border-t border-[#E8E4DC] bg-white py-14 md:py-20"
+          aria-labelledby="event-ideas-heading"
+        >
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-8 text-center">
+              <h2
+                id="event-ideas-heading"
+                className="mb-3 text-2xl font-bold text-[#1A1A1A] sm:text-3xl"
+              >
+                Have an event idea?
+              </h2>
+              <p className="mx-auto max-w-xl text-[#5A6070]">
+                Parents and community members can suggest celebrations, family nights, and fundraisers.
+                Ideas go to the VP of Events.
+              </p>
+            </div>
+            <DepartmentContactForm toEmail={eventsEmail} variant="events" />
+          </div>
+        </section>
+
         <section className="py-14 bg-white border-t border-[#E8E4DC]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">

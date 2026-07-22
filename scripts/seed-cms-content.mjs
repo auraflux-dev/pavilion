@@ -171,7 +171,7 @@ const PAGE_ROWS = [
   },
   {
     page: 'home-community',
-    title: 'Building community together — Go Stingrays!',
+    title: 'Building community together. Go Stingrays!',
     active: true,
   },
   {
@@ -714,6 +714,11 @@ async function ensureStaffRolesCollection() {
           { key: 'name', displayName: 'Name', type: 'TEXT' },
           { key: 'boardTitle', displayName: 'Board Title', type: 'TEXT' },
           { key: 'roles', displayName: 'System Roles', type: 'TEXT' },
+          {
+            key: 'assignedProgramIds',
+            displayName: 'Assigned Program IDs',
+            type: 'TEXT',
+          },
           { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
         ],
         permissions: {
@@ -728,9 +733,58 @@ async function ensureStaffRolesCollection() {
   } catch (err) {
     if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
       console.log('StaffRoles collection already exists')
+    } else {
+      console.warn('StaffRoles create skipped:', err.message.slice(0, 200))
+    }
+  }
+
+  try {
+    const collection = await wix('/wix-data/v2/collections/StaffRoles', undefined, 'GET')
+    const existing = new Set((collection.collection?.fields ?? []).map((field) => field.key))
+    if (!existing.has('assignedProgramIds')) {
+      await wix('/wix-data/v2/collections/create-field', {
+        dataCollectionId: 'StaffRoles',
+        field: {
+          key: 'assignedProgramIds',
+          displayName: 'Assigned Program IDs',
+          type: 'TEXT',
+        },
+      })
+      console.log('Created StaffRoles field assignedProgramIds')
+    }
+  } catch (err) {
+    console.warn('StaffRoles field ensure skipped:', String(err.message || err).slice(0, 200))
+  }
+}
+
+async function ensureProgramEnrollmentsFields() {
+  try {
+    const collection = await wix('/wix-data/v2/collections/ProgramEnrollments', undefined, 'GET')
+    if (!collection.collection) {
+      console.warn('ProgramEnrollments collection missing — create it in Wix Content Manager first')
       return
     }
-    console.warn('StaffRoles create skipped:', err.message.slice(0, 200))
+    const existing = new Set((collection.collection?.fields ?? []).map((field) => field.key))
+    const fields = [
+      { key: 'waitlistPosition', displayName: 'Waitlist Position', type: 'NUMBER' },
+      { key: 'photoMediaConsent', displayName: 'Photo Media Consent', type: 'BOOLEAN' },
+      { key: 'transactionId', displayName: 'Transaction ID', type: 'TEXT' },
+      { key: 'feePaid', displayName: 'Fee Paid', type: 'NUMBER' },
+      { key: 'enrolledAt', displayName: 'Enrolled At', type: 'DATETIME' },
+    ]
+    for (const field of fields) {
+      if (existing.has(field.key)) continue
+      await wix('/wix-data/v2/collections/create-field', {
+        dataCollectionId: 'ProgramEnrollments',
+        field,
+      })
+      console.log('Created ProgramEnrollments field', field.key)
+    }
+  } catch (err) {
+    console.warn(
+      'ProgramEnrollments field ensure skipped:',
+      String(err.message || err).slice(0, 200),
+    )
   }
 }
 
@@ -941,6 +995,7 @@ async function main() {
   await ensureSurveyResponsesCollection()
   await ensureStoredPaymentMethodsCollection()
   await ensureStaffRolesCollection()
+  await ensureProgramEnrollmentsFields()
   await ensureStudentArchiveFields()
   await ensureSocialPostsCollection()
   await ensureStaffProjectsCollection()

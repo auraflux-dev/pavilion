@@ -10,6 +10,7 @@ export type LegalDocSlug =
   | 'membership-terms'
   | 'enrichment-waiver'
   | 'enrichment-medical'
+  | 'data-security'
 
 export type LegalDoc = {
   slug: LegalDocSlug
@@ -51,6 +52,10 @@ const DEFAULTS: Record<LegalDoc['slug'], LegalDoc> = {
       {
         heading: 'Your choices',
         body: 'Update your profile in the member portal, remove a saved payment card anytime, or email the PTO to request account corrections.',
+      },
+      {
+        heading: 'Security & retention',
+        body: 'Technical and organizational measures for protecting family data, backups, monitoring, and retention are described in our Data Security Practices at /data-security.',
       },
     ],
   },
@@ -143,6 +148,45 @@ const DEFAULTS: Record<LegalDoc['slug'], LegalDoc> = {
       {
         heading: 'Code of conduct & attendance',
         body: 'Students must follow behavior expectations during non-school hours. Disruptive conduct may result in dismissal without refund. Missed classes (student absence, weather, or school closures) are not refunded or automatically rescheduled unless the PTO announces otherwise.',
+      },
+    ],
+  },
+  'data-security': {
+    slug: 'data-security',
+    title: 'Data Security Practices',
+    updated: 'July 2026',
+    sections: [
+      {
+        heading: 'Purpose',
+        body: 'This statement describes how SHMS PTO protects personal information on shmspto.org. It supplements our Privacy Policy and is intended for parents, staff, and school partners who need assurance that student and family data is handled with care.',
+      },
+      {
+        heading: 'Where data lives (not SQLite)',
+        body: 'The website does not use a local SQLite database. Application content and family records are stored in Wix CMS (Wix Data) as the system of record. Payment card numbers are never stored by SHMS PTO; card processing is handled by Square and/or Wix Payments. Session tokens are httpOnly cookies on Vercel-hosted Next.js.',
+      },
+      {
+        heading: 'Access control',
+        body: 'Parents authenticate with Wix Members (including Google sign-in where enabled) and only see their own household. Staff tools require an @shmspto.org identity plus an assigned role (admin, treasurer, membership, etc.). Sensitive staff actions such as act-as are role-gated and written to an audit log.',
+      },
+      {
+        heading: 'Transport & application security',
+        body: 'Production traffic is HTTPS-only with HSTS. The application sets security headers (frame denial, content-type sniffing protection, referrer policy, permissions policy, and a content security policy tuned for Wix, Square, PayPal, and POWR embeds). Mutating API calls from browsers are checked for same-origin. Public forms are rate-limited. Webhooks and cron jobs require shared secrets.',
+      },
+      {
+        heading: 'Backups',
+        body: 'Wix retains CMS data under Wix commercial backup practices. In addition, SHMS PTO runs scheduled exports of operational CMS collections to encrypted object storage (Cloudflare R2) when backup credentials are configured. Backups are for disaster recovery and authorized board access only — not for marketing use.',
+      },
+      {
+        heading: 'Monitoring & error reporting',
+        body: 'Uptime monitoring (UptimeRobot) checks public health endpoints. When error reporting is enabled in the deployment environment, application errors are logged with an event reference parents or staff can share with support (and optionally forwarded to a secure webhook). Reporting can be turned off by clearing the ERROR_REPORTING_ENABLED environment signal.',
+      },
+      {
+        heading: 'Vendor processors',
+        body: 'We rely on vetted processors: Wix (hosting identity & CMS), Vercel (application hosting), Square / PayPal (payments), Google Workspace (staff email/calendar/docs), and optional POWR for embedded surveys. Each vendor processes data under their own terms and security programs.',
+      },
+      {
+        heading: 'Incident contact',
+        body: 'Suspected unauthorized access or data issues: email president@shmspto.org and treasurer@shmspto.org immediately. Include any on-screen error reference ID if shown.',
       },
     ],
   },

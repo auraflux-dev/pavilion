@@ -5,13 +5,24 @@ import { MembershipJoinButton } from '@/components/membership/membership-join-bu
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getStoreCardBonusPercent } from '@/lib/store-card-bonus'
 
+const PLACE_ACCENT: Record<string, string> = {
+  reef: '#064206',
+  lagoon: '#1B6B1B',
+  tide: '#C9A800',
+  faculty: '#085508',
+}
+
+function tierAccent(tierId: string): string {
+  return PLACE_ACCENT[tierId] ?? '#085508'
+}
+
 const fmtDollars = (n: number): string => (Number.isInteger(n) ? String(n) : n.toFixed(2))
 
-/** Bold $amounts, percentages, and standalone counts in perk copy. */
-function emphasizeNumbers(text: string): ReactNode {
-  const parts = text.split(/(\$\d+(?:\.\d+)?|\d+(?:\.\d+)?%|\b\d+\b)/g)
+/** Bold $amounts, percentages, standalone counts, and the word free in perk copy. */
+function emphasizePerkCopy(text: string): ReactNode {
+  const parts = text.split(/(\$\d+(?:\.\d+)?|\d+(?:\.\d+)?%|\b\d+\b|\bfree\b)/gi)
   return parts.map((part, i) =>
-    /^(\$\d+(?:\.\d+)?|\d+(?:\.\d+)?%|\d+)$/.test(part) ? (
+    /^(\$\d+(?:\.\d+)?|\d+(?:\.\d+)?%|\d+)$/.test(part) || /^free$/i.test(part) ? (
       <strong key={i} className="font-bold text-[#085508]">
         {part}
       </strong>
@@ -97,7 +108,11 @@ export async function MembershipTiers() {
             </div>
           )}
 
-          <div className="h-1.5 w-full" style={{ backgroundColor: '#085508' }} aria-hidden="true" />
+          <div
+            className="h-1.5 w-full"
+            style={{ backgroundColor: tierAccent(tier.tierId) }}
+            aria-hidden="true"
+          />
 
           <div className="p-6 lg:p-8 flex flex-col flex-1">
             <div className="mb-6">
@@ -116,13 +131,13 @@ export async function MembershipTiers() {
             {bonusPercent > 0 && tier.giftCardCredit > 0 ? (
               <div className="mb-6 rounded-lg border border-[#F0D9A0] bg-[#FFF7E6] px-3 py-2">
                 <p className="text-xs font-bold text-[#8A6400]">
-                  Limited-time bonus · first{' '}
+                  Limited time bonus · first{' '}
                   <strong className="font-bold">30</strong> days
                 </p>
                 <p className="text-xs text-[#8A6400]">
                   Get an extra{' '}
                   <strong className="font-bold text-[#085508]">{bonusPercent}%</strong> on
-                  your PTO card —{' '}
+                  your PTO card.{' '}
                   <strong className="font-bold text-[#085508]">
                     ${tier.giftCardCredit}
                   </strong>{' '}
@@ -145,7 +160,7 @@ export async function MembershipTiers() {
                       aria-hidden="true"
                     />
                     <span className="text-sm text-[#1A1A1A] text-left">
-                      {emphasizeNumbers(perk)}
+                      {emphasizePerkCopy(perk)}
                     </span>
                   </li>
                 ))}

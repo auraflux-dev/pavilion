@@ -14,6 +14,8 @@ export type PageContentFields = {
   bullets: string[]
   ctaLabel: string
   ctaHref: string
+  /** Optional flyer / hero image URL (staff upload) */
+  flyerImage?: string
 }
 
 const empty = (page: string, partial: Partial<PageContentFields>): PageContentFields => ({
@@ -26,6 +28,7 @@ const empty = (page: string, partial: Partial<PageContentFields>): PageContentFi
   bullets: [],
   ctaLabel: '',
   ctaHref: '',
+  flyerImage: '',
   ...partial,
 })
 
@@ -56,7 +59,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   }),
   /** Home page community strip — Wix PageContent page = home-community */
   'home-community': empty('home-community', {
-    title: 'Building community together — Go Stingrays!',
+    title: 'Building community together. Go Stingrays!',
     body: '',
   }),
   membership: empty('membership', {
@@ -70,7 +73,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   events: empty('events', {
     eyebrow: 'Mark Your Calendar',
     title: 'Upcoming Events',
-    body: 'Stay connected with everything happening at Stone Hill Middle School — meetings, celebrations, competitions, and more.',
+    body: 'Stay connected with everything happening at Stone Hill Middle School: meetings, celebrations, competitions, and more.',
   }),
   programs: empty('programs', {
     eyebrow: 'Student Enrichment',
@@ -109,20 +112,20 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   }),
   'store-how': empty('store-how', {
     bullets: [
-      '1|Become a free member|Create a free parent account — then choose an amount and pay online with card or PayPal.',
-      '2|First load gets 10% extra|Pay $20, get $22 on first load or membership credit. Reloads are dollar-for-dollar.',
+      '1|Become a free member|Create a free parent account, then choose an amount and pay online with card or PayPal.',
+      '2|First load gets 10% extra|Pay $20, get $22 on first load or membership credit. Reloads are dollar for dollar.',
       '3|Student taps at The Cove|PTO issues one physical family card linked to the same Square balance for the snack window.',
     ],
   }),
   'store-cta': empty('store-cta', {
     eyebrow: 'Cove Card · Members',
     title: 'Free member? First load gets 10% extra.',
-    body: 'One family Cove card and balance (up to $500 per load). 10% on first load or membership credit — reloads 1:1. Pick up one plastic card from PTO for the snack window.',
+    body: 'One family Cove card and balance (up to $500 per load). 10% on first load or membership credit; reloads 1:1. Pick up one plastic card from PTO for the snack window.',
   }),
   'spirit-wear': empty('spirit-wear', {
     eyebrow: 'The Cove · Shop',
     title: 'Spirit wear & merchandise',
-    body: 'Show your Stingrays pride. Order online year-round — pick up at school when the window is open.',
+    body: 'Show your Stingrays pride. Order online year round. Pick up at school when the window is open.',
   }),
   fundraising: empty('fundraising', {
     eyebrow: 'Goals · Live',
@@ -137,11 +140,11 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   newsletter: empty('newsletter', {
     eyebrow: 'Stay Connected',
     title: 'SHMS PTO Newsletter',
-    body: 'Stay in the loop on everything happening at Stone Hill Middle School — delivered straight to your inbox.',
+    body: 'Stay in the loop on everything happening at Stone Hill Middle School, delivered straight to your inbox.',
   }),
   'member-portal': empty('member-portal', {
     title: 'Member Portal',
-    body: 'Your store card balance, membership, and quick links — all in one place.',
+    body: 'Your store card balance, membership, and quick links, all in one place.',
   }),
   portal: empty('portal', {
     sectionTitle: 'Paid PTO membership active',
@@ -152,7 +155,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     bullets: [
       'Welcome to the SHMS PTO',
       'Your free parent account is ready. Add a student to track programs, store card balance, and paid membership status.',
-      'Paid members get a pre-loaded store card, free or discounted program registration, and free refreshments at school events.',
+      'Paid members get a preloaded store card, free or discounted program registration, and free refreshments at school events.',
     ],
   }),
   /** key|text lines — see lib/defaults/portal-copy.ts */
@@ -161,28 +164,24 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body: 'Keyed bullets (key|text) drive portal quadrant titles, empty states, and CTAs.',
     bullets: portalHubBulletsDefault().split('\n'),
   }),
-  /** question|answer lines — shown only inside /member-portal */
+  /** question|answer lines — shown only inside /member-portal (full parent docs, not one-liners) */
   'portal-help': empty('portal-help', {
     title: 'Portal help',
-    body: 'Parent FAQ — member portal only.',
+    body: 'Parent guides — member portal only.',
     bullets: [
-      'How do I update My Account?|Click Edit profile in My Account. You can change your name and phone here. Email changes go through the PTO treasurer.',
-      'How do I add another student?|Scroll to My Students and tap Add a student at the bottom. Enter first name, last name, and grade.',
-      'How do I fix a student name or grade?|Open the student card (tap the arrow), then Edit student. Save — changes appear within a few minutes.',
-      'Am I free or paid?|The portal banner shows Free parent account or Paid PTO membership. Paid tiers are Reef, Lagoon, and Tide.',
-      'What are Reef, Lagoon, and Tide?|Those are the paid PTO membership levels on the website. Free accounts can upgrade anytime from Membership / Upgrade. Paid members see their tier in the portal after checkout syncs.',
-      'How do I join or upgrade membership?|Open Membership (or Upgrade in this portal), pick Reef, Lagoon, or Tide, and complete checkout. After payment, refresh the portal — your tier and store-card credit appear once sync finishes.',
-      'I am a paid member — where is my store card credit?|Store & Purchases on this portal shows balances. Membership gift-card credit loads after purchase (refresh if it is still catching up). Use Load card anytime to add more.',
-      'Do paid members get Cove coupons?|Often yes — when signed in as a paid member, look for the coupon bar on The Cove shop / checkout. If a code fails, wait a minute and refresh, or email membership@shmspto.org.',
-      'How do I reload the store card?|In Store & Purchases, tap Load family card. One card / one balance for the family. Presets or any whole dollar up to $500. 10% on first load only (or membership credit); reloads are 1:1.',
-      'What is the family Cove code?|In Store & Purchases you will see a 6-digit Family Cove code. Give that number to your student(s). At the snack window they tell staff the code so the family balance can be charged. You can reset the code anytime if it is shared or lost.',
-      'Do I need a store card?|Each family has one Cove card and one balance. Kids use the family Cove code (or a physical card later) at the snack window. Spirit wear and other Cove merch checkout online with card or PayPal (separate purchase).',
-      'How do I get a physical card for the snack window?|Loading online creates the family Square balance and Cove code. Plastic cards are optional for faster tapping — until then staff lookup by family code works at the register.',
-      'Can I pay with my own credit card?|Yes. Free and paid parents can pay with a credit or debit card (Square) or PayPal in the portal for membership, The Cove, and store-card reloads.',
-      'Can I save a payment card?|Optional. During checkout you can save a card with Square for faster reloads — never required. SHMS PTO never receives the card number.',
-      'Where do surveys appear?|Active surveys list below your quadrants. Same branded form we send by email, text, or WhatsApp — always on shmspto.org.',
-      'Where is Portal help?|Tap Help in the member top nav (or scroll to Portal help). FAQs stay inside this portal.',
-      'Can I remove a student from my account?|Parents can add and edit students. To archive or remove a student, contact the PTO (membership@shmspto.org) so Staff can update the record safely.',
+      'How do I update My Account?|Open My Account and choose Edit profile. You can update your display name and phone number here.\n\nYour sign-in email is your Wix login identity (often Google). Parents cannot change that email in the portal — email membership@shmspto.org if you need help with the login email.',
+      'How do I add another student?|Scroll to My Students and choose Add a student. Enter first name, last name, and grade (6, 7, or 8).\n\nAdd every student in your household so programs, The Cove balance, and messages stay tied to the right kids.',
+      'How do I fix a student name or grade?|Open the student card, choose Edit student, make your changes, and save. Updates usually show within a few minutes — refresh the portal if you still see the old info.',
+      'Am I free or paid?|My Account shows Free parent account or Paid PTO membership.\n\nFree means you can log in, add students, shop The Cove, and load a family Cove card. Paid means you purchased Reef, Lagoon, or Tide for the school year — perks and store-card credit sync after checkout.',
+      'What are Reef, Lagoon, and Tide?|Those are the paid PTO membership levels for the school year. Each tier includes different gift-card credit and member perks.\n\nStart free anytime, then upgrade from Membership when you are ready. After payment, refresh the portal so your tier and credit appear.',
+      'How do I join or upgrade membership?|Go to Membership (or Upgrade in this portal), pick Reef, Lagoon, or Tide, and complete checkout with card or PayPal.\n\nWhen payment clears, return here and refresh. If credit or tier is still missing after a few minutes, email membership@shmspto.org with your receipt.',
+      'Where is my store card credit?|Open Store & Cove card. Your family balance and recent purchases show there.\n\nMembership gift-card credit loads after purchase. Use Load family card anytime to add more. First-load bonus (when offered) applies once; reloads are dollar-for-dollar.',
+      'What is the family Cove code?|In Store & Cove card you will see a 6-digit Family Cove code. Give that code to your student(s).\n\nAt the snack window they tell staff the code (or show the QR) so the family balance can be charged. Reset the code anytime if it was shared or lost.',
+      'How does The Cove snack window work?|Online checkout creates the family Square balance and Cove code. Plastic cards are optional for faster tapping.\n\nUntil a physical card is issued, staff can look up your family by code at the register. Spirit wear and other Cove merch checkout online separately with card or PayPal.',
+      'Do paid members get Cove coupons?|Often yes. When you are signed in as a paid member, look for the coupon bar on The Cove shop or checkout.\n\nIf a code fails, wait a minute, refresh, and try again — or email membership@shmspto.org.',
+      'Can I pay with a credit card or PayPal?|Yes. Free and paid parents can pay with credit/debit (Square) or PayPal for membership, The Cove, and store-card reloads.\n\nSaving a card with Square is optional for faster reloads. SHMS PTO never receives your full card number.',
+      'Where do surveys appear?|Active surveys list under Surveys for you on this portal. You will get the same branded form by email, text, or WhatsApp — always on shmspto.org, never an outside link.',
+      'Can I remove a student from my account?|Parents can add and edit students. To archive or remove a student, email membership@shmspto.org so staff can update the record safely.',
     ],
   }),
 }
@@ -193,6 +192,8 @@ export const CONTACT_DEFAULTS = {
   contactEmailTreasurer: 'treasurer@shmspto.org',
   /** Co-VPs Fundraising & Programs (board sheet) */
   contactEmailPrograms: 'fundraising@shmspto.org',
+  contactEmailEvents: 'vp-events@shmspto.org',
+  contactEmailSponsorship: 'vp-initiatives@shmspto.org',
   contactAddress: '23415 Evergreen Ridge Drive, Ashburn, VA 20148',
   contactStoreHours: 'Mon–Fri · lunch periods (in person only)',
   portalGrades: '6,7,8',

@@ -1,0 +1,21 @@
+name: Production smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */12 * * *'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Hit health + smoke script
+        env:
+          SMOKE_BASE_URL: https://www.shmspto.org
+        run: |
+          curl -sfS "$SMOKE_BASE_URL/api/health" | tee /tmp/health.json
+          node scripts/smoke-production.mjs

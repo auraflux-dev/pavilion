@@ -12,7 +12,7 @@ export const revalidate = 300 // refresh from Wix CMS every 5 minutes
 
 export const metadata = {
   title: 'Board Members | SHMS PTO',
-  description: 'Meet the 2025–26 Stone Hill Middle School PTO Board — the parent volunteers who make it all happen.',
+  description: 'Meet the 2025-26 Stone Hill Middle School PTO Board, the parent volunteers who make it all happen.',
 }
 
 export default async function BoardPage() {
@@ -102,7 +102,7 @@ export default async function BoardPage() {
               </h2>
               <p className="text-[#5A6070] mb-8 max-w-xl mx-auto leading-relaxed">
                 Board positions are open to any SHMS parent or guardian. Time commitments
-                vary by role — most require 2–5 hours per month. No prior PTO experience needed.
+                vary by role. Most require 2 to 5 hours per month. No prior PTO experience needed.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <a
@@ -165,27 +165,29 @@ function BoardCard({
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="flex flex-col items-center gap-2 p-6">
+          <div className="relative flex flex-col items-center justify-center p-6 w-full h-full">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center"
               style={{ backgroundColor: '#085508' }}
             >
               {isOpen ? (
-                <span className="text-white text-2xl font-bold">?</span>
+                <span className="text-white text-xs font-bold tracking-wide uppercase px-1 text-center leading-tight">
+                  Open
+                </span>
               ) : (
                 <span className="text-white text-2xl font-bold">
                   {member.name.charAt(0).toUpperCase()}
                 </span>
               )}
             </div>
-            {isOpen && (
-              <span
-                className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: '#FFD700', color: '#1A1A1A' }}
-              >
-                Position Open
-              </span>
-            )}
+            {/* Always reserve badge height so OPEN circles align with initials */}
+            <span
+              className={`mt-2 text-xs font-semibold px-2 py-0.5 rounded-full ${isOpen ? '' : 'invisible'}`}
+              style={{ backgroundColor: '#FFD700', color: '#1A1A1A' }}
+              aria-hidden={!isOpen}
+            >
+              Position Open
+            </span>
           </div>
         )}
       </div>

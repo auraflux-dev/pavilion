@@ -1,11 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
+import {
+  scopedProgramIds,
+  canManageAllPrograms,
+  canAccessProgram,
+} from '@/lib/staff/roles'
+import { countSeatsTaken } from '@/lib/programs/enrollments'
+import { composeScheduleField } from '@/lib/programs/schedule'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!requireStaffRole(session?.staff ?? null, ['programs', 'instructor', 'admin'])) return null
+  if (
+    !requireStaffRole(session?.staff ?? null, [
+      'programs',
+      'instructor',
+      'coordinator',
+      'admin',
+    ])
+  ) {
+    return null
+  }
   return session
+}
+
+function dateField(value: unknown): string {
+  if (!value) return ''
+  if (typeof value === 'string') return value.slice(0, 10)
+  try {
+    return new Date(String(value)).toISOString().slice(0, 10)
+  } catch {
+    return ''
+  }
 }
 
 function mapProgram(item: Record<string, unknown>) {
@@ -26,6 +52,51 @@ function mapProgram(item: Record<string, unknown>) {
     tags: String(item.tags ?? ''),
     featured: item.featured === true,
     sortOrder: Number(item.sortOrder ?? 0) || 0,
+    image: String(item.image ?? ''),
+    dayOfWeek: String(item.dayOfWeek ?? ''),
+    classTime: String(item.classTime ?? ''),
+    durationWeeks: Number(item.durationWeeks ?? 0) || 0,
+    startDate: dateField(item.startDate),
+    endDate: dateField(item.endDate),
+  }
+}
+
+function schedulePatchFromBody(body: Record<string, unknown>, existing: Record<string, unknown>) {
+  const dayOfWeek =
+    body.dayOfWeek != null ? String(body.dayOfWeek).trim() : String(existing.dayOfWeek ?? '')
+  const classTime =
+    body.classTime != null ? String(body.classTime).trim() : String(existing.classTime ?? '')
+  const durationWeeks =
+    body.durationWeeks != null
+      ? Number(body.durationWeeks) || 0
+      : Number(existing.durationWeeks ?? 0) || 0
+  const startDate =
+    body.startDate != null
+      ? String(body.startDate).trim().slice(0, 10) || null
+      : existing.startDate ?? null
+  const endDate =
+    body.endDate != null
+      ? String(body.endDate).trim().slice(0, 10) || null
+      : existing.endDate ?? null
+  const composed = composeScheduleField({
+    dayOfWeek,
+    classTime,
+    durationWeeks,
+    startDate: startDate ? String(startDate) : null,
+    endDate: endDate ? String(endDate) : null,
+    schedule: body.schedule != null ? String(body.schedule).trim() : String(existing.schedule ?? ''),
+  })
+  return {
+    dayOfWeek,
+    classTime,
+    durationWeeks,
+    startDate,
+    endDate,
+    schedule:
+      body.schedule != null && String(body.schedule).trim()
+        ? String(body.schedule).trim()
+        : composed || String(existing.schedule ?? ''),
+    image: body.image != null ? String(body.image).trim() : String(existing.image ?? ''),
   }
 }
 
@@ -45,16 +116,41 @@ function mapSession(item: Record<string, unknown>) {
 }
 
 export async function GET(req: NextRequest) {
-  if (!(await gate(req))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const session = await gate(req)
+  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   try {
     const client = getWixClient()
+    const scope = scopedProgramIds(session.staff)
     const [programs, sessions] = await Promise.all([
       client.items.query('Programs').ascending('name').limit(100).find(),
       client.items.query('ProgramSessions').descending('startAt').limit(200).find(),
     ])
+    let mappedPrograms = (programs.items ?? []).map((i) => mapProgram(i as Record<string, unknown>))
+    let mappedSessions = (sessions.items ?? []).map((i) => mapSession(i as Record<string, unknown>))
+    if (scope !== null) {
+      const allowed = new Set(scope)
+      mappedPrograms = mappedPrograms.filter((p) => allowed.has(p.id))
+      mappedSessions = mappedSessions.filter(
+        (s) => !s.programId || allowed.has(s.programId),
+      )
+    }
+
+    const withSeats = await Promise.all(
+      mappedPrograms.map(async (p) => {
+        const seatsTaken = p.capacity > 0 ? await countSeatsTaken(p.id) : 0
+        return {
+          ...p,
+          seatsTaken,
+          seatsRemaining: p.capacity > 0 ? Math.max(0, p.capacity - seatsTaken) : null,
+        }
+      }),
+    )
+
     return NextResponse.json({
-      programs: (programs.items ?? []).map((i) => mapProgram(i as Record<string, unknown>)),
-      sessions: (sessions.items ?? []).map((i) => mapSession(i as Record<string, unknown>)),
+      programs: withSeats,
+      sessions: mappedSessions,
+      canManageAll: canManageAllPrograms(session.staff),
+      assignedProgramIds: scope,
     })
   } catch (err) {
     console.error('/api/staff/programs GET', err)
@@ -63,15 +159,30 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await gate(req))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const session = await gate(req)
+  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   try {
     const body = await req.json()
     const kind = String(body.kind ?? 'session')
     const client = getWixClient()
 
     if (kind === 'program') {
+      if (!canManageAllPrograms(session.staff)) {
+        return NextResponse.json(
+          { error: 'Only Programs VP / admin can create programs' },
+          { status: 403 },
+        )
+      }
       const name = String(body.name ?? '').trim()
       if (!name) return NextResponse.json({ error: 'Program name required' }, { status: 400 })
+      const dayOfWeek = String(body.dayOfWeek ?? '').trim()
+      const classTime = String(body.classTime ?? '').trim()
+      const durationWeeks = Number(body.durationWeeks ?? 0) || 0
+      const startDate = String(body.startDate ?? '').trim().slice(0, 10) || null
+      const endDate = String(body.endDate ?? '').trim().slice(0, 10) || null
+      const schedule =
+        String(body.schedule ?? '').trim() ||
+        composeScheduleField({ dayOfWeek, classTime, durationWeeks, startDate, endDate })
       const row = {
         name,
         description: String(body.description ?? '').trim(),
@@ -83,23 +194,33 @@ export async function POST(req: NextRequest) {
         grades: String(body.grades ?? '').trim(),
         category: String(body.category ?? '').trim(),
         paymentType: String(body.paymentType ?? 'wix').trim(),
-        schedule: String(body.schedule ?? '').trim(),
+        schedule,
         detail: String(body.detail ?? '').trim(),
         tags: String(body.tags ?? '').trim(),
         featured: body.featured === true,
         sortOrder: Number(body.sortOrder ?? 0) || 0,
+        image: String(body.image ?? '').trim(),
+        dayOfWeek,
+        classTime,
+        durationWeeks,
+        startDate,
+        endDate,
       }
       const inserted = await client.items.insert('Programs', row)
       return NextResponse.json({ ok: true, id: (inserted as { _id?: string })._id })
     }
 
+    const programId = String(body.programId ?? '').trim()
+    if (!canAccessProgram(session.staff, programId)) {
+      return NextResponse.json({ error: 'Not assigned to this program' }, { status: 403 })
+    }
     const programName = String(body.programName ?? '').trim()
     const title = String(body.title ?? programName).trim()
     if (!programName || !title) {
       return NextResponse.json({ error: 'Program name and session title required' }, { status: 400 })
     }
     const row = {
-      programId: String(body.programId ?? '').trim(),
+      programId,
       programName,
       title,
       startAt: body.startAt ? new Date(String(body.startAt)).toISOString() : null,
@@ -118,7 +239,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!(await gate(req))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const session = await gate(req)
+  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   try {
     const body = await req.json()
     const kind = String(body.kind ?? 'program')
@@ -130,10 +252,19 @@ export async function PATCH(req: NextRequest) {
     if (!existing?._id) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
     if (kind === 'session') {
+      const existingProgramId = String(existing.programId ?? '')
+      if (!canAccessProgram(session.staff, existingProgramId)) {
+        return NextResponse.json({ error: 'Not assigned to this program' }, { status: 403 })
+      }
+      const nextProgramId =
+        body.programId != null ? String(body.programId).trim() : existingProgramId
+      if (nextProgramId !== existingProgramId && !canAccessProgram(session.staff, nextProgramId)) {
+        return NextResponse.json({ error: 'Not assigned to target program' }, { status: 403 })
+      }
       const updates = {
         ...existing,
         _id: id,
-        programId: body.programId != null ? String(body.programId).trim() : existing.programId,
+        programId: nextProgramId || existing.programId,
         programName:
           body.programName != null ? String(body.programName).trim() : existing.programName,
         title: body.title != null ? String(body.title).trim() : existing.title,
@@ -159,27 +290,38 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ ok: true })
     }
 
+    if (!canAccessProgram(session.staff, id)) {
+      return NextResponse.json({ error: 'Not assigned to this program' }, { status: 403 })
+    }
+    const all = canManageAllPrograms(session.staff)
+    const scheduleFields = schedulePatchFromBody(body, existing)
+    // Instructors/coordinators may update schedule + flyer only; catalog/registration stays with Programs VP.
     const updates = {
       ...existing,
       _id: id,
-      name: body.name != null ? String(body.name).trim() : existing.name,
-      description: body.description != null ? String(body.description).trim() : existing.description,
-      fee: body.fee != null ? Number(body.fee) || 0 : existing.fee,
-      capacity: body.capacity != null ? Number(body.capacity) || 0 : existing.capacity,
-      registrationOpen:
-        body.registrationOpen != null ? body.registrationOpen === true : existing.registrationOpen === true,
-      cheddarupUrl:
-        body.cheddarupUrl != null ? String(body.cheddarupUrl).trim() : existing.cheddarupUrl,
-      requiresWaiver:
-        body.requiresWaiver != null ? body.requiresWaiver === true : existing.requiresWaiver === true,
-      grades: body.grades != null ? String(body.grades).trim() : existing.grades,
-      category: body.category != null ? String(body.category).trim() : existing.category,
-      paymentType: body.paymentType != null ? String(body.paymentType).trim() : existing.paymentType,
-      schedule: body.schedule != null ? String(body.schedule).trim() : existing.schedule,
-      detail: body.detail != null ? String(body.detail).trim() : existing.detail,
-      tags: body.tags != null ? String(body.tags).trim() : existing.tags,
-      featured: body.featured != null ? body.featured === true : existing.featured === true,
-      sortOrder: body.sortOrder != null ? Number(body.sortOrder) || 0 : existing.sortOrder,
+      name: all && body.name != null ? String(body.name).trim() : existing.name,
+      description: all && body.description != null ? String(body.description).trim() : existing.description,
+      fee: all && body.fee != null ? Number(body.fee) || 0 : existing.fee,
+      capacity: all && body.capacity != null ? Number(body.capacity) || 0 : existing.capacity,
+      registrationOpen: all
+        ? body.registrationOpen != null
+          ? body.registrationOpen === true
+          : existing.registrationOpen === true
+        : existing.registrationOpen === true,
+      cheddarupUrl: all && body.cheddarupUrl != null ? String(body.cheddarupUrl).trim() : existing.cheddarupUrl,
+      requiresWaiver: all
+        ? body.requiresWaiver != null
+          ? body.requiresWaiver === true
+          : existing.requiresWaiver === true
+        : existing.requiresWaiver === true,
+      grades: all && body.grades != null ? String(body.grades).trim() : existing.grades,
+      category: all && body.category != null ? String(body.category).trim() : existing.category,
+      paymentType: all && body.paymentType != null ? String(body.paymentType).trim() : existing.paymentType,
+      detail: all && body.detail != null ? String(body.detail).trim() : existing.detail,
+      tags: all && body.tags != null ? String(body.tags).trim() : existing.tags,
+      featured: all && body.featured != null ? body.featured === true : existing.featured === true,
+      sortOrder: all && body.sortOrder != null ? Number(body.sortOrder) || 0 : existing.sortOrder,
+      ...scheduleFields,
     }
     await client.items.update(collection, updates as Parameters<typeof client.items.update>[1])
     return NextResponse.json({ ok: true })

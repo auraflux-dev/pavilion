@@ -55,7 +55,15 @@ export function EventCard({ event }: EventCardProps) {
           />
         </div>
       ) : (
-        <div className="h-1.5" style={{ backgroundColor: colors.accent }} aria-hidden="true" />
+        <div
+          className="h-28 w-full flex items-center justify-center"
+          style={{ backgroundColor: colors.bg }}
+          aria-hidden="true"
+        >
+          <span className="text-xs font-semibold" style={{ color: colors.text }}>
+            Flyer coming soon
+          </span>
+        </div>
       )}
 
       <div className="p-6 flex flex-col flex-1">

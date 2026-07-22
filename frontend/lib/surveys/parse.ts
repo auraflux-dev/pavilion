@@ -30,6 +30,7 @@ export function mapSurveyItem(item: any): SurveyDefinition | null {
     showInPortal: data.showInPortal !== false,
     requireLogin: data.requireLogin === true || data.audience === 'members',
     createdBy: String(data.createdBy ?? ''),
+    powrEmbedHtml: String(data.powrEmbedHtml ?? '').trim() || undefined,
   }
 }
 

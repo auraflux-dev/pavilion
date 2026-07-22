@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { Trophy, Brain, Palette, Star, BookOpen, ArrowRight } from 'lucide-react'
 import { getFeaturedPrograms, type Program } from '@/lib/api/programs'
+import { formatProgramSchedule } from '@/lib/programs/schedule'
+import { BrandImageWash } from '@/components/brand/brand-image-wash'
 
 // Map icon names stored in CMS category → Lucide icon
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
@@ -24,25 +26,26 @@ export async function ProgramsPreview() {
   return (
     <section
       id="programs"
-      className="py-20 md:py-28"
+      className="relative overflow-hidden py-20 md:py-28"
       style={{ backgroundColor: '#F5F0E8' }}
       aria-labelledby="programs-heading"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <BrandImageWash src="/home/hero-a.jpg" side="left" />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="text-center mb-14">
           <div
             className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
             style={{ backgroundColor: '#085508', color: 'white' }}
           >
-            Student Enrichment
+            Student enrichment
           </div>
           <h2
             id="programs-heading"
             className="text-3xl sm:text-4xl lg:text-5xl font-bold text-balance"
             style={{ color: '#1A1A1A' }}
           >
-            Enrichment Programs
+            Enrichment programs
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#5A6070] max-w-2xl mx-auto leading-relaxed text-pretty">
             PTO-funded programs designed to challenge, inspire, and connect students
@@ -59,7 +62,7 @@ export async function ProgramsPreview() {
               : []
             const detailPills = [
               program.grades,
-              program.schedule,
+              formatProgramSchedule(program) || program.schedule,
               program.detail,
             ].filter(Boolean) as string[]
 

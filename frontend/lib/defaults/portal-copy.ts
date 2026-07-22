@@ -81,7 +81,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   calendarTitle: 'Calendar & Messages',
   accountTitle: 'My Account',
   studentsTitle: 'My Students',
-  storeTitle: 'Store & Purchases',
+  storeTitle: 'Store & Cove card',
   tabCalendar: 'Calendar',
   tabMessages: 'Messages',
   signOut: 'Sign out',

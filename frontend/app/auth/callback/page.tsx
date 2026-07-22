@@ -86,7 +86,11 @@ export default function CallbackPage() {
         <div className="bg-white rounded-2xl p-8 shadow-sm text-center max-w-sm">
           <p className="text-[#085508] font-bold mb-2">Login failed</p>
           <p className="text-sm text-[#5A6070] mb-6">{error}</p>
-          <a href="/auth/login" className="text-sm font-semibold underline" style={{ color: '#085508' }}>
+          <a
+            href="/api/auth/wix-login?returnTo=/member-portal"
+            className="text-sm font-semibold underline"
+            style={{ color: '#085508' }}
+          >
             Try again
           </a>
         </div>

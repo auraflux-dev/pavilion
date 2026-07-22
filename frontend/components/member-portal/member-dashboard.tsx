@@ -26,6 +26,7 @@ import { AddStudentForm } from './add-student-form'
 import { EditAccountForm } from './edit-account-form'
 import { PortalQuadrant } from './portal-quadrant'
 import { PortalHelpPanel } from './portal-help-panel'
+import { PortalSectionNav } from './portal-section-nav'
 import { PortalSurveys } from './portal-surveys'
 import { StoreCardReload } from './store-card-reload'
 import { CoveFamilyCodeCard } from './cove-family-code-card'
@@ -220,10 +221,13 @@ export function MemberDashboard({
 
   return (
     <div className="space-y-4">
+      <PortalSectionNav />
+
       {/* 2×2 quadrants — D (calendar/messages) first on mobile */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* D — Calendar & Messages (priority) */}
         <PortalQuadrant
+          id="calendar"
           title={copy.calendarTitle}
           icon={CalendarDays}
           className="order-1 lg:order-4 lg:col-start-2 lg:row-start-2"
@@ -349,6 +353,7 @@ export function MemberDashboard({
 
         {/* A — My Account */}
         <PortalQuadrant
+          id="account"
           title={copy.accountTitle}
           icon={User}
           className="order-2 lg:order-1 lg:col-start-1 lg:row-start-1"

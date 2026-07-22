@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { SurveyDefinition } from '@/lib/surveys/types'
+import { PowrEmbed } from '@/components/surveys/powr-embed'
 
 interface Props {
   survey: SurveyDefinition
@@ -39,6 +40,17 @@ export function SurveyForm({ survey, channel = 'link' }: Props) {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  if (survey.powrEmbedHtml) {
+    return (
+      <div className="space-y-4">
+        {survey.intro ? (
+          <p className="text-sm text-[#5A6070] leading-relaxed">{survey.intro}</p>
+        ) : null}
+        <PowrEmbed html={survey.powrEmbedHtml} title={survey.title} />
+      </div>
+    )
   }
 
   if (done) {

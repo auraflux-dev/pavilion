@@ -3,6 +3,8 @@ import { getMemberSession } from '@/lib/auth-member'
 import { getSurveyBySlug } from '@/lib/api/surveys'
 import { getWixClient } from '@/lib/wix-client'
 import type { SurveyResponsePayload } from '@/lib/surveys/types'
+import { clientIp, rateLimit } from '@/lib/security/rate-limit'
+import { reportError } from '@/lib/observability/error-reporting'
 
 export async function GET(
   _req: NextRequest,
@@ -39,6 +41,14 @@ export async function POST(
   }
 
   try {
+    const rl = rateLimit(`survey:${clientIp(req)}:${slug}`, 20, 10 * 60_000)
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: 'Too many submissions. Please wait and try again.' },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec) } },
+      )
+    }
+
     const body = (await req.json()) as SurveyResponsePayload
     const answers = body.answers ?? {}
     if (!Object.keys(answers).length) {
@@ -69,12 +79,39 @@ export async function POST(
       submittedAt: new Date().toISOString(),
     })
 
+    const answerLines = survey.fields
+      .map((field) => {
+        const value = String(answers[field.id] ?? '').trim()
+        return value ? `${field.label}: ${value}` : null
+      })
+      .filter(Boolean)
+
+    const { notifyStaffSubmission } = await import('@/lib/staff/submission-notify')
+    await notifyStaffSubmission({
+      kind: 'survey',
+      subject: survey.title,
+      replyTo: respondentEmail || undefined,
+      body: [
+        `New response to survey “${survey.title}” (${survey.slug}).`,
+        `Channel: ${channel}`,
+        respondentName ? `Name: ${respondentName}` : null,
+        respondentEmail ? `Email: ${respondentEmail}` : null,
+        '',
+        ...answerLines,
+        '',
+        'View all responses in Staff → Surveys (or Wix CMS → SurveyResponses).',
+        'POWR-embedded surveys do not notify here — check POWR.',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    })
+
     return NextResponse.json({
       ok: true,
       thankYou: survey.branding.thankYouMessage ?? 'Thank you!',
     })
   } catch (err) {
-    console.error('/api/surveys/[slug] POST error:', err)
-    return NextResponse.json({ error: 'Failed to submit survey' }, { status: 500 })
+    const eventId = await reportError(err, { route: `/api/surveys/${slug}` })
+    return NextResponse.json({ error: 'Failed to submit survey', eventId }, { status: 500 })
   }
 }

@@ -127,7 +127,6 @@ export async function Hero() {
             </div>
           </div>
 
-          {/* Photo stack — full column width, tight gap, consistent radii */}
           <div className="lg:col-span-6 xl:col-span-5">
             <div className="grid grid-cols-1 gap-3 sm:gap-3.5">
               <div className="relative w-full overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/20 aspect-[4/3] bg-white/10">
@@ -165,10 +164,7 @@ export async function Hero() {
           preserveAspectRatio="none"
           className="w-full h-8 sm:h-12"
         >
-          <path
-            d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z"
-            fill="#F5F0E8"
-          />
+          <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#F5F0E8" />
         </svg>
       </div>
     </section>

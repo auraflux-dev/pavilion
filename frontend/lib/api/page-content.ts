@@ -9,6 +9,7 @@ import {
   PAGE_CONTENT_DEFAULTS,
   type PageContentFields,
 } from '@/lib/defaults/page-content'
+import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 
 interface WixDataItem {
   id?: string
@@ -22,6 +23,7 @@ interface WixDataItem {
     bullets?: string
     ctaLabel?: string
     ctaHref?: string
+    flyerImage?: string
     active?: boolean
   }
 }
@@ -48,19 +50,30 @@ function merge(
     bullets: [],
     ctaLabel: '',
     ctaHref: '',
+    flyerImage: '',
   }
-  if (!cms) return { ...fallback }
+  const merged = !cms
+    ? { ...fallback }
+    : {
+        page,
+        eyebrow: cms.eyebrow || fallback.eyebrow,
+        title: cms.title || fallback.title,
+        body: cms.body || fallback.body,
+        sectionTitle: cms.sectionTitle || fallback.sectionTitle,
+        sectionBody: cms.sectionBody || fallback.sectionBody,
+        bullets: cms.bullets?.length ? cms.bullets : fallback.bullets,
+        ctaLabel: cms.ctaLabel || fallback.ctaLabel,
+        ctaHref: cms.ctaHref || fallback.ctaHref,
+        flyerImage: cms.flyerImage || fallback.flyerImage || '',
+      }
 
   return {
-    page,
-    eyebrow: cms.eyebrow || fallback.eyebrow,
-    title: cms.title || fallback.title,
-    body: cms.body || fallback.body,
-    sectionTitle: cms.sectionTitle || fallback.sectionTitle,
-    sectionBody: cms.sectionBody || fallback.sectionBody,
-    bullets: cms.bullets?.length ? cms.bullets : fallback.bullets,
-    ctaLabel: cms.ctaLabel || fallback.ctaLabel,
-    ctaHref: cms.ctaHref || fallback.ctaHref,
+    ...merged,
+    title: humanizePublicCopy(merged.title),
+    body: humanizePublicCopy(merged.body),
+    sectionTitle: humanizePublicCopy(merged.sectionTitle),
+    sectionBody: humanizePublicCopy(merged.sectionBody),
+    bullets: merged.bullets.map(humanizePublicCopy),
   }
 }
 
@@ -105,6 +118,7 @@ async function fetchPageRow(page: string): Promise<Partial<PageContentFields> | 
       bullets: parseBullets(item.data.bullets),
       ctaLabel: item.data.ctaLabel ?? '',
       ctaHref: item.data.ctaHref ?? '',
+      flyerImage: item.data.flyerImage ?? '',
     }
   } catch {
     return null

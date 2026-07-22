@@ -20,7 +20,7 @@ function JoinInner({ tierId, tierName, price }: Props) {
 
   return (
     <MemberGate
-      label={`Log in or create a free account to join ${tierName}`}
+      label={`Join ${tierName} · $${price.toFixed(0)}`}
       returnToQuery={`checkout=${tierId}${studentId ? `&studentId=${studentId}` : ''}`}
     >
       <div className="space-y-2">
@@ -42,7 +42,7 @@ function JoinInner({ tierId, tierName, price }: Props) {
           onClose={() => setOpen(false)}
           amount={price}
           title={`Join ${tierName}`}
-          subtitle="Pay with your own card on this page — free parent accounts can upgrade here"
+          subtitle="Pay with your own card on this page. Free parent accounts can upgrade here."
           payBody={{ kind: 'membership', tier: tierId, studentId }}
           containerId={`membership-pay-${tierId}`}
           onPaid={() => {

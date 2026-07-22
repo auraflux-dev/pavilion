@@ -190,7 +190,7 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
         </p>
       )}
 
-      <MemberGate label="Log in or create a free account to volunteer">
+      <MemberGate label="Sign up to volunteer">
         <Button
           type="submit"
           size="lg"

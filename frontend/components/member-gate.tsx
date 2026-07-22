@@ -2,12 +2,11 @@
 
 import { useAuth } from '@/lib/hooks/use-auth'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { Lock } from 'lucide-react'
 import { Suspense } from 'react'
 
 interface Props {
   children: React.ReactNode
-  /** Primary CTA when logged out */
+  /** Primary CTA when logged out — single action, e.g. "Join Lagoon · $149" */
   label?: string
   /** Extra returnTo query string (e.g. checkout=ruby&studentId=…) */
   returnToQuery?: string
@@ -15,7 +14,7 @@ interface Props {
 
 function MemberGateInner({
   children,
-  label = 'Log in or create a free account',
+  label = 'Create your free account',
   returnToQuery,
 }: Props) {
   const { status } = useAuth()
@@ -40,11 +39,10 @@ function MemberGateInner({
 
     return (
       <a
-        href={`/auth/login?returnTo=${returnTo}`}
-        className="inline-flex items-center justify-center gap-2 w-full font-semibold text-sm px-4 py-2.5 rounded-lg border-2 transition-colors hover:bg-[#085508] hover:text-white hover:border-[#085508]"
-        style={{ borderColor: '#085508', color: '#085508', backgroundColor: 'transparent' }}
+        href={`/auth/join?returnTo=${returnTo}`}
+        className="inline-flex items-center justify-center w-full font-bold text-sm px-4 py-2.5 rounded-lg text-white transition-opacity hover:opacity-90"
+        style={{ backgroundColor: '#085508', color: '#FFFFFF' }}
       >
-        <Lock className="w-3.5 h-3.5 shrink-0" />
         {label}
       </a>
     )
@@ -55,7 +53,7 @@ function MemberGateInner({
 
 /**
  * Wraps purchase / member-only actions.
- * Visitors are sent through Wix login/signup, then returned to the same page.
+ * Visitors create/sign in on /auth/join, then return to the same page.
  */
 export function MemberGate(props: Props) {
   return (

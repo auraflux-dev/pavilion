@@ -17,6 +17,9 @@ const checks = [
   { name: 'CheddarUp webhook rejects missing token', path: '/api/webhooks/cheddarup', method: 'POST', expected: 401 },
   { name: 'Square webhook rejects missing signature', path: '/api/webhooks/square', method: 'POST', expected: 401 },
   { name: 'cron rejects missing bearer token', path: '/api/cron/sync-membership-orders', expected: 401 },
+  { name: 'backup cron rejects missing bearer', path: '/api/cron/backup-cms', expected: 401 },
+  { name: 'health endpoint', path: '/api/health', expected: 200 },
+  { name: 'data security legal page', path: '/data-security', expected: 200 },
 ]
 
 let failures = 0

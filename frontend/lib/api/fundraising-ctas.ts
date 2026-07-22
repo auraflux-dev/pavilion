@@ -3,6 +3,8 @@
  * Admins manage in: Wix Dashboard → Content Manager → Fundraising CTAs
  */
 
+import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
+
 export interface FundraisingCTA {
   id: string
   title: string
@@ -29,9 +31,9 @@ interface WixDataItem {
 
 const FALLBACK_CTAS: FundraisingCTA[] = [
   { id: 'f1', title: 'Become a Member',    description: 'Join for $50 or $100. The single biggest thing you can do for SHMS students.', ctaLabel: 'Join',      href: '/membership', icon: 'Star',        sortOrder: 1, active: true },
-  { id: 'f2', title: 'Load the Store Card',description: "Load $20–$50 on your student's store card — they spend, PTO earns.",           ctaLabel: 'Load Card', href: '/cove',       icon: 'ShoppingBag', sortOrder: 2, active: true },
+  { id: 'f2', title: 'Load the Store Card',description: "Load $20 to $50 onto your student's store card. They spend, PTO earns.",           ctaLabel: 'Load Card', href: '/cove',       icon: 'ShoppingBag', sortOrder: 2, active: true },
   { id: 'f3', title: 'Volunteer',          description: 'Give an hour at the store window or help at an event.',                         ctaLabel: 'Sign Up',   href: '/volunteer',  icon: 'Users',       sortOrder: 3, active: true },
-  { id: 'f4', title: 'Spread the Word',    description: 'Tell other SHMS families — more members means more programs.',                  ctaLabel: 'Share',     href: '/membership', icon: 'Heart',       sortOrder: 4, active: true },
+  { id: 'f4', title: 'Spread the Word',    description: 'Tell other SHMS families. More members means more programs.',                  ctaLabel: 'Share',     href: '/membership', icon: 'Heart',       sortOrder: 4, active: true },
 ]
 
 export async function getFundraisingCTAs(): Promise<FundraisingCTA[]> {
@@ -64,7 +66,7 @@ export async function getFundraisingCTAs(): Promise<FundraisingCTA[]> {
     const items = (data.dataItems ?? []).map((item: WixDataItem) => ({
       id:          item.id ?? '',
       title:       item.data?.title       ?? '',
-      description: item.data?.description ?? '',
+      description: humanizePublicCopy(item.data?.description ?? ''),
       ctaLabel:    item.data?.ctaLabel    ?? 'Learn More',
       href:        item.data?.href        ?? '/',
       icon:        item.data?.icon        ?? 'Star',

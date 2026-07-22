@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   try {
     const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
     if (!tokens || !isMemberTokens(tokens)) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+      return NextResponse.json({ status: 'visitor', member: null }, { status: 200 })
     }
 
     const client = createOAuthClient(tokens)

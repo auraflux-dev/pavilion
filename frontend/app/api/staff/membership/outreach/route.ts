@@ -58,6 +58,36 @@ async function loadRoster() {
   )
 }
 
+/** Archive outreach into Newsletters CMS so it appears under portal Messages. */
+async function archiveNewsletter(opts: {
+  title: string
+  body: string
+  fromName: string
+  tier: string
+  grade: string
+  customEmails: string[]
+}) {
+  // Custom email lists are ParentMessages-only (not a reusable newsletter audience).
+  if (opts.customEmails.length) return false
+  const audience =
+    opts.grade ? 'grade' : opts.tier === 'free' ? 'free' : opts.tier === 'paid' ? 'paid' : 'all'
+  try {
+    const client = getWixClient()
+    await client.items.insert('Newsletters', {
+      title: opts.title,
+      body: opts.body,
+      fromName: opts.fromName,
+      audience,
+      grade: opts.grade || null,
+      publishedAt: new Date().toISOString(),
+      active: true,
+    })
+    return true
+  } catch {
+    return false
+  }
+}
+
 async function loadWhatsAppLinks(): Promise<GradeWhatsAppLinks> {
   const client = getWixClient()
   const result = await client.items.query('SiteSettings').limit(200).find()
@@ -158,6 +188,7 @@ export async function POST(req: NextRequest) {
       const sendResult = await sendMassEmail(draft, { dryRun })
 
       let portalInserted = false
+      let newsletterArchived = false
       if (alsoPortal && !dryRun) {
         try {
           const client = getWixClient()
@@ -196,6 +227,14 @@ export async function POST(req: NextRequest) {
         } catch {
           // ParentMessages optional
         }
+        newsletterArchived = await archiveNewsletter({
+          title: subject,
+          body: message,
+          fromName: draft.fromName,
+          tier,
+          grade,
+          customEmails,
+        })
       }
 
       return NextResponse.json({
@@ -207,6 +246,7 @@ export async function POST(req: NextRequest) {
         emailConfigured: emailConfigured(),
         send: sendResult,
         portalInserted,
+        newsletterArchived,
       })
     }
 
@@ -229,6 +269,7 @@ export async function POST(req: NextRequest) {
     }
 
     const client = getWixClient()
+    const fromName = session.staff.name || session.staff.boardTitle || session.email
     // When filtered to a subset, insert one message per parent so others don't see it.
     if (tier !== 'all' || grade || customEmails.length) {
       for (const email of recipients) {
@@ -239,7 +280,7 @@ export async function POST(req: NextRequest) {
           studentId: null,
           studentName: null,
           programName: null,
-          fromName: session.staff.name || session.staff.boardTitle || session.email,
+          fromName,
           subject,
           body: message,
           sentAt: new Date().toISOString(),
@@ -254,7 +295,7 @@ export async function POST(req: NextRequest) {
         studentId: null,
         studentName: null,
         programName: null,
-        fromName: session.staff.name || session.staff.boardTitle || session.email,
+        fromName,
         subject,
         body: message,
         sentAt: new Date().toISOString(),
@@ -262,10 +303,20 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    const newsletterArchived = await archiveNewsletter({
+      title: subject,
+      body: message,
+      fromName,
+      tier,
+      grade,
+      customEmails,
+    })
+
     return NextResponse.json({
       ok: true,
       channel: 'portal',
       recipientCount: recipients.length || roster.length,
+      newsletterArchived,
     })
   } catch (err) {
     console.error('/api/staff/membership/outreach POST', err)

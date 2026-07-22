@@ -8,8 +8,10 @@ import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { getWixClient } from '@/lib/wix-client'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { getAllPrograms } from '@/lib/api/programs'
+import { formatProgramSchedule } from '@/lib/programs/schedule'
 import { getUpcomingProgramSessions } from '@/lib/api/program-sessions'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
+import { listEnrollmentsForStudent } from '@/lib/programs/enrollments'
 
 export const dynamic = 'force-dynamic'
 
@@ -83,13 +85,7 @@ export async function GET(req: NextRequest) {
     const nameFor = (id: string) => studentById.get(id) ?? ''
 
     const enrollQueries = studentIds.map((id: string) =>
-      admin.items
-        .query('Enrollments')
-        .eq('studentId', id)
-        .descending('registrationDate')
-        .limit(25)
-        .find()
-        .catch(() => ({ items: [] }))
+      listEnrollmentsForStudent(id).catch(() => [] as Awaited<ReturnType<typeof listEnrollmentsForStudent>>),
     )
     const payQueries = studentIds.map((id: string) =>
       admin.items
@@ -101,24 +97,46 @@ export async function GET(req: NextRequest) {
         .catch(() => ({ items: [] }))
     )
 
-    const [programs, sessions, enrollResults, payResults, msgRes] = await Promise.all([
-      getAllPrograms().catch(() => []),
-      getUpcomingProgramSessions(50).catch(() => []),
-      Promise.all(enrollQueries),
-      Promise.all(payQueries),
-      // ParentMessages — optional CMS collection for instructor → parent notes
-      // Newsletters can be added here later (not wired yet).
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (admin.items.query('ParentMessages') as any)
-        .eq('active', true)
-        .descending('sentAt')
-        .limit(40)
-        .find()
-        .catch(() => ({ items: [] })),
-    ])
+    const [programs, sessions, enrollResults, payResults, msgRes, newsletterRes, portalEventRes, membershipRes] =
+      await Promise.all([
+        getAllPrograms().catch(() => []),
+        getUpcomingProgramSessions(50).catch(() => []),
+        Promise.all(enrollQueries),
+        Promise.all(payQueries),
+        // ParentMessages — instructor / staff → parent notes
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (admin.items.query('ParentMessages') as any)
+          .eq('active', true)
+          .descending('sentAt')
+          .limit(40)
+          .find()
+          .catch(() => ({ items: [] })),
+        // Newsletters — VP Marketing archive → portal Messages
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (admin.items.query('Newsletters') as any)
+          .eq('active', true)
+          .descending('publishedAt')
+          .limit(30)
+          .find()
+          .catch(() => ({ items: [] })),
+        // Staff-added events for member portal calendar
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (admin.items.query('PortalCalendarEvents') as any)
+          .eq('active', true)
+          .ascending('startAt')
+          .limit(40)
+          .find()
+          .catch(() => ({ items: [] })),
+        admin.items
+          .query('Memberships')
+          .eq('email', email)
+          .limit(1)
+          .find()
+          .catch(() => ({ items: [] })),
+      ])
 
     const enrollRes = {
-      items: enrollResults.flatMap((r) => r.items ?? []),
+      items: enrollResults.flatMap((r) => r ?? []),
     }
     const payRes = {
       items: payResults.flatMap((r) => r.items ?? []),
@@ -136,7 +154,7 @@ export async function GET(req: NextRequest) {
     for (const item of enrollRes.items ?? []) {
       const e = item as any
       const status = String(e.status ?? '').toLowerCase()
-      if (status === 'cancelled' || status === 'historical') continue
+      if (status === 'cancelled' || status === 'historical' || status === 'waitlisted') continue
       const programName = String(e.programName ?? 'Program')
       const sid = String(e.studentId ?? '')
       const sname = nameFor(sid) || 'Student'
@@ -151,9 +169,12 @@ export async function GET(req: NextRequest) {
         id: `enroll-${e._id}`,
         kind: 'program',
         title: programName,
-        subtitle: prog?.schedule || prog?.detail || 'Enrolled program',
-        whenLabel: prog?.schedule || formatWhen(e.registrationDate) || 'See program details',
-        startDate: e.registrationDate ?? null,
+        subtitle: (prog && formatProgramSchedule(prog)) || prog?.detail || 'Enrolled program',
+        whenLabel:
+          (prog && formatProgramSchedule(prog)) ||
+          formatWhen(e.enrolledAt || e.registrationDate) ||
+          'See program details',
+        startDate: prog?.startDate ?? e.enrolledAt ?? e.registrationDate ?? null,
         href: '/programs',
         studentNames: [sname],
       })
@@ -214,16 +235,50 @@ export async function GET(req: NextRequest) {
       ? sessionItems
       : Array.from(programCalendar.values())
 
-    // Portal calendar = programs this family registered for (public events stay on /events).
-    const calendarOut = [...programRows].sort((a, b) => {
+    // Staff CMS events for portal calendar (any event — not limited to enrollments)
+    const grades = new Set(students.map((s: { grade: string }) => s.grade))
+    const staffEventItems: PortalCalendarItem[] = []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    for (const item of portalEventRes.items ?? []) {
+      const e = item as any
+      const audience = String(e.audience ?? 'all').toLowerCase()
+      const grade = e.grade ? String(e.grade) : ''
+      if (audience === 'grade' && grade && !grades.has(grade)) continue
+      staffEventItems.push({
+        id: `staff-event-${e._id}`,
+        kind: 'event',
+        title: String(e.title ?? 'Event'),
+        subtitle: String(e.subtitle ?? ''),
+        whenLabel: formatEventWhen(e.startAt, e.endAt),
+        startDate: (e.startAt as string | null) ?? null,
+        href: String(e.href ?? '/events').trim() || '/events',
+        studentNames: [],
+      })
+    }
+
+    // Portal calendar = enrolled programs + staff PortalCalendarEvents
+    const calendarOut = [...programRows, ...staffEventItems].sort((a, b) => {
       if (!a.startDate && !b.startDate) return 0
       if (!a.startDate) return 1
       if (!b.startDate) return -1
       return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
     })
 
-    // --- Messages (filter to this family) ---
-    const grades = new Set(students.map((s: { grade: string }) => s.grade))
+    // Paid vs free for newsletter audience filters
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const membershipRow = (membershipRes.items?.[0] ?? null) as any
+    const paidFromMemberships =
+      !!membershipRow?.tier &&
+      String(membershipRow.tier) !== 'free' &&
+      String(membershipRow.status ?? '') !== 'expired'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const paidFromStudentRows = (studentsRes.items ?? []).some((raw: any) => {
+      if (raw.archived === true) return false
+      return String(raw.membershipTier ?? 'free') !== 'free'
+    })
+    const hasPaidMembership = paidFromMemberships || paidFromStudentRows
+
+    // --- Messages (ParentMessages + Newsletters) ---
     const messages: PortalMessage[] = []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const item of msgRes.items ?? []) {
@@ -258,6 +313,40 @@ export async function GET(req: NextRequest) {
         sentAt: (m.sentAt as string | null) ?? (m._createdDate as string | null) ?? null,
       })
     }
+
+    // Newsletters → same Messages list in the member portal
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    for (const item of newsletterRes.items ?? []) {
+      const n = item as any
+      const audience = String(n.audience ?? 'all').toLowerCase()
+      const grade = n.grade ? String(n.grade) : ''
+      let visible = false
+      if (audience === 'all') visible = true
+      else if (audience === 'free' && !hasPaidMembership) visible = true
+      else if (audience === 'paid' && hasPaidMembership) visible = true
+      else if (audience === 'grade' && grade && grades.has(grade)) visible = true
+      if (!visible) continue
+
+      messages.push({
+        id: `nl-${n._id}`,
+        fromName: String(n.fromName ?? 'SHMS PTO'),
+        subject: String(n.title ?? 'Newsletter'),
+        body: String(n.body ?? ''),
+        programName: 'Newsletter',
+        studentName: '',
+        sentAt:
+          (n.publishedAt as string | null) ??
+          (n._createdDate as string | null) ??
+          null,
+      })
+    }
+
+    messages.sort((a, b) => {
+      if (!a.sentAt && !b.sentAt) return 0
+      if (!a.sentAt) return 1
+      if (!b.sentAt) return -1
+      return new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
+    })
 
     // --- Purchases ---
     const purchases: PortalPurchase[] = []

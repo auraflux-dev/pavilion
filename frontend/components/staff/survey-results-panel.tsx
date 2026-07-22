@@ -28,6 +28,7 @@ type SurveyDefinition = {
   requireLogin: boolean
   active: boolean
   responseCount?: number
+  powrEmbedHtml?: string
 }
 
 type SurveyResponse = {
@@ -87,6 +88,7 @@ export function SurveyResultsPanel() {
   const [active, setActive] = useState(true)
   const [thankYou, setThankYou] = useState('Thank you — your response was recorded.')
   const [accentColor, setAccentColor] = useState('#085508')
+  const [powrEmbedHtml, setPowrEmbedHtml] = useState('')
   const [fields, setFields] = useState<SurveyField[]>([emptyField()])
 
   const load = useCallback(async (slugFilter = selectedSlug) => {
@@ -133,6 +135,7 @@ export function SurveyResultsPanel() {
     setActive(true)
     setThankYou('Thank you — your response was recorded.')
     setAccentColor('#085508')
+    setPowrEmbedHtml('')
     setFields([emptyField()])
   }
 
@@ -159,6 +162,7 @@ export function SurveyResultsPanel() {
     setActive(def.active !== false)
     setThankYou(def.branding?.thankYouMessage || 'Thank you — your response was recorded.')
     setAccentColor(def.branding?.accentColor || '#085508')
+    setPowrEmbedHtml(def.powrEmbedHtml || '')
     setFields(def.fields.length ? def.fields.map((f) => ({ ...f, options: f.options ?? [] })) : [emptyField()])
     setSelectedSlug(def.slug)
     setMode('edit')
@@ -206,6 +210,7 @@ export function SurveyResultsPanel() {
             options: f.type === 'grade' && !(f.options?.length) ? ['6', '7', '8'] : f.options,
           })),
         branding: { accentColor, thankYouMessage: thankYou },
+        powrEmbedHtml: powrEmbedHtml.trim() || undefined,
       }
       const response = await fetch('/api/staff/surveys', {
         method: mode === 'edit' ? 'PATCH' : 'POST',
@@ -336,6 +341,19 @@ export function SurveyResultsPanel() {
               onChange={(e) => setThankYou(e.target.value)}
               className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
             />
+          </label>
+          <label className="block text-xs font-bold text-[#5A6070] sm:col-span-2">
+            POWR embed (optional)
+            <textarea
+              value={powrEmbedHtml}
+              onChange={(e) => setPowrEmbedHtml(e.target.value)}
+              rows={3}
+              placeholder="Paste POWR iframe/embed HTML or a powr.io URL. When set, parents see POWR instead of built-in questions."
+              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A] font-mono"
+            />
+            <span className="mt-1 block font-normal text-[11px] text-[#5A6070]">
+              From Wix Apps → POWR: copy the embed code. Built-in questions are ignored when this is filled.
+            </span>
           </label>
         </div>
 

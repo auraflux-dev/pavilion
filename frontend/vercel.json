@@ -6,6 +6,10 @@
     {
       "path": "/api/cron/sync-membership-orders",
       "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/backup-cms",
+      "schedule": "0 7 * * *"
     }
   ],
   "redirects": [

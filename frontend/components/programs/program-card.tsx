@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Users, DollarSign, GraduationCap } from 'lucide-react'
+import { ArrowRight, Users, DollarSign, GraduationCap, CalendarClock } from 'lucide-react'
 import type { Program } from '@/lib/api/programs'
+import { formatProgramSchedule } from '@/lib/programs/schedule'
 import { MemberGate } from '@/components/member-gate'
 import { ProgramRegisterModal } from '@/components/programs/program-register-modal'
 
@@ -12,13 +13,13 @@ interface ProgramCardProps {
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; accent: string }> = {
-  Competition:   { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Strategy:      { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Competition: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Strategy: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
   'Creative Arts': { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  STEM:          { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Music:         { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Sports:        { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  default:       { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  STEM: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Music: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Sports: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  default: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
 }
 
 function getColors(category?: string) {
@@ -29,27 +30,32 @@ function getColors(category?: string) {
 export function ProgramCard({ program }: ProgramCardProps) {
   const colors = getColors(program.category)
   const [registerOpen, setRegisterOpen] = useState(false)
+  const scheduleLine = formatProgramSchedule(program)
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
       {program.image ? (
-        <div className="h-48 w-full overflow-hidden">
+        <div className="h-48 w-full overflow-hidden bg-[#F5F0E8]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={program.image}
-            alt={program.name}
+            alt={`${program.name} flyer`}
             className="w-full h-full object-cover"
           />
         </div>
       ) : (
         <div
-          className="h-1.5 w-full"
-          style={{ backgroundColor: colors.accent }}
+          className="h-28 w-full flex items-center justify-center"
+          style={{ backgroundColor: colors.bg }}
           aria-hidden="true"
-        />
+        >
+          <span className="text-xs font-semibold" style={{ color: colors.text }}>
+            Flyer coming soon
+          </span>
+        </div>
       )}
 
       <div className="p-6 lg:p-7 flex flex-col flex-1">
-        {/* Category tag */}
         <div className="flex items-start justify-between mb-4">
           <span
             className="text-xs font-semibold px-2.5 py-1 rounded-full"
@@ -58,7 +64,6 @@ export function ProgramCard({ program }: ProgramCardProps) {
             {program.category ?? 'Enrichment'}
           </span>
 
-          {/* Open/Closed badge */}
           <span
             className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
               program.registrationOpen
@@ -70,20 +75,28 @@ export function ProgramCard({ program }: ProgramCardProps) {
           </span>
         </div>
 
-        {/* Title */}
         <h3 className="text-xl font-bold text-[#1A1A1A] mb-3">{program.name}</h3>
 
-        {/* Description — strip HTML from rich text */}
         {program.description && (
           <p
-            className="text-sm text-[#5A6070] leading-relaxed mb-5 flex-1"
+            className="text-sm text-[#5A6070] leading-relaxed mb-4 flex-1"
             dangerouslySetInnerHTML={{
               __html: program.description,
             }}
           />
         )}
 
-        {/* Meta pills */}
+        {scheduleLine ? (
+          <p className="inline-flex items-start gap-2 text-sm font-semibold text-[#1A1A1A] mb-4">
+            <CalendarClock
+              className="w-4 h-4 mt-0.5 shrink-0"
+              style={{ color: colors.accent }}
+              aria-hidden="true"
+            />
+            <span>{scheduleLine}</span>
+          </p>
+        ) : null}
+
         <div className="flex flex-wrap gap-2 mb-6">
           {program.grades && (
             <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-[#EEF6EE] text-[#5A6070]">
@@ -105,16 +118,18 @@ export function ProgramCard({ program }: ProgramCardProps) {
           )}
         </div>
 
-        {/* CTA button — in-app registration (same checkout pattern as membership) */}
         {program.registrationOpen ? (
-          <MemberGate label="Log in or create a free account to register">
+          <MemberGate label="Register for this program">
             <Button
               className="w-full font-semibold text-white group"
               style={{ backgroundColor: colors.accent }}
               onClick={() => setRegisterOpen(true)}
             >
               Register Now
-              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              <ArrowRight
+                className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
             </Button>
           </MemberGate>
         ) : (

@@ -9,6 +9,7 @@ type StaffRoleRow = {
   name?: string
   boardTitle?: string
   roles?: string
+  assignedProgramIds?: string
   active?: boolean
 }
 
@@ -44,6 +45,10 @@ export async function GET(req: NextRequest) {
         name: String(row.name ?? ''),
         boardTitle: String(row.boardTitle ?? ''),
         roles: normalizeRoles(row.roles),
+        assignedProgramIds: String(row.assignedProgramIds ?? '')
+          .split(/[,|;]/)
+          .map((id) => id.trim())
+          .filter(Boolean),
         active: row.active !== false,
       })),
     })
@@ -64,6 +69,12 @@ export async function POST(req: NextRequest) {
     const name = String(body.name ?? '').trim()
     const boardTitle = String(body.boardTitle ?? '').trim()
     const roles = normalizeRoles(body.roles)
+    const assignedProgramIds = Array.isArray(body.assignedProgramIds)
+      ? body.assignedProgramIds.map((id: unknown) => String(id).trim()).filter(Boolean)
+      : String(body.assignedProgramIds ?? '')
+          .split(/[,|;]/)
+          .map((id) => id.trim())
+          .filter(Boolean)
     const active = body.active !== false
 
     if (!isStaffEmail(email)) {
@@ -79,7 +90,14 @@ export async function POST(req: NextRequest) {
     const client = getWixClient()
     const existing = await client.items.query('StaffRoles').eq('email', email).limit(1).find()
     const row = existing.items[0] as StaffRoleRow | undefined
-    const data = { email, name, boardTitle, roles: roles.join(','), active }
+    const data = {
+      email,
+      name,
+      boardTitle,
+      roles: roles.join(','),
+      assignedProgramIds: assignedProgramIds.join(','),
+      active,
+    }
 
     if (row?._id) {
       await client.items.update('StaffRoles', {

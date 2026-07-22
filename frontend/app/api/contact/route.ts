@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getSiteSettings } from '@/lib/api/site-settings'
+import { notifyStaffSubmission } from '@/lib/staff/submission-notify'
+import { clientIp, rateLimit } from '@/lib/security/rate-limit'
+import { reportError } from '@/lib/observability/error-reporting'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -19,6 +22,18 @@ function resolveAssignedTo(
       .trim()
       .toLowerCase()
   }
+  if (dept === 'events') {
+    return settings
+      .get('contactEmailEvents', 'vp-events@shmspto.org')
+      .trim()
+      .toLowerCase()
+  }
+  if (dept === 'sponsorship' || dept === 'initiatives') {
+    return settings
+      .get('contactEmailSponsorship', 'vp-initiatives@shmspto.org')
+      .trim()
+      .toLowerCase()
+  }
   if (dept === 'treasurer') {
     return settings.get('contactEmailTreasurer', 'treasurer@shmspto.org').trim().toLowerCase()
   }
@@ -27,6 +42,14 @@ function resolveAssignedTo(
 
 export async function POST(req: NextRequest) {
   try {
+    const rl = rateLimit(`contact:${clientIp(req)}`, 8, 10 * 60_000)
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: 'Too many submissions. Please wait and try again.' },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec) } },
+      )
+    }
+
     const body = await req.json()
     const name = String(body.name ?? '').trim()
     const email = String(body.email ?? '').trim().toLowerCase()
@@ -40,16 +63,32 @@ export async function POST(req: NextRequest) {
 
     const settings = await getSiteSettings()
     const assignedTo = resolveAssignedTo(department, body.assignedTo, settings)
+    const kind =
+      department === 'programs'
+        ? 'programs'
+        : department === 'events'
+          ? 'events'
+          : department === 'sponsorship' || department === 'initiatives'
+            ? 'sponsorship'
+            : 'contact'
 
     const client = getWixClient()
+    const routeLabel =
+      kind === 'programs'
+        ? 'VP Programs'
+        : kind === 'events'
+          ? 'VP Events'
+          : kind === 'sponsorship'
+            ? 'VP Initiatives'
+            : null
+    const routedMessage = routeLabel
+      ? `[Route: ${routeLabel} · ${assignedTo}]\n\n${message}`
+      : message
     const base = {
       name,
       email,
       topic,
-      message:
-        department === 'programs'
-          ? `[Route: VP Programs · ${assignedTo}]\n\n${message}`
-          : message,
+      message: routedMessage,
       submittedAt: new Date().toISOString(),
       resolved: false,
     }
@@ -61,13 +100,36 @@ export async function POST(req: NextRequest) {
         assignedTo,
       })
     } catch {
-      // Collection may not have department/assignedTo fields yet
       await client.items.insert('ContactSubmissions', base)
     }
 
-    return NextResponse.json({ ok: true, assignedTo })
+    const notify = await notifyStaffSubmission({
+      kind,
+      to: assignedTo,
+      subject: topic,
+      replyTo: email,
+      body: [
+        `New ${kind} submission from the website.`,
+        '',
+        `From: ${name} <${email}>`,
+        `Topic: ${topic}`,
+        `Routed to: ${assignedTo}`,
+        '',
+        routedMessage,
+        '',
+        '— Reply to this email to respond to the parent.',
+        'Also saved in Wix CMS → ContactSubmissions.',
+      ].join('\n'),
+    })
+
+    return NextResponse.json({
+      ok: true,
+      assignedTo,
+      emailed: notify.ok === true,
+      emailMode: 'mode' in notify ? notify.mode : undefined,
+    })
   } catch (err) {
-    console.error('Contact form error:', err)
-    return NextResponse.json({ error: 'Failed to submit' }, { status: 500 })
+    const eventId = await reportError(err, { route: '/api/contact' })
+    return NextResponse.json({ error: 'Failed to submit', eventId }, { status: 500 })
   }
 }

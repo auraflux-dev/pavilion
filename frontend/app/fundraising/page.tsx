@@ -5,7 +5,9 @@ import { getFundraisingTotals } from '@/lib/api/fundraising'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getFundraisingCTAs } from '@/lib/api/fundraising-ctas'
 import { getPageContent } from '@/lib/api/page-content'
-import { ArrowRight, Heart, TrendingUp, Users, ShoppingBag, Ticket, Star, RefreshCw, type LucideIcon } from 'lucide-react'
+import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
+import { getActiveSponsors } from '@/lib/api/sponsors'
+import { ArrowRight, Heart, TrendingUp, Users, ShoppingBag, Ticket, Star, RefreshCw, Handshake, type LucideIcon } from 'lucide-react'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Star, ShoppingBag, Users, Heart, TrendingUp, Ticket, ArrowRight, RefreshCw,
@@ -27,13 +29,20 @@ function fmtDollars(n: number) {
 }
 
 export default async function FundraisingPage() {
-  const [data, settings, ctas, page] = await Promise.all([
+  const [data, settings, ctas, page, sponsors] = await Promise.all([
     getFundraisingTotals(),
     getSiteSettings(),
     getFundraisingCTAs(),
     getPageContent('fundraising'),
+    getActiveSponsors(),
   ])
   const { totals, goals, volunteerHoursRaised, volunteerHoursGoal } = data
+  const sponsorshipRaised = settings.getNumber('sponsorshipRaised', 0)
+  const sponsorshipGoal = settings.getNumber('goalSponsorship', 5000)
+  const sponsorshipEmail = settings.get(
+    'contactEmailSponsorship',
+    'vp-initiatives@shmspto.org',
+  )
 
   const ANNUAL_GOAL = settings.getNumber('fundraisingAnnualGoal', 21667)
 
@@ -45,8 +54,14 @@ export default async function FundraisingPage() {
     { label: 'PTO Admin & Communications',   pct: settings.getNumber('allocPTOAdmin', 5),          amount: '' },
   ].map(a => ({ ...a, amount: fmtDollars(ANNUAL_GOAL * a.pct / 100) }))
 
-  const totalRaised = totals.membership + totals.store + totals.spiritWear +
-                      totals.danceNight + totals.novaMath + totals.other
+  const totalRaised =
+    totals.membership +
+    totals.store +
+    totals.spiritWear +
+    totals.danceNight +
+    totals.novaMath +
+    totals.other +
+    sponsorshipRaised
   const overallPct  = pct(totalRaised, ANNUAL_GOAL)
 
   const initiatives = [
@@ -63,8 +78,8 @@ export default async function FundraisingPage() {
     {
       id: 'store',
       icon: ShoppingBag,
-      label: 'The Cove — store card',
-      description: 'Student snack-window sales via prepaid store cards at The Cove.',
+      label: 'The Cove store card',
+      description: 'Student snack window sales via prepaid store cards at The Cove.',
       raised: totals.store,
       goal:   goals.store,
       href: '/cove',
@@ -73,7 +88,7 @@ export default async function FundraisingPage() {
     {
       id: 'spiritWear',
       icon: Heart,
-      label: 'The Cove — shop',
+      label: 'The Cove shop',
       description: 'Year-round Stingrays apparel and merchandise from The Cove.',
       raised: totals.spiritWear,
       goal:   goals.spiritWear,
@@ -94,17 +109,27 @@ export default async function FundraisingPage() {
       id: 'novaMath',
       icon: TrendingUp,
       label: 'NOVA Math Tournament',
-      description: 'Registration fees and sponsorships for our students competing in the Northern Virginia Math Tournament.',
+      description: 'Registration fees and community support for our students competing in the Northern Virginia Math Tournament.',
       raised: totals.novaMath,
       goal:   goals.novaMath,
       href: '/programs',
       cta: 'View Programs',
     },
     {
+      id: 'sponsorship',
+      icon: Handshake,
+      label: 'Sponsorships',
+      description: 'Local businesses and community partners who fund events, programs, and student enrichment.',
+      raised: sponsorshipRaised,
+      goal: sponsorshipGoal,
+      href: '/fundraising#sponsorship',
+      cta: 'Become a Sponsor',
+    },
+    {
       id: 'volunteer',
       icon: Users,
       label: 'Volunteer Hours',
-      description: 'We track volunteer hours as a community impact metric — every hour has a real dollar value to our school.',
+      description: 'We track volunteer hours as a community impact metric. Every hour has a real dollar value to our school.',
       raised: volunteerHoursRaised,
       goal:   volunteerHoursGoal,
       href: '/volunteer',
@@ -188,44 +213,30 @@ export default async function FundraisingPage() {
                 Every Way You Can Help
               </h2>
               <p className="text-[#5A6070] mt-3 max-w-xl mx-auto">
-                Memberships, store cards, event tickets, and volunteering — it all adds up.
+                Memberships, store cards, event tickets, and volunteering. It all adds up.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {initiatives.map((initiative) => {
-                const p    = pct(initiative.raised, initiative.goal)
                 const Icon = initiative.icon
                 const isHrs = initiative.unit === 'hrs'
                 const raisedDisplay = isHrs
                   ? `${initiative.raised} hrs`
                   : fmtDollars(initiative.raised)
-                const goalDisplay = isHrs
-                  ? `${initiative.goal} hrs`
-                  : fmtDollars(initiative.goal)
 
                 return (
                   <article
                     key={initiative.id}
                     className="bg-white rounded-2xl p-6 shadow-sm border border-[#E8E4DC] flex flex-col hover:shadow-md transition-shadow duration-300"
                   >
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-4">
+                    <div className="mb-4">
                       <div
                         className="w-11 h-11 rounded-xl flex items-center justify-center"
                         style={{ backgroundColor: '#EEF6EE' }}
                       >
                         <Icon className="w-5 h-5" style={{ color: '#085508' }} aria-hidden="true" />
                       </div>
-                      <span
-                        className="text-xs font-bold px-2.5 py-1 rounded-full"
-                        style={{
-                          backgroundColor: p >= 100 ? '#085508' : '#EEF6EE',
-                          color: p >= 100 ? 'white' : '#085508',
-                        }}
-                      >
-                        {p >= 100 ? '🎉 Goal Met!' : `${p}%`}
-                      </span>
                     </div>
 
                     <h3 className="text-lg font-bold text-[#1A1A1A] mb-2">{initiative.label}</h3>
@@ -233,32 +244,14 @@ export default async function FundraisingPage() {
                       {initiative.description}
                     </p>
 
-                    {/* Progress bar */}
+                    {/* Raised only — per-area goals stay in Staff settings (not public) */}
                     <div className="mb-4">
-                      <div className="flex justify-between text-xs font-semibold mb-1.5">
-                        <span style={{ color: '#085508' }}>
-                          {raisedDisplay}
-                          <span className="text-[#5A6070] font-normal"> raised</span>
-                        </span>
-                        <span className="text-[#5A6070]">Goal: {goalDisplay}</span>
-                      </div>
-                      <div className="w-full bg-[#E8E4DC] rounded-full h-2.5">
-                        <div
-                          className="h-2.5 rounded-full transition-all duration-700"
-                          style={{
-                            width: `${p}%`,
-                            backgroundColor: p >= 100 ? '#FFD700' : '#085508',
-                          }}
-                          role="progressbar"
-                          aria-valuenow={p}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                          aria-label={`${initiative.label}: ${p}% of goal`}
-                        />
-                      </div>
+                      <p className="text-sm font-semibold" style={{ color: '#085508' }}>
+                        {raisedDisplay}
+                        <span className="text-[#5A6070] font-normal"> raised</span>
+                      </p>
                     </div>
 
-                    {/* Manual update note for volunteer hours */}
                     {isHrs && (
                       <p className="text-xs text-[#5A6070] mb-3 italic">
                         Hours are updated manually by the PTO board each month.
@@ -329,6 +322,70 @@ export default async function FundraisingPage() {
           </div>
         </section>
 
+        {/* Sponsorships — deep link: /fundraising#sponsorship */}
+        <section
+          id="sponsorship"
+          className="scroll-mt-28 py-14 md:py-20 border-t border-[#E8E4DC] bg-white"
+          aria-labelledby="sponsorship-heading"
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <div
+                className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
+                style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
+              >
+                Community Partners
+              </div>
+              <h2 id="sponsorship-heading" className="text-3xl font-bold text-[#1A1A1A]">
+                Sponsorships
+              </h2>
+              <p className="text-[#5A6070] mt-3 max-w-2xl mx-auto">
+                Highlighting businesses and organizations who support Stone Hill students.
+                Suggest a sponsor or apply on behalf of your business. Submissions go to the VP of Initiatives.
+              </p>
+            </div>
+
+            {sponsors.length > 0 ? (
+              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12" role="list">
+                {sponsors.map((s) => (
+                  <li
+                    key={s.id}
+                    className="rounded-2xl border border-[#E8E4DC] bg-[#FAFCF9] p-5 flex flex-col"
+                  >
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#085508] mb-2">
+                      {s.tier}
+                    </p>
+                    <h3 className="text-lg font-bold text-[#1A1A1A]">{s.name}</h3>
+                    {s.blurb ? (
+                      <p className="text-sm text-[#5A6070] mt-2 flex-1">{s.blurb}</p>
+                    ) : (
+                      <div className="flex-1" />
+                    )}
+                    {s.websiteUrl ? (
+                      <a
+                        href={s.websiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 text-sm font-semibold inline-flex items-center gap-1"
+                        style={{ color: '#085508' }}
+                      >
+                        Visit site
+                        <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                      </a>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-center text-sm text-[#5A6070] mb-10">
+                Future sponsors will appear here. Be the first to partner with SHMS PTO.
+              </p>
+            )}
+
+            <DepartmentContactForm toEmail={sponsorshipEmail} variant="sponsorship" />
+          </div>
+        </section>
+
         {/* How to contribute */}
         <section className="py-16" style={{ backgroundColor: '#F5F0E8' }}>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -337,7 +394,7 @@ export default async function FundraisingPage() {
                 How Can You Contribute?
               </h2>
               <p className="text-[#5A6070] mt-3 max-w-xl mx-auto">
-                Every action counts — pick what works best for your family.
+                Every action counts. Pick what works best for your family.
               </p>
             </div>
 

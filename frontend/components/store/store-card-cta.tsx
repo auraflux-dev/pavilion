@@ -17,7 +17,7 @@ export function StoreCardCta({
   amounts,
   eyebrow = 'Cove Card · Members',
   title = 'Free member? First load gets 10% extra.',
-  body = 'One family Cove card and balance (up to $500 per load). 10% on first load or membership credit — reloads 1:1. Pick up one plastic card from PTO for the snack window.',
+  body = 'One family Cove card and balance (up to $500 per load). 10% on first load or membership credit. Reloads are 1:1. Pick up one plastic card from PTO for the snack window.',
   bonusPercent = 10,
   maxAmount = 500,
 }: Props) {
@@ -35,7 +35,7 @@ export function StoreCardCta({
         <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">{title}</h2>
         <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">{body}</p>
 
-        <MemberGate label="Become a free member to load a card">
+        <MemberGate label="Load a Cove card">
           <div className="max-w-sm mx-auto">
             <StoreCardReload
               amounts={amounts}

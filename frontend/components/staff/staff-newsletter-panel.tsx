@@ -85,11 +85,19 @@ export function StaffNewsletterPanel() {
       if (d.send?.mode === 'gmail') {
         setStatus(
           `Sent via Gmail: ${d.send.sent} delivered, ${d.send.failed} failed` +
-            (d.portalInserted ? ' · portal inbox updated' : ''),
+            (d.portalInserted ? ' · portal inbox updated' : '') +
+            (d.newsletterArchived
+              ? ' · newsletter archived for Messages'
+              : alsoPortal
+                ? ' · newsletter archive skipped or failed — check Newsletters CMS'
+                : ''),
         )
       } else if (d.mailto) {
         window.location.href = d.mailto
-        setStatus(`Opened mail app BCC to ${d.recipientCount} parents.`)
+        setStatus(
+          `Opened mail app BCC to ${d.recipientCount} parents.` +
+            (d.newsletterArchived ? ' · newsletter archived for Messages' : ''),
+        )
       } else {
         setStatus(d.send?.errors?.[0] ?? 'Email prepared')
       }

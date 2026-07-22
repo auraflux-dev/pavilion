@@ -84,14 +84,14 @@ export function StoreCardHero({
   const visitorSteps =
     howItWorks ??
     parseHowSteps([
-      '1|Become a free member|Create a free parent account — then choose an amount and pay online.',
+      '1|Become a free member|Create a free parent account, then choose an amount and pay online.',
       `2|First load gets ${bonusPercent}% extra|${formatStoreCardBonusExample(50, bonusPercent)}. Reloads are dollar-for-dollar.`,
-      '3|Tap at The Cove|One physical family card from PTO — same Square balance for every student in the household.',
+      '3|Tap at The Cove|One physical family card from PTO. Same Square balance for every student in the household.',
     ])
   const memberSteps = parseHowSteps([
     `1|Choose an amount|Load any whole dollar up to $${maxAmount}. ${formatStoreCardBonusExample(50, bonusPercent)} on your first load.`,
     '2|One family balance|Every student in your household shares the same Cove card balance.',
-    '3|Spend at the window|Pick up one plastic card from PTO — students use it at The Cove snack window.',
+    '3|Spend at the window|Pick up one plastic card from PTO. Students use it at The Cove snack window.',
   ])
   const steps = isMember ? memberSteps : visitorSteps
 
@@ -131,13 +131,13 @@ export function StoreCardHero({
                 ))}
               </ul>
               <p className="mt-4 text-sm text-white/65 max-w-lg">
-                {formatStoreCardBonusExample(50, bonusPercent)} on first load or membership credit —
-                reloads are 1:1. Load any whole dollar up to ${maxAmount}. Pay with card or PayPal.
+                {formatStoreCardBonusExample(50, bonusPercent)} on first load or membership credit.
+                Reloads are 1:1. Load any whole dollar up to ${maxAmount}. Pay with card or PayPal.
               </p>
             </div>
 
             <div className="lg:col-span-5">
-              <MemberGate label="Become a free member to load a card">
+              <MemberGate label="Load a Cove card">
                 <div className="w-full max-w-md lg:ml-auto rounded-2xl bg-white/10 border border-white/15 p-4 sm:p-5 backdrop-blur-sm">
                   <p className="text-xs font-bold tracking-widest uppercase text-white/70 mb-3">
                     Load a Cove card

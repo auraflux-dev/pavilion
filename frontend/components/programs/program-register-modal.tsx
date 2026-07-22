@@ -10,6 +10,7 @@ import { CheckoutConsent } from '@/components/checkout/checkout-consent'
 import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import type { ConsentAck } from '@/lib/checkout-consent'
 import type { Program } from '@/lib/api/programs'
+import { formatProgramSchedule } from '@/lib/programs/schedule'
 
 type Student = {
   id: string
@@ -92,13 +93,27 @@ export function ProgramRegisterModal({ program, open, onClose, onRegistered }: P
         return
       }
 
-      setSuccess(
-        data.alreadyEnrolled
-          ? 'Already enrolled — you are all set.'
-          : `Enrolled in ${data.programName || program.name}.`
-      )
+      const waitlisted = String(data.status ?? '') === 'Waitlisted'
+      const position = Number(data.waitlistPosition ?? 0)
+      if (data.alreadyEnrolled && waitlisted) {
+        setSuccess(
+          position > 0
+            ? `You are already on the waitlist (position #${position}).`
+            : 'You are already on the waitlist for this program.',
+        )
+      } else if (data.alreadyEnrolled) {
+        setSuccess('Already enrolled. You are all set.')
+      } else if (waitlisted) {
+        setSuccess(
+          position > 0
+            ? `This program is full. You are #${position} on the waitlist. We will email you if a seat opens.`
+            : 'This program is full. You are on the waitlist. We will email you if a seat opens.',
+        )
+      } else {
+        setSuccess(`Enrolled in ${data.programName || program.name}.`)
+      }
       onRegistered?.()
-      setTimeout(() => onClose(), 1400)
+      setTimeout(() => onClose(), waitlisted ? 2800 : 1400)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
@@ -109,6 +124,7 @@ export function ProgramRegisterModal({ program, open, onClose, onRegistered }: P
   if (!open) return null
 
   const fee = Number(program.fee ?? 0)
+  const scheduleLine = formatProgramSchedule(program)
 
   return (
     <>
@@ -127,6 +143,9 @@ export function ProgramRegisterModal({ program, open, onClose, onRegistered }: P
               <p className="text-sm font-bold mt-1" style={{ color: '#085508' }}>
                 {fee <= 0 ? 'Free' : `$${fee.toFixed(2)}`}
               </p>
+              {scheduleLine ? (
+                <p className="text-xs text-[#5A6070] mt-2 leading-relaxed">{scheduleLine}</p>
+              ) : null}
             </div>
             <button type="button" onClick={onClose} aria-label="Close">
               <X className="w-4 h-4 text-[#5A6070]" />
@@ -206,11 +225,21 @@ export function ProgramRegisterModal({ program, open, onClose, onRegistered }: P
           consents: consents ?? undefined,
         }}
         prefilledConsents={consents ?? undefined}
-        onPaid={() => {
+        onPaid={(result) => {
           setPayOpen(false)
-          setSuccess(`Enrolled and paid for ${program.name}.`)
+          const waitlisted = String(result?.status ?? '') === 'Waitlisted'
+          const position = Number(result?.waitlistPosition ?? 0)
+          if (waitlisted) {
+            setSuccess(
+              position > 0
+                ? `Payment received. You are #${position} on the waitlist. Staff will contact you if a seat opens (refund if needed).`
+                : 'Payment received. You are on the waitlist. Staff will contact you if a seat opens.',
+            )
+          } else {
+            setSuccess(`Enrolled and paid for ${program.name}.`)
+          }
           onRegistered?.()
-          setTimeout(() => onClose(), 1400)
+          setTimeout(() => onClose(), waitlisted ? 3200 : 1400)
         }}
         containerId="program-square-card"
       />

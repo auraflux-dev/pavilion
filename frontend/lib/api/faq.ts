@@ -6,6 +6,8 @@
  *   'membership' | 'volunteer' | 'general'
  */
 
+import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
+
 export interface FAQItem {
   id: string
   question: string
@@ -57,8 +59,8 @@ export async function getFAQItems(page?: string): Promise<FAQItem[]> {
     const data = await res.json()
     return (data.dataItems ?? []).map((item: WixDataItem) => ({
       id:        item.id ?? '',
-      question:  item.data?.question  ?? '',
-      answer:    item.data?.answer    ?? '',
+      question:  humanizePublicCopy(item.data?.question  ?? ''),
+      answer:    humanizePublicCopy(item.data?.answer    ?? ''),
       page:      item.data?.page      ?? 'general',
       sortOrder: item.data?.sortOrder ?? 99,
       active:    item.data?.active    ?? true,

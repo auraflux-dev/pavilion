@@ -1,0 +1,69 @@
+/**
+ * Same-origin check for cookie-authenticated mutating API calls.
+ * Browser fetch from shmspto.org sends Origin; block cross-site POSTs.
+ */
+
+function allowedOrigins(): string[] {
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org').replace(/\/$/, '')
+  const extras = (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((s) => s.trim().replace(/\/$/, ''))
+    .filter(Boolean)
+  const set = new Set<string>([
+    site,
+    'https://www.shmspto.org',
+    'https://shmspto.org',
+    ...extras,
+  ])
+  if (process.env.NODE_ENV !== 'production') {
+    set.add('http://localhost:3000')
+    set.add('http://127.0.0.1:3000')
+  }
+  return [...set]
+}
+
+export function isSameOriginRequest(req: Request): boolean {
+  const method = req.method.toUpperCase()
+  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return true
+
+  const origin = req.headers.get('origin')
+  const referer = req.headers.get('referer')
+  const allowed = allowedOrigins()
+
+  if (origin) {
+    return allowed.some((a) => origin === a || origin.startsWith(`${a}/`))
+  }
+  if (referer) {
+    try {
+      const refOrigin = new URL(referer).origin
+      return allowed.includes(refOrigin)
+    } catch {
+      return false
+    }
+  }
+
+  // Non-browser clients (webhooks, cron, curl) often omit Origin.
+  // Only allow when a trusted shared-secret style header is present,
+  // or path is under /api/webhooks or /api/cron (those use their own secrets).
+  const path = new URL(req.url).pathname
+  if (path.startsWith('/api/webhooks/') || path.startsWith('/api/cron/')) return true
+  if (path.startsWith('/api/wix-auth-proxy/')) return true
+  if (req.headers.get('authorization')?.startsWith('Bearer ')) return true
+
+  // Public forms may be posted without Origin in some older browsers — allow
+  // contact/volunteer/newsletter/surveys which are not cookie-session APIs.
+  if (
+    path.startsWith('/api/contact') ||
+    path.startsWith('/api/volunteer') ||
+    path.startsWith('/api/newsletter') ||
+    path.startsWith('/api/surveys/')
+  ) {
+    return true
+  }
+
+  return false
+}
+
+export function csrfForbiddenResponse() {
+  return Response.json({ error: 'Forbidden origin' }, { status: 403 })
+}

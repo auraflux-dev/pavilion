@@ -19,10 +19,28 @@ export function PortalSurveys() {
       .catch(() => setSurveys([]))
   }, [])
 
-  if (!surveys.length) return null
+  if (!surveys.length) {
+    return (
+      <section
+        id="surveys"
+        className="mt-6 scroll-mt-28 rounded-2xl border border-[#E8E4DC] bg-white p-5 shadow-sm"
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <ClipboardList className="w-5 h-5" style={{ color: '#085508' }} />
+          <h2 className="font-bold text-[#1A1A1A]">Surveys for you</h2>
+        </div>
+        <p className="text-xs text-[#5A6070]">
+          No open surveys right now. When the PTO posts one, it will show up here.
+        </p>
+      </section>
+    )
+  }
 
   return (
-    <section className="mt-6 rounded-2xl border border-[#E8E4DC] bg-white p-5 shadow-sm">
+    <section
+      id="surveys"
+      className="mt-6 scroll-mt-28 rounded-2xl border border-[#E8E4DC] bg-white p-5 shadow-sm"
+    >
       <div className="flex items-center gap-2 mb-3">
         <ClipboardList className="w-5 h-5" style={{ color: '#085508' }} />
         <h2 className="font-bold text-[#1A1A1A]">Surveys for you</h2>

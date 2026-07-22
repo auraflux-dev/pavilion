@@ -19,7 +19,7 @@ export const revalidate = 300
 export const metadata = {
   title: 'The Cove | SHMS PTO',
   description:
-    'The Cove — SHMS PTO store card, snack window menu, and spirit wear in one place.',
+    'The Cove: SHMS PTO store card, snack window menu, and spirit wear in one place.',
 }
 
 function parseHowSteps(bullets: string[]) {

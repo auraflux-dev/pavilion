@@ -96,7 +96,7 @@ export default async function ProgramsPage() {
                 Questions about a program?
               </h2>
               <p className="mx-auto max-w-xl text-[#5A6070]">
-                Message the VP of Programs — Co-VPs Fundraising &amp; Programs will follow up.
+                Message the VP of Programs. Co-VPs Fundraising &amp; Programs will follow up.
               </p>
             </div>
             <ProgramsContactForm toEmail={programsEmail} />
