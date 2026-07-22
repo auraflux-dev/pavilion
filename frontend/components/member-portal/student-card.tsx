@@ -344,7 +344,7 @@ export function StudentCard({
                 >
                   <Star className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#085508' }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-[#1A1A1A] mb-1">Upgrade {student.firstName}'s membership</p>
+                    <p className="text-sm font-bold text-[#1A1A1A] mb-1">Upgrade to a paid membership</p>
                     <p className="text-xs text-[#5A6070] leading-relaxed mb-3">
                       {upgradeBody}
                     </p>

@@ -152,11 +152,11 @@ export function MemberDashboard({
     load()
   }, [])
 
-  // Portal shell links use #store / #help — scroll once dashboard is ready.
+  // #store scrolls here; #help is handled by PortalHelpPanel (opens then scrolls).
   useEffect(() => {
     if (status !== 'ok') return
     const id = window.location.hash.replace(/^#/, '')
-    if (!id) return
+    if (!id || id === 'help') return
     const el = document.getElementById(id)
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [status])
@@ -430,11 +430,6 @@ export function MemberDashboard({
               <dt className="text-[#5A6070] m-0">{copy.studentsLabel}</dt>
               <dd className="font-semibold text-[#1A1A1A] m-0 text-right">
                 {students.length}
-                {students.length > 0 ? (
-                  <a href="#portal-students" className="block text-[10px] font-bold text-[#085508] mt-0.5">
-                    Manage students ↓
-                  </a>
-                ) : null}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-4">
@@ -452,9 +447,12 @@ export function MemberDashboard({
 
           {gradeLinks.length > 0 && (
             <div className="mt-auto pt-2 border-t border-[#F0EDE8]">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070] mb-2 flex items-center gap-1.5">
+              <p className="text-[11px] font-bold text-[#1A1A1A] mb-1 flex items-center gap-1.5">
                 <MessageCircle className="w-3.5 h-3.5" style={{ color: '#25D366' }} />
                 {copy.whatsappHeading}
+              </p>
+              <p className="text-[11px] text-[#5A6070] mb-2 leading-relaxed">
+                Join your student’s grade group for reminders and PTO updates.
               </p>
               <div className="flex flex-wrap gap-2">
                 {gradeLinks.map(({ grade, href }) => (
@@ -465,7 +463,7 @@ export function MemberDashboard({
                     rel="noopener noreferrer"
                     className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-[#E8E4DC] hover:border-[#25D366] hover:bg-green-50"
                   >
-                    {grade}
+                    Join {grade}
                   </a>
                 ))}
               </div>

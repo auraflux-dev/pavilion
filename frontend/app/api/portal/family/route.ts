@@ -7,7 +7,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { getWixClient } from '@/lib/wix-client'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
-import { getUpcomingEvents } from '@/lib/api/events'
 import { getAllPrograms } from '@/lib/api/programs'
 import { getUpcomingProgramSessions } from '@/lib/api/program-sessions'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
@@ -102,13 +101,13 @@ export async function GET(req: NextRequest) {
         .catch(() => ({ items: [] }))
     )
 
-    const [programs, events, sessions, enrollResults, payResults, msgRes] = await Promise.all([
+    const [programs, sessions, enrollResults, payResults, msgRes] = await Promise.all([
       getAllPrograms().catch(() => []),
-      getUpcomingEvents(12).catch(() => []),
       getUpcomingProgramSessions(50).catch(() => []),
       Promise.all(enrollQueries),
       Promise.all(payQueries),
       // ParentMessages — optional CMS collection for instructor → parent notes
+      // Newsletters can be added here later (not wired yet).
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (admin.items.query('ParentMessages') as any)
         .eq('active', true)
@@ -209,27 +208,14 @@ export async function GET(req: NextRequest) {
         }
       })
 
-    const eventItems: PortalCalendarItem[] = events.map((ev) => {
-      const start = ev.dateAndTimeSettings?.startDate ?? null
-      return {
-        id: `event-${ev.id}`,
-        kind: 'event' as const,
-        title: ev.title || 'Event',
-        subtitle: ev.location?.name || 'SHMS / PTO',
-        whenLabel: formatEventWhen(start, ev.dateAndTimeSettings?.endDate),
-        startDate: start,
-        href: '/events',
-        studentNames: [],
-      }
-    })
-
     // Prefer real sessions over free-text enrollment placeholders when sessions exist
     const hasSessions = sessionItems.length > 0
     const programRows = hasSessions
       ? sessionItems
       : Array.from(programCalendar.values())
 
-    const calendarOut = [...programRows, ...eventItems].sort((a, b) => {
+    // Portal calendar = programs this family registered for (public events stay on /events).
+    const calendarOut = [...programRows].sort((a, b) => {
       if (!a.startDate && !b.startDate) return 0
       if (!a.startDate) return 1
       if (!b.startDate) return -1

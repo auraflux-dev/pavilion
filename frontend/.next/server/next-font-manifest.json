@@ -4,7 +4,87 @@
       "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
       "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
     ],
+    "[project]/wix-shmspto/frontend/app/auth/callback/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/auth/login/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/board/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/contact/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/cove/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/events/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/fundraising/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/meetings/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/member-portal/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/membership/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/newsletter/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
     "[project]/wix-shmspto/frontend/app/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/photo-release/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/privacy/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/programs/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/spirit-wear/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/staff/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/store/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/survey/[slug]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/terms/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
+    ],
+    "[project]/wix-shmspto/frontend/app/volunteer/page": [
       "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
       "static/media/248e1dc0efc99276-s.p.0ft7o6kv5bp14.woff2"
     ]

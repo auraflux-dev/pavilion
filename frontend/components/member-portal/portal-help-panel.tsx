@@ -15,10 +15,14 @@ export function PortalHelpPanel({ items }: Props) {
   useEffect(() => {
     function openFromHash() {
       if (typeof window === 'undefined') return
-      if (window.location.hash === '#help') {
-        setOpen(true)
-        document.getElementById('help')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }
+      if (window.location.hash !== '#help') return
+      setOpen(true)
+      // Wait for expand so scroll lands on the open panel under the sticky header
+      window.requestAnimationFrame(() => {
+        window.setTimeout(() => {
+          document.getElementById('help')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 50)
+      })
     }
     openFromHash()
     window.addEventListener('hashchange', openFromHash)
@@ -30,7 +34,7 @@ export function PortalHelpPanel({ items }: Props) {
   return (
     <section
       id="help"
-      className="mt-8 scroll-mt-20 rounded-2xl border border-[#E8E4DC] bg-white overflow-hidden shadow-sm"
+      className="mt-8 scroll-mt-28 rounded-2xl border border-[#E8E4DC] bg-white overflow-hidden shadow-sm"
     >
       <button
         type="button"

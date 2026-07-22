@@ -110,8 +110,8 @@ export function CoveFamilyCodeCard() {
               </Button>
             </div>
             <p className="text-[11px] text-[#5A6070] mt-2 leading-relaxed">
-              Give this code to your student for The Cove snack window. They tell staff the code;
-              staff looks up the family balance and rings up what they ordered
+              Students can say the 6-digit code at The Cove window, or show the QR so staff can scan
+              it and charge the family balance
               {hasCard ? '.' : '. Load the family card so there is a balance to spend.'}
             </p>
           </div>

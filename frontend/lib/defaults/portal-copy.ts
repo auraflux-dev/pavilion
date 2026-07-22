@@ -99,7 +99,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   memberSince: 'Member since',
   studentsLabel: 'Students',
   paidMembershipsLabel: 'Paid memberships',
-  whatsappHeading: 'Grade WhatsApp',
+  whatsappHeading: 'Don’t forget to join your grade WhatsApp',
 
   storeCardsLabel: 'Family Cove card',
   storeCardsHint: 'One balance for the whole family',

@@ -74,6 +74,10 @@ export default async function CovePage() {
           maxAmount={catalog.storeCardMaxAmount}
         />
 
+        <DealsStrip items={featuredItems} />
+
+        <StoreGrid items={allItems} />
+
         <section
           id="shop"
           className="py-12 md:py-16 scroll-mt-28"
@@ -155,10 +159,6 @@ export default async function CovePage() {
             )}
           </div>
         </section>
-
-        <DealsStrip items={featuredItems} />
-
-        <StoreGrid items={allItems} />
 
         <StoreCardCta
           amounts={catalog.storeCardAmounts}

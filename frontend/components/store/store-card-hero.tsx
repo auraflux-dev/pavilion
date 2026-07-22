@@ -106,7 +106,7 @@ export function StoreCardHero({
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-white/90 hover:text-white hover:underline"
               >
                 <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-                Back to Member Portal
+                Return to Member Portal
               </Link>
             </div>
           ) : null}

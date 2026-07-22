@@ -26,7 +26,7 @@ export function PortalReturnBar() {
           style={{ color: '#085508' }}
         >
           <ArrowLeft className="w-4 h-4 shrink-0" aria-hidden="true" />
-          Member Portal
+          Return to Member Portal
         </Link>
       </div>
     </div>
