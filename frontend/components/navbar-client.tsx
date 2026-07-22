@@ -24,12 +24,8 @@ export function NavbarClient({ links }: Props) {
   }, [])
 
   const isMember = status === 'member'
-  const portalLabel =
-    accountType === 'paid'
-      ? 'Member Portal'
-      : member?.name
-        ? 'My Account'
-        : 'Member Portal'
+  // Same label for free and paid — title case Member Portal
+  const portalLabel = 'Member Portal'
 
   return (
     <header
