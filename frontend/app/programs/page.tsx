@@ -1,6 +1,7 @@
 import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { PortalReturnBar } from '@/components/portal-return-bar'
 import { ProgramCard } from '@/components/programs/program-card'
 import { ProgramsFilter } from '@/components/programs/programs-filter'
 import { PageHero } from '@/components/page-hero'
@@ -29,6 +30,7 @@ export default async function ProgramsPage() {
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
+      <PortalReturnBar />
 
       <main id="main-content">
         <PageHero

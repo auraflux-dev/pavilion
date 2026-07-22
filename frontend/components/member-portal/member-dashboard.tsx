@@ -152,6 +152,15 @@ export function MemberDashboard({
     load()
   }, [])
 
+  // Portal shell links use #store / #help — scroll once dashboard is ready.
+  useEffect(() => {
+    if (status !== 'ok') return
+    const id = window.location.hash.replace(/^#/, '')
+    if (!id) return
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [status])
+
   async function handleLogout() {
     try {
       await fetch('/api/auth/logout', { method: 'POST' })
@@ -515,6 +524,7 @@ export function MemberDashboard({
 
         {/* C — Store & Purchases */}
         <PortalQuadrant
+          id="store"
           title={copy.storeTitle}
           icon={CreditCard}
           className="order-4 lg:order-3 lg:col-start-1 lg:row-start-2"

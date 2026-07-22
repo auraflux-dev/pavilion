@@ -1,9 +1,11 @@
 'use client'
 
-import { CreditCard, CheckCircle2 } from 'lucide-react'
+import Link from 'next/link'
+import { CreditCard, CheckCircle2, ArrowLeft } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 import { StoreCardReload } from '@/components/member-portal/store-card-reload'
 import { formatStoreCardBonusExample } from '@/lib/store-card-bonus'
+import { useAuth } from '@/lib/hooks/use-auth'
 
 export type StoreCardDenomination = { amount: number; label: string; note: string }
 
@@ -64,19 +66,51 @@ export function StoreCardHero({
   bonusPercent = 10,
   maxAmount = 500,
 }: Props) {
+  const { status } = useAuth()
+  const isMember = status === 'member'
   const denominations = defaultDenominations(amounts)
-  const steps =
+
+  const displayTitle = isMember
+    ? 'Load your family Cove card.'
+    : title
+  const displayPerks = isMember
+    ? [
+        'One family Cove card & balance',
+        `${bonusPercent}% on first load (not reloads) · up to $${maxAmount}`,
+        'Pay online · spend at the snack window',
+      ]
+    : perks
+
+  const visitorSteps =
     howItWorks ??
     parseHowSteps([
       '1|Become a free member|Create a free parent account — then choose an amount and pay online.',
       `2|First load gets ${bonusPercent}% extra|${formatStoreCardBonusExample(50, bonusPercent)}. Reloads are dollar-for-dollar.`,
       '3|Tap at The Cove|One physical family card from PTO — same Square balance for every student in the household.',
     ])
+  const memberSteps = parseHowSteps([
+    `1|Choose an amount|Load any whole dollar up to $${maxAmount}. ${formatStoreCardBonusExample(50, bonusPercent)} on your first load.`,
+    '2|One family balance|Every student in your household shares the same Cove card balance.',
+    '3|Spend at the window|Pick up one plastic card from PTO — students use it at The Cove snack window.',
+  ])
+  const steps = isMember ? memberSteps : visitorSteps
 
   return (
     <>
       <section className="py-12 md:py-16" style={{ backgroundColor: '#085508' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {isMember ? (
+            <div className="mb-6">
+              <Link
+                href="/member-portal#store"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-white/90 hover:text-white hover:underline"
+              >
+                <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+                Back to Member Portal
+              </Link>
+            </div>
+          ) : null}
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <div className="lg:col-span-7">
               <div className="flex items-center gap-2 mb-3">
@@ -86,10 +120,10 @@ export function StoreCardHero({
                 </span>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-white leading-tight tracking-tight max-w-xl">
-                {title}
+                {displayTitle}
               </h1>
               <ul className="mt-5 flex flex-col sm:flex-row sm:flex-wrap gap-x-5 gap-y-2">
-                {perks.map((p) => (
+                {displayPerks.map((p) => (
                   <li key={p} className="flex items-center gap-1.5 text-sm text-white/85">
                     <CheckCircle2 className="w-4 h-4 text-green-300 shrink-0" aria-hidden="true" />
                     {p}
@@ -112,7 +146,7 @@ export function StoreCardHero({
                     amounts={denominations.map(({ amount }) => amount)}
                     bonusPercent={bonusPercent}
                     maxAmount={maxAmount}
-                    triggerLabel="Choose student & load card"
+                    triggerLabel="Load family card"
                     triggerClassName="w-full justify-center !bg-white !text-[#085508] px-5 py-3"
                   />
                 </div>

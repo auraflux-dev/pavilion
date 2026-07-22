@@ -41,7 +41,7 @@ export function StoreCardCta({
               amounts={amounts}
               bonusPercent={bonusPercent}
               maxAmount={maxAmount}
-              triggerLabel="Choose student & load card"
+              triggerLabel="Load family card"
               triggerClassName="w-full justify-center !bg-[#FFD700] !text-[#1A1A1A] px-8 py-3"
             />
           </div>

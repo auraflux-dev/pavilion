@@ -24,7 +24,7 @@ export function PortalQuadrant({
   return (
     <section
       id={id}
-      className={`bg-white rounded-2xl border border-[#E8E4DC] shadow-sm flex flex-col min-h-[280px] ${className}`}
+      className={`bg-white rounded-2xl border border-[#E8E4DC] shadow-sm flex flex-col min-h-[280px] scroll-mt-20 ${className}`}
     >
       <header className="flex items-center justify-between gap-3 px-5 py-4 border-b border-[#F0EDE8]">
         <div className="flex items-center gap-2.5 min-w-0">

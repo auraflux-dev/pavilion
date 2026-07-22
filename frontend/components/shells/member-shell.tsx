@@ -29,10 +29,12 @@ export function MemberShell({ children }: Props) {
   const isPaid = accountType === 'paid'
   const audienceLabel = status === 'loading' ? '…' : isPaid ? 'Paid member' : 'Free member'
 
+  // Keep primary actions inside the portal when possible (Cove load = #store).
+  // Membership / Programs still use public pages — PortalReturnBar brings members back.
   const links = [
     { href: '/member-portal', label: 'My portal' },
     { href: '/membership', label: isPaid ? 'Membership' : 'Upgrade' },
-    { href: '/cove', label: 'The Cove' },
+    { href: '/member-portal#store', label: 'The Cove' },
     { href: '/programs', label: 'Programs' },
     { href: '/member-portal#help', label: 'Help' },
   ]

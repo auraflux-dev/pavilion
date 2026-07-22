@@ -51,7 +51,7 @@ export function StoreCardReload({
   amounts = [20, 40, 75],
   maxAmount = 500,
   onLoaded,
-  triggerLabel = 'Load card',
+  triggerLabel = 'Load family card',
   triggerClassName = '',
   bonusPercent = 10,
 }: Props) {

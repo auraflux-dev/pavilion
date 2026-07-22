@@ -120,7 +120,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   cancel: 'Cancel',
   addStudentError: 'Could not add student. Please try again.',
   loadCardHelp:
-    'Choose a student and an amount — $20 / $40 / $75, or enter any amount you need. Pay with your own credit or debit card. Saving a card with Square is optional for faster reloads and auto top-off.',
+    'One family Cove card and balance. Choose $20 / $40 / $75, or enter any whole-dollar amount. Pay with card or PayPal. Saving a card with Square is optional for faster reloads and auto top-off.',
   paymentMethodsTitle: 'How you pay',
   paymentMethodsBody:
     'Snack window: prepaid student store card. Online: pay with credit/debit card or PayPal in this portal (membership, The Cove, and store-card reloads). Saving a card is optional.',
