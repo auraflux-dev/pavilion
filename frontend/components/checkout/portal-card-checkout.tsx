@@ -42,6 +42,7 @@ export type PortalPayBody =
       studentId: string
       consents?: ConsentAck[]
     }
+  | { kind: 'event'; eventId: string; quantity: number; consents?: ConsentAck[] }
 
 interface Props {
   open: boolean
@@ -82,15 +83,19 @@ export function PortalCardCheckout({
   const [ready, setReady] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [nextSteps, setNextSteps] = useState<string[]>([])
+  const [portalHref, setPortalHref] = useState('')
+  const [emailed, setEmailed] = useState(false)
   const [consents, setConsents] = useState<ConsentAck[] | null>(prefilledConsents ?? null)
   const [consentComplete, setConsentComplete] = useState(Boolean(prefilledConsents?.length))
   const cardRef = useRef<SquareCard | null>(null)
 
   const consentKind: CheckoutConsentKind =
-    payBody.kind === 'membership' || payBody.kind === 'program'
+    payBody.kind === 'membership' || payBody.kind === 'program' || payBody.kind === 'event'
       ? payBody.kind
       : 'product'
-  const needsConsent = payBody.kind === 'membership' || payBody.kind === 'program'
+  const needsConsent =
+    payBody.kind === 'membership' || payBody.kind === 'program' || payBody.kind === 'event'
   const showConsentUi = needsConsent && !prefilledConsents?.length
 
   const onConsentChange = useCallback((acks: ConsentAck[] | null, complete: boolean) => {
@@ -196,9 +201,15 @@ export function PortalCardCheckout({
       const data = await response.json()
       if (!response.ok) throw new Error(data.error ?? 'Payment failed.')
 
+      const conf = data.confirmation as
+        | { nextSteps?: string[]; portalHref?: string; emailed?: boolean }
+        | undefined
+      setNextSteps(Array.isArray(conf?.nextSteps) ? conf.nextSteps : [])
+      setPortalHref(typeof conf?.portalHref === 'string' ? conf.portalHref : '/member-portal')
+      setEmailed(Boolean(conf?.emailed))
       setSuccess('Payment successful — thank you!')
       onPaid?.(data)
-      setTimeout(() => onClose(), 1200)
+      setTimeout(() => onClose(), conf?.nextSteps?.length ? 6000 : 1400)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Payment failed.')
     } finally {
@@ -272,7 +283,30 @@ export function PortalCardCheckout({
           <p className="text-xs text-amber-700">Card payments are temporarily unavailable.</p>
         ) : null}
         {error ? <p className="text-xs text-red-600">{error}</p> : null}
-        {success ? <p className="text-xs font-semibold text-green-700">{success}</p> : null}
+        {success ? (
+          <div className="rounded-lg border border-green-200 bg-green-50 p-3 space-y-2">
+            <p className="text-xs font-semibold text-green-800">{success}</p>
+            {emailed ? (
+              <p className="text-[11px] text-green-800">A confirmation email is on its way.</p>
+            ) : (
+              <p className="text-[11px] text-green-800">
+                Confirmation is also in Member Portal → Messages.
+              </p>
+            )}
+            {nextSteps.length ? (
+              <ul className="text-[11px] text-green-900 space-y-1 list-disc pl-4">
+                {nextSteps.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ul>
+            ) : null}
+            {portalHref ? (
+              <a href={portalHref} className="text-[11px] font-semibold underline text-green-900">
+                Continue in portal
+              </a>
+            ) : null}
+          </div>
+        ) : null}
 
         <Button
           type="button"
@@ -303,9 +337,15 @@ export function PortalCardCheckout({
             consents: needsConsent ? consents ?? undefined : undefined,
           }}
           onPaid={(data) => {
+            const conf = data.confirmation as
+              | { nextSteps?: string[]; portalHref?: string; emailed?: boolean }
+              | undefined
+            setNextSteps(Array.isArray(conf?.nextSteps) ? conf.nextSteps : [])
+            setPortalHref(typeof conf?.portalHref === 'string' ? conf.portalHref : '/member-portal')
+            setEmailed(Boolean(conf?.emailed))
             setSuccess('PayPal payment successful — thank you!')
             onPaid?.(data)
-            setTimeout(() => onClose(), 1200)
+            setTimeout(() => onClose(), conf?.nextSteps?.length ? 6000 : 1400)
           }}
           onError={(message) => setError(message)}
         />

@@ -165,15 +165,22 @@ export function NavbarClient({ links }: Props) {
               </Link>
             </div>
           ) : (
-            <Link href="/auth/join?returnTo=%2Fmembership">
-              <Button
-                size="sm"
-                className="text-white font-semibold"
-                style={{ backgroundColor: '#085508' }}
-              >
-                Become a member
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/auth/join?mode=login&returnTo=%2Fmember-portal">
+                <Button size="sm" variant="outline" className="font-semibold">
+                  Already a member
+                </Button>
+              </Link>
+              <Link href="/auth/join?returnTo=%2Fmembership">
+                <Button
+                  size="sm"
+                  className="text-white font-semibold"
+                  style={{ backgroundColor: '#085508' }}
+                >
+                  Join
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
 
@@ -260,14 +267,24 @@ export function NavbarClient({ links }: Props) {
                   </Button>
                 </div>
               ) : (
-                <Button
-                  className="w-full text-white font-semibold"
-                  style={{ backgroundColor: '#085508' }}
-                  onClick={() => navigate('/auth/join?returnTo=%2Fmembership')}
-                  disabled={Boolean(pendingHref)}
-                >
-                  Become a member
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    className="w-full text-white font-semibold"
+                    style={{ backgroundColor: '#085508' }}
+                    onClick={() => navigate('/auth/join?returnTo=%2Fmembership')}
+                    disabled={Boolean(pendingHref)}
+                  >
+                    Join
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full font-semibold"
+                    onClick={() => navigate('/auth/join?mode=login&returnTo=%2Fmember-portal')}
+                    disabled={Boolean(pendingHref)}
+                  >
+                    Already a member
+                  </Button>
+                </div>
               )}
             </li>
           </ul>

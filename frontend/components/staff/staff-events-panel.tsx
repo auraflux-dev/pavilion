@@ -22,6 +22,8 @@ const emptyForm = {
   startDate: '',
   endDate: '',
   registrationType: 'RSVP',
+  ticketPrice: '',
+  capacity: '',
   draft: false,
 }
 
@@ -65,6 +67,8 @@ export function StaffEventsPanel() {
       startDate: e.startDate ? e.startDate.slice(0, 16) : '',
       endDate: e.endDate ? e.endDate.slice(0, 16) : '',
       registrationType: 'RSVP',
+      ticketPrice: '',
+      capacity: '',
       draft: false,
     })
     setShowForm(true)
@@ -103,6 +107,8 @@ export function StaffEventsPanel() {
             startDate: form.startDate,
             endDate: form.endDate || form.startDate,
             registrationType: form.registrationType,
+            ticketPrice: form.ticketPrice ? Number(form.ticketPrice) : 0,
+            capacity: form.capacity ? Number(form.capacity) : 0,
             draft: form.draft,
           }),
         })
@@ -244,6 +250,27 @@ export function StaffEventsPanel() {
                 <option value="RSVP">RSVP (free)</option>
                 <option value="TICKETING">Ticketed</option>
               </select>
+              {form.registrationType === 'TICKETING' ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    value={form.ticketPrice}
+                    onChange={(e) => setForm({ ...form, ticketPrice: e.target.value })}
+                    placeholder="Ticket price ($)"
+                    className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.capacity}
+                    onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+                    placeholder="Capacity (0 = unlimited)"
+                    className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+              ) : null}
               <label className="flex items-center gap-2 text-xs text-[#5A6070]">
                 <input
                   type="checkbox"

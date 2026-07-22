@@ -107,12 +107,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const ticketPrice = Number(body.ticketPrice ?? 0) || 0
+    const capacity = Number(body.capacity ?? 0) || 0
+    if (id && initialType === 'TICKETING' && ticketPrice > 0) {
+      const { upsertEventTicketOffer } = await import('@/lib/events/tickets')
+      await upsertEventTicketOffer({
+        eventId: id,
+        eventTitle: title,
+        ticketPrice,
+        capacity,
+        registrationOpen: !draft,
+        active: true,
+      })
+    }
+
     return NextResponse.json({
       ok: true,
       id,
       slug: (created as { slug?: string }).slug ?? '',
       status: (created as { status?: string }).status ?? '',
       draft,
+      ticketPrice: initialType === 'TICKETING' ? ticketPrice : 0,
     })
   } catch (err) {
     console.error('/api/staff/events POST', err)
@@ -170,6 +185,22 @@ export async function PATCH(req: NextRequest) {
     await client.wixEventsV2.updateEvent(id, { event } as unknown as Parameters<
       typeof client.wixEventsV2.updateEvent
     >[1])
+
+    if (body.ticketPrice != null || body.capacity != null || body.ticketsOpen != null) {
+      const ticketPrice = Number(body.ticketPrice ?? 0) || 0
+      if (ticketPrice > 0) {
+        const { upsertEventTicketOffer } = await import('@/lib/events/tickets')
+        await upsertEventTicketOffer({
+          eventId: id,
+          eventTitle: String(body.title ?? event.title ?? 'Event'),
+          ticketPrice,
+          capacity: Number(body.capacity ?? 0) || 0,
+          registrationOpen: body.ticketsOpen !== false,
+          active: true,
+        })
+      }
+    }
+
     return NextResponse.json({ ok: true, id, action: 'update' })
   } catch (err) {
     console.error('/api/staff/events PATCH', err)

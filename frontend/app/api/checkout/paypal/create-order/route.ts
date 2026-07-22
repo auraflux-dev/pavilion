@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const intent = body as CheckoutIntent & { consents?: ConsentAck[] }
-    if (!intent.kind || !['membership', 'product', 'store-card', 'program'].includes(intent.kind)) {
+    if (!intent.kind || !['membership', 'product', 'store-card', 'program', 'event'].includes(intent.kind)) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
     }
 

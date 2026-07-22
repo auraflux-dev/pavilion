@@ -1,5 +1,10 @@
+'use client'
+
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Calendar, Clock, MapPin } from 'lucide-react'
+import { Calendar, Clock, MapPin, Ticket } from 'lucide-react'
+import { MemberGate } from '@/components/member-gate'
+import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import type { WixEvent } from '@/lib/api/events'
 
 interface EventCardProps {
@@ -7,12 +12,12 @@ interface EventCardProps {
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; accent: string }> = {
-  Meeting:     { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Social:      { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Meeting: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Social: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
   Competition: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Fundraiser:  { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Workshop:    { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  default:     { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Fundraiser: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Workshop: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  default: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
 }
 
 function getColors(tags?: string[]) {
@@ -43,6 +48,15 @@ export function EventCard({ event }: EventCardProps) {
   const colors = getColors(event.tags)
   const { month, day, time } = formatDate(event.dateAndTimeSettings?.startDate)
   const endTime = formatDate(event.dateAndTimeSettings?.endDate).time
+  const ticket = event.ticket
+  const [qty, setQty] = useState(1)
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const remaining =
+    ticket && ticket.capacity > 0 ? Math.max(0, ticket.capacity - ticket.soldCount) : null
+  const canBuy =
+    Boolean(ticket?.onSale && ticket.price > 0 && event.id) &&
+    (remaining == null || remaining > 0)
+  const total = ticket ? ticket.price * qty : 0
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col">
@@ -67,7 +81,6 @@ export function EventCard({ event }: EventCardProps) {
       )}
 
       <div className="p-6 flex flex-col flex-1">
-        {/* Date badge + category */}
         <div className="flex items-start justify-between mb-5">
           <div
             className="w-14 h-14 rounded-xl flex flex-col items-center justify-center shadow-sm shrink-0"
@@ -97,12 +110,14 @@ export function EventCard({ event }: EventCardProps) {
           </p>
         )}
 
-        {/* Meta */}
         <div className="space-y-2 mb-6">
           {time && (
             <div className="flex items-center gap-2 text-xs text-[#5A6070]">
               <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-              <span>{time}{endTime ? ` – ${endTime}` : ''}</span>
+              <span>
+                {time}
+                {endTime ? ` – ${endTime}` : ''}
+              </span>
             </div>
           )}
           {event.location?.name && (
@@ -111,19 +126,67 @@ export function EventCard({ event }: EventCardProps) {
               <span>{event.location.name}</span>
             </div>
           )}
+          {canBuy ? (
+            <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: colors.accent }}>
+              <Ticket className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>
+                ${ticket!.price.toFixed(2)} / ticket
+                {remaining != null ? ` · ${remaining} left` : ''}
+              </span>
+            </div>
+          ) : null}
         </div>
 
-        <Button
-          variant="outline"
-          className="w-full font-semibold border-2 hover:text-white transition-colors"
-          style={{ borderColor: colors.accent, color: colors.accent }}
-          asChild
-        >
-          <a href={buildCalendarUrl(event)} target="_blank" rel="noopener noreferrer">
-            <Calendar className="w-4 h-4 mr-2" aria-hidden="true" />
-            Add to Calendar
-          </a>
-        </Button>
+        <div className="space-y-2 mt-auto">
+          {canBuy ? (
+            <>
+              <label className="flex items-center justify-between gap-2 text-xs text-[#5A6070]">
+                Quantity
+                <select
+                  value={qty}
+                  onChange={(e) => setQty(Number(e.target.value))}
+                  className="border border-[#E8E4DC] rounded-lg px-2 py-1"
+                >
+                  {Array.from({ length: Math.min(10, remaining ?? 10) }, (_, i) => i + 1).map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <MemberGate label={`Buy tickets · $${total.toFixed(2)}`}>
+                <Button
+                  className="w-full text-white font-semibold"
+                  style={{ backgroundColor: colors.accent }}
+                  onClick={() => setCheckoutOpen(true)}
+                >
+                  Buy tickets · ${total.toFixed(2)}
+                </Button>
+              </MemberGate>
+              <PortalCardCheckout
+                open={checkoutOpen}
+                onClose={() => setCheckoutOpen(false)}
+                amount={total}
+                title={event.title || 'Event tickets'}
+                subtitle={`${qty} ticket${qty === 1 ? '' : 's'} · $${ticket!.price.toFixed(2)} each`}
+                payBody={{ kind: 'event', eventId: event.id!, quantity: qty }}
+                containerId={`event-pay-${event.id}`}
+                onPaid={() => setCheckoutOpen(false)}
+              />
+            </>
+          ) : null}
+          <Button
+            variant="outline"
+            className="w-full font-semibold border-2 hover:text-white transition-colors"
+            style={{ borderColor: colors.accent, color: colors.accent }}
+            asChild
+          >
+            <a href={buildCalendarUrl(event)} target="_blank" rel="noopener noreferrer">
+              <Calendar className="w-4 h-4 mr-2" aria-hidden="true" />
+              Add to Calendar
+            </a>
+          </Button>
+        </div>
       </div>
     </article>
   )

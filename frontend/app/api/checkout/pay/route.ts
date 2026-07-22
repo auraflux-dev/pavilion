@@ -36,7 +36,7 @@ import {
   type CheckoutConsentKind,
 } from '@/lib/checkout-consent'
 
-type Kind = 'membership' | 'product' | 'store-card' | 'program'
+type Kind = 'membership' | 'product' | 'store-card' | 'program' | 'event'
 
 type StudentRow = {
   _id: string
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     const saveCard = Boolean(body.saveCard)
     const consents = body.consents as ConsentAck[] | undefined
 
-    if (!kind || !['membership', 'product', 'store-card', 'program'].includes(kind)) {
+    if (!kind || !['membership', 'product', 'store-card', 'program', 'event'].includes(kind)) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
     }
 
@@ -154,6 +154,37 @@ export async function POST(req: NextRequest) {
       const resolved = await resolveCheckoutIntent(
         { kind: 'program', programId, studentId },
         session.email
+      )
+      const paymentKey = randomUUID()
+      const payment = await chargePayment({
+        sourceId: paymentSource,
+        amountCents: resolved.amountCents,
+        idempotencyKey: paymentKey,
+        customerId,
+        referenceId: resolved.customId,
+        buyerEmailAddress: session.email,
+        note: resolved.description,
+      })
+      const result = await fulfillPaidCheckout({
+        resolved,
+        parentEmail: session.email,
+        parentName: name,
+        transactionId: payment.id ?? paymentKey,
+        paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
+        sourcePrefix: 'square',
+        consents: consentCheck.acks,
+      })
+      return NextResponse.json({ ok: true, ...result })
+    }
+
+    // ── Event tickets ───────────────────────────────────────────
+    if (kind === 'event') {
+      const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
+      const eventId = String(body.eventId ?? '').trim()
+      const quantity = Number(body.quantity ?? 1) || 1
+      const resolved = await resolveCheckoutIntent(
+        { kind: 'event', eventId, quantity },
+        session.email,
       )
       const paymentKey = randomUUID()
       const payment = await chargePayment({

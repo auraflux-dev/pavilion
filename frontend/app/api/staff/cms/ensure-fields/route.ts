@@ -228,6 +228,77 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    for (const spec of [
+      {
+        id: 'EventTicketOffers',
+        displayName: 'Event Ticket Offers',
+        fields: [
+          { key: 'eventId', displayName: 'Event ID', type: 'TEXT' },
+          { key: 'eventTitle', displayName: 'Event Title', type: 'TEXT' },
+          { key: 'ticketPrice', displayName: 'Ticket Price', type: 'NUMBER' },
+          { key: 'capacity', displayName: 'Capacity', type: 'NUMBER' },
+          { key: 'soldCount', displayName: 'Sold Count', type: 'NUMBER' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+          { key: 'registrationOpen', displayName: 'Registration Open', type: 'BOOLEAN' },
+        ],
+      },
+      {
+        id: 'EventTicketOrders',
+        displayName: 'Event Ticket Orders',
+        fields: [
+          { key: 'eventId', displayName: 'Event ID', type: 'TEXT' },
+          { key: 'eventTitle', displayName: 'Event Title', type: 'TEXT' },
+          { key: 'parentEmail', displayName: 'Parent Email', type: 'TEXT' },
+          { key: 'parentName', displayName: 'Parent Name', type: 'TEXT' },
+          { key: 'quantity', displayName: 'Quantity', type: 'NUMBER' },
+          { key: 'amount', displayName: 'Amount', type: 'NUMBER' },
+          { key: 'ticketPrice', displayName: 'Ticket Price', type: 'NUMBER' },
+          { key: 'transactionId', displayName: 'Transaction ID', type: 'TEXT' },
+          { key: 'status', displayName: 'Status', type: 'TEXT' },
+          { key: 'purchasedAt', displayName: 'Purchased At', type: 'DATETIME' },
+        ],
+      },
+    ] as const) {
+      const getRes = await fetch(`https://www.wixapis.com/wix-data/v2/collections/${spec.id}`, {
+        method: 'GET',
+        headers,
+      })
+      if (getRes.status === 404 || !getRes.ok) {
+        const createRes = await fetch('https://www.wixapis.com/wix-data/v2/collections', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            collection: {
+              id: spec.id,
+              displayName: spec.displayName,
+              fields: [...spec.fields],
+              permissions: {
+                insert: 'ADMIN',
+                update: 'ADMIN',
+                remove: 'ADMIN',
+                read: 'ADMIN',
+              },
+            },
+          }),
+        })
+        const createBody = await createRes.json().catch(() => ({}))
+        results.push({
+          collectionId: spec.id,
+          ok: createRes.ok,
+          created: createRes.ok ? ['(collection)'] : [],
+          existing: [],
+          error: createRes.ok ? undefined : JSON.stringify(createBody).slice(0, 200),
+        })
+      } else {
+        results.push(
+          await ensureFields(
+            spec.id,
+            spec.fields.map((f) => ({ key: f.key, displayName: f.displayName, type: f.type })),
+          ),
+        )
+      }
+    }
+
     return NextResponse.json({ ok: results.every((r) => r.ok), results })
   } catch (err) {
     console.error('ensure-fields', err)

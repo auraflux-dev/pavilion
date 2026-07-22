@@ -10,6 +10,7 @@ import { SocialComposePanel } from '@/components/staff/social-compose-panel'
 import { StaffTasksPanel } from '@/components/staff/staff-tasks-panel'
 import { StaffMinutesPanel } from '@/components/staff/staff-minutes-panel'
 import { StaffProgramsPanel } from '@/components/staff/staff-programs-panel'
+import { StaffReportsPanel } from '@/components/staff/staff-reports-panel'
 import { StaffPaymentsPanel } from '@/components/staff/staff-payments-panel'
 import { StaffEventsPanel } from '@/components/staff/staff-events-panel'
 import { StaffRetailPanel } from '@/components/staff/staff-retail-panel'
@@ -83,6 +84,7 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'newsletter',
   'expenses',
   'timesheets',
+  'reports',
   'help',
 ]
 
@@ -248,6 +250,16 @@ export function StaffDashboard() {
     if (canFundraising) items.push({ id: 'fundraising', label: STAFF_WORKSPACE_LABEL.fundraising })
     if (canWellness) items.push({ id: 'wellness', label: STAFF_WORKSPACE_LABEL.wellness })
     if (canNewsletter) items.push({ id: 'newsletter', label: STAFF_WORKSPACE_LABEL.newsletter })
+    if (
+      canPrograms ||
+      canRetail ||
+      canPayments ||
+      canMembership ||
+      canEvents ||
+      me.isAdmin
+    ) {
+      items.push({ id: 'reports', label: STAFF_WORKSPACE_LABEL.reports })
+    }
     items.push({ id: 'help', label: STAFF_WORKSPACE_LABEL.help })
     return items
   }, [
@@ -622,6 +634,17 @@ export function StaffDashboard() {
         {active === 'programs' && canPrograms ? <StaffProgramsPanel /> : null}
         {active === 'timesheets' && canTimesheets ? <StaffTimesheetsPanel /> : null}
         {active === 'payments' && canPayments ? <StaffPaymentsPanel /> : null}
+        {active === 'reports' ? (
+          <StaffReportsPanel
+            allowedFocuses={[
+              ...(canPrograms || me?.isAdmin ? (['programs'] as const) : []),
+              ...(canRetail || me?.isAdmin || canPayments ? (['cove'] as const) : []),
+              ...(canPayments || me?.isAdmin ? (['payments'] as const) : []),
+              ...(canMembership || me?.isAdmin || canPayments ? (['membership'] as const) : []),
+              ...(canEvents || me?.isAdmin || canPayments ? (['events'] as const) : []),
+            ]}
+          />
+        ) : null}
         {active === 'events' && canEvents ? (
           <div className="space-y-4">
             <StaffEventsPanel />

@@ -20,8 +20,12 @@ import {
 } from '@/lib/store-card-bonus'
 import { enrollInProgram } from '@/lib/program-enroll'
 import type { ConsentAck } from '@/lib/checkout-consent'
+import {
+  sendPurchaseConfirmation,
+  type PurchaseConfirmationInput,
+} from '@/lib/purchase-confirmation'
 
-export type CheckoutKind = 'membership' | 'product' | 'store-card' | 'program'
+export type CheckoutKind = 'membership' | 'product' | 'store-card' | 'program' | 'event'
 
 export type CheckoutIntent = {
   kind: CheckoutKind
@@ -29,6 +33,8 @@ export type CheckoutIntent = {
   studentId?: string | null
   productId?: string
   programId?: string
+  eventId?: string
+  quantity?: number
   amountCents?: number
   consents?: import('@/lib/checkout-consent').ConsentAck[]
 }
@@ -50,6 +56,27 @@ type StudentRow = {
   parentEmail?: string
   squareGiftCardGan?: string
   archived?: boolean
+}
+
+async function attachPurchaseConfirmation(
+  result: Record<string, unknown>,
+  input: PurchaseConfirmationInput,
+): Promise<Record<string, unknown>> {
+  try {
+    const confirmation = await sendPurchaseConfirmation(input)
+    return {
+      ...result,
+      confirmation: {
+        subject: confirmation.subject,
+        nextSteps: confirmation.nextSteps,
+        portalHref: confirmation.portalHref,
+        emailed: confirmation.emailed,
+      },
+    }
+  } catch (err) {
+    console.warn('[checkout-fulfill] confirmation failed', err)
+    return result
+  }
 }
 
 export async function resolveCheckoutIntent(
@@ -115,6 +142,38 @@ export async function resolveCheckoutIntent(
         programId,
         programName: program.name,
         studentId,
+      },
+    }
+  }
+
+  if (kind === 'event') {
+    const { getEventTicketOffer } = await import('@/lib/events/tickets')
+    const eventId = String(intent.eventId ?? '').trim()
+    const quantity = Math.max(1, Math.min(10, Number(intent.quantity ?? 1) || 1))
+    if (!eventId) throw new Error('Event required')
+    const offer = await getEventTicketOffer(eventId)
+    if (!offer || !offer.active || !offer.registrationOpen) {
+      throw new Error('Tickets are not on sale for this event')
+    }
+    const price = Number(offer.ticketPrice ?? 0)
+    if (price <= 0) throw new Error('Ticket price not configured')
+    const capacity = Number(offer.capacity ?? 0) || 0
+    const sold = Number(offer.soldCount ?? 0) || 0
+    if (capacity > 0 && sold + quantity > capacity) {
+      throw new Error('Not enough tickets remaining')
+    }
+    const amount = price * quantity
+    return {
+      kind,
+      amount,
+      amountCents: Math.round(amount * 100),
+      description: `Event tickets — ${offer.eventTitle} × ${quantity}`,
+      customId: `event:${eventId.slice(0, 36)}`,
+      meta: {
+        eventId,
+        eventTitle: offer.eventTitle,
+        quantity: String(quantity),
+        ticketPrice: String(price),
       },
     }
   }
@@ -187,11 +246,23 @@ export async function fulfillPaidCheckout(opts: {
       studentId: resolved.meta.studentId,
       notes: resolved.meta.programId,
     })
-    return {
-      kind: 'program',
-      ...enrolled,
-      paymentId: transactionId,
-    }
+    return attachPurchaseConfirmation(
+      {
+        kind: 'program',
+        ...enrolled,
+        paymentId: transactionId,
+      },
+      {
+        kind: 'program',
+        parentEmail,
+        parentName,
+        amount: resolved.amount,
+        description: resolved.description,
+        transactionId,
+        meta: resolved.meta,
+        extras: enrolled as Record<string, unknown>,
+      },
+    )
   }
 
   if (resolved.kind === 'membership') {
@@ -214,7 +285,18 @@ export async function fulfillPaidCheckout(opts: {
       source: `${sourcePrefix}_membership`,
       parentEmail,
     })
-    return { kind: 'membership', tier, applied, paymentId: transactionId }
+    return attachPurchaseConfirmation(
+      { kind: 'membership', tier, applied, paymentId: transactionId },
+      {
+        kind: 'membership',
+        parentEmail,
+        parentName,
+        amount: resolved.amount,
+        description: resolved.description,
+        transactionId,
+        meta: resolved.meta,
+      },
+    )
   }
 
   if (resolved.kind === 'product') {
@@ -229,13 +311,67 @@ export async function fulfillPaidCheckout(opts: {
       parentEmail,
       notes: resolved.meta.productId,
     })
-    return {
-      kind: 'product',
-      productId: resolved.meta.productId,
-      productName: resolved.meta.productName,
+    return attachPurchaseConfirmation(
+      {
+        kind: 'product',
+        productId: resolved.meta.productId,
+        productName: resolved.meta.productName,
+        amount: resolved.amount,
+        paymentId: transactionId,
+      },
+      {
+        kind: 'product',
+        parentEmail,
+        parentName,
+        amount: resolved.amount,
+        description: resolved.description,
+        transactionId,
+        meta: resolved.meta,
+      },
+    )
+  }
+
+  if (resolved.kind === 'event') {
+    const { recordEventTicketSale } = await import('@/lib/events/tickets')
+    const quantity = Math.max(1, Number(resolved.meta.quantity ?? 1) || 1)
+    await recordEventTicketSale({
+      eventId: resolved.meta.eventId,
+      quantity,
+      parentEmail,
+      parentName,
+      transactionId,
       amount: resolved.amount,
-      paymentId: transactionId,
-    }
+    })
+    await client.items.insert('Payments', {
+      programName: `Event — ${resolved.meta.eventTitle}`,
+      amount: resolved.amount,
+      status: 'Paid',
+      paymentDate: new Date().toISOString(),
+      paymentMethod,
+      transactionId,
+      source: `${sourcePrefix}_event_ticket`,
+      parentEmail,
+      notes: `${resolved.meta.eventId}|qty:${quantity}`,
+    })
+    return attachPurchaseConfirmation(
+      {
+        kind: 'event',
+        eventId: resolved.meta.eventId,
+        eventTitle: resolved.meta.eventTitle,
+        quantity,
+        amount: resolved.amount,
+        paymentId: transactionId,
+      },
+      {
+        kind: 'event',
+        parentEmail,
+        parentName,
+        amount: resolved.amount,
+        description: resolved.description,
+        transactionId,
+        meta: resolved.meta,
+      },
+    )
   }
 
   const studentId = resolved.meta.studentId
@@ -294,13 +430,25 @@ export async function fulfillPaidCheckout(opts: {
           ? `Paid $${resolved.amount}; loaded $${(loadCents / 100).toFixed(2)} (+${bonusPercent}%) on family card`
           : 'Family Cove card load',
     })
-    return {
-      kind: 'store-card',
-      paymentId: transactionId,
-      bonusPercent,
-      loadedCents: loadCents,
-      newBalance,
-    }
+    return attachPurchaseConfirmation(
+      {
+        kind: 'store-card',
+        paymentId: transactionId,
+        bonusPercent,
+        loadedCents: loadCents,
+        newBalance,
+      },
+      {
+        kind: 'store-card',
+        parentEmail: parentEmailForCard,
+        parentName,
+        amount: resolved.amount,
+        description: resolved.description,
+        transactionId,
+        meta: resolved.meta,
+        extras: { newBalance, bonusPercent },
+      },
+    )
   } catch (loadError) {
     await client.items.insert('Payments', {
       studentId,

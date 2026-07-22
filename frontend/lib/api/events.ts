@@ -12,6 +12,12 @@ export interface WixEvent {
   mainImage?: { url?: string };
   slug?: string;
   tags?: string[];
+  ticket?: {
+    price: number;
+    capacity: number;
+    soldCount: number;
+    onSale: boolean;
+  };
 }
 
 /** Extract plain text from a Wix rich-text description node tree or return the string as-is. */
@@ -66,7 +72,7 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
     });
 
     // Hide Wix template placeholder events still in the Events catalog
-    return mapped.filter((ev) => {
+    const filtered = mapped.filter((ev) => {
       const desc = (ev.description || "").toLowerCase();
       const title = (ev.title || "").toLowerCase();
       if (desc.includes("click here to open up the event editor")) return false;
@@ -75,6 +81,27 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
       if (title === "bake sale" && desc.includes("event editor")) return false;
       return true;
     });
+
+    try {
+      const { listEventTicketOffers } = await import("@/lib/events/tickets");
+      const offers = await listEventTicketOffers();
+      const byId = new Map(offers.map((o) => [o.eventId, o]));
+      return filtered.map((ev) => {
+        const offer = ev.id ? byId.get(ev.id) : undefined;
+        if (!offer || offer.ticketPrice <= 0) return ev;
+        return {
+          ...ev,
+          ticket: {
+            price: offer.ticketPrice,
+            capacity: offer.capacity,
+            soldCount: offer.soldCount,
+            onSale: offer.active && offer.registrationOpen,
+          },
+        };
+      });
+    } catch {
+      return filtered;
+    }
   } catch {
     return [];
   }

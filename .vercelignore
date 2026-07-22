@@ -1,0 +1,11 @@
+.serena
+.DS_Store
+**/node_modules
+**/.next
+frontend/.next
+frontend/node_modules
+tmp
+scripts/shots
+*.tsbuildinfo
+frontend/tsconfig.tsbuildinfo
+.git

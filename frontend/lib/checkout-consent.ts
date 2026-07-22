@@ -5,7 +5,7 @@
 import { getLegalDoc, type LegalDoc, type LegalDocSlug } from '@/lib/api/legal'
 import { getWixClient } from '@/lib/wix-client'
 
-export type CheckoutConsentKind = 'membership' | 'program' | 'store-card' | 'product'
+export type CheckoutConsentKind = 'membership' | 'program' | 'store-card' | 'product' | 'event'
 
 export type ConsentItem = {
   id: string
@@ -61,10 +61,21 @@ const PROGRAM_ITEMS: ConsentItem[] = [
   },
 ]
 
+const EVENT_ITEMS: ConsentItem[] = [
+  {
+    id: 'photo-release',
+    slug: 'photo-release',
+    label: 'I grant permission for photo/media use related to this event',
+    required: true,
+    mode: 'choice',
+  },
+]
+
 /** Store-card / Cove product purchases don't need enrichment waivers. */
 export function consentItemsFor(kind: CheckoutConsentKind): ConsentItem[] {
   if (kind === 'membership') return MEMBERSHIP_ITEMS
   if (kind === 'program') return PROGRAM_ITEMS
+  if (kind === 'event') return EVENT_ITEMS
   return []
 }
 
