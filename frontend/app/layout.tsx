@@ -1,16 +1,53 @@
 import type { Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/next'
 import { Inter, Merriweather } from 'next/font/google'
+import { GoogleAnalytics } from '@/components/google-analytics'
 import './globals.css'
 
 const _inter = Inter({ subsets: ['latin'] })
 const _merriweather = Merriweather({ subsets: ['latin'], weight: ['400', '700', '900'] })
 
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org').replace(/\/$/, '')
+
 export const metadata: Metadata = {
-  title: 'Stone Hill Middle School PTO | Go Stingrays!',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'Stone Hill Middle School PTO | Go Stingrays!',
+    template: '%s | SHMS PTO',
+  },
   description:
     'The Stone Hill Middle School PTO is an active volunteer organization committed to enriching the academic and social experience for all SHMS students and families in Ashburn, Virginia.',
-  keywords: ['Stone Hill Middle School', 'PTO', 'Ashburn', 'Virginia', 'Stingrays', 'SHMS'],
-  generator: 'v0.app',
+  keywords: [
+    'Stone Hill Middle School',
+    'PTO',
+    'Ashburn',
+    'Virginia',
+    'Stingrays',
+    'SHMS',
+    'LCPS',
+  ],
+  applicationName: 'SHMS PTO',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: siteUrl,
+    siteName: 'SHMS PTO',
+    title: 'Stone Hill Middle School PTO | Go Stingrays!',
+    description:
+      'Enriching the academic and social experience for all SHMS students and families in Ashburn, Virginia.',
+    images: [{ url: '/shms-logo.png', width: 1200, height: 1200, alt: 'SHMS PTO Stingrays' }],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Stone Hill Middle School PTO | Go Stingrays!',
+    description:
+      'Enriching the academic and social experience for all SHMS students and families in Ashburn, Virginia.',
+    images: ['/shms-logo.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({
@@ -20,7 +57,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-background">
-      <body className="font-sans antialiased text-foreground">{children}</body>
+      <body className="font-sans antialiased text-foreground">
+        {children}
+        <Analytics />
+        <GoogleAnalytics />
+      </body>
     </html>
   )
 }
