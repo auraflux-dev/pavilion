@@ -1,7 +1,6 @@
 import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { PortalReturnBar } from '@/components/portal-return-bar'
 import { StoreCardHero } from '@/components/store/store-card-hero'
 import { DealsStrip } from '@/components/store/deals-strip'
 import { StoreGrid } from '@/components/store/store-grid'
@@ -52,7 +51,6 @@ export default async function CovePage() {
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
-      <PortalReturnBar />
 
       <main id="main-content">
         <StoreCardHero

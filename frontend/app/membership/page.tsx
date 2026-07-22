@@ -1,7 +1,6 @@
 import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { PortalReturnBar } from '@/components/portal-return-bar'
 import { MembershipTiers } from '@/components/membership/membership-tiers'
 import { MembershipCheckoutHandler } from '@/components/membership/membership-checkout-handler'
 import { PageHero } from '@/components/page-hero'
@@ -36,7 +35,6 @@ export default async function MembershipPage() {
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
-      <PortalReturnBar />
 
       <main id="main-content">
         <PageHero content={page} />
