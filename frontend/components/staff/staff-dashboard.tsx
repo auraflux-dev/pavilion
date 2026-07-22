@@ -110,6 +110,9 @@ export function StaffDashboard() {
   const [msgProgram, setMsgProgram] = useState('')
   const [msgStatus, setMsgStatus] = useState('')
   const [msgBusy, setMsgBusy] = useState(false)
+  const [activityItems, setActivityItems] = useState<
+    { id: string; label: string; count: number; href: string; tone: 'info' | 'warn' }[]
+  >([])
 
   useEffect(() => {
     fetch('/api/staff/me')
@@ -120,6 +123,17 @@ export function StaffDashboard() {
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Not authorized'))
   }, [])
+
+  useEffect(() => {
+    if (!me) return
+    fetch('/api/staff/activity')
+      .then(async (r) => {
+        const data = await r.json()
+        if (!r.ok) return
+        setActivityItems(Array.isArray(data.items) ? data.items : [])
+      })
+      .catch(() => null)
+  }, [me])
 
   const canMarketing = Boolean(me && (me.roles.includes('marketing') || me.isAdmin))
   const canSurveys = Boolean(
@@ -426,6 +440,39 @@ export function StaffDashboard() {
                 that job.
               </p>
             </div>
+            {activityItems.length > 0 ? (
+              <div className="rounded-xl border border-[#085508]/25 bg-[#E8F3E8] p-4 space-y-2">
+                <p className="text-sm font-bold text-[#085508]">Needs your attention</p>
+                <ul className="space-y-1.5">
+                  {activityItems.map((item) => (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const view = new URL(item.href, 'https://www.shmspto.org').searchParams.get(
+                            'view',
+                          )
+                          if (view) go(view as StaffWorkspace)
+                          else router.push(item.href)
+                        }}
+                        className="w-full text-left text-sm text-[#1A1A1A] hover:underline flex items-center justify-between gap-3"
+                      >
+                        <span>{item.label}</span>
+                        <span
+                          className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${
+                            item.tone === 'warn'
+                              ? 'bg-amber-100 text-amber-900'
+                              : 'bg-white text-[#085508]'
+                          }`}
+                        >
+                          {item.count}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {navItems
                 .filter((i) => i.id !== 'home')

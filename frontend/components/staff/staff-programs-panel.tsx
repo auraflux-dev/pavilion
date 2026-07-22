@@ -11,7 +11,6 @@ type Program = {
   fee: number
   capacity: number
   registrationOpen: boolean
-  cheddarupUrl: string
   grades: string
   featured: boolean
   schedule: string
@@ -564,19 +563,6 @@ export function StaffProgramsPanel() {
                   </button>
                 </div>
               </div>
-              {canManageAll ? (
-                <input
-                  defaultValue={p.cheddarupUrl}
-                  placeholder="CheddarUp URL"
-                  className="w-full border border-[#E8E4DC] rounded-lg px-3 py-1.5 text-xs"
-                  onBlur={(e) => {
-                    if (e.target.value !== p.cheddarupUrl) {
-                      void patchProgram(p.id, { cheddarupUrl: e.target.value })
-                    }
-                  }}
-                />
-              ) : null}
-
               <div className="grid sm:grid-cols-2 gap-2 pt-1">
                 <input
                   defaultValue={p.dayOfWeek}

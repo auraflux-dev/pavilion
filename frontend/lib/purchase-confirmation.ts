@@ -4,7 +4,7 @@
  * checkout still succeeds if mail is unavailable.
  */
 import { getWixClient } from '@/lib/wix-client'
-import { gmailConfigured, sendMassEmail } from '@/lib/staff/mass-email'
+import { sendMassEmail } from '@/lib/staff/mass-email'
 
 export type PurchaseConfirmKind = 'membership' | 'product' | 'store-card' | 'program' | 'event'
 
@@ -164,23 +164,19 @@ export async function sendPurchaseConfirmation(
   await insertPortalMessage(input, copy)
 
   let emailed = false
-  if (gmailConfigured()) {
-    try {
-      const result = await sendMassEmail({
-        subject: copy.subject,
-        body: copy.body,
-        fromName: 'SHMS PTO',
-        recipients: [input.parentEmail],
-      })
-      emailed = result.ok && result.sent > 0
-      if (!result.ok) {
-        console.warn('[purchase-confirmation] email failed', result.errors)
-      }
-    } catch (err) {
-      console.warn('[purchase-confirmation] email error', err)
+  try {
+    const result = await sendMassEmail({
+      subject: copy.subject,
+      body: copy.body,
+      fromName: 'SHMS PTO',
+      recipients: [input.parentEmail],
+    })
+    emailed = result.ok && result.sent > 0
+    if (!result.ok) {
+      console.warn('[purchase-confirmation] email skipped/failed', result.errors)
     }
-  } else {
-    console.warn('[purchase-confirmation] Gmail not configured — portal message only')
+  } catch (err) {
+    console.warn('[purchase-confirmation] email error', err)
   }
 
   return { ...copy, emailed }

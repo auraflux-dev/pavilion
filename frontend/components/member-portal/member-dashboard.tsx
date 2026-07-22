@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   LogOut,
   Loader2,
@@ -112,6 +112,20 @@ function fmtShortDate(d: string | null) {
   }
 }
 
+const MESSAGES_SEEN_KEY = 'shmspto.portal.messagesSeenAt'
+
+function readMessagesSeenAt(): number {
+  if (typeof window === 'undefined') return 0
+  const raw = window.localStorage.getItem(MESSAGES_SEEN_KEY)
+  const n = raw ? Date.parse(raw) : NaN
+  return Number.isFinite(n) ? n : 0
+}
+
+function markMessagesSeen() {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(MESSAGES_SEEN_KEY, new Date().toISOString())
+}
+
 export function MemberDashboard({
   link6 = '',
   link7 = '',
@@ -128,6 +142,8 @@ export function MemberDashboard({
   const [purchases, setPurchases] = useState<PurchaseItem[]>([])
   const [status, setStatus] = useState<'loading' | 'error' | 'ok'>('loading')
   const [familyTab, setFamilyTab] = useState<'calendar' | 'messages'>('calendar')
+  const [messagesSeenAt, setMessagesSeenAt] = useState(0)
+  const [dismissedActivity, setDismissedActivity] = useState(false)
 
   async function load() {
     setStatus('loading')
@@ -157,6 +173,7 @@ export function MemberDashboard({
   }
 
   useEffect(() => {
+    setMessagesSeenAt(readMessagesSeenAt())
     load()
   }, [])
 
@@ -168,6 +185,38 @@ export function MemberDashboard({
     const el = document.getElementById(id)
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [status])
+
+  const newMessageCount = useMemo(() => {
+    // No prior visit recorded yet — do not treat the whole inbox as "new".
+    if (!messagesSeenAt) return 0
+    return messages.filter((m) => {
+      if (!m.sentAt) return false
+      const t = Date.parse(m.sentAt)
+      return Number.isFinite(t) && t > messagesSeenAt
+    }).length
+  }, [messages, messagesSeenAt])
+
+  useEffect(() => {
+    if (messagesSeenAt) return
+    if (status !== 'ok') return
+    // Baseline "seen" on first portal open after this feature ships.
+    markMessagesSeen()
+    setMessagesSeenAt(Date.now())
+  }, [messagesSeenAt, status])
+
+  function openMessages() {
+    setFamilyTab('messages')
+    markMessagesSeen()
+    setMessagesSeenAt(Date.now())
+    setDismissedActivity(true)
+    document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  useEffect(() => {
+    if (familyTab !== 'messages') return
+    markMessagesSeen()
+    setMessagesSeenAt(Date.now())
+  }, [familyTab])
 
   async function handleLogout() {
     try {
@@ -230,6 +279,42 @@ export function MemberDashboard({
     <div className="space-y-4">
       <PortalSectionNav />
 
+      {!dismissedActivity && newMessageCount > 0 ? (
+        <div className="rounded-xl border border-[#085508]/30 bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-start gap-2 min-w-0">
+            <Mail className="w-4 h-4 mt-0.5 shrink-0 text-[#085508]" aria-hidden />
+            <div>
+              <p className="text-sm font-bold text-[#085508]">
+                {newMessageCount === 1
+                  ? 'You have a new message'
+                  : `You have ${newMessageCount} new messages`}
+              </p>
+              <p className="text-xs text-[#1A1A1A]/80 mt-0.5">
+                Purchase confirmations, class notes, and PTO updates land here.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              type="button"
+              size="sm"
+              className="text-white"
+              style={{ backgroundColor: '#085508' }}
+              onClick={openMessages}
+            >
+              View messages
+            </Button>
+            <button
+              type="button"
+              className="text-xs font-semibold text-[#5A6070] underline"
+              onClick={() => setDismissedActivity(true)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {/* 2×2 quadrants — D (calendar/messages) first on mobile */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* D — Calendar & Messages (priority) */}
@@ -263,7 +348,11 @@ export function MemberDashboard({
                 }
               >
                 {copy.tabMessages}
-                {messages.length > 0 ? (
+                {newMessageCount > 0 ? (
+                  <span className="ml-1 rounded-full bg-white/25 px-1.5 py-0.5 text-[10px] tabular-nums">
+                    {newMessageCount}
+                  </span>
+                ) : messages.length > 0 ? (
                   <span className="ml-1 opacity-80">({messages.length})</span>
                 ) : null}
               </button>
@@ -334,13 +423,29 @@ export function MemberDashboard({
             </div>
           ) : (
             <ul className="space-y-3 flex-1 overflow-y-auto max-h-[360px] pr-1">
-              {messages.map((m) => (
+              {messages.map((m) => {
+                const isNew =
+                  Boolean(m.sentAt) &&
+                  Number.isFinite(Date.parse(m.sentAt!)) &&
+                  (!messagesSeenAt || Date.parse(m.sentAt!) > messagesSeenAt)
+                return (
                 <li
                   key={m.id}
-                  className="rounded-xl border border-[#E8E4DC] px-3.5 py-3"
+                  className={`rounded-xl border px-3.5 py-3 ${
+                    isNew
+                      ? 'border-[#085508]/40 bg-[#E8F3E8]/50'
+                      : 'border-[#E8E4DC]'
+                  }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <p className="text-xs font-bold text-[#085508]">{m.fromName}</p>
+                    <p className="text-xs font-bold text-[#085508]">
+                      {m.fromName}
+                      {isNew ? (
+                        <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wider text-[#085508]">
+                          New
+                        </span>
+                      ) : null}
+                    </p>
                     <p className="text-[11px] text-[#5A6070]">{fmtShortDate(m.sentAt)}</p>
                   </div>
                   <p className="text-sm font-bold text-[#1A1A1A] mb-1">{m.subject}</p>
@@ -353,7 +458,8 @@ export function MemberDashboard({
                     </p>
                   )}
                 </li>
-              ))}
+                )
+              })}
             </ul>
           )}
         </PortalQuadrant>

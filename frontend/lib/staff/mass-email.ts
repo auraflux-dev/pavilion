@@ -59,9 +59,14 @@ export function validateMassEmailDraft(draft: MassEmailDraft): string | null {
 }
 
 export function gmailConfigured(): boolean {
+  const clientId =
+    process.env.GMAIL_CLIENT_ID?.trim() || process.env.GOOGLE_OAUTH_CLIENT_ID?.trim()
+  const clientSecret =
+    process.env.GMAIL_CLIENT_SECRET?.trim() || process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim()
+  // Env refresh token path — StaffGoogleTokens fallback is checked async in sendMassEmail.
   return Boolean(
-    process.env.GMAIL_CLIENT_ID?.trim() &&
-      process.env.GMAIL_CLIENT_SECRET?.trim() &&
+    clientId &&
+      clientSecret &&
       process.env.GMAIL_REFRESH_TOKEN?.trim() &&
       process.env.GMAIL_SENDER?.trim(),
   )
@@ -73,11 +78,11 @@ export function emailConfigured(): boolean {
 }
 
 export function gmailSenderAddress(): string {
-  return process.env.GMAIL_SENDER?.trim().toLowerCase() || ''
+  return process.env.GMAIL_SENDER?.trim().toLowerCase() || 'membership@shmspto.org'
 }
 
-export function gmailFromHeader(fromName: string): string {
-  const sender = gmailSenderAddress()
+export function gmailFromHeader(fromName: string, senderEmail?: string): string {
+  const sender = (senderEmail || gmailSenderAddress()).trim().toLowerCase()
   const name = (process.env.GMAIL_FROM_NAME?.trim() || fromName || 'SHMS PTO').replace(
     /[\r\n"]/g,
     '',
@@ -118,33 +123,35 @@ export async function sendMassEmail(
     }
   }
 
-  if (!gmailConfigured()) {
-    return {
-      ok: false,
-      mode: 'unavailable',
-      sent: 0,
-      failed: recipients.length,
-      errors: [
-        'Gmail API is not configured. Use mailto BCC, or set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, and GMAIL_SENDER.',
-      ],
-    }
-  }
-
-  let accessToken: string
+  const { resolveGmailSendAuth } = await import('@/lib/staff/gmail-send-auth')
+  let auth: Awaited<ReturnType<typeof resolveGmailSendAuth>> = null
   try {
-    accessToken = await refreshGmailAccessToken()
+    auth = await resolveGmailSendAuth()
   } catch (err) {
     return {
       ok: false,
       mode: 'unavailable',
       sent: 0,
       failed: recipients.length,
-      errors: [err instanceof Error ? err.message : 'Could not refresh Gmail token'],
+      errors: [err instanceof Error ? err.message : 'Could not resolve Gmail auth'],
     }
   }
 
-  const from = gmailFromHeader(draft.fromName)
-  const replyTo = (draft.replyTo || gmailSenderAddress()).trim()
+  if (!auth) {
+    return {
+      ok: false,
+      mode: 'unavailable',
+      sent: 0,
+      failed: recipients.length,
+      errors: [
+        'Gmail send is not ready. In Staff → Inbox, Connect Google while signed in as membership@shmspto.org (or treasurer@), or set GMAIL_REFRESH_TOKEN + GMAIL_SENDER on Vercel.',
+      ],
+    }
+  }
+
+  const accessToken = auth.accessToken
+  const from = gmailFromHeader(draft.fromName, auth.senderEmail)
+  const replyTo = (draft.replyTo || auth.senderEmail).trim()
   const errors: string[] = []
   let sent = 0
   let failed = 0
@@ -197,8 +204,10 @@ export async function sendMassEmail(
 }
 
 export async function refreshGmailAccessToken(): Promise<string> {
-  const clientId = process.env.GMAIL_CLIENT_ID?.trim()
-  const clientSecret = process.env.GMAIL_CLIENT_SECRET?.trim()
+  const clientId =
+    process.env.GMAIL_CLIENT_ID?.trim() || process.env.GOOGLE_OAUTH_CLIENT_ID?.trim()
+  const clientSecret =
+    process.env.GMAIL_CLIENT_SECRET?.trim() || process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim()
   const refreshToken = process.env.GMAIL_REFRESH_TOKEN?.trim()
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error('Missing Gmail OAuth env vars')

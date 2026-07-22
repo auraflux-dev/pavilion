@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Paperclip } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -128,9 +129,12 @@ function AttachFilesButton({ onPick }: { onPick: (list: FileList | null) => void
  * Sapling grammar check on compose/reply (server-side SAPLING_API_KEY).
  */
 export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [status, setStatus] = useState<Status | null>(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [googleJustConnected, setGoogleJustConnected] = useState(false)
 
   const [threads, setThreads] = useState<MailItem[]>([])
   const [selectedThread, setSelectedThread] = useState<ThreadDetail | null>(null)
@@ -206,6 +210,15 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
     if (!r.ok) throw new Error(d.error ?? 'Docs failed')
     setDocs(d.files ?? [])
   }, [])
+
+  useEffect(() => {
+    if (searchParams.get('google') !== 'connected') return
+    setGoogleJustConnected(true)
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('google')
+    const qs = params.toString()
+    router.replace(qs ? `/staff?${qs}` : '/staff?view=inbox')
+  }, [searchParams, router])
 
   useEffect(() => {
     let cancelled = false
@@ -639,6 +652,17 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
       {status && !status.connected ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
           {status.setupHint || 'Google Workspace is not connected yet.'}
+        </div>
+      ) : null}
+
+      {googleJustConnected && status?.connected ? (
+        <div className="rounded-lg border border-[#085508]/30 bg-[#E8F3E8] px-3 py-2 text-xs text-[#085508]">
+          <p className="font-bold">Google connected as {status.email}</p>
+          <p className="mt-1 text-[#1A1A1A]/80">
+            This is your Workspace inbox (same mail as Gmail). Bold rows are unread. Purchase
+            confirmation and form-notify emails send from a connected mailbox (membership@ /
+            treasurer@ preferred).
+          </p>
         </div>
       ) : null}
 

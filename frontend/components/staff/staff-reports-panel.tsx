@@ -30,6 +30,12 @@ export function StaffReportsPanel({
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [status, setStatus] = useState('')
   const [busy, setBusy] = useState(false)
+  const [gmailStatus, setGmailStatus] = useState<{
+    ok: boolean
+    senderEmail: string | null
+    hint: string
+    connectUrl?: string
+  } | null>(null)
 
   const load = useCallback(async () => {
     if (!focus) return
@@ -57,6 +63,22 @@ export function StaffReportsPanel({
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    void fetch('/api/staff/gmail-send/status')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d && typeof d.ok === 'boolean') {
+          setGmailStatus({
+            ok: d.ok,
+            senderEmail: d.senderEmail ?? null,
+            hint: d.hint || d.preferredSenderHint || '',
+            connectUrl: d.connectUrl,
+          })
+        }
+      })
+      .catch(() => null)
+  }, [])
 
   const sorted = useMemo(() => {
     if (!sortKey) return rows
@@ -114,6 +136,24 @@ export function StaffReportsPanel({
         <p className="text-xs text-[#5A6070]">
           View, sort, and export your area — Programs, Cove, Payments, Membership, or Events.
         </p>
+        {gmailStatus ? (
+          <p className={`text-xs mt-2 ${gmailStatus.ok ? 'text-green-800' : 'text-amber-800'}`}>
+            Purchase emails:{' '}
+            {gmailStatus.ok
+              ? `ready (as ${gmailStatus.senderEmail})`
+              : 'not connected yet'}
+            {!gmailStatus.ok && gmailStatus.connectUrl ? (
+              <>
+                {' '}
+                —{' '}
+                <a href={gmailStatus.connectUrl} className="underline font-semibold">
+                  Connect Google
+                </a>{' '}
+                while signed in as membership@ or treasurer@
+              </>
+            ) : null}
+          </p>
+        ) : null}
       </div>
 
       <div className="flex flex-wrap gap-2">

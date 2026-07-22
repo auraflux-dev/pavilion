@@ -4,11 +4,8 @@
  * @shmspto.org Inbox — Gmail app + Staff → Inbox when Google is connected.
  */
 import { getSiteSettings } from '@/lib/api/site-settings'
-import {
-  gmailConfigured,
-  sendMassEmail,
-  type SendMassEmailResult,
-} from '@/lib/staff/mass-email'
+import { sendMassEmail, type SendMassEmailResult } from '@/lib/staff/mass-email'
+import { resolveGmailSendAuth } from '@/lib/staff/gmail-send-auth'
 
 export type SubmissionNotifyKind =
   | 'contact'
@@ -92,7 +89,8 @@ export async function notifyStaffSubmission(opts: {
   replyTo?: string
   fromName?: string
 }): Promise<SendMassEmailResult | { ok: false; mode: 'skipped'; reason: string }> {
-  if (!gmailConfigured()) {
+  const auth = await resolveGmailSendAuth().catch(() => null)
+  if (!auth) {
     return { ok: false, mode: 'skipped', reason: 'Gmail send not configured' }
   }
 

@@ -8,11 +8,11 @@ import {
 } from '@/lib/staff/members-roster'
 import {
   buildMailtoBcc,
-  emailConfigured,
   sanitizeRecipients,
   sendMassEmail,
   validateMassEmailDraft,
 } from '@/lib/staff/mass-email'
+import { gmailSendReady } from '@/lib/staff/gmail-send-auth'
 import {
   buildWhatsAppGroupPlan,
   type GradeWhatsAppLinks,
@@ -113,8 +113,11 @@ export async function GET(req: NextRequest) {
   }
   try {
     const links = await loadWhatsAppLinks()
+    const gmail = await gmailSendReady()
     return NextResponse.json({
-      emailConfigured: emailConfigured(),
+      emailConfigured: gmail.ok,
+      gmailSender: gmail.senderEmail,
+      gmailHint: gmail.hint,
       whatsapp: links,
     })
   } catch (err) {
@@ -243,7 +246,7 @@ export async function POST(req: NextRequest) {
         recipientCount: recipients.length,
         recipientsPreview: recipients.slice(0, 25),
         mailto,
-        emailConfigured: emailConfigured(),
+        emailConfigured: sendResult.mode === 'gmail',
         send: sendResult,
         portalInserted,
         newsletterArchived,

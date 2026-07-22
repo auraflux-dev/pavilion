@@ -167,7 +167,7 @@ export function StaffMembershipPanel() {
         window.location.href = d.mailto
         setStatus(
           `Opened your mail app with BCC to ${d.recipientCount} parents` +
-            (emailConfigured ? '' : ' (configure Gmail API for one-click send)') +
+            (emailConfigured ? '' : ' (Connect Google as membership@ in Staff → Inbox)') +
             (d.portalInserted ? ' · portal inbox updated' : ''),
         )
       } else {
@@ -367,7 +367,7 @@ export function StaffMembershipPanel() {
             Audience follows the roster filters above. Portal inbox always works.
             {emailConfigured
               ? ' Mass email sends from your Google Workspace mailbox via Gmail API.'
-              : ' Mass email opens your mail app with BCC until Gmail API env vars are set.'}
+              : ' Mass email opens your mail app with BCC until you Connect Google as membership@ (Staff → Inbox) or set GMAIL_* on Vercel.'}
           </p>
         </div>
         <input

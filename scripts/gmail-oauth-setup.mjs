@@ -23,11 +23,15 @@ const PORT = 42813
 const REDIRECT = `http://127.0.0.1:${PORT}/oauth2callback`
 const SCOPE = 'https://www.googleapis.com/auth/gmail.send'
 
-const clientId = process.env.GMAIL_CLIENT_ID?.trim()
-const clientSecret = process.env.GMAIL_CLIENT_SECRET?.trim()
+const clientId =
+  process.env.GMAIL_CLIENT_ID?.trim() || process.env.GOOGLE_OAUTH_CLIENT_ID?.trim()
+const clientSecret =
+  process.env.GMAIL_CLIENT_SECRET?.trim() || process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim()
 
 if (!clientId || !clientSecret) {
-  console.error('Set GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET, then re-run.')
+  console.error(
+    'Set GMAIL_CLIENT_ID + GMAIL_CLIENT_SECRET (or GOOGLE_OAUTH_CLIENT_ID + GOOGLE_OAUTH_CLIENT_SECRET), then re-run.',
+  )
   process.exit(1)
 }
 
@@ -96,16 +100,35 @@ if (!tokenRes.ok || !tokens.refresh_token) {
 }
 
 const rl = createInterface({ input, output })
+const senderEnv = process.env.GMAIL_SENDER?.trim()
+const fromNameEnv = process.env.GMAIL_FROM_NAME?.trim()
 const sender =
+  senderEnv ||
   (await rl.question('Sending Workspace email (e.g. membership@shmspto.org): ')).trim() ||
   'membership@shmspto.org'
-const fromName = (await rl.question('From display name [SHMS PTO]: ')).trim() || 'SHMS PTO'
+const fromName =
+  fromNameEnv || (await rl.question('From display name [SHMS PTO]: ')).trim() || 'SHMS PTO'
 rl.close()
 
-console.log('\nAdd these to Vercel → frontend → Environment Variables (Production):\n')
-console.log(`GMAIL_CLIENT_ID=${clientId}`)
-console.log(`GMAIL_CLIENT_SECRET=${clientSecret}`)
-console.log(`GMAIL_REFRESH_TOKEN=${tokens.refresh_token}`)
-console.log(`GMAIL_SENDER=${sender}`)
-console.log(`GMAIL_FROM_NAME=${fromName}`)
-console.log('\nThen redeploy. Staff → Memberships will show one-click Gmail send.')
+if (!tokens.refresh_token) {
+  console.error('No refresh_token returned. Revoke prior access and re-run with prompt=consent.')
+  process.exit(1)
+}
+
+const out = [
+  `GMAIL_CLIENT_ID=${clientId}`,
+  `GMAIL_CLIENT_SECRET=${clientSecret}`,
+  `GMAIL_REFRESH_TOKEN=${tokens.refresh_token}`,
+  `GMAIL_SENDER=${sender}`,
+  `GMAIL_FROM_NAME=${fromName}`,
+].join('\n')
+
+const outPath = process.env.GMAIL_ENV_OUT?.trim() || '/tmp/shmspto-gmail.env'
+await import('node:fs/promises').then((fs) => fs.writeFile(outPath, out + '\n', { mode: 0o600 }))
+
+console.log('\nWrote env file (do not commit):', outPath)
+console.log('Sender:', sender)
+console.log('From name:', fromName)
+console.log('Refresh token: present')
+console.log('\nNext: add GMAIL_* to Vercel Production and redeploy.')
+console.log('Staff → Memberships / purchase confirmations will send via Gmail.')

@@ -42,11 +42,17 @@ APIs must already be enabled (you did A): Gmail, Calendar, Drive.
 2. Application type: **Web application** (not Desktop)
 3. Name: `SHMS PTO Staff Web`
 4. **Authorized JavaScript origins** → Add:
-   - `https://shmspto.vercel.app`
-5. **Authorized redirect URIs** → Add **exactly**:
-   - `https://shmspto.vercel.app/api/staff/workspace/connect/callback`
-6. **Create**
-7. Download JSON **or** copy:
+   - `https://www.shmspto.org`
+   - `https://shmspto.org`
+   - `https://shmspto.vercel.app` (optional staging)
+5. **Authorized redirect URIs** → Add **exactly** (all that you use):
+   - `https://www.shmspto.org/api/staff/workspace/connect/callback`
+   - `https://shmspto.org/api/staff/workspace/connect/callback`
+   - `https://shmspto.vercel.app/api/staff/workspace/connect/callback` (optional staging)
+
+   If Connect Google fails with `redirect_uri_mismatch`, the URI in the error page is missing from this list — add it, Save, wait ~1 minute, retry.
+6. **Create** (or **Save** if editing an existing client)
+7. Copy:
    - Client ID  
    - Client secret  
 
