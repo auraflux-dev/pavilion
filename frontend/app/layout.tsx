@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import { Inter, Merriweather } from 'next/font/google'
 import { GoogleAnalytics } from '@/components/google-analytics'
+import { MetaPixel } from '@/components/meta-pixel'
 import './globals.css'
 
 const _inter = Inter({ subsets: ['latin'] })
@@ -61,6 +62,7 @@ export default function RootLayout({
         {children}
         <Analytics />
         <GoogleAnalytics />
+        <MetaPixel />
       </body>
     </html>
   )
