@@ -141,9 +141,14 @@ async function handle(req: NextRequest, ctx: Ctx) {
   if (!path?.length) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
-  // Rewrites pass /_api/... or /__auth/... into this catch-all
+  // Rewrites pass /_api, /__auth, /_serverless, /_partials into this catch-all
   const wixPath = `/${path.join('/')}`
-  if (!wixPath.startsWith('/_api/') && !wixPath.startsWith('/__auth/')) {
+  const allowed =
+    wixPath.startsWith('/_api/') ||
+    wixPath.startsWith('/__auth/') ||
+    wixPath.startsWith('/_serverless/') ||
+    wixPath.startsWith('/_partials/')
+  if (!allowed) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
   try {

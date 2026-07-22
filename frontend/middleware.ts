@@ -15,9 +15,14 @@ const PROTECTED_ROUTES = ['/member-portal', '/staff']
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
-  // Wix login paths must reach the Node proxy (Host-preserved to Wix edge).
-  // Do this in middleware so it always wins over filesystem 404s on Vercel.
-  if (pathname.startsWith('/_api/') || pathname.startsWith('/__auth/')) {
+  // Wix login UI needs /_api, /__auth, /_serverless, /_partials on www.
+  // After DNS cutover those hit Vercel — rewrite to the Node proxy.
+  if (
+    pathname.startsWith('/_api/') ||
+    pathname.startsWith('/__auth/') ||
+    pathname.startsWith('/_serverless/') ||
+    pathname.startsWith('/_partials/')
+  ) {
     const rewriteUrl = req.nextUrl.clone()
     rewriteUrl.pathname = `/api/wix-auth-proxy${pathname}`
     return NextResponse.rewrite(rewriteUrl)
@@ -41,7 +46,9 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/auth') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/_api') ||
-    pathname.startsWith('/__auth')
+    pathname.startsWith('/__auth') ||
+    pathname.startsWith('/_serverless') ||
+    pathname.startsWith('/_partials')
   ) {
     return res
   }
