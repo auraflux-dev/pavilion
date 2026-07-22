@@ -49,15 +49,18 @@ async function proxyToWix(req: NextRequest, wixPath: string) {
     ) {
       return
     }
-    // Never forward browser cookies on authorize — a stale svSession makes Wix
-    // redirect to /auth/callback?error=unknown_error. Login pages may keep Wix cookies.
+    // Authorize: never forward cookies (stale svSession → unknown_error).
+    // Login UI (/__auth, /_serverless, other /_api): forward Wix cookies, but
+    // strip our app cookies so they do not confuse Wix session handling.
     if (lower === 'cookie') {
       if (wixPath.startsWith('/_api/oauth2/authorize')) return
       const filtered = value
         .split(';')
         .map((c) => c.trim())
-        .filter((c) =>
-          /^(svSession|smSession|recent-writes|XSRF-TOKEN|_wixCIDX|consent-policy)=/i.test(c)
+        .filter(Boolean)
+        .filter(
+          (c) =>
+            !/^(wix_tokens|wix_oauth_data|shms_act_as)=/i.test(c)
         )
         .join('; ')
       if (filtered) incomingHeaders.cookie = filtered
