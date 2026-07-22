@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
 
@@ -47,15 +47,45 @@ type Enrollment = {
   feePaid: number
   enrolledAt: string | null
   waitlistPosition: number | null
+  allergies?: string
+  medicalConditions?: string
+  medications?: string
+  emergencyContact?: string
+  emergencyPhone?: string
+  pickupAuthorized?: string
+  parentPhone?: string
+  requestNote?: string
+  requestedToProgramId?: string
+  requestedToProgramName?: string
+}
+
+type AttendanceStudent = {
+  studentId: string
+  studentName: string
+  parentEmail: string
+  status: string
+  notes: string
+  checkedInAt: string | null
+  checkedOutAt: string | null
+}
+
+const ATT_STATUSES = ['Present', 'Absent', 'Late', 'CheckedOut'] as const
+
+function todayYmd() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 export function StaffProgramsPanel() {
   const [programs, setPrograms] = useState<Program[]>([])
   const [sessions, setSessions] = useState<Session[]>([])
   const [canManageAll, setCanManageAll] = useState(true)
-  const [tab, setTab] = useState<'programs' | 'sessions' | 'roster'>('programs')
+  const [tab, setTab] = useState<'programs' | 'sessions' | 'roster' | 'attendance' | 'calendar'>(
+    'programs',
+  )
   const [rosterProgramId, setRosterProgramId] = useState('')
   const [enrollments, setEnrollments] = useState<Enrollment[]>([])
+  const [expandedSafety, setExpandedSafety] = useState<Record<string, boolean>>({})
   const [rosterMeta, setRosterMeta] = useState<{
     enrolled: number
     waitlisted: number
@@ -66,6 +96,10 @@ export function StaffProgramsPanel() {
   const [msgBody, setMsgBody] = useState('')
   const [status, setStatus] = useState('')
   const [busy, setBusy] = useState(false)
+  const [attProgramId, setAttProgramId] = useState('')
+  const [attDate, setAttDate] = useState(todayYmd)
+  const [attStudents, setAttStudents] = useState<AttendanceStudent[]>([])
+  const [attDraft, setAttDraft] = useState<Record<string, { status: string; notes: string }>>({})
   const [sessionForm, setSessionForm] = useState({
     programName: '',
     programId: '',
@@ -77,6 +111,17 @@ export function StaffProgramsPanel() {
     grades: '',
   })
 
+  const upcomingSessions = useMemo(() => {
+    const now = Date.now()
+    return [...sessions]
+      .filter((s) => s.active !== false)
+      .filter((s) => {
+        if (!s.startAt) return true
+        return new Date(s.startAt).getTime() >= now - 12 * 60 * 60 * 1000
+      })
+      .sort((a, b) => String(a.startAt ?? '').localeCompare(String(b.startAt ?? '')))
+  }, [sessions])
+
   const load = useCallback(async () => {
     try {
       const r = await fetch('/api/staff/programs')
@@ -85,13 +130,15 @@ export function StaffProgramsPanel() {
       setPrograms(d.programs ?? [])
       setSessions(d.sessions ?? [])
       setCanManageAll(d.canManageAll !== false)
-      if (!rosterProgramId && (d.programs ?? [])[0]?.id) {
-        setRosterProgramId(d.programs[0].id)
+      const firstId = (d.programs ?? [])[0]?.id as string | undefined
+      if (firstId) {
+        setRosterProgramId((prev) => prev || firstId)
+        setAttProgramId((prev) => prev || firstId)
       }
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Load failed')
     }
-  }, [rosterProgramId])
+  }, [])
 
   const loadRoster = useCallback(async (programId: string) => {
     if (!programId) {
@@ -115,6 +162,30 @@ export function StaffProgramsPanel() {
     }
   }, [])
 
+  const loadAttendance = useCallback(async (programId: string, date: string) => {
+    if (!programId) {
+      setAttStudents([])
+      setAttDraft({})
+      return
+    }
+    try {
+      const r = await fetch(
+        `/api/staff/programs/attendance?programId=${encodeURIComponent(programId)}&date=${encodeURIComponent(date)}`,
+      )
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Attendance failed')
+      const students = (d.students ?? []) as AttendanceStudent[]
+      setAttStudents(students)
+      const draft: Record<string, { status: string; notes: string }> = {}
+      for (const s of students) {
+        draft[s.studentId] = { status: s.status || '', notes: s.notes || '' }
+      }
+      setAttDraft(draft)
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Attendance failed')
+    }
+  }, [])
+
   useEffect(() => {
     void load()
   }, [load])
@@ -122,6 +193,10 @@ export function StaffProgramsPanel() {
   useEffect(() => {
     if (tab === 'roster') void loadRoster(rosterProgramId)
   }, [tab, rosterProgramId, loadRoster])
+
+  useEffect(() => {
+    if (tab === 'attendance') void loadAttendance(attProgramId, attDate)
+  }, [tab, attProgramId, attDate, loadAttendance])
 
   async function patchProgram(id: string, body: Record<string, unknown>) {
     setBusy(true)
@@ -190,9 +265,71 @@ export function StaffProgramsPanel() {
       if (!r.ok) throw new Error(d.error ?? 'Update failed')
       await loadRoster(rosterProgramId)
       await load()
-      setStatus('Enrollment updated.')
+      setStatus(d.promoted ? 'Enrollment updated (waitlist promoted).' : 'Enrollment updated.')
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Update failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function refundEnrollment(id: string) {
+    const note = window.prompt('Refund note (optional)') ?? ''
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/programs/enrollments', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'refund', id, note }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Refund failed')
+      await loadRoster(rosterProgramId)
+      await load()
+      setStatus(d.promoted ? 'Marked refunded (waitlist promoted).' : 'Marked refunded.')
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Refund failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function transferEnrollment(id: string) {
+    const choices = programs.filter((p) => p.id !== rosterProgramId)
+    if (!choices.length) {
+      setStatus('No other programs available to transfer into.')
+      return
+    }
+    const label = choices.map((p, i) => `${i + 1}. ${p.name}`).join('\n')
+    const pick = window.prompt(`Transfer to program number:\n${label}`)
+    if (!pick) return
+    const idx = Number(pick) - 1
+    const dest = choices[idx]
+    if (!dest) {
+      setStatus('Invalid program selection.')
+      return
+    }
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/programs/enrollments', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'transfer',
+          id,
+          toProgramId: dest.id,
+          toProgramName: dest.name,
+        }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Transfer failed')
+      await loadRoster(rosterProgramId)
+      await load()
+      setStatus(`Transferred to ${dest.name}.`)
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Transfer failed')
     } finally {
       setBusy(false)
     }
@@ -224,10 +361,52 @@ export function StaffProgramsPanel() {
     }
   }
 
+  async function saveAttendance() {
+    setBusy(true)
+    setStatus('')
+    try {
+      const marks = Object.entries(attDraft)
+        .filter(([, v]) => v.status)
+        .map(([studentId, v]) => ({
+          studentId,
+          status: v.status,
+          notes: v.notes || undefined,
+        }))
+      const r = await fetch('/api/staff/programs/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          programId: attProgramId,
+          sessionDate: attDate,
+          marks,
+        }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Save failed')
+      await loadAttendance(attProgramId, attDate)
+      setStatus(`Saved ${d.upserted ?? marks.length} attendance mark(s).`)
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Save failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   function exportCsv() {
-    const header = 'studentName,parentEmail,status,feePaid,enrolledAt,waitlistPosition'
+    const header =
+      'studentName,parentEmail,status,feePaid,enrolledAt,waitlistPosition,allergies,emergencyContact,emergencyPhone'
     const lines = enrollments.map((e) =>
-      [e.studentName, e.parentEmail, e.status, e.feePaid, e.enrolledAt ?? '', e.waitlistPosition ?? '']
+      [
+        e.studentName,
+        e.parentEmail,
+        e.status,
+        e.feePaid,
+        e.enrolledAt ?? '',
+        e.waitlistPosition ?? '',
+        e.allergies ?? '',
+        e.emergencyContact ?? '',
+        e.emergencyPhone ?? '',
+      ]
         .map((c) => `"${String(c).replace(/"/g, '""')}"`)
         .join(','),
     )
@@ -240,14 +419,22 @@ export function StaffProgramsPanel() {
     URL.revokeObjectURL(url)
   }
 
+  const tabs = [
+    ['programs', 'Programs'],
+    ['sessions', 'Sessions'],
+    ['roster', 'Roster'],
+    ['attendance', 'Attendance'],
+    ['calendar', 'Calendar'],
+  ] as const
+
   return (
     <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
       <div>
         <h2 className="text-lg font-bold">Programs & sessions</h2>
         <p className="text-xs text-[#5A6070]">
           {canManageAll
-            ? 'Open/close registration, manage roster/waitlist, sessions, and message a class.'
-            : 'Your assigned programs — roster, waitlist, sessions, and class messages.'}
+            ? 'Open/close registration, manage roster/waitlist, attendance, sessions, and message a class.'
+            : 'Your assigned programs — roster, attendance, waitlist, sessions, and class messages.'}
         </p>
         {canManageAll ? (
           <button
@@ -263,7 +450,7 @@ export function StaffProgramsPanel() {
                   const r = await fetch('/api/staff/cms/ensure-fields', { method: 'POST' })
                   const d = await r.json()
                   if (!r.ok) throw new Error(d.error ?? 'Could not ensure CMS fields')
-                  setStatus('CMS schedule/flyer fields are ready.')
+                  setStatus('CMS schedule/flyer/attendance fields are ready.')
                 } catch (err) {
                   setStatus(err instanceof Error ? err.message : 'Could not ensure CMS fields')
                 } finally {
@@ -272,19 +459,19 @@ export function StaffProgramsPanel() {
               })()
             }}
           >
-            Ensure CMS fields (day/time/dates/flyer)
+            Ensure CMS fields (day/time/dates/flyer/attendance)
           </button>
         ) : null}
       </div>
-      <div className="inline-flex rounded-lg border border-[#E8E4DC] overflow-hidden text-sm">
-        {(['programs', 'sessions', 'roster'] as const).map((id) => (
+      <div className="inline-flex flex-wrap rounded-lg border border-[#E8E4DC] overflow-hidden text-sm">
+        {tabs.map(([id, label]) => (
           <button
             key={id}
             type="button"
-            className={`px-3 py-1.5 capitalize ${tab === id ? 'bg-[#085508] text-white' : 'bg-white'}`}
+            className={`px-3 py-1.5 ${tab === id ? 'bg-[#085508] text-white' : 'bg-white'}`}
             onClick={() => setTab(id)}
           >
-            {id}
+            {label}
           </button>
         ))}
       </div>
@@ -363,6 +550,17 @@ export function StaffProgramsPanel() {
                     }}
                   >
                     Roster
+                  </button>
+                  <button
+                    type="button"
+                    className="underline font-semibold"
+                    style={{ color: '#085508' }}
+                    onClick={() => {
+                      setAttProgramId(p.id)
+                      setTab('attendance')
+                    }}
+                  >
+                    Attendance
                   </button>
                 </div>
               </div>
@@ -564,45 +762,167 @@ export function StaffProgramsPanel() {
               Export CSV
             </Button>
           </div>
-          <div className="space-y-2 max-h-80 overflow-auto">
-            {enrollments.map((e) => (
-              <div
-                key={e.id}
-                className="border border-[#E8E4DC] rounded-lg p-2 text-sm flex flex-wrap justify-between gap-2"
-              >
-                <div>
-                  <p className="font-semibold">{e.studentName || 'Student'}</p>
-                  <p className="text-xs text-[#5A6070]">
-                    {e.parentEmail} · {e.status}
-                    {e.waitlistPosition ? ` #${e.waitlistPosition}` : ''}
-                    {e.feePaid ? ` · $${e.feePaid}` : ''}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-1 text-xs">
-                  {e.status === 'Waitlisted' ? (
+          <div className="space-y-2 max-h-96 overflow-auto">
+            {enrollments.map((e) => {
+              const allergyLine = (e.allergies || '').trim()
+              const hasSafety =
+                allergyLine ||
+                e.medicalConditions ||
+                e.medications ||
+                e.emergencyContact ||
+                e.pickupAuthorized
+              const open = expandedSafety[e.id]
+              const actionable =
+                e.status === 'Enrolled' ||
+                e.status === 'Paid' ||
+                e.status === 'Waitlisted' ||
+                e.status === 'RefundRequested' ||
+                e.status === 'TransferRequested'
+              return (
+                <div key={e.id} className="border border-[#E8E4DC] rounded-lg p-2 text-sm space-y-1">
+                  <div className="flex flex-wrap justify-between gap-2">
+                    <div>
+                      <p className="font-semibold">{e.studentName || 'Student'}</p>
+                      <p className="text-xs text-[#5A6070]">
+                        {e.parentEmail} · {e.status}
+                        {e.waitlistPosition ? ` #${e.waitlistPosition}` : ''}
+                        {e.feePaid ? ` · $${e.feePaid}` : ''}
+                      </p>
+                      {allergyLine ? (
+                        <p className="text-xs text-amber-800 mt-0.5">Allergy: {allergyLine}</p>
+                      ) : (
+                        <p className="text-xs text-[#8A8F9C] mt-0.5">No allergies listed</p>
+                      )}
+                      {e.requestedToProgramName ? (
+                        <p className="text-xs text-[#5A6070]">
+                          Transfer request → {e.requestedToProgramName}
+                        </p>
+                      ) : null}
+                      {e.requestNote ? (
+                        <p className="text-xs text-[#5A6070]">Note: {e.requestNote}</p>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-wrap gap-1 text-xs items-start">
+                      {e.status === 'Waitlisted' ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          className="underline font-semibold"
+                          style={{ color: '#085508' }}
+                          onClick={() => void updateEnrollment(e.id, 'Enrolled')}
+                        >
+                          Promote
+                        </button>
+                      ) : null}
+                      {e.status === 'RefundRequested' ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          className="underline font-semibold"
+                          style={{ color: '#085508' }}
+                          onClick={() => void refundEnrollment(e.id)}
+                        >
+                          Approve refund
+                        </button>
+                      ) : null}
+                      {e.status === 'TransferRequested' && e.requestedToProgramId ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          className="underline font-semibold"
+                          style={{ color: '#085508' }}
+                          onClick={() => {
+                            void (async () => {
+                              setBusy(true)
+                              try {
+                                const r = await fetch('/api/staff/programs/enrollments', {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    action: 'transfer',
+                                    id: e.id,
+                                    toProgramId: e.requestedToProgramId,
+                                    toProgramName: e.requestedToProgramName,
+                                  }),
+                                })
+                                const d = await r.json()
+                                if (!r.ok) throw new Error(d.error ?? 'Transfer failed')
+                                await loadRoster(rosterProgramId)
+                                await load()
+                                setStatus('Transfer completed.')
+                              } catch (err) {
+                                setStatus(err instanceof Error ? err.message : 'Transfer failed')
+                              } finally {
+                                setBusy(false)
+                              }
+                            })()
+                          }}
+                        >
+                          Approve transfer
+                        </button>
+                      ) : null}
+                      {actionable ? (
+                        <>
+                          <button
+                            type="button"
+                            disabled={busy}
+                            className="underline font-semibold"
+                            style={{ color: '#085508' }}
+                            onClick={() => void transferEnrollment(e.id)}
+                          >
+                            Transfer
+                          </button>
+                          <button
+                            type="button"
+                            disabled={busy}
+                            className="underline font-semibold"
+                            style={{ color: '#085508' }}
+                            onClick={() => void refundEnrollment(e.id)}
+                          >
+                            Refund
+                          </button>
+                        </>
+                      ) : null}
+                      {e.status !== 'Cancelled' && e.status !== 'Refunded' ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          className="underline text-red-700"
+                          onClick={() => void updateEnrollment(e.id, 'Cancelled')}
+                        >
+                          Cancel
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                  {hasSafety ? (
                     <button
                       type="button"
-                      disabled={busy}
-                      className="underline font-semibold"
-                      style={{ color: '#085508' }}
-                      onClick={() => void updateEnrollment(e.id, 'Enrolled')}
+                      className="text-[11px] underline text-[#5A6070]"
+                      onClick={() =>
+                        setExpandedSafety((prev) => ({ ...prev, [e.id]: !prev[e.id] }))
+                      }
                     >
-                      Promote
+                      {open ? 'Hide safety details' : 'Show safety details'}
                     </button>
                   ) : null}
-                  {e.status !== 'Cancelled' ? (
-                    <button
-                      type="button"
-                      disabled={busy}
-                      className="underline text-red-700"
-                      onClick={() => void updateEnrollment(e.id, 'Cancelled')}
-                    >
-                      Cancel
-                    </button>
+                  {open ? (
+                    <div className="text-[11px] text-[#5A6070] space-y-0.5 pl-1 border-l-2 border-[#E8E4DC]">
+                      {e.parentPhone ? <p>Parent phone: {e.parentPhone}</p> : null}
+                      {e.emergencyContact || e.emergencyPhone ? (
+                        <p>
+                          Emergency: {e.emergencyContact || '—'}
+                          {e.emergencyPhone ? ` · ${e.emergencyPhone}` : ''}
+                        </p>
+                      ) : null}
+                      {e.medicalConditions ? <p>Conditions: {e.medicalConditions}</p> : null}
+                      {e.medications ? <p>Medications: {e.medications}</p> : null}
+                      {e.pickupAuthorized ? <p>Pickup: {e.pickupAuthorized}</p> : null}
+                    </div>
                   ) : null}
                 </div>
-              </div>
-            ))}
+              )
+            })}
             {rosterProgramId && enrollments.length === 0 ? (
               <p className="text-sm text-[#5A6070]">No enrollments yet.</p>
             ) : null}
@@ -632,6 +952,114 @@ export function StaffProgramsPanel() {
               Send to class
             </Button>
           </div>
+        </div>
+      ) : null}
+
+      {tab === 'attendance' ? (
+        <div className="space-y-4">
+          <div className="grid sm:grid-cols-2 gap-2">
+            <select
+              value={attProgramId}
+              onChange={(e) => setAttProgramId(e.target.value)}
+              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            >
+              <option value="">Select program…</option>
+              {programs.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <input
+              type="date"
+              value={attDate}
+              onChange={(e) => setAttDate(e.target.value)}
+              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="space-y-2 max-h-96 overflow-auto">
+            {attStudents.map((s) => (
+              <div
+                key={s.studentId}
+                className="border border-[#E8E4DC] rounded-lg p-2 text-sm flex flex-wrap gap-2 items-center justify-between"
+              >
+                <div className="min-w-[140px]">
+                  <p className="font-semibold">{s.studentName || 'Student'}</p>
+                  <p className="text-xs text-[#5A6070]">{s.parentEmail}</p>
+                </div>
+                <select
+                  value={attDraft[s.studentId]?.status ?? ''}
+                  onChange={(e) =>
+                    setAttDraft((prev) => ({
+                      ...prev,
+                      [s.studentId]: {
+                        status: e.target.value,
+                        notes: prev[s.studentId]?.notes ?? '',
+                      },
+                    }))
+                  }
+                  className="border border-[#E8E4DC] rounded-lg px-2 py-1.5 text-xs"
+                >
+                  <option value="">—</option>
+                  {ATT_STATUSES.map((st) => (
+                    <option key={st} value={st}>
+                      {st}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  value={attDraft[s.studentId]?.notes ?? ''}
+                  onChange={(e) =>
+                    setAttDraft((prev) => ({
+                      ...prev,
+                      [s.studentId]: {
+                        status: prev[s.studentId]?.status ?? '',
+                        notes: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="Notes"
+                  className="flex-1 min-w-[120px] border border-[#E8E4DC] rounded-lg px-2 py-1.5 text-xs"
+                />
+              </div>
+            ))}
+            {attProgramId && attStudents.length === 0 ? (
+              <p className="text-sm text-[#5A6070]">No active enrollments for this program.</p>
+            ) : null}
+          </div>
+          <Button
+            disabled={busy || !attProgramId || !attStudents.length}
+            onClick={() => void saveAttendance()}
+            className="text-white"
+            style={{ backgroundColor: '#085508' }}
+          >
+            Save attendance
+          </Button>
+        </div>
+      ) : null}
+
+      {tab === 'calendar' ? (
+        <div className="space-y-2">
+          <p className="text-xs text-[#5A6070]">
+            Upcoming sessions for programs in your scope (sorted by start time).
+          </p>
+          {upcomingSessions.length === 0 ? (
+            <p className="text-sm text-[#5A6070]">No upcoming sessions yet. Add some under Sessions.</p>
+          ) : (
+            upcomingSessions.map((s) => (
+              <div key={s.id} className="border border-[#E8E4DC] rounded-lg p-3 text-sm">
+                <p className="font-semibold">
+                  {s.title} · {s.programName}
+                </p>
+                <p className="text-xs text-[#5A6070]">
+                  {s.startAt ? new Date(s.startAt).toLocaleString() : 'TBD'}
+                  {s.endAt ? ` – ${new Date(s.endAt).toLocaleTimeString()}` : ''}
+                  {s.location ? ` · ${s.location}` : ''}
+                  {s.instructorName ? ` · ${s.instructorName}` : ''}
+                </p>
+              </div>
+            ))
+          )}
         </div>
       ) : null}
 

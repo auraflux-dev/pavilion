@@ -8,10 +8,24 @@ import { EditStudentForm } from './edit-student-form'
 interface Enrollment {
   id: string
   programName: string
+  programId?: string
   status: string
   registrationDate: string | null
   paymentAmount: number
-  grade: string
+  grade?: string
+  waitlistPosition?: number | null
+}
+
+interface AttendanceMark {
+  id: string
+  programName: string
+  sessionDate: string
+  studentId: string
+  studentName: string
+  status: string
+  checkedInAt: string | null
+  checkedOutAt: string | null
+  notes: string
 }
 
 interface Payment {
@@ -33,6 +47,13 @@ interface Student {
   membershipStatus: string
   discountCode: string | null
   storeCardBalance: number
+  parentPhone?: string
+  emergencyContact?: string
+  emergencyPhone?: string
+  allergies?: string
+  medicalConditions?: string
+  medications?: string
+  pickupAuthorized?: string
 }
 
 interface Props {
@@ -52,6 +73,13 @@ const STATUS_COLORS: Record<string, string> = {
   pending:    'bg-blue-50 text-blue-700',
   paid:       'bg-green-50 text-green-700',
   failed:     'bg-red-50 text-red-600',
+  refundrequested: 'bg-amber-50 text-amber-800',
+  refunded: 'bg-gray-100 text-gray-600',
+  transferrequested: 'bg-blue-50 text-blue-700',
+  present: 'bg-green-50 text-green-700',
+  late: 'bg-amber-50 text-amber-800',
+  absent: 'bg-red-50 text-red-600',
+  checkedout: 'bg-gray-100 text-gray-600',
 }
 
 function statusClass(s: string) {
@@ -65,6 +93,16 @@ function formatDate(d: string | null) {
 
 function formatMoney(n: number) {
   return `$${Number(n).toFixed(2)}`
+}
+
+function safetySummary(student: Student): { complete: boolean; allergyLine: string } {
+  const complete = Boolean(
+    String(student.parentPhone ?? '').trim() &&
+      String(student.emergencyContact ?? '').trim() &&
+      String(student.emergencyPhone ?? '').trim() &&
+      String(student.pickupAuthorized ?? '').trim(),
+  )
+  return { complete, allergyLine: String(student.allergies ?? '').trim() }
 }
 
 interface GiftCardData {
@@ -89,8 +127,15 @@ export function StudentCard({
   onUpdated,
 }: Props) {
   const [open, setOpen] = useState(defaultOpen)
-  const [history, setHistory] = useState<{ enrollments: Enrollment[]; payments: Payment[] } | null>(null)
+  const [history, setHistory] = useState<{
+    enrollments: Enrollment[]
+    payments: Payment[]
+    transferOptions?: { id: string; name: string }[]
+  } | null>(null)
+  const [attendance, setAttendance] = useState<AttendanceMark[]>([])
   const [loading, setLoading] = useState(false)
+  const [requestBusy, setRequestBusy] = useState(false)
+  const [requestMsg, setRequestMsg] = useState('')
   const [giftCard, setGiftCard] = useState<GiftCardData | null>(null)
   const [giftCardLoading, setGiftCardLoading] = useState(false)
   const isPaid = student.membershipTier && student.membershipTier !== 'free'
@@ -111,13 +156,73 @@ export function StudentCard({
   useEffect(() => {
     if (open && !history) {
       setLoading(true)
-      fetch(`/api/students/${student.id}/history`)
-        .then(r => r.json())
-        .then(data => setHistory(data))
+      Promise.all([
+        fetch(`/api/students/${student.id}/history`).then((r) => r.json()),
+        fetch('/api/portal/programs/attendance').then((r) => r.json()).catch(() => ({ attendance: [] })),
+      ])
+        .then(([hist, att]) => {
+          setHistory(hist)
+          const marks = (att.attendance ?? []) as AttendanceMark[]
+          setAttendance(marks.filter((m) => !m.studentId || m.studentId === student.id))
+        })
         .catch(() => setHistory({ enrollments: [], payments: [] }))
         .finally(() => setLoading(false))
     }
   }, [open, student.id, history])
+
+  async function requestEnrollmentChange(
+    enrollmentId: string,
+    action: 'refund' | 'transfer',
+    currentProgramId?: string,
+  ) {
+    setRequestBusy(true)
+    setRequestMsg('')
+    try {
+      let toProgramId = ''
+      let note = ''
+      if (action === 'transfer') {
+        const progRes = await fetch('/api/portal/programs/enrollment-request')
+        const progData = await progRes.json().catch(() => ({ programs: [] }))
+        const choices = ((progData.programs ?? []) as { id: string; name: string }[]).filter(
+          (p) => p.id && p.id !== currentProgramId,
+        )
+        if (!choices.length) {
+          setRequestMsg('No other open programs available to transfer into.')
+          setRequestBusy(false)
+          return
+        }
+        const label = choices.map((p, i) => `${i + 1}. ${p.name}`).join('\n')
+        const pick = window.prompt(`Transfer to program number:\n${label}`)
+        if (!pick) {
+          setRequestBusy(false)
+          return
+        }
+        const dest = choices[Number(pick) - 1]
+        if (!dest) {
+          setRequestMsg('Invalid program selection.')
+          setRequestBusy(false)
+          return
+        }
+        toProgramId = dest.id
+        note = window.prompt('Optional note for staff')?.trim() || ''
+      } else {
+        note = window.prompt('Optional note for your refund request')?.trim() || ''
+      }
+      const r = await fetch('/api/portal/programs/enrollment-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enrollmentId, action, toProgramId: toProgramId || undefined, note }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Request failed')
+      setRequestMsg(action === 'refund' ? 'Refund request sent to staff.' : 'Transfer request sent to staff.')
+      setHistory(null)
+    } catch (err) {
+      setRequestMsg(err instanceof Error ? err.message : 'Request failed')
+    } finally {
+      setRequestBusy(false)
+    }
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-[#E8E4DC] overflow-hidden shadow-sm">
@@ -278,6 +383,20 @@ export function StudentCard({
                 )}
               </div>
 
+              {(() => {
+                const safety = safetySummary(student)
+                return (
+                  <p className="text-xs text-[#5A6070] -mt-2">
+                    {safety.complete ? (
+                      <span className="font-semibold text-[#085508]">Safety profile complete</span>
+                    ) : (
+                      <span className="font-semibold text-amber-800">Safety profile incomplete — edit student details above</span>
+                    )}
+                    {safety.allergyLine ? ` · Allergy: ${safety.allergyLine}` : ' · No allergies listed'}
+                  </p>
+                )
+              })()}
+
               {/* Enrollments */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -288,11 +407,39 @@ export function StudentCard({
                   <p className="text-sm text-[#5A6070]">No enrollments yet.</p>
                 ) : (
                   <div className="space-y-2">
-                    {history.enrollments.map(e => (
+                    {history.enrollments.map(e => {
+                      const canRequest =
+                        ['Enrolled', 'Paid', 'Waitlisted'].includes(e.status) && Boolean(e.id)
+                      return (
                       <div key={e.id} className="flex items-start justify-between gap-3 py-2.5 border-b border-[#F5F0E8] last:border-0">
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-[#1A1A1A] truncate">{e.programName}</p>
-                          <p className="text-xs text-[#5A6070]">{formatDate(e.registrationDate)}</p>
+                          <p className="text-xs text-[#5A6070]">
+                            {formatDate(e.registrationDate)}
+                            {e.waitlistPosition ? ` · Waitlist #${e.waitlistPosition}` : ''}
+                          </p>
+                          {canRequest ? (
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              <button
+                                type="button"
+                                disabled={requestBusy}
+                                className="text-[11px] font-semibold underline"
+                                style={{ color: '#085508' }}
+                                onClick={() => void requestEnrollmentChange(e.id, 'refund')}
+                              >
+                                Request refund
+                              </button>
+                              <button
+                                type="button"
+                                disabled={requestBusy}
+                                className="text-[11px] font-semibold underline"
+                                style={{ color: '#085508' }}
+                                onClick={() => void requestEnrollmentChange(e.id, 'transfer', e.programId)}
+                              >
+                                Request transfer
+                              </button>
+                            </div>
+                          ) : null}
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           {e.paymentAmount > 0 && (
@@ -302,6 +449,40 @@ export function StudentCard({
                             {e.status}
                           </span>
                         </div>
+                      </div>
+                      )
+                    })}
+                  </div>
+                )}
+                {requestMsg ? <p className="text-xs text-[#5A6070] mt-2">{requestMsg}</p> : null}
+              </div>
+
+              {/* Attendance */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <BookOpen className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Attendance</h4>
+                </div>
+                {attendance.length === 0 ? (
+                  <p className="text-sm text-[#5A6070]">No check-in records yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {attendance.slice(0, 12).map((m) => (
+                      <div
+                        key={m.id || `${m.sessionDate}-${m.programName}`}
+                        className="flex items-start justify-between gap-3 py-2.5 border-b border-[#F5F0E8] last:border-0"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-[#1A1A1A] truncate">{m.programName}</p>
+                          <p className="text-xs text-[#5A6070]">
+                            {m.sessionDate}
+                            {m.checkedInAt ? ` · in ${new Date(m.checkedInAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : ''}
+                            {m.checkedOutAt ? ` · out ${new Date(m.checkedOutAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : ''}
+                          </p>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusClass(m.status)}`}>
+                          {m.status}
+                        </span>
                       </div>
                     ))}
                   </div>

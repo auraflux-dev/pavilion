@@ -52,6 +52,13 @@ interface Student {
   membershipStatus: string
   discountCode: string | null
   storeCardBalance: number
+  parentPhone?: string
+  emergencyContact?: string
+  emergencyPhone?: string
+  allergies?: string
+  medicalConditions?: string
+  medications?: string
+  pickupAuthorized?: string
 }
 
 interface CalendarItem {

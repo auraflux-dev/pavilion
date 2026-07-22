@@ -29,9 +29,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 
-    const [enrollments, payRes] = await Promise.all([
+    const { getAllPrograms } = await import('@/lib/api/programs')
+    const [enrollments, payRes, programs] = await Promise.all([
       listEnrollmentsForStudent(id),
       adminClient.items.query('Payments').eq('studentId', id).descending('paymentDate').find(),
+      getAllPrograms().catch(() => []),
     ])
 
     const mappedEnrollments = enrollments.map((item) => ({
@@ -54,7 +56,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       transactionId: item.transactionId ?? '',
     }))
 
-    return NextResponse.json({ enrollments: mappedEnrollments, payments })
+    const transferOptions = programs
+      .filter((p) => p.registrationOpen !== false)
+      .map((p) => ({
+        id: p._id,
+        name: p.name,
+      }))
+      .filter((p) => p.id && p.name)
+
+    return NextResponse.json({ enrollments: mappedEnrollments, payments, transferOptions })
   } catch (err) {
     console.error('/api/students/[id]/history error:', err)
     return NextResponse.json({ error: 'Failed to load history' }, { status: 500 })

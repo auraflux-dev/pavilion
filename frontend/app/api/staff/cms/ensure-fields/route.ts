@@ -96,11 +96,84 @@ export async function POST(req: NextRequest) {
     results.push(
       await ensureFields('ProgramEnrollments', [
         { key: 'waitlistPosition', displayName: 'Waitlist Position', type: 'NUMBER' },
+        { key: 'requestNote', displayName: 'Request Note', type: 'TEXT' },
+        { key: 'requestedAt', displayName: 'Requested At', type: 'DATETIME' },
+        { key: 'requestedToProgramId', displayName: 'Requested To Program ID', type: 'TEXT' },
+        { key: 'requestedToProgramName', displayName: 'Requested To Program Name', type: 'TEXT' },
+        { key: 'refundNote', displayName: 'Refund Note', type: 'TEXT' },
+        { key: 'refundedAt', displayName: 'Refunded At', type: 'DATETIME' },
+        { key: 'refundedByEmail', displayName: 'Refunded By Email', type: 'TEXT' },
+        { key: 'transferredAt', displayName: 'Transferred At', type: 'DATETIME' },
+        { key: 'transferredFromProgramId', displayName: 'Transferred From Program ID', type: 'TEXT' },
       ]),
     )
 
-    // Create ContractorTimesheets if missing
     const headers = wixHeaders()
+
+    // Create ProgramAttendance if missing, else ensure fields
+    const attGet = await fetch('https://www.wixapis.com/wix-data/v2/collections/ProgramAttendance', {
+      method: 'GET',
+      headers,
+    })
+    if (attGet.status === 404 || !attGet.ok) {
+      const createAtt = await fetch('https://www.wixapis.com/wix-data/v2/collections', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          collection: {
+            id: 'ProgramAttendance',
+            displayName: 'Program Attendance',
+            fields: [
+              { key: 'programId', displayName: 'Program ID', type: 'TEXT' },
+              { key: 'programName', displayName: 'Program Name', type: 'TEXT' },
+              { key: 'sessionId', displayName: 'Session ID', type: 'TEXT' },
+              { key: 'sessionDate', displayName: 'Session Date', type: 'TEXT' },
+              { key: 'studentId', displayName: 'Student ID', type: 'TEXT' },
+              { key: 'studentName', displayName: 'Student Name', type: 'TEXT' },
+              { key: 'parentEmail', displayName: 'Parent Email', type: 'TEXT' },
+              { key: 'status', displayName: 'Status', type: 'TEXT' },
+              { key: 'checkedInAt', displayName: 'Checked In At', type: 'DATETIME' },
+              { key: 'checkedOutAt', displayName: 'Checked Out At', type: 'DATETIME' },
+              { key: 'markedByEmail', displayName: 'Marked By Email', type: 'TEXT' },
+              { key: 'notes', displayName: 'Notes', type: 'TEXT' },
+            ],
+            permissions: {
+              insert: 'ADMIN',
+              update: 'ADMIN',
+              remove: 'ADMIN',
+              read: 'ADMIN',
+            },
+          },
+        }),
+      })
+      const createAttBody = await createAtt.json().catch(() => ({}))
+      results.push({
+        collectionId: 'ProgramAttendance',
+        ok: createAtt.ok,
+        created: createAtt.ok ? ['(collection)'] : [],
+        existing: [],
+        error: createAtt.ok ? undefined : JSON.stringify(createAttBody).slice(0, 200),
+      })
+    } else {
+      results.push(
+        await ensureFields('ProgramAttendance', [
+          { key: 'programId', displayName: 'Program ID', type: 'TEXT' },
+          { key: 'programName', displayName: 'Program Name', type: 'TEXT' },
+          { key: 'sessionId', displayName: 'Session ID', type: 'TEXT' },
+          { key: 'sessionDate', displayName: 'Session Date', type: 'TEXT' },
+          { key: 'studentId', displayName: 'Student ID', type: 'TEXT' },
+          { key: 'studentName', displayName: 'Student Name', type: 'TEXT' },
+          { key: 'parentEmail', displayName: 'Parent Email', type: 'TEXT' },
+          { key: 'status', displayName: 'Status', type: 'TEXT' },
+          { key: 'checkedInAt', displayName: 'Checked In At', type: 'DATETIME' },
+          { key: 'checkedOutAt', displayName: 'Checked Out At', type: 'DATETIME' },
+          { key: 'markedByEmail', displayName: 'Marked By Email', type: 'TEXT' },
+          { key: 'notes', displayName: 'Notes', type: 'TEXT' },
+        ]),
+      )
+    }
+
+    // Create ContractorTimesheets if missing
     const tsGet = await fetch('https://www.wixapis.com/wix-data/v2/collections/ContractorTimesheets', {
       method: 'GET',
       headers,
