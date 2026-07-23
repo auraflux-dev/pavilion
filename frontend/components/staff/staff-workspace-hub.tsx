@@ -33,6 +33,31 @@ type MailDetail = MailItem & {
   attachments?: { filename: string; mimeType: string; size: number; attachmentId: string }[]
 }
 
+function sanitizeEmailHtml(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+    .replace(/<iframe[\s\S]*?>[\s\S]*?<\/iframe>/gi, '')
+    .replace(/\son\w+=("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/javascript:/gi, '')
+}
+
+function MailBody({ text, html }: { text: string; html: string }) {
+  const rich = html.trim()
+  const plain = text.trim()
+  // Prefer full HTML when it is meaningfully longer than the plain stub
+  if (rich && (!plain || rich.length > plain.length * 1.2 || plain.length < 80)) {
+    return (
+      <iframe
+        title="Email body"
+        sandbox="allow-popups allow-popups-to-escape-sandbox"
+        srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8" /><base target="_blank" rel="noopener" /><style>body{font-family:system-ui,sans-serif;font-size:14px;line-height:1.45;color:#1A1A1A;margin:0;padding:8px;word-break:break-word;}a{color:#085508;}img{max-width:100%;height:auto;}</style></head><body>${sanitizeEmailHtml(rich)}</body></html>`}
+        className="w-full min-h-[12rem] max-h-[28rem] rounded-md border border-[#E8E4DC] bg-white"
+      />
+    )
+  }
+  return <div className="text-sm whitespace-pre-wrap">{plain || '(No message body)'}</div>
+}
+
 type ThreadDetail = {
   id: string
   subject: string
@@ -49,7 +74,9 @@ type CalEvent = {
   end: string
   location: string
   htmlLink: string
+  meetingLink?: string
   allDay: boolean
+  attachments?: { title: string; fileUrl: string; mimeType: string }[]
 }
 
 type DocFile = {
@@ -943,13 +970,25 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
                           Reply to this
                         </button>
                       </div>
-                      <div className="text-sm whitespace-pre-wrap mt-2">
-                        {m.bodyText || m.snippet}
+                      <div className="mt-2">
+                        <MailBody text={m.bodyText || m.snippet || ''} html={m.bodyHtml || ''} />
                       </div>
                       {m.attachments?.length ? (
-                        <p className="text-[11px] text-[#5A6070] mt-1">
-                          Attachments: {m.attachments.map((a) => a.filename).join(', ')}
-                        </p>
+                        <ul className="mt-2 space-y-1">
+                          {m.attachments.map((a) => (
+                            <li key={`${m.id}-${a.attachmentId}`}>
+                              <a
+                                href={`/api/staff/workspace/mail/attachment?messageId=${encodeURIComponent(m.id)}&attachmentId=${encodeURIComponent(a.attachmentId)}&filename=${encodeURIComponent(a.filename)}&mimeType=${encodeURIComponent(a.mimeType)}`}
+                                className="text-xs font-semibold text-[#085508] underline"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Download {a.filename}
+                                {a.size ? ` (${Math.max(1, Math.round(a.size / 1024))} KB)` : ''}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
                       ) : null}
                     </article>
                   ))}
@@ -1056,9 +1095,46 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
                   {selectedEvent.location}
                 </p>
               ) : null}
+              {selectedEvent.meetingLink ? (
+                <p>
+                  <a
+                    href={selectedEvent.meetingLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center rounded-lg px-3 py-2 text-sm font-semibold text-white"
+                    style={{ backgroundColor: '#085508' }}
+                  >
+                    Join meeting
+                  </a>
+                </p>
+              ) : null}
+              {selectedEvent.attachments?.length ? (
+                <ul className="text-sm space-y-1">
+                  {selectedEvent.attachments.map((a) => (
+                    <li key={a.fileUrl}>
+                      <a
+                        href={a.fileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-semibold text-[#085508] underline"
+                      >
+                        {a.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
               {selectedEvent.description ? (
                 <div className="text-sm text-[#1A1A1A] whitespace-pre-wrap border-t border-[#E8E4DC] pt-2">
-                  {selectedEvent.description.replace(/<[^>]+>/g, '')}
+                  {selectedEvent.description
+                    .replace(/<br\s*\/?\s*>/gi, '\n')
+                    .replace(/<\/p>/gi, '\n\n')
+                    .replace(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, '$2 ($1)')
+                    .replace(/<[^>]+>/g, '')
+                    .replace(/&nbsp;/g, ' ')
+                    .replace(/&amp;/g, '&')
+                    .replace(/\n{3,}/g, '\n\n')
+                    .trim()}
                 </div>
               ) : (
                 <p className="text-xs text-[#5A6070]">No extra notes on this event.</p>

@@ -96,22 +96,47 @@ function toRaw(mime: string): string {
 function extractBodies(payload: {
   mimeType?: string
   body?: { data?: string }
-  parts?: { mimeType?: string; filename?: string; body?: { data?: string; attachmentId?: string; size?: number }; parts?: unknown[] }[]
+  parts?: {
+    mimeType?: string
+    filename?: string
+    body?: { data?: string; attachmentId?: string; size?: number }
+    parts?: unknown[]
+  }[]
 }): { text: string; html: string } {
-  let text = ''
-  let html = ''
+  const texts: string[] = []
+  const htmls: string[] = []
   const walk = (part: {
     mimeType?: string
-    body?: { data?: string }
+    filename?: string
+    body?: { data?: string; attachmentId?: string }
     parts?: { mimeType?: string; body?: { data?: string }; parts?: unknown[] }[]
   }) => {
     const mt = part.mimeType || ''
-    if (mt === 'text/plain' && part.body?.data) text = text || decodeBodyData(part.body.data)
-    if (mt === 'text/html' && part.body?.data) html = html || decodeBodyData(part.body.data)
+    const hasFile = Boolean(part.filename?.trim())
+    // Skip attachment parts when reading body (filename + attachmentId/data)
+    if (hasFile && (part.body?.attachmentId || (!mt.startsWith('text/') && part.body?.data))) {
+      for (const child of part.parts ?? []) walk(child as typeof part)
+      return
+    }
+    if (mt === 'text/plain' && part.body?.data) texts.push(decodeBodyData(part.body.data))
+    if (mt === 'text/html' && part.body?.data) htmls.push(decodeBodyData(part.body.data))
+    // Root-level non-multipart message
+    if (!part.parts?.length && part.body?.data && !mt.includes('multipart')) {
+      if (mt.includes('html')) htmls.push(decodeBodyData(part.body.data))
+      else if (mt.includes('text') || !mt) texts.push(decodeBodyData(part.body.data))
+    }
     for (const child of part.parts ?? []) walk(child as typeof part)
   }
   walk(payload)
-  if (!text && html) text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  // Prefer the longest part (stubs are often short text/plain companions to full HTML)
+  const text = texts.sort((a, b) => b.length - a.length)[0] || ''
+  const html = htmls.sort((a, b) => b.length - a.length)[0] || ''
+  if (!text && html) {
+    return {
+      text: html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+      html,
+    }
+  }
   return { text, html }
 }
 
@@ -119,26 +144,61 @@ function extractAttachmentMeta(payload: {
   parts?: {
     mimeType?: string
     filename?: string
-    body?: { attachmentId?: string; size?: number }
+    body?: { attachmentId?: string; size?: number; data?: string }
     parts?: unknown[]
   }[]
 }): GmailMessageDetail['attachments'] {
   const out: GmailMessageDetail['attachments'] = []
+  const seen = new Set<string>()
   const walk = (parts?: typeof payload.parts) => {
     for (const part of parts ?? []) {
-      if (part.filename && part.body?.attachmentId) {
-        out.push({
-          filename: part.filename,
-          mimeType: part.mimeType || 'application/octet-stream',
-          size: part.body.size || 0,
-          attachmentId: part.body.attachmentId,
-        })
+      const filename =
+        (part.filename || '').trim() ||
+        (part.mimeType === 'text/calendar'
+          ? 'invite.ics'
+          : part.mimeType === 'message/rfc822'
+            ? 'forwarded.eml'
+            : '')
+      const attachmentId = part.body?.attachmentId || ''
+      // Real attachments always have attachmentId in Gmail API; skip inline images without names
+      if (filename && attachmentId) {
+        const key = `${attachmentId}:${filename}`
+        if (!seen.has(key)) {
+          seen.add(key)
+          out.push({
+            filename,
+            mimeType: part.mimeType || 'application/octet-stream',
+            size: part.body?.size || 0,
+            attachmentId,
+          })
+        }
       }
       if (part.parts) walk(part.parts as typeof parts)
     }
   }
   walk(payload.parts)
   return out
+}
+
+export async function getMessageAttachment(
+  staffEmail: string,
+  messageId: string,
+  attachmentId: string,
+): Promise<{ data: Buffer; size: number }> {
+  const token = await accessToken(staffEmail)
+  const res = await fetch(
+    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${encodeURIComponent(messageId)}/attachments/${encodeURIComponent(attachmentId)}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  const data = (await res.json()) as { data?: string; size?: number; error?: { message?: string } }
+  if (!res.ok || !data.data) {
+    throw new Error(data.error?.message || 'Could not download attachment')
+  }
+  const normalized = data.data.replace(/-/g, '+').replace(/_/g, '/')
+  return {
+    data: Buffer.from(normalized, 'base64'),
+    size: data.size || 0,
+  }
 }
 
 function sanitizeAttachments(attachments: MailAttachment[] | undefined): MailAttachment[] {
