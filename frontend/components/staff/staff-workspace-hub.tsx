@@ -44,6 +44,7 @@ type Folder = { id: string; name: string; type: string; messagesUnread?: number 
 type CalEvent = {
   id: string
   summary: string
+  description: string
   start: string
   end: string
   location: string
@@ -57,6 +58,23 @@ type DocFile = {
   mimeType: string
   modifiedTime: string
   webViewLink: string
+}
+
+/** In-portal Google file URL (no new-tab jump). */
+function staffDocEmbedUrl(f: DocFile): string {
+  const id = f.id
+  switch (f.mimeType) {
+    case 'application/vnd.google-apps.document':
+      return `https://docs.google.com/document/d/${id}/edit?usp=embedded`
+    case 'application/vnd.google-apps.spreadsheet':
+      return `https://docs.google.com/spreadsheets/d/${id}/edit?usp=embedded`
+    case 'application/vnd.google-apps.presentation':
+      return `https://docs.google.com/presentation/d/${id}/embed?start=false&loop=false&delayms=60000`
+    case 'application/pdf':
+      return `https://drive.google.com/file/d/${id}/preview`
+    default:
+      return `https://drive.google.com/file/d/${id}/preview`
+  }
 }
 
 type PendingFile = { filename: string; mimeType: string; dataBase64: string }
@@ -161,9 +179,11 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
 
   const [events, setEvents] = useState<CalEvent[]>([])
   const [docs, setDocs] = useState<DocFile[]>([])
+  const [selectedEvent, setSelectedEvent] = useState<CalEvent | null>(null)
 
   const [embedUrl, setEmbedUrl] = useState<string | null>(null)
   const [embedTitle, setEmbedTitle] = useState('')
+  const embedPanelRef = useRef<HTMLDivElement>(null)
 
   const loadStatus = useCallback(async () => {
     const r = await fetch('/api/staff/workspace/status')
@@ -222,6 +242,12 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
     const qs = params.toString()
     router.replace(qs ? `/staff?${qs}` : '/staff?view=inbox')
   }, [searchParams, router])
+
+  useEffect(() => {
+    setSelectedEvent(null)
+    setEmbedUrl(null)
+    setEmbedTitle('')
+  }, [tab])
 
   useEffect(() => {
     let cancelled = false
@@ -977,36 +1003,69 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
       ) : null}
 
       {tab === 'calendar' && status?.connected ? (
-        <ul className="divide-y border border-[#E8E4DC] rounded-lg">
-          {events.length === 0 ? (
-            <li className="p-3 text-sm text-[#5A6070]">No upcoming events on your primary calendar.</li>
-          ) : (
-            events.map((e) => (
-              <li key={e.id} className="p-3 flex flex-wrap justify-between gap-2">
-                <div>
-                  <p className="text-sm font-semibold">{e.summary}</p>
-                  <p className="text-xs text-[#5A6070]">
-                    {formatWhen(e.start, e.allDay)}
-                    {e.location ? ` · ${e.location}` : ''}
-                  </p>
-                </div>
-                {e.htmlLink ? (
+        <div className="space-y-3">
+          <ul className="divide-y border border-[#E8E4DC] rounded-lg">
+            {events.length === 0 ? (
+              <li className="p-3 text-sm text-[#5A6070]">No upcoming events on your primary calendar.</li>
+            ) : (
+              events.map((e) => (
+                <li key={e.id}>
                   <button
                     type="button"
-                    className="text-xs font-bold underline text-[#085508]"
+                    className="w-full text-left p-3 flex flex-wrap justify-between gap-2 hover:bg-[#F7F5F0]"
                     onClick={() => {
-                      // Prefer embeddable calendar event view when possible
-                      setEmbedTitle(e.summary)
-                      setEmbedUrl(e.htmlLink)
+                      setEmbedUrl(null)
+                      setSelectedEvent(e)
                     }}
                   >
-                    View in Staff
+                    <div>
+                      <p className="text-sm font-semibold">{e.summary}</p>
+                      <p className="text-xs text-[#5A6070]">
+                        {formatWhen(e.start, e.allDay)}
+                        {e.location ? ` · ${e.location}` : ''}
+                      </p>
+                    </div>
+                    <span className="text-xs font-bold text-[#085508] self-center">Details</span>
                   </button>
-                ) : null}
-              </li>
-            ))
-          )}
-        </ul>
+                </li>
+              ))
+            )}
+          </ul>
+
+          {selectedEvent ? (
+            <div className="rounded-lg border border-[#E8E4DC] bg-white p-4 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="text-base font-bold text-[#1A1A1A]">{selectedEvent.summary}</h3>
+                <button
+                  type="button"
+                  className="text-xs font-semibold underline text-[#085508] shrink-0"
+                  onClick={() => setSelectedEvent(null)}
+                >
+                  Close
+                </button>
+              </div>
+              <p className="text-sm text-[#5A6070]">
+                {formatWhen(selectedEvent.start, selectedEvent.allDay)}
+                {selectedEvent.end
+                  ? ` → ${formatWhen(selectedEvent.end, selectedEvent.allDay)}`
+                  : ''}
+              </p>
+              {selectedEvent.location ? (
+                <p className="text-sm text-[#1A1A1A]">
+                  <span className="font-semibold">Where: </span>
+                  {selectedEvent.location}
+                </p>
+              ) : null}
+              {selectedEvent.description ? (
+                <div className="text-sm text-[#1A1A1A] whitespace-pre-wrap border-t border-[#E8E4DC] pt-2">
+                  {selectedEvent.description.replace(/<[^>]+>/g, '')}
+                </div>
+              ) : (
+                <p className="text-xs text-[#5A6070]">No extra notes on this event.</p>
+              )}
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       {tab === 'docs' && status?.connected ? (
@@ -1018,49 +1077,53 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
             </li>
           ) : (
             docs.map((f) => (
-              <li key={f.id} className="p-3 flex flex-wrap justify-between gap-2">
-                <div>
-                  <p className="text-sm font-semibold">{f.name}</p>
-                  <p className="text-[11px] text-[#5A6070]">
-                    {f.modifiedTime ? formatWhen(f.modifiedTime) : f.mimeType}
-                  </p>
-                </div>
+              <li key={f.id}>
                 <button
                   type="button"
-                  className="text-xs font-bold underline text-[#085508]"
+                  className="w-full text-left p-3 flex flex-wrap justify-between gap-2 hover:bg-[#F7F5F0]"
                   onClick={() => {
+                    setSelectedEvent(null)
                     setEmbedTitle(f.name)
-                    // /preview embeds more reliably than /edit for in-portal reading
-                    const preview = f.webViewLink.replace(/\/edit.*$/, '/preview')
-                    setEmbedUrl(preview || f.webViewLink)
+                    setEmbedUrl(staffDocEmbedUrl(f))
+                    requestAnimationFrame(() =>
+                      embedPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+                    )
                   }}
                 >
-                  Open in Staff
+                  <div>
+                    <p className="text-sm font-semibold">{f.name}</p>
+                    <p className="text-[11px] text-[#5A6070]">
+                      {f.modifiedTime ? formatWhen(f.modifiedTime) : f.mimeType}
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-[#085508] self-center">Open here</span>
                 </button>
               </li>
             ))
           )}
         </ul>
       ) : null}
-      {embedUrl ? (
-        <div className="rounded-lg border border-[#E8E4DC] overflow-hidden bg-white">
+      {tab === 'docs' && embedUrl ? (
+        <div
+          ref={embedPanelRef}
+          className="rounded-lg border border-[#E8E4DC] overflow-hidden bg-white"
+        >
           <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[#E8E4DC]">
             <p className="text-xs font-bold truncate">{embedTitle || 'Preview'}</p>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                className="text-xs font-semibold underline text-[#085508]"
-                onClick={() => setEmbedUrl(null)}
-              >
-                Close
-              </button>
-            </div>
+            <button
+              type="button"
+              className="text-xs font-semibold underline text-[#085508] shrink-0"
+              onClick={() => setEmbedUrl(null)}
+            >
+              Close
+            </button>
           </div>
-          <iframe title={embedTitle || 'Google'} src={embedUrl} className="w-full h-[min(70vh,36rem)]" />
-          <p className="text-[10px] text-[#5A6070] px-3 py-2">
-            Preview stays in Staff. Full Google editing (if the embed is blocked) is only needed for
-            complex Docs — day-to-day reading stays here.
-          </p>
+          <iframe
+            title={embedTitle || 'Document'}
+            src={embedUrl}
+            className="w-full h-[min(78vh,42rem)] bg-white"
+            allow="clipboard-read; clipboard-write"
+          />
         </div>
       ) : null}
     </section>

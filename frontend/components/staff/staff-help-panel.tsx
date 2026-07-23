@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
 
 type HelpDoc = {
   num: string
@@ -149,23 +148,11 @@ export function StaffHelpPanel({
 
         <div className="rounded-lg border border-[#E8E4DC] overflow-hidden bg-[#FAF8F4] min-h-[28rem]">
           {active?.docId ? (
-            <>
-              <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[#E8E4DC] bg-white">
-                <p className="text-xs font-bold text-[#1A1A1A] truncate">
-                  {active.num} — {active.title}
-                </p>
-                <Button asChild type="button" variant="outline" className="h-8 text-xs shrink-0">
-                  <a href={previewUrl(active.docId)} target="_blank" rel="noreferrer">
-                    Open larger
-                  </a>
-                </Button>
-              </div>
-              <iframe
-                title={active.title}
-                src={previewUrl(active.docId)}
-                className="w-full h-[min(70vh,40rem)] bg-white"
-              />
-            </>
+            <iframe
+              title={`${active.num} — ${active.title}`}
+              src={previewUrl(active.docId)}
+              className="w-full h-[min(78vh,42rem)] bg-white"
+            />
           ) : (
             <p className="p-4 text-sm text-[#5A6070]">Select a guide.</p>
           )}
