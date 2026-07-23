@@ -13,9 +13,14 @@ type Props = {
   subtitle: string
   groups: KbGroup[]
   indexHref: string
-  articleHref: (slug: string) => string
+  /** Use `{slug}` placeholder, e.g. `/member-portal/help/{slug}` or `/staff?view=help&article={slug}` */
+  articleHrefTemplate: string
   active?: KbArticle | null
   activeCategory?: KbCategory | null
+}
+
+function hrefForArticle(template: string, slug: string) {
+  return template.replaceAll('{slug}', encodeURIComponent(slug))
 }
 
 export function KnowledgeBase({
@@ -23,7 +28,7 @@ export function KnowledgeBase({
   subtitle,
   groups,
   indexHref,
-  articleHref,
+  articleHrefTemplate,
   active,
   activeCategory,
 }: Props) {
@@ -111,7 +116,7 @@ export function KnowledgeBase({
                 {articles.map((article) => (
                   <li key={article.slug}>
                     <Link
-                      href={articleHref(article.slug)}
+                      href={hrefForArticle(articleHrefTemplate, article.slug)}
                       className="flex items-start gap-3 px-3 py-3 hover:bg-[#F7F5F0] transition-colors"
                     >
                       <BookOpen

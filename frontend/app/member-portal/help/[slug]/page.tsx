@@ -36,7 +36,7 @@ export default async function MemberHelpArticlePage({ params }: Props) {
             subtitle=""
             groups={groups}
             indexHref="/member-portal/help"
-            articleHref={(s) => `/member-portal/help/${s}`}
+            articleHrefTemplate="/member-portal/help/{slug}"
             active={article}
             activeCategory={category}
           />

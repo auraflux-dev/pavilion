@@ -139,7 +139,7 @@ export function StaffHelpPanel({
         subtitle="Logged-in staff knowledge base. Articles open here in Staff. PayPal, Square, MoneyMinder, and Bank of America stay separate Treasurer/President logins."
         groups={groups}
         indexHref="/staff?view=help"
-        articleHref={(slug) => `/staff?view=help&article=${encodeURIComponent(slug)}`}
+        articleHrefTemplate="/staff?view=help&article={slug}"
         active={visibleActive}
         activeCategory={activeCategory}
       />

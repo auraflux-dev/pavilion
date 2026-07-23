@@ -23,7 +23,7 @@ export default async function MemberHelpIndexPage() {
             subtitle="Logged-in guides for parents. Full articles stay on this site. No outside knowledge base."
             groups={groups}
             indexHref="/member-portal/help"
-            articleHref={(slug) => `/member-portal/help/${slug}`}
+            articleHrefTemplate="/member-portal/help/{slug}"
           />
         </div>
       </main>
