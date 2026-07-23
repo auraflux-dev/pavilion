@@ -117,7 +117,7 @@ export function StaffCmsCollectionPanel({
         <div>
           <h2 className="text-lg font-bold">{label}</h2>
           <p className="text-xs text-[#5A6070]">
-            Add, edit, and deactivate visitor-facing CMS rows without opening Wix.
+            Add, edit, and deactivate visitor-facing site content without opening Wix.
           </p>
         </div>
         <Button type="button" className="text-white" style={{ backgroundColor: '#085508' }} onClick={startNew}>

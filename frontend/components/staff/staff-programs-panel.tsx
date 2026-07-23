@@ -449,16 +449,16 @@ export function StaffProgramsPanel() {
                   const r = await fetch('/api/staff/cms/ensure-fields', { method: 'POST' })
                   const d = await r.json()
                   if (!r.ok) throw new Error(d.error ?? 'Could not ensure CMS fields')
-                  setStatus('CMS schedule/flyer/attendance fields are ready.')
+                  setStatus('Schedule / flyer / attendance fields are ready.')
                 } catch (err) {
-                  setStatus(err instanceof Error ? err.message : 'Could not ensure CMS fields')
+                  setStatus(err instanceof Error ? err.message : 'Could not ensure fields')
                 } finally {
                   setBusy(false)
                 }
               })()
             }}
           >
-            Ensure CMS fields (day/time/dates/flyer/attendance)
+            Ensure schedule fields (day/time/dates/flyer/attendance)
           </button>
         ) : null}
       </div>

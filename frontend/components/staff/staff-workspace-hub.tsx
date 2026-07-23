@@ -162,6 +162,9 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
   const [events, setEvents] = useState<CalEvent[]>([])
   const [docs, setDocs] = useState<DocFile[]>([])
 
+  const [embedUrl, setEmbedUrl] = useState<string | null>(null)
+  const [embedTitle, setEmbedTitle] = useState('')
+
   const loadStatus = useCallback(async () => {
     const r = await fetch('/api/staff/workspace/status')
     const d = await r.json()
@@ -988,14 +991,17 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
                   </p>
                 </div>
                 {e.htmlLink ? (
-                  <a
-                    href={e.htmlLink}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
                     className="text-xs font-bold underline text-[#085508]"
+                    onClick={() => {
+                      // Prefer embeddable calendar event view when possible
+                      setEmbedTitle(e.summary)
+                      setEmbedUrl(e.htmlLink)
+                    }}
                   >
-                    Open in Google
-                  </a>
+                    View in Staff
+                  </button>
                 ) : null}
               </li>
             ))
@@ -1019,18 +1025,43 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
                     {f.modifiedTime ? formatWhen(f.modifiedTime) : f.mimeType}
                   </p>
                 </div>
-                <a
-                  href={f.webViewLink}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  type="button"
                   className="text-xs font-bold underline text-[#085508]"
+                  onClick={() => {
+                    setEmbedTitle(f.name)
+                    // /preview embeds more reliably than /edit for in-portal reading
+                    const preview = f.webViewLink.replace(/\/edit.*$/, '/preview')
+                    setEmbedUrl(preview || f.webViewLink)
+                  }}
                 >
-                  Open / edit in Google
-                </a>
+                  Open in Staff
+                </button>
               </li>
             ))
           )}
         </ul>
+      ) : null}
+      {embedUrl ? (
+        <div className="rounded-lg border border-[#E8E4DC] overflow-hidden bg-white">
+          <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[#E8E4DC]">
+            <p className="text-xs font-bold truncate">{embedTitle || 'Preview'}</p>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                className="text-xs font-semibold underline text-[#085508]"
+                onClick={() => setEmbedUrl(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+          <iframe title={embedTitle || 'Google'} src={embedUrl} className="w-full h-[min(70vh,36rem)]" />
+          <p className="text-[10px] text-[#5A6070] px-3 py-2">
+            Preview stays in Staff. Full Google editing (if the embed is blocked) is only needed for
+            complex Docs — day-to-day reading stays here.
+          </p>
+        </div>
       ) : null}
     </section>
   )

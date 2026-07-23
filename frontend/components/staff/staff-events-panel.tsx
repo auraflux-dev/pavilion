@@ -29,7 +29,6 @@ const emptyForm = {
 
 export function StaffEventsPanel() {
   const [events, setEvents] = useState<EventRow[]>([])
-  const [manageUrl, setManageUrl] = useState('')
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
@@ -43,7 +42,6 @@ export function StaffEventsPanel() {
     const d = await r.json()
     if (!r.ok) throw new Error(d.error ?? 'Load failed')
     setEvents(d.events ?? [])
-    setManageUrl(d.manageUrl ?? '')
     setNote(d.note ?? '')
   }, [])
 
@@ -185,13 +183,6 @@ export function StaffEventsPanel() {
           >
             New event
           </Button>
-          {manageUrl ? (
-            <Button asChild variant="outline">
-              <a href={manageUrl} target="_blank" rel="noopener noreferrer">
-                Wix Events (advanced)
-              </a>
-            </Button>
-          ) : null}
         </div>
       </div>
 

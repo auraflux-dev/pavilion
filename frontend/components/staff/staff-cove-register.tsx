@@ -289,11 +289,14 @@ export function StaffCoveRegister() {
           style={{ backgroundColor: '#EEF6EE' }}
         >
           <p className="text-sm font-bold text-[#1A1A1A]">
-            {family.students.map((s) => s.firstName).filter(Boolean).join(', ') || 'Family'}
+            {family.students
+              .map((s) => [s.firstName, s.lastName].filter(Boolean).join(' ').trim())
+              .filter(Boolean)
+              .join(', ') || family.parentEmail || 'Family'}
             <span className="font-normal text-[#5A6070]"> · code {family.coveFamilyCode}</span>
           </p>
           <p className="text-2xl font-bold tabular-nums" style={{ color: '#085508' }}>
-            Balance: ${Number(family.balance).toFixed(2)}
+            Family Cove card balance: ${Number(family.balance).toFixed(2)}
           </p>
           {!family.hasCard ? (
             <p className="text-xs text-amber-800">No card loaded yet — parent must load online first.</p>

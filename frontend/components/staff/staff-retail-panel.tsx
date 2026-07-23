@@ -14,9 +14,9 @@ export function StaffRetailPanel() {
         title="Cove inventory (advanced)"
       />
       <p className="text-[11px] text-[#5A6070] px-1">
-        Prefer <strong>Cove products</strong> above for day-to-day adds and restocks. The inventory
-        table is a backup if you need to fix a SKU/qty row directly. Membership and spirit-wear
-        catalog items can stay in Wix if needed; snacks should live here.
+        Prefer <strong>Cove products</strong> above for day-to-day adds and restocks. This table is a
+        backup if you need to fix a barcode/qty row directly. Snacks live here in Staff — not the Wix
+        Dashboard.
       </p>
     </div>
   )

@@ -104,7 +104,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   storeCardsLabel: 'Family Cove card',
   storeCardsHint: 'One balance for the whole family',
   recentBuysLabel: 'Recent buys',
-  recentBuysHint: 'programs & payments',
+  recentBuysHint: 'Payment History',
   ctaLoadCard: 'Load family card',
   ctaSpiritWear: 'Spirit wear',
   ctaPrograms: 'Programs',

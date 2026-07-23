@@ -23,6 +23,7 @@ import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection
 import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
 import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
 import { StaffTimesheetsPanel } from '@/components/staff/staff-timesheets-panel'
+import { StaffHelpPanel } from '@/components/staff/staff-help-panel'
 import { StaffShell } from '@/components/shells/staff-shell'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 
@@ -748,76 +749,14 @@ export function StaffDashboard() {
         ) : null}
         {active === 'expenses' ? <StaffExpensesPanel /> : null}
         {active === 'help' ? (
-          <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3">
-            <h1 className="text-xl font-bold">Help</h1>
-            <p className="text-xs text-[#5A6070]">
-              Full guides: Google Drive → SHMS PTO Platform Docs. Start with{' '}
-              <span className="font-semibold">30 - Staff Portal Quick Start</span>.
-            </p>
-            <ul className="text-sm space-y-1.5 text-[#1A1A1A]">
-              <li>
-                <span className="font-semibold">30</span> — Staff Portal Quick Start
-              </li>
-              <li>
-                <span className="font-semibold">26</span> — Roles & @shmspto.org login
-              </li>
-              <li>
-                <span className="font-semibold">29</span> — Year project board
-              </li>
-              {me.isAdmin ? (
-                <li>
-                  <span className="font-semibold">31</span> — Lookup, act-as, archive
-                </li>
-              ) : null}
-              <li>
-                <span className="font-semibold">33</span> — Inbox, Calendar & Docs (Connect Google)
-              </li>
-              <li>
-                <span className="font-semibold">37</span> — Site capability audit & test plans
-              </li>
-              <li>
-                <span className="font-semibold">27</span> — Helping a parent in the portal
-              </li>
-              <li>
-                <span className="font-semibold">38</span> — Parent portal checklist (free & paid)
-              </li>
-              {canMessage ? (
-                <li>
-                  <span className="font-semibold">16</span> — Parent inbox messages
-                </li>
-              ) : null}
-              {canMembership ? (
-                <li>
-                  <span className="font-semibold">34</span> — Memberships roster, mass email, WhatsApp
-                </li>
-              ) : null}
-              {canDiscounts ? (
-                <li>
-                  <span className="font-semibold">36</span> — Discount codes & spirit coupons
-                </li>
-              ) : null}
-              <li>
-                <span className="font-semibold">33–40</span> — Inbox/Docs, Memberships, Tiers,
-                Discounts, Newsletter, Site CMS by role, Parent checklist
-              </li>
-              {canSite ? (
-                <li>
-                  <span className="font-semibold">Site settings / CMS lists</span> — Announcement,
-                  board, nav, FAQs, volunteers, fundraising, tiers, wellness (by role)
-                </li>
-              ) : null}
-              {canMarketing ? (
-                <>
-                  <li>
-                    <span className="font-semibold">23–24</span> — Surveys
-                  </li>
-                  <li>
-                    <span className="font-semibold">25</span> — Facebook from Staff
-                  </li>
-                </>
-              ) : null}
-            </ul>
-          </section>
+          <StaffHelpPanel
+            isAdmin={me.isAdmin}
+            canMessage={canMessage}
+            canMembership={canMembership}
+            canDiscounts={canDiscounts}
+            canSite={canSite}
+            canMarketing={canMarketing}
+          />
         ) : null}
       </div>
     </StaffShell>
