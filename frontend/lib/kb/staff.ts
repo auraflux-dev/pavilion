@@ -325,11 +325,70 @@ If a parent paid but sees nothing:
 4. Escalate to Treasurer for payment-side mismatches`,
     },
     {
+      slug: 'refunds-cancellations',
+      title: 'Refunds & cancellations (online purchases)',
+      categoryId: 'admin',
+      summary: 'Square/PayPal money plus CMS or fulfill steps by product type.',
+      order: 4,
+      body: `Online checkout (Square or PayPal) does **not** auto-refund. Treasurer/President refunds money in **Square** (or PayPal). Staff then fix the matching record so seats, tickets, and balances stay accurate.
+
+Default contact for money issues: **treasurer@shmspto.org** (cc spiritwear or programs lead when relevant).
+
+## Wrong card or duplicate charge (any purchase)
+1. Find the payment in Square/PayPal (amount, time, last4)
+2. Refund that payment
+3. Fix product state below if the order was real or already fulfilled
+4. Email the parent what was refunded and what happens next
+
+Square may keep a small processing fee on refunds. That is normal.
+
+## By purchase type
+
+### Spirit wear / Cove merchandise (online product)
+- **Before ship / pickup:** refund in Square; cancel any fulfill/ship request
+- **After ship:** usually no full refund (exchange or partial minus shipping, board policy)
+- Staff also updates notes on the Payments row when useful
+- In-person Cove snack sales are register/store-card, not this flow
+
+### Family Cove card (store-card load)
+- Refund in Square **and** remove the same load from the family gift card balance
+- Never refund cash/credit and leave the loaded dollars on the card
+
+### Membership
+- **Non-refundable** once payment processes, except when required by law or the PTO cancels the membership benefit before it begins
+- Store-card credit bundled with membership follows Cove card rules, not membership donation rules
+
+### Enrichment programs
+- Parent can **Request refund** in the member portal
+- Staff **Approve refund** in Programs (marks enrollment Refunded; may free a seat / promote waitlist)
+- Then Treasurer processes the Square/PayPal refund
+- Missed classes, weather, or dismissal for conduct are generally **not** refunded unless the board announces otherwise
+- Waitlist: if no seat opens, refund the paid waitlist fee when policy says so
+
+### Event tickets
+- No parent self-serve refund button today
+- Parent emails staff/treasurer; staff refunds in Square/PayPal
+- If the sale is voided, adjust sold count / capacity so tickets are not oversold
+- Prefer a clear cutoff (example: no refunds after purchase, or only before a posted date). Follow whatever the event flyer states
+
+## Quick checklist
+1. Confirm payment cleared (Square/PayPal)
+2. Decide refund vs deny per policy above
+3. Refund money in Square/PayPal when approved
+4. Update enrollment / ticket / card / ship status
+5. Reply to the parent in portal message or email
+
+## Related
+- Staff Help → **Purchase confirmations & portal messages**
+- Staff Help → **PayPal, Square, MoneyMinder, Bank of America**
+- Public membership terms and enrichment waiver on the site`,
+    },
+    {
       slug: 'money-systems',
       title: 'PayPal, Square, MoneyMinder, Bank of America',
       categoryId: 'admin',
       summary: 'These stay separate logins on purpose.',
-      order: 4,
+      order: 5,
       body: `Treasurer and President keep **separate** logins for:
 
 - PayPal
