@@ -3,6 +3,20 @@ import { getSiteSettings } from '@/lib/api/site-settings'
 
 const DEFAULT_IMAGE = '/home/community.jpg'
 
+/** Put "Go Stingrays!" on its own line when it trails the community headline. */
+function splitCommunityHeadline(raw: string): string[] {
+  const text = raw.replace(/\\n/g, '\n').trim()
+  if (!text) return []
+  if (text.includes('\n')) {
+    return text.split('\n').map((l) => l.trim()).filter(Boolean)
+  }
+  const match = text.match(/^(.*?)\.\s+(Go Stingrays!?)$/i)
+  if (match?.[1] && match[2]) {
+    return [`${match[1].trim()}.`, match[2]]
+  }
+  return [text]
+}
+
 function resolveHomeImageUrl(raw: string, fallback: string): string {
   const url = (raw || '').trim()
   if (!url) return fallback
@@ -47,7 +61,11 @@ export async function CommunityBanner() {
       {headline ? (
         <div className="absolute inset-0 flex items-center justify-center md:justify-start">
           <p className="text-white text-2xl sm:text-3xl md:text-4xl font-bold text-center md:text-left px-6 md:px-16 drop-shadow-md max-w-3xl">
-            {headline}
+            {splitCommunityHeadline(headline).map((line, i) => (
+              <span key={i} className="block">
+                {line}
+              </span>
+            ))}
           </p>
         </div>
       ) : null}

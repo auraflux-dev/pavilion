@@ -59,7 +59,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   }),
   /** Home page community strip. Wix PageContent page = home-community */
   'home-community': empty('home-community', {
-    title: 'Building community together. Go Stingrays!',
+    title: 'Building community together.\nGo Stingrays!',
     body: '',
   }),
   membership: empty('membership', {
