@@ -131,8 +131,8 @@ const SITE_SETTINGS = {
   contactEmailTreasurer: 'treasurer@shmspto.org',
   contactAddress: '23415 Evergreen Ridge Drive, Ashburn, VA 20148',
   contactStoreHours: 'Open during lunch periods, Mon–Fri',
-  socialFacebook: '',
-  socialInstagram: '',
+  socialFacebook: 'https://www.facebook.com/stonehillmspto/',
+  socialInstagram: 'https://www.instagram.com/stonehillmspto',
   socialTwitter: '',
   socialYoutube: '',
   socialFacebookAccountId: '122099888691399229',
@@ -171,7 +171,7 @@ const PAGE_ROWS = [
   },
   {
     page: 'home-community',
-    title: 'Building community together. Go Stingrays!',
+    title: 'Building community together.\nGo Stingrays!',
     active: true,
   },
   {

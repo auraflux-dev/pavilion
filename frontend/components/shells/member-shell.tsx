@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { SocialFooterLinks } from '@/components/social-footer-links'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
 
@@ -140,12 +141,13 @@ export function MemberShell({ children }: Props) {
       {children}
 
       <footer className="border-t border-[#E8E4DC] bg-[#FAFCF9] py-4 mt-auto">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#5A6070]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#5A6070]">
           <span>{audienceLabel} · SHMS PTO</span>
           <Link href="/privacy" className="underline">Privacy</Link>
           <Link href="/terms" className="underline">Terms</Link>
           <Link href="/data-security" className="underline">Data security</Link>
           <Link href="/photo-release" className="underline">Photo release</Link>
+          <SocialFooterLinks variant="light" />
         </div>
       </footer>
     </div>

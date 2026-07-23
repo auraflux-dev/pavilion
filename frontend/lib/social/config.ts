@@ -2,6 +2,11 @@
  * Social publishing config — Facebook live via Wix Social Publisher; Instagram deferred (1 free slot).
  */
 import { getSiteSettings } from '@/lib/api/site-settings'
+import {
+  DEFAULT_SOCIAL_FACEBOOK,
+  DEFAULT_SOCIAL_INSTAGRAM,
+  resolveSocialLink,
+} from '@/lib/social/public-links'
 
 export type SocialPlatform = 'facebook' | 'instagram' | 'twitter' | 'youtube'
 
@@ -29,8 +34,8 @@ export async function getSocialConfig(): Promise<SocialPublishConfig> {
   const instagramAccountId = settings.get('socialInstagramAccountId', '')
   return {
     links: {
-      facebook: settings.get('socialFacebook', ''),
-      instagram: settings.get('socialInstagram', ''),
+      facebook: resolveSocialLink(settings.get('socialFacebook', ''), DEFAULT_SOCIAL_FACEBOOK),
+      instagram: resolveSocialLink(settings.get('socialInstagram', ''), DEFAULT_SOCIAL_INSTAGRAM),
       twitter: settings.get('socialTwitter', ''),
       youtube: settings.get('socialYoutube', ''),
     },

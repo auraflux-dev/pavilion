@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronDown, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { SocialFooterLinks } from '@/components/social-footer-links'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
 
@@ -237,7 +238,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
       </main>
 
       <footer className="border-t border-[#E8E4DC] bg-white/70 py-4">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#5A6070]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#5A6070]">
           <span>Staff workspace · {STAFF_WORKSPACE_LABEL[active]}</span>
           <Link href="/privacy" className="underline">
             Privacy
@@ -248,6 +249,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
           <Link href="/data-security" className="underline">
             Data security
           </Link>
+          <SocialFooterLinks variant="light" />
           <span className="text-[#9AA0A6]">Drive docs 26 to 40 for how-tos</span>
         </div>
       </footer>

@@ -1,6 +1,11 @@
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getFooterLinks } from '@/lib/api/nav'
 import { isMemberRequest } from '@/lib/is-member-request'
+import {
+  DEFAULT_SOCIAL_FACEBOOK,
+  DEFAULT_SOCIAL_INSTAGRAM,
+  resolveSocialLink,
+} from '@/lib/social/public-links'
 import { FooterClient } from './footer-client'
 
 export async function Footer() {
@@ -17,8 +22,8 @@ export async function Footer() {
       link6={member ? settings.get('announcement6thLink', '') : ''}
       link7={member ? settings.get('announcement7thLink', '') : ''}
       link8={member ? settings.get('announcement8thLink', '') : ''}
-      socialFacebook={settings.get('socialFacebook', '')}
-      socialInstagram={settings.get('socialInstagram', '')}
+      socialFacebook={resolveSocialLink(settings.get('socialFacebook', ''), DEFAULT_SOCIAL_FACEBOOK)}
+      socialInstagram={resolveSocialLink(settings.get('socialInstagram', ''), DEFAULT_SOCIAL_INSTAGRAM)}
       socialTwitter={settings.get('socialTwitter', '')}
       socialYoutube={settings.get('socialYoutube', '')}
       footerLinks={footerLinks}
