@@ -103,7 +103,7 @@ export async function GET(req: NextRequest) {
         getUpcomingProgramSessions(50).catch(() => []),
         Promise.all(enrollQueries),
         Promise.all(payQueries),
-        // ParentMessages — instructor / staff → parent notes
+        // ParentMessages. instructor / staff → parent notes
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (admin.items.query('ParentMessages') as any)
           .eq('active', true)
@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
           .limit(40)
           .find()
           .catch(() => ({ items: [] })),
-        // Newsletters — VP Marketing archive → portal Messages
+        // Newsletters. VP Marketing archive → portal Messages
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (admin.items.query('Newsletters') as any)
           .eq('active', true)
@@ -235,7 +235,7 @@ export async function GET(req: NextRequest) {
       ? sessionItems
       : Array.from(programCalendar.values())
 
-    // Staff CMS events for portal calendar (any event — not limited to enrollments)
+    // Staff CMS events for portal calendar (any event. not limited to enrollments)
     const grades = new Set(students.map((s: { grade: string }) => s.grade))
     const staffEventItems: PortalCalendarItem[] = []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -431,7 +431,7 @@ function formatEventWhen(start: string | null | undefined, end?: string | null):
         hour: 'numeric',
         minute: '2-digit',
       })
-      return `${datePart} · ${timePart}–${endTime}`
+      return `${datePart} · ${timePart} to ${endTime}`
     }
     return `${datePart} · ${timePart}`
   } catch {

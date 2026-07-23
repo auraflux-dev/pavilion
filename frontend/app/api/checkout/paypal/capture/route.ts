@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     // Soft-check captured amount vs quote (tolerance 1 cent)
     if (captured.amount != null && Math.abs(captured.amount - resolved.amount) > 0.02) {
       console.error('PayPal amount mismatch', captured.amount, resolved.amount)
-      return NextResponse.json({ error: 'Payment amount mismatch — contact the PTO' }, { status: 409 })
+      return NextResponse.json({ error: 'Payment amount mismatch. contact the PTO' }, { status: 409 })
     }
 
     const name =

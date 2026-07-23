@@ -1,6 +1,6 @@
 /**
- * GET  /api/gift-card/auto-topoff?studentId=xxx  — fetch current settings
- * POST /api/gift-card/auto-topoff                 — save settings
+ * GET  /api/gift-card/auto-topoff?studentId=xxx . fetch current settings
+ * POST /api/gift-card/auto-topoff                . save settings
  * Body: { studentId, enabled, thresholdDollars, reloadDollars }
  */
 import { NextRequest, NextResponse } from 'next/server'

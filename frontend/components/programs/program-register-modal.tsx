@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * In-app program registration — student select, safety check, consent checkboxes, pay if fee > 0.
+ * In-app program registration. Student select, safety check, consent checkboxes, pay if fee > 0.
  */
 import { useCallback, useEffect, useState } from 'react'
 import { Loader2, X } from 'lucide-react'
@@ -138,7 +138,7 @@ export function ProgramRegisterModal({ program, open, onClose, onRegistered }: P
           <div className="flex items-start justify-between gap-3">
             <div>
               <p id="program-register-title" className="text-base font-bold text-[#1A1A1A]">
-                Register — {program.name}
+                Register. {program.name}
               </p>
               <p className="text-sm font-bold mt-1" style={{ color: '#085508' }}>
                 {fee <= 0 ? 'Free' : `$${fee.toFixed(2)}`}
@@ -216,7 +216,7 @@ export function ProgramRegisterModal({ program, open, onClose, onRegistered }: P
         open={payOpen}
         onClose={() => setPayOpen(false)}
         amount={payAmount}
-        title={`Pay — ${program.name}`}
+        title={`Pay. ${program.name}`}
         subtitle="Enrichment program registration"
         payBody={{
           kind: 'program',

@@ -392,7 +392,7 @@ export function StaffExpensesPanel() {
                   <ul className="text-xs text-[#5A6070] space-y-0.5">
                     {ex.lineItems.map((li, i) => (
                       <li key={i}>
-                        {[li.date, li.vendor, li.description].filter(Boolean).join(' · ')} —{' '}
+                        {[li.date, li.vendor, li.description].filter(Boolean).join(' · ')} ·
                         {money(li.amount)}
                       </li>
                     ))}

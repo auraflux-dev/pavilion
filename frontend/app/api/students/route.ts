@@ -1,6 +1,6 @@
 /**
- * POST /api/students — create a student record linked to the logged-in parent
- * GET  /api/students — return all students for the logged-in parent
+ * POST /api/students. create a student record linked to the logged-in parent
+ * GET  /api/students. return all students for the logged-in parent
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createOAuthClient } from '@/lib/wix-oauth-client'

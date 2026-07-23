@@ -1,7 +1,7 @@
 import type { KbIndex } from './types'
 
 /**
- * Logged-in staff knowledge base — native articles (no Wix, no Google jump for reading).
+ * Logged-in staff knowledge base. Native articles (no Wix, no Google jump for reading).
  * PayPal / Square / MoneyMinder / Bank of America stay separate treasurer/president logins.
  */
 export const STAFF_KB: KbIndex = {
@@ -51,13 +51,13 @@ export const STAFF_KB: KbIndex = {
       categoryId: 'start',
       summary: 'Where to click on day one.',
       order: 1,
-      body: `Sign in with your **@shmspto.org** Google account. Staff access is granted by a **StaffRoles** row — ask President/Treasurer if the Staff button is missing.
+      body: `Sign in with your **@shmspto.org** Google account. Staff access is granted by a **StaffRoles** row. Ask President/Treasurer if the Staff button is missing.
 
 ## First stops
-- **Home** — your role workspaces and activity notices
-- **Help** — this knowledge base
-- **Inbox / My calendar / Docs** — Connect Google once, then work stays in Staff
-- **The Cove** — register + products when you run the snack window
+- **Home**: your role workspaces and activity notices
+- **Help**: this knowledge base
+- **Inbox / My calendar / Docs**. Connect Google once, then work stays in Staff
+- **The Cove**: register + products when you run the snack window
 
 ## Stay in Staff
 Day-to-day tools open inside Staff. The only intentional exits for money ops are **PayPal**, **Square**, **MoneyMinder**, and **Bank of America** (Treasurer / President).`,
@@ -93,14 +93,14 @@ Update status when you finish a milestone so Home activity stays useful for ever
       slug: 'google-connect',
       title: 'Inbox, Calendar & Docs (Connect Google)',
       categoryId: 'comms',
-      summary: 'One Connect — mail, calendar, and Drive stay in Staff.',
+      summary: 'One Connect. Mail, calendar, and Drive stay in Staff.',
       order: 1,
       body: `Open **Inbox**, **My calendar**, or **Docs** and choose **Connect Google** if prompted. Use the same @shmspto.org account.
 
 ## After connect
-- **Inbox** — read, reply, compose, folders
-- **My calendar** — upcoming events with details in Staff
-- **Docs** — open Drive files in an in-Staff embed
+- **Inbox**: read, reply, compose, folders
+- **My calendar**: upcoming events with details in Staff
+- **Docs**: open Drive files in an in-Staff embed
 
 Reconnect if you see permission errors after a password reset. Purchase confirmation email can also use connected Gmail when configured.`,
     },
@@ -114,10 +114,10 @@ Reconnect if you see permission errors after a password reset. Purchase confirma
 
 ## Checklist
 1. Confirm they are signed in (same email they joined with)
-2. **My Account** — free vs paid, phone/name
-3. **My Students** — every child listed with correct grade
-4. **Store & Cove card** — balance, family code, Payment History
-5. **Calendar & Messages** — program info and inbox
+2. **My Account**: free vs paid, phone/name
+3. **My Students**: every child listed with correct grade
+4. **Store & Cove card**: balance, family code, Payment History
+5. **Calendar & Messages**: program info and inbox
 
 Point them to **Member Help** (\`/member-portal/help\`) for full articles. For stuck records, use Lookup / act-as (admin) rather than guessing.`,
     },
@@ -149,13 +149,13 @@ If paid perks are missing after checkout, have them refresh, then check Square/P
       adminOnly: true,
       body: `**Lookup** finds a parent by email or name. Use it before changing student or card data.
 
-**Act-as** opens the member portal as that parent so you can see exactly what they see. End act-as when finished — do not leave a session open on a shared computer.
+**Act-as** opens the member portal as that parent so you can see exactly what they see. End act-as when finished. Do not leave a session open on a shared computer.
 
 **Archive** is for students or records that should leave the active roster without deleting history. Prefer archive over silent deletes.`,
     },
     {
       slug: 'programs-attendance',
-      title: 'Programs — schedule, roster, attendance',
+      title: 'Programs. Schedule, roster, attendance',
       categoryId: 'programs',
       summary: 'Run enrichment from Staff Programs.',
       order: 1,
@@ -165,7 +165,7 @@ If paid perks are missing after checkout, have them refresh, then check Square/P
 Use check-in / check-out for session dates. Medical notes appear for staff who need them on the roster view.
 
 ## Refunds & transfers
-Process from the enrollment tools in Programs — do not invent off-system credits without Treasurer alignment.
+Process from the enrollment tools in Programs. Do not invent off-system credits without Treasurer alignment.
 
 Parents register on the public/member Programs flows; Staff owns capacity and day-of ops.`,
     },
@@ -194,7 +194,7 @@ Staff can adjust roster/waitlist from Programs when needed.`,
 
 Parents get purchase confirmation in portal messages (and email when Gmail send is connected).
 
-Do not send parents to the old Wix Events dashboard for day-to-day work — stay in Staff.`,
+Do not send parents to the old Wix Events dashboard for day-to-day work. Stay in Staff.`,
     },
     {
       slug: 'cove-register',
@@ -205,7 +205,7 @@ Do not send parents to the old Wix Events dashboard for day-to-day work — stay
       body: `Staff → **The Cove** → Cove register.
 
 1. Student says what they want
-2. Student gives the 6-digit family code — staff enters it
+2. Student gives the 6-digit family code. Staff enters it
 3. Confirm **full student names** and **Family Cove card balance**
 4. Scan or tap products, then **Charge**
 
@@ -221,7 +221,7 @@ If there is no card yet, the parent must load online first. Plastic cards are op
 
 Multiple staff can work products at once. Spirit wear stock is separate (Wix Stores / Cove shop merch), not the snack register catalog.
 
-Use advanced inventory only when you need deeper stock tools — day-to-day is products + register.`,
+Use advanced inventory only when you need deeper stock tools. Day-to-day is products + register.`,
     },
     {
       slug: 'discount-codes',
@@ -258,9 +258,9 @@ Prefer portal messages + email for official notices so parents are not chased on
       need: 'membership',
       body: `**Memberships** shows paid/free roster status for outreach and support.
 
-Mass email and WhatsApp share actions open the compose/share flow for that campaign. WhatsApp may leave Staff briefly to the WhatsApp app — that is intentional for sharing, not a second CMS.
+Mass email and WhatsApp share actions open the compose/share flow for that campaign. WhatsApp may leave Staff briefly to the WhatsApp app. That is intentional for sharing, not a second CMS.
 
-Keep MoneyMinder / bank exports with Treasurer — do not duplicate finance ledgers in the roster.`,
+Keep MoneyMinder / bank exports with Treasurer. Do not duplicate finance ledgers in the roster.`,
     },
     {
       slug: 'facebook-from-staff',

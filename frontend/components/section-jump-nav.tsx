@@ -13,8 +13,8 @@ type Props = {
   ariaLabel: string
   items: readonly SectionJumpItem[]
   /**
-   * `band` — full-bleed bar under a page hero (Cove).
-   * `card` — inset card above dense content (member portal).
+   * `band`. full-bleed bar under a page hero (Cove).
+   * `card`. inset card above dense content (member portal).
    */
   variant?: 'band' | 'card'
   className?: string

@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * In-portal Square card checkout — personal credit/debit card for any ecommerce.
+ * In-portal Square card checkout. Personal credit/debit card for any ecommerce.
  * Free and paid members. Saved card is optional convenience, never required.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -55,7 +55,7 @@ interface Props {
   onPaid?: (data: Record<string, unknown>) => void
   /** Unique DOM id so multiple forms can mount */
   containerId?: string
-  /** When consents were already collected (e.g. program register), skip the checkbox UI */
+  /** When consents were already collected (e.g. Program register), skip the checkbox UI */
   prefilledConsents?: ConsentAck[]
 }
 
@@ -207,7 +207,7 @@ export function PortalCardCheckout({
       setNextSteps(Array.isArray(conf?.nextSteps) ? conf.nextSteps : [])
       setPortalHref(typeof conf?.portalHref === 'string' ? conf.portalHref : '/member-portal')
       setEmailed(Boolean(conf?.emailed))
-      setSuccess('Payment successful — thank you!')
+      setSuccess('Payment successful. Thank you!')
       onPaid?.(data)
       setTimeout(() => onClose(), conf?.nextSteps?.length ? 6000 : 1400)
     } catch (err) {
@@ -243,7 +243,7 @@ export function PortalCardCheckout({
         </div>
 
         <p className="text-xs text-[#5A6070]">
-          Pay with your own credit or debit card. Free and paid parent accounts can checkout here —
+          Pay with your own credit or debit card. Free and paid parent accounts can checkout here.
           you do not need a saved Square card.
         </p>
 
@@ -343,7 +343,7 @@ export function PortalCardCheckout({
             setNextSteps(Array.isArray(conf?.nextSteps) ? conf.nextSteps : [])
             setPortalHref(typeof conf?.portalHref === 'string' ? conf.portalHref : '/member-portal')
             setEmailed(Boolean(conf?.emailed))
-            setSuccess('PayPal payment successful — thank you!')
+            setSuccess('PayPal payment successful. Thank you!')
             onPaid?.(data)
             setTimeout(() => onClose(), conf?.nextSteps?.length ? 6000 : 1400)
           }}

@@ -180,7 +180,7 @@ export function StaffTimesheetsPanel() {
         <textarea
           value={form.notes}
           onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-          placeholder="Notes (optional) — e.g. makeup class, prep time"
+          placeholder="Notes (optional). e.g. makeup class, prep time"
           rows={2}
           className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
         />
@@ -210,7 +210,7 @@ export function StaffTimesheetsPanel() {
                 {row.programName} · {row.hours}h
               </p>
               <p className="text-xs text-[#5A6070]">
-                {row.workDate} · {row.startTime}–{row.endTime}
+                {row.workDate} · {row.startTime} to {row.endTime}
                 {canReview ? ` · ${row.staffName || row.staffEmail}` : ''}
               </p>
               {row.notes ? <p className="text-xs text-[#5A6070] mt-1">{row.notes}</p> : null}

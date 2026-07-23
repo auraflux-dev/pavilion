@@ -2,7 +2,7 @@
 
 /**
  * Renders a POWR survey embed.
- * Only https://*.powr.io URLs are allowed — no arbitrary HTML/srcDoc execution.
+ * Only https://*.powr.io URLs are allowed. no arbitrary HTML/srcDoc execution.
  */
 
 function isAllowedPowrUrl(raw: string): boolean {
@@ -26,7 +26,7 @@ function extractPowrSrc(htmlOrUrl: string): string | null {
   const src = srcMatch?.[1]?.trim()
   if (src && isAllowedPowrUrl(src)) return src
 
-  // POWR sometimes uses data-powr-id scripts — pull iframe fallback URLs if present
+  // POWR sometimes uses data-powr-id scripts. pull iframe fallback URLs if present
   const urlMatch = trimmed.match(/https:\/\/(?:www\.)?(?:[\w-]+\.)?powr\.io\/[^\s"'<>]+/i)
   if (urlMatch?.[0] && isAllowedPowrUrl(urlMatch[0])) return urlMatch[0]
 

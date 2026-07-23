@@ -1,5 +1,5 @@
 /**
- * POST /api/errors/report — browser / parent pasteable client errors when reporting is on.
+ * POST /api/errors/report. browser / parent pasteable client errors when reporting is on.
  * Gated by ERROR_REPORTING_ENABLED.
  */
 import { NextRequest, NextResponse } from 'next/server'

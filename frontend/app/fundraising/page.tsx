@@ -145,7 +145,7 @@ export default async function FundraisingPage() {
 
       <main id="main-content" className="flex-1">
 
-        {/* Hero — overall progress */}
+        {/* Hero. overall progress */}
         <section className="py-16 md:py-24" style={{ backgroundColor: '#085508' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div
@@ -244,7 +244,7 @@ export default async function FundraisingPage() {
                       {initiative.description}
                     </p>
 
-                    {/* Raised only — per-area goals stay in Staff settings (not public) */}
+                    {/* Raised only. per-area goals stay in Staff settings (not public) */}
                     <div className="mb-4">
                       <p className="text-sm font-semibold" style={{ color: '#085508' }}>
                         {raisedDisplay}
@@ -322,7 +322,7 @@ export default async function FundraisingPage() {
           </div>
         </section>
 
-        {/* Sponsorships — deep link: /fundraising#sponsorship */}
+        {/* Sponsorships. deep link: /fundraising#sponsorship */}
         <section
           id="sponsorship"
           className="scroll-mt-28 py-14 md:py-20 border-t border-[#E8E4DC] bg-white"

@@ -1,8 +1,8 @@
 /**
  * Member portal UI copy. Edited via Wix PageContent:
- * - `portal` — free/paid blurbs + empty-student / upgrade (legacy bullets)
- * - `portal-hub` — quadrant titles, empty states, CTAs (keyed bullets: key|text)
- * - `member-portal` — page hero (via PageHero)
+ * - `portal`. free/paid blurbs + empty-student / upgrade (legacy bullets)
+ * - `portal-hub`. quadrant titles, empty states, CTAs (keyed bullets: key|text)
+ * - `member-portal`. page hero (via PageHero)
  */
 
 export type PortalCopy = {
@@ -94,7 +94,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   calendarEmptyCta: 'Browse programs',
   messagesEmptyTitle: 'Inbox empty',
   messagesEmptyBody:
-    'Instructors can send updates here after your student is enrolled — class reminders, location changes, and more.',
+    'Instructors can send updates here after your student is enrolled: class reminders, location changes, and more.',
 
   memberSince: 'Member since',
   studentsLabel: 'Students',
@@ -102,14 +102,14 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   whatsappHeading: 'Don’t forget to join your grade WhatsApp',
 
   storeCardsLabel: 'Family Cove card',
-  storeCardsHint: 'One balance for the whole family',
+  storeCardsHint: 'Current Balance',
   recentBuysLabel: 'Recent buys',
   recentBuysHint: 'Payment History',
   ctaLoadCard: 'Load family card',
   ctaSpiritWear: 'Spirit wear',
   ctaPrograms: 'Programs',
   purchasesEmpty:
-    'Purchases from the site — memberships, programs, store card loads — will list here so you can see what each student is signed up for.',
+    'Purchases from the site (memberships, programs, store card loads) will list here so you can see what each student is signed up for.',
 
   addStudentCta: 'Add a student',
   addStudentTitle: 'Add a student',
@@ -120,10 +120,10 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   cancel: 'Cancel',
   addStudentError: 'Could not add student. Please try again.',
   loadCardHelp:
-    'One family Cove card and balance. Choose $20 / $40 / $75, or enter any whole-dollar amount. Pay with card or PayPal. Saving a card with Square is optional for faster reloads and auto top-off.',
+    'One family Cove card and balance. Choose $20 / $40 / $75, or enter any whole dollar amount. Pay with card or PayPal. Saving a card with Square is optional for faster reloads and auto top off.',
   paymentMethodsTitle: 'How you pay',
   paymentMethodsBody:
-    'Snack window: prepaid student store card. Online: pay with credit/debit card or PayPal in this portal (membership, The Cove, and store-card reloads). Saving a card is optional.',
+    'Snack window: prepaid family Cove card. Online: pay with credit/debit card or PayPal in this portal (membership, The Cove, and Cove card reloads). Saving a card is optional.',
 }
 
 /** Parse `key|value` lines (store-how style). Value may contain `|`. */

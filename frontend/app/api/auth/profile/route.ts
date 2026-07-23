@@ -1,5 +1,5 @@
 /**
- * PATCH /api/auth/profile — update logged-in parent name & phone (in-portal, no Wix redirect).
+ * PATCH /api/auth/profile. update logged-in parent name & phone (in-portal, no Wix redirect).
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'

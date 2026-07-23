@@ -17,7 +17,7 @@ type Props = {
 
 /**
  * Phone / tablet camera scanner for Cove register.
- * USB keyboard-wedge scanners do not need this — they type into the focused input.
+ * USB keyboard-wedge scanners do not need this. They type into the focused input.
  */
 export function CoveCameraScanner({
   onScan,
@@ -41,9 +41,9 @@ export function CoveCameraScanner({
       scannerRef.current = null
       if (s) {
         void s
-          .stop()
-          .catch(() => undefined)
-          .finally(() => {
+         .stop()
+         .catch(() => undefined)
+         .finally(() => {
             try {
               s.clear()
             } catch {
@@ -87,7 +87,7 @@ export function CoveCameraScanner({
       setError(
         err instanceof Error
           ? err.message
-          : 'Camera unavailable — use a USB scanner or type the code.'
+          : 'Camera unavailable. Use a USB scanner or type the code.'
       )
     } finally {
       setStarting(false)

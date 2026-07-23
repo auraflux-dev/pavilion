@@ -1,6 +1,6 @@
 /**
  * Soft photo wash for cream / white section dead space.
- * Real campus imagery, faded and masked — not pattern ribbons.
+ * Real campus imagery, faded and masked. not pattern ribbons.
  */
 export function BrandImageWash({
   src,

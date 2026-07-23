@@ -78,9 +78,9 @@ export async function POST(req: NextRequest) {
       })
       await adminClient.items.insert('Payments', {
         studentId: student._id,
-        programName: 'Auto Top-Off — Store Card',
+        programName: 'Auto Top-Off. Store Card',
         amount: reloadCents / 100,
-        status: 'Disabled — No Payment Method',
+        status: 'Disabled. No Payment Method',
         paymentDate: new Date().toISOString(),
         paymentMethod: 'Auto Top-Off',
         transactionId: event.event_id ?? activity.id ?? '',
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
       await loadGiftCard(gan, reloadCents, loadKey, [payment.id ?? paymentKey])
       await adminClient.items.insert('Payments', {
         studentId: student._id,
-        programName: 'Auto Top-Off — Store Card',
+        programName: 'Auto Top-Off. Store Card',
         amount: reloadCents / 100,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
     } catch (loadError) {
       await adminClient.items.insert('Payments', {
         studentId: student._id,
-        programName: 'Auto Top-Off — Store Card',
+        programName: 'Auto Top-Off. Store Card',
         amount: reloadCents / 100,
         status: 'Needs Reconciliation',
         paymentDate: new Date().toISOString(),

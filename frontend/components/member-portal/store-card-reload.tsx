@@ -93,7 +93,7 @@ export function StoreCardReload({
       .then((data) => {
         setConfig(data)
         setStoredCard(data.paymentMethod ?? null)
-        // Own CC first — saved card is optional, never required
+        // Own CC first. Saved card is optional, never required
         setUseStored(false)
       })
       .catch(() => setError('Payment settings could not be loaded.'))
@@ -429,7 +429,7 @@ export function StoreCardReload({
 
       <p className="text-[10px] text-[#5A6070] text-center">
         Pay with credit/debit card or PayPal. One family Cove card and balance. {bonusPercent}% on
-        first load or membership credit only — reloads are 1:1. Saving a card is optional.
+        first load or membership credit only. Reloads are 1:1. Saving a card is optional.
       </p>
     </div>
   )

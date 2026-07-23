@@ -53,7 +53,7 @@ export function StaffNewsletterPanel() {
       setStatus(
         `Preview: ${d.recipientCount} member parents` +
           (d.recipientsPreview?.length
-            ? ` — e.g. ${d.recipientsPreview.slice(0, 5).join(', ')}`
+            ? `. E.g. ${d.recipientsPreview.slice(0, 5).join(', ')}`
             : ''),
       )
     } catch (err) {
@@ -89,7 +89,7 @@ export function StaffNewsletterPanel() {
             (d.newsletterArchived
               ? ' · newsletter archived for Messages'
               : alsoPortal
-                ? ' · newsletter archive skipped or failed — check Newsletters CMS'
+                ? ' · newsletter archive skipped or failed. Check Newsletters CMS'
                 : ''),
         )
       } else if (d.mailto) {
@@ -157,7 +157,7 @@ export function StaffNewsletterPanel() {
         <p className="text-xs text-[#5A6070] mt-1">
           Send to free and/or paid member parents (Students roster). Email uses Gmail API
           {emailConfigured ? '' : ' (or mailto BCC until Gmail env is set)'}. WhatsApp opens
-          grade group invite links from Site Settings — paste the copied message in-app (Meta has
+          grade group invite links from Site Settings. Paste the copied message in-app (Meta has
           no simple group-post API).
         </p>
       </div>
@@ -205,7 +205,7 @@ export function StaffNewsletterPanel() {
           waLinks.grade8 && '8th',
         ]
           .filter(Boolean)
-          .join(', ') || 'none — add in Site settings'}
+          .join(', ') || 'none. Add in Site settings'}
       </p>
 
       <input

@@ -1,5 +1,5 @@
 /**
- * POST /api/checkout/quote — public price check before opening card form.
+ * POST /api/checkout/quote. public price check before opening card form.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getPaidMembershipTiers } from '@/lib/api/membership'

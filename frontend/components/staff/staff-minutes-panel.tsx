@@ -208,7 +208,7 @@ export function StaffMinutesPanel() {
           <div key={m.id} className="flex items-start justify-between gap-2 border-t border-[#F0EBE3] pt-2">
             <div>
               <p className="text-sm font-semibold">
-                {m.committee} · {m.meetingDate ? new Date(m.meetingDate).toLocaleDateString() : '—'}
+                {m.committee} · {m.meetingDate ? new Date(m.meetingDate).toLocaleDateString() : 'n/a'}
                 {!m.published ? ' · draft' : ''}
               </p>
               <p className="text-xs text-[#5A6070]">{m.summary || m.minutesContent.slice(0, 80)}</p>

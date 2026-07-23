@@ -14,7 +14,7 @@ export const metadata = {
     'Parent hub: account, students, store purchases, program calendar, and instructor messages.',
 }
 
-// No ISR — always fresh for authenticated pages
+// No ISR. always fresh for authenticated pages
 export const dynamic = 'force-dynamic'
 
 export default async function MemberPortalPage() {

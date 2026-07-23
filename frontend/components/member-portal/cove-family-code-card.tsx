@@ -53,7 +53,7 @@ export function CoveFamilyCodeCard() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Reset failed')
       setCode(d.coveFamilyCode)
-      setMessage('New code ready — screenshot or print the QR for your student(s).')
+      setMessage('New code ready. screenshot or print the QR for your student(s).')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Reset failed')
     } finally {
@@ -67,7 +67,7 @@ export function CoveFamilyCodeCard() {
       await navigator.clipboard.writeText(code)
       setMessage('Code copied')
     } catch {
-      setMessage('Could not copy — write it down for your student')
+      setMessage('Could not copy. write it down for your student')
     }
   }
 

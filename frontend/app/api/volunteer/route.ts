@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
         `Opportunity: ${opportunity}`,
         notes ? `Notes: ${notes}` : null,
         '',
-        '— Reply to this email to reach the volunteer.',
+        'Reply to this email to reach the volunteer.',
         'Also saved in Wix CMS → Volunteers.',
       ]
         .filter(Boolean)

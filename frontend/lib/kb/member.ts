@@ -1,6 +1,6 @@
 import type { KbIndex } from './types'
 
-/** Logged-in parent knowledge base — no Wix CMS required. */
+/** Logged-in parent knowledge base. No Wix CMS required. */
 export const MEMBER_KB: KbIndex = {
   audience: 'member',
   categories: [
@@ -160,7 +160,7 @@ Spirit wear and other Cove merch checkout online separately with card or PayPal.
       order: 4,
       body: `Often yes. When you are signed in as a paid member, look for the coupon bar on The Cove shop or checkout.
 
-If a code fails, wait a minute, refresh, and try again — or email membership@shmspto.org.`,
+If a code fails, wait a minute, refresh, and try again, or email membership@shmspto.org.`,
     },
     {
       slug: 'pay-card-or-paypal',
@@ -176,11 +176,11 @@ Saving a card with Square is optional for faster reloads. SHMS PTO never receive
       slug: 'surveys',
       title: 'Where do surveys appear?',
       categoryId: 'programs',
-      summary: 'Surveys stay on shmspto.org — never an outside link.',
+      summary: 'Surveys stay on shmspto.org. Never an outside link.',
       order: 1,
       body: `Active surveys list under **Surveys for you** on this portal.
 
-You will get the same branded form by email, text, or WhatsApp — always on shmspto.org, never an outside link.`,
+You will get the same branded form by email, text, or WhatsApp. Always on shmspto.org, never an outside link.`,
     },
     {
       slug: 'programs-calendar',

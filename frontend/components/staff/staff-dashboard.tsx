@@ -437,7 +437,7 @@ export function StaffDashboard() {
             <div>
               <h1 className="text-2xl font-bold text-[#1A1A1A]">Home</h1>
               <p className="text-sm text-[#5A6070] mt-1">
-                Roles: {me.roles.join(', ')}. Open a workspace from the top nav — only what you need for
+                Roles: {me.roles.join(', ')}. Open a workspace from the top nav. Only what you need for
                 that job.
               </p>
             </div>

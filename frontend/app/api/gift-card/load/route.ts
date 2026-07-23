@@ -2,7 +2,7 @@
  * POST /api/gift-card/load
  * Parent manually loads funds onto their student's gift card.
  * Body: { studentId, amountCents }
- * Payment is handled by Wix Payments — this route is called after payment succeeds.
+ * Payment is handled by Wix Payments. this route is called after payment succeeds.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createOAuthClient } from '@/lib/wix-oauth-client'

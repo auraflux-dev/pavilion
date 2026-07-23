@@ -86,7 +86,7 @@ export function SurveyResultsPanel() {
   const [showInPortal, setShowInPortal] = useState(true)
   const [requireLogin, setRequireLogin] = useState(false)
   const [active, setActive] = useState(true)
-  const [thankYou, setThankYou] = useState('Thank you — your response was recorded.')
+  const [thankYou, setThankYou] = useState('Thank you. Your response was recorded.')
   const [accentColor, setAccentColor] = useState('#085508')
   const [powrEmbedHtml, setPowrEmbedHtml] = useState('')
   const [fields, setFields] = useState<SurveyField[]>([emptyField()])
@@ -133,7 +133,7 @@ export function SurveyResultsPanel() {
     setShowInPortal(true)
     setRequireLogin(false)
     setActive(true)
-    setThankYou('Thank you — your response was recorded.')
+    setThankYou('Thank you. Your response was recorded.')
     setAccentColor('#085508')
     setPowrEmbedHtml('')
     setFields([emptyField()])
@@ -160,7 +160,7 @@ export function SurveyResultsPanel() {
     setShowInPortal(def.showInPortal)
     setRequireLogin(def.requireLogin)
     setActive(def.active !== false)
-    setThankYou(def.branding?.thankYouMessage || 'Thank you — your response was recorded.')
+    setThankYou(def.branding?.thankYouMessage || 'Thank you. Your response was recorded.')
     setAccentColor(def.branding?.accentColor || '#085508')
     setPowrEmbedHtml(def.powrEmbedHtml || '')
     setFields(def.fields.length ? def.fields.map((f) => ({ ...f, options: f.options ?? [] })) : [emptyField()])
@@ -220,7 +220,7 @@ export function SurveyResultsPanel() {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error ?? 'Could not save survey')
       const savedSlug = String(data.survey?.slug ?? payload.slug)
-      setStatus(mode === 'edit' ? 'Survey updated.' : 'Survey created — share it below.')
+      setStatus(mode === 'edit' ? 'Survey updated.' : 'Survey created. Share it below.')
       setMode('list')
       setSelectedSlug(savedSlug)
       await load(savedSlug)
@@ -270,7 +270,7 @@ export function SurveyResultsPanel() {
               {mode === 'edit' ? 'Edit survey' : 'Create survey'}
             </h2>
             <p className="text-xs text-[#5A6070]">
-              Build questions here — no Wix CMS JSON. Parents take it at /survey/your-slug.
+              Build questions here. No Wix CMS JSON. Parents take it at /survey/your-slug.
             </p>
           </div>
           <Button type="button" variant="outline" onClick={() => setMode('list')}>
@@ -556,7 +556,7 @@ export function SurveyResultsPanel() {
         </div>
       ) : (
         <p className="text-xs text-[#5A6070]">
-          Choose a survey to edit, share, or filter responses — or create a new one.
+          Choose a survey to edit, share, or filter responses, or create a new one.
         </p>
       )}
 
@@ -586,7 +586,7 @@ export function SurveyResultsPanel() {
               {responses.map((response) => (
                 <tr key={response.id} className="border-t border-[#F0EBE3] align-top">
                   <td className="px-3 py-2 whitespace-nowrap">
-                    {response.submittedAt ? new Date(response.submittedAt).toLocaleString() : '—'}
+                    {response.submittedAt ? new Date(response.submittedAt).toLocaleString() : 'n/a'}
                   </td>
                   {!selectedSlug ? <td className="px-3 py-2">{response.surveyTitle}</td> : null}
                   <td className="px-3 py-2">
@@ -598,7 +598,7 @@ export function SurveyResultsPanel() {
                   <td className="px-3 py-2">{response.channel}</td>
                   {answerKeys.map((key) => (
                     <td key={key} className="px-3 py-2 min-w-40 whitespace-pre-wrap">
-                      {response.answers[key] || '—'}
+                      {response.answers[key] || 'n/a'}
                     </td>
                   ))}
                 </tr>

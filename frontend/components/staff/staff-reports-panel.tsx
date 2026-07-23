@@ -134,7 +134,7 @@ export function StaffReportsPanel({
       <div>
         <h2 className="text-lg font-bold">Reports</h2>
         <p className="text-xs text-[#5A6070]">
-          View, sort, and export your area — Programs, Cove, Payments, Membership, or Events.
+          View, sort, and export your area. Programs, Cove, Payments, Membership, or Events.
         </p>
         {gmailStatus ? (
           <p className={`text-xs mt-2 ${gmailStatus.ok ? 'text-green-800' : 'text-amber-800'}`}>
@@ -145,7 +145,7 @@ export function StaffReportsPanel({
             {!gmailStatus.ok && gmailStatus.connectUrl ? (
               <>
                 {' '}
-                —{' '}
+                ·
                 <a href={gmailStatus.connectUrl} className="underline font-semibold">
                   Connect Google
                 </a>{' '}

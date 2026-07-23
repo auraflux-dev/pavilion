@@ -89,7 +89,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ ok: true, message: 'Gift card loaded; payment marked Paid.' })
     }
 
-    // markPaid — manual reconcile after verifying Square + fixing balance outside
+    // markPaid. manual reconcile after verifying Square + fixing balance outside
     const updates = {
       ...existing,
       _id: id,

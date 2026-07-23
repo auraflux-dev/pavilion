@@ -109,7 +109,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
               students and families in Ashburn, Virginia.
             </p>
 
-            {/* Social icons — only rendered when URLs are set in SiteSettings */}
+            {/* Social icons. only rendered when URLs are set in SiteSettings */}
             {socialLinks.length > 0 && (
               <div className="flex items-center gap-2">
                 {socialLinks.map(({ icon: Icon, label, href }) => (
@@ -129,7 +129,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
             )}
           </div>
 
-          {/* Col 2: Quick Links — centered on mobile */}
+          {/* Col 2: Quick Links. centered on mobile */}
           <div className="flex flex-col items-center w-full">
             <h3 className="text-white font-bold text-sm tracking-wider uppercase mb-5 text-center">
               Quick Links
@@ -205,7 +205,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
                 </div>
               </div>
 
-              {/* WhatsApp — only after free/paid member login (no tease for visitors) */}
+              {/* WhatsApp. only after free/paid member login (no tease for visitors) */}
               {status === 'member' && gradeLinks.length > 0 && (
                 <div
                   className="rounded-xl p-3.5 mt-2"
@@ -286,7 +286,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
               </form>
             )}
 
-            {/* In-person snack window only — online checkout is 24/7 for free or paid parents */}
+            {/* In-person snack window only. online checkout is 24/7 for free or paid parents */}
             <div
               className="mt-4 rounded-lg p-3 border"
               style={{ backgroundColor: '#2a2a2a', borderColor: '#333333' }}

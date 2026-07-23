@@ -4,7 +4,7 @@ import { getWixClient } from '@/lib/wix-client'
 export const dynamic = 'force-dynamic'
 
 /**
- * GET /api/health — UptimeRobot / load balancer probe.
+ * GET /api/health. UptimeRobot / load balancer probe.
  * Returns 200 when the app process and Wix CMS credentials respond.
  */
 export async function GET(_req: NextRequest) {

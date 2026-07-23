@@ -73,13 +73,13 @@ export function MeetingMonthFilter({ meetings, showJoinLink }: Props) {
               }`}
               style={activeYear === y ? { backgroundColor: '#085508', borderColor: '#085508' } : {}}
             >
-              {y}–{String(Number(y) + 1).slice(2)}
+              {y} to {String(Number(y) + 1).slice(2)}
             </button>
           ))}
         </div>
       )}
 
-      {/* Month pills — months first, All at the end */}
+      {/* Month pills. months first, All at the end */}
       <div className="flex flex-wrap gap-2">
         {monthsWithData.map(m => (
           <button
@@ -108,7 +108,7 @@ export function MeetingMonthFilter({ meetings, showJoinLink }: Props) {
         </button>
       </div>
 
-      {/* Results — most recent past open, rest collapsed */}
+      {/* Results. most recent past open, rest collapsed */}
       <div className="space-y-3">
         {(() => {
           const firstPastId = visibleMeetings.find(x => !x.isUpcoming)?._id ?? null

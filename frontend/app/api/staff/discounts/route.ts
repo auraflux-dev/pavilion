@@ -1,7 +1,7 @@
 /**
- * GET  /api/staff/discounts — list codes
- * POST /api/staff/discounts — create named code OR issue to member
- * PATCH /api/staff/discounts — activate/deactivate
+ * GET  /api/staff/discounts. list codes
+ * POST /api/staff/discounts. create named code OR issue to member
+ * PATCH /api/staff/discounts. activate/deactivate
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'

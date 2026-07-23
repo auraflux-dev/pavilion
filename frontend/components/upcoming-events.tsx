@@ -3,7 +3,7 @@ import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react'
 import { getUpcomingEvents } from '@/lib/api/events'
 
 function formatEventDate(startDate?: string): { month: string; day: string; time: string } {
-  if (!startDate) return { month: '—', day: '—', time: '' }
+  if (!startDate) return { month: 'n/a', day: 'n/a', time: '' }
   const d = new Date(startDate)
   return {
     month: d.toLocaleString('en-US', { month: 'short', timeZone: 'America/New_York' }),
@@ -19,7 +19,7 @@ function formatTimeRange(startDate?: string, endDate?: string): string {
   if (!endDate) return startStr
   const end = new Date(endDate)
   const endStr = end.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York' })
-  return `${startStr} – ${endStr}`
+  return `${startStr} to ${endStr}`
 }
 
 export async function UpcomingEvents() {

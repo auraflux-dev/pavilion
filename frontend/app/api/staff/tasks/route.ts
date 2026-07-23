@@ -232,7 +232,7 @@ export async function POST(req: NextRequest) {
         )
       }
       if (assigneeEmail && !isAdmin && !isProjectMember(full, assigneeEmail) && assigneeEmail !== session.email) {
-        // Allow assigning any staff — user said assign after communicating.
+        // Allow assigning any staff. user said assign after communicating.
         // Soft rule: prefer project members but allow any @shmspto staff email.
       }
       if (!resolvedOwnerRole) {

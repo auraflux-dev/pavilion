@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     if (!Number.isInteger(amountCents) || !isAllowedStoreCardLoadAmount(amount, cfg)) {
       return NextResponse.json(
         {
-          error: `Invalid amount (use whole dollars $${cfg.storeCardMinAmount}–$${cfg.storeCardMaxAmount})`,
+          error: `Invalid amount (use whole dollars ${cfg.storeCardMinAmount} to ${cfg.storeCardMaxAmount})`,
         },
         { status: 400 }
       )

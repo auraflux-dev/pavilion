@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
     return fail(
       tokens.error_description ||
         tokens.error ||
-        'No refresh token — revoke prior access and try Connect again.',
+        'No refresh token. revoke prior access and try Connect again.',
     )
   }
 

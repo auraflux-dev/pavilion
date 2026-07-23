@@ -27,7 +27,7 @@ export function DealsStrip({ items }: DealsStripProps) {
           </div>
           <div>
             <h2 className="text-xl font-bold text-[#1A1A1A]">Deals of the Week</h2>
-            <p className="text-xs text-[#5A6070]">Staff picks — rotating weekly</p>
+            <p className="text-xs text-[#5A6070]">Staff picks. Rotating weekly</p>
           </div>
         </div>
 

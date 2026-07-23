@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       mode: 'delegation',
-      message: 'Domain-wide delegation is active — no Connect step needed.',
+      message: 'Domain-wide delegation is active. no Connect step needed.',
     })
   }
 

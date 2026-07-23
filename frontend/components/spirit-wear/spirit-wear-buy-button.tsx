@@ -14,7 +14,7 @@ interface Props {
   disabled?: boolean
 }
 
-/** Cove / spirit buys — free or paid member, own CC in portal via Square. */
+/** Cove / spirit buys. free or paid member, own CC in portal via Square. */
 export function SpiritWearBuyButton({ productId, price, productName, disabled }: Props) {
   const { status } = useAuth()
   const pathname = usePathname()
@@ -69,7 +69,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
         onClose={() => setOpen(false)}
         amount={price}
         title={productName || 'The Cove'}
-        subtitle="Pay with your credit or debit card — stays on shmspto.org"
+        subtitle="Pay with your credit or debit card. stays on shmspto.org"
         payBody={{ kind: 'product', productId }}
         containerId={`cove-pay-${productId.slice(0, 8)}`}
         onPaid={() => {

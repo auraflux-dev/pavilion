@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Required legal checkboxes for checkout — each has a Read link that opens the full text.
+ * Required legal checkboxes for checkout. each has a Read link that opens the full text.
  */
 import { useEffect, useMemo, useState } from 'react'
 import { ExternalLink, Loader2, X } from 'lucide-react'
@@ -229,7 +229,7 @@ export function CheckoutConsent({ kind, onChange }: Props) {
               className="w-full rounded-lg py-2.5 text-sm font-semibold text-white"
               style={{ backgroundColor: '#085508' }}
             >
-              {reading.mode === 'agree' ? 'I understand — close' : 'Close'}
+              {reading.mode === 'agree' ? 'I understand. close' : 'Close'}
             </button>
           </div>
         </div>

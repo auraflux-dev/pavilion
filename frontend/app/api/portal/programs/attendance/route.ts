@@ -1,5 +1,5 @@
 /**
- * GET /api/portal/programs/attendance — parent view of CICO marks
+ * GET /api/portal/programs/attendance. parent view of CICO marks
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getEffectiveParentEmail } from '@/lib/staff/session'

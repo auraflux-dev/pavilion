@@ -1,7 +1,7 @@
 /**
  * POST /api/programs/register
  * Free programs: enroll immediately (requires consents + student safety profile).
- * Paid programs: returns { requiresPayment, fee } — client then uses PortalCardCheckout.
+ * Paid programs: returns { requiresPayment, fee }. client then uses PortalCardCheckout.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'

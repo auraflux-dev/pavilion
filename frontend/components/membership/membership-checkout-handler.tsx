@@ -2,7 +2,7 @@
 
 /**
  * After login return to /membership?checkout=reef&studentId=…
- * opens in-portal Square card pay (own CC — free or paid parent).
+ * opens in-portal Square card pay (own CC. free or paid parent).
  */
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStudentsByParentEmail } from "@/lib/api/students";
 
-// Internal route — called from member portal page after Wix OAuth token is validated
+// Internal route. called from member portal page after Wix OAuth token is validated
 export async function GET(req: NextRequest) {
   const email = req.nextUrl.searchParams.get("email");
 

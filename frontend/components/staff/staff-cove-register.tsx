@@ -36,7 +36,7 @@ type CartLine = {
 type SkuHit = { productId: string; variantId?: string }
 
 /**
- * Cove window register — matches in-person ops:
+ * Cove window register. Matches in-person ops:
  * 1) Student says what they want
  * 2) Student gives family code → staff enters it
  * 3) Staff scans product barcode (phone camera)
@@ -299,7 +299,7 @@ export function StaffCoveRegister() {
             Family Cove card balance: ${Number(family.balance).toFixed(2)}
           </p>
           {!family.hasCard ? (
-            <p className="text-xs text-amber-800">No card loaded yet — parent must load online first.</p>
+            <p className="text-xs text-amber-800">No card loaded yet. Parent must load online first.</p>
           ) : null}
         </div>
       ) : null}

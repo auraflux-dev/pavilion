@@ -1,7 +1,7 @@
 /**
- * GET   /api/staff/timesheets — own rows (instructors) or all (programs/admin)
- * POST  /api/staff/timesheets — submit hours for an assigned program
- * PATCH /api/staff/timesheets — VP Programs / admin approve or reject
+ * GET   /api/staff/timesheets. own rows (instructors) or all (programs/admin)
+ * POST  /api/staff/timesheets. submit hours for an assigned program
+ * PATCH /api/staff/timesheets. VP Programs / admin approve or reject
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'

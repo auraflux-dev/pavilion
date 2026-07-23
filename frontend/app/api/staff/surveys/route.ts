@@ -87,8 +87,8 @@ function normalizeBranding(raw: unknown): SurveyBranding {
   return {
     accentColor: String(row.accentColor ?? '#085508').trim() || '#085508',
     thankYouMessage:
-      String(row.thankYouMessage ?? 'Thank you — your response was recorded.').trim() ||
-      'Thank you — your response was recorded.',
+      String(row.thankYouMessage ?? 'Thank you. your response was recorded.').trim() ||
+      'Thank you. your response was recorded.',
   }
 }
 
@@ -253,7 +253,7 @@ export async function POST(req: NextRequest) {
     const client = getWixClient()
     const existing = await client.items.query('Surveys').eq('slug', slug).limit(1).find()
     if (existing.items?.length) {
-      return NextResponse.json({ error: 'That slug is already used — pick another.' }, { status: 409 })
+      return NextResponse.json({ error: 'That slug is already used. pick another.' }, { status: 409 })
     }
 
     const row = {
@@ -304,7 +304,7 @@ export async function PATCH(req: NextRequest) {
     if (nextSlug !== String(existing.slug ?? '')) {
       const clash = await client.items.query('Surveys').eq('slug', nextSlug).limit(5).find()
       if ((clash.items ?? []).some((item) => String((item as { _id?: string })._id) !== id)) {
-        return NextResponse.json({ error: 'That slug is already used — pick another.' }, { status: 409 })
+        return NextResponse.json({ error: 'That slug is already used. pick another.' }, { status: 409 })
       }
     }
 

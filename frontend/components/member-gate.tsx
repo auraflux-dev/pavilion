@@ -6,7 +6,7 @@ import { Suspense } from 'react'
 
 interface Props {
   children: React.ReactNode
-  /** Primary CTA when logged out — single action, e.g. "Join Lagoon · $149" */
+  /** Primary CTA when logged out. single action, e.g. "Join Lagoon · $149" */
   label?: string
   /** Extra returnTo query string (e.g. checkout=ruby&studentId=…) */
   returnToQuery?: string

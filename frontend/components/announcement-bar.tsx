@@ -5,7 +5,7 @@ import { AnnouncementBarClient } from './announcement-bar-client'
 
 /**
  * Optional site-wide banner from SiteSettings.
- * WhatsApp grade-group promo is intentionally never shown here — those links live
+ * WhatsApp grade-group promo is intentionally never shown here. those links live
  * in the footer / member portal only.
  */
 export async function AnnouncementBar() {

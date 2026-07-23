@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
         error:
           err instanceof Error
             ? err.message
-            : 'Could not create event — confirm API key has Manage Events permission',
+            : 'Could not create event. confirm API key has Manage Events permission',
       },
       { status: 400 },
     )

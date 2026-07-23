@@ -95,7 +95,7 @@ export function StaffPaymentsPanel() {
                   {p.programName || 'Payment'} · {p.source}
                 </p>
                 <p className="text-xs text-[#5A6070]">
-                  {p.paymentDate ? new Date(p.paymentDate).toLocaleString() : '—'}
+                  {p.paymentDate ? new Date(p.paymentDate).toLocaleString() : 'n/a'}
                   {p.transactionId ? ` · tx ${p.transactionId}` : ''}
                 </p>
                 {(p.payerEmail || p.payerName) && (

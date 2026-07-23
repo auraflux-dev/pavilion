@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * /auth/join — Sign Up–first parent account gate.
+ * /auth/join. Sign Up–first parent account gate.
  * Wix’s hosted MemberLoginDialog always opens in Log In mode, so pricing CTAs
  * land here first. Email sign-up/login is owned on this page; social providers
  * still use Wix OAuth (provider screens), not the Log In–first modal copy.

@@ -5,7 +5,7 @@ const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org').
   '',
 )
 
-/** Public marketing pages only — no /staff, /member-portal, or auth. */
+/** Public marketing pages only. no /staff, /member-portal, or auth. */
 const PUBLIC_PATHS = [
   '/',
   '/programs',

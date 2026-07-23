@@ -109,7 +109,7 @@ export function StaffMembershipPanel() {
       setStatus(
         `Preview: ${d.recipientCount} recipients` +
           (d.recipientsPreview?.length
-            ? ` — e.g. ${d.recipientsPreview.slice(0, 5).join(', ')}`
+            ? `. E.g. ${d.recipientsPreview.slice(0, 5).join(', ')}`
             : ''),
       )
     } catch (err) {
@@ -257,7 +257,7 @@ export function StaffMembershipPanel() {
           <div>
             <h1 className="text-xl font-bold">Membership roster</h1>
             <p className="text-xs text-[#5A6070] mt-1">
-              Parents from Students CMS — email, phone, and paid tier (Reef / Lagoon / Tide).
+              Parents from Students CMS. Email, phone, and paid tier (Reef / Lagoon / Tide).
             </p>
           </div>
           <Button
@@ -424,8 +424,8 @@ export function StaffMembershipPanel() {
           <p className="text-sm font-semibold">WhatsApp grade groups</p>
           <p className="text-xs text-[#5A6070]">
             Copies your message, then opens the invite link(s) so you can paste in the group.
-            Links: 6th {waLinks.grade6 ? '✓' : '—'} · 7th {waLinks.grade7 ? '✓' : '—'} · 8th{' '}
-            {waLinks.grade8 ? '✓' : '—'}.
+            Links: 6th {waLinks.grade6 ? '✓' : 'n/a'} · 7th {waLinks.grade7 ? '✓' : 'n/a'} · 8th{' '}
+            {waLinks.grade8 ? '✓' : 'n/a'}.
           </p>
           <div className="flex flex-wrap gap-2 items-center">
             <select

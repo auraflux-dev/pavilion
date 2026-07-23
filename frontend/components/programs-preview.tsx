@@ -20,7 +20,7 @@ function iconForProgram(program: Program) {
 export async function ProgramsPreview() {
   const programs = await getFeaturedPrograms()
 
-  // Fallback if CMS is empty — show placeholder cards
+  // Fallback if CMS is empty. show placeholder cards
   const display = programs.length > 0 ? programs : []
 
   return (

@@ -1,5 +1,5 @@
 /**
- * PATCH /api/students/[id] — parent edits their own student (name, grade).
+ * PATCH /api/students/[id]. parent edits their own student (name, grade).
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'

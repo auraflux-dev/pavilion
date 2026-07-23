@@ -8,8 +8,8 @@ import { listFamilyStudents, resolveFamilyGiftCard } from '@/lib/family-store-ca
 import { getGiftCardBalance } from '@/lib/square'
 
 /**
- * GET  /api/gift-card/family-code — ensure + return family Cove window code
- * POST /api/gift-card/family-code { action: 'reset' } — rotate code
+ * GET  /api/gift-card/family-code. ensure + return family Cove window code
+ * POST /api/gift-card/family-code { action: 'reset' }. rotate code
  */
 export async function GET(req: NextRequest) {
   const session = await getMemberSession(req)

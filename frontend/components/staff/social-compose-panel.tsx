@@ -195,7 +195,7 @@ export function SocialComposePanel({ enabled }: Props) {
           setAssetName('')
         }
       } else {
-        setMsg(d.error ?? 'Publish failed — draft saved in SocialPosts.')
+        setMsg(d.error ?? 'Publish failed. draft saved in SocialPosts.')
       }
     } catch (err) {
       setMsg(err instanceof Error ? err.message : 'Publish failed')

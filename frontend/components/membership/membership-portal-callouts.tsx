@@ -24,9 +24,9 @@ const ICONS: LucideIcon[] = [
 type Item = { title: string; detail: string }
 
 function parseLine(line: string): Item {
-  const parts = line.split(/\s+[—–-]\s+/)
+  const parts = line.split(/\s+[-]\s+/)
   if (parts.length >= 2) {
-    return { title: parts[0].trim(), detail: parts.slice(1).join(' — ').trim() }
+    return { title: parts[0].trim(), detail: parts.slice(1).join('n/a').trim() }
   }
   return { title: line.trim(), detail: '' }
 }

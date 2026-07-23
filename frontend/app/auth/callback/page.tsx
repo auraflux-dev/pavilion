@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * /auth/callback — handles the redirect back from Wix login.
+ * /auth/callback. handles the redirect back from Wix login.
  * Exchanges the authorization code for member tokens, stores them
  * in a secure httpOnly cookie via the API route, then redirects home.
  */
@@ -60,7 +60,7 @@ export default function CallbackPage() {
 
         if (!res.ok) throw new Error('Failed to save session')
 
-        // Redirect to original destination (keep query — e.g. ?checkout=ruby)
+        // Redirect to original destination (keep query. e.g. ?checkout=ruby)
         let returnTo = '/member-portal'
         if (oAuthData.originalUri) {
           try {

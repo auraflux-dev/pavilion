@@ -186,7 +186,7 @@ export function MemberDashboard({
   }, [status])
 
   const newMessageCount = useMemo(() => {
-    // No prior visit recorded yet — do not treat the whole inbox as "new".
+    // No prior visit recorded yet. Do not treat the whole inbox as "new".
     if (!messagesSeenAt) return 0
     return messages.filter((m) => {
       if (!m.sentAt) return false
@@ -314,9 +314,9 @@ export function MemberDashboard({
         </div>
       ) : null}
 
-      {/* 2×2 quadrants — D (calendar/messages) first on mobile */}
+      {/* 2×2 quadrants. D (calendar/messages) first on mobile */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* D — Calendar & Messages (priority) */}
+        {/* D. Calendar & Messages (priority) */}
         <PortalQuadrant
           id="calendar"
           title={copy.calendarTitle}
@@ -463,7 +463,7 @@ export function MemberDashboard({
           )}
         </PortalQuadrant>
 
-        {/* A — My Account */}
+        {/* A. My Account */}
         <PortalQuadrant
           id="account"
           title={copy.accountTitle}
@@ -588,7 +588,7 @@ export function MemberDashboard({
           )}
         </PortalQuadrant>
 
-        {/* B — My Students */}
+        {/* B. My Students */}
         <PortalQuadrant
           id="portal-students"
           title={copy.studentsTitle}
@@ -637,7 +637,7 @@ export function MemberDashboard({
           )}
         </PortalQuadrant>
 
-        {/* C — Store & Purchases */}
+        {/* C. Store & Purchases */}
         <PortalQuadrant
           id="store"
           title={copy.storeTitle}
@@ -733,8 +733,7 @@ export function MemberDashboard({
                 Member Help
               </h2>
               <p className="text-sm text-[#5A6070] mt-1 leading-relaxed">
-                Full articles for account, students, membership, The Cove, and programs —
-                organized by category, signed-in parents only.
+                Full articles for account, students, membership, The Cove, and programs, organized by category. Signed in parents only.
               </p>
             </div>
           </div>

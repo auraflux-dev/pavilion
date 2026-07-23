@@ -1,5 +1,5 @@
 /**
- * GET /api/staff/activity — counts staff should notice (mail, payments, forms).
+ * GET /api/staff/activity. counts staff should notice (mail, payments, forms).
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
     if (n > 0) {
       items.push({
         id: 'forms',
-        label: 'Website form submissions (7 days) — also emailed when Gmail is connected',
+        label: 'Website form submissions (7 days). also emailed when Gmail is connected',
         count: n,
         href: '/staff?view=inbox',
         tone: 'info',

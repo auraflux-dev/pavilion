@@ -15,7 +15,7 @@ export function StaffRetailPanel() {
       />
       <p className="text-[11px] text-[#5A6070] px-1">
         Prefer <strong>Cove products</strong> above for day-to-day adds and restocks. This table is a
-        backup if you need to fix a barcode/qty row directly. Snacks live here in Staff — not the Wix
+        backup if you need to fix a barcode/qty row directly. Snacks live here in Staff. Not the Wix
         Dashboard.
       </p>
     </div>

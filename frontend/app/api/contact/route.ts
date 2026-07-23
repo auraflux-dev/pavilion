@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
         '',
         routedMessage,
         '',
-        '— Reply to this email to respond to the parent.',
+        'Reply to this email to respond to the parent.',
         'Also saved in Wix CMS → ContactSubmissions.',
       ].join('\n'),
     })

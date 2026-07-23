@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       balance: family.balance,
       hasCard: true,
       students: family.students,
-      // full GAN only for staff redeem — never show to parents in UI lists
+      // full GAN only for staff redeem. never show to parents in UI lists
       gan: family.gan,
     })
   } catch (err) {

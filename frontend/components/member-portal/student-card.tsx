@@ -87,7 +87,7 @@ function statusClass(s: string) {
 }
 
 function formatDate(d: string | null) {
-  if (!d) return '—'
+  if (!d) return 'n/a'
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
@@ -143,7 +143,7 @@ export function StudentCard({
     ? student.membershipTier.charAt(0).toUpperCase() + student.membershipTier.slice(1)
     : 'Free'
 
-  // Live gift card balance — fetched on mount
+  // Live gift card balance. Fetched on mount
   useEffect(() => {
     setGiftCardLoading(true)
     fetch(`/api/gift-card/balance?studentId=${student.id}`)
@@ -268,7 +268,7 @@ export function StudentCard({
               <Loader2 className="w-3.5 h-3.5 animate-spin mt-0.5" style={{ color: '#085508' }} />
             ) : (
               <p className="text-sm font-bold text-[#1A1A1A]">
-                {giftCard?.hasCard ? formatMoney(giftCard.balance) : '—'}
+                {giftCard?.hasCard ? formatMoney(giftCard.balance) : 'n/a'}
               </p>
             )}
           </div>
@@ -390,7 +390,7 @@ export function StudentCard({
                     {safety.complete ? (
                       <span className="font-semibold text-[#085508]">Safety profile complete</span>
                     ) : (
-                      <span className="font-semibold text-amber-800">Safety profile incomplete — edit student details above</span>
+                      <span className="font-semibold text-amber-800">Safety profile incomplete. Edit student details above</span>
                     )}
                     {safety.allergyLine ? ` · Allergy: ${safety.allergyLine}` : ' · No allergies listed'}
                   </p>

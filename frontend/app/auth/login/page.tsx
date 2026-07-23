@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * /auth/login — send existing “log in” links to /auth/join.
+ * /auth/login. send existing “log in” links to /auth/join.
  * Pricing / Join CTAs use signup mode by default; explicit login keeps mode=login.
  */
 import { Suspense, useEffect } from 'react'

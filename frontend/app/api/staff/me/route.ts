@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
   if (!isStaffEmail(session.email)) {
     return NextResponse.json(
       {
-        error: `Staff tools require your @${STAFF_EMAIL_DOMAIN} login. You are signed in as ${session.email} — use that personal email in the member portal for your students, and sign in with your @${STAFF_EMAIL_DOMAIN} email for staff work.`,
+        error: `Staff tools require your @${STAFF_EMAIL_DOMAIN} login. You are signed in as ${session.email}. use that personal email in the member portal for your students, and sign in with your @${STAFF_EMAIL_DOMAIN} email for staff work.`,
       },
       { status: 403 },
     )

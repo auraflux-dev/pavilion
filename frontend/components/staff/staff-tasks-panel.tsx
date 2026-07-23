@@ -216,7 +216,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
       setTaskAssignee('')
       setStatus(
         taskAssignee
-          ? 'Task added — it shows on the year board, this project, and their board.'
+          ? 'Task added. It shows on the year board, this project, and their board.'
           : 'Task added to the project / year board.',
       )
       await load()
@@ -339,7 +339,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
         <h2 className="text-lg font-bold">Staff · Year project board</h2>
         <p className="text-xs text-[#5A6070]">
           Each VP / president adds projects for the school year. Everyone sees the swimlanes.
-          Assign a task to a member after you&apos;ve talked — it shows on the year board, the
+          Assign a task to a member after you&apos;ve talked. It shows on the year board, the
           project, and their board.
         </p>
       </div>
@@ -675,7 +675,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
               </div>
               <div className="space-y-2">
                 {(tasksByProject.get(selectedProject.id) ?? []).length === 0 ? (
-                  <p className="text-xs text-[#5A6070]">No tasks yet — add one above.</p>
+                  <p className="text-xs text-[#5A6070]">No tasks yet. Add one above.</p>
                 ) : null}
                 {(tasksByProject.get(selectedProject.id) ?? []).map((t) => renderTaskCard(t))}
               </div>

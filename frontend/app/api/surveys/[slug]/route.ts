@@ -100,7 +100,7 @@ export async function POST(
         ...answerLines,
         '',
         'View all responses in Staff → Surveys (or Wix CMS → SurveyResponses).',
-        'POWR-embedded surveys do not notify here — check POWR.',
+        'POWR-embedded surveys do not notify here. check POWR.',
       ]
         .filter(Boolean)
         .join('\n'),

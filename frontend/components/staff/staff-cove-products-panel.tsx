@@ -56,7 +56,7 @@ const emptyForm = {
 }
 
 /**
- * Manage Cove snack products entirely from Staff — creates/updates Wix Catalog
+ * Manage Cove snack products entirely from Staff. Creates/updates Wix Catalog
  * (including photos + flavor/size variants) and keeps /cove allowlist + inventory in sync.
  */
 export function StaffCoveProductsPanel() {
@@ -146,7 +146,7 @@ export function StaffCoveProductsPanel() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Create failed')
       setForm(emptyForm)
-      setStatus(`Added “${d.product.name}” — live on /cove within a few minutes.`)
+      setStatus(`Added “${d.product.name}”. Live on /cove within a few minutes.`)
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Create failed')
@@ -228,7 +228,7 @@ export function StaffCoveProductsPanel() {
       <div>
         <h2 className="text-lg font-bold">Cove products</h2>
         <p className="text-xs text-[#5A6070] mt-1">
-          Add snacks, photos, flavors/sizes, and restock here — no Wix Dashboard needed. “On Cove”
+          Add snacks, photos, flavors/sizes, and restock here. No Wix Dashboard needed. “On Cove”
           controls the visitor menu; barcodes feed the register scanner.
         </p>
       </div>
@@ -671,7 +671,7 @@ export function StaffCoveProductsPanel() {
           )
         })}
         {products.length === 0 ? (
-          <p className="text-sm text-[#5A6070] py-4">No products yet — add the first snack above.</p>
+          <p className="text-sm text-[#5A6070] py-4">No products yet. Add the first snack above.</p>
         ) : null}
       </div>
 

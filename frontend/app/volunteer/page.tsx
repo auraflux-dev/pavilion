@@ -84,7 +84,7 @@ export default async function VolunteerPage() {
                 </div>
               </div>
 
-              {/* Right: form — dropdown options from VolunteerOpportunities CMS */}
+              {/* Right: form. dropdown options from VolunteerOpportunities CMS */}
               <div className="lg:sticky lg:top-8">
                 <VolunteerForm
                   opportunities={opportunities.map((o) => o.title).filter(Boolean)}

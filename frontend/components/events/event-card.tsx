@@ -26,7 +26,7 @@ function getColors(tags?: string[]) {
 }
 
 function formatDate(dateStr?: string) {
-  if (!dateStr) return { month: '—', day: '—', time: '' }
+  if (!dateStr) return { month: 'n/a', day: 'n/a', time: '' }
   const d = new Date(dateStr)
   return {
     month: d.toLocaleString('en-US', { month: 'short' }).toUpperCase(),
@@ -116,7 +116,7 @@ export function EventCard({ event }: EventCardProps) {
               <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               <span>
                 {time}
-                {endTime ? ` – ${endTime}` : ''}
+                {endTime ? ` to ${endTime}` : ''}
               </span>
             </div>
           )}

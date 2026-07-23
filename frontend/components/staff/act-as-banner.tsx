@@ -26,7 +26,7 @@ export function ActAsBanner() {
     <div className="bg-amber-100 border-b border-amber-300 text-amber-950 px-4 py-2.5">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-sm">
         <p>
-          <strong>Admin act-as:</strong> viewing member portal as {info.viewingEmail}. Edits are disabled for safety —
+          <strong>Admin act-as:</strong> viewing member portal as {info.viewingEmail}. Edits are disabled for safety.
           exit to return to staff tools.
         </p>
         <div className="flex gap-3">

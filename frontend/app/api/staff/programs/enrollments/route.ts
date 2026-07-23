@@ -1,7 +1,7 @@
 /**
  * GET  /api/staff/programs/enrollments?programId=
  * PATCH /api/staff/programs/enrollments
- *   { id, status } — promote waitlist / cancel / refund statuses
+ *   { id, status }. promote waitlist / cancel / refund statuses
  *   { action: 'transfer', id, toProgramId, toProgramName? }
  *   { action: 'refund', id, note? }
  * POST  /api/staff/programs/enrollments { action: 'message-class', programId, subject, body }
@@ -289,7 +289,7 @@ export async function PATCH(req: NextRequest) {
         const seats = await countSeatsTaken(programId)
         const alreadySeat = ACTIVE_ENROLL_STATUSES.has(previousStatus)
         if (!alreadySeat && seats >= capacity) {
-          return NextResponse.json({ error: 'Class is full — free a seat before promoting' }, { status: 409 })
+          return NextResponse.json({ error: 'Class is full. free a seat before promoting' }, { status: 409 })
         }
       }
     }

@@ -67,7 +67,7 @@ export default async function NewsletterPage() {
                   ))}
                 </div>
                 <p className="text-xs text-[#5A6070] mt-8">
-                  No spam. Unsubscribe at any time. We send 1–2 emails per month.
+                  No spam. Unsubscribe at any time. We send 1 to 2 emails per month.
                 </p>
               </div>
 

@@ -1,6 +1,6 @@
 /**
  * GET /api/auth/wix-login?returnTo=/member-portal
- * Server-side Wix OAuth start — one authorize URL, no client double-fetch.
+ * Server-side Wix OAuth start. one authorize URL, no client double-fetch.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, OAuthStrategy } from '@wix/sdk'

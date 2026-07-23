@@ -18,7 +18,7 @@ type DiscountRow = {
 
 /**
  * Staff → Discounts (Digital & Retail Sales / VP digital sales).
- * Creates named Wix coupon codes (5–75%) and issues tier-based codes to members.
+ * Creates named Wix coupon codes (5 to 75%) and issues tier-based codes to members.
  */
 export function StaffDiscountsPanel() {
   const [codes, setCodes] = useState<DiscountRow[]>([])
@@ -136,9 +136,9 @@ export function StaffDiscountsPanel() {
         <div>
           <h2 className="text-lg font-bold">Discount codes</h2>
           <p className="text-xs text-[#5A6070]">
-            Create named percent-off codes (5–75%) for enrichment programs and retail checkout later.
+            Create named percent-off codes (5 to 75%) for enrichment programs and retail checkout later.
             Codes never apply to membership or store card purchases. Issue personal codes for
-            onboarding emails after membership purchase — percent follows their paid tier (
+            onboarding emails after membership purchase. Percent follows their paid tier (
             <code className="text-[11px]">discountPercent</code> on Membership Tiers), or override
             here.
           </p>
@@ -165,7 +165,7 @@ export function StaffDiscountsPanel() {
             />
           </label>
           <label className="block text-xs font-bold text-[#5A6070]">
-            Percent off (5–75)
+            Percent off (5 to 75)
             <input
               type="number"
               min={5}

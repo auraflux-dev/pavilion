@@ -46,7 +46,7 @@ export function PortalSurveys() {
         <h2 className="font-bold text-[#1A1A1A]">Surveys for you</h2>
       </div>
       <p className="text-xs text-[#5A6070] mb-4">
-        Open a survey here — same branded form we send by email, text, or WhatsApp. No outside links.
+        Open a survey here. Same branded form we send by email, text, or WhatsApp. No outside links.
       </p>
       <ul className="space-y-2">
         {surveys.map((s) => (

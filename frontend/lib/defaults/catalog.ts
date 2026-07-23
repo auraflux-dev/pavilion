@@ -7,7 +7,7 @@ export const CATALOG_DEFAULTS = {
   membershipRubyVariantId: '23ea8122-e8b0-4eea-912f-c4227308193d',
   membershipSupremeProductId: '58f334f3-32d7-4d38-9639-7e587a38a26f',
   membershipSupremeVariantId: '1bfd31dd-32e6-4781-9083-97168e82cb1d',
-  /** Pearl (3rd paid tier) — paste Wix Catalog product/variant IDs in Site Settings when created */
+  /** Pearl (3rd paid tier). paste Wix Catalog product/variant IDs in Site Settings when created */
   membershipPearlProductId: '',
   membershipPearlVariantId: '',
   /** Default Square gift-card credits by tier (CMS giftCardCredit overrides).

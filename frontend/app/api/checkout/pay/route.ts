@@ -1,7 +1,7 @@
 /**
  * POST /api/checkout/pay
  * In-portal Square card charge for any ecommerce: membership | product | store-card.
- * Free and paid members (logged in) can pay with their own CC — saved card is optional.
+ * Free and paid members (logged in) can pay with their own CC. saved card is optional.
  */
 import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
 
     if (useStoredCard) {
       if (!stored?.squareCardId || !stored.squareCustomerId) {
-        return NextResponse.json({ error: 'No saved card on file — enter your card below' }, { status: 400 })
+        return NextResponse.json({ error: 'No saved card on file. enter your card below' }, { status: 400 })
       }
       paymentSource = stored.squareCardId
       customerId = stored.squareCustomerId
@@ -226,7 +226,7 @@ export async function POST(req: NextRequest) {
         customerId,
         referenceId: `membership:${tier}`,
         buyerEmailAddress: session.email,
-        note: `SHMS PTO membership — ${match.name}`,
+        note: `SHMS PTO membership. ${match.name}`,
       })
 
       const applied = await applyPaidMembership({
@@ -238,7 +238,7 @@ export async function POST(req: NextRequest) {
       })
 
       await client.items.insert('Payments', {
-        programName: `Membership — ${match.name}`,
+        programName: `Membership. ${match.name}`,
         amount: match.price,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
@@ -295,11 +295,11 @@ export async function POST(req: NextRequest) {
         customerId,
         referenceId: `cove:${productId.slice(0, 20)}`,
         buyerEmailAddress: session.email,
-        note: `The Cove — ${catalog.name}`,
+        note: `The Cove. ${catalog.name}`,
       })
 
       await client.items.insert('Payments', {
-        programName: `The Cove — ${catalog.name}`,
+        programName: `The Cove. ${catalog.name}`,
         amount: catalog.price,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
@@ -331,7 +331,7 @@ export async function POST(req: NextRequest) {
     if (!Number.isInteger(amountCents) || !isAllowedStoreCardLoadAmount(amount, cfg)) {
       return NextResponse.json(
         {
-          error: `Invalid amount (use whole dollars $${cfg.storeCardMinAmount}–$${cfg.storeCardMaxAmount})`,
+          error: `Invalid amount (use whole dollars ${cfg.storeCardMinAmount} to ${cfg.storeCardMaxAmount})`,
         },
         { status: 400 }
       )

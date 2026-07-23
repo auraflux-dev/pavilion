@@ -88,7 +88,7 @@ export function StaffCmsCollectionPanel({
     if (!form?.id) return
     const activeField = fields.find((f) => f.key === 'active')
     if (!activeField) {
-      setStatus('This collection has no Active flag — edit in Wix to remove.')
+      setStatus('This collection has no Active flag. edit in Wix to remove.')
       return
     }
     setForm({ ...form, active: false })

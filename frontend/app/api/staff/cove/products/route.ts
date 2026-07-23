@@ -1,7 +1,7 @@
 /**
- * GET  /api/staff/cove/products — list catalog (+ Cove allowlist / inventory)
- * POST /api/staff/cove/products — create snack product in Wix + optional allowlist
- * PATCH /api/staff/cove/products — update name/price/qty/sku/showOnCove/variants/image
+ * GET  /api/staff/cove/products. list catalog (+ Cove allowlist / inventory)
+ * POST /api/staff/cove/products. create snack product in Wix + optional allowlist
+ * PATCH /api/staff/cove/products. update name/price/qty/sku/showOnCove/variants/image
  */
 import { NextRequest, NextResponse } from 'next/server'
 import {

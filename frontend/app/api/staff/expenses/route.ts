@@ -1,7 +1,7 @@
 /**
- * GET   /api/staff/expenses  — list (own for most staff; all for treasurer/admin)
- * POST  /api/staff/expenses  — submit a reimbursement request (any staff)
- * PATCH /api/staff/expenses  — approve/reject (admin/president) or mark paid (treasurer/admin)
+ * GET   /api/staff/expenses . list (own for most staff; all for treasurer/admin)
+ * POST  /api/staff/expenses . submit a reimbursement request (any staff)
+ * PATCH /api/staff/expenses . approve/reject (admin/president) or mark paid (treasurer/admin)
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'

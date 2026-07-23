@@ -501,7 +501,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
       const next = String(d.appliedText ?? text)
       apply(next)
       const n = Number(d.editCount ?? 0)
-      setGrammarNote(n === 0 ? 'Looks good — no edits suggested.' : `Applied ${n} Sapling edit${n === 1 ? '' : 's'}.`)
+      setGrammarNote(n === 0 ? 'Looks good. No edits suggested.' : `Applied ${n} Sapling edit${n === 1 ? '' : 's'}.`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Grammar check failed')
     } finally {
@@ -627,7 +627,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
         <div>
           <h1 className="text-xl font-bold">{title}</h1>
           <p className="text-xs text-[#5A6070] mt-1">
-            Your Google Workspace — same account as {status?.email || 'your @shmspto.org login'}.
+            Your Google Workspace. Same account as {status?.email || 'your @shmspto.org login'}.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

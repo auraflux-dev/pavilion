@@ -20,7 +20,7 @@ async function signOut() {
 }
 
 /**
- * Lightweight chrome for /member-portal — not the public marketing nav.
+ * Lightweight chrome for /member-portal. not the public marketing nav.
  * Free vs paid only changes labels / upgrade emphasis.
  */
 export function MemberShell({ children }: Props) {

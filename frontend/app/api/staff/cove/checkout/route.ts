@@ -180,7 +180,7 @@ export async function POST(req: NextRequest) {
         paymentMethod: 'Cove Family Card',
         transactionId: idempotencyKey,
         source: 'cove_register_redeem',
-        programName: 'The Cove — snack window',
+        programName: 'The Cove. snack window',
         notes: `Code ${family.coveFamilyCode}: ${lineSummary}`,
       })
     } catch (err) {

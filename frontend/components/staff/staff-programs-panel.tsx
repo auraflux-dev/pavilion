@@ -433,7 +433,7 @@ export function StaffProgramsPanel() {
         <p className="text-xs text-[#5A6070]">
           {canManageAll
             ? 'Open/close registration, manage roster/waitlist, attendance, sessions, and message a class.'
-            : 'Your assigned programs — roster, attendance, waitlist, sessions, and class messages.'}
+            : 'Your assigned programs. Roster, attendance, waitlist, sessions, and class messages.'}
         </p>
         {canManageAll ? (
           <button
@@ -488,7 +488,7 @@ export function StaffProgramsPanel() {
                 <div>
                   <p className="text-sm font-bold">{p.name}</p>
                   <p className="text-xs text-[#5A6070]">
-                    ${p.fee} · grades {p.grades || '—'} · seats{' '}
+                    ${p.fee} · grades {p.grades || 'n/a'} · seats{' '}
                     {p.capacity
                       ? `${p.seatsTaken ?? 0}/${p.capacity}${
                           p.seatsRemaining != null ? ` (${p.seatsRemaining} open)` : ''
@@ -576,7 +576,7 @@ export function StaffProgramsPanel() {
                 />
                 <input
                   defaultValue={p.classTime}
-                  placeholder="Class time (e.g. 3:30–4:30 PM)"
+                  placeholder="Class time (e.g. 3:30 to 4:30 PM)"
                   className="border border-[#E8E4DC] rounded-lg px-3 py-1.5 text-xs"
                   onBlur={(e) => {
                     if (e.target.value !== p.classTime) {
@@ -897,7 +897,7 @@ export function StaffProgramsPanel() {
                       {e.parentPhone ? <p>Parent phone: {e.parentPhone}</p> : null}
                       {e.emergencyContact || e.emergencyPhone ? (
                         <p>
-                          Emergency: {e.emergencyContact || '—'}
+                          Emergency: {e.emergencyContact || 'n/a'}
                           {e.emergencyPhone ? ` · ${e.emergencyPhone}` : ''}
                         </p>
                       ) : null}
@@ -986,7 +986,7 @@ export function StaffProgramsPanel() {
                   }
                   className="border border-[#E8E4DC] rounded-lg px-2 py-1.5 text-xs"
                 >
-                  <option value="">—</option>
+                  <option value="">None</option>
                   {ATT_STATUSES.map((st) => (
                     <option key={st} value={st}>
                       {st}
@@ -1039,7 +1039,7 @@ export function StaffProgramsPanel() {
                 </p>
                 <p className="text-xs text-[#5A6070]">
                   {s.startAt ? new Date(s.startAt).toLocaleString() : 'TBD'}
-                  {s.endAt ? ` – ${new Date(s.endAt).toLocaleTimeString()}` : ''}
+                  {s.endAt ? ` to ${new Date(s.endAt).toLocaleTimeString()}` : ''}
                   {s.location ? ` · ${s.location}` : ''}
                   {s.instructorName ? ` · ${s.instructorName}` : ''}
                 </p>

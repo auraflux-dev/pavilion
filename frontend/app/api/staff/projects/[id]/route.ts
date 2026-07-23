@@ -112,7 +112,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   }
 }
 
-/** Lightweight membership check helper used by task routes via import pattern — keep exported util. */
+/** Lightweight membership check helper used by task routes via import pattern. keep exported util. */
 export function canManageProject(project: StaffProject, email: string, isAdmin: boolean) {
   return isAdmin || project.leadEmail === email || isProjectMember(project, email)
 }

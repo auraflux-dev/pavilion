@@ -87,7 +87,7 @@ export function StaffRoleManager() {
         <p className="text-xs text-[#5A6070]">
           Assign staff tools only to official @shmspto.org accounts. Personal family accounts remain
           separate. Anyone who signs in once with their @shmspto.org email appears below automatically
-          with no roles — click their row and check the roles to activate them.
+          with no roles. Click their row and check the roles to activate them.
         </p>
       </div>
 
@@ -137,7 +137,7 @@ export function StaffRoleManager() {
       <input
         value={assignedProgramIds}
         onChange={(event) => setAssignedProgramIds(event.target.value)}
-        placeholder="Assigned program IDs (comma-separated) — required for instructor/coordinator"
+        placeholder="Assigned program IDs (comma-separated). Required for instructor/coordinator"
         className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
       />
       <p className="text-[11px] text-[#5A6070]">

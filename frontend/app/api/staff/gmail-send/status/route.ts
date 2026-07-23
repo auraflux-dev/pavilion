@@ -1,5 +1,5 @@
 /**
- * GET /api/staff/gmail-send/status — is purchase/outreach email ready?
+ * GET /api/staff/gmail-send/status. is purchase/outreach email ready?
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
