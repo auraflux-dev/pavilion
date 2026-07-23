@@ -24,9 +24,10 @@ const ICONS: LucideIcon[] = [
 type Item = { title: string; detail: string }
 
 function parseLine(line: string): Item {
-  const parts = line.split(/\s+[-]\s+/)
+  // CMS lines often use em/en dashes: "Title — description"
+  const parts = line.split(/\s*[\u2014\u2013\-]\s+/)
   if (parts.length >= 2) {
-    return { title: parts[0].trim(), detail: parts.slice(1).join('n/a').trim() }
+    return { title: parts[0].trim(), detail: parts.slice(1).join(' ').trim() }
   }
   return { title: line.trim(), detail: '' }
 }
@@ -59,16 +60,20 @@ export function MembershipPortalCallouts({ lines }: { lines: string[] }) {
                 key={`${item.title}-${i}`}
                 className="rounded-2xl border border-[#E8E4DC] bg-[#FAFCF9] p-4 transition-colors hover:border-[#085508]/35 hover:bg-[#EEF6EE]"
               >
-                <span
-                  className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl text-white"
-                  style={{ backgroundColor: '#085508' }}
-                  aria-hidden="true"
-                >
-                  <Icon className="h-5 w-5" />
-                </span>
-                <h3 className="text-sm font-bold text-[#1A1A1A]">{item.title}</h3>
+                <div className="flex flex-col items-center text-center">
+                  <span
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-white"
+                    style={{ backgroundColor: '#085508' }}
+                    aria-hidden="true"
+                  >
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <h3 className="mt-3 text-sm font-bold text-[#1A1A1A]">{item.title}</h3>
+                </div>
                 {item.detail ? (
-                  <p className="mt-1 text-xs leading-relaxed text-[#5A6070]">{item.detail}</p>
+                  <p className="mt-2 pl-3 text-left text-xs leading-relaxed text-[#5A6070]">
+                    {item.detail}
+                  </p>
                 ) : null}
               </li>
             )
