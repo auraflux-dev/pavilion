@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import { MemberShell } from '@/components/shells/member-shell'
 import { KnowledgeBase } from '@/components/kb/knowledge-base'
-import { articlesByCategory, getArticle, getCategory, listArticles } from '@/lib/kb'
+import { getMergedKbArticle, getMergedKbArticles } from '@/lib/api/kb-articles'
+import { articlesByCategoryWithExtras, getCategory } from '@/lib/kb'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,7 +10,7 @@ type Props = { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params
-  const article = getArticle('member', slug)
+  const article = await getMergedKbArticle('member', slug)
   if (!article) return { title: 'Help | SHMS PTO' }
   return {
     title: `${article.title} | Member Help`,
@@ -19,11 +20,12 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function MemberHelpArticlePage({ params }: Props) {
   const { slug } = await params
-  const article = getArticle('member', slug)
+  const article = await getMergedKbArticle('member', slug)
   if (!article) notFound()
 
+  const articles = await getMergedKbArticles('member')
   const category = getCategory('member', article.categoryId)
-  const groups = articlesByCategory('member')
+  const groups = articlesByCategoryWithExtras('member', articles)
 
   return (
     <MemberShell>

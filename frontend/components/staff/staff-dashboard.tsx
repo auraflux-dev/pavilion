@@ -756,6 +756,7 @@ export function StaffDashboard() {
             canDiscounts={canDiscounts}
             canSite={canSite}
             canMarketing={canMarketing}
+            canEditKb={canFaq}
           />
         ) : null}
       </div>

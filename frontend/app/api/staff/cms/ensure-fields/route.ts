@@ -258,6 +258,22 @@ export async function POST(req: NextRequest) {
           { key: 'purchasedAt', displayName: 'Purchased At', type: 'DATETIME' },
         ],
       },
+      {
+        id: 'KbArticles',
+        displayName: 'Help Knowledge Base',
+        fields: [
+          { key: 'audience', displayName: 'Audience', type: 'TEXT' },
+          { key: 'categoryId', displayName: 'Category ID', type: 'TEXT' },
+          { key: 'slug', displayName: 'Slug', type: 'TEXT' },
+          { key: 'title', displayName: 'Title', type: 'TEXT' },
+          { key: 'summary', displayName: 'Summary', type: 'TEXT' },
+          { key: 'body', displayName: 'Body', type: 'TEXT' },
+          { key: 'order', displayName: 'Sort Order', type: 'NUMBER' },
+          { key: 'adminOnly', displayName: 'Admin Only', type: 'BOOLEAN' },
+          { key: 'need', displayName: 'Role Gate', type: 'TEXT' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+        ],
+      },
     ] as const) {
       const getRes = await fetch(`https://www.wixapis.com/wix-data/v2/collections/${spec.id}`, {
         method: 'GET',

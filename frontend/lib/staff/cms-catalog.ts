@@ -208,6 +208,57 @@ export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
       { key: 'active', label: 'Active on portal calendar', type: 'boolean' },
     ],
   },
+  KbArticles: {
+    id: 'KbArticles',
+    label: 'Help knowledge base',
+    roles: ['marketing', 'membership', 'secretary', 'admin'],
+    sortField: 'order',
+    activeField: 'active',
+    fields: [
+      {
+        key: 'audience',
+        label: 'Audience',
+        type: 'select',
+        options: ['member', 'staff'],
+        required: true,
+      },
+      {
+        key: 'categoryId',
+        label: 'Category id',
+        type: 'select',
+        options: [
+          'account',
+          'students',
+          'membership',
+          'cove',
+          'programs',
+          'start',
+          'parents',
+          'comms',
+          'admin',
+        ],
+        required: true,
+      },
+      { key: 'slug', label: 'URL slug', type: 'text', required: true },
+      { key: 'title', label: 'Title', type: 'text', required: true },
+      { key: 'summary', label: 'Summary', type: 'text' },
+      {
+        key: 'body',
+        label: 'Full article (paragraphs, ## headings, - lists, **bold**)',
+        type: 'textarea',
+        required: true,
+      },
+      { key: 'order', label: 'Sort order', type: 'number' },
+      { key: 'adminOnly', label: 'Staff admin only', type: 'boolean' },
+      {
+        key: 'need',
+        label: 'Staff role gate (staff audience)',
+        type: 'select',
+        options: ['none', 'message', 'membership', 'discounts', 'site', 'marketing'],
+      },
+      { key: 'active', label: 'Active', type: 'boolean' },
+    ],
+  },
 }
 
 /** SiteSettings keys grouped for role-scoped editing (visitor-facing). */

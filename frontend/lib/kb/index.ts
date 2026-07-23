@@ -4,6 +4,16 @@ import type { KbArticle, KbAudience, KbCategory, KbIndex, StaffKbNeed } from './
 
 export type { KbArticle, KbAudience, KbCategory, KbIndex, StaffKbNeed }
 
+export type KbGateOpts = {
+  categoryId?: string
+  isAdmin?: boolean
+  canMessage?: boolean
+  canMembership?: boolean
+  canDiscounts?: boolean
+  canSite?: boolean
+  canMarketing?: boolean
+}
+
 function indexFor(audience: KbAudience): KbIndex {
   return audience === 'staff' ? STAFF_KB : MEMBER_KB
 }
@@ -12,22 +22,15 @@ export function listCategories(audience: KbAudience): KbCategory[] {
   return [...indexFor(audience).categories].sort((a, b) => a.order - b.order)
 }
 
-export function listArticles(
+export function filterArticles(
   audience: KbAudience,
-  opts?: {
-    categoryId?: string
-    isAdmin?: boolean
-    canMessage?: boolean
-    canMembership?: boolean
-    canDiscounts?: boolean
-    canSite?: boolean
-    canMarketing?: boolean
-  },
+  articles: KbArticle[],
+  opts?: KbGateOpts,
 ): KbArticle[] {
-  let articles = [...indexFor(audience).articles]
+  let list = [...articles]
 
   if (audience === 'staff') {
-    articles = articles.filter((a) => {
+    list = list.filter((a) => {
       if (a.adminOnly && !opts?.isAdmin) return false
       if (a.need === 'message' && !opts?.canMessage) return false
       if (a.need === 'membership' && !opts?.canMembership) return false
@@ -39,10 +42,15 @@ export function listArticles(
   }
 
   if (opts?.categoryId) {
-    articles = articles.filter((a) => a.categoryId === opts.categoryId)
+    list = list.filter((a) => a.categoryId === opts.categoryId)
   }
 
-  return articles.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title))
+  return list.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title))
+}
+
+/** Sync code-defaults only (no CMS). Prefer async helpers in lib/api/kb-articles for live Help. */
+export function listArticles(audience: KbAudience, opts?: KbGateOpts): KbArticle[] {
+  return filterArticles(audience, indexFor(audience).articles, opts)
 }
 
 export function getArticle(audience: KbAudience, slug: string): KbArticle | null {
@@ -55,14 +63,39 @@ export function getCategory(audience: KbAudience, id: string): KbCategory | null
 
 export function articlesByCategory(
   audience: KbAudience,
-  opts?: Parameters<typeof listArticles>[1],
+  opts?: KbGateOpts,
+  articles?: KbArticle[],
 ): { category: KbCategory; articles: KbArticle[] }[] {
   const categories = listCategories(audience)
-  const articles = listArticles(audience, opts)
+  const list = filterArticles(audience, articles ?? indexFor(audience).articles, opts)
   return categories
     .map((category) => ({
       category,
-      articles: articles.filter((a) => a.categoryId === category.id),
+      articles: list.filter((a) => a.categoryId === category.id),
     }))
     .filter((group) => group.articles.length > 0)
+}
+
+/** Group unknown categoryIds (CMS-only) under a catch-all when needed. */
+export function articlesByCategoryWithExtras(
+  audience: KbAudience,
+  articles: KbArticle[],
+  opts?: KbGateOpts,
+): { category: KbCategory; articles: KbArticle[] }[] {
+  const groups = articlesByCategory(audience, opts, articles)
+  const known = new Set(listCategories(audience).map((c) => c.id))
+  const extras = filterArticles(audience, articles, opts).filter((a) => !known.has(a.categoryId))
+  if (!extras.length) return groups
+  return [
+    ...groups,
+    {
+      category: {
+        id: 'more',
+        title: 'More',
+        summary: 'Additional articles',
+        order: 99,
+      },
+      articles: extras,
+    },
+  ]
 }

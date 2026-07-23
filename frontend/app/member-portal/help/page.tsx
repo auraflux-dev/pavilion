@@ -1,6 +1,7 @@
 import { MemberShell } from '@/components/shells/member-shell'
 import { KnowledgeBase } from '@/components/kb/knowledge-base'
-import { articlesByCategory } from '@/lib/kb'
+import { getMergedKbArticles } from '@/lib/api/kb-articles'
+import { articlesByCategoryWithExtras } from '@/lib/kb'
 
 export const metadata = {
   title: 'Member Help | SHMS PTO',
@@ -9,8 +10,9 @@ export const metadata = {
 
 export const dynamic = 'force-dynamic'
 
-export default function MemberHelpIndexPage() {
-  const groups = articlesByCategory('member')
+export default async function MemberHelpIndexPage() {
+  const articles = await getMergedKbArticles('member')
+  const groups = articlesByCategoryWithExtras('member', articles)
 
   return (
     <MemberShell>

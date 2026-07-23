@@ -40,6 +40,7 @@ export const BACKUP_COLLECTIONS = [
   'BoardMembers',
   'NavLinks',
   'FAQItems',
+  'KbArticles',
   'VolunteerOpportunities',
   'FundraisingCTAs',
   'MembershipTiers',
