@@ -18,6 +18,13 @@ export async function getPortalCopy(): Promise<PortalCopy> {
   const pick = (key: keyof PortalCopy) =>
     keyed[key]?.trim() || PORTAL_COPY_DEFAULTS[key]
 
+  // Stale CMS copy from earlier seed — prefer the current default label.
+  const recentBuysHintRaw = pick('recentBuysHint')
+  const recentBuysHint =
+    /^programs\s*&\s*payments$/i.test(recentBuysHintRaw.trim())
+      ? PORTAL_COPY_DEFAULTS.recentBuysHint
+      : recentBuysHintRaw
+
   return {
     paidTitle: portal.sectionTitle || PORTAL_COPY_DEFAULTS.paidTitle,
     paidBody: portal.sectionBody || PORTAL_COPY_DEFAULTS.paidBody,
@@ -49,7 +56,7 @@ export async function getPortalCopy(): Promise<PortalCopy> {
     storeCardsLabel: pick('storeCardsLabel'),
     storeCardsHint: pick('storeCardsHint'),
     recentBuysLabel: pick('recentBuysLabel'),
-    recentBuysHint: pick('recentBuysHint'),
+    recentBuysHint,
     ctaLoadCard: pick('ctaLoadCard'),
     ctaSpiritWear: pick('ctaSpiritWear'),
     ctaPrograms: pick('ctaPrograms'),

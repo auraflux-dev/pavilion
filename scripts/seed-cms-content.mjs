@@ -314,7 +314,7 @@ const PAGE_ROWS = [
       'storeCardsLabel|Store cards',
       'storeCardsHint|CMS balance total',
       'recentBuysLabel|Recent buys',
-      'recentBuysHint|programs & payments',
+      'recentBuysHint|Payment History',
       'ctaLoadCard|Load card',
       'ctaSpiritWear|Spirit wear',
       'ctaPrograms|Programs',
