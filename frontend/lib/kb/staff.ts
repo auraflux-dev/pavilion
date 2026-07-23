@@ -56,7 +56,7 @@ export const STAFF_KB: KbIndex = {
 ## First stops
 - **Home**: your role workspaces and activity notices
 - **Help**: this knowledge base
-- **Inbox / My calendar / Docs**. Connect Google once, then work stays in Staff
+- **Inbox / Calendar / Docs**. Connect Google once, then work stays in Staff
 - **The Cove**: register + products when you run the snack window
 
 ## Stay in Staff
@@ -95,11 +95,11 @@ Update status when you finish a milestone so Home activity stays useful for ever
       categoryId: 'comms',
       summary: 'One Connect. Mail, calendar, and Drive stay in Staff.',
       order: 1,
-      body: `Open **Inbox**, **My calendar**, or **Docs** and choose **Connect Google** if prompted. Use the same @shmspto.org account.
+      body: `Open **Inbox**, **Calendar**, or **Docs** and choose **Connect Google** if prompted. Use the same @shmspto.org account.
 
 ## After connect
 - **Inbox**: read, reply, compose, folders
-- **My calendar**: upcoming events with details in Staff
+- **Calendar**: upcoming events with details in Staff
 - **Docs**: open Drive files in an in-Staff embed
 
 Reconnect if you see permission errors after a password reset. Purchase confirmation email can also use connected Gmail when configured.`,

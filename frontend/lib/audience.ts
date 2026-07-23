@@ -58,7 +58,7 @@ export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
   discounts: 'Discounts',
   membership: 'Memberships',
   inbox: 'Inbox',
-  calendar: 'My calendar',
+  calendar: 'Calendar',
   docs: 'Docs',
   content: 'Page copy',
   site: 'Site settings',

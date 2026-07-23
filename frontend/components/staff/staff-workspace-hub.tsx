@@ -44,18 +44,32 @@ function sanitizeEmailHtml(html: string): string {
 function MailBody({ text, html }: { text: string; html: string }) {
   const rich = html.trim()
   const plain = text.trim()
-  // Prefer full HTML when it is meaningfully longer than the plain stub
-  if (rich && (!plain || rich.length > plain.length * 1.2 || plain.length < 80)) {
+  const preferHtml = Boolean(
+    rich && (!plain || rich.length > plain.length * 1.2 || plain.length < 80),
+  )
+
+  if (preferHtml) {
     return (
       <iframe
         title="Email body"
         sandbox="allow-popups allow-popups-to-escape-sandbox"
-        srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8" /><base target="_blank" rel="noopener" /><style>body{font-family:system-ui,sans-serif;font-size:14px;line-height:1.45;color:#1A1A1A;margin:0;padding:8px;word-break:break-word;}a{color:#085508;}img{max-width:100%;height:auto;}</style></head><body>${sanitizeEmailHtml(rich)}</body></html>`}
-        className="w-full min-h-[12rem] max-h-[28rem] rounded-md border border-[#E8E4DC] bg-white"
+        srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8" /><base target="_blank" rel="noopener" /><style>html,body{margin:0;padding:0;}body{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#1A1A1A;padding:4px 2px;word-break:break-word;}a{color:#085508;}img{max-width:100%;height:auto;}</style></head><body>${sanitizeEmailHtml(rich)}</body></html>`}
+        className="w-full border-0 bg-transparent"
+        style={{ minHeight: '8rem', height: 'auto' }}
+        onLoad={(e) => {
+          const frame = e.currentTarget
+          try {
+            const doc = frame.contentDocument
+            const h = doc?.body?.scrollHeight || 0
+            if (h > 0) frame.style.height = `${Math.min(Math.max(h + 16, 120), 900)}px`
+          } catch {
+            frame.style.height = '24rem'
+          }
+        }}
       />
     )
   }
-  return <div className="text-sm whitespace-pre-wrap">{plain || '(No message body)'}</div>
+  return <div className="text-sm whitespace-pre-wrap leading-relaxed">{plain || '(No message body)'}</div>
 }
 
 type ThreadDetail = {
@@ -585,7 +599,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
   }
 
   const title =
-    tab === 'inbox' ? 'Inbox' : tab === 'calendar' ? 'My calendar' : 'Docs'
+    tab === 'inbox' ? 'Inbox' : tab === 'calendar' ? 'Calendar' : 'Docs'
 
   const moveFolders = folders.filter((f) => f.type === 'user')
   const folderLabel = (f: Folder) =>
@@ -813,9 +827,13 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
       ) : null}
 
       {tab === 'inbox' && status?.connected && mode === 'read' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-[13rem_minmax(0,1fr)_minmax(0,1.15fr)] gap-3 min-h-[520px]">
-          {/* Folders sidebar */}
-          <aside className="border border-[#E8E4DC] rounded-lg flex flex-col min-h-0 max-h-[520px] bg-[#FBFBF9]">
+        <div className="grid grid-cols-1 lg:grid-cols-[12rem_minmax(0,20rem)_minmax(0,1fr)] gap-0 lg:gap-3 lg:min-h-[min(70vh,40rem)] lg:h-[min(70vh,40rem)]">
+          {/* Folders sidebar — compact on desktop; collapsible strip on mobile when reading */}
+          <aside
+            className={`border border-[#E8E4DC] rounded-lg flex flex-col min-h-0 bg-[#FBFBF9] lg:max-h-none ${
+              selectedThread ? 'hidden lg:flex' : 'flex max-h-48 lg:max-h-none'
+            }`}
+          >
             <div className="px-2.5 py-2 border-b border-[#E8E4DC] flex items-center justify-between gap-2">
               <p className="text-[11px] font-bold uppercase tracking-wide text-[#5A6070]">Folders</p>
               <button
@@ -869,8 +887,12 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
             </div>
           </aside>
 
-          {/* Thread list */}
-          <div className="border border-[#E8E4DC] rounded-lg max-h-[520px] overflow-auto divide-y min-h-0">
+          {/* Thread list — hide on mobile once a conversation is open */}
+          <div
+            className={`border border-[#E8E4DC] rounded-lg overflow-auto divide-y min-h-0 bg-white lg:max-h-none ${
+              selectedThread ? 'hidden lg:block' : 'block max-h-[min(50vh,24rem)] lg:max-h-none'
+            }`}
+          >
             <div className="sticky top-0 bg-white px-3 py-2 border-b border-[#E8E4DC] z-10">
               <p className="text-xs font-bold text-[#1A1A1A]">
                 {folderLabel(
@@ -890,100 +912,124 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
                   key={t.id}
                   type="button"
                   onClick={() => void openThread(t.id)}
-                  className={`w-full text-left p-3 hover:bg-[#F7F5F0] ${
-                    selectedThread?.id === t.id ? 'bg-[#F0F7F0]' : ''
+                  className={`w-full text-left px-3 py-2.5 hover:bg-[#F7F5F0] border-l-2 ${
+                    selectedThread?.id === t.id
+                      ? 'bg-[#F0F7F0] border-[#085508]'
+                      : 'border-transparent'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className={`text-sm ${t.unread ? 'font-bold' : 'font-medium'}`}>{t.subject}</p>
+                    <p className={`text-sm leading-snug ${t.unread ? 'font-bold' : 'font-medium'}`}>
+                      {t.subject}
+                    </p>
                     {(t.messageCount ?? 1) > 1 ? (
                       <span className="shrink-0 text-[10px] font-semibold text-[#5A6070] tabular-nums">
                         {t.messageCount}
                       </span>
                     ) : null}
                   </div>
-                  <p className="text-[11px] text-[#5A6070] truncate">{t.from}</p>
-                  <p className="text-[11px] text-[#5A6070] line-clamp-2 mt-0.5">{t.snippet}</p>
+                  <p className="text-[11px] text-[#5A6070] truncate mt-0.5">{t.from}</p>
+                  <p className="text-[11px] text-[#5A6070] line-clamp-1 mt-0.5">{t.snippet}</p>
                 </button>
               ))
             )}
           </div>
 
-          {/* Thread detail */}
-          <div className="border border-[#E8E4DC] rounded-lg p-3 min-h-[280px] max-h-[520px] overflow-auto space-y-3">
+          {/* Reading pane — one scroll; full width on mobile when open */}
+          <div
+            className={`border border-[#E8E4DC] rounded-lg bg-white min-h-0 flex flex-col ${
+              selectedThread ? 'flex' : 'hidden lg:flex'
+            }`}
+          >
             {!selectedThread ? (
-              <p className="text-sm text-[#5A6070]">
+              <p className="p-6 text-sm text-[#5A6070]">
                 Select a conversation to read the thread, reply, forward, or archive.
               </p>
             ) : (
               <>
-                <div>
-                  <p className="text-sm font-bold">{selectedThread.subject}</p>
-                  <p className="text-[11px] text-[#5A6070]">
-                    {selectedThread.messages.length} message
-                    {selectedThread.messages.length === 1 ? '' : 's'} in thread
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button type="button" variant="outline" onClick={startForward}>
-                    Forward
-                  </Button>
-                  <Button type="button" variant="outline" onClick={() => void archiveSelected()}>
-                    Archive
-                  </Button>
-                  <select
-                    defaultValue=""
-                    onChange={(e) => {
-                      if (e.target.value) void moveSelected(e.target.value)
-                      e.target.value = ''
+                <div className="shrink-0 px-4 pt-3 pb-2 border-b border-[#E8E4DC] space-y-2">
+                  <button
+                    type="button"
+                    className="lg:hidden text-xs font-semibold text-[#085508] underline"
+                    onClick={() => {
+                      setSelectedThread(null)
+                      setReplyToMessageId(null)
                     }}
-                    className="border border-[#E8E4DC] rounded-lg px-2 py-1.5 text-xs"
                   >
-                    <option value="">Move to folder…</option>
-                    {moveFolders.map((f) => (
-                      <option key={f.id} value={f.id}>
-                        {f.name}
-                      </option>
-                    ))}
-                  </select>
+                    ← Back to list
+                  </button>
+                  <div>
+                    <p className="text-base font-bold leading-snug">{selectedThread.subject}</p>
+                    <p className="text-[11px] text-[#5A6070] mt-0.5">
+                      {selectedThread.messages.length} message
+                      {selectedThread.messages.length === 1 ? '' : 's'} in thread
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="button" variant="outline" className="h-8 text-xs" onClick={startForward}>
+                      Forward
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-8 text-xs"
+                      onClick={() => void archiveSelected()}
+                    >
+                      Archive
+                    </Button>
+                    <select
+                      defaultValue=""
+                      onChange={(e) => {
+                        if (e.target.value) void moveSelected(e.target.value)
+                        e.target.value = ''
+                      }}
+                      className="border border-[#E8E4DC] rounded-lg px-2 py-1.5 text-xs"
+                    >
+                      <option value="">Move to folder…</option>
+                      {moveFolders.map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="space-y-3 max-h-[280px] overflow-auto border-t border-[#E8E4DC] pt-2">
-                  {selectedThread.messages.map((m) => (
+
+                <div className="flex-1 overflow-y-auto px-4 py-3 space-y-6">
+                  {selectedThread.messages.map((m, idx) => (
                     <article
                       key={m.id}
-                      className={`rounded-lg border px-3 py-2 ${
-                        m.id === replyToMessageId
-                          ? 'border-[#085508] bg-[#F0F7F0]'
-                          : 'border-[#E8E4DC] bg-[#F7F5F0]'
+                      className={`${
+                        idx > 0 ? 'border-t border-[#E8E4DC] pt-5' : ''
+                      } ${
+                        m.id === replyToMessageId ? 'rounded-lg bg-[#F0F7F0] -mx-2 px-2 py-2' : ''
                       }`}
                     >
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div>
-                          <p className="text-xs font-semibold">{m.from}</p>
+                      <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold truncate">{m.from}</p>
                           <p className="text-[11px] text-[#5A6070]">{m.date}</p>
                         </div>
                         <button
                           type="button"
-                          className="text-[11px] font-bold underline text-[#085508]"
+                          className="text-[11px] font-bold underline text-[#085508] shrink-0"
                           onClick={() => setReplyToMessageId(m.id)}
                         >
                           Reply to this
                         </button>
                       </div>
-                      <div className="mt-2">
-                        <MailBody text={m.bodyText || m.snippet || ''} html={m.bodyHtml || ''} />
-                      </div>
+                      <MailBody text={m.bodyText || m.snippet || ''} html={m.bodyHtml || ''} />
                       {m.attachments?.length ? (
-                        <ul className="mt-2 space-y-1">
+                        <ul className="mt-3 flex flex-wrap gap-2">
                           {m.attachments.map((a) => (
                             <li key={`${m.id}-${a.attachmentId}`}>
                               <a
                                 href={`/api/staff/workspace/mail/attachment?messageId=${encodeURIComponent(m.id)}&attachmentId=${encodeURIComponent(a.attachmentId)}&filename=${encodeURIComponent(a.filename)}&mimeType=${encodeURIComponent(a.mimeType)}`}
-                                className="text-xs font-semibold text-[#085508] underline"
+                                className="inline-flex text-xs font-semibold text-[#085508] underline"
                                 target="_blank"
                                 rel="noreferrer"
                               >
-                                Download {a.filename}
+                                {a.filename}
                                 {a.size ? ` (${Math.max(1, Math.round(a.size / 1024))} KB)` : ''}
                               </a>
                             </li>
@@ -993,12 +1039,14 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
                     </article>
                   ))}
                 </div>
+
+                <div className="shrink-0 border-t border-[#E8E4DC] px-4 py-3 space-y-2 bg-[#FBFBF9]">
                 <textarea
                   value={reply}
                   onChange={(e) => setReply(e.target.value)}
-                  rows={4}
+                  rows={3}
                   placeholder="Type your reply…"
-                  className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
                 />
                 <div className="flex flex-wrap items-center gap-2">
                   <Button
@@ -1035,6 +1083,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
                 >
                   Send reply
                 </Button>
+                </div>
               </>
             )}
           </div>

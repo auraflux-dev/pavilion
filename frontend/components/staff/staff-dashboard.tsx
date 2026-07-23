@@ -489,7 +489,7 @@ export function StaffDashboard() {
                       {(
                         {
                           inbox: 'Workspace mail + reply',
-                          calendar: 'Your Google Calendar',
+                          calendar: 'Google Calendar',
                           docs: 'Drive Docs to read/edit',
                           projects: 'Year board, assign tasks',
                           members: 'Lookup, act-as, archive',
