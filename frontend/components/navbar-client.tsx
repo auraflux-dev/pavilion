@@ -142,61 +142,64 @@ export function NavbarClient({ links }: Props) {
           ) : null}
         </ul>
 
-        <div className="hidden xl:flex items-center gap-2 shrink-0 justify-self-end min-w-[9.5rem] justify-end">
-          {status === 'loading' ? (
-            <div className="h-9 w-[9.5rem] rounded-md bg-[#EEF6EE] animate-pulse" />
-          ) : isMember ? (
-            <div className="flex items-center gap-2">
-              {isStaff ? (
-                <Link href="/staff">
-                  <Button size="sm" variant="outline" className="font-semibold">
-                    Staff
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 justify-self-end col-start-3">
+          {/* Auth always visible from sm so laptop widths under xl are not hamburger-only */}
+          <div className="hidden sm:flex items-center gap-2">
+            {status === 'loading' ? (
+              <div className="h-9 w-24 rounded-md bg-[#EEF6EE] animate-pulse" />
+            ) : isMember ? (
+              <>
+                {isStaff ? (
+                  <Link href="/staff">
+                    <Button size="sm" variant="outline" className="font-semibold">
+                      Staff
+                    </Button>
+                  </Link>
+                ) : null}
+                <Link href="/member-portal">
+                  <Button
+                    size="sm"
+                    className="text-white font-semibold"
+                    style={{ backgroundColor: '#085508' }}
+                  >
+                    {portalLabel}
                   </Button>
                 </Link>
-              ) : null}
-              <Link href="/member-portal">
-                <Button
-                  size="sm"
-                  className="text-white font-semibold"
-                  style={{ backgroundColor: '#085508' }}
-                >
-                  {portalLabel}
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link href="/auth/join?mode=login&returnTo=%2Fmember-portal">
-                <Button size="sm" variant="outline" className="font-semibold">
-                  Already a member
-                </Button>
-              </Link>
-              <Link href="/auth/join?returnTo=%2Fmembership">
-                <Button
-                  size="sm"
-                  className="text-white font-semibold"
-                  style={{ backgroundColor: '#085508' }}
-                >
-                  Join
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/join?mode=login&returnTo=%2Fmember-portal">
+                  <Button size="sm" variant="outline" className="font-semibold">
+                    Log in
+                  </Button>
+                </Link>
+                <Link href="/auth/join?returnTo=%2Fmembership">
+                  <Button
+                    size="sm"
+                    className="text-white font-semibold"
+                    style={{ backgroundColor: '#085508' }}
+                  >
+                    Join
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
 
-        <button
-          className="xl:hidden p-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#085508] justify-self-end col-start-3"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-expanded={menuOpen}
-          aria-controls="mobile-menu"
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-        >
-          {menuOpen ? (
-            <X className="w-5 h-5 text-[#1A1A1A]" />
-          ) : (
-            <Menu className="w-5 h-5 text-[#1A1A1A]" />
-          )}
-        </button>
+          <button
+            className="xl:hidden p-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#085508]"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          >
+            {menuOpen ? (
+              <X className="w-5 h-5 text-[#1A1A1A]" />
+            ) : (
+              <Menu className="w-5 h-5 text-[#1A1A1A]" />
+            )}
+          </button>
+        </div>
       </nav>
 
       {menuOpen && (
@@ -282,7 +285,7 @@ export function NavbarClient({ links }: Props) {
                     onClick={() => navigate('/auth/join?mode=login&returnTo=%2Fmember-portal')}
                     disabled={Boolean(pendingHref)}
                   >
-                    Already a member
+                    Log in
                   </Button>
                 </div>
               )}

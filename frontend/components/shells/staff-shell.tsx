@@ -69,7 +69,11 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F5F0E8' }}>
       <header className="sticky top-0 z-50 bg-[#0B3D0B] text-white shadow-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 min-w-0 rounded-md hover:bg-white/10 px-1 py-0.5 -ml-1"
+            aria-label="Return to SHMS PTO home"
+          >
             <Image
               src="/shms-logo.png"
               alt=""
@@ -86,7 +90,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                 ) : null}
               </p>
             </div>
-          </div>
+          </Link>
 
           <nav className="hidden lg:flex items-center gap-0.5 min-w-0" aria-label="Staff workspaces">
             {primary.map((item) => (
@@ -162,7 +166,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                 variant="outline"
                 className="border-white/40 text-white hover:bg-white/10 bg-transparent h-8 text-xs"
               >
-                View site
+                Site home
               </Button>
             </Link>
             <Button
@@ -218,7 +222,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                   variant="outline"
                   className="w-full border-white/40 text-white bg-transparent"
                 >
-                  View site
+                  Site home
                 </Button>
               </Link>
               <Button
@@ -232,6 +236,35 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
           </div>
         ) : null}
       </header>
+
+      {active !== 'home' ? (
+        <div
+          className="border-b border-[#D4E8D4] bg-[#EEF6EE]"
+          role="navigation"
+          aria-label="Staff navigation"
+        >
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+            <button
+              type="button"
+              onClick={() => onNavigate('home')}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
+              style={{ color: '#085508' }}
+            >
+              ← Staff home
+            </button>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
+              style={{ color: '#085508' }}
+            >
+              Site home
+            </Link>
+            <span className="text-xs text-[#5A6070]">
+              Editing · {STAFF_WORKSPACE_LABEL[active]}
+            </span>
+          </div>
+        </div>
+      ) : null}
 
       <main id="main-content" className="flex-1">
         {children}
