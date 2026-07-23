@@ -244,7 +244,7 @@ export const ROLE_HOME_COPY: Record<
     thisWeek: [
       'Submit timesheet hours to VP Programs',
       'Send session reminders to your class',
-      'Share supply or schedule updates',
+      'If paid as a contractor, send a completed W-9 to treasurer@shmspto.org',
     ],
   },
   coordinator: {
@@ -253,7 +253,7 @@ export const ROLE_HOME_COPY: Record<
     thisWeek: [
       'Confirm roster and waitlist with instructor',
       'Submit coordinator hours if contracted',
-      'Escalate issues to Programs VP',
+      'If paid as a contractor, send a completed W-9 to treasurer@shmspto.org',
     ],
   },
 }

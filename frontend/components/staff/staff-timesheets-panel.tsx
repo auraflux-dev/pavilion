@@ -132,6 +132,44 @@ export function StaffTimesheetsPanel() {
         </p>
       </div>
 
+      <div
+        className="rounded-lg border p-4 space-y-2"
+        style={{ borderColor: '#E8D48A', backgroundColor: '#FFFBEB' }}
+        role="note"
+      >
+        <p className="text-sm font-bold text-[#1A1A1A]">Contractors: W-9 required</p>
+        <p className="text-xs text-[#5A6070] leading-relaxed">
+          If your pay may exceed <span className="font-semibold text-[#1A1A1A]">$600 in a calendar year</span>,
+          SHMS PTO may need to file a Form 1099. Complete IRS Form W-9 before or with your first paid work,
+          then email the finished form to{' '}
+          <a
+            href="mailto:treasurer@shmspto.org?subject=W-9%20for%20SHMS%20PTO%20contractor"
+            className="font-semibold underline"
+            style={{ color: '#085508' }}
+          >
+            treasurer@shmspto.org
+          </a>
+          .
+        </p>
+        <div className="flex flex-wrap gap-2 pt-1">
+          <a
+            href="/forms/fw9.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center rounded-md border border-[#E8E4DC] bg-white px-3 py-1.5 text-xs font-semibold text-[#1A1A1A] hover:bg-[#EEF6EE]"
+          >
+            Download Form W-9 (PDF)
+          </a>
+          <a
+            href="mailto:treasurer@shmspto.org?subject=W-9%20for%20SHMS%20PTO%20contractor&body=Hi%20Treasurer%2C%0A%0AAttached%20is%20my%20completed%20Form%20W-9%20for%20SHMS%20PTO%20contractor%20payments.%0A%0AThank%20you."
+            className="inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold text-white"
+            style={{ backgroundColor: '#085508' }}
+          >
+            Email completed W-9 to Treasurer
+          </a>
+        </div>
+      </div>
+
       <div className="rounded-lg border border-[#E8E4DC] bg-[#FAFAF8] p-4 space-y-3">
         <p className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">
           Submit hours

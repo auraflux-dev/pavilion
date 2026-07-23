@@ -171,11 +171,26 @@ Process from the enrollment tools in Programs. Do not invent off-system credits 
 Parents register on the public/member Programs flows; Staff owns capacity and day-of ops.`,
     },
     {
+      slug: 'contractor-w9',
+      title: 'Contractor W-9 and 1099 reminder',
+      categoryId: 'programs',
+      summary: 'Send a completed W-9 to the Treasurer if pay may exceed $600.',
+      order: 2,
+      body: `Paid instructors and other contractors: SHMS PTO may need to file **Form 1099** if your pay exceeds **$600 in a calendar year**.
+
+## What to do
+1. Download **Form W-9** from Staff → **Timesheets** (or open [/forms/fw9.pdf](/forms/fw9.pdf))
+2. Complete the form
+3. Email the finished PDF to **treasurer@shmspto.org** with subject like “W-9 for SHMS PTO contractor”
+
+Do this before or with your first paid work. Keep a copy for your records. Timesheets still go to VP Programs for hour approval; tax forms go to the Treasurer.`,
+    },
+    {
       slug: 'parent-enrichment-registration',
       title: 'Parent enrichment registration',
       categoryId: 'programs',
       summary: 'What parents see when claiming seats.',
-      order: 2,
+      order: 3,
       body: `Parents enroll from **Programs** while signed in. Free vs paid rules follow the program settings (member-only seats, waitlist, capacity).
 
 If a parent cannot enroll:
@@ -190,7 +205,7 @@ Staff can adjust roster/waitlist from Programs when needed.`,
       title: 'Event tickets',
       categoryId: 'programs',
       summary: 'Sell tickets on /events; manage from Staff Events.',
-      order: 3,
+      order: 4,
       body: `Public tickets sell on **/events**. Staff **Events** manages listings, capacity, and ticket ops inside Staff.
 
 Parents get purchase confirmation in portal messages (and email when Gmail send is connected).
