@@ -63,6 +63,7 @@ export async function GET(req: NextRequest) {
     name: staff.name || `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim(),
     boardTitle: staff.boardTitle,
     roles: staff.roles,
+    personalEmail: staff.personalEmail || '',
     isAdmin: requireStaffRole(staff, 'admin'),
     homes,
   })

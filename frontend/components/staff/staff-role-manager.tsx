@@ -10,6 +10,7 @@ type StaffRow = {
   boardTitle: string
   roles: string[]
   assignedProgramIds: string[]
+  personalEmail: string
   active: boolean
 }
 
@@ -21,6 +22,7 @@ export function StaffRoleManager() {
   const [boardTitle, setBoardTitle] = useState('')
   const [roles, setRoles] = useState<string[]>([])
   const [assignedProgramIds, setAssignedProgramIds] = useState('')
+  const [personalEmail, setPersonalEmail] = useState('')
   const [active, setActive] = useState(true)
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
@@ -43,6 +45,7 @@ export function StaffRoleManager() {
     setBoardTitle(row.boardTitle)
     setRoles(row.roles)
     setAssignedProgramIds((row.assignedProgramIds ?? []).join(', '))
+    setPersonalEmail(row.personalEmail ?? '')
     setActive(row.active)
     setStatus(`Editing ${row.email}`)
   }
@@ -60,6 +63,7 @@ export function StaffRoleManager() {
           boardTitle,
           roles,
           assignedProgramIds,
+          personalEmail,
           active,
         }),
       })
@@ -71,6 +75,7 @@ export function StaffRoleManager() {
       setBoardTitle('')
       setRoles([])
       setAssignedProgramIds('')
+      setPersonalEmail('')
       setActive(true)
       setStatus('Staff access saved.')
     } catch (err) {
@@ -85,9 +90,10 @@ export function StaffRoleManager() {
       <div>
         <h2 className="text-lg font-bold">Admin · Staff access</h2>
         <p className="text-xs text-[#5A6070]">
-          Assign staff tools only to official @shmspto.org accounts. Personal family accounts remain
-          separate. Anyone who signs in once with their @shmspto.org email appears below automatically
-          with no roles. Click their row and check the roles to activate them.
+          Hierarchy: Staff tools only on official @shmspto.org accounts. Each board member can also
+          link a personal email for the parent portal (students, Cove). Anyone who signs in once with
+          @shmspto.org appears below with no roles. Click their row, assign roles, and optionally set
+          their personal email.
         </p>
       </div>
 
@@ -135,6 +141,17 @@ export function StaffRoleManager() {
       </div>
 
       <input
+        type="email"
+        value={personalEmail}
+        onChange={(event) => setPersonalEmail(event.target.value)}
+        placeholder="Personal / parent portal email (e.g. you@gmail.com)"
+        className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+      />
+      <p className="text-[11px] text-[#5A6070]">
+        Optional. Their family login for Member Portal. Must not be @shmspto.org.
+      </p>
+
+      <input
         value={assignedProgramIds}
         onChange={(event) => setAssignedProgramIds(event.target.value)}
         placeholder="Assigned program IDs (comma-separated). Required for instructor/coordinator"
@@ -167,6 +184,7 @@ export function StaffRoleManager() {
               <span className="block text-sm font-semibold">{row.name || row.email}</span>
               <span className="block text-xs text-[#5A6070]">
                 {row.email} · {row.roles.join(', ')}
+                {row.personalEmail ? ` · parent: ${row.personalEmail}` : ''}
                 {(row.assignedProgramIds ?? []).length
                   ? ` · ${row.assignedProgramIds.length} program(s)`
                   : ''}

@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
-import { isStaffEmail, STAFF_ROLES, type StaffRole } from '@/lib/staff/roles'
+import {
+  isStaffEmail,
+  isValidPersonalEmail,
+  normalizePersonalEmail,
+  STAFF_ROLES,
+  type StaffRole,
+} from '@/lib/staff/roles'
 
 type StaffRoleRow = {
   _id?: string
@@ -10,6 +16,7 @@ type StaffRoleRow = {
   boardTitle?: string
   roles?: string
   assignedProgramIds?: string
+  personalEmail?: string
   active?: boolean
 }
 
@@ -49,6 +56,7 @@ export async function GET(req: NextRequest) {
           .split(/[,|;]/)
           .map((id) => id.trim())
           .filter(Boolean),
+        personalEmail: String(row.personalEmail ?? '').trim().toLowerCase(),
         active: row.active !== false,
       })),
     })
@@ -75,6 +83,7 @@ export async function POST(req: NextRequest) {
           .split(/[,|;]/)
           .map((id) => id.trim())
           .filter(Boolean)
+    const personalEmail = normalizePersonalEmail(String(body.personalEmail ?? ''))
     const active = body.active !== false
 
     if (!isStaffEmail(email)) {
@@ -86,8 +95,36 @@ export async function POST(req: NextRequest) {
     if (!roles.length) {
       return NextResponse.json({ error: 'Choose at least one role.' }, { status: 400 })
     }
+    if (personalEmail && !isValidPersonalEmail(personalEmail)) {
+      return NextResponse.json(
+        {
+          error: isStaffEmail(personalEmail)
+            ? 'Parent portal email must be personal, not @shmspto.org.'
+            : 'Enter a valid personal email for the parent portal.',
+        },
+        { status: 400 },
+      )
+    }
 
     const client = getWixClient()
+    if (personalEmail) {
+      const clash = await client.items
+        .query('StaffRoles')
+        .eq('personalEmail', personalEmail)
+        .limit(5)
+        .find()
+      const taken = (clash.items as StaffRoleRow[]).some((item) => {
+        const other = String(item.email ?? '').toLowerCase()
+        return other && other !== email
+      })
+      if (taken) {
+        return NextResponse.json(
+          { error: 'That personal email is already linked to another staff account.' },
+          { status: 409 },
+        )
+      }
+    }
+
     const existing = await client.items.query('StaffRoles').eq('email', email).limit(1).find()
     const row = existing.items[0] as StaffRoleRow | undefined
     const data = {
@@ -96,6 +133,7 @@ export async function POST(req: NextRequest) {
       boardTitle,
       roles: roles.join(','),
       assignedProgramIds: assignedProgramIds.join(','),
+      personalEmail,
       active,
     }
 

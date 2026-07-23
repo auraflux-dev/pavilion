@@ -91,6 +91,8 @@ export async function POST(req: NextRequest) {
     results.push(
       await ensureFields('StaffRoles', [
         { key: 'assignedProgramIds', displayName: 'Assigned Program IDs', type: 'TEXT' },
+        { key: 'personalEmail', displayName: 'Personal / Parent Email', type: 'TEXT' },
+        { key: 'emailSignature', displayName: 'Email Signature', type: 'TEXT' },
       ]),
     )
     results.push(

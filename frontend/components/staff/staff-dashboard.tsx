@@ -24,6 +24,7 @@ import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
 import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
 import { StaffTimesheetsPanel } from '@/components/staff/staff-timesheets-panel'
 import { StaffHelpPanel } from '@/components/staff/staff-help-panel'
+import { StaffPersonalEmailPanel } from '@/components/staff/staff-personal-email-panel'
 import { StaffShell } from '@/components/shells/staff-shell'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 
@@ -39,6 +40,7 @@ type StaffMe = {
   name: string
   boardTitle: string
   roles: string[]
+  personalEmail?: string
   isAdmin: boolean
   homes: StaffHome[]
 }
@@ -437,10 +439,14 @@ export function StaffDashboard() {
             <div>
               <h1 className="text-2xl font-bold text-[#1A1A1A]">Home</h1>
               <p className="text-sm text-[#5A6070] mt-1">
-                Roles: {me.roles.join(', ')}. Open a workspace from the top nav. Only what you need for
-                that job.
+                Roles: {me.roles.join(', ')}. Staff login: {me.email}. Open a workspace from the top
+                nav. Only what you need for that job.
               </p>
             </div>
+            <StaffPersonalEmailPanel
+              initialEmail={me.personalEmail ?? ''}
+              onSaved={(email) => setMe((current) => (current ? { ...current, personalEmail: email } : current))}
+            />
             {activityItems.length > 0 ? (
               <div className="rounded-xl border border-[#085508]/25 bg-[#E8F3E8] p-4 space-y-2">
                 <p className="text-sm font-bold text-[#085508]">Needs your attention</p>

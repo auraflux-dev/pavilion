@@ -40,6 +40,20 @@ export type StaffProfile = {
   emailSignature: string
   /** Comma-separated Program CMS ids — scopes instructor/coordinator views */
   assignedProgramIds: string[]
+  /** Personal email for parent portal (students, Cove). Not @shmspto.org. */
+  personalEmail: string
+}
+
+export function normalizePersonalEmail(raw: string): string {
+  return raw.trim().toLowerCase()
+}
+
+/** Personal parent emails must not use the staff domain. */
+export function isValidPersonalEmail(email: string): boolean {
+  const value = normalizePersonalEmail(email)
+  if (!value || !value.includes('@') || value.startsWith('@')) return false
+  if (isStaffEmail(value)) return false
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 }
 
 const ROLE_SET = new Set<string>(STAFF_ROLES)
@@ -86,6 +100,7 @@ export async function getStaffProfile(email: string): Promise<StaffProfile | nul
           name?: string
           emailSignature?: string
           assignedProgramIds?: string
+          personalEmail?: string
           active?: boolean
         }
       | undefined
@@ -99,6 +114,7 @@ export async function getStaffProfile(email: string): Promise<StaffProfile | nul
       name: String(row.name ?? ''),
       emailSignature: String(row.emailSignature ?? ''),
       assignedProgramIds: parseAssignedProgramIds(row.assignedProgramIds),
+      personalEmail: normalizePersonalEmail(String(row.personalEmail ?? '')),
     }
   } catch {
     return null

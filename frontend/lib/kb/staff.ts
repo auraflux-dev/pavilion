@@ -64,15 +64,16 @@ Day-to-day tools open inside Staff. The only intentional exits for money ops are
     },
     {
       slug: 'roles-login',
-      title: 'Roles & @shmspto.org login',
+      title: 'Roles, Staff login & personal parent email',
       categoryId: 'start',
-      summary: 'How StaffRoles map to tools you see.',
+      summary: 'Staff @shmspto.org hierarchy plus personal email for parent portal.',
       order: 2,
       body: `Each board/staff person has a role (President, Treasurer, VP Events, Cove lead, and so on). The Staff shell only shows workspaces your role can use.
 
 ## Login rules
-- Use the **@shmspto.org** Google identity tied to your StaffRoles email
-- Personal Gmail will not unlock Staff even if you are on the board sheet
+- Use the **@shmspto.org** Google identity tied to your StaffRoles email for Staff tools
+- On Staff **Home**, save your **personal email** for the parent portal (students, Cove). That address must not be @shmspto.org
+- Personal Gmail will not unlock Staff; @shmspto.org will not own your students. Two logins, one hierarchy
 - After a role change, sign out and back in so permissions refresh
 
 If tools are missing that your role should have, President/Treasurer can update StaffRoles.`,
