@@ -21,9 +21,9 @@ const SECTIONS = [
     icon: ClipboardList,
   },
   {
-    href: '#help',
+    href: '/member-portal/help',
     label: 'Help',
-    hint: 'Guides & FAQs',
+    hint: 'Knowledge base',
     icon: HelpCircle,
   },
 ] as const

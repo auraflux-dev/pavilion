@@ -133,7 +133,7 @@ export function NavbarClient({ links }: Props) {
           {isMember ? (
             <li>
               <Link
-                href="/member-portal#help"
+                href="/member-portal/help"
                 className="px-2.5 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508]"
               >
                 Help
@@ -230,7 +230,7 @@ export function NavbarClient({ links }: Props) {
                 <button
                   type="button"
                   className="w-full text-left block px-3 py-2.5 text-sm font-medium rounded-md hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508] transition-colors"
-                  onClick={() => navigate('/member-portal#help')}
+                  onClick={() => navigate('/member-portal/help')}
                   disabled={Boolean(pendingHref)}
                 >
                   Help

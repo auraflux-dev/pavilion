@@ -515,7 +515,7 @@ export function StaffDashboard() {
                           wellness: 'Wish list & appreciation',
                           newsletter: 'Member email & WhatsApp',
                           expenses: 'Submit & track reimbursements',
-                          help: 'Drive how-tos',
+                          help: 'Staff knowledge base',
                         } as Partial<Record<StaffWorkspace, string>>
                       )[item.id] ?? 'Open workspace'}
                     </p>

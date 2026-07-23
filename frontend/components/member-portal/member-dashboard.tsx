@@ -14,7 +14,10 @@ import {
   ArrowRight,
   ShoppingBag,
   Star,
+  HelpCircle,
+  BookOpen,
 } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
 import {
@@ -25,12 +28,10 @@ import { StudentCard } from './student-card'
 import { AddStudentForm } from './add-student-form'
 import { EditAccountForm } from './edit-account-form'
 import { PortalQuadrant } from './portal-quadrant'
-import { PortalHelpPanel } from './portal-help-panel'
 import { PortalSectionNav } from './portal-section-nav'
 import { PortalSurveys } from './portal-surveys'
 import { StoreCardReload } from './store-card-reload'
 import { CoveFamilyCodeCard } from './cove-family-code-card'
-import type { PortalHelpItem } from '@/lib/api/portal-help'
 
 interface MemberData {
   member: {
@@ -96,7 +97,6 @@ interface Props {
   link8?: string
   grades?: string[]
   copy?: PortalCopy
-  portalHelp?: PortalHelpItem[]
 }
 
 function fmtMoney(n: number) {
@@ -132,7 +132,6 @@ export function MemberDashboard({
   link8 = '',
   grades = ['6', '7', '8'],
   copy = PORTAL_COPY_DEFAULTS,
-  portalHelp = [],
 }: Props) {
   const [member, setMember] = useState<MemberData['member'] | null>(null)
   const [accountType, setAccountType] = useState<'free' | 'paid'>('free')
@@ -177,7 +176,7 @@ export function MemberDashboard({
     load()
   }, [])
 
-  // #store scrolls here; #help is handled by PortalHelpPanel (opens then scrolls).
+  // #store scrolls here; Help opens /member-portal/help.
   useEffect(() => {
     if (status !== 'ok') return
     const id = window.location.hash.replace(/^#/, '')
@@ -720,7 +719,34 @@ export function MemberDashboard({
       </div>
 
       <PortalSurveys />
-      <PortalHelpPanel items={portalHelp} />
+
+      <section
+        id="help"
+        className="mt-8 scroll-mt-28 rounded-2xl border border-[#E8E4DC] bg-white overflow-hidden shadow-sm"
+      >
+        <div className="px-5 py-5 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+          <div className="flex items-start gap-3 min-w-0">
+            <HelpCircle className="w-5 h-5 mt-0.5 shrink-0" style={{ color: '#085508' }} />
+            <div>
+              <h2 className="font-bold text-[#1A1A1A] text-base flex items-center gap-2">
+                <BookOpen className="w-4 h-4" style={{ color: '#085508' }} aria-hidden />
+                Member Help
+              </h2>
+              <p className="text-sm text-[#5A6070] mt-1 leading-relaxed">
+                Full articles for account, students, membership, The Cove, and programs —
+                organized by category, signed-in parents only.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/member-portal/help"
+            className="shrink-0 inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white"
+            style={{ backgroundColor: '#085508' }}
+          >
+            Open knowledge base
+          </Link>
+        </div>
+      </section>
     </div>
   )
 }
