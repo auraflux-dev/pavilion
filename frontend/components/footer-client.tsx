@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { MapPin, Mail, Facebook, Twitter, Instagram, Youtube, ArrowRight, Send } from 'lucide-react'
+import { MapPin, Mail, Twitter, Youtube, ArrowRight, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { SocialFooterLinks } from '@/components/social-footer-links'
 import type { NavLink } from '@/lib/api/nav'
 import { useAuth } from '@/lib/hooks/use-auth'
 
@@ -60,12 +61,10 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
     { grade: '8th', href: link8 },
   ].filter(g => g.href)
 
-  const socialLinks = [
-    { icon: Facebook,  label: 'Facebook',    href: socialFacebook },
-    { icon: Instagram, label: 'Instagram',   href: socialInstagram },
-    { icon: Twitter,   label: 'Twitter / X', href: socialTwitter },
-    { icon: Youtube,   label: 'YouTube',     href: socialYoutube },
-  ].filter(s => s.href)
+  const extraSocial = [
+    { icon: Twitter, label: 'Twitter / X', href: socialTwitter },
+    { icon: Youtube, label: 'YouTube', href: socialYoutube },
+  ].filter((s) => s.href)
 
   return (
     <footer
@@ -104,29 +103,31 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
               </div>
             </a>
 
-            <p className="text-[#5A6070] text-sm leading-relaxed mb-6">
+            <p className="text-sm leading-relaxed mb-6" style={{ color: '#C5CCD6' }}>
               Enriching the academic and social experience for all SHMS
               students and families in Ashburn, Virginia.
             </p>
 
-            {/* Social icons. only rendered when URLs are set in SiteSettings */}
-            {socialLinks.length > 0 && (
-              <div className="flex items-center gap-2">
-                {socialLinks.map(({ icon: Icon, label, href }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={label}
-                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:text-white"
-                    style={{ backgroundColor: '#2a2a2a', color: '#5A6070' }}
-                  >
-                    <Icon className="w-4 h-4" aria-hidden="true" />
-                  </a>
-                ))}
-              </div>
-            )}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <SocialFooterLinks
+                variant="dark"
+                facebook={socialFacebook}
+                instagram={socialInstagram}
+              />
+              {extraSocial.map(({ icon: Icon, label, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-[#3a3a3a]"
+                  style={{ backgroundColor: '#3a3a3a', color: '#F0F2F5' }}
+                >
+                  <Icon className="w-4 h-4" aria-hidden="true" />
+                </a>
+              ))}
+            </div>
           </div>
 
           {/* Col 2: Quick Links. centered on mobile */}
@@ -142,7 +143,8 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
                 <li key={link.id} className="min-w-0">
                   <a
                     href={link.href}
-                    className="text-sm text-[#5A6070] hover:text-white transition-colors inline-flex items-center justify-center gap-1 group text-center leading-snug"
+                    className="text-sm hover:text-white transition-colors inline-flex items-center justify-center gap-1 group text-center leading-snug"
+                    style={{ color: '#C5CCD6' }}
                   >
                     {link.label}
                     <ArrowRight
@@ -164,11 +166,11 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
               <div className="flex items-start gap-3">
                 <MapPin
                   className="w-4 h-4 mt-0.5 shrink-0"
-                  style={{ color: '#085508' }}
+                  style={{ color: '#FFD700' }}
                   aria-hidden="true"
                 />
                 <div>
-                  <p className="text-sm text-[#5A6070] leading-relaxed">
+                  <p className="text-sm leading-relaxed" style={{ color: '#C5CCD6' }}>
                     23415 Evergreen Ridge Drive
                     <br />
                     Ashburn, VA 20148
@@ -178,7 +180,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs mt-1 inline-block hover:underline"
-                    style={{ color: '#085508' }}
+                    style={{ color: '#FFD700' }}
                   >
                     Get Directions
                   </a>
@@ -188,17 +190,17 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
               <div className="flex items-start gap-3">
                 <Mail
                   className="w-4 h-4 mt-0.5 shrink-0"
-                  style={{ color: '#085508' }}
+                  style={{ color: '#FFD700' }}
                   aria-hidden="true"
                 />
                 <div>
-                  <p className="text-xs text-[#5A6070] uppercase tracking-wider mb-0.5">
+                  <p className="text-xs uppercase tracking-wider mb-0.5" style={{ color: '#9AA3B0' }}>
                     President
                   </p>
                   <a
                     href={`mailto:${presidentEmail}`}
                     className="text-sm hover:text-white transition-colors"
-                    style={{ color: '#5A6070' }}
+                    style={{ color: '#C5CCD6' }}
                   >
                     {presidentEmail}
                   </a>
@@ -209,7 +211,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
               {status === 'member' && gradeLinks.length > 0 && (
                 <div
                   className="rounded-xl p-3.5 mt-2"
-                  style={{ backgroundColor: '#2a2a2a' }}
+                  style={{ backgroundColor: '#2F2F2F' }}
                 >
                   <p className="text-xs font-bold text-white uppercase tracking-wider mb-2">
                     WhatsApp Parent Groups
@@ -222,7 +224,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs transition-colors hover:text-white"
-                        style={{ color: '#5A6070' }}
+                        style={{ color: '#C5CCD6' }}
                       >
                         {grade} Grade Parents:{' '}
                         <span className="underline">Join Here</span>
@@ -239,7 +241,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
             <h3 className="text-white font-bold text-sm tracking-wider uppercase mb-5">
               Stay Connected
             </h3>
-            <p className="text-sm text-[#5A6070] leading-relaxed mb-5">
+            <p className="text-sm leading-relaxed mb-5" style={{ color: '#C5CCD6' }}>
               Subscribe to our newsletter for the latest updates, event
               announcements, and PTO news delivered to your inbox.
             </p>
@@ -252,7 +254,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
                 <p className="text-sm font-semibold" style={{ color: '#FFD700' }}>
                   Thanks for subscribing!
                 </p>
-                <p className="text-xs text-[#5A6070] mt-1">
+                <p className="text-xs mt-1" style={{ color: '#C5CCD6' }}>
                   You&apos;ll receive our next newsletter soon.
                 </p>
               </div>
@@ -269,8 +271,8 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="text-sm border-0 text-white placeholder:text-[#5A6070] focus-visible:ring-1 focus-visible:ring-[#085508]"
-                    style={{ backgroundColor: '#2a2a2a' }}
+                    className="text-sm border-0 text-white placeholder:text-[#9AA3B0] focus-visible:ring-1 focus-visible:ring-[#FFD700]"
+                    style={{ backgroundColor: '#2F2F2F' }}
                   />
                 </div>
                 <Button
@@ -289,15 +291,15 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
             {/* In-person snack window only. online checkout is 24/7 for free or paid parents */}
             <div
               className="mt-4 rounded-lg p-3 border"
-              style={{ backgroundColor: '#2a2a2a', borderColor: '#333333' }}
+              style={{ backgroundColor: '#2F2F2F', borderColor: '#4A4A4A' }}
             >
               <p className="text-xs font-semibold" style={{ color: '#FFD700' }}>
                 The Cove (in person)
               </p>
-              <p className="text-xs text-[#5A6070] mt-0.5">
+              <p className="text-xs mt-0.5" style={{ color: '#C5CCD6' }}>
                 Snack window: {storeHours}
               </p>
-              <p className="text-xs text-[#5A6070] mt-1.5 leading-relaxed">
+              <p className="text-xs mt-1.5 leading-relaxed" style={{ color: '#C5CCD6' }}>
                 Online (membership, shop, store-card reload): anytime with a free or paid parent login.
               </p>
             </div>
@@ -312,13 +314,13 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
         style={{ borderColor: '#333333' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-xs text-[#5A6070] text-center sm:text-left space-y-1">
+          <div className="text-xs text-center sm:text-left space-y-1" style={{ color: '#C5CCD6' }}>
             <p>&copy; 2026 Stone Hill Middle School PTO. All rights reserved.</p>
             <p className="flex flex-wrap gap-x-3 gap-y-1 justify-center sm:justify-start">
-              <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
-              <a href="/terms" className="hover:text-white transition-colors">Terms</a>
-              <a href="/data-security" className="hover:text-white transition-colors">Data security</a>
-              <a href="/photo-release" className="hover:text-white transition-colors">Photo release</a>
+              <a href="/privacy" className="hover:text-white transition-colors underline-offset-2 hover:underline">Privacy</a>
+              <a href="/terms" className="hover:text-white transition-colors underline-offset-2 hover:underline">Terms</a>
+              <a href="/data-security" className="hover:text-white transition-colors underline-offset-2 hover:underline">Data security</a>
+              <a href="/photo-release" className="hover:text-white transition-colors underline-offset-2 hover:underline">Photo release</a>
             </p>
           </div>
           <p
