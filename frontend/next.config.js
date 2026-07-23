@@ -55,6 +55,11 @@ const nextConfig = {
         destination: 'https://www.shmspto.org/:path*',
         permanent: true,
       },
+      // Legacy shop URLs → The Cove (edge 308; do not keep separate storefronts)
+      { source: '/store', destination: '/cove', permanent: true },
+      { source: '/store/:path*', destination: '/cove', permanent: true },
+      { source: '/spirit-wear', destination: '/cove', permanent: true },
+      { source: '/spirit-wear/:path*', destination: '/cove', permanent: true },
     ]
   },
   async rewrites() {

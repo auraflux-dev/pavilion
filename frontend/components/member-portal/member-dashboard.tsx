@@ -671,7 +671,7 @@ export function MemberDashboard({
               onLoaded={load}
             />
             <a
-              href="/spirit-wear"
+              href="/cove#shop"
               className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#1A1A1A]"
             >
               <ShoppingBag className="w-3.5 h-3.5" /> {copy.ctaSpiritWear}

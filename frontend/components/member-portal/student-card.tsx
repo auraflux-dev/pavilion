@@ -332,7 +332,7 @@ export function StudentCard({
                   <div className="rounded-xl border-2 border-dashed border-[#E8E4DC] p-4 text-center">
                     <p className="text-sm text-[#5A6070] mb-3">No store card linked yet.</p>
                     <a
-                      href="/store"
+                      href="/cove"
                       className="inline-flex items-center gap-1.5 text-sm font-bold"
                       style={{ color: '#085508' }}
                     >
@@ -368,7 +368,7 @@ export function StudentCard({
 
                     {/* Load more / top-off button */}
                     <a
-                      href="/store"
+                      href="/cove"
                       className="flex items-center justify-center gap-2 w-full py-2 rounded-lg text-sm font-bold border-2 border-[#085508] text-[#085508] hover:bg-[#EEF6EE] transition-colors"
                     >
                       <Plus className="w-3.5 h-3.5" /> Load funds

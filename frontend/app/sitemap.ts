@@ -18,8 +18,6 @@ const PUBLIC_PATHS = [
   '/meetings',
   '/contact',
   '/newsletter',
-  '/spirit-wear',
-  '/store',
   '/privacy',
   '/terms',
   '/data-security',
