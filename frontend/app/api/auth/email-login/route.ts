@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, OAuthStrategy, LoginState } from '@wix/sdk'
 import { redirects } from '@wix/redirects'
 import { TOKENS_COOKIE, TOKEN_MAX_AGE, isSecure } from '@/lib/auth-cookies'
+import { approvePendingMemberByEmail } from '@/lib/auth-approve-member'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -218,11 +219,41 @@ export async function POST(req: NextRequest) {
         message: 'Check your email for a verification code, then enter it below.',
       })
     }
+    // Wix site may require owner approval (or left older accounts PENDING).
+    // Parents proved email/password — approve PENDING and retry once.
+    // Do not steer them to @shmspto.org staff login.
     if (result.loginState === LoginState.OWNER_APPROVAL_REQUIRED) {
+      const healed = await approvePendingMemberByEmail(email)
+      if (healed.ok && healed.wasPending) {
+        const retry = await client.auth.login({ email, password })
+        if (
+          retry.loginState === LoginState.SUCCESS &&
+          'data' in retry &&
+          retry.data?.sessionToken
+        ) {
+          console.info('email-login: approved PENDING member and retried login')
+          return issueMemberCookiesFromSession(
+            retry.data.sessionToken,
+            returnTo,
+            origin,
+          )
+        }
+      }
+      if (!healed.ok && healed.reason === 'blocked') {
+        return NextResponse.json(
+          {
+            error:
+              'This account is blocked. Email membership@shmspto.org for help.',
+            errorCode: 'memberBlocked',
+          },
+          { status: 403 },
+        )
+      }
       return NextResponse.json(
         {
           error:
-            'Your account is waiting for PTO approval. Email membership@shmspto.org.',
+            'This parent account is still pending approval. Use your personal email (not @shmspto.org). If this keeps happening, email membership@shmspto.org — do not use Staff login for family portal access.',
+          errorCode: 'ownerApprovalRequired',
         },
         { status: 403 },
       )

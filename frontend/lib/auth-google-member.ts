@@ -5,6 +5,7 @@
  */
 import { createClient, ApiKeyStrategy, OAuthStrategy } from '@wix/sdk'
 import { members } from '@wix/members'
+import { approvePendingMemberById } from '@/lib/auth-approve-member'
 
 export const GOOGLE_MEMBER_STATE_COOKIE = 'shms_google_oauth'
 export const GOOGLE_MEMBER_SCOPES = ['openid', 'email', 'profile'].join(' ')
@@ -189,8 +190,18 @@ export async function findOrCreateMemberForGoogle(
     .eq('loginEmail', email)
     .limit(1)
     .find()
-  const foundId = existing.items?.[0]?._id
-  if (foundId) return foundId
+  const found = existing.items?.[0] as
+    | { _id?: string; status?: string }
+    | undefined
+  const foundId = found?._id
+  if (foundId) {
+    // Email path can leave PENDING; Google create uses APPROVED. Heal on find.
+    const status = String(found?.status || '').toUpperCase()
+    if (status === 'PENDING') {
+      await approvePendingMemberById(foundId, 'PENDING')
+    }
+    return foundId
+  }
 
   const nickname =
     profile.name ||

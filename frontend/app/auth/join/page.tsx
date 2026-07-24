@@ -122,6 +122,12 @@ function JoinInner() {
             data.error || 'That email already has an account. Enter your password to log in.',
           )
         }
+        if (data.errorCode === 'ownerApprovalRequired') {
+          throw new Error(
+            data.error ||
+              'Your parent account is pending approval. Keep using your personal email — Staff (@shmspto.org) is only for board tools, not family portal login. Email membership@shmspto.org if this continues.',
+          )
+        }
         throw new Error(data.error || (mode === 'signup' ? 'Could not create account' : 'Could not log in'))
       }
 
@@ -148,8 +154,8 @@ function JoinInner() {
         </h1>
         <p className="text-sm text-[#5A6070] mb-6">
           {isSignup
-            ? 'Sign up free, then finish joining your membership tier.'
-            : 'Welcome back. Continue to membership or your portal.'}
+            ? 'Sign up free with your personal email, then finish joining your membership tier.'
+            : 'Parents: use your personal email (Gmail, etc.). @shmspto.org is for Staff tools only — not for Member Portal family login.'}
         </p>
 
         {panel === 'chooser' ? (
