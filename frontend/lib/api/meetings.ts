@@ -24,7 +24,7 @@ export function sanitizeMeetingJoinUrl(url: unknown): string | undefined {
 }
 
 function mapMeeting(item: Record<string, unknown>): MeetingMinute {
-  const row = item as MeetingMinute
+  const row = item as unknown as MeetingMinute
   return {
     ...row,
     joinUrl: sanitizeMeetingJoinUrl(row.joinUrl),
