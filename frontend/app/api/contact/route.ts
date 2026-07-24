@@ -4,6 +4,7 @@ import { getSiteSettings } from '@/lib/api/site-settings'
 import { notifyStaffSubmission } from '@/lib/staff/submission-notify'
 import { clientIp, rateLimit } from '@/lib/security/rate-limit'
 import { reportError } from '@/lib/observability/error-reporting'
+import { normalizeStaffInbox, STAFF_INBOX_FALLBACK } from '@/lib/staff/inbox'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -13,31 +14,32 @@ function resolveAssignedTo(
   settings: Awaited<ReturnType<typeof getSiteSettings>>
 ): string {
   const explicit = String(assignedTo ?? '').trim().toLowerCase()
-  if (explicit && EMAIL_RE.test(explicit)) return explicit
+  if (explicit && EMAIL_RE.test(explicit)) return normalizeStaffInbox(explicit)
 
   const dept = String(department ?? '').trim().toLowerCase()
   if (dept === 'programs') {
-    return settings
-      .get('contactEmailPrograms', 'fundraising@shmspto.org')
-      .trim()
-      .toLowerCase()
+    return normalizeStaffInbox(
+      settings.get('contactEmailPrograms', STAFF_INBOX_FALLBACK),
+    )
   }
   if (dept === 'events') {
-    return settings
-      .get('contactEmailEvents', 'vp-events@shmspto.org')
-      .trim()
-      .toLowerCase()
+    return normalizeStaffInbox(
+      settings.get('contactEmailEvents', 'vp-events@shmspto.org'),
+    )
   }
   if (dept === 'sponsorship' || dept === 'initiatives') {
-    return settings
-      .get('contactEmailSponsorship', 'vp-initiatives@shmspto.org')
-      .trim()
-      .toLowerCase()
+    return normalizeStaffInbox(
+      settings.get('contactEmailSponsorship', 'vp-initiatives@shmspto.org'),
+    )
   }
   if (dept === 'treasurer') {
-    return settings.get('contactEmailTreasurer', 'treasurer@shmspto.org').trim().toLowerCase()
+    return normalizeStaffInbox(
+      settings.get('contactEmailTreasurer', 'treasurer@shmspto.org'),
+    )
   }
-  return settings.get('contactEmailGeneral', 'info@shmspto.org').trim().toLowerCase()
+  return normalizeStaffInbox(
+    settings.get('contactEmailGeneral', STAFF_INBOX_FALLBACK),
+  )
 }
 
 export async function POST(req: NextRequest) {

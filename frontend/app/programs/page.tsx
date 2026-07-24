@@ -8,6 +8,7 @@ import { ProgramsContactForm } from '@/components/programs/programs-contact-form
 import { getAllPrograms, type Program } from '@/lib/api/programs'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
+import { normalizeStaffInbox, STAFF_INBOX_FALLBACK } from '@/lib/staff/inbox'
 
 export const revalidate = 300 // revalidate every 5 minutes
 
@@ -16,7 +17,9 @@ export default async function ProgramsPage() {
   let error = false
 
   const [settings, page] = await Promise.all([getSiteSettings(), getPageContent('programs')])
-  const programsEmail = settings.get('contactEmailPrograms', 'fundraising@shmspto.org')
+  const programsEmail = normalizeStaffInbox(
+    settings.get('contactEmailPrograms', STAFF_INBOX_FALLBACK),
+  )
   const inSession = settings.getBool('schoolInSession', false)
 
   try {

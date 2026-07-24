@@ -6,6 +6,7 @@
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { sendMassEmail, type SendMassEmailResult } from '@/lib/staff/mass-email'
 import { resolveGmailSendAuth } from '@/lib/staff/gmail-send-auth'
+import { normalizeStaffInbox, STAFF_INBOX_FALLBACK } from '@/lib/staff/inbox'
 
 export type SubmissionNotifyKind =
   | 'contact'
@@ -43,40 +44,43 @@ export async function resolveSubmissionInbox(
   const explicit = String(overrideTo ?? '')
     .trim()
     .toLowerCase()
-  if (explicit.includes('@')) return explicit
+  if (explicit.includes('@')) return normalizeStaffInbox(explicit)
 
   const settings = await getSiteSettings()
   if (kind === 'programs') {
-    return settings
-      .get('contactEmailPrograms', 'fundraising@shmspto.org')
-      .trim()
-      .toLowerCase()
+    return normalizeStaffInbox(
+      settings.get('contactEmailPrograms', STAFF_INBOX_FALLBACK),
+    )
   }
   if (kind === 'events') {
-    return settings
-      .get('contactEmailEvents', 'vp-events@shmspto.org')
-      .trim()
-      .toLowerCase()
+    return normalizeStaffInbox(
+      settings.get('contactEmailEvents', 'vp-events@shmspto.org'),
+    )
   }
   if (kind === 'sponsorship') {
-    return settings
-      .get('contactEmailSponsorship', 'vp-initiatives@shmspto.org')
-      .trim()
-      .toLowerCase()
+    return normalizeStaffInbox(
+      settings.get('contactEmailSponsorship', 'vp-initiatives@shmspto.org'),
+    )
   }
   if (kind === 'volunteer') {
-    return settings
-      .get('contactEmailVolunteer', settings.get('contactEmailGeneral', 'info@shmspto.org'))
-      .trim()
-      .toLowerCase()
+    return normalizeStaffInbox(
+      settings.get(
+        'contactEmailVolunteer',
+        settings.get('contactEmailGeneral', STAFF_INBOX_FALLBACK),
+      ),
+    )
   }
   if (kind === 'newsletter' || kind === 'survey') {
-    return settings
-      .get('contactEmailMarketing', settings.get('contactEmailGeneral', 'info@shmspto.org'))
-      .trim()
-      .toLowerCase()
+    return normalizeStaffInbox(
+      settings.get(
+        'contactEmailMarketing',
+        settings.get('contactEmailGeneral', STAFF_INBOX_FALLBACK),
+      ),
+    )
   }
-  return settings.get('contactEmailGeneral', 'info@shmspto.org').trim().toLowerCase()
+  return normalizeStaffInbox(
+    settings.get('contactEmailGeneral', STAFF_INBOX_FALLBACK),
+  )
 }
 
 export async function notifyStaffSubmission(opts: {

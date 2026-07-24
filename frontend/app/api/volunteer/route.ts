@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getMemberSession } from '@/lib/auth-member'
 import { submitVolunteerForm } from '@/lib/api/volunteers'
 import { notifyStaffSubmission } from '@/lib/staff/submission-notify'
 import { clientIp, rateLimit } from '@/lib/security/rate-limit'
@@ -6,6 +7,11 @@ import { reportError } from '@/lib/observability/error-reporting'
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getMemberSession(req)
+    if (!session) {
+      return NextResponse.json({ error: 'Log in to sign up to volunteer' }, { status: 401 })
+    }
+
     const rl = rateLimit(`volunteer:${clientIp(req)}`, 8, 10 * 60_000)
     if (!rl.ok) {
       return NextResponse.json(
@@ -15,7 +21,10 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { firstName, lastName, email, phone, opportunity, notes } = body
+    const { firstName, lastName, phone, opportunity, notes } = body
+    const email = String(body.email ?? session.email ?? '')
+      .trim()
+      .toLowerCase() || session.email
 
     if (!firstName || !lastName || !email || !opportunity) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })

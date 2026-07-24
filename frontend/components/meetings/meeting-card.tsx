@@ -45,7 +45,7 @@ export function MeetingCard({ meeting, showJoinLink, defaultOpen = false }: Prop
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {showJoinLink && meeting.isUpcoming && meeting.joinUrl && (
+          {showJoinLink && meeting.isUpcoming && meeting.joinUrl && !/placeholder/i.test(meeting.joinUrl) && (
             <a
               href={meeting.joinUrl}
               target="_blank"

@@ -188,10 +188,11 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
 
 /** Contact detail fallbacks (SiteSettings keys preferred). */
 export const CONTACT_DEFAULTS = {
-  contactEmailGeneral: 'info@shmspto.org',
+  /** info@ is not provisioned yet — use president until aliases exist */
+  contactEmailGeneral: 'president@shmspto.org',
   contactEmailTreasurer: 'treasurer@shmspto.org',
-  /** Co-VPs Fundraising & Programs (board sheet) */
-  contactEmailPrograms: 'fundraising@shmspto.org',
+  /** vp-programs@ not provisioned — president until Programs alias exists */
+  contactEmailPrograms: 'president@shmspto.org',
   contactEmailEvents: 'vp-events@shmspto.org',
   contactEmailSponsorship: 'vp-initiatives@shmspto.org',
   contactAddress: '23415 Evergreen Ridge Drive, Ashburn, VA 20148',

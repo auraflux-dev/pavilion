@@ -7,6 +7,7 @@ import { getFundraisingCTAs } from '@/lib/api/fundraising-ctas'
 import { getPageContent } from '@/lib/api/page-content'
 import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
 import { getActiveSponsors } from '@/lib/api/sponsors'
+import { normalizeStaffInbox } from '@/lib/staff/inbox'
 import { ArrowRight, Heart, TrendingUp, Users, ShoppingBag, Ticket, Star, RefreshCw, Handshake, type LucideIcon } from 'lucide-react'
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -39,9 +40,8 @@ export default async function FundraisingPage() {
   const { totals, goals, volunteerHoursRaised, volunteerHoursGoal } = data
   const sponsorshipRaised = settings.getNumber('sponsorshipRaised', 0)
   const sponsorshipGoal = settings.getNumber('goalSponsorship', 5000)
-  const sponsorshipEmail = settings.get(
-    'contactEmailSponsorship',
-    'vp-initiatives@shmspto.org',
+  const sponsorshipEmail = normalizeStaffInbox(
+    settings.get('contactEmailSponsorship', 'vp-initiatives@shmspto.org'),
   )
 
   const ANNUAL_GOAL = settings.getNumber('fundraisingAnnualGoal', 21667)
