@@ -101,7 +101,7 @@ export default async function BoardPage() {
                 Interested in joining the board?
               </h2>
               <p className="text-[#5A6070] mb-8 max-w-xl mx-auto leading-relaxed">
-                Board positions are open to any SHMS parent or guardian. Time commitments
+                Board positions are open to any SHMS PTO parent or guardian. Time commitments
                 vary by role. Most require 2 to 5 hours per month. No prior PTO experience needed.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">

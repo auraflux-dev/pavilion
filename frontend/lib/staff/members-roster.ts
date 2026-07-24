@@ -59,12 +59,17 @@ export function isPaidTier(tier: string): boolean {
   return n !== 'free' && n !== 'none' && n !== ''
 }
 
+export function tierRank(tier: string | undefined | null): number {
+  const n = normalizeMembershipTier(tier)
+  return TIER_RANK[n] ?? (isPaidTier(n) ? 10 : 0)
+}
+
 export function pickHighestTier(tiers: string[]): string {
   let best = 'free'
   let bestRank = -1
   for (const tier of tiers) {
     const n = normalizeMembershipTier(tier)
-    const rank = TIER_RANK[n] ?? (isPaidTier(n) ? 10 : 0)
+    const rank = tierRank(n)
     if (rank > bestRank) {
       bestRank = rank
       best = n

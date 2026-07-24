@@ -16,6 +16,7 @@ import { StaffEventsPanel } from '@/components/staff/staff-events-panel'
 import { StaffRetailPanel } from '@/components/staff/staff-retail-panel'
 import { StaffDiscountsPanel } from '@/components/staff/staff-discounts-panel'
 import { StaffMembershipPanel } from '@/components/staff/staff-membership-panel'
+import { StaffFulfillmentsPanel } from '@/components/staff/staff-fulfillments-panel'
 import { StaffWorkspaceHub } from '@/components/staff/staff-workspace-hub'
 import { StaffPageContentPanel } from '@/components/staff/staff-page-content-panel'
 import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-panel'
@@ -710,7 +711,12 @@ export function StaffDashboard() {
         ) : null}
         {active === 'retail' && canRetail ? <StaffRetailPanel /> : null}
         {active === 'discounts' && canDiscounts ? <StaffDiscountsPanel /> : null}
-        {active === 'membership' && canMembership ? <StaffMembershipPanel /> : null}
+        {active === 'membership' && canMembership ? (
+          <div className="space-y-4">
+            <StaffMembershipPanel />
+            <StaffFulfillmentsPanel />
+          </div>
+        ) : null}
         {active === 'inbox' ? <StaffWorkspaceHub tab="inbox" /> : null}
         {active === 'calendar' ? <StaffWorkspaceHub tab="calendar" /> : null}
         {active === 'docs' ? <StaffWorkspaceHub tab="docs" /> : null}

@@ -6,6 +6,7 @@ import { VolunteerSection } from '@/components/volunteer-section'
 import { UpcomingEvents } from '@/components/upcoming-events'
 import { CommunityBanner } from '@/components/community-banner'
 import { Footer } from '@/components/footer'
+import { DonateBlock } from '@/components/donate/donate-block'
 import { isSchoolInSession } from '@/lib/api/visitor-season'
 
 export default async function HomePage() {
@@ -20,6 +21,11 @@ export default async function HomePage() {
         {inSession ? <ProgramsPreview /> : null}
         <VolunteerSection />
         {inSession ? <UpcomingEvents /> : null}
+        <DonateBlock
+          compact
+          title="Donate to SHMS PTO"
+          body="Any amount helps the PTO fund enrichment, The Cove, and events for Stone Hill students."
+        />
         <CommunityBanner />
       </main>
       <Footer />

@@ -159,40 +159,67 @@ export async function resetCoveFamilyCode(parentEmail: string): Promise<string> 
   return code
 }
 
+/**
+ * Lookup by short family PIN (4–8 digits) or Square gift-card GAN (raw digits in QR).
+ * Square Stand / iPad scans encode the GAN only — no SHMSCOVE: prefix.
+ */
 export async function lookupFamilyByCoveCode(rawCode: string): Promise<CoveFamilyLookup | null> {
-  const code = normalizeCode(rawCode)
-  if (code.length < 4) return null
+  const digits = String(rawCode ?? '').replace(/\D/g, '')
+  if (digits.length < 4) return null
 
   const client = getWixClient()
   let parentEmail = ''
+  let matchedCode = ''
 
-  try {
-    const membership = await client.items
-      .query('Memberships')
-      .eq('coveFamilyCode', code)
-      .limit(1)
-      .find()
-    const row = membership.items?.[0] as { email?: string } | undefined
-    parentEmail = String(row?.email ?? '')
-      .trim()
-      .toLowerCase()
-  } catch {
-    // fall through to Students
-  }
-
-  if (!parentEmail) {
+  // Long numeric → Square GAN on a student row (Wallet / Photos QR / Stand scan)
+  if (digits.length >= 12) {
     try {
-      const students = await client.items
+      const byGan = await client.items
         .query('Students')
-        .eq('coveFamilyCode', code)
+        .eq('squareGiftCardGan', digits)
         .limit(20)
         .find()
-      const first = (students.items ?? [])[0] as { parentEmail?: string } | undefined
+      const first = (byGan.items ?? [])[0] as { parentEmail?: string } | undefined
       parentEmail = String(first?.parentEmail ?? '')
         .trim()
         .toLowerCase()
     } catch {
-      return null
+      // fall through
+    }
+  }
+
+  const code = normalizeCode(digits.length <= 8 ? digits : '')
+  if (!parentEmail && code.length >= 4) {
+    try {
+      const membership = await client.items
+        .query('Memberships')
+        .eq('coveFamilyCode', code)
+        .limit(1)
+        .find()
+      const row = membership.items?.[0] as { email?: string } | undefined
+      parentEmail = String(row?.email ?? '')
+        .trim()
+        .toLowerCase()
+      if (parentEmail) matchedCode = code
+    } catch {
+      // fall through to Students
+    }
+
+    if (!parentEmail) {
+      try {
+        const students = await client.items
+          .query('Students')
+          .eq('coveFamilyCode', code)
+          .limit(20)
+          .find()
+        const first = (students.items ?? [])[0] as { parentEmail?: string } | undefined
+        parentEmail = String(first?.parentEmail ?? '')
+          .trim()
+          .toLowerCase()
+        if (parentEmail) matchedCode = code
+      } catch {
+        return null
+      }
     }
   }
 
@@ -209,10 +236,19 @@ export async function lookupFamilyByCoveCode(rawCode: string): Promise<CoveFamil
     }
   }
 
+  let coveFamilyCode = matchedCode
+  if (!coveFamilyCode) {
+    try {
+      coveFamilyCode = await ensureCoveFamilyCode(parentEmail)
+    } catch {
+      coveFamilyCode = ''
+    }
+  }
+
   return {
     parentEmail,
-    coveFamilyCode: code,
-    gan: card.gan,
+    coveFamilyCode,
+    gan: card.gan || (digits.length >= 12 ? digits : ''),
     balance,
     students: family.map((s) => ({
       id: s._id,
@@ -220,4 +256,16 @@ export async function lookupFamilyByCoveCode(rawCode: string): Promise<CoveFamil
       lastName: String(s.lastName ?? ''),
     })),
   }
+}
+
+/** QR / Wallet barcode value for Square Stand + Cove: raw GAN when loaded, else family PIN prefix. */
+export function coveDigitalCardScanPayload(opts: {
+  gan?: string | null
+  coveFamilyCode?: string | null
+}): string {
+  const gan = String(opts.gan ?? '').replace(/\D/g, '')
+  if (gan.length >= 12) return gan
+  const code = String(opts.coveFamilyCode ?? '').replace(/\D/g, '')
+  if (code.length >= 4) return `SHMSCOVE:${code}`
+  return ''
 }

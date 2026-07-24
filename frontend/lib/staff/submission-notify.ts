@@ -104,7 +104,7 @@ export async function notifyStaffSubmission(opts: {
   }
 
   const prefix = `[SHMS PTO · ${topicLabel(opts.kind)}]`
-  const subject = opts.subject.startsWith('[SHMS')
+  const subject = opts.subject.startsWith('[SHMS PTO')
     ? opts.subject
     : `${prefix} ${opts.subject}`.trim()
 

@@ -9,6 +9,7 @@ import { DepartmentContactForm } from '@/components/programs/programs-contact-fo
 import { getActiveSponsors } from '@/lib/api/sponsors'
 import { normalizeStaffInbox } from '@/lib/staff/inbox'
 import { ArrowRight, Heart, TrendingUp, Users, ShoppingBag, Ticket, Star, RefreshCw, Handshake, type LucideIcon } from 'lucide-react'
+import { DonateBlock } from '@/components/donate/donate-block'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Star, ShoppingBag, Users, Heart, TrendingUp, Ticket, ArrowRight, RefreshCw,
@@ -18,7 +19,7 @@ export const revalidate = 3600 // refresh totals every hour
 
 export const metadata = {
   title: 'Fundraising | SHMS PTO',
-  description: 'Every purchase, membership, and Cove sale directly funds SHMS student enrichment. Track live goals here.',
+  description: 'Every purchase, membership, and Cove sale directly funds SHMS PTO student enrichment. Track live goals here.',
 }
 
 function pct(raised: number, goal: number) {
@@ -78,12 +79,12 @@ export default async function FundraisingPage() {
     {
       id: 'store',
       icon: ShoppingBag,
-      label: 'The Cove store card',
-      description: 'Student snack window sales via prepaid store cards at The Cove.',
+      label: 'The Cove digital card',
+      description: 'Student snack window sales via prepaid Cove digital cards at The Cove.',
       raised: totals.store,
       goal:   goals.store,
       href: '/cove',
-      cta: 'Load a Card',
+      cta: 'Load digital card',
     },
     {
       id: 'spiritWear',
@@ -199,6 +200,11 @@ export default async function FundraisingPage() {
           </div>
         </section>
 
+        <DonateBlock
+          title="Make a gift to SHMS PTO"
+          body="Choose any amount. Your gift goes to the PTO — enrichment, The Cove, teacher support, and events for Stone Hill students. Not a donation to the school district."
+        />
+
         {/* Initiative cards */}
         <section className="py-14 md:py-20" style={{ backgroundColor: '#F5F0E8' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -287,7 +293,7 @@ export default async function FundraisingPage() {
                 Where the Funds Go
               </h2>
               <p className="text-[#5A6070] mt-3">
-                100% of PTO funds stay at Stone Hill Middle School.
+                100% of gifts support SHMS PTO programs for Stone Hill students — not the school district.
               </p>
             </div>
 

@@ -40,7 +40,7 @@ export function StoreGrid({ items }: StoreGridProps) {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-[#1A1A1A] mb-1">What&apos;s in the Store</h2>
           <p className="text-[#5A6070] text-sm">
-            In-person snack window only. Students spend with their store card. Online reload anytime after free or paid parent login.
+            In-person snack window only. Students spend with their Cove digital card. Online reload anytime after free or paid parent login.
           </p>
         </div>
 
@@ -93,7 +93,7 @@ export function StoreGrid({ items }: StoreGridProps) {
         {/* Footer note */}
         <p className="text-center text-xs text-[#5A6070] mt-10 max-w-lg mx-auto">
           Items and prices may vary. Snack-window hours are in person only; load the card online anytime.
-          Use your student&apos;s store card to pay. No cash accepted.
+          Use your Cove digital card (code or QR) to pay. No cash at the snack window — guests without a portal login can buy spirit wear / merch on Square Stand with staff.
         </p>
       </div>
     </section>

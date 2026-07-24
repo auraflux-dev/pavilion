@@ -33,7 +33,13 @@ declare global {
 }
 
 export type PortalPayBody =
-  | { kind: 'membership'; tier: string; studentId?: string | null; consents?: ConsentAck[] }
+  | {
+      kind: 'membership'
+      tier: string
+      studentId?: string | null
+      shirtSize?: string | null
+      consents?: ConsentAck[]
+    }
   | { kind: 'product'; productId: string; consents?: ConsentAck[] }
   | { kind: 'store-card'; studentId: string; amountCents: number; consents?: ConsentAck[] }
   | {
@@ -43,6 +49,7 @@ export type PortalPayBody =
       consents?: ConsentAck[]
     }
   | { kind: 'event'; eventId: string; quantity: number; consents?: ConsentAck[] }
+  | { kind: 'donation'; amountCents: number; note?: string; consents?: ConsentAck[] }
 
 interface Props {
   open: boolean
@@ -244,7 +251,7 @@ export function PortalCardCheckout({
 
         <p className="text-xs text-[#5A6070]">
           Pay with your own credit or debit card. Free and paid parent accounts can checkout here.
-          you do not need a saved Square card.
+          You do not need a saved card.
         </p>
 
         {storedCard ? (
@@ -270,7 +277,7 @@ export function PortalCardCheckout({
                 onChange={(e) => setSaveCard(e.target.checked)}
                 className="mt-0.5"
               />
-              Optionally save this card with Square for faster reloads later (never required).
+              Optionally save this card for faster reloads later (never required).
             </label>
           </>
         ) : null}

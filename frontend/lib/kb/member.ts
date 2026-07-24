@@ -170,7 +170,7 @@ If a code fails, wait a minute, refresh, and try again, or email membership@shms
       order: 5,
       body: `Yes. Free and paid parents can pay with credit/debit (Square) or PayPal for membership, The Cove, and store-card reloads.
 
-Saving a card with Square is optional for faster reloads. SHMS PTO never receives your full card number.`,
+Saving a card is optional for faster reloads. SHMS PTO never receives your full card number.`,
     },
     {
       slug: 'surveys',

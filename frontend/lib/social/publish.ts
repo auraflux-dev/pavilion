@@ -1,6 +1,5 @@
 /**
- * Publish via Wix Social Publisher — full Facebook POST / REEL / STORY surface.
- * Instagram remains gated until a second Wix social slot is connected.
+ * Publish via Wix Social Publisher — Facebook POST / REEL / STORY and Instagram POST / STORY.
  */
 import { getSocialConfig } from './config'
 import { ensureWixMediaUrl } from './wix-media'
@@ -106,6 +105,51 @@ async function buildFacebookContent(
   return { type: 'POST', payloadKey: 'facebookPost', payload: facebookPost }
 }
 
+async function buildInstagramContent(
+  draft: SocialPostDraft
+): Promise<{ type: 'POST' | 'STORY'; payloadKey: string; payload: Record<string, unknown> }> {
+  const creative = draft.creative
+
+  const media =
+    creative.media && creative.media.length
+      ? await resolveMediaList(creative.media)
+      : creative.imageUrl
+        ? [{ type: 'IMAGE' as const, url: await ensureWixMediaUrl(creative.imageUrl, 'image/jpeg') }]
+        : creative.videoUrl
+          ? [{ type: 'VIDEO' as const, url: await ensureWixMediaUrl(creative.videoUrl, 'video/mp4') }]
+          : []
+
+  if (draft.format === 'STORY') {
+    if (!media.length) throw new Error('Instagram Stories require an image or video.')
+    return {
+      type: 'STORY',
+      payloadKey: 'instagramStory',
+      payload: { mediaWrapper: { media } },
+    }
+  }
+
+  if (draft.format === 'REEL') {
+    throw new Error('Instagram Reels are not supported yet — use Post or Story.')
+  }
+
+  // Instagram POST requires media
+  if (!media.length) {
+    throw new Error('Instagram posts need an image or video (caption-only is not supported).')
+  }
+
+  const instagramPost: Record<string, unknown> = {
+    caption: draft.message,
+  }
+  if (media.length === 1) {
+    if (media[0].type === 'VIDEO') instagramPost.videoUrl = media[0].url
+    else instagramPost.imageUrl = media[0].url
+  } else {
+    instagramPost.mediaWrapper = { media }
+  }
+
+  return { type: 'POST', payloadKey: 'instagramPost', payload: instagramPost }
+}
+
 function normalizeCreative(input?: Partial<SocialCreativeInput>): SocialCreativeInput {
   return {
     kind: input?.kind ?? 'text',
@@ -118,18 +162,9 @@ function normalizeCreative(input?: Partial<SocialCreativeInput>): SocialCreative
 }
 
 export async function publishSocialPost(draft: SocialPostDraft): Promise<SocialPublishResult> {
-  const config = await getSocialConfig()
+  const config = await getSocialConfig({ syncAccounts: true })
 
-  if (draft.platform === 'instagram') {
-    return {
-      ok: false,
-      platform: draft.platform,
-      error:
-        'Instagram is not connected yet. Wix free plans allow one social account — Facebook is live; connect Instagram after upgrading or freeing a slot.',
-    }
-  }
-
-  if (draft.platform !== 'facebook') {
+  if (!['facebook', 'instagram'].includes(draft.platform)) {
     return {
       ok: false,
       platform: draft.platform,
@@ -142,16 +177,7 @@ export async function publishSocialPost(draft: SocialPostDraft): Promise<SocialP
       ok: false,
       platform: draft.platform,
       error:
-        'Social publishing is disabled. Set socialPublishEnabled=true in Site Settings after connecting Facebook in Wix Social.',
-    }
-  }
-
-  if (!config.facebookAccountId || !config.facebookPageId) {
-    return {
-      ok: false,
-      platform: draft.platform,
-      error:
-        'Facebook account/page IDs missing. Connect Facebook in Wix Dashboard → Marketing & SEO → Social, then set socialFacebookAccountId and socialFacebookPageId in Site Settings.',
+        'Social publishing is disabled. Set socialPublishEnabled=true in Site Settings after connecting accounts in Wix Social.',
     }
   }
 
@@ -162,21 +188,49 @@ export async function publishSocialPost(draft: SocialPostDraft): Promise<SocialP
   }
 
   try {
-    const resolved = await buildFacebookContent({
-      ...draft,
-      creative: normalizeCreative(draft.creative),
-      message: draft.message.trim(),
-    })
-    resolved.payload.pageId = config.facebookPageId
+    const creative = normalizeCreative(draft.creative)
+    const normalizedDraft = { ...draft, creative, message: draft.message.trim() }
 
-    const item: Record<string, unknown> = {
-      channel: {
-        name: 'FACEBOOK',
-        accountId: config.facebookAccountId,
-        publishingTarget: { id: config.facebookPageId },
-      },
-      type: resolved.type,
-      [resolved.payloadKey]: resolved.payload,
+    let item: Record<string, unknown>
+
+    if (draft.platform === 'instagram') {
+      if (!config.instagramAccountId) {
+        return {
+          ok: false,
+          platform: draft.platform,
+          error:
+            'Instagram is not connected. Connect it in Wix Dashboard → Marketing & SEO → Social, then reopen Staff → Social.',
+        }
+      }
+      const resolved = await buildInstagramContent(normalizedDraft)
+      item = {
+        channel: {
+          name: 'INSTAGRAM',
+          accountId: config.instagramAccountId,
+        },
+        type: resolved.type,
+        [resolved.payloadKey]: resolved.payload,
+      }
+    } else {
+      if (!config.facebookAccountId || !config.facebookPageId) {
+        return {
+          ok: false,
+          platform: draft.platform,
+          error:
+            'Facebook account/page IDs missing. Connect Facebook in Wix Dashboard → Marketing & SEO → Social.',
+        }
+      }
+      const resolved = await buildFacebookContent(normalizedDraft)
+      resolved.payload.pageId = config.facebookPageId
+      item = {
+        channel: {
+          name: 'FACEBOOK',
+          accountId: config.facebookAccountId,
+          publishingTarget: { id: config.facebookPageId },
+        },
+        type: resolved.type,
+        [resolved.payloadKey]: resolved.payload,
+      }
     }
 
     if (draft.scheduledAt) {
@@ -225,6 +279,8 @@ export async function publishSocialPost(draft: SocialPostDraft): Promise<SocialP
         facebookPost?: { postUrl?: string }
         facebookReel?: { videoUrl?: string }
         facebookStory?: { storyUrl?: string }
+        instagramPost?: { postUrl?: string }
+        instagramStory?: { storyUrl?: string }
       }
       message?: string
     }
@@ -245,6 +301,8 @@ export async function publishSocialPost(draft: SocialPostDraft): Promise<SocialP
     const externalId =
       publishJson.item?.facebookPost?.postUrl ||
       publishJson.item?.facebookStory?.storyUrl ||
+      publishJson.item?.instagramPost?.postUrl ||
+      publishJson.item?.instagramStory?.storyUrl ||
       publishJson.item?.id ||
       itemId
 
@@ -259,7 +317,7 @@ export async function publishSocialPost(draft: SocialPostDraft): Promise<SocialP
       ok: false,
       platform: draft.platform,
       status: 'failed',
-      error: err instanceof Error ? err.message : 'Facebook publish failed',
+      error: err instanceof Error ? err.message : `${draft.platform} publish failed`,
     }
   }
 }

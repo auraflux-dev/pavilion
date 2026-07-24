@@ -27,7 +27,7 @@ if (!clientId || !clientSecret) {
 
 if (!raw.web) {
   console.warn(
-    'Warning: this looks like an Installed/Desktop client. Prefer a Web client with redirect:\n  https://shmspto.vercel.app/api/staff/workspace/connect/callback\n',
+    'Warning: this looks like an Installed/Desktop client. Prefer a Web client with redirect:\n  https://www.shmspto.org/api/staff/workspace/connect/callback\n',
   )
 }
 
@@ -56,5 +56,8 @@ setEnv('GOOGLE_OAUTH_CLIENT_ID', clientId)
 setEnv('GOOGLE_OAUTH_CLIENT_SECRET', clientSecret)
 
 console.log('\nDone. Redeploy Production.')
-console.log('Redirect URI must be authorized on this client:')
-console.log('  https://shmspto.vercel.app/api/staff/workspace/connect/callback')
+console.log('Authorized redirect URIs on this Web client must include:')
+console.log('  https://www.shmspto.org/api/staff/workspace/connect/callback')
+console.log('  (member Google login reuses that URI when GOOGLE_MEMBER_* is unset)')
+console.log('If you also set GOOGLE_MEMBER_CLIENT_ID (External parent client), add:')
+console.log('  https://www.shmspto.org/api/auth/google/callback')

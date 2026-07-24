@@ -120,6 +120,8 @@ export async function applyPaidMembership(opts: {
   expiresAt?: string | null
   orderId?: string | null
   parentName?: string | null
+  /** Spirit Wear size when the tier includes a free T-shirt */
+  shirtSize?: string | null
 }): Promise<{
   updatedStudentIds: string[]
   membershipUpserted: boolean
@@ -130,6 +132,8 @@ export async function applyPaidMembership(opts: {
     status: 'loaded' | 'skipped' | 'failed'
     error?: string
   }
+  entitlements?: import('@/lib/membership-entitlements').MembershipEntitlement[]
+  enrichmentCode?: string | null
 }> {
   const email = opts.parentEmail.trim().toLowerCase()
   const tier = opts.tier.trim().toLowerCase()
@@ -177,20 +181,28 @@ export async function applyPaidMembership(opts: {
     })
     updatedStudentIds.push(student._id)
 
-    // Gift-card credit once per order (or once when moving free → paid without orderId)
+    // Gift-card credit once per order (or once when moving free → paid without orderId).
+    // Upgrades only load the tier credit delta so Reef→Lagoon does not re-grant the full Lagoon amount.
     if (!giftCardResult) {
-      const creditDollars = await resolveGiftCardCredit(tier)
+      const { normalizeMembershipTier } = await import('@/lib/staff/members-roster')
+      const previousNormalized = normalizeMembershipTier(previousTier)
+      const fullCredit = await resolveGiftCardCredit(tier)
+      const priorCredit =
+        previousNormalized === 'free'
+          ? 0
+          : await resolveGiftCardCredit(previousNormalized)
+      const creditDollars = Math.max(0, fullCredit - priorCredit)
       const shouldLoad =
         creditDollars > 0 &&
         (opts.orderId
           ? true
-          : previousTier === 'free' || previousTier === '' || previousTier !== tier)
+          : previousNormalized === 'free' || previousNormalized !== tier)
 
       if (!shouldLoad || creditDollars <= 0) {
         giftCardResult = {
           studentId: student._id,
           gan: String((student as { squareGiftCardGan?: string }).squareGiftCardGan ?? ''),
-          creditDollars,
+          creditDollars: fullCredit,
           status: 'skipped',
         }
       } else {
@@ -267,14 +279,21 @@ export async function applyPaidMembership(opts: {
             await client.items.insert('Payments', {
               parentEmail: email,
               studentId: student._id,
-              amount: creditDollars,
-              status: 'Paid',
+              programName: `Membership ${String(tier).charAt(0).toUpperCase()}${String(tier).slice(1)} · Cove credit`,
+              amount: loadedDollars,
+              status: 'Loaded',
+              paymentDate: new Date().toISOString(),
+              paymentMethod: 'Membership credit',
               source: 'membership_gift_card',
               orderId: opts.orderId || idempotencyKey,
               notes:
                 bonusPercent > 0
-                  ? `Membership ${tier} family Cove credit $${creditDollars} → $${loadedDollars.toFixed(2)} (+${bonusPercent}%)`
-                  : `Membership ${tier} family Cove credit`,
+                  ? `Membership ${tier} family Cove credit $${creditDollars} → $${loadedDollars.toFixed(2)} (+${bonusPercent}%)${
+                      priorCredit > 0 ? ` (upgrade delta from $${priorCredit})` : ''
+                    }`
+                  : `Membership ${tier} family Cove credit${
+                      priorCredit > 0 ? ` (upgrade delta from $${priorCredit})` : ''
+                    }`,
             })
           } catch {
             // Payments insert is best-effort for ledger / idempotency
@@ -292,8 +311,11 @@ export async function applyPaidMembership(opts: {
             await client.items.insert('Payments', {
               parentEmail: email,
               studentId: student._id,
+              programName: `Membership ${String(tier).charAt(0).toUpperCase()}${String(tier).slice(1)} · Cove credit`,
               amount: creditDollars,
               status: 'Needs Reconciliation',
+              paymentDate: new Date().toISOString(),
+              paymentMethod: 'Membership credit',
               source: 'membership_gift_card',
               orderId: opts.orderId || `membership-gc-fail-${student._id}-${Date.now()}`,
               notes: message,
@@ -313,31 +335,62 @@ export async function applyPaidMembership(opts: {
     }
   }
 
-  // Upsert parent Memberships row
+  // Upsert parent Memberships row + perk entitlements for portal / staff fulfillment
   let membershipUpserted = false
+  const { buildMembershipEntitlements } = await import('@/lib/membership-entitlements')
+  const { assignEnrichmentCodeToFamily } = await import('@/lib/staff/enrichment-codes')
+  const fullCredit = await resolveGiftCardCredit(tier)
+
+  let enrichmentCode: string | null = null
+  try {
+    enrichmentCode = await assignEnrichmentCodeToFamily(email, tier)
+  } catch (err) {
+    console.warn('assignEnrichmentCodeToFamily', err)
+  }
+
+  const entitlements = buildMembershipEntitlements({
+    tier,
+    shirtSize: opts.shirtSize,
+    coveCreditDollars: giftCardResult?.creditDollars || fullCredit,
+    enrichmentCode,
+  })
+  // Mark cove credit fulfilled when Square load succeeded (or skipped because already applied)
+  const entitlementsStored = entitlements.map((e) =>
+    e.kind === 'cove_credit' && giftCardResult?.status === 'failed'
+      ? { ...e, status: 'pending' as const, notes: giftCardResult.error || e.notes }
+      : e
+  )
+
   try {
     const existing = await client.items.query('Memberships').eq('email', email).find()
     const row = existing.items?.[0]
+    const membershipPayload = {
+      email,
+      tier,
+      expiresAt,
+      status: 'active',
+      shirtSize: String(opts.shirtSize ?? '').trim() || undefined,
+      entitlementsJson: JSON.stringify(entitlementsStored),
+      enrichmentCode: enrichmentCode || undefined,
+    }
     if (row?._id) {
       await client.items.update('Memberships', {
         ...row,
-        email,
-        tier,
-        expiresAt,
-        status: 'active',
+        ...membershipPayload,
       })
     } else {
-      await client.items.insert('Memberships', {
-        email,
-        tier,
-        expiresAt,
-        status: 'active',
-      })
+      await client.items.insert('Memberships', membershipPayload)
     }
     membershipUpserted = true
   } catch {
     // Memberships collection may be missing or permissioned differently
   }
 
-  return { updatedStudentIds, membershipUpserted, giftCard: giftCardResult }
+  return {
+    updatedStudentIds,
+    membershipUpserted,
+    giftCard: giftCardResult,
+    entitlements: entitlementsStored,
+    enrichmentCode,
+  }
 }

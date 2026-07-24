@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const title = String(body.title ?? '').trim()
     const description = String(body.description ?? '').trim()
-    const locationName = String(body.location ?? '').trim() || 'SHMS'
+    const locationName = String(body.location ?? '').trim() || 'SHMS PTO'
     const startRaw = String(body.startDate ?? '').trim()
     const endRaw = String(body.endDate ?? '').trim()
     const draft = body.draft === true
@@ -166,7 +166,7 @@ export async function PATCH(req: NextRequest) {
     if (body.title != null) event.title = String(body.title).trim()
     if (body.description != null) event.description = String(body.description).trim()
     if (body.location != null) {
-      event.location = { type: 'VENUE', name: String(body.location).trim() || 'SHMS' }
+      event.location = { type: 'VENUE', name: String(body.location).trim() || 'SHMS PTO' }
     }
     if (body.startDate || body.endDate) {
       const startDate = body.startDate ? toDate(String(body.startDate)) : undefined

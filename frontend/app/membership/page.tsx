@@ -12,6 +12,7 @@ import { getPageContent } from '@/lib/api/page-content'
 import { MembershipPortalCallouts } from '@/components/membership/membership-portal-callouts'
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
 import { EmphasizedCopy } from '@/components/emphasized-copy'
+import { DonateBlock } from '@/components/donate/donate-block'
 
 export const revalidate = 60
 
@@ -31,7 +32,7 @@ export default async function MembershipPage() {
 
   const facultyTier = allTiers.find(t => t.tierId === 'faculty')
   const facultyPrice = facultyTier?.price ?? 15
-  const facultyDescription = facultyTier?.description ?? 'Faculty and staff memberships are $15 for the school year. We appreciate everything SHMS educators do for our students.'
+  const facultyDescription = facultyTier?.description ?? 'Faculty and staff memberships are $15 for the school year. We appreciate everything SHMS PTO educators do for our students.'
   const presidentEmail = settings.get('presidentEmail', 'president@shmspto.org')
   return (
     <div className="min-h-screen flex flex-col">
@@ -73,7 +74,7 @@ export default async function MembershipPage() {
                   className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
                   style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
                 >
-                  SHMS Faculty & Staff
+                  SHMS PTO Faculty & Staff
                 </div>
                 <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Faculty Membership</h3>
                 <p className="text-[#5A6070] text-sm">
@@ -95,6 +96,11 @@ export default async function MembershipPage() {
             </div>
           </div>
         </section>
+
+        <DonateBlock
+          title="Already a member? Donate any amount"
+          body="Membership dues are one way to help. An extra gift to the PTO funds enrichment, The Cove, and events."
+        />
 
         {/* FAQ */}
         <section className="py-16 bg-white border-t border-[#E8E4DC]">

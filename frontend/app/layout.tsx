@@ -17,15 +17,14 @@ export const metadata: Metadata = {
     template: '%s | SHMS PTO',
   },
   description:
-    'The Stone Hill Middle School PTO is an active volunteer organization committed to enriching the academic and social experience for all SHMS students and families in Ashburn, Virginia.',
+    'The Stone Hill Middle School PTO is an active volunteer organization committed to enriching the academic and social experience for all SHMS PTO students and families in Ashburn, Virginia.',
   keywords: [
     'Stone Hill Middle School',
     'PTO',
     'Ashburn',
     'Virginia',
     'Stingrays',
-    'SHMS',
-    'LCPS',
+    'SHMS PTO',
   ],
   applicationName: 'SHMS PTO',
   openGraph: {
@@ -35,14 +34,14 @@ export const metadata: Metadata = {
     siteName: 'SHMS PTO',
     title: 'Stone Hill Middle School PTO | Go Stingrays!',
     description:
-      'Enriching the academic and social experience for all SHMS students and families in Ashburn, Virginia.',
+      'Enriching the academic and social experience for all SHMS PTO students and families in Ashburn, Virginia.',
     images: [{ url: '/shms-logo.png', width: 1200, height: 1200, alt: 'SHMS PTO Stingrays' }],
   },
   twitter: {
     card: 'summary',
     title: 'Stone Hill Middle School PTO | Go Stingrays!',
     description:
-      'Enriching the academic and social experience for all SHMS students and families in Ashburn, Virginia.',
+      'Enriching the academic and social experience for all SHMS PTO students and families in Ashburn, Virginia.',
     images: ['/shms-logo.png'],
   },
   robots: {

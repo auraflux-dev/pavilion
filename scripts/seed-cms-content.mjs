@@ -329,7 +329,7 @@ const PAGE_ROWS = [
       'addStudentError|Could not add student. Please try again.',
       'loadCardHelp|One family Cove card and balance. Choose $20 / $40 / $75, or enter any whole dollar amount. Pay with card or PayPal. Saving a card with Square is optional for faster reloads and auto top off.',
       'paymentMethodsTitle|How you pay',
-      'paymentMethodsBody|Snack window: prepaid student store card. Online reloads: one-time card payment or optional Square-secured saved card.',
+      'paymentMethodsBody|Snack window: prepaid family Cove card. Online: pay with credit/debit card or PayPal in this portal (membership, The Cove, and Cove card reloads). Saving a card is optional.',
     ].join('\n'),
     active: true,
   },

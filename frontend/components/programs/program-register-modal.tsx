@@ -88,7 +88,14 @@ export function ProgramRegisterModal({ program, open, onClose, onRegistered }: P
       if (!res.ok) throw new Error(data.error || 'Registration failed')
 
       if (data.requiresPayment) {
-        setPayAmount(Number(data.fee) || program.fee || 0)
+        const amount = Number(data.fee) || program.fee || 0
+        setPayAmount(amount)
+        const pct = Number(data.memberDiscountPercent ?? 0)
+        if (pct > 0) {
+          setSuccess(
+            `${pct}% membership discount applied (list $${Number(data.listFee).toFixed(2)} → $${amount.toFixed(2)}). Complete payment to enroll.`,
+          )
+        }
         setPayOpen(true)
         return
       }

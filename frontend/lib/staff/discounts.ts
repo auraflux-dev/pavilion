@@ -75,15 +75,15 @@ export async function resolveTierDiscountPercent(parentEmail: string): Promise<{
   const fromCms = Number(cms?.discountPercent ?? 0)
   if (fromCms >= 5 && fromCms <= 75) return { percent: fromCms, tierId }
   const defaults: Record<string, number> = {
-    reef: 5,
-    ruby: 5,
-    lagoon: 10,
-    supreme: 10,
-    tide: 15,
-    trench: 15,
-    pearl: 15,
+    reef: 10,
+    ruby: 10,
+    lagoon: 15,
+    supreme: 15,
+    tide: 30,
+    trench: 30,
+    pearl: 30,
   }
-  return { percent: defaults[tierId] ?? 5, tierId }
+  return { percent: defaults[tierId] ?? 10, tierId }
 }
 
 export async function createDiscountCode(input: {

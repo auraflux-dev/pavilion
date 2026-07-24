@@ -8,6 +8,7 @@ import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { getWixClient } from '@/lib/wix-client'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { listEnrollmentsForStudent } from '@/lib/programs/enrollments'
+import { normalizePaymentLedgerRow } from '@/lib/payment-ledger'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -46,15 +47,19 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       waitlistPosition: item.waitlistPosition ?? null,
     }))
 
-    const payments = (payRes.items ?? []).map((item: Record<string, unknown>) => ({
-      id: item._id,
-      programName: item.programName ?? '',
-      amount: item.amount ?? 0,
-      status: item.status ?? '',
-      paymentDate: item.paymentDate ?? null,
-      paymentMethod: item.paymentMethod ?? '',
-      transactionId: item.transactionId ?? '',
-    }))
+    const payments = (payRes.items ?? []).map((item: Record<string, unknown>) => {
+      const norm = normalizePaymentLedgerRow(item)
+      return {
+        id: item._id,
+        programName: norm.programName,
+        amount: norm.amount,
+        status: norm.status,
+        paymentDate: norm.paymentDate,
+        paymentMethod: norm.paymentMethod,
+        detail: norm.detail ?? '',
+        transactionId: item.transactionId ?? '',
+      }
+    })
 
     const transferOptions = programs
       .filter((p) => p.registrationOpen !== false)

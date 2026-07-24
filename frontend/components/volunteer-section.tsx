@@ -24,7 +24,7 @@ export async function VolunteerSection() {
   )
   const imageAlt = settings.get(
     'homeVolunteerImageAlt',
-    'SHMS students and parent volunteers working together at a school event'
+    'SHMS PTO students and parent volunteers working together at a school event'
   )
   const primaryLabel = content.ctaLabel || 'Volunteer with us'
   const quote = content.sectionTitle

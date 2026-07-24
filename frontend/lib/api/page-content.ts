@@ -67,13 +67,24 @@ function merge(
         flyerImage: cms.flyerImage || fallback.flyerImage || '',
       }
 
+  const brand = (s: string) =>
+    String(s ?? '')
+      .replace(/\s*[·•|]\s*LCPS\b/gi, '')
+      .replace(/\bLCPS\b/gi, '')
+      .replace(/\bSHMS\b(?!\s+PTO)/g, 'SHMS PTO')
+      .replace(/SHMS PTO PTO/g, 'SHMS PTO')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+
   return {
     ...merged,
-    title: humanizePublicCopy(merged.title),
-    body: humanizePublicCopy(merged.body),
-    sectionTitle: humanizePublicCopy(merged.sectionTitle),
-    sectionBody: humanizePublicCopy(merged.sectionBody),
-    bullets: merged.bullets.map(humanizePublicCopy),
+    eyebrow: brand(merged.eyebrow),
+    title: humanizePublicCopy(brand(merged.title)),
+    body: humanizePublicCopy(brand(merged.body)),
+    sectionTitle: humanizePublicCopy(brand(merged.sectionTitle)),
+    sectionBody: humanizePublicCopy(brand(merged.sectionBody)),
+    bullets: merged.bullets.map((b) => humanizePublicCopy(brand(b))),
+    ctaLabel: brand(merged.ctaLabel),
   }
 }
 

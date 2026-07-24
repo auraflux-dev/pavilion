@@ -35,6 +35,7 @@ interface Payment {
   status: string
   paymentDate: string | null
   paymentMethod: string
+  detail?: string
   transactionId: string
 }
 
@@ -83,7 +84,10 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 function statusClass(s: string) {
-  return STATUS_COLORS[s?.toLowerCase()] ?? 'bg-gray-100 text-gray-500'
+  const key = s?.toLowerCase()
+  if (key === 'loaded') return 'bg-[#EEF6EE] text-[#085508]'
+  if (key === 'spent') return 'bg-amber-50 text-amber-800'
+  return STATUS_COLORS[key] ?? 'bg-gray-100 text-gray-500'
 }
 
 function formatDate(d: string | null) {
@@ -122,7 +126,7 @@ interface GiftCardData {
 export function StudentCard({
   student,
   defaultOpen = false,
-  upgradeBody = 'Paid members get a pre-loaded store card, free or discounted program registration, and free refreshments at school events.',
+  upgradeBody = 'Paid members get Cove digital card credit, enrichment discounts, and free refreshments at school events.',
   grades = ['6', '7', '8'],
   onUpdated,
 }: Props) {
@@ -263,7 +267,7 @@ export function StudentCard({
         <div className="flex items-center gap-2 px-5 py-3">
           <CreditCard className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
           <div>
-            <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Store Card</p>
+            <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Cove digital card</p>
             {giftCardLoading ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin mt-0.5" style={{ color: '#085508' }} />
             ) : (
@@ -321,7 +325,7 @@ export function StudentCard({
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <CreditCard className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">SHMS Store Card</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Cove digital card</h4>
                   </div>
                   {giftCard?.hasCard && (
                     <span className="text-lg font-bold text-[#1A1A1A]">{formatMoney(giftCard.balance)}</span>
@@ -330,7 +334,7 @@ export function StudentCard({
 
                 {!giftCard?.hasCard ? (
                   <div className="rounded-xl border-2 border-dashed border-[#E8E4DC] p-4 text-center">
-                    <p className="text-sm text-[#5A6070] mb-3">No store card linked yet.</p>
+                    <p className="text-sm text-[#5A6070] mb-3">No Cove digital card linked yet.</p>
                     <a
                       href="/cove"
                       className="inline-flex items-center gap-1.5 text-sm font-bold"
@@ -503,7 +507,17 @@ export function StudentCard({
                       <div key={p.id} className="flex items-start justify-between gap-3 py-2.5 border-b border-[#F5F0E8] last:border-0">
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-[#1A1A1A] truncate">{p.programName}</p>
-                          <p className="text-xs text-[#5A6070]">{formatDate(p.paymentDate)} · {p.paymentMethod}</p>
+                          <p className="text-xs text-[#5A6070]">
+                            {[
+                              formatDate(p.paymentDate) !== 'n/a' ? formatDate(p.paymentDate) : null,
+                              p.paymentMethod || null,
+                            ]
+                              .filter(Boolean)
+                              .join(' · ') || '—'}
+                          </p>
+                          {p.detail ? (
+                            <p className="text-[11px] text-[#5A6070] mt-0.5 leading-snug">{p.detail}</p>
+                          ) : null}
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="text-sm font-bold text-[#1A1A1A]">{formatMoney(p.amount)}</span>

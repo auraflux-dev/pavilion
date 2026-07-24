@@ -36,7 +36,7 @@ import {
   type CheckoutConsentKind,
 } from '@/lib/checkout-consent'
 
-type Kind = 'membership' | 'product' | 'store-card' | 'program' | 'event'
+type Kind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation'
 
 type StudentRow = {
   _id: string
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     const saveCard = Boolean(body.saveCard)
     const consents = body.consents as ConsentAck[] | undefined
 
-    if (!kind || !['membership', 'product', 'store-card', 'program', 'event'].includes(kind)) {
+    if (!kind || !['membership', 'product', 'store-card', 'program', 'event', 'donation'].includes(kind)) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
     }
 
@@ -212,12 +212,51 @@ export async function POST(req: NextRequest) {
     if (kind === 'membership') {
       const tier = String(body.tier ?? '').trim().toLowerCase()
       const studentId = typeof body.studentId === 'string' ? body.studentId : null
+      const shirtSize = typeof body.shirtSize === 'string' ? body.shirtSize.trim() : ''
+      const { tierNeedsShirtSize } = await import('@/lib/membership-entitlements')
+      if (tierNeedsShirtSize(tier) && !shirtSize) {
+        return NextResponse.json(
+          { error: 'Select a Spirit Wear T-shirt size for this membership.' },
+          { status: 400 },
+        )
+      }
       const tiers = await getPaidMembershipTiers()
       const match = tiers.find((t) => t.tierId === tier && t.active)
       if (!match || match.price <= 0) {
         return NextResponse.json({ error: 'Unknown membership tier' }, { status: 400 })
       }
-      const amountCents = Math.round(match.price * 100)
+
+      const { getParentHighestTier, membershipChargeDollars, formatTierLabel } =
+        await import('@/lib/membership-pricing')
+      const { tierRank, normalizeMembershipTier } = await import(
+        '@/lib/staff/members-roster'
+      )
+      const currentTier = await getParentHighestTier(session.email)
+      if (
+        tierRank(currentTier) >= tierRank(normalizeMembershipTier(tier)) &&
+        tierRank(currentTier) > 0
+      ) {
+        return NextResponse.json(
+          {
+            error: `You already have ${formatTierLabel(currentTier)} membership. Choose a higher tier to upgrade.`,
+          },
+          { status: 409 },
+        )
+      }
+
+      const charge = membershipChargeDollars({
+        targetTier: tier,
+        currentTier,
+        tiers,
+      })
+      if (charge.amount <= 0) {
+        return NextResponse.json(
+          { error: 'Nothing to charge for this upgrade' },
+          { status: 400 },
+        )
+      }
+
+      const amountCents = Math.round(charge.amount * 100)
       const paymentKey = randomUUID()
       const payment = await chargePayment({
         sourceId: paymentSource,
@@ -226,7 +265,9 @@ export async function POST(req: NextRequest) {
         customerId,
         referenceId: `membership:${tier}`,
         buyerEmailAddress: session.email,
-        note: `SHMS PTO membership. ${match.name}`,
+        note: charge.isUpgrade
+          ? `SHMS PTO membership upgrade. ${formatTierLabel(currentTier)} → ${match.name}`
+          : `SHMS PTO membership. ${match.name}`,
       })
 
       const applied = await applyPaidMembership({
@@ -235,17 +276,30 @@ export async function POST(req: NextRequest) {
         studentId,
         orderId: payment.id ?? paymentKey,
         parentName: name || null,
+        shirtSize: shirtSize || null,
       })
 
+      const membershipStudentId =
+        studentId ||
+        applied.updatedStudentIds?.[0] ||
+        applied.giftCard?.studentId ||
+        null
+
       await client.items.insert('Payments', {
-        programName: `Membership. ${match.name}`,
-        amount: match.price,
+        programName: charge.isUpgrade
+          ? `Membership upgrade. ${formatTierLabel(currentTier)} → ${match.name}`
+          : `Membership. ${match.name}`,
+        amount: charge.amount,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
         paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
         transactionId: payment.id ?? paymentKey,
         source: 'square_membership',
         parentEmail: session.email,
+        ...(membershipStudentId ? { studentId: membershipStudentId } : {}),
+        notes: charge.isUpgrade
+          ? `List $${charge.listPrice}; charged upgrade delta $${charge.amount}`
+          : undefined,
       })
 
       await recordConsentAcknowledgments({
@@ -261,6 +315,8 @@ export async function POST(req: NextRequest) {
         kind,
         paymentId: payment.id,
         tier,
+        amount: charge.amount,
+        isUpgrade: charge.isUpgrade,
         applied,
         paymentMethod: stored
           ? { brand: stored.brand, last4: stored.last4 }
@@ -271,6 +327,7 @@ export async function POST(req: NextRequest) {
     // ── Cove / spirit product ───────────────────────────────────
     if (kind === 'product') {
       const productId = String(body.productId ?? '').trim()
+      const productStudentId = String(body.studentId ?? '').trim()
       const cfg = await getCatalogConfig()
       const allowed = new Set([
         ...cfg.spiritWearProductIds,
@@ -286,6 +343,13 @@ export async function POST(req: NextRequest) {
       const amountCents = Math.round(catalog.price * 100)
       if (amountCents < 100) {
         return NextResponse.json({ error: 'Invalid product price' }, { status: 400 })
+      }
+      // Prefer explicit studentId; otherwise attach the family's first student so
+      // the purchase appears in portal student payment history (not only family).
+      let resolvedStudentId = productStudentId || null
+      if (!resolvedStudentId) {
+        const familyStudents = await listFamilyStudents(session.email)
+        resolvedStudentId = familyStudents[0]?._id ?? null
       }
       const paymentKey = randomUUID()
       const payment = await chargePayment({
@@ -308,6 +372,7 @@ export async function POST(req: NextRequest) {
         source: 'square_cove_product',
         parentEmail: session.email,
         notes: productId,
+        ...(resolvedStudentId ? { studentId: resolvedStudentId } : {}),
       })
 
       return NextResponse.json({
@@ -320,6 +385,75 @@ export async function POST(req: NextRequest) {
         paymentMethod: stored
           ? { brand: stored.brand, last4: stored.last4 }
           : null,
+      })
+    }
+
+    // ── PTO donation (any amount) ───────────────────────────────
+    if (kind === 'donation') {
+      const { isAllowedDonationAmount } = await import('@/lib/donation')
+      const amountCents = Number(body.amountCents)
+      const amount = amountCents / 100
+      if (!Number.isInteger(amountCents) || !isAllowedDonationAmount(amount)) {
+        return NextResponse.json(
+          { error: 'Enter a donation between $1 and $10,000' },
+          { status: 400 },
+        )
+      }
+      const note = String(body.note ?? '').trim().slice(0, 120)
+      const paymentKey = randomUUID()
+      const payment = await chargePayment({
+        sourceId: paymentSource,
+        amountCents,
+        idempotencyKey: paymentKey,
+        customerId,
+        referenceId: `donation:${session.email}`,
+        buyerEmailAddress: session.email,
+        note: note ? `PTO donation — ${note}` : 'SHMS PTO donation',
+      })
+
+      await client.items.insert('Payments', {
+        programName: 'PTO Donation',
+        amount,
+        status: 'Paid',
+        paymentDate: new Date().toISOString(),
+        paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
+        transactionId: payment.id ?? paymentKey,
+        source: 'square_donation',
+        parentEmail: session.email,
+        notes: note || 'General PTO donation',
+      })
+
+      const { sendPurchaseConfirmation } = await import('@/lib/purchase-confirmation')
+      let confirmation: Record<string, unknown> | undefined
+      try {
+        const conf = await sendPurchaseConfirmation({
+          kind: 'donation',
+          parentEmail: session.email,
+          parentName: name,
+          amount,
+          description: 'SHMS PTO donation',
+          transactionId: payment.id ?? paymentKey,
+          meta: { note },
+        })
+        confirmation = {
+          subject: conf.subject,
+          nextSteps: conf.nextSteps,
+          portalHref: conf.portalHref,
+          emailed: conf.emailed,
+        }
+      } catch (err) {
+        console.warn('donation confirmation failed', err)
+      }
+
+      return NextResponse.json({
+        ok: true,
+        kind,
+        paymentId: payment.id,
+        amount,
+        paymentMethod: stored
+          ? { brand: stored.brand, last4: stored.last4 }
+          : null,
+        confirmation,
       })
     }
 
@@ -359,7 +493,7 @@ export async function POST(req: NextRequest) {
       customerId,
       referenceId: `store-card:${session.email}`,
       buyerEmailAddress: session.email,
-      note: 'SHMS family Cove card load',
+      note: 'SHMS PTO family Cove card load',
     })
 
     try {

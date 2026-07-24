@@ -6,7 +6,7 @@
 import { getWixClient } from '@/lib/wix-client'
 import { sendMassEmail } from '@/lib/staff/mass-email'
 
-export type PurchaseConfirmKind = 'membership' | 'product' | 'store-card' | 'program' | 'event'
+export type PurchaseConfirmKind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation'
 
 export type PurchaseConfirmationInput = {
   kind: PurchaseConfirmKind
@@ -33,7 +33,7 @@ function money(n: number) {
 }
 
 function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation, 'emailed'> {
-  const name = (input.parentName || 'SHMS family').trim()
+  const name = (input.parentName || 'SHMS PTO family').trim()
   const baseReceipt = [
     `Hi ${name.split(' ')[0] || 'there'},`,
     '',
@@ -119,6 +119,28 @@ function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation,
       ),
       nextSteps,
       portalHref: '/events',
+    }
+  }
+
+  if (input.kind === 'donation') {
+    const nextSteps = [
+      'Thank you — your gift supports SHMS PTO enrichment, The Cove, and events.',
+      'A receipt is in Member Portal → Messages (and email when mail is connected).',
+      'SHMS PTO is a 501(c)(3); consult your tax advisor about deductibility.',
+    ]
+    return {
+      subject: 'Thank you for your SHMS PTO donation',
+      body: [
+        ...baseReceipt,
+        'Your donation goes to SHMS PTO (not the school district) to support Stone Hill students.',
+        '',
+        'Next steps:',
+        ...nextSteps.map((s) => `• ${s}`),
+        '',
+        '— SHMS PTO',
+      ].join('\n'),
+      nextSteps,
+      portalHref: '/fundraising#donate',
     }
   }
 

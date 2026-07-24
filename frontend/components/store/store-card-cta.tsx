@@ -15,9 +15,9 @@ type Props = {
 
 export function StoreCardCta({
   amounts,
-  eyebrow = 'Cove Card · Members',
+  eyebrow = 'Cove digital card · Members',
   title = 'Free member? First load gets 10% extra.',
-  body = 'One family Cove card and balance (up to $500 per load). 10% on first load or membership credit. Reloads are 1:1. Pick up one plastic card from PTO for the snack window.',
+  body = 'One family Cove digital card and balance (up to $500 per load). 10% on first load or membership credit. Reloads are 1:1. Students spend with the code or QR at The Cove window.',
   bonusPercent = 10,
   maxAmount = 500,
 }: Props) {
@@ -35,13 +35,13 @@ export function StoreCardCta({
         <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">{title}</h2>
         <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">{body}</p>
 
-        <MemberGate label="Load a Cove card">
+        <MemberGate label="Load a Cove digital card">
           <div className="max-w-sm mx-auto">
             <StoreCardReload
               amounts={amounts}
               bonusPercent={bonusPercent}
               maxAmount={maxAmount}
-              triggerLabel="Load family card"
+              triggerLabel="Load digital card"
               triggerClassName="w-full justify-center !bg-[#FFD700] !text-[#1A1A1A] px-8 py-3"
             />
           </div>

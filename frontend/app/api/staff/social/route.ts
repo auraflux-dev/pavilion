@@ -22,13 +22,15 @@ export async function GET(req: NextRequest) {
   if (!requireStaffRole(session?.staff ?? null, ['marketing', 'admin'])) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
-  const config = await getSocialConfig()
+  // Sync live Wix connections so newly linked Instagram unlocks without a manual ID paste.
+  const config = await getSocialConfig({ syncAccounts: true })
   return NextResponse.json({
     publishEnabled: config.publishEnabled,
     links: config.links,
     facebookAccountId: config.facebookAccountId,
     facebookPageId: config.facebookPageId,
     instagramAccountId: config.instagramAccountId,
+    instagramUsername: config.instagramUsername ?? '',
     instagramAvailable: config.instagramAvailable,
     facebookReady: Boolean(config.publishEnabled && config.facebookAccountId && config.facebookPageId),
     formats: FORMATS,

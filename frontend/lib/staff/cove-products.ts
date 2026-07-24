@@ -46,6 +46,9 @@ export type StaffCoveProduct = {
   wixInStock: boolean
   image?: string
   optionName?: string
+  /** Wix product ribbon → weekly deal on register / public Cove */
+  featured?: boolean
+  dealLabel?: string
   variants: StaffCoveVariant[]
 }
 
@@ -227,6 +230,9 @@ function mapProduct(
   const availability = String(
     (raw.inventory as { availabilityStatus?: string } | undefined)?.availabilityStatus ?? ''
   )
+  const ribbonName = String(
+    (raw.ribbon as { name?: string } | undefined)?.name ?? ''
+  ).trim()
 
   const priceFallback =
     parseFloat(
@@ -249,6 +255,8 @@ function mapProduct(
     wixInStock: availability === 'IN_STOCK' || raw.visible === true,
     image: getProductImage(raw),
     optionName,
+    featured: ribbonName.length > 0,
+    dealLabel: ribbonName || undefined,
     variants:
       variants.length > 0
         ? variants
@@ -345,6 +353,8 @@ export function flattenRegisterProducts(products: StaffCoveProduct[]): Array<{
   quantity: number | null
   available: boolean
   image?: string
+  featured?: boolean
+  dealLabel?: string
 }> {
   const lines: Array<{
     id: string
@@ -356,6 +366,8 @@ export function flattenRegisterProducts(products: StaffCoveProduct[]): Array<{
     quantity: number | null
     available: boolean
     image?: string
+    featured?: boolean
+    dealLabel?: string
   }> = []
 
   for (const p of products) {
@@ -377,11 +389,16 @@ export function flattenRegisterProducts(products: StaffCoveProduct[]): Array<{
         quantity: qty,
         available,
         image: p.image,
+        featured: Boolean(p.featured),
+        dealLabel: p.dealLabel,
       })
     }
   }
 
-  return lines.sort((a, b) => a.name.localeCompare(b.name))
+  return lines.sort((a, b) => {
+    if (Boolean(a.featured) !== Boolean(b.featured)) return a.featured ? -1 : 1
+    return a.name.localeCompare(b.name)
+  })
 }
 
 function buildOptionAndVariants(

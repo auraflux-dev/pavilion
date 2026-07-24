@@ -45,7 +45,7 @@ export function NewsletterSignup() {
     <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 lg:p-8 shadow-sm">
       <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Subscribe to the Newsletter</h3>
       <p className="text-sm text-[#5A6070] mb-6">
-        Join hundreds of SHMS families already in the loop.
+        Join hundreds of SHMS PTO families already in the loop.
       </p>
 
       <div className="space-y-4">

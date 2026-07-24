@@ -41,12 +41,25 @@ export async function POST(req: NextRequest) {
   }
 
   const activity = event.data?.object?.gift_card_activity
-  if (!activity || activity.type !== 'REDEEM') {
+  if (!activity) {
     return NextResponse.json({ ok: true })
   }
 
   const gan = activity.gift_card_gan
   const balanceCents = Number(activity.gift_card_balance_money?.amount ?? 0)
+  if (gan) {
+    try {
+      const { syncLitecardBalanceForGan } = await import('@/lib/wallet/litecard')
+      await syncLitecardBalanceForGan(String(gan), balanceCents / 100)
+    } catch (err) {
+      console.warn('Litecard balance sync skipped', err)
+    }
+  }
+
+  if (activity.type !== 'REDEEM') {
+    return NextResponse.json({ ok: true })
+  }
+
   if (!gan) return NextResponse.json({ ok: true })
 
   try {
@@ -100,7 +113,7 @@ export async function POST(req: NextRequest) {
       customerId: method.squareCustomerId,
       referenceId: `topoff:${student._id}`,
       buyerEmailAddress: parentEmail,
-      note: `SHMS auto top-off for ${student.firstName ?? ''} ${student.lastName ?? ''}`.trim(),
+      note: `SHMS PTO auto top-off for ${student.firstName ?? ''} ${student.lastName ?? ''}`.trim(),
     })
 
     const loadKey = `topoff-load-${eventKey}`.slice(0, 45)

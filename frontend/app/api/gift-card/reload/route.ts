@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
       customerId,
       referenceId: `store-card:${session.email}`,
       buyerEmailAddress: session.email,
-      note: 'SHMS family Cove card load',
+      note: 'SHMS PTO family Cove card load',
     })
 
     const settings = await getSiteSettings()

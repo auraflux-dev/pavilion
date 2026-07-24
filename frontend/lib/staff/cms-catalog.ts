@@ -399,6 +399,22 @@ export const SITE_SETTING_GROUPS: {
       { key: 'socialInstagram', label: 'Instagram URL' },
       { key: 'socialTwitter', label: 'Twitter/X URL' },
       { key: 'socialYoutube', label: 'YouTube URL' },
+      {
+        key: 'socialInstagramAccountId',
+        label: 'Wix Instagram account ID (auto-filled when Staff → Social loads)',
+      },
+      {
+        key: 'socialFacebookAccountId',
+        label: 'Wix Facebook account ID (auto-filled when Staff → Social loads)',
+      },
+      {
+        key: 'socialFacebookPageId',
+        label: 'Facebook Page ID for publishing',
+      },
+      {
+        key: 'socialPublishEnabled',
+        label: 'Social publish enabled (true/false)',
+      },
     ],
   },
   {

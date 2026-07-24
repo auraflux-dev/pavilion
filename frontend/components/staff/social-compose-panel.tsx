@@ -214,6 +214,7 @@ export function SocialComposePanel({ enabled }: Props) {
     (format !== 'STORY' && !text.trim()) ||
     (format === 'REEL' && !videoUrl) ||
     (format === 'STORY' && gallery.length === 0 && !imageUrl && !videoUrl) ||
+    (platform === 'instagram' && format === 'POST' && !imageUrl && !videoUrl && gallery.length === 0) ||
     (format === 'POST' && kind === 'image' && !imageUrl) ||
     (format === 'POST' && kind === 'video' && !videoUrl) ||
     (format === 'POST' && kind === 'link' && !linkUrl) ||
@@ -229,8 +230,8 @@ export function SocialComposePanel({ enabled }: Props) {
     <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
       <h2 className="text-lg font-bold">Marketing · Facebook & Instagram</h2>
       <p className="text-xs text-[#5A6070]">
-        Full Facebook creative surface via Wix Social Publisher (post / reel / story, media upload,
-        link preview, schedule, site asset). Instagram waits on Wix&apos;s one free social account.
+        Publish via Wix Social Publisher. Facebook supports post / reel / story. Instagram supports
+        post and story (image or video required).
         {facebookReady ? ' · Facebook ready.' : ' · Facebook not ready.'}
         {instagramAvailable ? ' · Instagram ready.' : ' · Instagram not connected.'}
       </p>
@@ -240,25 +241,33 @@ export function SocialComposePanel({ enabled }: Props) {
           <button
             key={p}
             type="button"
-            onClick={() => setPlatform(p)}
+            onClick={() => {
+              setPlatform(p)
+              if (p === 'instagram' && format === 'REEL') setFormat('POST')
+            }}
             className={`${chip(platform === p)} ${p === 'instagram' && !instagramAvailable ? 'opacity-60' : ''}`}
           >
-            {p === 'instagram' && !instagramAvailable ? 'instagram (later)' : p}
+            {p === 'instagram' && !instagramAvailable ? 'instagram (connect in Wix)' : p}
           </button>
         ))}
       </div>
 
       {platform === 'instagram' && !instagramAvailable ? (
         <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-          Instagram publish is disabled until a second Wix social slot is available. Save a draft
-          here, or post from Meta when ready.
+          Connect Instagram in Wix Dashboard → Marketing & SEO → Social, then refresh this page. We
+          auto-detect the account id.
+        </p>
+      ) : null}
+      {platform === 'instagram' && instagramAvailable ? (
+        <p className="text-xs text-[#5A6070]">
+          Instagram posts need an image or video. Caption-only is not supported by Meta.
         </p>
       ) : null}
 
       <div>
         <p className="text-xs font-bold text-[#5A6070] mb-1">Format</p>
         <div className="flex flex-wrap gap-2">
-          {FORMATS.map((f) => (
+          {FORMATS.filter((f) => platform !== 'instagram' || f.id !== 'REEL').map((f) => (
             <button key={f.id} type="button" onClick={() => setFormat(f.id)} className={chip(format === f.id)}>
               {f.label}
             </button>

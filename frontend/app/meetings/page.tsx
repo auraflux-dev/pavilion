@@ -70,7 +70,7 @@ export default async function MeetingsPage() {
               </div>
             </div>
             <p className="text-sm text-[#5A6070] mb-8 ml-[52px]">
-              Open to all SHMS families. Upcoming meetings include a join link. All minutes are published after each meeting.
+              Open to all SHMS PTO families. Upcoming meetings include a join link. All minutes are published after each meeting.
             </p>
             <MeetingMonthFilter meetings={pto} showJoinLink />
           </div>

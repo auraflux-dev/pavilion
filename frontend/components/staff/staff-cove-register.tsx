@@ -1,9 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Loader2, ScanBarcode, ShoppingCart, X } from 'lucide-react'
+import { Loader2, Minus, Plus, ShoppingCart, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { CoveCameraScanner } from '@/components/staff/cove-camera-scanner'
 
 type Family = {
   parentEmail: string
@@ -23,6 +22,9 @@ type Product = {
   sku: string
   quantity: number | null
   available: boolean
+  image?: string
+  featured?: boolean
+  dealLabel?: string
 }
 
 type CartLine = {
@@ -33,30 +35,23 @@ type CartLine = {
   qty: number
 }
 
-type SkuHit = { productId: string; variantId?: string }
+function lineKey(productId: string, variantId: string) {
+  return `${productId}:${variantId || ''}`
+}
 
 /**
- * Cove window register. Matches in-person ops:
- * 1) Student says what they want
- * 2) Student gives family code → staff enters it
- * 3) Staff scans product barcode (phone camera)
- * 4) Charge (or tell student balance / remaining if asked)
- * 5) Inventory decrements on successful charge
+ * In-person Cove window register — tap tiles, weekly deals on top, one Charge button.
+ * Restock qty lives in Cove products below. No barcodes on this screen.
  */
 export function StaffCoveRegister() {
   const [code, setCode] = useState('')
   const [family, setFamily] = useState<Family | null>(null)
   const [products, setProducts] = useState<Product[]>([])
-  const [skuIndex, setSkuIndex] = useState<Record<string, SkuHit>>({})
   const [cart, setCart] = useState<CartLine[]>([])
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
   const [error, setError] = useState('')
   const codeRef = useRef<HTMLInputElement>(null)
-  const productsRef = useRef(products)
-  const skuIndexRef = useRef(skuIndex)
-  productsRef.current = products
-  skuIndexRef.current = skuIndex
 
   const loadProducts = useCallback(async () => {
     const r = await fetch('/api/staff/cove/products?mode=register')
@@ -66,9 +61,10 @@ export function StaffCoveRegister() {
       ((d.products ?? []) as Product[]).map((p) => ({
         ...p,
         variantId: p.variantId ?? '',
+        featured: Boolean(p.featured),
+        dealLabel: p.dealLabel || (p.featured ? 'Deal' : undefined),
       }))
     )
-    setSkuIndex((d.skuIndex ?? {}) as Record<string, SkuHit>)
   }, [])
 
   useEffect(() => {
@@ -78,10 +74,19 @@ export function StaffCoveRegister() {
     codeRef.current?.focus()
   }, [loadProducts])
 
+  const deals = useMemo(
+    () => products.filter((p) => p.featured),
+    [products]
+  )
+  const regular = useMemo(
+    () => products.filter((p) => !p.featured),
+    [products]
+  )
+
   async function lookup(nextCode = code) {
     const trimmed = nextCode.replace(/\D/g, '').trim()
     if (trimmed.length < 4) {
-      setError('Enter the family code the student gives you.')
+      setError('Scan the phone QR / gift-card number, or enter the 6-digit backup code.')
       return
     }
     setBusy(true)
@@ -99,7 +104,7 @@ export function StaffCoveRegister() {
       if (!r.ok) throw new Error(d.error ?? 'Lookup failed')
       setFamily(d)
       setCode(trimmed)
-      setStatus(`Balance on card: $${Number(d.balance).toFixed(2)}`)
+      setStatus(`Digital card balance: $${Number(d.balance).toFixed(2)}`)
     } catch (err) {
       setFamily(null)
       setError(err instanceof Error ? err.message : 'Lookup failed')
@@ -108,25 +113,20 @@ export function StaffCoveRegister() {
     }
   }
 
-  function lineKey(productId: string, variantId: string) {
-    return `${productId}:${variantId || ''}`
-  }
-
-  function addProduct(product: Product, qty = 1) {
+  function setLineQty(product: Product, qty: number) {
     if (!family?.hasCard) {
-      setError('Enter the family code first.')
+      setError('Look up the family digital card code first.')
       return
     }
     const variantId = product.variantId || ''
+    const key = lineKey(product.id, variantId)
     setCart((prev) => {
-      const existing = prev.find(
-        (l) => lineKey(l.productId, l.variantId) === lineKey(product.id, variantId)
-      )
+      const nextQty = Math.max(0, Math.floor(qty))
+      if (nextQty <= 0) return prev.filter((l) => lineKey(l.productId, l.variantId) !== key)
+      const existing = prev.find((l) => lineKey(l.productId, l.variantId) === key)
       if (existing) {
         return prev.map((l) =>
-          lineKey(l.productId, l.variantId) === lineKey(product.id, variantId)
-            ? { ...l, qty: l.qty + qty }
-            : l
+          lineKey(l.productId, l.variantId) === key ? { ...l, qty: nextQty } : l
         )
       }
       return [
@@ -136,45 +136,26 @@ export function StaffCoveRegister() {
           variantId,
           name: product.name,
           price: product.price,
-          qty,
+          qty: nextQty,
         },
       ]
     })
     setError('')
-    setStatus(`Added ${product.name}`)
   }
 
-  function resolveProduct(raw: string): Product | null {
-    const key = raw.trim()
-    const upper = key.toUpperCase()
-    const fromIndex = skuIndexRef.current[upper]
+  function bump(product: Product, delta: number) {
+    const variantId = product.variantId || ''
+    const key = lineKey(product.id, variantId)
+    const current = cart.find((l) => lineKey(l.productId, l.variantId) === key)?.qty ?? 0
+    setLineQty(product, current + delta)
+  }
+
+  function qtyFor(product: Product) {
     return (
-      productsRef.current.find((p) => p.sku.toUpperCase() === upper) ||
-      (fromIndex
-        ? productsRef.current.find(
-            (p) =>
-              p.id === fromIndex.productId &&
-              (!fromIndex.variantId || p.variantId === fromIndex.variantId)
-          )
-        : null) ||
-      productsRef.current.find((p) => p.id === key) ||
-      null
+      cart.find(
+        (l) => lineKey(l.productId, l.variantId) === lineKey(product.id, product.variantId || '')
+      )?.qty ?? 0
     )
-  }
-
-  function onProductScan(raw: string) {
-    // Ignore family-code shaped payloads if staff accidentally re-scans a QR
-    const cleaned = raw.trim()
-    if (/^(?:SHMSCOVE:|shmscove\/|cove:)/i.test(cleaned) || /^\d{4,6}$/.test(cleaned)) {
-      void lookup(cleaned.replace(/\D/g, ''))
-      return
-    }
-    const product = resolveProduct(cleaned)
-    if (!product) {
-      setError(`No product for barcode “${cleaned}”. Check CoveInventory.sku.`)
-      return
-    }
-    addProduct(product)
   }
 
   const cartTotal = useMemo(
@@ -188,7 +169,7 @@ export function StaffCoveRegister() {
     if (!family?.hasCard || !cart.length) return
     if (remainingAfter < 0) {
       setError(
-        `Not enough balance. Card has $${balance.toFixed(2)}; order is $${cartTotal.toFixed(2)}.`
+        `Not enough balance. Digital card has $${balance.toFixed(2)}; order is $${cartTotal.toFixed(2)}.`
       )
       return
     }
@@ -211,7 +192,7 @@ export function StaffCoveRegister() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Checkout failed')
       setStatus(
-        `Charged $${Number(d.total).toFixed(2)}. New balance $${Number(d.newBalance).toFixed(2)}. Inventory updated.`
+        `Charged $${Number(d.total).toFixed(2)}. New digital card balance $${Number(d.newBalance).toFixed(2)}.`
       )
       setFamily(null)
       setCart([])
@@ -234,19 +215,92 @@ export function StaffCoveRegister() {
     codeRef.current?.focus()
   }
 
+  function ProductTile({ product }: { product: Product }) {
+    const qty = qtyFor(product)
+    const inCart = qty > 0
+    return (
+      <div
+        className={`rounded-2xl border overflow-hidden flex flex-col ${
+          inCart ? 'border-[#085508] ring-2 ring-[#085508]/25' : 'border-[#E8E4DC]'
+        } bg-white`}
+      >
+        <button
+          type="button"
+          onClick={() => bump(product, 1)}
+          disabled={!family?.hasCard}
+          className="text-left flex-1 disabled:opacity-50"
+        >
+          <div className="aspect-square bg-[#FAFCF9] relative">
+            {product.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={product.image}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-[#C5CFC5] text-xs font-bold">
+                Cove
+              </div>
+            )}
+            {product.featured ? (
+              <span className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-wide bg-[#FFD700] text-[#1A1A1A] px-2 py-0.5 rounded-full">
+                {product.dealLabel || 'Deal'}
+              </span>
+            ) : null}
+            {inCart ? (
+              <span className="absolute top-2 right-2 min-w-7 h-7 rounded-full bg-[#085508] text-white text-sm font-bold flex items-center justify-center px-1.5">
+                {qty}
+              </span>
+            ) : null}
+          </div>
+          <div className="p-2.5">
+            <p className="text-sm font-bold text-[#1A1A1A] leading-snug line-clamp-2 min-h-[2.5rem]">
+              {product.name}
+            </p>
+            <p className="text-sm font-bold mt-1" style={{ color: '#085508' }}>
+              ${product.price.toFixed(2)}
+            </p>
+          </div>
+        </button>
+        <div className="flex items-center justify-between gap-1 px-2 pb-2">
+          <button
+            type="button"
+            aria-label={`Fewer ${product.name}`}
+            disabled={!family?.hasCard || qty <= 0}
+            onClick={() => bump(product, -1)}
+            className="h-9 w-9 rounded-lg border border-[#E8E4DC] flex items-center justify-center disabled:opacity-30"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+          <span className="text-sm font-bold tabular-nums w-6 text-center">{qty}</span>
+          <button
+            type="button"
+            aria-label={`More ${product.name}`}
+            disabled={!family?.hasCard}
+            onClick={() => bump(product, 1)}
+            className="h-9 w-9 rounded-lg border border-[#E8E4DC] flex items-center justify-center disabled:opacity-30"
+            style={{ backgroundColor: inCart ? '#EEF6EE' : undefined }}
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section className="rounded-xl border border-[#E8E4DC] bg-white p-4 sm:p-5 space-y-4">
       <div>
         <h2 className="text-lg font-bold flex items-center gap-2">
           <ShoppingCart className="w-5 h-5" style={{ color: '#085508' }} />
           Cove register
         </h2>
-        <ol className="mt-2 text-xs text-[#5A6070] list-decimal list-inside space-y-0.5">
-          <li>Student says what they want</li>
-          <li>Student gives unique family code → staff enters it</li>
-          <li>Staff scans product barcode with phone</li>
-          <li>Tell balance / remaining if asked → Charge → hand items from behind the door</li>
-        </ol>
+        <p className="mt-1 text-xs text-[#5A6070] leading-relaxed">
+          Prefer Square Stand / iPad scanning the student&apos;s Photos or Wallet QR (Square gift
+          card). Or type the 6-digit spoken backup / paste a long GAN here → tap products → Charge.
+          Guests without a loaded Cove card pay card-present on Square Stand.
+        </p>
       </div>
 
       <form
@@ -257,14 +311,14 @@ export function StaffCoveRegister() {
         }}
       >
         <label className="flex-1 min-w-[10rem] text-xs font-bold text-[#5A6070]">
-          Family code (from student)
+          Scan QR / GAN or 6-digit backup
           <input
             ref={codeRef}
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 24))}
             inputMode="numeric"
             autoComplete="off"
-            placeholder="Enter code"
+            placeholder="Scan or 6-digit code"
             className="mt-1 w-full border-2 border-[#085508] rounded-lg px-3 py-3 text-xl font-mono tracking-widest"
           />
         </label>
@@ -284,10 +338,7 @@ export function StaffCoveRegister() {
       </form>
 
       {family ? (
-        <div
-          className="rounded-xl px-4 py-3 space-y-1"
-          style={{ backgroundColor: '#EEF6EE' }}
-        >
+        <div className="rounded-xl px-4 py-3 space-y-1" style={{ backgroundColor: '#EEF6EE' }}>
           <p className="text-sm font-bold text-[#1A1A1A]">
             {family.students
               .map((s) => [s.firstName, s.lastName].filter(Boolean).join(' ').trim())
@@ -296,117 +347,93 @@ export function StaffCoveRegister() {
             <span className="font-normal text-[#5A6070]"> · code {family.coveFamilyCode}</span>
           </p>
           <p className="text-2xl font-bold tabular-nums" style={{ color: '#085508' }}>
-            Family Cove card balance: ${Number(family.balance).toFixed(2)}
+            Cove digital card: ${Number(family.balance).toFixed(2)}
           </p>
           {!family.hasCard ? (
-            <p className="text-xs text-amber-800">No card loaded yet. Parent must load online first.</p>
+            <p className="text-xs text-amber-800">
+              No digital card loaded yet. Parent must load online in the member portal first — or sell
+              this purchase on Square Stand.
+            </p>
           ) : null}
         </div>
       ) : null}
 
       {family?.hasCard ? (
         <>
-          <div>
-            <p className="text-xs font-bold text-[#5A6070] mb-2 flex items-center gap-1">
-              <ScanBarcode className="w-3.5 h-3.5" /> Scan product barcode (phone)
-            </p>
-            <CoveCameraScanner onScan={onProductScan} label="Open camera to scan product" />
-          </div>
+          {deals.length > 0 ? (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#5A6070] mb-2">
+                Weekly deals
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {deals.map((p) => (
+                  <ProductTile key={`deal:${lineKey(p.id, p.variantId)}`} product={p} />
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-[#5A6070] mb-2">
-              Or tap product
+              All products
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
-              {products.map((p) => (
-                <button
-                  key={`${p.id}:${p.variantId || ''}`}
-                  type="button"
-                  onClick={() => addProduct(p)}
-                  className="text-left rounded-xl border border-[#E8E4DC] px-3 py-2.5 hover:border-[#085508] hover:bg-[#FAFCF9]"
-                >
-                  <p className="text-sm font-bold text-[#1A1A1A] leading-snug line-clamp-2">
-                    {p.name}
-                  </p>
-                  <p className="text-xs mt-1" style={{ color: '#085508' }}>
-                    ${p.price.toFixed(2)}
-                  </p>
-                </button>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-[28rem] overflow-y-auto pr-1">
+              {regular.map((p) => (
+                <ProductTile key={lineKey(p.id, p.variantId)} product={p} />
               ))}
             </div>
+            {products.length === 0 ? (
+              <p className="text-sm text-[#5A6070]">No Cove products in stock. Restock below.</p>
+            ) : null}
           </div>
 
-          <div className="rounded-xl border border-[#E8E4DC] p-3 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">This order</p>
-            {cart.length === 0 ? (
-              <p className="text-sm text-[#5A6070]">Scan or tap what they asked for.</p>
-            ) : (
-              <ul className="space-y-1.5">
+          <div className="sticky bottom-2 z-10 rounded-2xl border-2 border-[#085508] bg-white shadow-lg p-3 space-y-3">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <div className="text-sm space-y-0.5">
+                <p>
+                  Order{' '}
+                  <span className="font-bold tabular-nums">${cartTotal.toFixed(2)}</span>
+                  {cart.length ? (
+                    <span className="text-[#5A6070]">
+                      {' '}
+                      · {cart.reduce((n, l) => n + l.qty, 0)} items
+                    </span>
+                  ) : null}
+                </p>
+                <p style={{ color: remainingAfter < 0 ? '#b91c1c' : '#085508' }}>
+                  Left after charge:{' '}
+                  <span className="font-bold tabular-nums">
+                    {remainingAfter < 0 ? 'Not enough' : `$${remainingAfter.toFixed(2)}`}
+                  </span>
+                </p>
+              </div>
+              <Button
+                disabled={busy || !cart.length || remainingAfter < 0}
+                onClick={() => void checkout()}
+                className="text-white text-base px-8 py-6 font-bold min-w-[10rem]"
+                style={{ backgroundColor: '#085508' }}
+              >
+                {busy ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  `Charge $${cartTotal.toFixed(2)}`
+                )}
+              </Button>
+            </div>
+            {cart.length > 0 ? (
+              <ul className="flex flex-wrap gap-2 text-xs text-[#5A6070]">
                 {cart.map((l) => (
                   <li
                     key={lineKey(l.productId, l.variantId)}
-                    className="flex items-center justify-between gap-2 text-sm"
+                    className="rounded-full bg-[#FAFCF9] border border-[#E8E4DC] px-2.5 py-1"
                   >
-                    <span>
-                      {l.qty}× {l.name}
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <span className="font-bold tabular-nums">
-                        ${(l.price * l.qty).toFixed(2)}
-                      </span>
-                      <button
-                        type="button"
-                        className="text-[11px] text-red-600 font-semibold"
-                        onClick={() =>
-                          setCart((prev) =>
-                            prev.filter(
-                              (x) =>
-                                lineKey(x.productId, x.variantId) !==
-                                lineKey(l.productId, l.variantId)
-                            )
-                          )
-                        }
-                      >
-                        Remove
-                      </button>
-                    </span>
+                    {l.qty}× {l.name}
                   </li>
                 ))}
               </ul>
+            ) : (
+              <p className="text-xs text-[#5A6070]">Tap a product tile to add it.</p>
             )}
-
-            <div className="rounded-lg bg-[#FAFCF9] border border-[#E8E4DC] px-3 py-2 text-sm space-y-0.5">
-              <p>
-                Order total:{' '}
-                <span className="font-bold tabular-nums">${cartTotal.toFixed(2)}</span>
-              </p>
-              <p>
-                On card now:{' '}
-                <span className="font-bold tabular-nums">${balance.toFixed(2)}</span>
-              </p>
-              <p style={{ color: remainingAfter < 0 ? '#b91c1c' : '#085508' }}>
-                Left after this purchase:{' '}
-                <span className="font-bold tabular-nums">
-                  {remainingAfter < 0 ? 'Not enough' : `$${remainingAfter.toFixed(2)}`}
-                </span>
-              </p>
-              <p className="text-[11px] text-[#5A6070]">
-                Tell the student these numbers if they ask before you charge.
-              </p>
-            </div>
-
-            <Button
-              disabled={busy || !cart.length || remainingAfter < 0}
-              onClick={() => void checkout()}
-              className="w-full text-white text-base py-6 font-bold"
-              style={{ backgroundColor: '#085508' }}
-            >
-              {busy ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                `Charge $${cartTotal.toFixed(2)}`
-              )}
-            </Button>
           </div>
         </>
       ) : null}

@@ -49,9 +49,19 @@ export async function POST(req: NextRequest) {
 
     const fee = Number(program.fee ?? 0)
     if (fee > 0) {
+      const { enrichmentDiscountPercent } = await import('@/lib/membership-entitlements')
+      const { normalizeMembershipTier } = await import('@/lib/staff/members-roster')
+      const tier = normalizeMembershipTier(String(student.membershipTier ?? 'free'))
+      const percent = enrichmentDiscountPercent(tier)
+      const discountDollars =
+        percent > 0 ? Math.round(fee * (percent / 100) * 100) / 100 : 0
+      const amount = Math.max(0, Math.round((fee - discountDollars) * 100) / 100)
       return NextResponse.json({
         requiresPayment: true,
-        fee,
+        fee: amount,
+        listFee: fee,
+        memberDiscountPercent: percent,
+        memberDiscountDollars: discountDollars,
         programName: program.name,
         programId,
         studentId,

@@ -144,13 +144,16 @@ export function CoveCameraScanner({
   )
 }
 
-/** Canonical QR / scan payload for a family Cove code. */
+/** @deprecated Prefer coveDigitalCardScanPayload — kept for short PIN fallbacks. */
 export function coveFamilyScanPayload(code: string): string {
   const digits = String(code).replace(/\D/g, '')
   return `SHMSCOVE:${digits}`
 }
 
-/** Parse scanner input into family code or product SKU/barcode. */
+/**
+ * Parse scanner input into family PIN, Square GAN (Wallet / Stand QR), or product SKU.
+ * Square gift-card QR = raw GAN digits only (typically 16).
+ */
 export function parseCoveScan(
   raw: string,
   opts?: { preferProduct?: boolean }
@@ -161,9 +164,15 @@ export function parseCoveScan(
   const prefixed = value.match(/^(?:SHMSCOVE:|shmscove\/|cove:)\s*(\d{4,8})$/i)
   if (prefixed?.[1]) return { kind: 'family', code: prefixed[1] }
 
-  // Our family PINs are 6 digits. Prefer product for longer barcodes (EAN-8/UPC/EAN-13).
-  if (/^\d{4,6}$/.test(value) && !opts?.preferProduct) {
-    return { kind: 'family', code: value }
+  const digits = value.replace(/\D/g, '')
+  // Square GAN / Wallet pass / Photos QR — long numeric only
+  if (/^\d{12,24}$/.test(digits)) {
+    return { kind: 'family', code: digits }
+  }
+
+  // Family PIN (spoken at window). Prefer product for mid-length barcodes when requested.
+  if (/^\d{4,6}$/.test(digits) && !opts?.preferProduct) {
+    return { kind: 'family', code: digits }
   }
 
   return { kind: 'product', sku: value }

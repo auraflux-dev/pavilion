@@ -44,6 +44,7 @@ export type PortalPurchase = {
   date: string | null
   studentName: string
   source: 'payment' | 'enrollment'
+  detail?: string
 }
 
 export async function GET(req: NextRequest) {
@@ -87,15 +88,25 @@ export async function GET(req: NextRequest) {
     const enrollQueries = studentIds.map((id: string) =>
       listEnrollmentsForStudent(id).catch(() => [] as Awaited<ReturnType<typeof listEnrollmentsForStudent>>),
     )
-    const payQueries = studentIds.map((id: string) =>
+    const payQueries = [
+      ...studentIds.map((id: string) =>
+        admin.items
+          .query('Payments')
+          .eq('studentId', id)
+          .descending('paymentDate')
+          .limit(15)
+          .find()
+          .catch(() => ({ items: [] })),
+      ),
+      // Membership charges are parent-level; include when not tied to a studentId.
       admin.items
         .query('Payments')
-        .eq('studentId', id)
+        .eq('parentEmail', email)
         .descending('paymentDate')
-        .limit(15)
+        .limit(20)
         .find()
-        .catch(() => ({ items: [] }))
-    )
+        .catch(() => ({ items: [] })),
+    ]
 
     const [programs, sessions, enrollResults, payResults, msgRes, newsletterRes, portalEventRes, membershipRes] =
       await Promise.all([
@@ -139,7 +150,14 @@ export async function GET(req: NextRequest) {
       items: enrollResults.flatMap((r) => r ?? []),
     }
     const payRes = {
-      items: payResults.flatMap((r) => r.items ?? []),
+      items: Array.from(
+        new Map(
+          payResults
+            .flatMap((r) => r.items ?? [])
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((item: any) => [String(item._id), item]),
+        ).values(),
+      ),
     }
 
     const programByName = new Map(
@@ -350,17 +368,20 @@ export async function GET(req: NextRequest) {
 
     // --- Purchases ---
     const purchases: PortalPurchase[] = []
+    const { normalizePaymentLedgerRow } = await import('@/lib/payment-ledger')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const item of payRes.items ?? []) {
       const p = item as any
+      const norm = normalizePaymentLedgerRow(p)
       purchases.push({
         id: p._id,
-        label: String(p.programName ?? 'Payment'),
-        amount: Number(p.amount ?? 0),
-        status: String(p.status ?? ''),
-        date: p.paymentDate ?? null,
+        label: norm.programName,
+        amount: norm.amount,
+        status: norm.status,
+        date: norm.paymentDate,
         studentName: nameFor(String(p.studentId ?? '')),
         source: 'payment',
+        detail: norm.detail,
       })
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,18 +1,19 @@
 /**
  * GET /api/auth/google/callback
  * Finish Google OAuth → find/create Wix member → set session cookie.
+ *
+ * Used when GOOGLE_MEMBER_CLIENT_ID is set (External parent client).
+ * Without that env, member login reuses the staff Workspace callback URI
+ * (see googleMemberCallbackUrl) so DNS-cutover Console entries keep working.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { TOKENS_COOKIE, TOKEN_MAX_AGE, isSecure } from '@/lib/auth-cookies'
 import {
   GOOGLE_MEMBER_STATE_COOKIE,
-  exchangeGoogleCode,
-  fetchGoogleProfile,
-  findOrCreateMemberForGoogle,
+  completeGoogleMemberLogin,
   googleMemberCallbackUrl,
   googleMemberOauthConfigured,
   googleMemberRedirectBase,
-  issueMemberTokensForId,
   safeReturnTo,
 } from '@/lib/auth-google-member'
 
@@ -74,14 +75,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { accessToken } = await exchangeGoogleCode(code, redirectUri)
-    const profile = await fetchGoogleProfile(accessToken)
-    if (!profile.emailVerified) {
-      return clear(failRedirect(origin, returnTo, 'google_email_unverified'))
-    }
-    const memberId = await findOrCreateMemberForGoogle(profile)
-    const tokens = await issueMemberTokensForId(memberId)
-
+    const { tokens } = await completeGoogleMemberLogin({ code, redirectUri })
     const res = NextResponse.redirect(new URL(returnTo, origin), 302)
     res.cookies.set(TOKENS_COOKIE, JSON.stringify(tokens), {
       httpOnly: true,
@@ -93,6 +87,10 @@ export async function GET(req: NextRequest) {
     return clear(res)
   } catch (err) {
     console.error('google member callback', err)
+    const msg = err instanceof Error ? err.message : ''
+    if (msg === 'google_email_unverified') {
+      return clear(failRedirect(origin, returnTo, 'google_email_unverified'))
+    }
     return clear(failRedirect(origin, returnTo, 'google_failed'))
   }
 }

@@ -56,10 +56,10 @@ function parseHowSteps(bullets: string[]): HowStep[] {
 export function StoreCardHero({
   amounts,
   eyebrow = 'The Cove',
-  title = 'Become a free member, then load a Cove card.',
+  title = 'Become a free member, then load a Cove digital card.',
   perks = [
     'Free parent membership required',
-    'One family Cove card & balance',
+    'One family Cove digital card & balance',
     '10% on first load · up to $500',
   ],
   howItWorks,
@@ -71,13 +71,13 @@ export function StoreCardHero({
   const denominations = defaultDenominations(amounts)
 
   const displayTitle = isMember
-    ? 'Load your family Cove card.'
+    ? 'Load your family Cove digital card.'
     : title
   const displayPerks = isMember
     ? [
-        'One family Cove card & balance',
+        'One family Cove digital card & balance',
         `${bonusPercent}% on first load (not reloads) · up to $${maxAmount}`,
-        'Pay online · spend at the snack window',
+        'Pay online · spend at the snack window with code or QR',
       ]
     : perks
 
@@ -86,12 +86,12 @@ export function StoreCardHero({
     parseHowSteps([
       '1|Become a free member|Create a free parent account, then choose an amount and pay online.',
       `2|First load gets ${bonusPercent}% extra|${formatStoreCardBonusExample(50, bonusPercent)}. Reloads are dollar-for-dollar.`,
-      '3|Tap at The Cove|One physical family card from PTO. Same Square balance for every student in the household.',
+      '3|Spend at The Cove|Students show the family digital card code or QR from the member portal.',
     ])
   const memberSteps = parseHowSteps([
     `1|Choose an amount|Load any whole dollar up to $${maxAmount}. ${formatStoreCardBonusExample(50, bonusPercent)} on your first load.`,
-    '2|One family balance|Every student in your household shares the same Cove card balance.',
-    '3|Spend at the window|Pick up one plastic card from PTO. Students use it at The Cove snack window.',
+    '2|One family balance|Every student in your household shares the same Cove digital card balance.',
+    '3|Spend at the window|Students use the portal QR or 6-digit code at The Cove snack window.',
   ])
   const steps = isMember ? memberSteps : visitorSteps
 
@@ -137,16 +137,16 @@ export function StoreCardHero({
             </div>
 
             <div className="lg:col-span-5">
-              <MemberGate label="Load a Cove card">
+              <MemberGate label="Load a Cove digital card">
                 <div className="w-full max-w-md lg:ml-auto rounded-2xl bg-white/10 border border-white/15 p-4 sm:p-5 backdrop-blur-sm">
                   <p className="text-xs font-bold tracking-widest uppercase text-white/70 mb-3">
-                    Load a Cove card
+                    Load a Cove digital card
                   </p>
                   <StoreCardReload
                     amounts={denominations.map(({ amount }) => amount)}
                     bonusPercent={bonusPercent}
                     maxAmount={maxAmount}
-                    triggerLabel="Load family card"
+                    triggerLabel="Load digital card"
                     triggerClassName="w-full justify-center !bg-white !text-[#085508] px-5 py-3"
                   />
                 </div>

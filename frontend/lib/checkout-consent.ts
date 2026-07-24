@@ -5,7 +5,7 @@
 import { getLegalDoc, type LegalDoc, type LegalDocSlug } from '@/lib/api/legal'
 import { getWixClient } from '@/lib/wix-client'
 
-export type CheckoutConsentKind = 'membership' | 'program' | 'store-card' | 'product' | 'event'
+export type CheckoutConsentKind = 'membership' | 'program' | 'store-card' | 'product' | 'event' | 'donation'
 
 export type ConsentItem = {
   id: string

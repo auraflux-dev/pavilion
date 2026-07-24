@@ -92,11 +92,12 @@ export async function getPortalCopy(): Promise<PortalCopy> {
       /—|–/,
     ]),
     paymentMethodsTitle: pick('paymentMethodsTitle'),
-    paymentMethodsBody: preferDefault(
-      'paymentMethodsBody',
-      pick('paymentMethodsBody'),
+    paymentMethodsBody: preferDefault('paymentMethodsBody', pick('paymentMethodsBody'), [
       /—|–/,
-    ),
+      /Square-secured/i,
+      /optional Square/i,
+      /prepaid student store card/i,
+    ]),
   }
 }
 

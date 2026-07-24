@@ -65,9 +65,36 @@ export function googleMemberRedirectBase(hostHeader?: string | null): string {
   return 'https://www.shmspto.org'
 }
 
-/** Must match an Authorized redirect URI on the parent Google OAuth client. */
+/**
+ * Must match an Authorized redirect URI on the Google OAuth client in use.
+ *
+ * - Dedicated External parent client (`GOOGLE_MEMBER_CLIENT_ID`) →
+ *   `/api/auth/google/callback`
+ * - Shared staff client (current production fallback) → reuse the URI already
+ *   registered at DNS cutover: `/api/staff/workspace/connect/callback`
+ *   (member vs staff Connect is distinguished by `state.flow`).
+ */
 export function googleMemberCallbackUrl(base: string): string {
-  return `${base.replace(/\/$/, '')}/api/auth/google/callback`
+  const root = base.replace(/\/$/, '')
+  if (process.env.GOOGLE_MEMBER_CLIENT_ID?.trim()) {
+    return `${root}/api/auth/google/callback`
+  }
+  return `${root}/api/staff/workspace/connect/callback`
+}
+
+/** Finish Google → Wix member session (shared by both callback routes). */
+export async function completeGoogleMemberLogin(opts: {
+  code: string
+  redirectUri: string
+}): Promise<{ tokens: Awaited<ReturnType<typeof issueMemberTokensForId>>; email: string }> {
+  const { accessToken } = await exchangeGoogleCode(opts.code, opts.redirectUri)
+  const profile = await fetchGoogleProfile(accessToken)
+  if (!profile.emailVerified) {
+    throw new Error('google_email_unverified')
+  }
+  const memberId = await findOrCreateMemberForGoogle(profile)
+  const tokens = await issueMemberTokensForId(memberId)
+  return { tokens, email: profile.email }
 }
 
 export type GoogleProfile = {

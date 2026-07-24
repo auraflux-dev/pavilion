@@ -25,17 +25,21 @@ import {
   type PurchaseConfirmationInput,
 } from '@/lib/purchase-confirmation'
 
-export type CheckoutKind = 'membership' | 'product' | 'store-card' | 'program' | 'event'
+export type CheckoutKind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation'
 
 export type CheckoutIntent = {
   kind: CheckoutKind
   tier?: string
   studentId?: string | null
+  /** Spirit Wear size when membership includes a free T-shirt */
+  shirtSize?: string | null
   productId?: string
   programId?: string
   eventId?: string
   quantity?: number
   amountCents?: number
+  /** Optional parent note for donations */
+  note?: string
   consents?: import('@/lib/checkout-consent').ConsentAck[]
 }
 
@@ -90,16 +94,37 @@ export async function resolveCheckoutIntent(
     const tiers = await getPaidMembershipTiers()
     const match = tiers.find((t) => t.tierId === tier && t.active)
     if (!match || match.price <= 0) throw new Error('Unknown membership tier')
+    const { getParentHighestTier, membershipChargeDollars, formatTierLabel } =
+      await import('@/lib/membership-pricing')
+    const { tierRank } = await import('@/lib/staff/members-roster')
+    const currentTier = await getParentHighestTier(parentEmail)
+    if (tierRank(currentTier) >= tierRank(tier) && tierRank(currentTier) > 0) {
+      throw new Error(
+        `You already have ${formatTierLabel(currentTier)} membership. Choose a higher tier to upgrade.`,
+      )
+    }
+    const charge = membershipChargeDollars({
+      targetTier: tier,
+      currentTier,
+      tiers,
+    })
+    if (charge.amount <= 0) throw new Error('Nothing to charge for this upgrade')
     return {
       kind,
-      amount: match.price,
-      amountCents: Math.round(match.price * 100),
-      description: `SHMS PTO membership — ${match.name}`,
+      amount: charge.amount,
+      amountCents: Math.round(charge.amount * 100),
+      description: charge.isUpgrade
+        ? `SHMS PTO membership upgrade — ${formatTierLabel(currentTier)} → ${match.name}`
+        : `SHMS PTO membership — ${match.name}`,
       customId: `membership:${tier}`,
       meta: {
         tier,
         tierName: match.name,
         studentId: intent.studentId ? String(intent.studentId) : '',
+        shirtSize: intent.shirtSize ? String(intent.shirtSize) : '',
+        isUpgrade: charge.isUpgrade ? '1' : '',
+        currentTier,
+        listPrice: String(charge.listPrice),
       },
     }
   }
@@ -125,6 +150,8 @@ export async function resolveCheckoutIntent(
 
   if (kind === 'program') {
     const { getProgramById } = await import('@/lib/api/programs')
+    const { enrichmentDiscountPercent } = await import('@/lib/membership-entitlements')
+    const { normalizeMembershipTier } = await import('@/lib/staff/members-roster')
     const programId = String(intent.programId ?? '').trim()
     const studentId = String(intent.studentId ?? '').trim()
     if (!programId || !studentId) throw new Error('Program and student required')
@@ -132,16 +159,36 @@ export async function resolveCheckoutIntent(
     if (!program || !program.registrationOpen) throw new Error('Program not open for registration')
     const fee = Number(program.fee ?? 0)
     if (fee <= 0) throw new Error('This program does not require payment — use free registration')
+
+    const client = getWixClient()
+    const student = (await client.items.get('Students', studentId).catch(() => null)) as {
+      membershipTier?: string
+      parentEmail?: string
+      discountCode?: string
+    } | null
+    const tier = normalizeMembershipTier(String(student?.membershipTier ?? 'free'))
+    const percent = enrichmentDiscountPercent(tier)
+    const discountDollars =
+      percent > 0 ? Math.round(fee * (percent / 100) * 100) / 100 : 0
+    const amount = Math.max(0, Math.round((fee - discountDollars) * 100) / 100)
+
     return {
       kind,
-      amount: fee,
-      amountCents: Math.round(fee * 100),
-      description: `Enrichment — ${program.name}`,
+      amount,
+      amountCents: Math.round(amount * 100),
+      description:
+        discountDollars > 0
+          ? `Enrichment — ${program.name} (${percent}% member discount)`
+          : `Enrichment — ${program.name}`,
       customId: `program:${programId.slice(0, 36)}`,
       meta: {
         programId,
         programName: program.name,
         studentId,
+        listFee: String(fee),
+        memberDiscountPercent: String(percent || 0),
+        memberDiscountDollars: String(discountDollars || 0),
+        discountCode: String(student?.discountCode ?? ''),
       },
     }
   }
@@ -174,6 +221,27 @@ export async function resolveCheckoutIntent(
         eventTitle: offer.eventTitle,
         quantity: String(quantity),
         ticketPrice: String(price),
+      },
+    }
+  }
+
+  if (kind === 'donation') {
+    const { isAllowedDonationAmount, donationAmountCents } = await import('@/lib/donation')
+    const amountCents = Number(intent.amountCents)
+    const amount = amountCents / 100
+    if (!Number.isInteger(amountCents) || !isAllowedDonationAmount(amount)) {
+      throw new Error('Enter a donation between $1 and $10,000')
+    }
+    const note = String(intent.note ?? '').trim().slice(0, 120)
+    return {
+      kind,
+      amount,
+      amountCents: donationAmountCents(amount),
+      description: 'SHMS PTO donation',
+      customId: `donation:${parentEmail}`,
+      meta: {
+        parentEmail,
+        note,
       },
     }
   }
@@ -274,9 +342,12 @@ export async function fulfillPaidCheckout(opts: {
       studentId,
       orderId: transactionId,
       parentName: parentName || null,
+      shirtSize: resolved.meta.shirtSize || null,
     })
     await client.items.insert('Payments', {
-      programName: `Membership — ${resolved.meta.tierName}`,
+      programName: resolved.meta.isUpgrade === '1'
+        ? `Membership upgrade — ${resolved.meta.currentTier} → ${resolved.meta.tierName}`
+        : `Membership — ${resolved.meta.tierName}`,
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
@@ -284,6 +355,10 @@ export async function fulfillPaidCheckout(opts: {
       transactionId,
       source: `${sourcePrefix}_membership`,
       parentEmail,
+      ...(studentId ? { studentId } : {}),
+      ...(applied.updatedStudentIds?.[0] && !studentId
+        ? { studentId: applied.updatedStudentIds[0] }
+        : {}),
     })
     return attachPurchaseConfirmation(
       { kind: 'membership', tier, applied, paymentId: transactionId },
@@ -364,6 +439,37 @@ export async function fulfillPaidCheckout(opts: {
       },
       {
         kind: 'event',
+        parentEmail,
+        parentName,
+        amount: resolved.amount,
+        description: resolved.description,
+        transactionId,
+        meta: resolved.meta,
+      },
+    )
+  }
+
+  if (resolved.kind === 'donation') {
+    const note = resolved.meta.note || ''
+    await client.items.insert('Payments', {
+      programName: 'PTO Donation',
+      amount: resolved.amount,
+      status: 'Paid',
+      paymentDate: new Date().toISOString(),
+      paymentMethod,
+      transactionId,
+      source: `${sourcePrefix}_donation`,
+      parentEmail,
+      notes: note || 'General PTO donation',
+    })
+    return attachPurchaseConfirmation(
+      {
+        kind: 'donation',
+        amount: resolved.amount,
+        paymentId: transactionId,
+      },
+      {
+        kind: 'donation',
         parentEmail,
         parentName,
         amount: resolved.amount,

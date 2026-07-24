@@ -52,6 +52,23 @@ export function StaffDiscountsPanel() {
     void load()
   }, [load])
 
+  async function ensureShared() {
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/discounts/ensure-shared', { method: 'POST' })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not create shared codes')
+      const list = (d.codes ?? []).map((c: { code: string; percent: number }) => `${c.code} (${c.percent}%)`).join(', ')
+      setStatus(`Shared enrichment codes ready: ${list}`)
+      await load()
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Ensure shared failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function createNamed() {
     setBusy(true)
     setStatus('')
@@ -209,9 +226,19 @@ export function StaffDiscountsPanel() {
           <h3 className="text-base font-bold">Issue to member</h3>
           <p className="text-xs text-[#5A6070]">
             Generates a unique code for a parent email. Default % from their highest paid tier
-            (Reef 5 / Lagoon 10 / Tide 15 unless CMS override). Leave override blank to use tier.
+            (Reef 10 / Lagoon 15 / Tide 30 unless CMS override). Leave override blank to use tier.
+            Prefer shared codes SHMSREEF10 / SHMSLAGOON15 / SHMSTIDE30 for normal membership perks.
           </p>
         </div>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy}
+          onClick={() => void ensureShared()}
+          className="w-full sm:w-auto"
+        >
+          Ensure shared enrichment codes (10% / 15% / 30%)
+        </Button>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block text-xs font-bold text-[#5A6070]">
             Parent email

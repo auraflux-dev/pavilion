@@ -51,7 +51,7 @@ export function StoreCardReload({
   amounts = [20, 40, 75],
   maxAmount = 500,
   onLoaded,
-  triggerLabel = 'Load family card',
+  triggerLabel = 'Load digital card',
   triggerClassName = '',
   bonusPercent = 10,
 }: Props) {
@@ -165,7 +165,7 @@ export function StoreCardReload({
   async function submit() {
     const loadStudentId = studentId || studentList[0]?.id || ''
     if (!loadStudentId) {
-      setError('Add a student in the portal before loading the family card.')
+      setError('Add a student in the portal before loading the Cove digital card.')
       return
     }
     if (!Number.isInteger(amount) || amount < 1 || amount > maxAmount) {
@@ -257,7 +257,7 @@ export function StoreCardReload({
   return (
     <div className="w-full rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] p-4 space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-bold text-[#1A1A1A]">Load the family Cove card</p>
+        <p className="text-sm font-bold text-[#1A1A1A]">Load the family Cove digital card</p>
         <button type="button" onClick={() => setOpen(false)} aria-label="Close reload form">
           <X className="w-4 h-4 text-[#5A6070]" />
         </button>
@@ -275,7 +275,7 @@ export function StoreCardReload({
 
       {/* Keep studentId for payment attribution; UI no longer asks parents to pick a card. */}
       {studentList.length === 0 ? (
-        <p className="text-xs text-amber-700">Add a student in the portal before loading the card.</p>
+        <p className="text-xs text-amber-700">Add a student in the portal before loading the digital card.</p>
       ) : null}
 
       <div>
@@ -320,7 +320,7 @@ export function StoreCardReload({
         {appliedBonus > 0 ? (
           <p className="mt-2 text-[11px] text-[#085508] font-semibold">
             First-load bonus: pay ${amount} · get $
-            {(amount * (1 + appliedBonus / 100)).toFixed(2).replace(/\.00$/, '')} on the family card (
+            {(amount * (1 + appliedBonus / 100)).toFixed(2).replace(/\.00$/, '')} on the digital card (
             {appliedBonus}%). Reloads after this are dollar-for-dollar.
           </p>
         ) : bonusPercent > 0 ? (
@@ -370,7 +370,7 @@ export function StoreCardReload({
               onChange={(event) => setSaveCard(event.target.checked)}
               className="mt-0.5"
             />
-            Save this card securely with Square for future reloads and optional auto top-off.
+            Save this card securely for future reloads and optional auto top-off.
             SHMS PTO never stores the card number.
           </label>
         </>
@@ -428,8 +428,8 @@ export function StoreCardReload({
       ) : null}
 
       <p className="text-[10px] text-[#5A6070] text-center">
-        Pay with credit/debit card or PayPal. One family Cove card and balance. {bonusPercent}% on
-        first load or membership credit only. Reloads are 1:1. Saving a card is optional.
+        Pay with credit/debit card or PayPal. One family Cove digital card and balance. {bonusPercent}% on
+        first load or membership credit only. Reloads are 1:1. Saving a payment card is optional.
       </p>
     </div>
   )

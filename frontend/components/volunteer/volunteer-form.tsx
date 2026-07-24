@@ -71,7 +71,7 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
         </div>
         <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Thank you for signing up!</h3>
         <p className="text-[#5A6070] text-sm">
-          We&apos;ll be in touch soon with next steps. We appreciate your support of SHMS students.
+          We&apos;ll be in touch soon with next steps. We appreciate your support of SHMS PTO students.
         </p>
       </div>
     )

@@ -18,7 +18,7 @@ type EventRow = {
 const emptyForm = {
   title: '',
   description: '',
-  location: 'SHMS',
+  location: 'SHMS PTO',
   startDate: '',
   endDate: '',
   registrationType: 'RSVP',
@@ -61,7 +61,7 @@ export function StaffEventsPanel() {
     setForm({
       title: e.title,
       description: e.description,
-      location: e.location || 'SHMS',
+      location: e.location || 'SHMS PTO',
       startDate: e.startDate ? e.startDate.slice(0, 16) : '',
       endDate: e.endDate ? e.endDate.slice(0, 16) : '',
       registrationType: 'RSVP',

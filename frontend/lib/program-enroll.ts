@@ -32,6 +32,7 @@ export type StudentSafety = {
   pickupAuthorized?: string
   selfRelease?: boolean
   photoMediaConsent?: boolean | null
+  membershipTier?: string
   archived?: boolean
 }
 

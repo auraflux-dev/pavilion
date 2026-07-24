@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic'
 
 /**
  * GET /api/staff/cove/lookup?code=123456
+ * Also accepts Square gift-card GAN (raw digits from Wallet / Photos QR / Stand).
  */
 export async function GET(req: NextRequest) {
   const session = await getStaffSession(req)

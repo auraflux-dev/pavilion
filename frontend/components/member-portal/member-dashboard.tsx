@@ -32,6 +32,7 @@ import { PortalSectionNav } from './portal-section-nav'
 import { PortalSurveys } from './portal-surveys'
 import { StoreCardReload } from './store-card-reload'
 import { CoveFamilyCodeCard } from './cove-family-code-card'
+import { MembershipBenefitsCard } from './membership-benefits-card'
 
 interface MemberData {
   member: {
@@ -89,6 +90,7 @@ interface PurchaseItem {
   status: string
   date: string | null
   studentName: string
+  detail?: string
 }
 
 interface Props {
@@ -663,6 +665,7 @@ export function MemberDashboard({
             </div>
           </div>
 
+          <MembershipBenefitsCard />
           <CoveFamilyCodeCard />
 
           <div className="flex flex-wrap gap-2 mb-4">
@@ -700,6 +703,9 @@ export function MemberDashboard({
                     <p className="text-[11px] text-[#5A6070]">
                       {[p.studentName, fmtShortDate(p.date)].filter(Boolean).join(' · ')}
                     </p>
+                    {p.detail ? (
+                      <p className="text-[11px] text-[#5A6070] mt-0.5 leading-snug">{p.detail}</p>
+                    ) : null}
                   </div>
                   <div className="text-right shrink-0 min-w-[4.5rem] pl-1">
                     <p className="text-sm font-bold text-[#1A1A1A] tabular-nums">

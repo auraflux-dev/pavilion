@@ -104,7 +104,7 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
             </a>
 
             <p className="text-sm leading-relaxed mb-6" style={{ color: '#C5CCD6' }}>
-              Enriching the academic and social experience for all SHMS
+              Enriching the academic and social experience for all SHMS PTO
               students and families in Ashburn, Virginia.
             </p>
 
