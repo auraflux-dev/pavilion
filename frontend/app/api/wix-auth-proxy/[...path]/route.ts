@@ -1,7 +1,7 @@
 /**
- * Proxies Wix-managed login routes (/_api/*, /__auth/*) to Wix edge with
- * Host: www.shmspto.org. After DNS cutover, those paths hit Vercel (404);
- * Wix still serves them when the Host header matches the connected domain.
+ * Proxies Wix-managed login routes (/_api/*, /__auth/*) to the free wixsite
+ * host (SNI + Host = treasurer7596.wixsite.com, path prefixed with site name).
+ * www no longer has a Wix TLS cert after DNS cutover.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import https from 'https'
@@ -30,7 +30,9 @@ const HOP_BY_HOP = new Set([
 async function proxyToWix(req: NextRequest, wixPath: string) {
   const { address } = await lookup(UPSTREAM_DNS)
   const url = new URL(req.url)
-  const pathWithQuery = `${wixPath}${url.search}`
+  const sitePrefix =
+    process.env.WIX_AUTH_SITE_PATH?.trim() || '/shms-pto-2026'
+  const pathWithQuery = `${sitePrefix}${wixPath}${url.search}`
   const method = req.method.toUpperCase()
   const body =
     method === 'GET' || method === 'HEAD' ? undefined : Buffer.from(await req.arrayBuffer())
@@ -68,7 +70,9 @@ async function proxyToWix(req: NextRequest, wixPath: string) {
     }
     incomingHeaders[key] = value
   })
-  incomingHeaders.host = PUBLIC_HOST
+  // Host must match SNI (Wix CF 403s on Host/SNI mismatch). Path is prefixed
+  // with the free wixsite site name so Wix resolves the correct meta-site.
+  incomingHeaders.host = UPSTREAM_DNS
   incomingHeaders['x-forwarded-host'] = PUBLIC_HOST
   incomingHeaders['x-forwarded-proto'] = 'https'
   // Ensure Wix sees a normal browser navigation context
@@ -91,7 +95,9 @@ async function proxyToWix(req: NextRequest, wixPath: string) {
     const request = https.request(
       {
         host: address,
-        servername: PUBLIC_HOST,
+        // SNI must be the Wix upstream host — www.shmspto.org is no longer
+        // on Wix TLS after DNS cutover (handshake failure → white-screen 502).
+        servername: UPSTREAM_DNS,
         path: pathWithQuery,
         method,
         headers: {
@@ -124,10 +130,29 @@ async function proxyToWix(req: NextRequest, wixPath: string) {
     if (!value) continue
     const lower = key.toLowerCase()
     if (HOP_BY_HOP.has(lower) || lower === 'content-encoding') continue
-    if (Array.isArray(value)) {
-      for (const v of value) outHeaders.append(key, v)
-    } else {
-      outHeaders.set(key, value)
+    const values = Array.isArray(value) ? value : [value]
+    for (let v of values) {
+      if (lower === 'location') {
+        try {
+          const loc = new URL(v, `https://${UPSTREAM_DNS}`)
+          if (
+            loc.hostname === UPSTREAM_DNS &&
+            loc.pathname.startsWith(`${sitePrefix}/`)
+          ) {
+            loc.hostname = PUBLIC_HOST
+            loc.pathname = loc.pathname.slice(sitePrefix.length) || '/'
+            v = loc.toString()
+          }
+        } catch {
+          /* keep original */
+        }
+      }
+      if (lower === 'set-cookie') {
+        v = v
+          .replace(/Domain=[^;]+/gi, `Domain=.shmspto.org`)
+          .replace(/;\s*Domain=[^;]+/gi, `; Domain=.shmspto.org`)
+      }
+      outHeaders.append(key, v)
     }
   }
 
@@ -158,6 +183,16 @@ async function handle(req: NextRequest, ctx: Ctx) {
     return await proxyToWix(req, wixPath)
   } catch (err) {
     console.error('wix-auth-proxy', err)
+    const accept = req.headers.get('accept') || ''
+    if (accept.includes('text/html')) {
+      return new NextResponse(
+        `<!doctype html><html><head><meta charset="utf-8"/><title>Sign-in unavailable</title></head><body style="font-family:system-ui;padding:2rem;max-width:32rem"><h1>Sign-in temporarily unavailable</h1><p>Please go back and try <strong>email and password</strong> on the join page, or try again in a few minutes.</p><p><a href="/auth/join?mode=login">Back to log in</a></p></body></html>`,
+        {
+          status: 502,
+          headers: { 'content-type': 'text/html; charset=utf-8' },
+        }
+      )
+    }
     return NextResponse.json(
       { error: 'Login service temporarily unavailable' },
       { status: 502 }

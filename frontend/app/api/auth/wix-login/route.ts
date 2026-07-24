@@ -6,6 +6,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, OAuthStrategy } from '@wix/sdk'
 import { redirects } from '@wix/redirects'
 import { OAUTH_DATA_COOKIE, isSecure } from '@/lib/auth-cookies'
+import { WIX_LOGIN_DOMAIN } from '@/lib/wix-oauth-client'
+
+/** Send browser to the live Wix host — www/_api is proxied and TLS-broken. */
+function rewriteAuthUrlToWixHost(authUrl: string): string {
+  try {
+    const u = new URL(authUrl)
+    if (u.hostname !== 'www.shmspto.org' && u.hostname !== 'shmspto.org') {
+      return authUrl
+    }
+    const base = new URL(WIX_LOGIN_DOMAIN)
+    return `${base.origin}${base.pathname.replace(/\/$/, '')}${u.pathname}${u.search}${u.hash}`
+  } catch {
+    return authUrl
+  }
+}
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -55,7 +70,7 @@ export async function GET(req: NextRequest) {
     const { authUrl } = await client.auth.getAuthUrl(oAuthData)
     if (!authUrl) throw new Error('No authUrl from Wix')
 
-    const res = NextResponse.redirect(authUrl, 302)
+    const res = NextResponse.redirect(rewriteAuthUrlToWixHost(authUrl), 302)
     res.cookies.set(OAUTH_DATA_COOKIE, JSON.stringify(oAuthData), {
       httpOnly: false, // callback page reads via js-cookie
       secure: isSecure(),

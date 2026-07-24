@@ -8,8 +8,6 @@
  */
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { createVisitorClient } from '@/lib/wix-oauth-client'
-import { LoginState } from '@wix/sdk'
 
 type Mode = 'signup' | 'login'
 type Panel = 'chooser' | 'email'
@@ -36,39 +34,42 @@ function JoinInner() {
   const [error, setError] = useState<string | null>(null)
   const [verifyCode, setVerifyCode] = useState('')
   const [needsVerify, setNeedsVerify] = useState(false)
+  const [verifyStateToken, setVerifyStateToken] = useState<string | null>(null)
 
   useEffect(() => {
     setMode(initialMode)
   }, [initialMode])
 
-  function switchMode(next: Mode) {
+  useEffect(() => {
+    const code = searchParams.get('error')
+    if (!code) return
+    const messages: Record<string, string> = {
+      google_not_configured:
+        'Google sign-in is not configured yet. Use email for now, or ask the PTO admin to finish Google setup.',
+      google_denied: 'Google sign-in was cancelled. Try again or use email.',
+      google_state_mismatch: 'Google sign-in expired. Please try again.',
+      google_email_unverified:
+        'That Google account email is not verified. Verify it with Google, or use email.',
+      google_failed: 'Google sign-in failed. Try again or use email and password.',
+    }
+    setError(messages[code] || 'Sign-in failed. Try again or use email.')
+  }, [searchParams])
+
+  function switchMode(next: Mode, opts?: { keepEmailPanel?: boolean }) {
     setMode(next)
-    setPanel('chooser')
+    // Stay on the email form when switching signup↔login from there —
+    // resetting to the chooser felt like getting kicked out mid-flow.
+    if (!opts?.keepEmailPanel) setPanel('chooser')
     setNeedsVerify(false)
+    setVerifyStateToken(null)
     setError(null)
     const qs = new URLSearchParams({ returnTo })
     if (next === 'login') qs.set('mode', 'login')
     router.replace(`/auth/join?${qs.toString()}`)
   }
 
-  async function completeWithSessionToken(sessionToken: string) {
-    const res = await fetch('/api/auth/complete-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionToken, returnTo }),
-    })
-    const data = (await res.json().catch(() => ({}))) as {
-      authUrl?: string
-      error?: string
-    }
-    if (!res.ok || !data.authUrl) {
-      throw new Error(data.error || 'Could not finish sign-in')
-    }
-    window.location.href = data.authUrl
-  }
-
-  function startWixProviders() {
-    window.location.href = `/api/auth/wix-login?returnTo=${encodeURIComponent(returnTo)}`
+  function startGoogle() {
+    window.location.href = `/api/auth/google?returnTo=${encodeURIComponent(returnTo)}`
   }
 
   async function onEmailSubmit(e: React.FormEvent) {
@@ -76,43 +77,55 @@ function JoinInner() {
     setError(null)
     setBusy(true)
     try {
-      const client = createVisitorClient()
-      const visitorTokens = await client.auth.generateVisitorTokens()
-      client.auth.setTokens(visitorTokens)
-
-      if (needsVerify) {
-        const verified = await client.auth.processVerification({
-          verificationCode: verifyCode.trim(),
-        })
-        if (verified.loginState !== LoginState.SUCCESS || !verified.data?.sessionToken) {
-          throw new Error('Verification failed. Check the code and try again.')
-        }
-        await completeWithSessionToken(verified.data.sessionToken)
-        return
+      const res = await fetch('/api/auth/email-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          needsVerify
+            ? {
+                email: email.trim(),
+                password,
+                verificationCode: verifyCode.trim(),
+                stateToken: verifyStateToken,
+                returnTo,
+              }
+            : {
+                mode,
+                email: email.trim(),
+                password,
+                returnTo,
+              },
+        ),
+      })
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean
+        redirectTo?: string
+        needsVerify?: boolean
+        stateToken?: string
+        message?: string
+        error?: string
+        errorCode?: string
       }
 
-      const result =
-        mode === 'signup'
-          ? await client.auth.register({ email: email.trim(), password })
-          : await client.auth.login({ email: email.trim(), password })
-
-      if (result.loginState === LoginState.EMAIL_VERIFICATION_REQUIRED) {
+      if (data.needsVerify) {
         setNeedsVerify(true)
-        setError('Check your email for a verification code, then enter it below.')
+        if (data.stateToken) setVerifyStateToken(data.stateToken)
+        setError(data.message || 'Check your email for a verification code, then enter it below.')
         return
       }
-      if (result.loginState === LoginState.OWNER_APPROVAL_REQUIRED) {
-        throw new Error('Your account is waiting for PTO approval. Email membership@shmspto.org.')
-      }
-      if (result.loginState !== LoginState.SUCCESS || !('data' in result) || !result.data?.sessionToken) {
-        const fail = result as { error?: string; errorCode?: string }
-        if (fail.errorCode === 'emailAlreadyExists') {
-          switchMode('login')
-          throw new Error('That email already has an account. Log in below.')
+
+      if (!res.ok || !data.redirectTo) {
+        if (data.errorCode === 'emailAlreadyExists') {
+          switchMode('login', { keepEmailPanel: true })
+          setPassword('')
+          throw new Error(
+            data.error || 'That email already has an account. Enter your password to log in.',
+          )
         }
-        throw new Error(fail.error || (mode === 'signup' ? 'Could not create account' : 'Could not log in'))
+        throw new Error(data.error || (mode === 'signup' ? 'Could not create account' : 'Could not log in'))
       }
-      await completeWithSessionToken(result.data.sessionToken)
+
+      window.location.href = data.redirectTo
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
@@ -141,21 +154,14 @@ function JoinInner() {
 
         {panel === 'chooser' ? (
           <div className="space-y-3">
+            {error ? <p className="text-sm text-red-700">{error}</p> : null}
             <button
               type="button"
-              onClick={startWixProviders}
+              onClick={startGoogle}
               className={primaryBtn}
               style={{ backgroundColor: '#085508' }}
             >
               {isSignup ? 'Sign up with Google' : 'Log in with Google'}
-            </button>
-            <button
-              type="button"
-              onClick={startWixProviders}
-              className={primaryBtn}
-              style={{ backgroundColor: '#085508' }}
-            >
-              {isSignup ? 'Sign up with Facebook' : 'Log in with Facebook'}
             </button>
             <button
               type="button"
@@ -169,7 +175,7 @@ function JoinInner() {
               {isSignup ? 'Sign up with Email' : 'Log in with Email'}
             </button>
             <p className="text-xs text-[#5A6070] text-center pt-1">
-              Google and Facebook open secure provider sign-in. Email stays on this page.
+              Google and email both finish on this site. Facebook is temporarily unavailable.
             </p>
           </div>
         ) : (
@@ -252,7 +258,7 @@ function JoinInner() {
                 type="button"
                 className="font-semibold underline"
                 style={{ color: '#085508' }}
-                onClick={() => switchMode('login')}
+                onClick={() => switchMode('login', { keepEmailPanel: panel === 'email' })}
               >
                 Log In
               </button>
@@ -264,7 +270,7 @@ function JoinInner() {
                 type="button"
                 className="font-semibold underline"
                 style={{ color: '#085508' }}
-                onClick={() => switchMode('signup')}
+                onClick={() => switchMode('signup', { keepEmailPanel: panel === 'email' })}
               >
                 Sign Up
               </button>
