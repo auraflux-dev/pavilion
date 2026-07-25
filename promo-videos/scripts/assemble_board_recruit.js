@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * Assemble board recruiting 16:9 video (designed slides + site stills + VO).
- * STAPLE: cold open (~5s) + outro (~4s) via staple_brand_bookends.js.
+ * Assemble board recruiting 16:9 video.
+ * STAPLE: matching intro + outro logo cards (staple_brand_bookends.js).
  *
  *   NODE_PATH=~/cwn-c0/node_modules node scripts/assemble_board_recruit.js
  *   NODE_PATH=~/cwn-c0/node_modules node scripts/gemini_board_recruit_qa.js
@@ -14,8 +14,15 @@ const { execFileSync } = require('child_process');
 const {
   COLD_SEC,
   OUTRO_SEC,
+  TEXT_TOP,
+  LOGO_W,
+  LOGO_X,
+  LOGO_Y,
+  LOGO_CX,
+  LABEL_Y,
   PATHS: STAPLE,
   ensureBoardColdOpen,
+  ensureBoardOutro,
   assertStapleAssets,
 } = require('./staple_brand_bookends');
 
@@ -40,15 +47,15 @@ const H = 1080;
 const FPS = 30;
 const VF = `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1,fps=${FPS}`;
 const PAD = 0.9;
+/** Hold after last VO so thank-you finishes before silent outro */
+const TAIL_PAD = 1.2;
 
-/** Seal placement — SHMS PTO must center under this logo */
-const LOGO_W = 480;
-const LOGO_RIGHT = 140;
-const LOGO_X = W - LOGO_W - LOGO_RIGHT; // 1300
-/** Visual center of circular seal (nudge left — stingray tail pulls bbox right) */
-const LOGO_CX = LOGO_X + LOGO_W / 2; // geometric center of seal overlay (= ~1540)
-const LOGO_Y = Math.round((H - LOGO_W) / 2 - 30); // ~270
-const LABEL_Y = LOGO_Y + LOGO_W + 18; // just under seal
+/** Text column — clear of left swoosh waves; never over bottom-right waves */
+const TEXT_X = 90;
+const BULLET_X = 110;
+const FOOTER_X = 460; // clear of left-side design waves
+const FOOTER_Y = 800; // above bottom wave band
+const CONTENT_MAX_Y = 780;
 
 const BEATS = [
   { part: 'vo/_parts/board_p01_open.m4a', still: 'assets/board-recruit/slide_open.png', caption: 'Five Board Seats Open' },
@@ -59,18 +66,17 @@ const BEATS = [
   { part: 'vo/_parts/board_p06_events.m4a', still: 'assets/board-recruit/slide_events.png', caption: 'Events Coordinator' },
   { part: 'vo/_parts/board_p07_initiatives.m4a', still: 'assets/board-recruit/slide_initiatives.png', caption: 'Initiatives Coordinator' },
   { part: 'vo/_parts/board_p08_benefits.m4a', still: 'assets/board-recruit/slide_benefits.png', caption: 'Board Benefits' },
-  { part: 'vo/_parts/board_p09_donate_initiatives.m4a', still: 'assets/board-recruit/slide_donate.png', caption: 'Support Initiatives' },
-  { part: 'vo/_parts/board_p10_apply_board.m4a', still: 'assets/board-recruit/slide_apply.png', caption: 'Email President@SHMSPTO.ORG' },
-  { part: 'vo/_parts/board_p11_volunteer_fallback.m4a', still: 'assets/board-recruit/slide_volunteer.png', caption: 'Cannot Join the Board? Volunteer' },
+  { part: 'vo/_parts/board_p10_apply_board.m4a', still: 'assets/board-recruit/slide_apply.png', caption: 'Board Page On Our Website' },
+  { part: 'vo/_parts/board_p11_volunteer_fallback.m4a', still: 'assets/board-recruit/slide_volunteer.png', caption: 'Cannot Join The Board? Volunteer' },
   { part: 'vo/_parts/board_p12_volunteer_ways.m4a', still: 'assets/board-recruit/03_volunteer_form.png', caption: 'SHMSPTO.ORG/Volunteer' },
-  { part: 'vo/_parts/board_p13_close.m4a', still: 'assets/board-recruit/slide_roles.png', caption: 'Thank You — Go Stingrays!' },
+  { part: 'vo/_parts/board_p13_close.m4a', still: 'assets/board-recruit/slide_thanks.png', caption: 'Thank You — Go Stingrays!' },
 ];
 
 function a(rel) { return path.join(ROOT, rel); }
 function esc(s) {
   return String(s)
     .replace(/\\/g, '\\\\')
-    .replace(/%/g, '\\%') // ffmpeg drawtext expansion
+    .replace(/%/g, '\\%')
     .replace(/:/g, '\\:')
     .replace(/'/g, "\\'");
 }
@@ -85,8 +91,7 @@ function run(args) {
 }
 
 /**
- * Designed slide on site-green bg + seal + centered SHMS PTO under seal.
- * Left column: eyebrow, title, bullets, footer.
+ * Site-green slide: left text aligned to logo top; footer clear of waves.
  */
 function makeSlide(outName, { eyebrow, title, bullets = [], footer }) {
   const out = path.join(ASSETS, outName);
@@ -113,7 +118,6 @@ function makeSlide(outName, { eyebrow, title, bullets = [], footer }) {
     last = tag;
   };
 
-  // SHMS PTO centered under seal
   addText('SHMS PTO', {
     size: 44,
     color: '0x98C818',
@@ -121,18 +125,33 @@ function makeSlide(outName, { eyebrow, title, bullets = [], footer }) {
     y: LABEL_Y,
   });
 
+  // Left column starts at same Y as logo top
+  let y = TEXT_TOP;
   if (eyebrow) {
-    addText(eyebrow, { size: 28, color: '0x98C818', x: 90, y: 160 });
+    addText(eyebrow, { size: 28, color: '0x98C818', x: TEXT_X, y });
+    y += 48;
   }
-  addText(title, { size: title.length > 22 ? 56 : 64, color: 'white', x: 90, y: eyebrow ? 210 : 180 });
+  addText(title, {
+    size: title.length > 24 ? 52 : 60,
+    color: 'white',
+    x: TEXT_X,
+    y,
+  });
+  y += 78;
 
-  let y = eyebrow ? 320 : 300;
   for (const b of bullets) {
-    addText(`•  ${b}`, { size: 36, color: 'white', x: 110, y, bold: false });
-    y += 62;
+    if (y > CONTENT_MAX_Y) break;
+    addText(`•  ${b}`, { size: 34, color: 'white', x: BULLET_X, y, bold: false });
+    y += 56;
   }
   if (footer) {
-    addText(footer, { size: 30, color: '0x98C818', x: 90, y: Math.max(y + 24, 920) });
+    // White + dark edge so commitment/footer stays readable over green waves
+    const tag = `v${n++}`;
+    parts.push(
+      `[${last}]drawtext=fontfile=${fontB}:text='${esc(footer)}':fontsize=32:fontcolor=white:` +
+      `borderw=3:bordercolor=black@0.75:x=${FOOTER_X}:y=${FOOTER_Y}[${tag}]`
+    );
+    last = tag;
   }
 
   run([
@@ -231,28 +250,19 @@ function buildAllSlides() {
     eyebrow: 'Board Positions Only',
     title: 'Board Benefits',
     bullets: [
-      'Free PTO Membership',
-      '75 Percent Off Enrichment Programs',
+      'Free Reef Membership (First Tier)',
+      '75 Percent Off 1 Enrichment Program Per Season',
+      'Inside Knowledge — School Updates First',
+      'Direct Impact — Vote On How Funds Are Spent',
     ],
-    footer: 'This Year — For These Open Seats',
-  });
-
-  makeSlide('slide_donate.png', {
-    eyebrow: 'Optional',
-    title: 'Support Initiatives',
-    bullets: [
-      'Donate On The Site If You Can',
-      'Funds Enrichment & Sponsorships',
-      'Not A Condition Of Serving',
-    ],
-    footer: 'Every Gift Helps Students',
+    footer: 'For These Open Board Seats',
   });
 
   makeSlide('slide_apply.png', {
     eyebrow: 'Ready For A Board Seat?',
-    title: 'How To Apply',
+    title: 'Board Page On Our Website',
     bullets: [
-      'Go To The Board Page',
+      'Visit The Board Page At SHMSPTO.ORG',
       'Email President@SHMSPTO.ORG',
       'Tell Us Which Role You Want',
     ],
@@ -268,6 +278,17 @@ function buildAllSlides() {
       'Offer Any Contribution Of Time',
     ],
     footer: 'SHMSPTO.ORG/Volunteer',
+  });
+
+  // Same branding language as intro/outro bookends
+  makeSlide('slide_thanks.png', {
+    eyebrow: 'SHMS PTO',
+    title: 'Thank You',
+    bullets: [
+      'Stingray Families',
+      'Go Stingrays!',
+    ],
+    footer: 'SHMSPTO.ORG',
   });
 }
 
@@ -317,8 +338,9 @@ function main() {
   fs.mkdirSync(WORK, { recursive: true });
 
   const coldImg = ensureBoardColdOpen();
-  assertStapleAssets(coldImg);
-  console.log(`STAPLE bookends: cold ${COLD_SEC}s + outro ${OUTRO_SEC}s`);
+  const outroImg = ensureBoardOutro();
+  assertStapleAssets(coldImg, outroImg);
+  console.log(`STAPLE: matching intro + outro logo cards (${COLD_SEC}s / ${OUTRO_SEC}s)`);
   console.log('Building designed slides…');
   buildAllSlides();
 
@@ -341,27 +363,31 @@ function main() {
     if (!fs.existsSync(vo)) throw new Error(`Missing VO ${b.part}`);
     const img = a(b.still);
     if (!fs.existsSync(img)) throw new Error(`Missing still ${b.still}`);
-    const d = dur(vo) + PAD;
+    const isLast = i === BEATS.length - 1;
+    const d = dur(vo) + PAD + (isLast ? TAIL_PAD : 0);
     const clip = path.join(WORK, `beat_${String(i).padStart(2, '0')}.mp4`);
     stillHold(img, clip, d);
     const muxed = path.join(WORK, `beat_${String(i).padStart(2, '0')}_m.mp4`);
+    // Pad VO with silence so thank-you finishes before outro bookend
+    const padDur = PAD + (isLast ? TAIL_PAD : 0);
     run([
       '-y', '-i', clip, '-i', vo,
-      '-filter_complex', `[1:a]apad=pad_dur=${PAD}[a]`,
+      '-filter_complex', `[1:a]apad=pad_dur=${padDur}[a]`,
       '-map', '0:v', '-map', '[a]',
-      '-c:v', 'copy', '-c:a', 'aac', '-shortest',
+      '-c:v', 'copy', '-c:a', 'aac', '-t', String(d),
       muxed,
     ]);
     bodyClips.push(muxed);
     const start = t;
     t += d;
-    srt.push(`${i + 2}\n${tsFmt(start)} --> ${tsFmt(t - 0.05)}\n${b.caption}\n`);
+    srt.push(`${i + 2}\n${tsFmt(start)} --> ${tsFmt(start + dur(vo))}\n${b.caption}\n`);
   }
 
+  // Silent matching outro — music only, AFTER thank-you VO fully ends
   const outroA = path.join(WORK, 'outro_a.m4a');
   const outroClip = path.join(WORK, '99_outro.mp4');
   musicBed(music, outroA, OUTRO_SEC, { fadeOut: true, startAt: 28 });
-  muxSilentStill(STAPLE.outro, outroA, outroClip, OUTRO_SEC);
+  muxSilentStill(outroImg, outroA, outroClip, OUTRO_SEC);
   srt.push(`${BEATS.length + 2}\n${tsFmt(t)} --> ${tsFmt(t + OUTRO_SEC - 0.05)}\nThank You · Go Stingrays · SHMS PTO\n`);
 
   const list = path.join(WORK, 'concat.txt');
@@ -387,7 +413,7 @@ function main() {
   fs.writeFileSync(path.join(OUT_DIR, 'SHMSPTO_board_recruit_captions.srt'), srt.join('\n'));
   console.log('DONE', out);
   console.log('Watch file (Gemini PASS before Rob opens):', watch);
-  console.log('duration', dur(out).toFixed(1) + 's', `(incl. staple cold ${COLD_SEC}s + outro ${OUTRO_SEC}s)`);
+  console.log('duration', dur(out).toFixed(1) + 's');
 }
 
 main();

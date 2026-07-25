@@ -4,6 +4,7 @@
  * Generate board-recruit VO parts from board_recruit_elevenlabs.txt (one line = one m4a).
  *
  *   NODE_PATH=~/cwn-c0/node_modules node scripts/generate_board_recruit_vo.js
+ *   NODE_PATH=~/cwn-c0/node_modules node scripts/generate_board_recruit_vo.js --only p08_benefits,p10_apply_board,p13_close
  */
 require('dotenv').config({ path: '/Users/robertgregory/cwn-c0/.env' });
 
@@ -25,7 +26,6 @@ const NAMES = [
   'p06_events',
   'p07_initiatives',
   'p08_benefits',
-  'p09_donate_initiatives',
   'p10_apply_board',
   'p11_volunteer_fallback',
   'p12_volunteer_ways',
@@ -45,8 +45,12 @@ async function main() {
   if (lines.length !== NAMES.length) {
     throw new Error(`${SCRIPT}: ${lines.length} lines, expected ${NAMES.length}`);
   }
+  const onlyArg = process.argv.find((a, i) => process.argv[i - 1] === '--only');
+  const only = onlyArg ? new Set(onlyArg.split(',')) : null;
+
   console.log(`[board-vo] voice ${VOICE}`);
   for (let i = 0; i < lines.length; i++) {
+    if (only && !only.has(NAMES[i])) continue;
     const out = path.join(PARTS, `board_${NAMES[i]}.m4a`);
     console.log(`→ ${path.basename(out)}`);
     const r = await synthesizeSpeech(lines[i], out, {
@@ -56,6 +60,9 @@ async function main() {
     if (!r) throw new Error(`TTS failed for ${out}`);
     await new Promise((res) => setTimeout(res, 400));
   }
+  // Drop removed donate part if present
+  const dead = path.join(PARTS, 'board_p09_donate_initiatives.m4a');
+  if (fs.existsSync(dead)) fs.unlinkSync(dead);
   console.log('[board-vo] DONE');
 }
 

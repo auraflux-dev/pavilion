@@ -62,15 +62,16 @@ Watch the ENTIRE video with audio. Duration ≈ ${durationSec.toFixed(1)}s.
 NORTH STAR: SEE = HEAR. Role names spoken must match on-screen role cards/pages.
 
 MUST-PASS:
-0. STAPLE bookends: cold-open brand card at start (~5s, seal + SHMS PTO) and thank-you / Go Stingrays outro at end (~4s, seal + SHMS PTO). Missing either = critical FAIL
-1. Mentions five open board roles: Secretary, Treasurer, SEAC Representative, Events Coordinator, Initiatives Coordinator — each role beat should show that role's highlight bullets on a designed slide (not a blank/generic screen)
+0. STAPLE bookends: cold-open brand card at start (~5s, seal + SHMS PTO) and thank-you / Go Stingrays outro at end (~4s, SAME logo style as intro — no mismatched white-plate seal). Missing either = critical FAIL
+1. Mentions five open board roles: Secretary, Treasurer, SEAC Representative, Events Coordinator, Initiatives Coordinator — each role beat should show that role's highlight bullets on a designed slide
 2. Initiatives framed as enrichment programs + sponsorships (not jargon "EPS")
-3. Board benefits: free membership + 75% off enrichment (board roles) — on-screen bullets OK
-4. Board apply path: Board page and/or president@shmspto.org · urgency ASAP
+3. Board benefits on screen/VO: free Reef (first-tier) membership; 75% off ONE enrichment program per season; plus inside knowledge and/or direct impact (vote on funds). Do NOT require a "donate optional / support initiatives" beat.
+4. Board apply path: Board page on the website + president@shmspto.org · urgency ASAP
 5. CRITICAL: If someone cannot join the board, video must show Volunteer page/form and invite any contribution of time (shmspto.org/volunteer)
-6. No claim that general volunteers get free membership / 75% off
-7. Close bookend shows Thank You / Go Stingrays with SHMS PTO
-8. On-screen titles/bullets should be readable Title Case (not random lowercase walls of text)
+6. No claim that general volunteers get free membership / enrichment discount
+7. Thank-you VO must finish on a thank-you slide BEFORE the silent outro bookend (VO must not play early over / into outro)
+8. On-screen titles/bullets Title Case; commitment/footer text readable and not sitting in the bottom wave graphics
+9. Do NOT replay a "What You Need To Know / Five Roles" slide at the end before thank you
 
 Return ONLY valid JSON:
 {
