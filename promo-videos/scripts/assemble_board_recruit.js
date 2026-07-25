@@ -51,11 +51,19 @@ const PAD = 0.9;
 const TAIL_PAD = 1.2;
 
 /**
- * Left copy owns the open landscape (big, readable). Stay above wave crest.
- * At TEXT_X≈120, wave encroaches ~y520+; keep content under WAVE_SAFE_MAX_Y.
+ * Universal type scale — same sizes on every slide (no per-slide scaling).
+ * Sized so the densest slide (5 bullets) still clears the wave crest.
  */
 const TEXT_X = 110;
 const BULLET_X = 140;
+const TYPE_EYEBROW = 40;
+const TYPE_TITLE = 72;
+const TYPE_BULLET = 44;
+const TYPE_BRAND = 44;
+const TYPE_FOOTER = 38;
+const STEP_EYEBROW = 56;
+const STEP_TITLE = 88;
+const STEP_BULLET = 48;
 /** Bottom of glyphs must stay above this (wave crest at TEXT_X≈110) */
 const WAVE_SAFE_MAX_Y = 540;
 const CONTENT_MAX_Y = WAVE_SAFE_MAX_Y;
@@ -124,48 +132,35 @@ function makeSlide(outName, { eyebrow, title, bullets = [], footer }) {
   };
 
   addText('SHMS PTO', {
-    size: 44,
+    size: TYPE_BRAND,
     color: '0x98C818',
     x: `${LOGO_CX}-text_w/2`,
     y: LABEL_Y,
   });
 
-  // Left column — same top as logo; fill the frame (readable on phone)
+  // Left column — universal type, same top as logo
   let y = TEXT_TOP;
   if (eyebrow) {
-    addText(eyebrow, { size: 40, color: '0x98C818', x: TEXT_X, y });
-    y += 58;
+    addText(eyebrow, { size: TYPE_EYEBROW, color: '0x98C818', x: TEXT_X, y });
+    y += STEP_EYEBROW;
   }
-  // Dense lists keep a slightly smaller title so every bullet still fits
-  let titleSize = title.length > 28 ? 68 : title.length > 18 ? 78 : 88;
-  if (bullets.length >= 5) titleSize = Math.min(titleSize, 72);
   addText(title, {
-    size: titleSize,
+    size: TYPE_TITLE,
     color: 'white',
     x: TEXT_X,
     y,
   });
-  y += Math.round(titleSize * 1.2);
+  y += STEP_TITLE;
 
-  // Partition safe band so every bullet fits; role slides (≤3) get largest type
-  const slots = Math.max(bullets.length, 1);
-  const room = Math.max(CONTENT_MAX_Y - y, 120);
-  const bulletStep = Math.floor(room / slots);
-  const bulletSize = Math.min(
-    bullets.length <= 3 ? 58 : 48,
-    Math.max(40, bulletStep - 14),
-  );
   for (const b of bullets) {
-    // Glyph bottoms must clear the wave crest
-    if (y + bulletSize > CONTENT_MAX_Y) break;
-    addText(`•  ${b}`, { size: bulletSize, color: 'white', x: BULLET_X, y, bold: false });
-    y += bulletStep;
+    if (y + TYPE_BULLET > CONTENT_MAX_Y) break;
+    addText(`•  ${b}`, { size: TYPE_BULLET, color: 'white', x: BULLET_X, y, bold: false });
+    y += STEP_BULLET;
   }
   if (footer) {
-    // Under seal, dropped below SHMS PTO — clear of waves
     const tag = `v${n++}`;
     parts.push(
-      `[${last}]drawtext=fontfile=${fontB}:text='${esc(footer)}':fontsize=38:fontcolor=white:` +
+      `[${last}]drawtext=fontfile=${fontB}:text='${esc(footer)}':fontsize=${TYPE_FOOTER}:fontcolor=white:` +
       `borderw=3:bordercolor=black@0.8:x=${LOGO_CX}-text_w/2:y=${FOOTER_Y}[${tag}]`
     );
     last = tag;
