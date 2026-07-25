@@ -50,7 +50,7 @@ function ensureBoardColdOpen() {
   const LOGO_W = 480;
   const LOGO_RIGHT = 140;
   const LOGO_X = 1920 - LOGO_W - LOGO_RIGHT;
-  const LOGO_CX = LOGO_X + LOGO_W / 2 - 55; // visual center under circular seal
+  const LOGO_CX = LOGO_X + LOGO_W / 2; // geometric center of seal overlay
   const LOGO_Y = Math.round((1080 - LOGO_W) / 2 - 30);
   const LABEL_Y = LOGO_Y + LOGO_W + 18;
 

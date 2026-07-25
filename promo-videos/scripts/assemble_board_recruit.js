@@ -46,7 +46,7 @@ const LOGO_W = 480;
 const LOGO_RIGHT = 140;
 const LOGO_X = W - LOGO_W - LOGO_RIGHT; // 1300
 /** Visual center of circular seal (nudge left — stingray tail pulls bbox right) */
-const LOGO_CX = LOGO_X + LOGO_W / 2 - 55;
+const LOGO_CX = LOGO_X + LOGO_W / 2; // geometric center of seal overlay (= ~1540)
 const LOGO_Y = Math.round((H - LOGO_W) / 2 - 30); // ~270
 const LABEL_Y = LOGO_Y + LOGO_W + 18; // just under seal
 

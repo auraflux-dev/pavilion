@@ -27,12 +27,13 @@ function brand(bakName, destName) {
   const dest = path.join(THUMBS, destName);
   if (!fs.existsSync(src)) throw new Error(`Missing backup ${bakName}`);
 
-  // Lime label below seal (outside white circle)
+  // Lime label centered under the white seal circle (seal cx ≈ 1500 on 1920 cards)
+  const SEAL_CX = 1500;
   const vf = [
     `drawtext=fontfile=${FONT.replace(/:/g, '\\:')}:`,
     `text='SHMS PTO':`,
     `fontsize=48:fontcolor=0x98C818:`,
-    `x=w*0.745-text_w/2:`,
+    `x=${SEAL_CX}-text_w/2:`,
     `y=h*0.905`,
   ].join('');
 
