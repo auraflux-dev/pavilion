@@ -12,6 +12,7 @@ migration/data/
 # promo-videos — rebuild from scripts; keep sources, drop work products
 promo-videos/out/
 promo-videos/tmp/
+promo-videos/logs/
 promo-videos/**/.DS_Store
 promo-videos/vo/archive_*/
 promo-videos/vo/_DO_NOT_USE_*/

@@ -241,9 +241,13 @@ Go Stingrays.
 
 # VIDEO 2 — Board recruiting (open seats) · volunteer fallback
 
+**Status:** Gemini PASS — send-ready (Jul 25, 2026)  
 **Canonical VO:** `scripts/board_recruit_elevenlabs.txt`  
-**Assemble:** `node scripts/assemble_board_recruit.js` → `out/SHMSPTO_board_recruit_16x9.mp4`  
-**Watch:** `~/Downloads/SHMSPTO_WATCH_THIS_board_recruit_16x9.mp4` (Gemini PASS first)
+**VO gen:** `NODE_PATH=~/cwn-c0/node_modules node scripts/generate_board_recruit_vo.js`  
+**Assemble:** `NODE_PATH=~/cwn-c0/node_modules node scripts/assemble_board_recruit.js` → `out/SHMSPTO_board_recruit_16x9.mp4`  
+**QA:** `NODE_PATH=~/cwn-c0/node_modules node scripts/gemini_board_recruit_qa.js`  
+**Watch:** `~/Downloads/SHMSPTO_WATCH_THIS_board_recruit_16x9.mp4` (only after Gemini PASS)  
+**Bookends:** matching intro + outro seal + `SHMS PTO` via `scripts/staple_brand_bookends.js`
 
 ### Locked creative
 
@@ -251,22 +255,27 @@ Go Stingrays.
 |------|------|
 | Roles (5) | Secretary · Treasurer · SEAC Representative · Events Coordinator · Initiatives Coordinator |
 | Initiatives | **Enrichment programs + sponsorships** (say “enrichment programs,” not EPS) |
-| Benefits | **Board positions only:** free membership + 75% off enrichment; optional support Initiatives on site |
+| Benefits | **Board seats only:** free **Reef** (first tier) · **75% off 1 enrichment program per season** · Inside Knowledge · Direct Impact (vote on funds) |
 | When | ASAP |
-| Board apply | Board page + **president@shmspto.org** |
+| Board apply | **Board page on our website** + **president@shmspto.org** |
 | Cannot join board | **Volunteer page + form** — any contribution of time (`shmspto.org/volunteer`) |
+| Not in cut | Donate / optional Initiatives support beat · replaying “What You Need To Know” before thank you |
+| Type | Universal slide scale (eyebrow/title/bullets/footer) · bullets spaced · commitment under seal (2 lines if needed) · copy clear of bottom-left waves |
+| Timing | Thank-you VO finishes on thank-you slide **before** silent outro bookend |
 
 ### Scene map (SEE = HEAR)
 
 | Beat | Still / card | On-screen |
 |------|----------------|-----------|
-| Open | Board page | `OPEN BOARD SEATS` |
-| Roles intro | Role stack card | `5 ROLES · ASAP` |
-| Each role | Role title card | Role name + one-line scope |
-| Benefits | Benefits card | `FREE MEMBERSHIP` · `75% OFF ENRICHMENT` |
-| Apply board | Board CTA | `president@shmspto.org` |
-| Volunteer fallback | Volunteer **form** | `VOLUNTEER FORM` · `SHMSPTO.ORG/VOLUNTEER` |
-| Close | Outro | `GO STINGRAYS` |
+| Cold open | `cold_open_board_recruit.png` | `OPEN BOARD SEATS` · `Join The SHMS PTO` · seal |
+| Open | `slide_open.png` | `Five Seats Open` + five roles · commitment under seal |
+| Roles intro | `slide_roles.png` | `Five Roles · ASAP` |
+| Each role | `slide_*.png` | Role name + highlight bullets · hours under seal |
+| Benefits | `slide_benefits.png` | Reef · 75% off 1 enrichment/season · Inside Knowledge · Direct Impact |
+| Apply board | `slide_apply.png` | Board page on website · `president@shmspto.org` |
+| Volunteer fallback | `slide_volunteer.png` + form still | `SHMSPTO.ORG/Volunteer` |
+| Thank you | `slide_thanks.png` | `Thank You` · `Go Stingrays!` (VO ends here) |
+| Outro | `outro_board_recruit.png` | Matching seal + `SHMS PTO` (silent / music) |
 
 
 ---
