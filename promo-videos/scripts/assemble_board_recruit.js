@@ -50,12 +50,16 @@ const PAD = 0.9;
 /** Hold after last VO so thank-you finishes before silent outro */
 const TAIL_PAD = 1.2;
 
-/** Text column — clear of left swoosh waves; never over bottom-right waves */
-const TEXT_X = 90;
-const BULLET_X = 110;
-const FOOTER_X = 460; // clear of left-side design waves
-const FOOTER_Y = 800; // above bottom wave band
-const CONTENT_MAX_Y = 780;
+/**
+ * Site bg waves hug bottom-left (measured): at y=640 wave reaches ~x293;
+ * at y=520 ~x162. Park copy in mid landscape, ABOVE the crest.
+ */
+const TEXT_X = 340;   // clear of left wave rise
+const BULLET_X = 360;
+const WAVE_SAFE_MAX_Y = 620; // above wave at this TEXT_X
+const CONTENT_MAX_Y = WAVE_SAFE_MAX_Y;
+/** Commitment / footers: under seal on the right — clear of all waves */
+const FOOTER_Y = LABEL_Y + 64;
 
 const BEATS = [
   { part: 'vo/_parts/board_p01_open.m4a', still: 'assets/board-recruit/slide_open.png', caption: 'Five Board Seats Open' },
@@ -125,31 +129,31 @@ function makeSlide(outName, { eyebrow, title, bullets = [], footer }) {
     y: LABEL_Y,
   });
 
-  // Left column starts at same Y as logo top
+  // Mid-landscape column — same top as logo; never into bottom-left waves
   let y = TEXT_TOP;
   if (eyebrow) {
-    addText(eyebrow, { size: 28, color: '0x98C818', x: TEXT_X, y });
-    y += 48;
+    addText(eyebrow, { size: 32, color: '0x98C818', x: TEXT_X, y });
+    y += 50;
   }
   addText(title, {
-    size: title.length > 24 ? 52 : 60,
+    size: title.length > 24 ? 54 : 62,
     color: 'white',
     x: TEXT_X,
     y,
   });
-  y += 78;
+  y += 76;
 
   for (const b of bullets) {
     if (y > CONTENT_MAX_Y) break;
-    addText(`•  ${b}`, { size: 34, color: 'white', x: BULLET_X, y, bold: false });
-    y += 56;
+    addText(`•  ${b}`, { size: 38, color: 'white', x: BULLET_X, y, bold: false });
+    y += 52;
   }
   if (footer) {
-    // White + dark edge so commitment/footer stays readable over green waves
+    // Under logo in clear landscape — never on bottom-left waves (mobile-readable)
     const tag = `v${n++}`;
     parts.push(
-      `[${last}]drawtext=fontfile=${fontB}:text='${esc(footer)}':fontsize=32:fontcolor=white:` +
-      `borderw=3:bordercolor=black@0.75:x=${FOOTER_X}:y=${FOOTER_Y}[${tag}]`
+      `[${last}]drawtext=fontfile=${fontB}:text='${esc(footer)}':fontsize=36:fontcolor=white:` +
+      `borderw=3:bordercolor=black@0.8:x=${LOGO_CX}-text_w/2:y=${FOOTER_Y}[${tag}]`
     );
     last = tag;
   }
