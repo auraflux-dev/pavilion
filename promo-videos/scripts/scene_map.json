@@ -1,0 +1,192 @@
+{
+  "title": "SHMSPTO parent tour",
+  "aspect": "16:9",
+  "voiceId": "joS3VNDgWtGa4Qh8jbI7",
+  "voiceName": "Better PTO",
+  "voFull": "vo/parent_tour_full.m4a",
+  "voChapters": {
+    "ch1": { "file": "vo/ch01_website.m4a", "durationSec": 41.75 },
+    "ch2": { "file": "vo/ch02_membership.m4a", "durationSec": 36.83 },
+    "ch3": { "file": "vo/ch03_cove_card.m4a", "durationSec": 31.63 }
+  },
+  "music": {
+    "file": "assets/music/es_go_adelyn_paik_instrumental.mp3",
+    "title": "Go (Instrumental Version) — Adelyn Paik",
+    "mixedWithVo": "vo/parent_tour_vo_music.m4a",
+    "bedVolume": "-22dB",
+    "note": "Was 0.12 (~-18dB linear) — remixed to -22dB under full VO; fade in/out; trim to VO length"
+  },
+  "privacy": "Blur emails on portal frames before public post",
+  "beats": [
+    {
+      "id": "c1_01",
+      "chapter": 1,
+      "voCue": "Hi Stingray families. The Stone Hill Middle School PTO just launched a brand-new website: shmspto.org.",
+      "asset": "assets/parent-tour/ch1/01_home.png",
+      "overlay": ["STONE HILL MIDDLE SCHOOL PTO", "SHMSPTO.ORG"],
+      "mustShow": "Home hero + brand"
+    },
+    {
+      "id": "c1_02",
+      "chapter": 1,
+      "voCue": "You do not need a membership to explore. This site is for every SHMS family.",
+      "asset": "assets/parent-tour/ch1/01_home.png",
+      "overlay": ["OPEN TO EVERY FAMILY"],
+      "mustShow": "Top nav visible"
+    },
+    {
+      "id": "c1_03",
+      "chapter": 1,
+      "voCue": "Programs. Evening enrichment and student opportunities.",
+      "asset": "assets/parent-tour/ch1/02_programs.png",
+      "overlay": ["PROGRAMS"],
+      "mustShow": "Programs page"
+    },
+    {
+      "id": "c1_04",
+      "chapter": 1,
+      "voCue": "Events. What is happening at school with the PTO.",
+      "asset": "assets/parent-tour/ch1/03_events.png",
+      "overlay": ["EVENTS"],
+      "mustShow": "Events page"
+    },
+    {
+      "id": "c1_05",
+      "chapter": 1,
+      "voCue": "The Cove. Our school store and snack window, online.",
+      "asset": "assets/parent-tour/ch1/04_cove.png",
+      "overlay": ["THE COVE"],
+      "mustShow": "The Cove page"
+    },
+    {
+      "id": "c1_06",
+      "chapter": 1,
+      "voCue": "Volunteer and Fundraising. Ways to help when you can.",
+      "asset": "assets/parent-tour/ch1/05_volunteer.png",
+      "assetAlt": "assets/parent-tour/ch1/06_fundraising.png",
+      "overlay": ["VOLUNTEER", "FUNDRAISING"],
+      "mustShow": "Volunteer then Fundraising (split still or cut)"
+    },
+    {
+      "id": "c1_07",
+      "chapter": 1,
+      "voCue": "Meet the Board, and find PTO Meetings. All in the top menu.",
+      "asset": "assets/parent-tour/ch1/07_board.png",
+      "assetAlt": "assets/parent-tour/ch1/08_meetings.png",
+      "overlay": ["BOARD", "MEETINGS"],
+      "mustShow": "Board then Meetings"
+    },
+    {
+      "id": "c1_08",
+      "chapter": 1,
+      "voCue": "When you are ready to support the PTO, Membership is right there in the nav. That is how you become a member. Here is what that looks like.",
+      "asset": "assets/parent-tour/ch1/09_membership.png",
+      "overlay": ["NEXT · MEMBERSHIP"],
+      "mustShow": "Membership page / tiers"
+    },
+    {
+      "id": "c2_01",
+      "chapter": 2,
+      "voCue": "Membership is online at shmspto.org slash membership. Pick Reef, Lagoon, or Tide.",
+      "asset": "assets/parent-tour/ch2/01b_membership_tiers_full.png",
+      "overlay": ["SHMSPTO.ORG/MEMBERSHIP", "REEF · LAGOON · TIDE"],
+      "mustShow": "Three tier cards"
+    },
+    {
+      "id": "c2_02",
+      "chapter": 2,
+      "voCue": "Your membership helps fund everything the PTO runs for SHMS PTO families.",
+      "asset": "assets/parent-tour/ch1/01_home.png",
+      "montage": [
+        "assets/parent-tour/ch1/02_programs.png",
+        "assets/parent-tour/ch1/03_events.png",
+        "assets/parent-tour/ch1/04_cove.png",
+        "assets/parent-tour/ch1/05_volunteer.png",
+        "assets/parent-tour/ch1/06_fundraising.png",
+        "assets/parent-tour/ch1/07_board.png",
+        "assets/parent-tour/ch1/08_meetings.png"
+      ],
+      "overlay": ["MEMBERSHIP FUNDS ALL OF THIS"],
+      "mustShow": "Nav destinations montage"
+    },
+    {
+      "id": "c2_03",
+      "chapter": 2,
+      "voCue": "Signing up takes about two minutes online. Lagoon and Tide ask for T shirt size at checkout so we can fulfill the shirt.",
+      "asset": "assets/parent-tour/ch2/01b_membership_tiers_full.png",
+      "assetAlt": "assets/parent-tour/ch2/02_auth_join.png",
+      "overlay": ["ABOUT 2 MINUTES", "T-SHIRT SIZE AT CHECKOUT"],
+      "mustShow": "Join / membership CTA · Lagoon/Tide tee size"
+    },
+    {
+      "id": "c2_04",
+      "chapter": 2,
+      "voCue": "And joining does not mean mandatory volunteer hours.",
+      "asset": "assets/parent-tour/ch1/05_volunteer.png",
+      "overlay": ["NO MANDATORY VOLUNTEER HOURS"],
+      "mustShow": "Volunteer page (optional help)"
+    },
+    {
+      "id": "c2_05",
+      "chapter": 2,
+      "voCue": "Once you are signed in, you will also see your Cove Digital Card in the Member Portal.",
+      "asset": "assets/parent-tour/ch3/01_portal_free_account.png",
+      "overlay": ["NEXT · COVE DIGITAL CARD"],
+      "mustShow": "Member Portal",
+      "privacy": "blur_email"
+    },
+    {
+      "id": "c3_01",
+      "chapter": 3,
+      "voCue": "Every signed in family gets a Cove Digital Card in the Member Portal — a QR to show at the snack window, plus a six digit code as backup.",
+      "asset": "assets/parent-tour/ch3/02b_store_cove_code_qr_free.png",
+      "overlay": ["COVE DIGITAL CARD", "QR PRIMARY"],
+      "mustShow": "QR primary + 6-digit backup",
+      "privacy": "blur_email"
+    },
+    {
+      "id": "c3_01b",
+      "chapter": 3,
+      "voCue": "Show the QR at the snack window, or say the six digit backup. You can also save the QR to Photos. Apple and Google Wallet are coming soon — same digital card, even easier on a phone.",
+      "asset": "assets/parent-tour/ch3/02b_store_cove_code_qr_free.png",
+      "overlay": ["SHOW QR", "SAVE TO PHOTOS", "WALLET COMING SOON"],
+      "mustShow": "QR how-to + Photos + Wallet soon",
+      "privacy": "blur_email"
+    },
+    {
+      "id": "c3_02",
+      "chapter": 3,
+      "voCue": "Paid Reef, Lagoon, or Tide: your card credit is preloaded.",
+      "asset": "assets/parent-tour/ch3/02_portal_store_card_paid.png",
+      "overlay": ["PAID · PRELOADED"],
+      "mustShow": "Paid portal Store & Cove Digital Card",
+      "privacy": "blur_email"
+    },
+    {
+      "id": "c3_03",
+      "chapter": 3,
+      "voCue": "Free parent account: load money anytime in that same portal. Same QR and same backup code either way.",
+      "asset": "assets/parent-tour/ch3/03b_load_family_card_free.png",
+      "overlay": ["FREE · LOAD ANYTIME"],
+      "mustShow": "Load family card UI + FREE MEMBER",
+      "privacy": "blur_email"
+    },
+    {
+      "id": "c3_04",
+      "chapter": 3,
+      "voCue": "At the snack window, kids show the QR or say the code, and staff charges your family balance.",
+      "asset": "assets/parent-tour/ch3/04_cove_shop.png",
+      "overlay": ["SHOW QR OR SAY CODE"],
+      "mustShow": "The Cove snack window"
+    },
+    {
+      "id": "c3_06",
+      "chapter": 3,
+      "voCue": "Bookmark SHMSPTO dot org, join Membership when you are ready, and open the Member Portal for your Cove Digital Card. Go Stingrays!",
+      "asset": "assets/parent-tour/ch3/05_end_home.png",
+      "logo": "assets/parent-tour/ch3/06_logo.png",
+      "overlay": ["SHMSPTO.ORG", "MEMBERSHIP", "MEMBER PORTAL"],
+      "mustShow": "Home + logo end"
+    }
+  ]
+}

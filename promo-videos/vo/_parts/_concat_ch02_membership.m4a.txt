@@ -1,0 +1,7 @@
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch02_membership_p01.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch02_membership_p02.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch02_membership_p03.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch02_membership_p04.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch02_membership_p05.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch02_membership_p06.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch02_membership_p07.m4a'

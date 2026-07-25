@@ -8,3 +8,18 @@ frontend/.env.local
 data/*.csv
 migration/data/
 .vercel
+
+# promo-videos — rebuild from scripts; keep sources, drop work products
+promo-videos/out/
+promo-videos/tmp/
+promo-videos/**/.DS_Store
+promo-videos/vo/archive_*/
+promo-videos/vo/_DO_NOT_USE_*/
+promo-videos/vo/compare/
+promo-videos/vo/*.m4a
+promo-videos/vo/*.mp3
+promo-videos/assets/parent-tour/video/_pw_*/
+promo-videos/assets/parent-tour/video/_frames/
+promo-videos/assets/parent-tour/video/*.bak
+promo-videos/assets/parent-tour/thumbs/*_pre_shmspto.png
+promo-videos/assets/parent-tour/thumbs/*_evergreen*

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 1920px; height: 1080px; overflow: hidden;
+      background: #F5F0E8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      color: #1A1A1A;
+    }
+    .shell { width: 920px; margin: 72px auto 0; }
+    .hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px; padding: 0 4px;
+    }
+    .hdr .who { font-size: 18px; font-weight: 700; color: #085508; }
+    .hdr .nav { font-size: 15px; color: #5A6070; }
+    .card {
+      border: 1px solid #F0D9A0; background: #FFF7E6;
+      border-radius: 16px; padding: 28px 32px;
+    }
+    .title-row { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
+    .icon {
+      width: 28px; height: 28px; border-radius: 6px; background: #085508;
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 800; flex-shrink: 0; margin-top: 2px;
+    }
+    .title { font-size: 22px; font-weight: 800; }
+    .title span { font-weight: 600; color: #5A6070; font-size: 18px; }
+    .why { font-size: 16px; color: #5A6070; line-height: 1.45; margin-top: 6px; }
+    .lock {
+      margin-top: 12px; font-size: 15px; font-weight: 700; color: #8A6400;
+      display: flex; align-items: center; gap: 8px;
+    }
+    ul { list-style: none; margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+    li {
+      display: flex; gap: 12px; align-items: flex-start;
+      border: 1px solid #F0EDE8; background: #FAFAF8;
+      border-radius: 12px; padding: 14px 16px;
+    }
+    .dot {
+      width: 18px; height: 18px; border-radius: 50%; border: 2px solid #8A8F9C;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .dot.done { background: #085508; border-color: #085508; }
+    .item-title { font-size: 16px; font-weight: 700; }
+    .item-detail { font-size: 14px; color: #5A6070; margin-top: 3px; line-height: 1.4; }
+    .foot {
+      margin-top: 22px; text-align: center; font-size: 14px; color: #5A6070;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="hdr">
+      <div class="who">FREE MEMBER · Member Portal</div>
+      <div class="nav">My Portal · The Cove · Programs</div>
+    </div>
+    <section class="card">
+      <div class="title-row">
+        <div class="icon">✓</div>
+        <div>
+          <p class="title">Family setup checklist <span>· 1/3 required</span></p>
+          <p class="why">You can browse anytime. Cove QR, card loads, and enrichment stay locked until the required steps below are done.</p>
+          <p class="lock">🔒 The Cove digital card is locked until setup is complete</p>
+        </div>
+      </div>
+      <ul>
+        <li>
+          <div class="dot done"></div>
+          <div>
+            <p class="item-title">Add your students</p>
+            <p class="item-detail">Name and grade so programs and The Cove attach to the right kids.</p>
+          </div>
+        </li>
+        <li>
+          <div class="dot"></div>
+          <div>
+            <p class="item-title">Complete student safety profile</p>
+            <p class="item-detail">Parent phone, emergency contact, and pick-up list — required to unlock The Cove card.</p>
+          </div>
+        </li>
+        <li>
+          <div class="dot"></div>
+          <div>
+            <p class="item-title">Review allergies &amp; notes</p>
+            <p class="item-detail">So snack-window staff know what matters for your family.</p>
+          </div>
+        </li>
+      </ul>
+      <p class="foot">Finish setup → Cove Digital Card unlocks</p>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,3 @@
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/ch01_website.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/ch02_membership.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/ch03_cove_card.m4a'

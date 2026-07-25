@@ -1,0 +1,6 @@
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch03_cove_card_p01.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch03_cove_card_p02.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch03_cove_card_p03.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch03_cove_card_p04.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch03_cove_card_p05.m4a'
+file '/Users/robertgregory/wix-shmspto/promo-videos/vo/_parts/ch03_cove_card_p06.m4a'
