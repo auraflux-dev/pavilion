@@ -51,15 +51,16 @@ const PAD = 0.9;
 const TAIL_PAD = 1.2;
 
 /**
- * Site bg waves hug bottom-left (measured): at y=640 wave reaches ~x293;
- * at y=520 ~x162. Park copy in mid landscape, ABOVE the crest.
+ * Left copy owns the open landscape (big, readable). Stay above wave crest.
+ * At TEXT_X≈120, wave encroaches ~y520+; keep content under WAVE_SAFE_MAX_Y.
  */
-const TEXT_X = 340;   // clear of left wave rise
-const BULLET_X = 360;
-const WAVE_SAFE_MAX_Y = 620; // above wave at this TEXT_X
+const TEXT_X = 110;
+const BULLET_X = 140;
+/** Bottom of glyphs must stay above this (wave crest at TEXT_X≈110) */
+const WAVE_SAFE_MAX_Y = 540;
 const CONTENT_MAX_Y = WAVE_SAFE_MAX_Y;
-/** Commitment / footers: under seal on the right — clear of all waves */
-const FOOTER_Y = LABEL_Y + 64;
+/** Commitment under seal — dropped for breathing room below SHMS PTO */
+const FOOTER_Y = LABEL_Y + 130;
 
 const BEATS = [
   { part: 'vo/_parts/board_p01_open.m4a', still: 'assets/board-recruit/slide_open.png', caption: 'Five Board Seats Open' },
@@ -129,30 +130,42 @@ function makeSlide(outName, { eyebrow, title, bullets = [], footer }) {
     y: LABEL_Y,
   });
 
-  // Mid-landscape column — same top as logo; never into bottom-left waves
+  // Left column — same top as logo; fill the frame (readable on phone)
   let y = TEXT_TOP;
   if (eyebrow) {
-    addText(eyebrow, { size: 32, color: '0x98C818', x: TEXT_X, y });
-    y += 50;
+    addText(eyebrow, { size: 40, color: '0x98C818', x: TEXT_X, y });
+    y += 58;
   }
+  // Dense lists keep a slightly smaller title so every bullet still fits
+  let titleSize = title.length > 28 ? 68 : title.length > 18 ? 78 : 88;
+  if (bullets.length >= 5) titleSize = Math.min(titleSize, 72);
   addText(title, {
-    size: title.length > 24 ? 54 : 62,
+    size: titleSize,
     color: 'white',
     x: TEXT_X,
     y,
   });
-  y += 76;
+  y += Math.round(titleSize * 1.2);
 
+  // Partition safe band so every bullet fits; role slides (≤3) get largest type
+  const slots = Math.max(bullets.length, 1);
+  const room = Math.max(CONTENT_MAX_Y - y, 120);
+  const bulletStep = Math.floor(room / slots);
+  const bulletSize = Math.min(
+    bullets.length <= 3 ? 58 : 48,
+    Math.max(40, bulletStep - 14),
+  );
   for (const b of bullets) {
-    if (y > CONTENT_MAX_Y) break;
-    addText(`•  ${b}`, { size: 38, color: 'white', x: BULLET_X, y, bold: false });
-    y += 52;
+    // Glyph bottoms must clear the wave crest
+    if (y + bulletSize > CONTENT_MAX_Y) break;
+    addText(`•  ${b}`, { size: bulletSize, color: 'white', x: BULLET_X, y, bold: false });
+    y += bulletStep;
   }
   if (footer) {
-    // Under logo in clear landscape — never on bottom-left waves (mobile-readable)
+    // Under seal, dropped below SHMS PTO — clear of waves
     const tag = `v${n++}`;
     parts.push(
-      `[${last}]drawtext=fontfile=${fontB}:text='${esc(footer)}':fontsize=36:fontcolor=white:` +
+      `[${last}]drawtext=fontfile=${fontB}:text='${esc(footer)}':fontsize=38:fontcolor=white:` +
       `borderw=3:bordercolor=black@0.8:x=${LOGO_CX}-text_w/2:y=${FOOTER_Y}[${tag}]`
     );
     last = tag;
