@@ -239,52 +239,35 @@ Go Stingrays.
 
 
 
-# VIDEO 2 — Meet the team · WhatsApp · opens · volunteers
+# VIDEO 2 — Board recruiting (open seats) · volunteer fallback
 
-*(Unchanged for now — still ~60–75s; same BTM voice.)*
+**Canonical VO:** `scripts/board_recruit_elevenlabs.txt`  
+**Assemble:** `node scripts/assemble_board_recruit.js` → `out/SHMSPTO_board_recruit_16x9.mp4`  
+**Watch:** `~/Downloads/SHMSPTO_WATCH_THIS_board_recruit_16x9.mp4` (Gemini PASS first)
 
-**WhatsApp:** portal CTA + grade QR images — **not** chat screenshots.
+### Locked creative
 
-### Scene map
+| Item | Call |
+|------|------|
+| Roles (5) | Secretary · Treasurer · SEAC Representative · Events Coordinator · Initiatives Coordinator |
+| Initiatives | **Enrichment programs + sponsorships** (say “enrichment programs,” not EPS) |
+| Benefits | **Board positions only:** free membership + 75% off enrichment; optional support Initiatives on site |
+| When | ASAP |
+| Board apply | Board page + **president@shmspto.org** |
+| Cannot join board | **Volunteer page + form** — any contribution of time (`shmspto.org/volunteer`) |
 
+### Scene map (SEE = HEAR)
 
-| #   | ~Time     | Still                 | On-screen               | Beat                                               |
-| --- | --------- | --------------------- | ----------------------- | -------------------------------------------------- |
-| 1   | 0:00–0:08 | home / board          | `MEET YOUR PTO`         | Open                                               |
-| 2   | 0:08–0:28 | `v2-01-board.png`     | `LEADERSHIP TEAM`       | Named officers                                     |
-| 3   | 0:28–0:40 | OPEN cards            | `POSITIONS OPEN`        | Secretary, Treasurer, SEAC, Volunteer Coordinators |
-| 4   | 0:40–0:52 | grade QRs             | `GRADE WHATSAPP`        | Join from portal                                   |
-| 5   | 0:52–1:05 | `v2-02-volunteer.png` | `VOLUNTEER`             | Ways to help                                       |
-| 6   | 1:05–1:15 | logo + QR             | `SHMSPTO.ORG/VOLUNTEER` | CTA                                                |
+| Beat | Still / card | On-screen |
+|------|----------------|-----------|
+| Open | Board page | `OPEN BOARD SEATS` |
+| Roles intro | Role stack card | `5 ROLES · ASAP` |
+| Each role | Role title card | Role name + one-line scope |
+| Benefits | Benefits card | `FREE MEMBERSHIP` · `75% OFF ENRICHMENT` |
+| Apply board | Board CTA | `president@shmspto.org` |
+| Volunteer fallback | Volunteer **form** | `VOLUNTEER FORM` · `SHMSPTO.ORG/VOLUNTEER` |
+| Close | Outro | `GO STINGRAYS` |
 
-
-
-
-### VO (Video 2)
-
-```
-Your SHMS PTO is run entirely by parent volunteers.
-Every event, every program, every fundraiser starts with neighbors who showed up.
-
-Meet the board — President Robert Gregory,
-VP Membership Shweta Walia, VP Events Shruti Sagar,
-VP Marketing Diane Worden, VP Fundraising Pallavi Muley,
-VP Digital and Retail Grace Huang,
-plus program leads who keep wellness, The Cove, and family liaisons moving.
-
-We also have open seats — including Secretary, Treasurer,
-SEAC Liaison, and Volunteer Coordinators.
-No prior PTO experience required. A few hours a month can change a school year.
-
-Day to day, join your student’s grade WhatsApp from the Member Portal —
-sixth, seventh, or eighth — for reminders and PTO updates.
-That’s the group chat for your grade — not a substitute for the board.
-
-Ready to help? Volunteer With Us — school store window, events,
-chaperones, fundraisers. Sign up at shmspto.org slash volunteer.
-
-Go Stingrays.
-```
 
 ---
 

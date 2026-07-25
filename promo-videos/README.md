@@ -26,7 +26,7 @@
 |-------|--------|--------|
 | **Parent tour (stitched)** | Website → membership → Cove Digital Card | ~1:50 VO (+ music) |
 | **Long portal walkthrough** | Free vs paid deep dive (`VO_AND_SCENES.md`) | later |
-| **Team / volunteer** | Board, opens, WhatsApp | later |
+| **Board recruit** | 5 open seats + volunteer form fallback | `board_recruit_elevenlabs.txt` · assemble_board_recruit.js |
 
 | Folder | Contents |
 |--------|----------|
