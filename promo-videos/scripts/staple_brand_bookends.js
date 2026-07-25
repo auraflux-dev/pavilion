@@ -47,21 +47,12 @@ function ensureBoardColdOpen() {
   if (!fs.existsSync(logo)) throw new Error(`Missing logo ${logo}`);
 
   // Same visual language as parent cold open: site green plate + seal + title + SHMS PTO under seal
-  const vf = [
-    `scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg]`,
-    `[1:v]scale=520:-1,format=rgba[lg]`,
-    `[bg][lg]overlay=x=1920-w-160:y=(1080-h)/2-20[v1]`,
-    `drawtext=fontfile=${FONT.replace(/:/g, '\\:')}:text='OPEN BOARD SEATS':fontsize=72:fontcolor=white:x=90:y=340`,
-    `drawtext=fontfile=${FONT.replace(/:/g, '\\:')}:text='Serve your SHMS PTO':fontsize=40:fontcolor=0x98C818:x=90:y=440`,
-    `drawtext=fontfile=${FONT.replace(/:/g, '\\:')}:text='SHMS PTO':fontsize=48:fontcolor=0x98C818:x=1920*0.745-text_w/2:y=1080*0.905`,
-  ];
-  // filter_complex for overlay + drawtext on result
   const fc = [
     `[0:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg]`,
     `[1:v]scale=520:-1,format=rgba[lg]`,
     `[bg][lg]overlay=x=1920-w-160:y=(1080-h)/2-20[v1]`,
     `[v1]drawtext=fontfile=${FONT.replace(/:/g, '\\:')}:text='OPEN BOARD SEATS':fontsize=72:fontcolor=white:x=90:y=340,` +
-      `drawtext=fontfile=${FONT.replace(/:/g, '\\:')}:text='Serve your SHMS PTO':fontsize=40:fontcolor=0x98C818:x=90:y=440,` +
+      `drawtext=fontfile=${FONT.replace(/:/g, '\\:')}:text='Join the SHMS PTO':fontsize=40:fontcolor=0x98C818:x=90:y=440,` +
       `drawtext=fontfile=${FONT.replace(/:/g, '\\:')}:text='SHMS PTO':fontsize=48:fontcolor=0x98C818:x=1920*0.745-text_w/2:y=1080*0.905`,
   ].join(';');
 

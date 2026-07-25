@@ -21,7 +21,7 @@ Seal + lime **SHMS PTO** under seal on both. Music bed; no VO on bookends.
 - [ ] Cold open ~5s, **no captions / no VO**
 - [ ] Outro ~4s thank-you / Go Stingrays, **no VO**
 - [ ] Parent tour cold open copy: NEW PTO WEBSITE + What parents need to know  
-- [ ] Board recruit cold open copy: OPEN BOARD SEATS + Serve your SHMS PTO  
+- [ ] Board recruit cold open copy: OPEN BOARD SEATS + Join the SHMS PTO  
 - [ ] **SHMS PTO** label under the seal on **both** intro and outro (not overlapping MIDDLE SCHOOL)  
 - [ ] Same seal treatment for cold open **and** outro
 
