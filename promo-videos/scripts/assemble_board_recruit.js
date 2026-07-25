@@ -54,21 +54,23 @@ const TAIL_PAD = 1.2;
  * Universal type scale — same sizes on every slide (no per-slide scaling).
  * Sized so the densest slide (5 bullets) still clears the wave crest.
  */
-const TEXT_X = 110;
-const BULLET_X = 140;
+/** Mid-left column — room for real bullet gaps without sitting on waves */
+const TEXT_X = 280;
+const BULLET_X = 310;
 const TYPE_EYEBROW = 40;
 const TYPE_TITLE = 72;
 const TYPE_BULLET = 44;
 const TYPE_BRAND = 44;
-const TYPE_FOOTER = 38;
+const TYPE_FOOTER = 36;
 const STEP_EYEBROW = 56;
 const STEP_TITLE = 88;
-const STEP_BULLET = 48;
-/** Bottom of glyphs must stay above this (wave crest at TEXT_X≈110) */
-const WAVE_SAFE_MAX_Y = 540;
+const STEP_BULLET = 64; // ~20px air between lines
+const STEP_FOOTER = 44;
+/** Glyph bottoms clear wave crest at this TEXT_X */
+const WAVE_SAFE_MAX_Y = 680;
 const CONTENT_MAX_Y = WAVE_SAFE_MAX_Y;
-/** Commitment under seal — dropped for breathing room below SHMS PTO */
-const FOOTER_Y = LABEL_Y + 130;
+/** Commitment under seal — breathing room below SHMS PTO */
+const FOOTER_Y = LABEL_Y + 120;
 
 const BEATS = [
   { part: 'vo/_parts/board_p01_open.m4a', still: 'assets/board-recruit/slide_open.png', caption: 'Five Board Seats Open' },
@@ -158,12 +160,21 @@ function makeSlide(outName, { eyebrow, title, bullets = [], footer }) {
     y += STEP_BULLET;
   }
   if (footer) {
-    const tag = `v${n++}`;
-    parts.push(
-      `[${last}]drawtext=fontfile=${fontB}:text='${esc(footer)}':fontsize=${TYPE_FOOTER}:fontcolor=white:` +
-      `borderw=3:bordercolor=black@0.8:x=${LOGO_CX}-text_w/2:y=${FOOTER_Y}[${tag}]`
-    );
-    last = tag;
+    // Two lines under seal when · present — keeps commitment inside the frame
+    const s = String(footer);
+    const lines = s.includes(' · ')
+      ? (() => { const [a, ...rest] = s.split(' · '); return [a, rest.join(' · ')]; })()
+      : [s];
+    let fy = FOOTER_Y;
+    for (const line of lines) {
+      const tag = `v${n++}`;
+      parts.push(
+        `[${last}]drawtext=fontfile=${fontB}:text='${esc(line)}':fontsize=${TYPE_FOOTER}:fontcolor=white:` +
+        `borderw=3:bordercolor=black@0.8:x=${LOGO_CX}-text_w/2:y=${fy}[${tag}]`
+      );
+      last = tag;
+      fy += STEP_FOOTER;
+    }
   }
 
   run([
