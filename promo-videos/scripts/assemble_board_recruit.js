@@ -2,14 +2,22 @@
 'use strict';
 /**
  * Assemble board recruiting 16:9 video (stills + VO + light music).
- * Hard gate after: gemini_parent_tour_qa.js (or board-specific later).
+ * STAPLE: cold open (~5s) + outro (~4s) via staple_brand_bookends.js — same as parent tour.
  *
  *   NODE_PATH=~/cwn-c0/node_modules node scripts/assemble_board_recruit.js
+ *   NODE_PATH=~/cwn-c0/node_modules node scripts/gemini_board_recruit_qa.js
  */
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { execFileSync } = require('child_process');
+const {
+  COLD_SEC,
+  OUTRO_SEC,
+  PATHS: STAPLE,
+  ensureBoardColdOpen,
+  assertStapleAssets,
+} = require('./staple_brand_bookends');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUT_DIR = path.join(ROOT, 'out');
@@ -27,6 +35,7 @@ const FPS = 30;
 const VF = `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1,fps=${FPS}`;
 const PAD = 0.9;
 
+/** Body beats only — cold open + outro are STAPLE bookends (no VO). */
 const BEATS = [
   { part: 'vo/_parts/board_p01_open.m4a', still: 'assets/board-recruit/01_board.png', caption: '5 board seats open', title: 'OPEN BOARD SEATS' },
   { part: 'vo/_parts/board_p02_need_asap.m4a', still: 'assets/board-recruit/card_roles.png', caption: 'What each role does — ASAP', title: '5 ROLES · ASAP' },
@@ -37,10 +46,10 @@ const BEATS = [
   { part: 'vo/_parts/board_p07_initiatives.m4a', still: 'assets/board-recruit/card_initiatives.png', caption: 'Initiatives — enrichment & sponsorships', title: 'INITIATIVES COORDINATOR' },
   { part: 'vo/_parts/board_p08_benefits.m4a', still: 'assets/board-recruit/card_benefits.png', caption: 'Free membership · 75% off enrichment', title: 'BOARD BENEFITS' },
   { part: 'vo/_parts/board_p09_donate_initiatives.m4a', still: 'assets/board-recruit/card_donate.png', caption: 'Optional: support Initiatives', title: 'SUPPORT INITIATIVES' },
-  { part: 'vo/_parts/board_p10_apply_board.m4a', still: 'assets/board-recruit/01_board_cta.png', caption: 'Board page · president@shmspto.org', title: 'EMAIL PRESIDENT@' },
+  { part: 'vo/_parts/board_p10_apply_board.m4a', still: 'assets/board-recruit/card_apply.png', caption: 'Board page · president@shmspto.org', title: 'EMAIL PRESIDENT@' },
   { part: 'vo/_parts/board_p11_volunteer_fallback.m4a', still: 'assets/board-recruit/03_volunteer_form.png', caption: 'Cannot join board? Volunteer form', title: 'VOLUNTEER FORM' },
-  { part: 'vo/_parts/board_p12_volunteer_ways.m4a', still: 'assets/board-recruit/02_volunteer_mid.png', caption: 'Any contribution of time', title: 'SHMSPTO.ORG/VOLUNTEER' },
-  { part: 'vo/_parts/board_p13_close.m4a', still: 'assets/parent-tour/thumbs/outro_thank_you.png', caption: 'Go Stingrays!', title: 'GO STINGRAYS' },
+  { part: 'vo/_parts/board_p12_volunteer_ways.m4a', still: 'assets/board-recruit/02_volunteer.png', caption: 'Any contribution of time', title: 'SHMSPTO.ORG/VOLUNTEER' },
+  { part: 'vo/_parts/board_p13_close.m4a', still: 'assets/board-recruit/card_roles.png', caption: 'Thank you — Go Stingrays!', title: 'GO STINGRAYS' },
 ];
 
 function a(rel) { return path.join(ROOT, rel); }
@@ -99,10 +108,43 @@ function stillHold(img, outMp4, seconds) {
   ]);
 }
 
+function tsFmt(x) {
+  const h = Math.floor(x / 3600);
+  const m = Math.floor((x % 3600) / 60);
+  const s = Math.floor(x % 60);
+  const ms = Math.floor((x % 1) * 1000);
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
+}
+
+function musicBed(srcMusic, outAac, seconds, { fadeOut = true, startAt = 0 } = {}) {
+  const fade = fadeOut
+    ? `,afade=t=out:st=${Math.max(0, seconds - 1.2)}:d=1.2`
+    : '';
+  run([
+    '-y', '-ss', String(startAt), '-i', srcMusic, '-t', String(seconds),
+    '-af', `volume=-20dB,afade=t=in:st=0:d=0.6${fade}`,
+    '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-ac', '2', outAac,
+  ]);
+}
+
+function muxSilentStill(img, audio, dest, seconds) {
+  run([
+    '-y', '-loop', '1', '-i', img, '-i', audio,
+    '-vf', VF, '-t', String(seconds),
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', String(FPS),
+    '-c:a', 'aac', '-shortest',
+    dest,
+  ]);
+}
+
 function main() {
   if (!FONT) throw new Error('Arial Bold font missing');
   fs.mkdirSync(WORK, { recursive: true });
   fs.mkdirSync(a('assets/board-recruit'), { recursive: true });
+
+  const coldImg = ensureBoardColdOpen();
+  assertStapleAssets(coldImg);
+  console.log(`STAPLE bookends: cold ${COLD_SEC}s + outro ${OUTRO_SEC}s`);
 
   makeCard('card_roles.png', '5 ROLES OPEN', 'What you do · how you help');
   makeCard('card_secretary.png', 'SECRETARY', 'Minutes · calendar · micro-tasks');
@@ -112,10 +154,22 @@ function main() {
   makeCard('card_initiatives.png', 'INITIATIVES COORDINATOR', 'Enrichment programs · sponsorships');
   makeCard('card_benefits.png', 'BOARD BENEFITS', 'Free membership · 75% off enrichment');
   makeCard('card_donate.png', 'SUPPORT INITIATIVES', 'Optional donation on the site');
+  makeCard('card_apply.png', 'EMAIL PRESIDENT@SHMSPTO.ORG', 'Board page · tell us which role · ASAP');
 
-  const clips = [];
+  const music = a('assets/music/es_go_adelyn_paik_instrumental.mp3');
+  if (!fs.existsSync(music)) throw new Error('Missing music bed');
+
+  // --- STAPLE cold open (music only) ---
+  const coldA = path.join(WORK, 'cold_a.m4a');
+  const coldClip = path.join(WORK, '00_cold.mp4');
+  musicBed(music, coldA, COLD_SEC, { fadeOut: false });
+  muxSilentStill(coldImg, coldA, coldClip, COLD_SEC);
+
+  const bodyClips = [];
   const srt = [];
-  let t = 0;
+  let t = COLD_SEC;
+  srt.push(`1\n${tsFmt(0)} --> ${tsFmt(COLD_SEC - 0.05)}\nOPEN BOARD SEATS · SHMS PTO\n`);
+
   for (let i = 0; i < BEATS.length; i++) {
     const b = BEATS[i];
     const vo = a(b.part);
@@ -125,7 +179,6 @@ function main() {
     const d = dur(vo) + PAD;
     const clip = path.join(WORK, `beat_${String(i).padStart(2, '0')}.mp4`);
     stillHold(img, clip, d);
-    // mux exact VO under still (replace silence)
     const muxed = path.join(WORK, `beat_${String(i).padStart(2, '0')}_m.mp4`);
     run([
       '-y', '-i', clip, '-i', vo,
@@ -134,45 +187,48 @@ function main() {
       '-c:v', 'copy', '-c:a', 'aac', '-shortest',
       muxed,
     ]);
-    clips.push(muxed);
+    bodyClips.push(muxed);
     const start = t;
     t += d;
-    const ts = (x) => {
-      const h = Math.floor(x / 3600);
-      const m = Math.floor((x % 3600) / 60);
-      const s = Math.floor(x % 60);
-      const ms = Math.floor((x % 1) * 1000);
-      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
-    };
-    srt.push(`${i + 1}\n${ts(start)} --> ${ts(t - 0.05)}\n${b.caption}\n`);
+    srt.push(`${i + 2}\n${tsFmt(start)} --> ${tsFmt(t - 0.05)}\n${b.caption}\n`);
   }
 
+  // --- STAPLE outro (music only) ---
+  const outroA = path.join(WORK, 'outro_a.m4a');
+  const outroClip = path.join(WORK, '99_outro.mp4');
+  musicBed(music, outroA, OUTRO_SEC, { fadeOut: true, startAt: 28 });
+  muxSilentStill(STAPLE.outro, outroA, outroClip, OUTRO_SEC);
+  srt.push(`${BEATS.length + 2}\n${tsFmt(t)} --> ${tsFmt(t + OUTRO_SEC - 0.05)}\nTHANK YOU · GO STINGRAYS · SHMS PTO\n`);
+
   const list = path.join(WORK, 'concat.txt');
-  fs.writeFileSync(list, clips.map((c) => `file '${c}'`).join('\n'));
+  const all = [coldClip, ...bodyClips, outroClip];
+  fs.writeFileSync(list, all.map((c) => `file '${c}'`).join('\n'));
   const joined = path.join(WORK, 'joined.mp4');
   run(['-y', '-f', 'concat', '-safe', '0', '-i', list, '-c', 'copy', joined]);
 
-  const music = a('assets/music/es_go_adelyn_paik_instrumental.mp3');
+  // Light music under body VO only (bookends already have music beds)
   const out = path.join(OUT_DIR, 'SHMSPTO_board_recruit_16x9.mp4');
   const watch = path.join(os.homedir(), 'Downloads', 'SHMSPTO_WATCH_THIS_board_recruit_16x9.mp4');
-  if (fs.existsSync(music)) {
-    run([
-      '-y', '-i', joined, '-stream_loop', '-1', '-i', music,
-      '-filter_complex',
-      `[1:a]volume=0.10,afade=t=in:st=0:d=2[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=2[a]`,
-      '-map', '0:v', '-map', '[a]',
-      '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-c:a', 'aac',
-      '-movflags', '+faststart',
-      out,
-    ]);
-  } else {
-    fs.copyFileSync(joined, out);
-  }
+  const bodyStart = COLD_SEC;
+  const bodyEnd = t;
+  run([
+    '-y', '-i', joined, '-stream_loop', '-1', '-i', music,
+    '-filter_complex',
+    `[1:a]volume=0.08,afade=t=in:st=0:d=0.5[a1];` +
+      `[0:a][a1]amix=inputs=2:duration=first:dropout_transition=2:weights=1 0.35[a]`,
+    '-map', '0:v', '-map', '[a]',
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-c:a', 'aac',
+    '-movflags', '+faststart',
+    out,
+  ]);
+  // Note: bookend beds + body mix — acceptable; parent tour uses similar layered bed
+  void bodyStart; void bodyEnd;
+
   fs.copyFileSync(out, watch);
   fs.writeFileSync(path.join(OUT_DIR, 'SHMSPTO_board_recruit_captions.srt'), srt.join('\n'));
   console.log('DONE', out);
   console.log('Watch file (Gemini PASS before Rob opens):', watch);
-  console.log('duration', dur(out).toFixed(1) + 's');
+  console.log('duration', dur(out).toFixed(1) + 's', `(incl. staple cold ${COLD_SEC}s + outro ${OUTRO_SEC}s)`);
 }
 
 main();

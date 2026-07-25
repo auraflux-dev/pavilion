@@ -13,7 +13,17 @@ NODE_PATH=~/cwn-c0/node_modules node scripts/gemini_parent_tour_qa.js
 
 Gemini must watch the **entire** video and enforce SEE=HEAR (menu pages appear when named, membership on membership, portal = Cove QR / no Staff chrome, no white/black flashes).
 
-## Cold open / outro cards
+## Cold open / outro cards (STAPLE — every video)
+
+**Required on every SHMSPTO promo:** ~5s cold open + ~4s outro from `scripts/staple_brand_bookends.js`.
+Seal + lime **SHMS PTO** under seal on both. Music bed; no VO on bookends.
+
+- [ ] Cold open ~5s, **no captions / no VO**
+- [ ] Outro ~4s thank-you / Go Stingrays, **no VO**
+- [ ] Parent tour cold open copy: NEW PTO WEBSITE + What parents need to know  
+- [ ] Board recruit cold open copy: OPEN BOARD SEATS + Serve your SHMS PTO  
+- [ ] **SHMS PTO** label under the seal on **both** intro and outro (not overlapping MIDDLE SCHOOL)  
+- [ ] Same seal treatment for cold open **and** outro
 
 - [ ] Exactly **one** logo: official Stone Hill seal only
 - [ ] No AI seal, no PTO ribbon peeking, no second emblem
@@ -21,10 +31,7 @@ Gemini must watch the **entire** video and enforce SEE=HEAR (menu pages appear w
 - [ ] Logo sits on continuous `#085508` (site primary) — circular pad OK; square panel **fail**
 - [ ] Headline fully readable (not clipped by logo)
 - [ ] Banner lime ≈ `#98C818`; not purple / cream / lavender “NEW”
-- [ ] Cold open copy: NEW PTO WEBSITE + What parents need to know  
-- [ ] Outro copy: THANK YOU / Stingray families / Go Stingrays!  
-- [ ] **SHMS PTO** label under the seal on **both** intro and outro (not overlapping MIDDLE SCHOOL)  
-- [ ] Same treatment for cold open **and** outro
+- [ ] Outro copy: THANK YOU / Stingray families / Go Stingrays!
 
 ## Full cut (Gemini + agent checklist)
 

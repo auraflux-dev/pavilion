@@ -62,13 +62,14 @@ Watch the ENTIRE video with audio. Duration ≈ ${durationSec.toFixed(1)}s.
 NORTH STAR: SEE = HEAR. Role names spoken must match on-screen role cards/pages.
 
 MUST-PASS:
+0. STAPLE bookends: cold-open brand card at start (~5s, seal + SHMS PTO) and thank-you / Go Stingrays outro at end (~4s, seal + SHMS PTO). Missing either = critical FAIL
 1. Mentions five open board roles: Secretary, Treasurer, SEAC Representative, Events Coordinator, Initiatives Coordinator
 2. Initiatives framed as enrichment programs + sponsorships (not jargon "EPS")
 3. Board benefits: free membership + 75% off enrichment (board roles)
 4. Board apply path: Board page and/or president@shmspto.org · urgency ASAP
 5. CRITICAL: If someone cannot join the board, video must show Volunteer page/form and invite any contribution of time (shmspto.org/volunteer)
 6. No claim that general volunteers get free membership / 75% off
-7. Close with Go Stingrays / brand
+7. Close bookend shows Thank You / Go Stingrays with SHMS PTO
 
 Return ONLY valid JSON:
 {
@@ -87,7 +88,8 @@ Return ONLY valid JSON:
 }
 
 PASS only if see_hear_pass, score >= ${PASS_SCORE}, no critical, send_ready true.
-Missing volunteer-form fallback = critical FAIL.`;
+Missing volunteer-form fallback = critical FAIL.
+Missing staple intro or outro with SHMS PTO under seal = critical FAIL.`;
 }
 
 async function main() {

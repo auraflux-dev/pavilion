@@ -1,5 +1,7 @@
 # SHMSPTO promo videos
 
+**STAPLE bookends** (every video): ~5s cold open + ~4s outro via `scripts/staple_brand_bookends.js` (seal + SHMS PTO).
+
 **BTM ElevenLabs voice** `Cw9uRGud1Qq3szlTqQXG` · screenshots from live site.
 
 ## Where these go
