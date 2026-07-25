@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Copy, Download, Loader2, RefreshCw, Share2, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { CoveLogo } from '@/components/brand/cove-logo'
 
 /**
- * Family Cove digital card — QR encodes Square GAN when loaded (Stand / iPad / Photos / Wallet).
+ * Family Cove Digital Card — QR encodes Square GAN when loaded (Stand / iPad / Photos / Wallet).
  * 6-digit PIN stays as spoken backup if the phone dies.
  */
 export function CoveFamilyCodeCard() {
@@ -91,8 +92,8 @@ export function CoveFamilyCodeCard() {
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: 'SHMS PTO Cove digital card',
-          text: `Family Cove digital card — show this QR at The Cove or school store`,
+          title: 'SHMS PTO Cove Digital Card',
+          text: `Family Cove Digital Card — show this QR at The Cove or school store`,
         })
         setMessage('Shared — add to Photos so your student can open it at checkout')
         return
@@ -164,9 +165,12 @@ export function CoveFamilyCodeCard() {
 
   return (
     <div className="rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] px-3 py-3 mb-4">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
-        Family Cove digital card
-      </p>
+      <div className="flex items-center gap-2.5">
+        <CoveLogo size="xs" className="w-10 h-10 shrink-0" />
+        <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
+          Family Cove Digital Card
+        </p>
+      </div>
       {busy && !code ? (
         <Loader2 className="w-4 h-4 animate-spin mt-2 text-[#085508]" />
       ) : code ? (
@@ -175,7 +179,7 @@ export function CoveFamilyCodeCard() {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={qrUrl}
-              alt="Cove digital card QR for Square Stand and Cove"
+              alt="Cove Digital Card QR for Square Stand and Cove"
               width={140}
               height={140}
               className="rounded-lg border border-[#E8E4DC] bg-white"
@@ -229,10 +233,10 @@ export function CoveFamilyCodeCard() {
                   to remember the 6-digit code.
                 </>
               ) : hasCard ? (
-                <>Load or refresh the Cove card, then Save QR again.</>
+                <>Load or refresh the Cove Digital Card, then Save QR again.</>
               ) : (
                 <>
-                  Load the Cove digital card first. Then Save QR to Photos — that QR is what Square
+                  Load the Cove Digital Card first. Then Save QR to Photos — that QR is what Square
                   Stand scans.
                 </>
               )}
@@ -241,7 +245,7 @@ export function CoveFamilyCodeCard() {
         </div>
       ) : (
         <p className="text-xs text-[#5A6070] mt-1">
-          {message || 'Add a student to get a family Cove digital card.'}
+          {message || 'Add a student to get a family Cove Digital Card.'}
         </p>
       )}
       {error ? <p className="text-[11px] text-red-600 mt-1">{error}</p> : null}

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { CreditCard, CheckCircle2, ArrowLeft } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 import { StoreCardReload } from '@/components/member-portal/store-card-reload'
+import { CoveLogo } from '@/components/brand/cove-logo'
 import { formatStoreCardBonusExample } from '@/lib/store-card-bonus'
 import { useAuth } from '@/lib/hooks/use-auth'
 
@@ -56,10 +57,10 @@ function parseHowSteps(bullets: string[]): HowStep[] {
 export function StoreCardHero({
   amounts,
   eyebrow = 'The Cove',
-  title = 'Become a free member, then load a Cove digital card.',
+  title = 'Become a free member, then load a Cove Digital Card.',
   perks = [
     'Free parent membership required',
-    'One family Cove digital card & balance',
+    'One family Cove Digital Card & balance',
     '10% on first load · up to $500',
   ],
   howItWorks,
@@ -71,11 +72,11 @@ export function StoreCardHero({
   const denominations = defaultDenominations(amounts)
 
   const displayTitle = isMember
-    ? 'Load your family Cove digital card.'
+    ? 'Load your family Cove Digital Card.'
     : title
   const displayPerks = isMember
     ? [
-        'One family Cove digital card & balance',
+        'One family Cove Digital Card & balance',
         `${bonusPercent}% on first load (not reloads) · up to $${maxAmount}`,
         'Pay online · spend at the snack window with code or QR',
       ]
@@ -90,7 +91,7 @@ export function StoreCardHero({
     ])
   const memberSteps = parseHowSteps([
     `1|Choose an amount|Load any whole dollar up to $${maxAmount}. ${formatStoreCardBonusExample(50, bonusPercent)} on your first load.`,
-    '2|One family balance|Every student in your household shares the same Cove digital card balance.',
+    '2|One family balance|Every student in your household shares the same Cove Digital Card balance.',
     '3|Spend at the window|Students use the portal QR or 6-digit code at The Cove snack window.',
   ])
   const steps = isMember ? memberSteps : visitorSteps
@@ -113,11 +114,21 @@ export function StoreCardHero({
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <div className="lg:col-span-7">
-              <div className="flex items-center gap-2 mb-3">
-                <CreditCard className="w-4 h-4 text-yellow-300 shrink-0" aria-hidden="true" />
-                <span className="text-xs font-bold tracking-widest uppercase text-white/70">
-                  {eyebrow}
-                </span>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="rounded-2xl bg-[#F5F0E8] p-1.5 shadow-sm shrink-0">
+                  <CoveLogo size="md" priority className="w-20 h-20 sm:w-24 sm:h-24" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <CreditCard className="w-4 h-4 text-yellow-300 shrink-0" aria-hidden="true" />
+                    <span className="text-xs font-bold tracking-widest uppercase text-white/70">
+                      {eyebrow}
+                    </span>
+                  </div>
+                  <p className="text-sm text-white/75 hidden sm:block max-w-xs leading-snug">
+                    Snacks · spirit wear · family digital card
+                  </p>
+                </div>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-white leading-tight tracking-tight max-w-xl">
                 {displayTitle}
@@ -137,10 +148,10 @@ export function StoreCardHero({
             </div>
 
             <div className="lg:col-span-5">
-              <MemberGate label="Load a Cove digital card">
+              <MemberGate label="Load a Cove Digital Card">
                 <div className="w-full max-w-md lg:ml-auto rounded-2xl bg-white/10 border border-white/15 p-4 sm:p-5 backdrop-blur-sm">
                   <p className="text-xs font-bold tracking-widest uppercase text-white/70 mb-3">
-                    Load a Cove digital card
+                    Load a Cove Digital Card
                   </p>
                   <StoreCardReload
                     amounts={denominations.map(({ amount }) => amount)}

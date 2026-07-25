@@ -11,7 +11,16 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/staff', '/staff/', '/api/', '/auth/', '/member-portal', '/member-portal/'],
+        disallow: [
+          '/staff',
+          '/staff/',
+          '/api/',
+          '/auth/',
+          '/member-portal',
+          '/member-portal/',
+          '/brand',
+          '/brand/',
+        ],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,
