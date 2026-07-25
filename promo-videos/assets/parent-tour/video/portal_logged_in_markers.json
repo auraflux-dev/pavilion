@@ -1,0 +1,25 @@
+{
+  "master": "assets/parent-tour/video/portal_logged_in_tour.mp4",
+  "durationSec": 36,
+  "capturedAt": "2026-07-24T23:41:34.810Z",
+  "source": "family free-member portal · Cove QR unlocked after safety profile",
+  "account": "Free member Robert Gregory (personal email — no Staff chrome)",
+  "chapters": {
+    "ch03_p01": {
+      "t0": 0,
+      "t1": 11
+    },
+    "ch03_p02": {
+      "t0": 11,
+      "t1": 22
+    },
+    "ch03_p03": {
+      "t0": 22,
+      "t1": 28
+    },
+    "ch03_p04": {
+      "t0": 28,
+      "t1": 36
+    }
+  }
+}

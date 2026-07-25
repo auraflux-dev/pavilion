@@ -11,9 +11,15 @@ export const GOOGLE_MEMBER_STATE_COOKIE = 'shms_google_oauth'
 export const GOOGLE_MEMBER_SCOPES = ['openid', 'email', 'profile'].join(' ')
 
 /**
- * Prefer a dedicated External (public) OAuth client for parents.
- * The staff Workspace client is often Internal (org-only) and returns
- * Google error org_internal for @gmail.com parents.
+ * Parent Google sign-in uses the same Google Cloud OAuth *client* as staff when
+ * GOOGLE_MEMBER_* is unset — that is fine. The bug is User type = Internal
+ * (org-only), which Google brands as “Staff Portal” and blocks @gmail.com.
+ *
+ * Fix in Google Cloud (one client, no second app):
+ *   1. OAuth consent / client → User type External (not Internal)
+ *   2. Rename app to “SHMS PTO” (parents should never see “Staff Portal”)
+ *   3. Keep redirect URI already registered for Workspace Connect
+ * Optional: set GOOGLE_MEMBER_* only if you later want a separate client.
  */
 export function googleMemberOauthConfigured(): boolean {
   return Boolean(googleMemberClientId() && googleMemberClientSecret())
@@ -67,13 +73,12 @@ export function googleMemberRedirectBase(hostHeader?: string | null): string {
 }
 
 /**
- * Must match an Authorized redirect URI on the Google OAuth client in use.
+ * Must match an Authorized redirect URI on the Google OAuth client.
  *
- * - Dedicated External parent client (`GOOGLE_MEMBER_CLIENT_ID`) →
+ * - Optional dedicated parent client (`GOOGLE_MEMBER_CLIENT_ID`) →
  *   `/api/auth/google/callback`
- * - Shared staff client (current production fallback) → reuse the URI already
- *   registered at DNS cutover: `/api/staff/workspace/connect/callback`
- *   (member vs staff Connect is distinguished by `state.flow`).
+ * - Shared site client (normal) → reuse Workspace Connect URI already in Console;
+ *   `state.flow === 'member'` routes the callback to parent login.
  */
 export function googleMemberCallbackUrl(base: string): string {
   const root = base.replace(/\/$/, '')

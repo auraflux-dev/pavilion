@@ -59,13 +59,13 @@ export default async function CovePage() {
         <StoreCardHero
           amounts={catalog.storeCardAmounts}
           eyebrow={storeCopy.eyebrow || 'The Cove'}
-          title={storeCopy.title || 'Become a free member, then load a Cove card.'}
+          title={storeCopy.title || 'Become a free member, then load a Cove Digital Card.'}
           perks={
             storeCopy.bullets.length
               ? storeCopy.bullets
               : [
                   'Free parent membership required',
-                  'One family Cove card & balance',
+                  'One family Cove Digital Card & balance',
                   `${bonusPercent}% on first load · up to $500`,
                 ]
           }

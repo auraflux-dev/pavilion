@@ -27,7 +27,10 @@ function JoinInner() {
   )
   const initialMode = searchParams.get('mode') === 'login' ? 'login' : 'signup'
   const [mode, setMode] = useState<Mode>(initialMode)
-  const [panel, setPanel] = useState<Panel>('chooser')
+  const [panel, setPanel] = useState<Panel>(() => {
+    // Login defaults to email — Google is blocked while the OAuth app is Internal.
+    return initialMode === 'login' ? 'email' : 'chooser'
+  })
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -38,19 +41,27 @@ function JoinInner() {
 
   useEffect(() => {
     setMode(initialMode)
+    if (initialMode === 'login') setPanel('email')
   }, [initialMode])
+
+  /** Google parent sign-in stays off until OAuth app is External (not Internal). */
+  const googleParentEnabled =
+    process.env.NEXT_PUBLIC_GOOGLE_PARENT_SIGNIN === 'true'
 
   useEffect(() => {
     const code = searchParams.get('error')
     if (!code) return
     const messages: Record<string, string> = {
       google_not_configured:
-        'Google sign-in is not configured yet. Use email for now, or ask the PTO admin to finish Google setup.',
+        'Google sign-in is not configured yet. Use your personal email and password for now.',
       google_denied: 'Google sign-in was cancelled. Try again or use email.',
       google_state_mismatch: 'Google sign-in expired. Please try again.',
       google_email_unverified:
         'That Google account email is not verified. Verify it with Google, or use email.',
-      google_failed: 'Google sign-in failed. Try again or use email and password.',
+      google_failed:
+        'Google sign-in failed. Try again or use email and password.',
+      google_org_internal:
+        'Google still has this app set to Internal (org-only). PTO admin: set the OAuth client to External and rename it “SHMS PTO”. Meanwhile use email and password.',
     }
     setError(messages[code] || 'Sign-in failed. Try again or use email.')
   }, [searchParams])
@@ -163,14 +174,6 @@ function JoinInner() {
             {error ? <p className="text-sm text-red-700">{error}</p> : null}
             <button
               type="button"
-              onClick={startGoogle}
-              className={primaryBtn}
-              style={{ backgroundColor: '#085508' }}
-            >
-              {isSignup ? 'Sign up with Google' : 'Log in with Google'}
-            </button>
-            <button
-              type="button"
               onClick={() => {
                 setPanel('email')
                 setError(null)
@@ -180,24 +183,36 @@ function JoinInner() {
             >
               {isSignup ? 'Sign up with Email' : 'Log in with Email'}
             </button>
-            <p className="text-xs text-[#5A6070] text-center pt-1">
-              Google and email both finish on this site. Facebook is temporarily unavailable.
-            </p>
+            {googleParentEnabled ? (
+              <button
+                type="button"
+                onClick={startGoogle}
+                className="w-full inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-bold border border-[#E8E4DC] text-[#1A1A1A] transition-opacity hover:opacity-90"
+              >
+                {isSignup ? 'Sign up with Google' : 'Log in with Google'}
+              </button>
+            ) : (
+              <p className="text-xs text-[#5A6070] text-center pt-1">
+                Use your personal email and password. Google sign-in is temporarily off while we finish Google setup (the old button was aimed at Staff Portal).
+              </p>
+            )}
           </div>
         ) : (
           <form onSubmit={onEmailSubmit} className="space-y-3">
-            <button
-              type="button"
-              className="text-xs font-semibold underline mb-1"
-              style={{ color: '#085508' }}
-              onClick={() => {
-                setPanel('chooser')
-                setNeedsVerify(false)
-                setError(null)
-              }}
-            >
-              ← Back to options
-            </button>
+            {isSignup || googleParentEnabled ? (
+              <button
+                type="button"
+                className="text-xs font-semibold underline mb-1"
+                style={{ color: '#085508' }}
+                onClick={() => {
+                  setPanel('chooser')
+                  setNeedsVerify(false)
+                  setError(null)
+                }}
+              >
+                ← Back to options
+              </button>
+            ) : null}
             {!needsVerify ? (
               <>
                 <label className="block text-sm">

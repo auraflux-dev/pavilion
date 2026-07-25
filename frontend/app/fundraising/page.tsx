@@ -79,8 +79,8 @@ export default async function FundraisingPage() {
     {
       id: 'store',
       icon: ShoppingBag,
-      label: 'The Cove digital card',
-      description: 'Student snack window sales via prepaid Cove digital cards at The Cove.',
+      label: 'The Cove Digital Card',
+      description: 'Student snack window sales via prepaid Cove Digital Cards at The Cove.',
       raised: totals.store,
       goal:   goals.store,
       href: '/cove',

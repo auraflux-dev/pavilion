@@ -121,7 +121,7 @@ const SITE_SETTINGS = {
   ].join(','),
   homeVolunteerImageUrl: '/placeholder.svg?height=450&width=600',
   homeVolunteerImageAlt:
-    'SHMS students and parent volunteers working together at a school event',
+    'SHMS PTO students and parent volunteers working together at a school event',
   homeVolunteerSecondaryCta: 'Learn More',
   homeCommunityImageUrl:
     'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1440&h=400&fit=crop&crop=center',
@@ -144,9 +144,9 @@ const SITE_SETTINGS = {
 const PAGE_ROWS = [
   {
     page: 'home',
-    eyebrow: 'Ashburn, Virginia · LCPS',
+    eyebrow: 'Ashburn, Virginia',
     title: 'Welcome to Stone Hill Middle School PTO',
-    body: 'An active volunteer organization committed to enriching the academic and social experience for all SHMS students and families. Go Stingrays!',
+    body: 'An active volunteer organization committed to enriching the academic and social experience for all SHMS PTO students and families. Go Stingrays!',
     ctaLabel: 'Join the PTO',
     ctaHref: '/membership',
     active: true,
@@ -158,7 +158,7 @@ const PAGE_ROWS = [
     body: 'Every hour you volunteer helps create a richer, more vibrant experience for every student at Stone Hill Middle School. Whether you can give an hour a month or a few hours a week, your time makes a real difference.',
     bullets: [
       'Make a direct impact on student enrichment',
-      'Connect with other SHMS families',
+      'Connect with other SHMS PTO families',
       'Flexible time commitments for every schedule',
       'Be part of school events and celebrations',
     ].join('\n'),
@@ -166,7 +166,7 @@ const PAGE_ROWS = [
     ctaHref: '/volunteer',
     sectionTitle:
       'Volunteering with SHMS PTO has been one of the most rewarding experiences of our family\'s school year.',
-    sectionBody: '— SHMS Parent, 2025–2026',
+    sectionBody: '— SHMS PTO Parent, 2025–2026',
     active: true,
   },
   {
@@ -224,7 +224,7 @@ const PAGE_ROWS = [
   },
   {
     page: 'store',
-    eyebrow: 'SHMS Store Card',
+    eyebrow: 'SHMS PTO Store Card',
     title: 'Load a card, your student handles the rest.',
     bullets: 'No cash needed\nReload anytime online\nFunds never expire',
     active: true,
@@ -282,7 +282,7 @@ const PAGE_ROWS = [
     body: "You're signed in as a free parent member. Add your students here, then upgrade to Ruby or Supreme anytime for paid benefits.",
     sectionTitle: 'Paid PTO membership active',
     sectionBody:
-      'Thanks for supporting SHMS. Your Ruby/Supreme benefits show on each student card below.',
+      'Thanks for supporting SHMS PTO. Your Ruby/Supreme benefits show on each student card below.',
     bullets:
       'Welcome to the SHMS PTO\nYour free parent account is ready. Add a student to track programs, store card balance, and paid membership status.\nPaid members get a pre-loaded store card, free or discounted program registration, and free refreshments at school events.',
     active: true,
@@ -327,9 +327,9 @@ const PAGE_ROWS = [
       'addStudentSubmit|Add student',
       'cancel|Cancel',
       'addStudentError|Could not add student. Please try again.',
-      'loadCardHelp|One family Cove card and balance. Choose $20 / $40 / $75, or enter any whole dollar amount. Pay with card or PayPal. Saving a card with Square is optional for faster reloads and auto top off.',
+      'loadCardHelp|One family Cove Digital Card and balance. Choose $20 / $40 / $75, or enter any whole dollar amount. Pay with card or PayPal. Saving a card with Square is optional for faster reloads and auto top off.',
       'paymentMethodsTitle|How you pay',
-      'paymentMethodsBody|Snack window: prepaid family Cove card. Online: pay with credit/debit card or PayPal in this portal (membership, The Cove, and Cove card reloads). Saving a card is optional.',
+      'paymentMethodsBody|Snack window: prepaid family Cove Digital Card. Online: pay with credit/debit card or PayPal in this portal (membership, The Cove, and Cove Digital Card reloads). Saving a card is optional.',
     ].join('\n'),
     active: true,
   },

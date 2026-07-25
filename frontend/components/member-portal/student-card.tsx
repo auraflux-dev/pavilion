@@ -126,7 +126,7 @@ interface GiftCardData {
 export function StudentCard({
   student,
   defaultOpen = false,
-  upgradeBody = 'Paid members get Cove digital card credit, enrichment discounts, and free refreshments at school events.',
+  upgradeBody = 'Paid members get Cove Digital Card credit, enrichment discounts, and free refreshments at school events.',
   grades = ['6', '7', '8'],
   onUpdated,
 }: Props) {
@@ -267,7 +267,7 @@ export function StudentCard({
         <div className="flex items-center gap-2 px-5 py-3">
           <CreditCard className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
           <div>
-            <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Cove digital card</p>
+            <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Cove Digital Card</p>
             {giftCardLoading ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin mt-0.5" style={{ color: '#085508' }} />
             ) : (
@@ -325,7 +325,7 @@ export function StudentCard({
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <CreditCard className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Cove digital card</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Cove Digital Card</h4>
                   </div>
                   {giftCard?.hasCard && (
                     <span className="text-lg font-bold text-[#1A1A1A]">{formatMoney(giftCard.balance)}</span>
@@ -334,7 +334,7 @@ export function StudentCard({
 
                 {!giftCard?.hasCard ? (
                   <div className="rounded-xl border-2 border-dashed border-[#E8E4DC] p-4 text-center">
-                    <p className="text-sm text-[#5A6070] mb-3">No Cove digital card linked yet.</p>
+                    <p className="text-sm text-[#5A6070] mb-3">No Cove Digital Card linked yet.</p>
                     <a
                       href="/cove"
                       className="inline-flex items-center gap-1.5 text-sm font-bold"

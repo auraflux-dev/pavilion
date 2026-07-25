@@ -98,8 +98,8 @@ export default async function MembershipPage() {
         </section>
 
         <DonateBlock
-          title="Already a member? Donate any amount"
-          body="Membership dues are one way to help. An extra gift to the PTO funds enrichment, The Cove, and events."
+          title="Not joining a paid tier? You can still donate"
+          body="Reef, Lagoon, and Tide are optional. If paid membership isn’t for you right now, any gift still helps the PTO fund enrichment, The Cove, and events for Stone Hill students."
         />
 
         {/* FAQ */}

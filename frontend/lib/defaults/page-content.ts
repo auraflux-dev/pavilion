@@ -100,7 +100,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   }),
   store: empty('store', {
     eyebrow: 'The Cove',
-    title: 'Become a free member, then load a Cove digital card.',
+    title: 'Become a free member, then load a Cove Digital Card.',
     body: '',
     bullets: [
       'Free parent membership required',
@@ -118,9 +118,9 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     ],
   }),
   'store-cta': empty('store-cta', {
-    eyebrow: 'Cove digital card · Members',
+    eyebrow: 'Cove Digital Card · Members',
     title: 'Free member? First load gets 10% extra.',
-    body: 'One family Cove digital card and balance (up to $500 per load). 10% on first load or membership credit; reloads 1:1. Students spend with the code or QR at The Cove window.',
+    body: 'One family Cove Digital Card and balance (up to $500 per load). 10% on first load or membership credit; reloads 1:1. Students spend with the code or QR at The Cove window.',
   }),
   'spirit-wear': empty('spirit-wear', {
     eyebrow: 'The Cove · Shop',
@@ -144,7 +144,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   }),
   'member-portal': empty('member-portal', {
     title: 'Member Portal',
-    body: 'Your Cove digital card balance, membership, and quick links, all in one place.',
+    body: 'Your Cove Digital Card balance, membership, and quick links, all in one place.',
   }),
   portal: empty('portal', {
     sectionTitle: 'Paid PTO membership active',
@@ -154,8 +154,8 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body: "You're signed in as a free parent member. Add your students here, then upgrade to Reef, Lagoon, or Tide anytime for paid benefits.",
     bullets: [
       'Welcome to the SHMS PTO',
-      'Your free parent account is ready. Add a student to track programs, Cove digital card balance, and paid membership status.',
-      'Paid members get Cove digital card credit, enrichment discounts, and free refreshments at school events.',
+      'Your free parent account is ready. Add a student to track programs, Cove Digital Card balance, and paid membership status.',
+      'Paid members get Cove Digital Card credit, enrichment discounts, and free refreshments at school events.',
     ],
   }),
   /** key|text lines. See lib/defaults/portal-copy.ts */
@@ -172,11 +172,11 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
       'How do I update My Account?|Open My Account and choose Edit profile. You can update your display name and phone number here.\n\nYour sign-in email is your Wix login identity (often Google). Parents cannot change that email in the portal. Email membership@shmspto.org if you need help with the login email.',
       'How do I add another student?|Scroll to My Students and choose Add a student. Enter first name, last name, and grade (6, 7, or 8).\n\nAdd every student in your household so programs, The Cove balance, and messages stay tied to the right kids.',
       'How do I fix a student name or grade?|Open the student card, choose Edit student, make your changes, and save. Updates usually show within a few minutes. Refresh the portal if you still see the old info.',
-      'Am I free or paid?|My Account shows Free parent account or Paid PTO membership.\n\nFree means you can log in, add students, shop The Cove, and load a family Cove digital card. Paid means you purchased Reef, Lagoon, or Tide for the school year. Perks and digital card credit sync after checkout.',
-      'What are Reef, Lagoon, and Tide?|Those are the paid PTO membership levels for the school year. Each tier includes different Cove digital card credit and member perks.\n\nStart free anytime, then upgrade from Membership when you are ready. Lagoon and Tide ask for Spirit Wear T-shirt size at checkout so we can fulfill your shirt. After payment, refresh the portal so your tier and credit appear.',
+      'Am I free or paid?|My Account shows Free parent account or Paid PTO membership.\n\nFree means you can log in, add students, shop The Cove, and load a family Cove Digital Card. Paid means you purchased Reef, Lagoon, or Tide for the school year. Perks and digital card credit sync after checkout.',
+      'What are Reef, Lagoon, and Tide?|Those are the paid PTO membership levels for the school year. Each tier includes different Cove Digital Card credit and member perks.\n\nStart free anytime, then upgrade from Membership when you are ready. Lagoon and Tide ask for Spirit Wear T-shirt size at checkout so we can fulfill your shirt. After payment, refresh the portal so your tier and credit appear.',
       'How do I join or upgrade membership?|Go to Membership (or Upgrade in this portal), pick Reef, Lagoon, or Tide, and complete checkout with card or PayPal.\n\nWhen payment clears, return here and refresh. If credit or tier is still missing after a few minutes, email membership@shmspto.org with your receipt.',
-      'Where is my Cove digital card credit?|Open Store & Cove digital card. Your family balance and recent purchases show there.\n\nMembership credit loads after purchase. Use Load digital card anytime to add more. First-load bonus (when offered) applies once; reloads are dollar-for-dollar.',
-      'What is the family Cove digital card?|In the member portal, Save the QR to Photos (or Wallet). That QR is the Square gift-card number — Square Stand / iPad at Cove and events scan it like a plastic card. Students do not need to remember a code.\n\nA 6-digit spoken backup still appears if the phone dies. Staff can type that code on the Cove register.\n\nLoad balance online first so the QR works at Stand.',
+      'Where is my Cove Digital Card credit?|Open Store & Cove Digital Card. Your family balance and recent purchases show there.\n\nMembership credit loads after purchase. Use Load digital card anytime to add more. First-load bonus (when offered) applies once; reloads are dollar-for-dollar.',
+      'What is the family Cove Digital Card?|In the member portal, Save the QR to Photos (or Wallet). That QR is the Square gift-card number — Square Stand / iPad at Cove and events scan it like a plastic card. Students do not need to remember a code.\n\nA 6-digit spoken backup still appears if the phone dies. Staff can type that code on the Cove register.\n\nLoad balance online first so the QR works at Stand.',
       'How does The Cove snack window work?|Online checkout creates the family Square digital card balance and Cove code/QR. Staff look up by code at the register and tap products to charge.\n\nGuests without a portal login buy spirit wear or event merch on Square Stand with staff (card present). Spirit wear and other Cove merch also checkout online with card or PayPal.',
       'Do paid members get Cove coupons?|Often yes. When you are signed in as a paid member, look for the coupon bar on The Cove shop or checkout.\n\nIf a code fails, wait a minute, refresh, and try again, or email membership@shmspto.org.',
       'Can I pay with a credit card or PayPal?|Yes. Free and paid parents can pay with credit/debit (Square) or PayPal for membership, The Cove, and digital card reloads.\n\nSaving a payment card is optional for faster reloads. SHMS PTO never receives your full card number.',

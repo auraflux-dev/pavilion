@@ -1,5 +1,5 @@
 /**
- * Apple / Google Wallet pass endpoint for the family Cove digital card.
+ * Apple / Google Wallet pass endpoint for the family Cove Digital Card.
  * Prefer Litecard (hosted signing + Square GAN barcode) when configured.
  */
 import { NextRequest, NextResponse } from 'next/server'
@@ -27,6 +27,16 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}))
     const platform = String(body.platform ?? 'auto').toLowerCase()
     const requested = String(body.code ?? '').replace(/\D/g, '')
+
+    const { requireCoveUnlocked } = await import('@/lib/onboarding-checklist')
+    const gate = await requireCoveUnlocked(session.email)
+    if (!gate.ok) {
+      return NextResponse.json(
+        { error: gate.error, code: 'ONBOARDING_INCOMPLETE' },
+        { status: 403 },
+      )
+    }
+
     const code = await ensureCoveFamilyCode(session.email)
     if (requested && requested !== code) {
       return NextResponse.json(
@@ -50,7 +60,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            'Load the Cove digital card first so a Square gift card number exists for Wallet / Stand.',
+            'Load the Cove Digital Card first so a Square gift card number exists for Wallet / Stand.',
         },
         { status: 409 },
       )

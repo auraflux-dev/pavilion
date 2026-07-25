@@ -117,7 +117,7 @@ Reconnect if you see permission errors after a password reset. Purchase confirma
 1. Confirm they are signed in (same email they joined with)
 2. **My Account**: free vs paid, phone/name
 3. **My Students**: every child listed with correct grade
-4. **Store & Cove card**: balance, family code, Payment History
+4. **Store & Cove Digital Card**: balance, family code, Payment History
 5. **Calendar & Messages**: program info and inbox
 
 Point them to **Member Help** (\`/member-portal/help\`) for full articles. For stuck records, use Lookup / act-as (admin) rather than guessing.`,
@@ -130,12 +130,12 @@ Point them to **Member Help** (\`/member-portal/help\`) for full articles. For s
       order: 2,
       body: `## Free parent
 - Sign in, edit profile, add/edit students
-- Load Cove card, shop Cove, see Payment History
+- Load Cove Digital Card, shop Cove, see Payment History
 - View programs/surveys available to free members
 
 ## Paid parent (Reef / Lagoon / Tide)
 - Everything free has
-- Membership tier badge and gift credit on the Cove card
+- Membership tier badge and gift credit on the Cove Digital Card
 - Member coupons when offered
 - Paid-only program seats when the program requires membership
 
@@ -222,7 +222,7 @@ Do not send parents to the old Wix Events dashboard for day-to-day work. Stay in
 
 1. Student says what they want
 2. Student gives the 6-digit family code. Staff enters it
-3. Confirm **full student names** and **Family Cove card balance**
+3. Confirm **full student names** and **Family Cove Digital Card balance**
 4. Scan or tap products, then **Charge**
 
 If there is no card yet, the parent must load online first. Plastic cards are optional; the code is enough.`,
@@ -350,13 +350,13 @@ Square may keep a small processing fee on refunds. That is normal.
 - Staff also updates notes on the Payments row when useful
 - In-person Cove snack sales are register/store-card, not this flow
 
-### Family Cove card (store-card load)
+### Family Cove Digital Card (store-card load)
 - Refund in Square **and** remove the same load from the family gift card balance
 - Never refund cash/credit and leave the loaded dollars on the card
 
 ### Membership
 - **Non-refundable** once payment processes, except when required by law or the PTO cancels the membership benefit before it begins
-- Store-card credit bundled with membership follows Cove card rules, not membership donation rules
+- Store-card credit bundled with membership follows Cove Digital Card rules, not membership donation rules
 
 ### Enrichment programs
 - Parent can **Request refund** in the member portal

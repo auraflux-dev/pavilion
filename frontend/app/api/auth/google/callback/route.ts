@@ -2,9 +2,9 @@
  * GET /api/auth/google/callback
  * Finish Google OAuth → find/create Wix member → set session cookie.
  *
- * Used when GOOGLE_MEMBER_CLIENT_ID is set (External parent client).
- * Without that env, member login reuses the staff Workspace callback URI
- * (see googleMemberCallbackUrl) so DNS-cutover Console entries keep working.
+ * Used when GOOGLE_MEMBER_CLIENT_ID is set. Otherwise parent Google login
+ * reuses /api/staff/workspace/connect/callback with state.flow=member
+ * (same Google client — set that client to External, not Internal).
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { TOKENS_COOKIE, TOKEN_MAX_AGE, isSecure } from '@/lib/auth-cookies'

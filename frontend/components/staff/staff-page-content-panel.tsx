@@ -77,13 +77,43 @@ export function StaffPageContentPanel() {
     }
   }
 
+  async function brandFix(apply: boolean) {
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/page-content/brand-fix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apply }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Brand fix failed')
+      setStatus(String(d.message ?? 'Done'))
+      if (apply) await load()
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Brand fix failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
-      <div>
-        <h2 className="text-lg font-bold">Page copy</h2>
-        <p className="text-xs text-[#5A6070]">
-          Edit heroes and section copy without Wix CMS. Changes show after refresh / ~5 minutes.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="text-lg font-bold">Page copy</h2>
+          <p className="text-xs text-[#5A6070]">
+            Edit heroes and section copy without Wix CMS. Changes show after refresh / ~5 minutes.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="outline" disabled={busy} onClick={() => void brandFix(false)}>
+            Preview SHMS → SHMS PTO
+          </Button>
+          <Button type="button" variant="outline" disabled={busy} onClick={() => void brandFix(true)}>
+            Apply SHMS → SHMS PTO
+          </Button>
+        </div>
       </div>
       <select
         value={selected}

@@ -299,7 +299,7 @@ export function StaffCoveRegister() {
         <p className="mt-1 text-xs text-[#5A6070] leading-relaxed">
           Prefer Square Stand / iPad scanning the student&apos;s Photos or Wallet QR (Square gift
           card). Or type the 6-digit spoken backup / paste a long GAN here → tap products → Charge.
-          Guests without a loaded Cove card pay card-present on Square Stand.
+          Guests without a loaded Cove Digital Card pay card-present on Square Stand.
         </p>
       </div>
 
@@ -347,7 +347,7 @@ export function StaffCoveRegister() {
             <span className="font-normal text-[#5A6070]"> · code {family.coveFamilyCode}</span>
           </p>
           <p className="text-2xl font-bold tabular-nums" style={{ color: '#085508' }}>
-            Cove digital card: ${Number(family.balance).toFixed(2)}
+            Cove Digital Card: ${Number(family.balance).toFixed(2)}
           </p>
           {!family.hasCard ? (
             <p className="text-xs text-amber-800">

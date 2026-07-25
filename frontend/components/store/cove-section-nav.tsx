@@ -4,7 +4,7 @@ import { SectionJumpNav } from '@/components/section-jump-nav'
 const SECTIONS = [
   {
     href: '#card',
-    label: 'Family Cove digital card',
+    label: 'Family Cove Digital Card',
     hint: 'Load & reload',
     icon: CreditCard,
   },

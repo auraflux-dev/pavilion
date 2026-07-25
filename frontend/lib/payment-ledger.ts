@@ -64,7 +64,7 @@ export function normalizePaymentLedgerRow(
     if (notes.includes('→')) detail = notes
   }
 
-  // Family Cove card first load / reload with first-load bonus in notes.
+  // Family Cove Digital Card first load / reload with first-load bonus in notes.
   if (
     /store_card_reload/.test(source) &&
     !/_load_failed/.test(source)
@@ -79,7 +79,7 @@ export function normalizePaymentLedgerRow(
       if (Number.isFinite(loaded) && loaded > paid) {
         detail = `Loaded $${loaded.toFixed(2)} on family card (${bonus[3]})`
         if (!/bonus|first load/i.test(programName)) {
-          programName = programName || 'Family Cove Card First Load'
+          programName = programName || 'Family Cove Digital Card First Load'
         }
       }
     }

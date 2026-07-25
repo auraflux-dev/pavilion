@@ -457,7 +457,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // ── Family Cove card load / reload ──────────────────────────
+    // ── Family Cove Digital Card load / reload ──────────────────────────
     const studentId = String(body.studentId ?? '').trim()
     const amountCents = Number(body.amountCents)
     const amount = amountCents / 100
@@ -474,7 +474,7 @@ export async function POST(req: NextRequest) {
     const family = await listFamilyStudents(session.email)
     if (family.length === 0) {
       return NextResponse.json(
-        { error: 'Add a student before loading the family Cove card.' },
+        { error: 'Add a student before loading the family Cove Digital Card.' },
         { status: 400 }
       )
     }
@@ -493,7 +493,7 @@ export async function POST(req: NextRequest) {
       customerId,
       referenceId: `store-card:${session.email}`,
       buyerEmailAddress: session.email,
-      note: 'SHMS PTO family Cove card load',
+      note: 'SHMS PTO family Cove Digital Card load',
     })
 
     try {
@@ -541,8 +541,8 @@ export async function POST(req: NextRequest) {
         studentId: student._id,
         parentEmail: session.email,
         programName: isFirstLoad
-          ? `Family Cove Card First Load (+${bonusPercent}% bonus)`
-          : 'Family Cove Card Reload',
+          ? `Family Cove Digital Card First Load (+${bonusPercent}% bonus)`
+          : 'Family Cove Digital Card Reload',
         amount,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
@@ -552,7 +552,7 @@ export async function POST(req: NextRequest) {
         notes:
           bonusPercent > 0
             ? `Paid $${amount}; loaded $${(loadCents / 100).toFixed(2)} (+${bonusPercent}%) on family card`
-            : 'Family Cove card load',
+            : 'Family Cove Digital Card load',
       })
       return NextResponse.json({
         ok: true,
@@ -570,7 +570,7 @@ export async function POST(req: NextRequest) {
       await client.items.insert('Payments', {
         studentId: student._id,
         parentEmail: session.email,
-        programName: 'Family Cove Card Reload',
+        programName: 'Family Cove Digital Card Reload',
         amount,
         status: 'Needs Reconciliation',
         paymentDate: new Date().toISOString(),

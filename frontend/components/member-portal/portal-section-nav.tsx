@@ -1,7 +1,13 @@
-import { CalendarDays, CreditCard, ClipboardList, HelpCircle } from 'lucide-react'
+import { CalendarDays, CreditCard, ClipboardList, HelpCircle, Users } from 'lucide-react'
 import { SectionJumpNav } from '@/components/section-jump-nav'
 
 const SECTIONS = [
+  {
+    href: '#portal-onboarding',
+    label: 'Family setup',
+    hint: 'Students & safety',
+    icon: Users,
+  },
   {
     href: '#calendar',
     label: 'Calendar & Messages',
@@ -10,7 +16,7 @@ const SECTIONS = [
   },
   {
     href: '#store',
-    label: 'Store & Cove card',
+    label: 'Store & Cove Digital Card',
     hint: 'Balance & purchases',
     icon: CreditCard,
   },

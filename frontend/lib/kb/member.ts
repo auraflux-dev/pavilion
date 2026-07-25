@@ -24,7 +24,7 @@ export const MEMBER_KB: KbIndex = {
     },
     {
       id: 'cove',
-      title: 'Store & Cove card',
+      title: 'Store & Cove Digital Card',
       summary: 'Balance, family code, snack window, payments.',
       order: 4,
     },
@@ -57,7 +57,7 @@ If you need help with the login email, email membership@shmspto.org.`,
       body: `**My Account** shows **Free parent account** or **Paid PTO membership**.
 
 ## Free
-You can log in, add students, shop The Cove, and load a family Cove card.
+You can log in, add students, shop The Cove, and load a family Cove Digital Card.
 
 ## Paid
 You purchased Reef, Lagoon, or Tide for the school year. Perks and store-card credit sync after checkout.
@@ -118,11 +118,11 @@ When payment clears, return here and refresh. If credit or tier is still missing
     },
     {
       slug: 'cove-card-balance',
-      title: 'Where is my Cove card credit?',
+      title: 'Where is my Cove Digital Card credit?',
       categoryId: 'cove',
-      summary: 'Family balance and Payment History live in Store & Cove card.',
+      summary: 'Family balance and Payment History live in Store & Cove Digital Card.',
       order: 1,
-      body: `Open **Store & Cove card**. Your family balance and **Payment History** show there.
+      body: `Open **Store & Cove Digital Card**. Your family balance and **Payment History** show there.
 
 Membership gift-card credit loads after purchase. Use **Load family card** anytime to add more.
 
@@ -134,7 +134,7 @@ First-load bonus (when offered) applies once; reloads are dollar-for-dollar.`,
       categoryId: 'cove',
       summary: 'The 6-digit code students give at the snack window.',
       order: 2,
-      body: `In **Store & Cove card** you will see a 6-digit **Family Cove code**. Give that code to your student(s).
+      body: `In **Store & Cove Digital Card** you will see a 6-digit **Family Cove code**. Give that code to your student(s).
 
 At the snack window they tell staff the code (or show the QR) so the family balance can be charged.
 

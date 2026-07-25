@@ -73,15 +73,15 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
     "You're signed in as a free parent member. Add your students here, then upgrade to Reef, Lagoon, or Tide anytime for paid benefits.",
   emptyTitle: 'Welcome to the SHMS PTO',
   emptyBody:
-    'Your free parent account is ready. Add a student to track programs, Cove digital card balance, and paid membership status.',
+    'Your free parent account is ready. Add a student to track programs, Cove Digital Card balance, and paid membership status.',
   upgradeBody:
-    'Paid members get Cove digital card credit, enrichment discounts, and free refreshments at school events.',
+    'Paid members get Cove Digital Card credit, enrichment discounts, and free refreshments at school events.',
   viewMemberships: 'View paid memberships',
 
   calendarTitle: 'Calendar & Messages',
   accountTitle: 'My Account',
   studentsTitle: 'My Students',
-  storeTitle: 'Store & Cove digital card',
+  storeTitle: 'Store & Cove Digital Card',
   tabCalendar: 'Calendar',
   tabMessages: 'Messages',
   signOut: 'Sign out',
@@ -101,7 +101,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   paidMembershipsLabel: 'Paid memberships',
   whatsappHeading: 'Don’t forget to join your grade WhatsApp',
 
-  storeCardsLabel: 'Family Cove digital card',
+  storeCardsLabel: 'Family Cove Digital Card',
   storeCardsHint: 'Current Balance',
   recentBuysLabel: 'Recent buys',
   recentBuysHint: 'Payment History',
@@ -109,7 +109,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   ctaSpiritWear: 'Spirit wear',
   ctaPrograms: 'Programs',
   purchasesEmpty:
-    'Purchases from the site (memberships, programs, Cove digital card loads) will list here so you can see what each student is signed up for.',
+    'Purchases from the site (memberships, programs, Cove Digital Card loads) will list here so you can see what each student is signed up for.',
 
   addStudentCta: 'Add a student',
   addStudentTitle: 'Add a student',
@@ -120,10 +120,10 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   cancel: 'Cancel',
   addStudentError: 'Could not add student. Please try again.',
   loadCardHelp:
-    'One family Cove digital card and balance. Choose $20 / $40 / $75, or enter any whole dollar amount. Pay with credit/debit card or PayPal. Saving a payment card is optional for faster reloads and auto top off.',
+    'One family Cove Digital Card and balance. Choose $20 / $40 / $75, or enter any whole dollar amount. Pay with credit/debit card or PayPal. Saving a payment card is optional for faster reloads and auto top off.',
   paymentMethodsTitle: 'How you pay',
   paymentMethodsBody:
-    'Snack window: prepaid family Cove digital card (code or QR). Online: pay with credit/debit card or PayPal in this portal (membership, The Cove, and digital card reloads). Saving a payment card is optional.',
+    'Snack window: prepaid family Cove Digital Card (code or QR). Online: pay with credit/debit card or PayPal in this portal (membership, The Cove, and digital card reloads). Saving a payment card is optional.',
 }
 
 /** Parse `key|value` lines (store-how style). Value may contain `|`. */

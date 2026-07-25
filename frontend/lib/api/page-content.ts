@@ -9,6 +9,7 @@ import {
   PAGE_CONTENT_DEFAULTS,
   type PageContentFields,
 } from '@/lib/defaults/page-content'
+import { brandifyShmsPto } from '@/lib/copy/brandify-shms-pto'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 
 interface WixDataItem {
@@ -67,24 +68,15 @@ function merge(
         flyerImage: cms.flyerImage || fallback.flyerImage || '',
       }
 
-  const brand = (s: string) =>
-    String(s ?? '')
-      .replace(/\s*[·•|]\s*LCPS\b/gi, '')
-      .replace(/\bLCPS\b/gi, '')
-      .replace(/\bSHMS\b(?!\s+PTO)/g, 'SHMS PTO')
-      .replace(/SHMS PTO PTO/g, 'SHMS PTO')
-      .replace(/\s{2,}/g, ' ')
-      .trim()
-
   return {
     ...merged,
-    eyebrow: brand(merged.eyebrow),
-    title: humanizePublicCopy(brand(merged.title)),
-    body: humanizePublicCopy(brand(merged.body)),
-    sectionTitle: humanizePublicCopy(brand(merged.sectionTitle)),
-    sectionBody: humanizePublicCopy(brand(merged.sectionBody)),
-    bullets: merged.bullets.map((b) => humanizePublicCopy(brand(b))),
-    ctaLabel: brand(merged.ctaLabel),
+    eyebrow: brandifyShmsPto(merged.eyebrow),
+    title: humanizePublicCopy(brandifyShmsPto(merged.title)),
+    body: humanizePublicCopy(brandifyShmsPto(merged.body)),
+    sectionTitle: humanizePublicCopy(brandifyShmsPto(merged.sectionTitle)),
+    sectionBody: humanizePublicCopy(brandifyShmsPto(merged.sectionBody)),
+    bullets: merged.bullets.map((b) => humanizePublicCopy(brandifyShmsPto(b))),
+    ctaLabel: brandifyShmsPto(merged.ctaLabel),
   }
 }
 

@@ -33,6 +33,14 @@ import { PortalSurveys } from './portal-surveys'
 import { StoreCardReload } from './store-card-reload'
 import { CoveFamilyCodeCard } from './cove-family-code-card'
 import { MembershipBenefitsCard } from './membership-benefits-card'
+import {
+  CoveFeatureLockBanner,
+  OnboardingChecklist,
+} from './onboarding-checklist'
+import {
+  buildOnboardingChecklist,
+  coveFeaturesUnlocked,
+} from '@/lib/onboarding-checklist'
 
 interface MemberData {
   member: {
@@ -145,6 +153,7 @@ export function MemberDashboard({
   const [familyTab, setFamilyTab] = useState<'calendar' | 'messages'>('calendar')
   const [messagesSeenAt, setMessagesSeenAt] = useState(0)
   const [dismissedActivity, setDismissedActivity] = useState(false)
+  const [membershipSuccessNudge, setMembershipSuccessNudge] = useState(false)
 
   async function load() {
     setStatus('loading')
@@ -176,6 +185,19 @@ export function MemberDashboard({
   useEffect(() => {
     setMessagesSeenAt(readMessagesSeenAt())
     load()
+  }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('membership') !== 'success') return
+    setMembershipSuccessNudge(true)
+    params.delete('membership')
+    const qs = params.toString()
+    window.history.replaceState(
+      {},
+      '',
+      window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash,
+    )
   }, [])
 
   // #store scrolls here; Help opens /member-portal/help.
@@ -276,9 +298,44 @@ export function MemberDashboard({
     (s) => s.membershipTier && s.membershipTier !== 'free'
   ).length
 
+  const onboarding = buildOnboardingChecklist({ students, accountType })
+  const coveGate = coveFeaturesUnlocked(students)
+  const highlightChecklist =
+    membershipSuccessNudge || !onboarding.complete || accountType === 'paid'
+
   return (
     <div className="space-y-4">
       <PortalSectionNav />
+
+      {membershipSuccessNudge ? (
+        <div className="rounded-xl border border-[#D4E8D4] bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold text-[#085508]">Membership confirmed — thank you!</p>
+            <p className="text-xs text-[#1A1A1A]/80 mt-0.5 leading-relaxed">
+              {onboarding.complete
+                ? 'Your Cove card and perks are ready below.'
+                : 'Finish the family setup checklist so card credit and your QR attach to your students.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            className="text-xs font-semibold text-[#5A6070] underline shrink-0"
+            onClick={() => setMembershipSuccessNudge(false)}
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : null}
+
+      <OnboardingChecklist
+        items={onboarding.items}
+        requiredDone={onboarding.requiredDone}
+        requiredTotal={onboarding.requiredTotal}
+        complete={onboarding.complete}
+        coveUnlocked={onboarding.coveUnlocked}
+        highlight={Boolean(highlightChecklist && !onboarding.complete)}
+        onJumpStudents={() => setMembershipSuccessNudge(false)}
+      />
 
       {!dismissedActivity && newMessageCount > 0 ? (
         <div className="rounded-xl border border-[#085508]/30 bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
@@ -666,13 +723,28 @@ export function MemberDashboard({
           </div>
 
           <MembershipBenefitsCard />
-          <CoveFamilyCodeCard />
+          {coveGate.ok ? (
+            <CoveFamilyCodeCard />
+          ) : (
+            <CoveFeatureLockBanner reason={coveGate.error ?? 'Complete family setup first.'} />
+          )}
 
           <div className="flex flex-wrap gap-2 mb-4">
-            <StoreCardReload
-              students={students.map(({ id, firstName, lastName }) => ({ id, firstName, lastName }))}
-              onLoaded={load}
-            />
+            {coveGate.ok ? (
+              <StoreCardReload
+                students={students.map(({ id, firstName, lastName }) => ({ id, firstName, lastName }))}
+                onLoaded={load}
+              />
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#8A8F9C] cursor-not-allowed"
+                title={coveGate.error}
+              >
+                Load digital card (locked)
+              </button>
+            )}
             <a
               href="/cove#shop"
               className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#1A1A1A]"
@@ -680,10 +752,16 @@ export function MemberDashboard({
               <ShoppingBag className="w-3.5 h-3.5" /> {copy.ctaSpiritWear}
             </a>
             <a
-              href="/programs"
+              href={onboarding.complete ? '/programs' : '#portal-onboarding'}
               className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#1A1A1A]"
+              title={
+                onboarding.complete
+                  ? undefined
+                  : 'Complete student safety profiles before program registration'
+              }
             >
               {copy.ctaPrograms}
+              {!onboarding.complete ? ' (setup needed)' : ''}
             </a>
           </div>
 

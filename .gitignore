@@ -23,3 +23,8 @@ promo-videos/assets/parent-tour/video/_frames/
 promo-videos/assets/parent-tour/video/*.bak
 promo-videos/assets/parent-tour/thumbs/*_pre_shmspto.png
 promo-videos/assets/parent-tour/thumbs/*_evergreen*
+*.tsbuildinfo
+promo-videos/**/*.bak.mp4
+
+.DS_Store
+**/.DS_Store

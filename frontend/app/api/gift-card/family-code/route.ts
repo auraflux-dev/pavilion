@@ -23,7 +23,20 @@ export async function GET(req: NextRequest) {
         coveFamilyCode: null,
         balance: 0,
         gan: '',
+        locked: true,
         message: 'Add a student before a Cove family code is issued.',
+      })
+    }
+
+    const { requireCoveUnlocked } = await import('@/lib/onboarding-checklist')
+    const gate = await requireCoveUnlocked(session.email)
+    if (!gate.ok) {
+      return NextResponse.json({
+        coveFamilyCode: null,
+        balance: 0,
+        gan: '',
+        locked: true,
+        message: gate.error,
       })
     }
 
@@ -81,6 +94,11 @@ export async function POST(req: NextRequest) {
     const family = await listFamilyStudents(session.email)
     if (family.length === 0) {
       return NextResponse.json({ error: 'Add a student first' }, { status: 400 })
+    }
+    const { requireCoveUnlocked } = await import('@/lib/onboarding-checklist')
+    const gate = await requireCoveUnlocked(session.email)
+    if (!gate.ok) {
+      return NextResponse.json({ error: gate.error, code: 'ONBOARDING_INCOMPLETE' }, { status: 403 })
     }
     const code = await resetCoveFamilyCode(session.email)
     return NextResponse.json({ ok: true, coveFamilyCode: code })

@@ -55,7 +55,7 @@ export function StaffPersonalEmailPanel({
         <h2 className="text-base font-bold text-[#1A1A1A]">Your parent portal email</h2>
         <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
           Staff hierarchy uses your <span className="font-semibold">@shmspto.org</span> login.
-          Add your personal email so you can also be a parent: students, Cove card, and membership
+          Add your personal email so you can also be a parent: students, Cove Digital Card, and membership
           live under that personal login.
         </p>
       </div>

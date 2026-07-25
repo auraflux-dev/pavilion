@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     if (!family.gan) {
       return NextResponse.json(
         {
-          error: 'Family has a code but no Cove card balance yet. Parent must load the family card online first.',
+          error: 'Family has a code but no Cove Digital Card balance yet. Parent must load the family card online first.',
           family: {
             parentEmail: family.parentEmail,
             coveFamilyCode: family.coveFamilyCode,

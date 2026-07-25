@@ -92,12 +92,12 @@ function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation,
     const bal =
       input.extras?.newBalance != null ? money(Number(input.extras.newBalance)) : null
     const nextSteps = [
-      bal ? `Family Cove card balance is now ${bal}.` : 'Your Cove card load is complete.',
+      bal ? `Family Cove Digital Card balance is now ${bal}.` : 'Your Cove Digital Card load is complete.',
       'Students can use the 6-digit Family Cove code (or QR) at The Cove window.',
-      'Reload anytime from Member Portal → Store & Cove card.',
+      'Reload anytime from Member Portal → Store & Cove Digital Card.',
     ]
     return {
-      subject: 'Cove card load confirmed',
+      subject: 'Cove Digital Card load confirmed',
       body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', '— The Cove'].join('\n'),
       nextSteps,
       portalHref: '/member-portal#store',

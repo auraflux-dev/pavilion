@@ -1,5 +1,5 @@
 /**
- * Apple Wallet (.pkpass) + Google Wallet save URL for the family Cove digital card.
+ * Apple Wallet (.pkpass) + Google Wallet save URL for the family Cove Digital Card.
  * Requires PTO certs in Vercel env (see .env.example).
  */
 import { PKPass } from 'passkit-generator'
@@ -58,7 +58,7 @@ export async function buildCoveApplePass(opts: {
   const balanceLabel =
     opts.balance != null && Number.isFinite(opts.balance)
       ? `Balance $${Number(opts.balance).toFixed(2)}`
-      : 'Family Cove digital card'
+      : 'Family Cove Digital Card'
 
   const passJson = {
     formatVersion: 1,
@@ -66,7 +66,7 @@ export async function buildCoveApplePass(opts: {
     serialNumber: `cove-${opts.code}-${opts.parentEmail.slice(0, 24)}`,
     teamIdentifier,
     organizationName: 'SHMS PTO',
-    description: 'SHMS PTO Cove digital card',
+    description: 'SHMS PTO Cove Digital Card',
     logoText: 'SHMS PTO Cove',
     foregroundColor: 'rgb(255, 255, 255)',
     backgroundColor: 'rgb(8, 85, 8)',
@@ -156,7 +156,7 @@ export async function buildCoveGoogleWalletUrl(opts: {
           id: objectId,
           classId,
           cardTitle: {
-            defaultValue: { language: 'en-US', value: 'SHMS PTO Cove digital card' },
+            defaultValue: { language: 'en-US', value: 'SHMS PTO Cove Digital Card' },
           },
           header: {
             defaultValue: { language: 'en-US', value: opts.code },

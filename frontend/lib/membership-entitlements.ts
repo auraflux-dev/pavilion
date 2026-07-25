@@ -65,10 +65,10 @@ export function buildMembershipEntitlements(opts: {
   if (credit > 0) {
     out.push({
       kind: 'cove_credit',
-      label: `$${credit} Cove digital card credit`,
+      label: `$${credit} Cove Digital Card credit`,
       status: 'fulfilled',
       detail: `$${credit.toFixed(0)}`,
-      notes: 'Loaded onto your family Cove digital card at checkout.',
+      notes: 'Loaded onto your family Cove Digital Card at checkout.',
     })
   }
 

@@ -1,4 +1,4 @@
-# Litecard setup — SHMS Cove digital card (Square GAN → Apple/Google Wallet)
+# Litecard setup — SHMS Cove Digital Card (Square GAN → Apple/Google Wallet)
 
 Litecard issues native Wallet passes and holds Apple/Google signing for you.
 Our app creates/updates passes with **barcode = Square gift card GAN** so Square
@@ -48,7 +48,7 @@ LITECARD_TEMPLATE_ID=...
 # LITECARD_BUSINESS_ID=...
 ```
 
-Redeploy after setting. Portal → Cove digital card → **Wallet** opens Litecard’s
+Redeploy after setting. Portal → Cove Digital Card → **Wallet** opens Litecard’s
 Add to Apple / Google page. Photos QR still works without Litecard.
 
 ## 4. CMS fields (Memberships)
@@ -68,7 +68,7 @@ When Litecard is configured it PATCHes the pass balance after every activity.
 
 ## 6. Smoke test
 
-1. Parent with loaded Cove card → Member portal → Wallet.
+1. Parent with loaded Cove Digital Card → Member portal → Wallet.
 2. Confirm Welcome URL opens Add to Apple / Google.
 3. Scan Wallet QR on Square Stand gift-card flow → same GAN / balance.
 4. Redeem $1 at Stand → pass balance updates (may take a push cycle).

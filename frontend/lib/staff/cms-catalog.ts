@@ -437,19 +437,19 @@ export const SITE_SETTING_GROUPS: {
       {
         key: 'storeCardBonusPercent',
         label:
-          'Cove card first-load / membership bonus % (not on reloads; e.g. 10 = pay $50, load $55)',
+          'Cove Digital Card first-load / membership bonus % (not on reloads; e.g. 10 = pay $50, load $55)',
       },
       {
         key: 'storeCardAmounts',
-        label: 'Cove card preset amounts (comma-separated, e.g. 20,40,75)',
+        label: 'Cove Digital Card preset amounts (comma-separated, e.g. 20,40,75)',
       },
       {
         key: 'storeCardMinAmount',
-        label: 'Cove card minimum load ($)',
+        label: 'Cove Digital Card minimum load ($)',
       },
       {
         key: 'storeCardMaxAmount',
-        label: 'Cove card maximum load ($)',
+        label: 'Cove Digital Card maximum load ($)',
       },
     ],
   },

@@ -257,7 +257,7 @@ export async function resolveCheckoutIntent(
   }
   const family = await listFamilyStudents(parentEmail)
   if (family.length === 0) {
-    throw new Error('Add a student before loading the family Cove card.')
+    throw new Error('Add a student before loading the family Cove Digital Card.')
   }
   const student = (studentId ? family.find((s) => s._id === studentId) : undefined) ?? family[0]
   if (!student?._id) {
@@ -268,7 +268,7 @@ export async function resolveCheckoutIntent(
     kind: 'store-card',
     amount,
     amountCents,
-    description: 'Family Cove card load',
+    description: 'Family Cove Digital Card load',
     customId: `store-card:${parentEmail}`,
     meta: {
       studentId: student._id,
@@ -523,8 +523,8 @@ export async function fulfillPaidCheckout(opts: {
       studentId,
       parentEmail: parentEmailForCard,
       programName: isFirstLoad
-        ? `Family Cove Card First Load (+${bonusPercent}% bonus)`
-        : 'Family Cove Card Reload',
+        ? `Family Cove Digital Card First Load (+${bonusPercent}% bonus)`
+        : 'Family Cove Digital Card Reload',
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
@@ -534,7 +534,7 @@ export async function fulfillPaidCheckout(opts: {
       notes:
         bonusPercent > 0
           ? `Paid $${resolved.amount}; loaded $${(loadCents / 100).toFixed(2)} (+${bonusPercent}%) on family card`
-          : 'Family Cove card load',
+          : 'Family Cove Digital Card load',
     })
     return attachPurchaseConfirmation(
       {

@@ -165,7 +165,7 @@ export function StoreCardReload({
   async function submit() {
     const loadStudentId = studentId || studentList[0]?.id || ''
     if (!loadStudentId) {
-      setError('Add a student in the portal before loading the Cove digital card.')
+      setError('Add a student in the portal before loading the Cove Digital Card.')
       return
     }
     if (!Number.isInteger(amount) || amount < 1 || amount > maxAmount) {
@@ -257,7 +257,7 @@ export function StoreCardReload({
   return (
     <div className="w-full rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] p-4 space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-bold text-[#1A1A1A]">Load the family Cove digital card</p>
+        <p className="text-sm font-bold text-[#1A1A1A]">Load the family Cove Digital Card</p>
         <button type="button" onClick={() => setOpen(false)} aria-label="Close reload form">
           <X className="w-4 h-4 text-[#5A6070]" />
         </button>
@@ -428,7 +428,7 @@ export function StoreCardReload({
       ) : null}
 
       <p className="text-[10px] text-[#5A6070] text-center">
-        Pay with credit/debit card or PayPal. One family Cove digital card and balance. {bonusPercent}% on
+        Pay with credit/debit card or PayPal. One family Cove Digital Card and balance. {bonusPercent}% on
         first load or membership credit only. Reloads are 1:1. Saving a payment card is optional.
       </p>
     </div>

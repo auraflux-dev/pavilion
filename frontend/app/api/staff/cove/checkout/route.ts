@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     const family = await lookupFamilyByCoveCode(code)
     if (!family?.gan) {
       return NextResponse.json(
-        { error: 'Family not found or has no Cove card loaded' },
+        { error: 'Family not found or has no Cove Digital Card loaded' },
         { status: 404 }
       )
     }
