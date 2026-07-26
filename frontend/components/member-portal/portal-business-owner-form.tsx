@@ -260,7 +260,7 @@ export function PortalBusinessOwnerForm({
 
         <Button
           type="submit"
-          disabled={status === 'loading' || !isOwner}
+          disabled={status === 'loading'}
           className="gap-2 text-white"
           style={{ backgroundColor: '#085508' }}
         >
@@ -319,7 +319,7 @@ export function PortalBusinessOwnerForm({
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <Button
           type="submit"
-          disabled={status === 'loading' || !isOwner}
+          disabled={status === 'loading'}
           className="gap-2 text-white"
           style={{ backgroundColor: '#085508' }}
         >
