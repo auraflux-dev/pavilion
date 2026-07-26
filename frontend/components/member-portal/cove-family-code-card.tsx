@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { CoveLogo } from '@/components/brand/cove-logo'
 
 /**
- * Family Cove Digital Card — QR encodes Square GAN when loaded (Stand / iPad / Photos / Wallet).
+ * Family Cove Digital Card. QR encodes Square GAN when loaded (Stand / iPad / Photos / Wallet).
  * 6-digit PIN stays as spoken backup if the phone dies.
  */
 export function CoveFamilyCodeCard() {
@@ -75,7 +75,7 @@ export function CoveFamilyCodeCard() {
       await navigator.clipboard.writeText(code)
       setMessage('Backup code copied')
     } catch {
-      setMessage('Could not copy — write the code down for your student')
+ setMessage('Could not copy. write the code down for your student')
     }
   }
 
@@ -93,9 +93,9 @@ export function CoveFamilyCodeCard() {
         await navigator.share({
           files: [file],
           title: 'SHMS PTO Cove Digital Card',
-          text: `Family Cove Digital Card — show this QR at The Cove or school store`,
+ text: `Family Cove Digital Card. show this QR at The Cove or school store`,
         })
-        setMessage('Shared — add to Photos so your student can open it at checkout')
+ setMessage('Shared. add to Photos so your student can open it at checkout')
         return
       }
       const url = URL.createObjectURL(blob)
@@ -132,13 +132,13 @@ export function CoveFamilyCodeCard() {
         a.download = `shms-cove-${code}.pkpass`
         a.click()
         URL.revokeObjectURL(url)
-        setMessage('Apple Wallet pass downloaded — open it to Add to Wallet.')
+ setMessage('Apple Wallet pass downloaded. open it to Add to Wallet.')
         return
       }
       const d = await r.json().catch(() => ({}))
       if (d.walletUrl || d.litecard?.welcomeUrl) {
         window.open(String(d.walletUrl || d.litecard.welcomeUrl), '_blank', 'noopener,noreferrer')
-        setMessage('Opening Wallet pass — Add to Apple Wallet or Google Wallet on the next screen.')
+ setMessage('Opening Wallet pass. Add to Apple Wallet or Google Wallet on the next screen.')
         return
       }
       if (d.appleWalletUrl) {
@@ -229,14 +229,14 @@ export function CoveFamilyCodeCard() {
               {squareScanReady ? (
                 <>
                   Save this QR to <strong>Photos</strong> (or Wallet). Students open it at Cove /
-                  store / events — Square Stand and iPad scan it like a gift card. Kids do not need
+ store / events. Square Stand and iPad scan it like a gift card. Kids do not need
                   to remember the 6-digit code.
                 </>
               ) : hasCard ? (
                 <>Load or refresh the Cove Digital Card, then Save QR again.</>
               ) : (
                 <>
-                  Load the Cove Digital Card first. Then Save QR to Photos — that QR is what Square
+ Load the Cove Digital Card first. Then Save QR to Photos. that QR is what Square
                   Stand scans.
                 </>
               )}

@@ -1,5 +1,5 @@
 /**
- * Publish via Wix Social Publisher — Facebook POST / REEL / STORY and Instagram POST / STORY.
+ * Publish via Wix Social Publisher. Facebook POST / REEL / STORY and Instagram POST / STORY.
  */
 import { getSocialConfig } from './config'
 import { ensureWixMediaUrl } from './wix-media'
@@ -129,7 +129,7 @@ async function buildInstagramContent(
   }
 
   if (draft.format === 'REEL') {
-    throw new Error('Instagram Reels are not supported yet — use Post or Story.')
+ throw new Error('Instagram Reels are not supported yet. use Post or Story.')
   }
 
   // Instagram POST requires media

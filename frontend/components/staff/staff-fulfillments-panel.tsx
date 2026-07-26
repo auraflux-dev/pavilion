@@ -83,7 +83,7 @@ export function StaffFulfillmentsPanel() {
       {busy && items.length === 0 ? (
         <Loader2 className="w-5 h-5 animate-spin text-[#085508]" />
       ) : items.length === 0 ? (
-        <p className="text-sm text-[#5A6070]">Queue clear — nothing pending.</p>
+ <p className="text-sm text-[#5A6070]">Queue clear. nothing pending.</p>
       ) : (
         <div className="space-y-5">
           {shirts.length > 0 ? (
@@ -100,7 +100,7 @@ export function StaffFulfillmentsPanel() {
                     <div>
                       <p className="text-sm font-bold text-[#1A1A1A]">{item.parentEmail}</p>
                       <p className="text-xs text-[#5A6070]">
-                        {item.tier} · Size {item.detail || item.shirtSize || '—'}
+ {item.tier} · Size {item.detail || item.shirtSize || '-'}
                       </p>
                     </div>
                     <Button

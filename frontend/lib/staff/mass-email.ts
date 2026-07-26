@@ -63,7 +63,7 @@ export function gmailConfigured(): boolean {
     process.env.GMAIL_CLIENT_ID?.trim() || process.env.GOOGLE_OAUTH_CLIENT_ID?.trim()
   const clientSecret =
     process.env.GMAIL_CLIENT_SECRET?.trim() || process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim()
-  // Env refresh token path — StaffGoogleTokens fallback is checked async in sendMassEmail.
+ // Env refresh token path. StaffGoogleTokens fallback is checked async in sendMassEmail.
   return Boolean(
     clientId &&
       clientSecret &&
@@ -72,7 +72,7 @@ export function gmailConfigured(): boolean {
   )
 }
 
-/** @deprecated alias — UI still asks emailConfigured */
+/** @deprecated alias. UI still asks emailConfigured */
 export function emailConfigured(): boolean {
   return gmailConfigured()
 }

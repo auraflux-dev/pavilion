@@ -1,5 +1,5 @@
 /**
- * Membership perk entitlements — what we still owe the family after they join.
+ * Membership perk entitlements. what we still owe the family after they join.
  * Stored as JSON on Memberships.entitlementsJson and surfaced in the portal / Staff.
  */
 export type MembershipEntitlementKind =
@@ -103,7 +103,7 @@ export function buildMembershipEntitlements(opts: {
       status: 'pending',
       detail: size || 'Size needed',
       notes: size
-        ? `Size ${size} — PTO will fulfill from Spirit Wear stock.`
+ ? `Size ${size}. PTO will fulfill from Spirit Wear stock.`
         : 'Choose a size so we can fulfill your shirt.',
     })
   }

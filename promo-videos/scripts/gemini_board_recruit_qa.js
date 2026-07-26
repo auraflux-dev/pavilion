@@ -62,8 +62,8 @@ Watch the ENTIRE video with audio. Duration ≈ ${durationSec.toFixed(1)}s.
 NORTH STAR: SEE = HEAR. Role names spoken must match on-screen role cards/pages.
 
 MUST-PASS:
-0. STAPLE bookends: cold-open brand card at start (~5s, seal + SHMS PTO) and thank-you / Go Stingrays outro at end (~4s, SAME logo style as intro — no mismatched white-plate seal). Missing either = critical FAIL
-1. Mentions five open board roles: Secretary, Treasurer, SEAC Representative, Events Coordinator, Initiatives Coordinator — each role beat should show that role's highlight bullets on a designed slide
+0. STAPLE bookends: cold-open brand card at start (~5s, seal + SHMS PTO) and thank-you / Go Stingrays outro at end (~4s, SAME logo style as intro. no mismatched white-plate seal). Missing either = critical FAIL
+1. Mentions five open board roles: Secretary, Treasurer, SEAC Representative, Events Coordinator, Initiatives Coordinator. each role beat should show that role's highlight bullets on a designed slide
 2. Initiatives framed as enrichment programs + sponsorships (not jargon "EPS")
 3. Board benefits on screen/VO: free Reef (first-tier) membership; 75% off ONE enrichment program per season; plus inside knowledge and/or direct impact (vote on funds). Do NOT require a "donate optional / support initiatives" beat.
 4. Board apply path: Board page on the website + president@shmspto.org · urgency ASAP
@@ -158,7 +158,7 @@ async function main() {
       `**Video:** \`${video}\``,
       '',
       '## Summary',
-      parsed.summary || '—',
+ parsed.summary || '. ',
       '',
       '## Notes',
       ...(parsed.chapter_notes || []).map((c) => `- **${c.chapter}** (~${c.approx_time_sec}s) ${c.ok ? 'OK' : 'ISSUE'}: ${c.note}`),
@@ -172,7 +172,7 @@ async function main() {
     ].join('\n');
     fs.writeFileSync(path.join(OUT_DIR, 'gemini_board_recruit_qa.md'), md);
     console.log('\n' + md + '\n');
-    console.log(pass ? '✅ GEMINI PASS — send-ready' : '❌ GEMINI FAIL');
+ console.log(pass ? '✅ GEMINI PASS. send-ready' : '❌ GEMINI FAIL');
     process.exit(pass ? 0 : 2);
   } finally {
     if (geminiFile?.name) {

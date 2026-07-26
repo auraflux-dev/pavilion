@@ -1,5 +1,5 @@
 /**
- * Next.js middleware — runs on every request.
+ * Next.js middleware. runs on every request.
  *
  * 1. Protect member-only routes with a real member session (not visitor tokens).
  * 2. Generate anonymous visitor tokens for everyone else.
@@ -18,7 +18,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
   // Wix login UI needs /_api, /__auth, /_serverless, /_partials on www.
-  // After DNS cutover those hit Vercel — rewrite to the Node proxy.
+ // After DNS cutover those hit Vercel. rewrite to the Node proxy.
   if (
     pathname.startsWith('/_api/') ||
     pathname.startsWith('/__auth/') ||

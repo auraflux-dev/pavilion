@@ -32,7 +32,7 @@ export function listConfiguredGradeLinks(links: GradeWhatsAppLinks): {
   ).filter((g) => Boolean(g.url.trim()))
 }
 
-/** Personal share (not group) — opens WhatsApp with prefilled text. */
+/** Personal share (not group). opens WhatsApp with prefilled text. */
 export function buildWaMeShareUrl(message: string): string {
   const text = message.trim()
   return `https://wa.me/?text=${encodeURIComponent(text)}`

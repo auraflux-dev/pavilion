@@ -1,5 +1,5 @@
 /**
- * Fundraising totals — pulled live from Wix eCommerce Orders API.
+ * Fundraising totals. pulled live from Wix eCommerce Orders API.
  *
  * Strategy:
  *  1. Fetch all PAID orders for the current school year (Aug 1 → Jul 31).
@@ -7,7 +7,7 @@
  *     against SiteSettings product-ID lists (storeProductIds / spiritWearProductIds).
  *  3. Sum totals per initiative and return alongside CMS goals.
  *
- * Volunteer hours remain manual — SiteSettings volunteerHoursRaised/Goal.
+ * Volunteer hours remain manual. SiteSettings volunteerHoursRaised/Goal.
  */
 
 import { getCatalogConfig } from '@/lib/api/catalog-config'
@@ -16,7 +16,7 @@ import { getCatalogConfig } from '@/lib/api/catalog-config'
 const SCHOOL_YEAR_START = '2025-08-01T00:00:00.000Z'
 const SCHOOL_YEAR_END   = '2026-07-31T23:59:59.999Z'
 
-// ─── Goals & volunteer hours — loaded from Wix SiteSettings CMS at runtime ───
+// ─── Goals & volunteer hours. loaded from Wix SiteSettings CMS at runtime ───
 // Fallback values used when CMS is unreachable or keys are missing.
 export const VOLUNTEER_HOURS_RAISED_DEFAULT = 0
 export const VOLUNTEER_HOURS_GOAL_DEFAULT   = 500
@@ -30,7 +30,7 @@ export const GOALS_DEFAULT = {
   other:       1000,
 }
 
-// Event tickets — not yet created as Wix store products (can move to SiteSettings later)
+// Event tickets. not yet created as Wix store products (can move to SiteSettings later)
 const DANCE_NIGHT_IDS = new Set<string>([])
 const NOVA_MATH_IDS = new Set<string>([])
 
@@ -106,7 +106,7 @@ async function fetchAllPaidOrders(): Promise<WixOrder[]> {
         'wix-site-id': siteId,
       },
       body: JSON.stringify(body),
-      // No Next.js cache — this route is called with revalidate at the page level
+ // No Next.js cache. this route is called with revalidate at the page level
     })
 
     if (!res.ok) break
@@ -205,7 +205,7 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
       }
     }
   } catch {
-    // return zeros on error — page still renders with empty bars
+ // return zeros on error. page still renders with empty bars
   }
 
   return {

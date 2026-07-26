@@ -325,7 +325,7 @@ export async function listLabels(staffEmail: string): Promise<GmailLabel[]> {
       messagesUnread: l.messagesUnread,
     }))
 
-  // labels.list often omits unread counts — pull them via labels.get for sidebar badges.
+ // labels.list often omits unread counts. pull them via labels.get for sidebar badges.
   const needCounts = base.filter(
     (l) =>
       l.type === 'user' ||

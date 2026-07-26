@@ -95,7 +95,7 @@ async function proxyToWix(req: NextRequest, wixPath: string) {
     const request = https.request(
       {
         host: address,
-        // SNI must be the Wix upstream host — www.shmspto.org is no longer
+ // SNI must be the Wix upstream host. www.shmspto.org is no longer
         // on Wix TLS after DNS cutover (handshake failure → white-screen 502).
         servername: UPSTREAM_DNS,
         path: pathWithQuery,

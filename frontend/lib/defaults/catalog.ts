@@ -20,7 +20,7 @@ export const CATALOG_DEFAULTS = {
   storeCardVariant20: 'bddb2f05-4ce4-4d41-848a-f6b3dc9bf478',
   storeCardVariant25: '24000231-2b43-4dee-8434-695f3034858d',
   /** Suggested new-card load amounts shown in UI (tier-aligned). Refills can be any
-   *  whole dollar via the custom field (Square path allows $min–$max). */
+ * whole dollar via the custom field (Square path allows $min to $max). */
   storeCardAmounts: '20,40,75',
   storeCardMinAmount: '1',
   storeCardMaxAmount: '500',

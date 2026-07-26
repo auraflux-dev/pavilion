@@ -1,5 +1,5 @@
 /**
- * Contractor / instructor timesheets — submitted to VP Programs for approval.
+ * Contractor / instructor timesheets. submitted to VP Programs for approval.
  * Collection: ContractorTimesheets
  */
 import { getWixClient } from '@/lib/wix-client'

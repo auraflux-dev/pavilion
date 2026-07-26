@@ -174,7 +174,7 @@ const DEFAULTS: Record<LegalDoc['slug'], LegalDoc> = {
       },
       {
         heading: 'Backups',
-        body: 'Wix retains CMS data under Wix commercial backup practices. In addition, SHMS PTO runs scheduled exports of operational CMS collections to encrypted object storage (Cloudflare R2) when backup credentials are configured. Backups are for disaster recovery and authorized board access only — not for marketing use.',
+ body: 'Wix retains CMS data under Wix commercial backup practices. In addition, SHMS PTO runs scheduled exports of operational CMS collections to encrypted object storage (Cloudflare R2) when backup credentials are configured. Backups are for disaster recovery and authorized board access only. not for marketing use.',
       },
       {
         heading: 'Monitoring & error reporting',

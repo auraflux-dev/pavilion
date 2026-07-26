@@ -50,7 +50,7 @@ export function isSameOriginRequest(req: Request): boolean {
   if (path.startsWith('/api/wix-auth-proxy/')) return true
   if (req.headers.get('authorization')?.startsWith('Bearer ')) return true
 
-  // Public forms may be posted without Origin in some older browsers — allow
+ // Public forms may be posted without Origin in some older browsers. allow
   // contact/volunteer/newsletter/surveys which are not cookie-session APIs.
   if (
     path.startsWith('/api/contact') ||

@@ -1,4 +1,4 @@
-# Parent Portal & Surveys — Locked Plan (July 2026)
+# Parent Portal & Surveys. Locked Plan (July 2026)
 
 Decisions from product review, with test plans for execution.
 
@@ -7,55 +7,55 @@ Decisions from product review, with test plans for execution.
 | # | Decision |
 |---|----------|
 | 1 | **Both** money paths: prepaid reload plus Square card-on-file for optional auto top-off |
-| 2 | **In-portal edit only** — never link parents out to Wix profile |
+| 2 | **In-portal edit only**. never link parents out to Wix profile |
 | 3 | General FAQ on the page it applies to; **portal-specific help only inside `/member-portal`** |
-| 4 | **Branded embedded surveys** on `shmspto.org/survey/{slug}` — share same URL via email/SMS/WhatsApp; responses in `SurveyResponses` CMS |
+| 4 | **Branded embedded surveys** on `shmspto.org/survey/{slug}`. share same URL via email/SMS/WhatsApp; responses in `SurveyResponses` CMS |
 | 5 | **Social**: code config + publish stub now; connect FB/IG in Wix when accounts exist |
 
 ---
 
 ## Workstreams & status
 
-### A — Money (both paths)
+### A. Money (both paths)
 
 | Item | Phase | Status |
 |------|-------|--------|
-| Copy: store card vs checkout vs no card-on-file | 1 | **Done** — portal copy + auto top-off honesty |
+| Copy: store card vs checkout vs no card-on-file | 1 | **Done**. portal copy + auto top-off honesty |
 | Load card help in Store quadrant | 1 | **Done** |
-| Card-on-file + charge for auto top-off | 2 | **Done in code** — Square Web Payments SDK + Cards API |
-| Student-scoped reload | 2 | **Done in code** — required student picker before payment |
-| Production payment test | 2 | Pending — requires signed-in parent and real/test card |
+| Card-on-file + charge for auto top-off | 2 | **Done in code**. Square Web Payments SDK + Cards API |
+| Student-scoped reload | 2 | **Done in code**. required student picker before payment |
+| Production payment test | 2 | Pending. requires signed-in parent and real/test card |
 
-### B — In-portal profile & household
+### B. In-portal profile & household
 
 | Item | Status |
 |------|--------|
-| Edit profile (name, phone) | **Done** — `PATCH /api/auth/profile` |
-| Edit student (name, grade) | **Done** — `PATCH /api/students/[id]` |
+| Edit profile (name, phone) | **Done**. `PATCH /api/auth/profile` |
+| Edit student (name, grade) | **Done**. `PATCH /api/students/[id]` |
 | Add student | Already existed |
 | My Account → Manage students link | **Done** |
 | Return anytime hub | `/member-portal` |
 
-### C — Portal help (placement)
+### C. Portal help (placement)
 
 | Item | Status |
 |------|--------|
-| `portal-help` PageContent (question\|answer) | **Done** — seed + defaults |
+| `portal-help` PageContent (question\|answer) | **Done**. seed + defaults |
 | Collapsible help panel in portal | **Done** |
 | Board edits via CMS without deploy | **Done** |
 
-### D — Surveys & data
+### D. Surveys & data
 
 | Item | Status |
 |------|--------|
-| `Surveys` + `SurveyResponses` CMS collections | **Done** — seed script |
+| `Surveys` + `SurveyResponses` CMS collections | **Done**. seed script |
 | Branded `/survey/[slug]` page | **Done** |
 | Portal survey list | **Done** |
-| Board creates survey in CMS (fields JSON) | **Done** — manual CMS for now |
-| Staff share center for email/SMS/WhatsApp | **Done** — `/staff` opens or copies branded channel messages |
-| Review responses in staff portal | **Done** — filterable response table for marketing/secretary/admin |
-| CSV export | **Done** — `/api/staff/surveys?format=csv` |
-| Export/analyze in Wix CMS | **Done** — SurveyResponses collection remains the source of truth |
+| Board creates survey in CMS (fields JSON) | **Done**. manual CMS for now |
+| Staff share center for email/SMS/WhatsApp | **Done**. `/staff` opens or copies branded channel messages |
+| Review responses in staff portal | **Done**. filterable response table for marketing/secretary/admin |
+| CSV export | **Done**. `/api/staff/surveys?format=csv` |
+| Export/analyze in Wix CMS | **Done**. SurveyResponses collection remains the source of truth |
 
 **Survey share URL:** `https://shmspto.org/survey/{slug}?from=email|sms|whatsapp|portal`
 
@@ -67,20 +67,20 @@ Decisions from product review, with test plans for execution.
 ]
 ```
 
-### E — Social (code now, accounts later)
+### E. Social (code now, accounts later)
 
 | Item | Status |
 |------|--------|
-| Site Settings: social URLs + page IDs + `socialPublishEnabled` | **Done** — seed |
+| Site Settings: social URLs + page IDs + `socialPublishEnabled` | **Done**. seed |
 | `lib/social/config.ts` + `publish.ts` stub | **Done** |
-| Wix Dashboard connect FB/IG | **Waiting** — you create accounts |
-| Board how-to for native Wix Social publish | **Done** — Drive doc 25 |
+| Wix Dashboard connect FB/IG | **Waiting**. you create accounts |
+| Board how-to for native Wix Social publish | **Done**. Drive doc 25 |
 
 ---
 
 ## Test plans
 
-### TP-B — Portal edit
+### TP-B. Portal edit
 
 | # | Test | Pass |
 |---|------|------|
@@ -90,7 +90,7 @@ Decisions from product review, with test plans for execution.
 | B.4 | Edit student grade → saves, refresh persists | |
 | B.5 | Wrong parent cannot PATCH another student | 404 |
 
-### TP-C — Store card and saved payment
+### TP-C. Store card and saved payment
 
 | # | Test | Pass |
 |---|------|------|
@@ -102,14 +102,14 @@ Decisions from product review, with test plans for execution.
 | C.6 | REDEEM at/below threshold charges saved card before loading gift card | |
 | C.7 | Payment succeeds but load fails → `Needs Reconciliation`, no blind retry | |
 
-### TP-D — Portal help
+### TP-D. Portal help
 
 | # | Test | Pass |
 |---|------|------|
 | D.1 | Help panel only on `/member-portal` | |
 | D.2 | CMS edit to `portal-help` bullets updates FAQ (~5 min) | |
 
-### TP-E — Surveys
+### TP-E. Surveys
 
 | # | Test | Pass |
 |---|------|------|
@@ -119,7 +119,7 @@ Decisions from product review, with test plans for execution.
 | E.4 | `?from=whatsapp` stored as channel | |
 | E.5 | requireLogin survey redirects anon to login | |
 
-### TP-F — Social stub
+### TP-F. Social stub
 
 | # | Test | Pass |
 |---|------|------|
@@ -131,10 +131,10 @@ Decisions from product review, with test plans for execution.
 
 ## Board docs
 
-1. **23 - How to Create & Share a Branded Survey** — created  
-2. **24 - How to Review and Export Survey Responses** — created  
-3. **25 - How to Publish to Facebook and Instagram from Wix** — created  
-4. **Parent portal help** — already in CMS `portal-help`; board can edit there  
+1. **23 - How to Create & Share a Branded Survey**. created 
+2. **24 - How to Review and Export Survey Responses**. created 
+3. **25 - How to Publish to Facebook and Instagram from Wix**. created 
+4. **Parent portal help**. already in CMS `portal-help`; board can edit there 
 
 ---
 

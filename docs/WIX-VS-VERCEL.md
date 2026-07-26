@@ -8,7 +8,7 @@
 
 | Wix source | What it drives |
 |------------|----------------|
-| **SiteSettings** | Announcement, hero *numbers*, footer hours/email/socials, WhatsApp grade links (**shown only after free/paid member login** — hidden from visitors), membership shared benefits, volunteer benefits, fundraising goals/allocations, **catalog product/variant IDs + store-card amounts**, **`storeProductIds` / `spiritWearProductIds` allowlists**, home volunteer/community image URLs, **portal grades**, **contact emails/address/hours** |
+| **SiteSettings** | Announcement, hero *numbers*, footer hours/email/socials, WhatsApp grade links (**shown only after free/paid member login**. hidden from visitors), membership shared benefits, volunteer benefits, fundraising goals/allocations, **catalog product/variant IDs + store-card amounts**, **`storeProductIds` / `spiritWearProductIds` allowlists**, home volunteer/community image URLs, **portal grades**, **contact emails/address/hours** |
 | **PageContent** | Page heroes / marketing chrome (home, membership, events, programs, volunteer, board, contact, store, spirit-wear, fundraising, meetings, newsletter, member-portal) + home blocks (`home-volunteer`, `home-community`) + portal free/paid copy (`portal`) + portal hub UI labels (`portal-hub` keyed bullets) |
 | **NavLinks** | Navbar + footer labels / order / visibility |
 | **Programs** | Programs list + featured home cards (+ Cheddarup URL) |
@@ -51,11 +51,11 @@ Code fallbacks remain in `frontend/lib/defaults/catalog.ts` if a key is missing.
 `page` (slug), `eyebrow`, `title`, `body`, `sectionTitle`, `sectionBody`, `bullets` (newline-separated; store-how uses `step\|title\|body`), `ctaLabel`, `ctaHref`, `active`.
 
 Special pages:
-- `home-volunteer` — home volunteer section (`bullets` = benefit list; `sectionTitle`/`sectionBody` = quote + attribution; CTAs via `ctaLabel`/`ctaHref`)
-- `home-community` — home community strip headline (`title`)
-- `member-portal` — hero title/body
-- `portal` — free/paid account blurbs (`title`/`body` = free, `sectionTitle`/`sectionBody` = paid); bullets line 1–3 = empty-student title/body + upgrade blurb
-- `portal-hub` — quadrant titles, empty states, CTAs as `key|text` lines in **Bullets** (e.g. `calendarTitle|Calendar & Messages`)
+- `home-volunteer`. home volunteer section (`bullets` = benefit list; `sectionTitle`/`sectionBody` = quote + attribution; CTAs via `ctaLabel`/`ctaHref`)
+- `home-community`. home community strip headline (`title`)
+- `member-portal`. hero title/body
+- `portal`. free/paid account blurbs (`title`/`body` = free, `sectionTitle`/`sectionBody` = paid); bullets line 1 to 3 = empty-student title/body + upgrade blurb
+- `portal-hub`. quadrant titles, empty states, CTAs as `key|text` lines in **Bullets** (e.g. `calendarTitle|Calendar & Messages`)
 - `store` / `store-how` / `store-cta`
 
 **Seed / refresh CMS rows:**
@@ -68,7 +68,7 @@ node --env-file=frontend/.env.local scripts/seed-cms-content.mjs
 
 ## Locked in Vercel today (needs code deploy)
 
-PTO-facing write-up (Google Drive Tech Ops): **22 - Vercel Only — Cursor Code vs Dashboard** — splits (A) Cursor/git changes vs (B) Vercel Dashboard (env, domains, aliases, cron). Short checklist: doc **09 v3**.
+PTO-facing write-up (Google Drive Tech Ops): **22 - Vercel Only. Cursor Code vs Dashboard**. splits (A) Cursor/git changes vs (B) Vercel Dashboard (env, domains, aliases, cron). Short checklist: doc **09 v3**.
 
 ### Member journey
 

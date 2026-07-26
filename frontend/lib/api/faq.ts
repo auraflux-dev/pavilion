@@ -1,5 +1,5 @@
 /**
- * FAQ items — fetched from Wix CMS FAQItems collection.
+ * FAQ items. fetched from Wix CMS FAQItems collection.
  * Admins manage in: Wix Dashboard → Content Manager → FAQ Items
  *
  * Filter by `page` field to show the right FAQs on each page:

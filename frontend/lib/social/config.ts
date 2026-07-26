@@ -1,5 +1,5 @@
 /**
- * Social publishing config — Facebook + Instagram via Wix Social Publisher.
+ * Social publishing config. Facebook + Instagram via Wix Social Publisher.
  */
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { listWixSocialAccounts, pickDefaultAccount } from '@/lib/social/accounts'

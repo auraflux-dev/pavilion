@@ -1,10 +1,10 @@
 'use client'
 
 /**
- * /auth/join. Sign Up–first parent account gate.
+ * /auth/join. Sign Up-first parent account gate.
  * Wix’s hosted MemberLoginDialog always opens in Log In mode, so pricing CTAs
  * land here first. Email sign-up/login is owned on this page; social providers
- * still use Wix OAuth (provider screens), not the Log In–first modal copy.
+ * still use Wix OAuth (provider screens), not the Log In-first modal copy.
  */
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -28,7 +28,7 @@ function JoinInner() {
   const initialMode = searchParams.get('mode') === 'login' ? 'login' : 'signup'
   const [mode, setMode] = useState<Mode>(initialMode)
   const [panel, setPanel] = useState<Panel>(() => {
-    // Login defaults to email — Google is blocked while the OAuth app is Internal.
+ // Login defaults to email. Google is blocked while the OAuth app is Internal.
     return initialMode === 'login' ? 'email' : 'chooser'
   })
   const [email, setEmail] = useState('')
@@ -68,8 +68,7 @@ function JoinInner() {
 
   function switchMode(next: Mode, opts?: { keepEmailPanel?: boolean }) {
     setMode(next)
-    // Stay on the email form when switching signup↔login from there —
-    // resetting to the chooser felt like getting kicked out mid-flow.
+ // Stay on the email form when switching signup↔login from there.     // resetting to the chooser felt like getting kicked out mid-flow.
     if (!opts?.keepEmailPanel) setPanel('chooser')
     setNeedsVerify(false)
     setVerifyStateToken(null)
@@ -136,7 +135,7 @@ function JoinInner() {
         if (data.errorCode === 'ownerApprovalRequired') {
           throw new Error(
             data.error ||
-              'Your parent account is pending approval. Keep using your personal email — Staff (@shmspto.org) is only for board tools, not family portal login. Email membership@shmspto.org if this continues.',
+ 'Your parent account is pending approval. Keep using your personal email. Staff (@shmspto.org) is only for board tools, not family portal login. Email membership@shmspto.org if this continues.',
           )
         }
         throw new Error(data.error || (mode === 'signup' ? 'Could not create account' : 'Could not log in'))
@@ -166,7 +165,7 @@ function JoinInner() {
         <p className="text-sm text-[#5A6070] mb-6">
           {isSignup
             ? 'Sign up free with your personal email, then finish joining your membership tier.'
-            : 'Parents: use your personal email (Gmail, etc.). @shmspto.org is for Staff tools only — not for Member Portal family login.'}
+ : 'Parents: use your personal email (Gmail, etc.). @shmspto.org is for Staff tools only. not for Member Portal family login.'}
         </p>
 
         {panel === 'chooser' ? (

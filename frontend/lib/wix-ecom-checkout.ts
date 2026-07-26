@@ -1,5 +1,5 @@
 /**
- * Headless Wix eCom checkout — creates a checkout + hosted checkout URL.
+ * Headless Wix eCom checkout. creates a checkout + hosted checkout URL.
  * Used because the published Wix site template has no /product-page routes.
  * Product/variant IDs come from SiteSettings via getCatalogConfig().
  */
@@ -123,7 +123,7 @@ export async function membershipCheckoutRedirectUrl(
     productId: product.productId,
     variantId: product.variantId || null,
     postFlowUrl,
-    // Discount codes are for enrichment programs later — not membership checkout
+ // Discount codes are for enrichment programs later. not membership checkout
     lockCouponCode: true,
   })
 }

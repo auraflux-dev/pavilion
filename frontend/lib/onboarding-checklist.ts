@@ -1,5 +1,5 @@
 /**
- * Member portal onboarding checklist — soft reminders + feature locks.
+ * Member portal onboarding checklist. soft reminders + feature locks.
  * Account creation and membership payment stay open; Cove / programs stay locked
  * until required student profile fields are filled.
  */
@@ -110,7 +110,7 @@ export function buildOnboardingChecklist(opts: {
       title: 'Add your student(s)',
       detail: hasStudent
         ? `${students.length} student${students.length === 1 ? '' : 's'} on your account.`
-        : 'Name and grade — needed for Cove credit, programs, and your family QR.',
+ : 'Name and grade. needed for Cove credit, programs, and your family QR.',
       done: hasStudent,
       required: true,
       href: '#portal-students',

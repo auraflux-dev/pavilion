@@ -41,7 +41,7 @@ export function normalizePaymentLedgerRow(
   let paymentMethod = String(raw.paymentMethod ?? '').trim()
   let detail: string | undefined
 
-  // Membership gift-card credit (Reef / Lagoon / Tide) — amount should be loaded $, not base.
+ // Membership gift-card credit (Reef / Lagoon / Tide). amount should be loaded $, not base.
   if (source === 'membership_gift_card') {
     const loaded = notes.match(/→\s*\$?\s*([\d.]+)/)
     if (loaded) {

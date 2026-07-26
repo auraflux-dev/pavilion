@@ -1,6 +1,6 @@
 /**
  * Square SDK client + Gift Card helpers.
- * All calls are server-side only — never import this in client components.
+ * All calls are server-side only. never import this in client components.
  */
 import { SquareClient, SquareEnvironment } from 'square'
 
@@ -181,7 +181,7 @@ export async function createOrLoadStudentGiftCard(opts: {
       try {
         await linkGiftCardToCustomer(giftCardId, opts.customerId)
       } catch {
-        // Linking is best-effort — card still usable by GAN
+ // Linking is best-effort. card still usable by GAN
       }
     }
   }

@@ -1,5 +1,5 @@
 /**
- * Paid event tickets — CMS EventTicketOffers + EventTicketOrders.
+ * Paid event tickets. CMS EventTicketOffers + EventTicketOrders.
  * Staff sets price/capacity when marking an event Ticketed; parents buy on /events.
  */
 import { getWixClient } from '@/lib/wix-client'

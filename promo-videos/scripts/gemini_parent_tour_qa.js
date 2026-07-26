@@ -51,10 +51,10 @@ function loadExpected() {
   const mapPath = a('out/parent_share_chapter_map.json');
   const map = fs.existsSync(mapPath) ? JSON.parse(fs.readFileSync(mapPath, 'utf8')) : null;
   const beats = [
-    { tHint: 'after cold open', expect: 'Homepage — Welcome / new PTO website' },
+ { tHint: 'after cold open', expect: 'Homepage. Welcome / new PTO website' },
     { tHint: 'menu chapter', expect: 'In order: Programs, Events, The Cove, Volunteer, Fundraising, Board, Meetings pages (NOT stuck on homepage)' },
-    { tHint: 'membership', expect: 'Membership / Join — Reef Lagoon Tide tiers, benefits, checkout' },
-    { tHint: 'portal', expect: 'Member Portal Cove Digital Card — QR + backup code, Save to Photos, Load card (family Free member OK; Staff/Treasurer chrome = FAIL)' },
+ { tHint: 'membership', expect: 'Membership / Join. Reef Lagoon Tide tiers, benefits, checkout' },
+ { tHint: 'portal', expect: 'Member Portal Cove Digital Card. QR + backup code, Save to Photos, Load card (family Free member OK; Staff/Treasurer chrome = FAIL)' },
     { tHint: 'cta', expect: 'Homepage + shmspto.org CTA' },
   ];
   return { map, beats };
@@ -88,13 +88,13 @@ function extractJson(raw) {
 function buildPrompt({ durationSec, map, beats }) {
   const chapterBlock = map?.chapters
     ? map.chapters.map((c) => {
-      let line = `- ${c.id}: ~${Number(c.durSec).toFixed(1)}s — picture must be: ${c.picture}`;
+ let line = `- ${c.id}: ~${Number(c.durSec).toFixed(1)}s. picture must be: ${c.picture}`;
       if (c.pages?.length) {
         line += `\n  page beats: ${c.pages.map((p) => p.id).join(' → ')}`;
       }
       return line;
     }).join('\n')
-    : '(chapter map missing — still enforce SEE=HEAR from expectations below)';
+ : '(chapter map missing. still enforce SEE=HEAR from expectations below)';
 
   return `You are the FINAL pre-send QA reviewer for a Stone Hill Middle School PTO parent explainer video.
 
@@ -109,7 +109,7 @@ ${chapterBlock}
 MUST-PASS CHECKS:
 0. Cold open + outro cards show official seal AND the text "SHMS PTO" under the seal (not missing, not overlapping MIDDLE SCHOOL on the seal)
 1. Intro VO → homepage (not blank/white flash). Settled homepage is OK (motion not required).
-2. Menu: each nav page (Programs→Meetings) appears with its own spoken beat — not a homepage hold, not sub-second flicker
+2. Menu: each nav page (Programs→Meetings) appears with its own spoken beat. not a homepage hold, not sub-second flicker
 3. Membership: tiers + Join/Log in (Create Account OK). FAIL if home/programs/cove detour mid-membership
 4. Portal: brief family setup checklist (why it unlocks Cove), then Member Portal Cove QR/card tease. Full portal feature tour NOT required. Staff chrome = FAIL
 5. CTA / series close → homepage / shmspto.org; teasing future Programs/Membership/Portal videos is CORRECT
@@ -163,7 +163,7 @@ async function main() {
   let geminiFile;
   try {
     geminiFile = await waitForGeminiFile(await uploadToGeminiFiles(video));
-    console.log('[gemini-parent-qa] Upload ACTIVE — generating review…');
+ console.log('[gemini-parent-qa] Upload ACTIVE. generating review…');
 
     const prompt = buildPrompt({ durationSec, map, beats });
     const rawPath = path.join(OUT_DIR, 'gemini_parent_tour_qa_raw.txt');
@@ -210,7 +210,7 @@ async function main() {
     const critical = (parsed.issues || []).some((i) => i.severity === 'critical');
     const seeHear = parsed.see_hear_pass === true
       || (parsed.verdict === 'PASS' && !(parsed.issues || []).length);
-    // Model sometimes returns PASS + send_ready false — trust verdict when clean
+ // Model sometimes returns PASS + send_ready false. trust verdict when clean
     if (parsed.verdict === 'PASS' && seeHear && score >= PASS_SCORE && !critical) {
       parsed.send_ready = true;
     }
@@ -246,7 +246,7 @@ async function main() {
       `**Generated:** ${report.generatedAt}`,
       '',
       '## Summary',
-      parsed.summary || '—',
+ parsed.summary || '. ',
       '',
       '## Chapter notes',
       ...(parsed.chapter_notes || []).map((c) =>
@@ -260,14 +260,14 @@ async function main() {
       '',
       pass
         ? '## Next\nOpen watch file for Rob.'
-        : '## Next\nFix issues and reassemble — do **not** ask Rob to rewatch until PASS.',
+ : '## Next\nFix issues and reassemble. do **not** ask Rob to rewatch until PASS.',
     ].join('\n');
     fs.writeFileSync(mdPath, md);
 
     console.log('\n' + md + '\n');
     console.log(`[gemini-parent-qa] Wrote ${jsonPath}`);
     console.log(`[gemini-parent-qa] Wrote ${mdPath}`);
-    console.log(pass ? '✅ GEMINI PASS — send-ready' : '❌ GEMINI FAIL — fix before Rob watches');
+ console.log(pass ? '✅ GEMINI PASS. send-ready' : '❌ GEMINI FAIL. fix before Rob watches');
 
     process.exit(pass ? 0 : 2);
   } finally {

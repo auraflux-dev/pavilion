@@ -14,7 +14,7 @@ export interface StudentRecord {
   membershipTier?: string;
 }
 
-// Called server-side from member portal after OAuth — email comes from Wix session
+// Called server-side from member portal after OAuth. email comes from Wix session
 export async function getStudentsByParentEmail(
   parentEmail: string
 ): Promise<StudentRecord[]> {

@@ -1,16 +1,16 @@
-# SHMS PTO — Full-Site QA Test Plan
+# SHMS PTO. Full-Site QA Test Plan
 
 **Site:** Stone Hill Middle School PTO  
 **Pre-DNS base URL:** https://shmspto.vercel.app
 **Production (post-DNS):** https://www.shmspto.org  
 
-**DNS is last.** Do not cut over DNS until Phases 0–6 are green. See [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md).
+**DNS is last.** Do not cut over DNS until Phases 0 to 6 are green. See [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md).
 
 Mark each **Result** cell: `[x]` pass · `[ ]` fail / not run · `[!]` blocked · `[~]` N/A / waived  
 
 ---
 
-## Phase 0 — Preconditions
+## Phase 0. Preconditions
 
 Confirm environment and secrets before functional testing.
 
@@ -29,7 +29,7 @@ Confirm environment and secrets before functional testing.
 
 ---
 
-## Phase 1 — Global chrome (navbar / footer)
+## Phase 1. Global chrome (navbar / footer)
 
 Test on desktop and mobile (hamburger). Base: `https://shmspto.vercel.app`
 
@@ -57,7 +57,7 @@ Test on desktop and mobile (hamburger). Base: `https://shmspto.vercel.app`
 
 ---
 
-## Phase 2 — Public pages
+## Phase 2. Public pages
 
 For each route: load (HTTP 200), layout intact, primary CTAs work, no broken images.
 
@@ -164,7 +164,7 @@ For each route: load (HTTP 200), layout intact, primary CTAs work, no broken ima
 
 ---
 
-## Phase 3 — Auth flows
+## Phase 3. Auth flows
 
 | # | Check | How | Result |
 |---|-------|-----|--------|
@@ -180,7 +180,7 @@ For each route: load (HTTP 200), layout intact, primary CTAs work, no broken ima
 
 ---
 
-## Phase 4 — Member portal & paid paths
+## Phase 4. Member portal & paid paths
 
 > **Checkout note:** Purchases use headless **`POST /api/checkout/start`** (not Wix product-page URLs). Store card catalog amounts are **$10 / $20 / $25**.
 
@@ -202,7 +202,7 @@ For each route: load (HTTP 200), layout intact, primary CTAs work, no broken ima
 
 ---
 
-## Phase 5 — Webhooks & cron
+## Phase 5. Webhooks & cron
 
 | # | Check | How | Result |
 |---|-------|-----|--------|
@@ -217,7 +217,7 @@ For each route: load (HTTP 200), layout intact, primary CTAs work, no broken ima
 
 ---
 
-## Phase 6 — Cross-cutting
+## Phase 6. Cross-cutting
 
 | # | Check | How | Result |
 |---|-------|-----|--------|
@@ -234,15 +234,15 @@ For each route: load (HTTP 200), layout intact, primary CTAs work, no broken ima
 
 ---
 
-## Phase 7 — Go-live (DNS LAST)
+## Phase 7. Go-live (DNS LAST)
 
-**Do not start this phase until Phases 0–6 are green (or explicitly waived).**
+**Do not start this phase until Phases 0 to 6 are green (or explicitly waived).**
 
 Follow the full procedure in [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md). Summary:
 
 | # | Check | How | Result |
 |---|-------|-----|--------|
-| 7.1 | Pre-DNS QA signed off | Phases 0–6 | `[ ]` |
+| 7.1 | Pre-DNS QA signed off | Phases 0 to 6 | `[ ]` |
 | 7.2 | Add `www.shmspto.org` + apex in Vercel Domains | Vercel UI | `[ ]` |
 | 7.3 | DNS A `@` → `76.76.21.21`, CNAME `www` → `cname.vercel-dns.com` | DNS host | `[ ]` |
 | 7.4 | `dig www.shmspto.org` shows Vercel (not Wix DNS) | CLI | `[ ]` |
@@ -251,7 +251,7 @@ Follow the full procedure in [`docs/DNS-CUTOVER.md`](./DNS-CUTOVER.md). Summary:
 | 7.7 | Point Cheddarup / Square / Wix Orders webhooks at www | Ops | `[ ]` |
 | 7.8 | Update GHA `SYNC_URL` to www host | GitHub workflow | `[ ]` |
 | 7.9 | Wix OAuth redirects include www (+ apex) callback | Wix app | `[ ]` |
-| 7.10 | Re-run Phases 1–5 against **https://www.shmspto.org** | Full smoke | `[ ]` |
+| 7.10 | Re-run Phases 1 to 5 against **https://www.shmspto.org** | Full smoke | `[ ]` |
 
 ---
 
@@ -292,8 +292,8 @@ Automated command: `node scripts/smoke-production.mjs` (or `npm run test:smoke` 
 | D2 | Med | Event detail 404 links | **Fixed** |
 | D3 | Low | Footer newsletter mock API | **Fixed** |
 | D4 | Med | Faculty CTA broken / non-mailto | **Fixed** (mailto) |
-| D5 | High | Square production path unverified | **Open** — credentials exist; signed-in payment/reload E2E remains |
-| D6 | Med | Cheddarup webhook host | **Open** — ops (use Vercel URL pre-DNS) |
+| D5 | High | Square production path unverified | **Open**. credentials exist; signed-in payment/reload E2E remains |
+| D6 | Med | Cheddarup webhook host | **Open**. ops (use Vercel URL pre-DNS) |
 | D7 | Critical | Product-page 404s on buy/load | **Mitigated** via headless `/api/checkout/start` |
 | D8 | Med | Demo events in Wix | **Filtered** in API; still delete in Wix Events UI |
 

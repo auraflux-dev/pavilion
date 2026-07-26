@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
       gan: card.gan ? `${card.gan.slice(0, 4)}…${card.gan.slice(-4)}` : '',
       hasCard: Boolean(card.gan),
       scanPayload,
-      /** Raw GAN digits — same as Square Stand gift-card barcode when card is loaded */
+ /** Raw GAN digits. same as Square Stand gift-card barcode when card is loaded */
       squareScanReady: Boolean(card.gan && scanPayload === card.gan),
     })
   } catch (err) {

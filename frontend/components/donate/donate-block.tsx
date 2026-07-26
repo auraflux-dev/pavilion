@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Flexible PTO donation block — presets + custom amount, Square/PayPal via portal checkout.
+ * Flexible PTO donation block. presets + custom amount, Square/PayPal via portal checkout.
  * Requires free or paid member login (MemberGate).
  */
 import { useMemo, useState } from 'react'
@@ -186,7 +186,7 @@ export function DonateBlock({
               className="w-full inline-flex items-center justify-center font-bold text-sm px-4 py-3 rounded-lg text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: '#085508' }}
             >
-              Donate ${effectiveAmount > 0 ? effectiveAmount.toFixed(effectiveAmount % 1 ? 2 : 0) : '—'}
+ Donate ${effectiveAmount > 0 ? effectiveAmount.toFixed(effectiveAmount % 1 ? 2 : 0) : '-'}
             </button>
           </MemberGate>
 
@@ -210,7 +210,7 @@ export function DonateBlock({
         }}
         onPaid={() => {
           setOpen(false)
-          setThanks(`Thank you — your $${effectiveAmount.toFixed(2)} donation is complete.`)
+ setThanks(`Thank you. Your $${effectiveAmount.toFixed(2)} donation is complete.`)
         }}
       />
     </section>

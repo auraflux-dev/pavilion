@@ -1,5 +1,6 @@
 # Conventions
 - TypeScript, no semicolons in frontend code, single quotes, async server functions and client components marked `'use client'`.
+- Public/portal copy: never use em/en dashes as punctuation (AI tell). Prefer periods, commas, or colons. Details in `mem:frontend/copy-voice`.
 - API routes return JSON errors with explicit HTTP statuses; log server errors with route-specific prefixes.
 - Any member-owned CMS mutation requires authentication plus ownership validation.
 - CMS data uses code fallbacks so missing collections/rows do not break public pages.

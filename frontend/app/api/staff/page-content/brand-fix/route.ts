@@ -25,7 +25,7 @@ async function gate(req: NextRequest) {
 
 /**
  * POST /api/staff/page-content/brand-fix
- * Body: { apply?: boolean } — default dry-run. Set apply:true to write CMS.
+ * Body: { apply?: boolean }. default dry-run. Set apply:true to write CMS.
  * Find/replace bare "SHMS" → "SHMS PTO" (+ strip LCPS) across marketing CMS collections.
  */
 export async function POST(req: NextRequest) {

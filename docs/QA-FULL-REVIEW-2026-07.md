@@ -1,4 +1,4 @@
-# SHMS PTO — Full Build QA Review (July 2026)
+# SHMS PTO. Full Build QA Review (July 2026)
 
 Consolidated QA for **everything built**: backend (API routes + gates), frontend (public + portal + staff),
 scripts, and the Cove family store-card system (register, products, variants, photos, inventory).
@@ -28,7 +28,7 @@ Organized by the four audiences: **visitor · free member · paid member · staf
 
 ---
 
-## 1. Backend — API gate matrix (auth/authz)
+## 1. Backend. API gate matrix (auth/authz)
 
 Verify each returns the documented code. Anonymous = no member cookie; Free/Paid = member cookie, non-`@shmspto.org`.
 Automated (`smoke-production.mjs`) already covers the ★ rows.
@@ -135,7 +135,7 @@ Login → `accountType:'paid'` (a student tier ≠ free, or active Memberships r
 
 ---
 
-## 5. Staff — per role
+## 5. Staff. per role
 
 Each staff tester logs in with `@shmspto.org` + an active `StaffRoles` row. Verify **sees** allowed workspaces and
 **403** on others. `admin` is a super-role (all).
@@ -152,7 +152,7 @@ Each staff tester logs in with `@shmspto.org` + an active `StaffRoles` row. Veri
 | R.7 | secretary | Minutes, Surveys, Messages, Memberships, Events, Page copy, Board, Nav, FAQs, Volunteers | Payments | `[ ]` |
 | R.8 | events | Events, Volunteers, wellness settings | Payments, Social | `[ ]` |
 | R.9 | wellness | Wellness workspace only | everything gated | `[ ]` |
-| R.10 | admin | All + Members + Staff access + act-as | — | `[x]` (2026-07-21: all 27 panels shown) |
+| R.10 | admin | All + Members + Staff access + act-as |. | `[x]` (2026-07-21: all 27 panels shown) |
 | R.11 | any (role-less new `@shmspto.org`) | auto-registered; dashboard 403 until role assigned | any workspace | `[ ]` |
 
 ### 5b. Admin powers
@@ -165,7 +165,7 @@ Each staff tester logs in with `@shmspto.org` + an active `StaffRoles` row. Veri
 | A.5 | Archive student → leaves parent portal, still searchable; disables auto top-off/reload | `[ ]` |
 | A.6 | Restore student | `[ ]` |
 
-### 5c. Retail role — Cove register & products (NEW build focus)
+### 5c. Retail role. Cove register & products (NEW build focus)
 | # | Test | Result |
 |---|------|--------|
 | C.1 | Register loads product menu (in-stock only), each variant its own tappable line (`Takis · Fuego`) | `[ ]` |
@@ -197,13 +197,13 @@ Each staff tester logs in with `@shmspto.org` + an active `StaffRoles` row. Veri
 
 ---
 
-## 6. Payments — sandbox vs real matrix
+## 6. Payments. sandbox vs real matrix
 
 > **Decision required (0.4).** Today there is **no sandbox** wired. Options:
 > **(a)** configure Square + PayPal **sandbox** creds → full load/redeem/membership loop with fake money;
 > **(b)** accept small **real** charges on production;
-> **(c)** test everything **up to the charge** (quote, checkout URL, gates, read-only balances) — no charge.
-> Wix hosted checkout (`/api/checkout/start`) has **no sandbox** either way — real money only.
+> **(c)** test everything **up to the charge** (quote, checkout URL, gates, read-only balances). no charge.
+> Wix hosted checkout (`/api/checkout/start`) has **no sandbox** either way. real money only.
 
 | # | Flow | Sandbox-able? | Result |
 |---|------|---------------|--------|
@@ -215,7 +215,7 @@ Each staff tester logs in with `@shmspto.org` + an active `StaffRoles` row. Veri
 | P.6 | Membership gift-card credit provisioning | Yes | `[ ]` |
 | P.7 | PayPal membership/product/store-card | Yes (needs `PAYPAL_ENVIRONMENT=sandbox`) | `[ ]` |
 | P.8 | Cove product CRUD + photo + inventory | No money, but mutates **live** Wix catalog → use throwaway products | `[ ]` |
-| P.9 | Wix hosted checkout redirect (`/api/checkout/start`) | **No sandbox — real card** | `[ ]` |
+| P.9 | Wix hosted checkout redirect (`/api/checkout/start`) | **No sandbox. real card** | `[ ]` |
 | P.10 | membership claim / wix-orders webhook / cron sync | No money (needs tokens/`CRON_SECRET`) | `[ ]` |
 
 ---
@@ -224,7 +224,7 @@ Each staff tester logs in with `@shmspto.org` + an active `StaffRoles` row. Veri
 
 | Script | Class | Safe to run? |
 |--------|-------|--------------|
-| `smoke-production.mjs` | A: read-only smoke | ✅ (`npm run test:smoke`) — now 22/22 |
+| `smoke-production.mjs` | A: read-only smoke | ✅ (`npm run test:smoke`). now 22/22 |
 | `test-membership-outreach.mjs` | A: unit + dry-run | ✅ (`npm run test:membership`, needs `tsx`) |
 | `seed-cms-content.mjs` | B: writes Wix CMS | ⚠️ explicit permission |
 | `seed-discount-codes.mjs` | B: writes Wix CMS | ⚠️ |
@@ -233,7 +233,7 @@ Each staff tester logs in with `@shmspto.org` + an active `StaffRoles` row. Veri
 | `off-season-cove-cms.js` | B: writes Wix CMS | ⚠️ |
 | `gmail-oauth-setup.mjs` | B: mints Gmail token | ⚠️ |
 | `set-google-sa-env.mjs` / `set-google-oauth-env.mjs` | B: overwrite Vercel prod env | ⚠️ |
-| `auth.js`, `create-pto-docs.js`, `close-help-gaps.js`, `update-image-guide.js`, `insert-doc-screenshots.js`, `insert-wix-help-images.js`, `scrape-wix-help.js`, `wix-login.js`, `wix-screenshots.js`, `insert-screenshots.js` | C: Google Docs/Drive + Playwright | ✅ to site, but write to Google Drive — run only to regenerate docs |
+| `auth.js`, `create-pto-docs.js`, `close-help-gaps.js`, `update-image-guide.js`, `insert-doc-screenshots.js`, `insert-wix-help-images.js`, `scrape-wix-help.js`, `wix-login.js`, `wix-screenshots.js`, `insert-screenshots.js` | C: Google Docs/Drive + Playwright | ✅ to site, but write to Google Drive. run only to regenerate docs |
 
 ---
 
@@ -243,18 +243,18 @@ Each staff tester logs in with `@shmspto.org` + an active `StaffRoles` row. Veri
 |----|-----|---------|--------|
 | N1 | Low | `smoke-production.mjs` expected `/store` 200 but app 308-redirects to `/cove` | **Fixed** 2026-07-21 (now checks 308→/cove) |
 | N2 | Low | `lint` script uses ESLint 10 with no flat config → fails to run | **Open** (tooling) |
-| N3 | Med | No sandbox configured for payments (prod Square/live PayPal) | **Configured 2026-07-21** — Square + PayPal sandbox keys in `frontend/.env.local` (prod values backed up as comments; restore before deploy). Both authenticate (Square location `L38G61EQQM7ZV`, PayPal OAuth OK) |
+| N3 | Med | No sandbox configured for payments (prod Square/live PayPal) | **Configured 2026-07-21**. Square + PayPal sandbox keys in `frontend/.env.local` (prod values backed up as comments; restore before deploy). Both authenticate (Square location `L38G61EQQM7ZV`, PayPal OAuth OK) |
 | N4 | Info | Wix hosted checkout has no sandbox; real money only | **By design** (Wix) |
 | N5 | Pass | Member-only chrome (Staff link, My Account, WhatsApp parent-group links) correctly hidden for anonymous; shown only when authed | **Verified** 2026-07-21 |
-| N6 | ~~Med~~ | `/membership` advertised **$20/$40/$75** but CMS + code provisioned only **$10/$25/$50** (paid members under-credited on every tier) | **Fixed 2026-07-21** — CMS SiteSettings + MembershipTiers set to 20/40/75; code defaults + preset amounts (`20,40,75`) + `storeCardMinAmount=1` updated. Live via CMS immediately; code on next deploy |
-| N6b | Policy | Membership credit gets +10% first-load bonus on top → base 20/40/75 loads **$22/$44/$82.50** (decision: **keep the +10%** as a limited-time perk) | **Done** — `/membership` tiers now show a "Limited-time bonus · first 30 days" callout with boosted amount, driven by `storeCardBonusPercent` (set to 0 to end promo). Code → next deploy |
-| N8 | Med | "First 30 days" bonus copy is **not enforced by date logic** — membership provisioning applies the bonus to every paid membership regardless of date (until `storeCardBonusPercent` is set to 0) | **Open** — decide: manual on/off via `storeCardBonusPercent`, or add real 30-day enforcement |
+| N6 | ~~Med~~ | `/membership` advertised **$20/$40/$75** but CMS + code provisioned only **$10/$25/$50** (paid members under-credited on every tier) | **Fixed 2026-07-21**. CMS SiteSettings + MembershipTiers set to 20/40/75; code defaults + preset amounts (`20,40,75`) + `storeCardMinAmount=1` updated. Live via CMS immediately; code on next deploy |
+| N6b | Policy | Membership credit gets +10% first-load bonus on top → base 20/40/75 loads **$22/$44/$82.50** (decision: **keep the +10%** as a limited-time perk) | **Done**. `/membership` tiers now show a "Limited-time bonus · first 30 days" callout with boosted amount, driven by `storeCardBonusPercent` (set to 0 to end promo). Code → next deploy |
+| N8 | Med | "First 30 days" bonus copy is **not enforced by date logic**. membership provisioning applies the bonus to every paid membership regardless of date (until `storeCardBonusPercent` is set to 0) | **Open**. decide: manual on/off via `storeCardBonusPercent`, or add real 30-day enforcement |
 | N7 | Low | Logged-out header has only "Become a member" (→ login); no distinct "Log in" label for returning members (functional, minor UX) | **Open** (cosmetic) |
-| N9 | **Critical** | `lib/square.ts` `createOrLoadStudentGiftCard` + `loadGiftCard` sent `amount_money` only on `ACTIVATE`/`LOAD`. Square's custom-processing path (this app charges via Payments API / PayPal, not Orders-API `GIFT_CARD` line items) **requires** `buyer_payment_instrument_ids` → every call returns `BAD_REQUEST`. **All membership gift-card provisioning + all store-card loads/reloads/auto-top-offs were broken** (never worked against real Square; site pre-launch). | **Fixed 2026-07-21** — added `buyerPaymentInstrumentIds` to both helpers (default `['gift-card-provision']`/`['store-card-load']`); threaded the real Square `payment.id` from `checkout/pay`, `gift-card/reload`, `webhooks/square`, and labels from `membership-sync`/`checkout-fulfill`. Verified in sandbox: provision $20+10%→$22, redeem $5→$17, refill $40→$57. Code → next deploy |
-| N10 | High | `lib/square.ts` `getGiftCardActivities` read `result.giftCardActivities`, but the Square SDK returns a paginated Page with items under `.data` → **always returned `[]`; members saw an empty store-card transaction history** | **Fixed 2026-07-21** — reads `.data` (fallback to old key). Sandbox ledger now returns ACTIVATE/REDEEM/LOAD entries. Code → next deploy |
-| N11 | Low | `lib/square.ts` `getGiftCardById` called `giftCards.get({ giftCardId })` → 404; correct SDK param is `{ id }` (helper imported by balance route but currently unused, so no live impact) | **Fixed 2026-07-21** — param corrected to `{ id }`. Code → next deploy |
+| N9 | **Critical** | `lib/square.ts` `createOrLoadStudentGiftCard` + `loadGiftCard` sent `amount_money` only on `ACTIVATE`/`LOAD`. Square's custom-processing path (this app charges via Payments API / PayPal, not Orders-API `GIFT_CARD` line items) **requires** `buyer_payment_instrument_ids` → every call returns `BAD_REQUEST`. **All membership gift-card provisioning + all store-card loads/reloads/auto-top-offs were broken** (never worked against real Square; site pre-launch). | **Fixed 2026-07-21**. added `buyerPaymentInstrumentIds` to both helpers (default `['gift-card-provision']`/`['store-card-load']`); threaded the real Square `payment.id` from `checkout/pay`, `gift-card/reload`, `webhooks/square`, and labels from `membership-sync`/`checkout-fulfill`. Verified in sandbox: provision $20+10%→$22, redeem $5→$17, refill $40→$57. Code → next deploy |
+| N10 | High | `lib/square.ts` `getGiftCardActivities` read `result.giftCardActivities`, but the Square SDK returns a paginated Page with items under `.data` → **always returned `[]`; members saw an empty store-card transaction history** | **Fixed 2026-07-21**. reads `.data` (fallback to old key). Sandbox ledger now returns ACTIVATE/REDEEM/LOAD entries. Code → next deploy |
+| N11 | Low | `lib/square.ts` `getGiftCardById` called `giftCards.get({ giftCardId })` → 404; correct SDK param is `{ id }` (helper imported by balance route but currently unused, so no live impact) | **Fixed 2026-07-21**. param corrected to `{ id }`. Code → next deploy |
 
-> **Deploy note:** N6/N6b/N9/N10/N11 are **code fixes** — they take effect only on the next Vercel deploy. Until then, live gift-card provisioning/loads remain broken (N9). Verification harness: `frontend/scripts/sandbox-payment-loop.mjs` (sandbox-guarded).
+> **Deploy note:** N6/N6b/N9/N10/N11 are **code fixes**. they take effect only on the next Vercel deploy. Until then, live gift-card provisioning/loads remain broken (N9). Verification harness: `frontend/scripts/sandbox-payment-loop.mjs` (sandbox-guarded).
 
 ---
 

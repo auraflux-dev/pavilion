@@ -1,7 +1,6 @@
 /**
  * Post-purchase confirmation email + portal inbox message + next-step copy.
- * Uses Gmail (same Workspace sender as mass email). Failures are logged only —
- * checkout still succeeds if mail is unavailable.
+ * Uses Gmail (same Workspace sender as mass email). Failures are logged only.  * checkout still succeeds if mail is unavailable.
  */
 import { getWixClient } from '@/lib/wix-client'
 import { sendMassEmail } from '@/lib/staff/mass-email'
@@ -61,9 +60,9 @@ function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation,
         ]
     return {
       subject: waitlisted
-        ? `Waitlisted — ${input.meta?.programName || 'enrichment program'}`
-        : `Enrolled — ${input.meta?.programName || 'enrichment program'}`,
-      body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', '— SHMS PTO Programs'].join(
+ ? `Waitlisted: ${input.meta?.programName || 'enrichment program'}`
+ : `Enrolled: ${input.meta?.programName || 'enrichment program'}`,
+ body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', 'SHMS PTO Programs'].join(
         '\n',
       ),
       nextSteps,
@@ -79,8 +78,8 @@ function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation,
       'Add or update students so enrichment discounts apply correctly.',
     ]
     return {
-      subject: `Welcome — ${tier} membership confirmed`,
-      body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', '— SHMS PTO Membership'].join(
+ subject: `Welcome: ${tier} membership confirmed`,
+ body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', 'SHMS PTO Membership'].join(
         '\n',
       ),
       nextSteps,
@@ -98,7 +97,7 @@ function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation,
     ]
     return {
       subject: 'Cove Digital Card load confirmed',
-      body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', '— The Cove'].join('\n'),
+ body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', 'The Cove'].join('\n'),
       nextSteps,
       portalHref: '/member-portal#store',
     }
@@ -108,13 +107,13 @@ function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation,
     const title = input.meta?.eventTitle || 'event'
     const qty = input.meta?.quantity || '1'
     const nextSteps = [
-      `${qty} ticket${qty === '1' ? '' : 's'} for ${title} — confirmed.`,
+ `${qty} ticket${qty === '1' ? '' : 's'} for ${title} is confirmed.`,
       'Add the event to your calendar from the Events page or Member Portal.',
       'Bring this confirmation (email or portal Messages) to check in.',
     ]
     return {
-      subject: `Tickets confirmed — ${title}`,
-      body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', '— SHMS PTO Events'].join(
+ subject: `Tickets confirmed: ${title}`,
+ body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', 'SHMS PTO Events'].join(
         '\n',
       ),
       nextSteps,
@@ -124,7 +123,7 @@ function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation,
 
   if (input.kind === 'donation') {
     const nextSteps = [
-      'Thank you — your gift supports SHMS PTO enrichment, The Cove, and events.',
+ 'Thank you. Your gift supports SHMS PTO enrichment, The Cove, and events.',
       'A receipt is in Member Portal → Messages (and email when mail is connected).',
       'SHMS PTO is a 501(c)(3); consult your tax advisor about deductibility.',
     ]
@@ -137,7 +136,7 @@ function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation,
         'Next steps:',
         ...nextSteps.map((s) => `• ${s}`),
         '',
-        '— SHMS PTO',
+ 'SHMS PTO',
       ].join('\n'),
       nextSteps,
       portalHref: '/fundraising#donate',
@@ -151,8 +150,8 @@ function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation,
     'Questions? Reply to this email or use Member Portal → Help.',
   ]
   return {
-    subject: `Order confirmed — ${input.meta?.productName || 'The Cove'}`,
-    body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', '— The Cove'].join('\n'),
+ subject: `Order confirmed: ${input.meta?.productName || 'The Cove'}`,
+ body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', 'The Cove'].join('\n'),
     nextSteps,
     portalHref: '/cove',
   }

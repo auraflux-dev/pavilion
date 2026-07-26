@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * SHMSPTO parent tour — PARENT-SHARE assemble
+ * SHMSPTO parent tour. PARENT-SHARE assemble
  *
  * Goal: a parent can follow what they hear without hunting the screen.
  * Editorial rules (repeatable for this audience):
- *   1. SEE = HEAR — picture matches the spoken idea (mute-test must roughly tell the story)
- *   2. When VO names pages, SHOW each named page (settled) — never freeze on home for a list,
+ * 1. SEE = HEAR. picture matches the spoken idea (mute-test must roughly tell the story)
+ * 2. When VO names pages, SHOW each named page (settled). never freeze on home for a list,
  *      and never sub-second flip-book (aim ~2s+ per page)
  *   3. Chapter joins: intro → menu pages → membership → portal → CTA
  *   4. Skip white page-load frames; never fade-to-black between sections
@@ -32,7 +32,7 @@ const COLD = 5.0;
 const OUTRO = 4.0;
 /** Small picture lag vs VO (parents read captions + hear first). */
 const VIDEO_DELAY_SEC = Number(process.env.SHMS_VIDEO_DELAY_SEC || 0.4);
-/** Master capture opens on a white page-load — skip into painted homepage. */
+/** Master capture opens on a white page-load. skip into painted homepage. */
 const HOME_SKIP_WHITE_SEC = 1.05;
 
 function run(args, quiet = true) {
@@ -50,33 +50,33 @@ fs.mkdirSync(WORK, { recursive: true });
 fs.mkdirSync(OUT_DIR, { recursive: true });
 
 /** VO parts + parent-facing captions (short, readable on phone).
- *  Indices: 0–1 intro · 2–8 nav (why+what) · 9 bridge · 10–16 membership · 17–22 portal/CTA
+ * Indices: 0 to 1 intro · 2 to 8 nav (why+what) · 9 bridge · 10 to 16 membership · 17 to 22 portal/CTA
  */
 const BEATS = [
-  { part: 'vo/_parts/ch01_website_p01.m4a', caption: 'Hi Stingray families — new PTO website', padAfter: 1.4 },
-  { part: 'vo/_parts/ch01_website_p01b.m4a', caption: 'shmspto.org — every family welcome', padAfter: 1.4 },
-  { part: 'vo/_parts/ch01_website_p02_programs.m4a', caption: 'Programs — enrichment for students', padAfter: 1.2 },
-  { part: 'vo/_parts/ch01_website_p02_events.m4a', caption: 'Events — family nights & celebrations', padAfter: 1.2 },
-  { part: 'vo/_parts/ch01_website_p02_cove.m4a', caption: 'The Cove — snacks & spirit wear', padAfter: 1.2 },
-  { part: 'vo/_parts/ch01_website_p02_volunteer.m4a', caption: 'Volunteer — help when you can', padAfter: 1.2 },
-  { part: 'vo/_parts/ch01_website_p02_fundraising.m4a', caption: 'Fundraising — how the PTO stays funded', padAfter: 1.2 },
-  { part: 'vo/_parts/ch01_website_p02_board.m4a', caption: 'Board — parent volunteers who run it', padAfter: 1.2 },
-  { part: 'vo/_parts/ch01_website_p02_meetings.m4a', caption: 'Meetings — agendas & minutes', padAfter: 1.2 },
-  { part: 'vo/_parts/ch01_website_p03.m4a', caption: 'Membership — quick tour (more later)', padAfter: 1.6 },
+ { part: 'vo/_parts/ch01_website_p01.m4a', caption: 'Hi Stingray families. new PTO website', padAfter: 1.4 },
+ { part: 'vo/_parts/ch01_website_p01b.m4a', caption: 'shmspto.org. every family welcome', padAfter: 1.4 },
+ { part: 'vo/_parts/ch01_website_p02_programs.m4a', caption: 'Programs. enrichment for students', padAfter: 1.2 },
+ { part: 'vo/_parts/ch01_website_p02_events.m4a', caption: 'Events. family nights & celebrations', padAfter: 1.2 },
+ { part: 'vo/_parts/ch01_website_p02_cove.m4a', caption: 'The Cove. snacks & spirit wear', padAfter: 1.2 },
+ { part: 'vo/_parts/ch01_website_p02_volunteer.m4a', caption: 'Volunteer. help when you can', padAfter: 1.2 },
+ { part: 'vo/_parts/ch01_website_p02_fundraising.m4a', caption: 'Fundraising. how the PTO stays funded', padAfter: 1.2 },
+ { part: 'vo/_parts/ch01_website_p02_board.m4a', caption: 'Board. parent volunteers who run it', padAfter: 1.2 },
+ { part: 'vo/_parts/ch01_website_p02_meetings.m4a', caption: 'Meetings. agendas & minutes', padAfter: 1.2 },
+ { part: 'vo/_parts/ch01_website_p03.m4a', caption: 'Membership. quick tour (more later)', padAfter: 1.6 },
   { part: 'vo/_parts/ch02_membership_p01.m4a', caption: 'Three tiers: Reef · Lagoon · Tide', padAfter: 1.4 },
   { part: 'vo/_parts/ch02_membership_p02.m4a', caption: 'Reef $79', padAfter: 1.4 },
-  { part: 'vo/_parts/ch02_membership_p03.m4a', caption: 'Lagoon $149 — most popular', padAfter: 1.6 },
-  { part: 'vo/_parts/ch02_membership_p04.m4a', caption: 'Tide $249 — top tier', padAfter: 1.6 },
+ { part: 'vo/_parts/ch02_membership_p03.m4a', caption: 'Lagoon $149. most popular', padAfter: 1.6 },
+ { part: 'vo/_parts/ch02_membership_p04.m4a', caption: 'Tide $249. top tier', padAfter: 1.6 },
   { part: 'vo/_parts/ch02_membership_p05.m4a', caption: 'First 30 days: bonus card credit', padAfter: 1.4 },
-  { part: 'vo/_parts/ch02_membership_p06.m4a', caption: 'Funds the PTO — no mandatory hours', padAfter: 1.6 },
-  { part: 'vo/_parts/ch02_membership_p07.m4a', caption: 'Join or Log in — about 2 minutes', padAfter: 1.8 },
-  { part: 'vo/_parts/ch03_cove_card_p01.m4a', caption: 'Member Portal — what every family needs', padAfter: 1.4 },
+ { part: 'vo/_parts/ch02_membership_p06.m4a', caption: 'Funds the PTO. no mandatory hours', padAfter: 1.6 },
+ { part: 'vo/_parts/ch02_membership_p07.m4a', caption: 'Join or Log in. about 2 minutes', padAfter: 1.8 },
+ { part: 'vo/_parts/ch03_cove_card_p01.m4a', caption: 'Member Portal. what every family needs', padAfter: 1.4 },
   { part: 'vo/_parts/ch03_cove_card_p01b_onboarding.m4a', caption: 'Setup checklist unlocks your Cove card', padAfter: 1.2 },
-  { part: 'vo/_parts/ch03_cove_card_p02.m4a', caption: 'Cove Digital Card — QR + backup code', padAfter: 1.6 },
+ { part: 'vo/_parts/ch03_cove_card_p02.m4a', caption: 'Cove Digital Card. QR + backup code', padAfter: 1.6 },
   { part: 'vo/_parts/ch03_cove_card_p03.m4a', caption: 'Save QR · paid credit or free load', padAfter: 1.6 },
   { part: 'vo/_parts/ch03_cove_card_p04.m4a', caption: 'At The Cove: show QR or say the code', padAfter: 1.4 },
   { part: 'vo/_parts/ch03_cove_card_p05.m4a', caption: 'More portal features in a later video', padAfter: 1.4 },
-  { part: 'vo/_parts/ch03_cove_card_p06.m4a', caption: 'shmspto.org — Go Stingrays!', padAfter: 1.6 },
+ { part: 'vo/_parts/ch03_cove_card_p06.m4a', caption: 'shmspto.org. Go Stingrays!', padAfter: 1.6 },
 ];
 
 const VF = `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},fps=${FPS},format=yuv420p`;
@@ -142,8 +142,8 @@ function holdSettled(src, t0, t1, dest, targetSec, preferEarly = false) {
 
 /**
  * VO-locked holds: each spoken line gets its matching page (settled), duration = that line.
- * opts.preferHold — always settle-hold (membership: capture edges wander).
- * opts.prefix — unique workfile prefix (avoid menu/member collisions).
+ * opts.preferHold. always settle-hold (membership: capture edges wander).
+ * opts.prefix. unique workfile prefix (avoid menu/member collisions).
  */
 function voLockedPages(src, rawMarkers, chapters, segments, dest, opts = {}) {
   const preferHold = opts.preferHold === true;
@@ -258,7 +258,7 @@ async function main() {
   const voDur = buildPacedVoMusic(voMusic);
   fs.copyFileSync(voMusic, a('vo/parent_tour_vo_paced.m4a'));
 
-  // Parent chapters (SEE = HEAR) — each spoken idea gets matching picture
+ // Parent chapters (SEE = HEAR). each spoken idea gets matching picture
   const introNeed = sectionDur(0, 1);       // welcome + URL on homepage
   const menuNeed = sectionDur(2, 8);        // one VO beat per nav page
   const memberNeed = sectionDur(9, 16);     // bridge → tiers → login
@@ -285,10 +285,10 @@ async function main() {
   const portalBlock = path.join(WORK, 'block_portal.mp4');
   const cta = path.join(WORK, 'block_cta.mp4');
 
-  // 1) Welcome + URL — homepage
+ // 1) Welcome + URL. homepage
   continuousFit(MASTER, homeT0, homeT1, intro, introNeed);
 
-  // 2) Nav — one why+what VO line per page (no shared list timing)
+ // 2) Nav. one why+what VO line per page (no shared list timing)
   const menuSegs = [
     { id: 'ch01_p02', sec: sectionDur(2, 2) },
     { id: 'ch01_p02b', sec: sectionDur(3, 3) },
@@ -301,7 +301,7 @@ async function main() {
   console.log('Menu pages (SEE=HEAR):', menuSegs.map((s) => `${s.id}=${s.sec.toFixed(2)}s`).join(' · '));
   voLockedPages(MASTER, raw, ch, menuSegs, menu, { preferHold: true, prefix: 'menu' });
 
-  // 3) Membership — settle-hold; login beat uses Create Account (preferEarly)
+ // 3) Membership. settle-hold; login beat uses Create Account (preferEarly)
   voLockedPages(MASTER, raw, ch, [
     { id: 'ch01_p03', sec: sectionDur(9, 9) },
     { id: 'ch02_p01', sec: sectionDur(10, 10) },
@@ -313,7 +313,7 @@ async function main() {
     { id: 'ch02_p07', sec: sectionDur(16, 16), preferEarly: true }, // Join / Log in
   ], member, { preferHold: true, prefix: 'mem' });
 
-  // 4) Portal — brief checklist why/what, then Cove card tease
+ // 4) Portal. brief checklist why/what, then Cove card tease
   const portalSlices = [];
   // land in portal
   {
@@ -323,7 +323,7 @@ async function main() {
     holdSettled(PORTAL, chapter.t0, chapter.t1, slice, sectionDur(17, 17), true);
     portalSlices.push(slice);
   }
-  // onboarding checklist (brief awareness — still, not long dwell)
+ // onboarding checklist (brief awareness. still, not long dwell)
   {
     const slice = path.join(WORK, 'portal_vl_1_onboarding.mp4');
     stillHold(a('assets/parent-tour/ch3/10_onboarding_checklist.png'), slice, sectionDur(18, 18));
@@ -346,7 +346,7 @@ async function main() {
   }
   concatReencode(portalSlices, portalBlock);
 
-  // 5) Final CTA — homepage
+ // 5) Final CTA. homepage
   holdSettled(MASTER, homeT0, homeT1, cta, ctaNeed);
 
   console.log('Joining parent chapters: intro → menu pages → membership → portal → CTA…');
@@ -434,7 +434,7 @@ async function main() {
 
   const listen = path.join(os.homedir(), 'Downloads', 'SHMSPTO_WATCH_THIS_parent_tour_16x9.mp4');
   fs.copyFileSync(finalOut, listen);
-  // Do NOT auto-open for Rob — Gemini full-pass must PASS first (gemini_parent_tour_qa.js).
+ // Do NOT auto-open for Rob. Gemini full-pass must PASS first (gemini_parent_tour_qa.js).
   console.log('Watch file written (do not open for Rob until Gemini PASS):', listen);
   console.log('Next: NODE_PATH=~/cwn-c0/node_modules node scripts/gemini_parent_tour_qa.js');
 

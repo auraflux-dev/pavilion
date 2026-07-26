@@ -9,7 +9,7 @@ export type TokenRole = 'member' | 'visitor' | 'none' | string
 export function isMemberTokens(tokens: Tokens | null | undefined): boolean {
   if (!tokens?.refreshToken?.value) return false
   const role = (tokens.refreshToken as { role?: TokenRole }).role
-  // Older cookies may omit role — treat presence of a refresh token from
+ // Older cookies may omit role. treat presence of a refresh token from
   // getMemberTokens as member only when role is explicitly member, or when
   // role is missing but access token exists AND role isn't visitor.
   if (role === 'member') return true

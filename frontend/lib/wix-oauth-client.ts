@@ -1,5 +1,5 @@
 /**
- * Wix OAuth client — used for visitor/member authenticated calls.
+ * Wix OAuth client. used for visitor/member authenticated calls.
  * Separate from wix-client.ts (which uses ApiKeyStrategy for admin/server calls).
  * This client is safe to use client-side with OAuthStrategy + tokens from cookies.
  */
@@ -20,46 +20,46 @@ export const CALLBACK_PATH = '/auth/callback'
 
 /**
  * OAuth redirect_uri must match the host the user is actually on.
- * Never fall back to localhost in a browser session — that breaks production
+ * Never fall back to localhost in a browser session. that breaks production
  * login when an old build baked NEXT_PUBLIC_SITE_URL=http://localhost:3000.
  */
 export function getCallbackUrl(): string {
-  if (typeof window !== 'undefined') {
-    const origin = window.location.origin
-    // Guard: refuse localhost callback when page is clearly hosted elsewhere
-    if (
-      origin.includes('localhost') &&
-      typeof document !== 'undefined' &&
-      !document.location.hostname.includes('localhost')
-    ) {
-      return `https://${document.location.host}${CALLBACK_PATH}`
-    }
-    return `${origin}${CALLBACK_PATH}`
-  }
+ if (typeof window !== 'undefined') {
+ const origin = window.location.origin
+ // Guard: refuse localhost callback when page is clearly hosted elsewhere
+ if (
+ origin.includes('localhost') &&
+ typeof document !== 'undefined' &&
+ !document.location.hostname.includes('localhost')
+ ) {
+ return `https://${document.location.host}${CALLBACK_PATH}`
+ }
+ return `${origin}${CALLBACK_PATH}`
+ }
 
   const site = (process.env.NEXT_PUBLIC_SITE_URL ?? '').replace(/\/$/, '')
-  if (site && !site.includes('localhost')) {
-    return `${site}${CALLBACK_PATH}`
-  }
-  // Production fallback (never localhost)
+ if (site && !site.includes('localhost')) {
+ return `${site}${CALLBACK_PATH}`
+ }
+ // Production fallback (never localhost)
   return `https://www.shmspto.org${CALLBACK_PATH}`
 }
 
 /** Create a client with existing tokens (member or visitor). */
 export function createOAuthClient(tokens?: Tokens) {
-  return createClient({
-    modules: { members, items },
-    auth: OAuthStrategy({
-      clientId: WIX_OAUTH_CLIENT_ID,
-      tokens,
-    }),
-  })
+ return createClient({
+ modules: { members, items },
+ auth: OAuthStrategy({
+ clientId: WIX_OAUTH_CLIENT_ID,
+ tokens,
+ }),
+ })
 }
 
-/** Create a client with no tokens — visitor anonymous session. */
+/** Create a client with no tokens. visitor anonymous session. */
 export function createVisitorClient() {
-  return createClient({
-    modules: { members, items },
-    auth: OAuthStrategy({ clientId: WIX_OAUTH_CLIENT_ID }),
-  })
+ return createClient({
+ modules: { members, items },
+ auth: OAuthStrategy({ clientId: WIX_OAUTH_CLIENT_ID }),
+ })
 }

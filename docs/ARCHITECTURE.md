@@ -1,12 +1,12 @@
 # SHMS PTO Platform Architecture
-**Stone Hill Middle School PTO — Technical Architecture Document**
+**Stone Hill Middle School PTO. Technical Architecture Document**
 Last updated: June 2026
 
 ---
 
 ## Overview
 
-The SHMS PTO platform uses a **headless architecture** — Wix powers all backend data and business logic, while a Next.js frontend hosted on Vercel delivers the public-facing website. Parents and students interact with the Vercel site; all data lives in Wix.
+The SHMS PTO platform uses a **headless architecture**. Wix powers all backend data and business logic, while a Next.js frontend hosted on Vercel delivers the public-facing website. Parents and students interact with the Vercel site; all data lives in Wix.
 
 ---
 
@@ -20,7 +20,7 @@ graph TB
         B[Board Members - Admin]
     end
 
-    subgraph FRONTEND["🌐 Frontend — Vercel (shmspto.org)"]
+ subgraph FRONTEND["🌐 Frontend. Vercel (shmspto.org)"]
         NX[Next.js 16 App]
         subgraph PAGES["Pages"]
             H[Home]
@@ -48,38 +48,38 @@ graph TB
             CN[Newsletter Subscribers]
         end
         subgraph APPS["📦 Wix Apps"]
-            WS[Wix Stores — Spirit Wear + Store Card]
-            WM[Wix Members — Auth + Portal]
-            WE[Wix Events — Calendar]
-            WF[Wix Forms — Data Capture]
+ WS[Wix Stores. Spirit Wear + Store Card]
+ WM[Wix Members. Auth + Portal]
+ WE[Wix Events. Calendar]
+ WF[Wix Forms. Data Capture]
         end
         subgraph VELO["⚡ Legacy Velo Backend"]
-            HF[http-functions.js — Legacy CheddarUp webhook]
-            DA[data.js — CMS Hooks]
-            SC[storeCard.js — Legacy store-card API]
+ HF[http-functions.js. Legacy CheddarUp webhook]
+ DA[data.js. CMS Hooks]
+ SC[storeCard.js. Legacy store-card API]
         end
     end
 
     subgraph PAYMENTS["💳 Payment Layer"]
-        CH[Cheddarup — Programs + Fundraisers]
-        WP[Wix Payments — Store + Membership]
-        SQ[Square — Student Store Card + Saved Cards]
-        POS[Wix POS — In-Person Store]
+ CH[Cheddarup. Programs + Fundraisers]
+ WP[Wix Payments. Store + Membership]
+ SQ[Square. Student Store Card + Saved Cards]
+ POS[Wix POS. In-Person Store]
     end
 
     subgraph BOOKKEEPING["📒 Bookkeeping"]
-        GS[Google Sheets — Transaction Log]
-        MM[MoneyMinder — Accounting]
+ GS[Google Sheets. Transaction Log]
+ MM[MoneyMinder. Accounting]
     end
 
     subgraph MIGRATION["🔄 Data Migration"]
         JB[Jumbula CSV Export]
-        MS[Migration Script — Node.js]
+ MS[Migration Script. Node.js]
     end
 
     subgraph DEVOPS["🛠 DevOps"]
-        GH[GitHub — auraflux-dev/wix-shmspto]
-        VR[Vercel — Auto Deploy on Push]
+ GH[GitHub. auraflux-dev/wix-shmspto]
+ VR[Vercel. Auto Deploy on Push]
     end
 
     %% User flows
@@ -166,7 +166,7 @@ sequenceDiagram
     POS-->>ST: Transaction complete
 ```
 
-### 3. Member Portal — View Student Balance
+### 3. Member Portal. View Student Balance
 
 ```mermaid
 sequenceDiagram
@@ -199,8 +199,8 @@ sequenceDiagram
 | **Hosting** | Vercel | Frontend deployment, auto-deploy from GitHub |
 | **Backend Data** | Wix CMS (headless) | Students, Programs, Enrollments, Payments, Volunteers, Newsletter |
 | **Store** | Wix Stores V3 | Spirit wear, schwag, memberships, store cards |
-| **Payments — Online** | Wix Payments + Cheddarup | Store checkout + enrichment programs/fundraisers |
-| **Payments — In-Person** | Wix POS + Tap to Pay | School store window (volunteer's iPhone) |
+| **Payments. Online** | Wix Payments + Cheddarup | Store checkout + enrichment programs/fundraisers |
+| **Payments. In-Person** | Wix POS + Tap to Pay | School store window (volunteer's iPhone) |
 | **Gift Cards** | Square Gift Cards + Web Payments SDK | Student store card, secure reloads, saved cards, and auto top-off |
 | **Auth** | Wix Members (headless OAuth) | Parent login, member portal |
 | **Events** | Wix Events | PTO meetings, dance night, NOVA Math |
@@ -234,7 +234,7 @@ auraflux-dev/wix-shmspto/
 │       └── utils.ts
 ├── src/                         # Wix Velo code (syncs to Wix Studio)
 │   ├── pages/
-│   │   ├── masterPage.js        # Nav, footer, member welcome — all pages
+│ │ ├── masterPage.js # Nav, footer, member welcome. all pages
 │   │   ├── Home.c1dmp.js        # Homepage logic
 │   │   ├── About.se3l5.js       # Board members
 │   │   ├── Programs.m4kt5.js    # CMS-driven programs
@@ -305,7 +305,7 @@ All payment records from Cheddarup and Wix.
 ## Environment Variables (Vercel)
 
 ```env
-# Wix API — production headless site (CMS / Stores / Events)
+# Wix API. production headless site (CMS / Stores / Events)
 WIX_SITE_ID=509fda24-8dbf-43c6-aa74-df9f8b63c388
 WIX_API_KEY=your_wix_api_key
 NEXT_PUBLIC_WIX_CLIENT_ID=your_oauth_client_id

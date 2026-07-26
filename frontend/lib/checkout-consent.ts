@@ -1,5 +1,5 @@
 /**
- * Checkout consent requirements — legal checkboxes with open/read text.
+ * Checkout consent requirements. legal checkboxes with open/read text.
  * Text is CMS-editable via PageContent rows keyed legal-<slug> (same as /terms).
  */
 import { getLegalDoc, type LegalDoc, type LegalDocSlug } from '@/lib/api/legal'
@@ -23,7 +23,7 @@ export type ConsentAck = {
   accepted: boolean
   /** ISO timestamp when parent checked */
   acceptedAt: string
-  /** Doc "updated" string at time of accept — audit version */
+ /** Doc "updated" string at time of accept. audit version */
   docVersion: string
 }
 
@@ -109,7 +109,7 @@ export function validateConsentAcks(
       return { ok: false, error: `Please choose yes or no for photo/media permission.` }
     }
     if (!ack.acceptedAt || !ack.docVersion) {
-      return { ok: false, error: 'Consent acknowledgment is incomplete — reopen checkout and try again.' }
+ return { ok: false, error: 'Consent acknowledgment is incomplete. reopen checkout and try again.' }
     }
   }
   return { ok: true, acks }

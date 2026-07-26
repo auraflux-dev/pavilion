@@ -40,7 +40,7 @@ function lineKey(productId: string, variantId: string) {
 }
 
 /**
- * In-person Cove window register — tap tiles, weekly deals on top, one Charge button.
+ * In-person Cove window register. tap tiles, weekly deals on top, one Charge button.
  * Restock qty lives in Cove products below. No barcodes on this screen.
  */
 export function StaffCoveRegister() {
@@ -351,7 +351,7 @@ export function StaffCoveRegister() {
           </p>
           {!family.hasCard ? (
             <p className="text-xs text-amber-800">
-              No digital card loaded yet. Parent must load online in the member portal first — or sell
+ No digital card loaded yet. Parent must load online in the member portal first. or sell
               this purchase on Square Stand.
             </p>
           ) : null}

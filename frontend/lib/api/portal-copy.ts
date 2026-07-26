@@ -69,7 +69,7 @@ export async function getPortalCopy(): Promise<PortalCopy> {
     paidMembershipsLabel: pick('paidMembershipsLabel'),
     whatsappHeading: pick('whatsappHeading'),
     storeCardsLabel: pick('storeCardsLabel'),
-    // Always prefer Current Balance — CMS still has "CMS balance total" from an old seed.
+ // Always prefer Current Balance. CMS still has "CMS balance total" from an old seed.
     storeCardsHint: preferDefault('storeCardsHint', pick('storeCardsHint'), [
       /cms/i,
       /balance total/i,
@@ -91,7 +91,7 @@ export async function getPortalCopy(): Promise<PortalCopy> {
     addStudentSubmit: pick('addStudentSubmit'),
     cancel: pick('cancel'),
     addStudentError: pick('addStudentError'),
-    // Old CMS said "Choose a student…" — family card is one balance for the household.
+ // Old CMS said "Choose a student…". family card is one balance for the household.
     loadCardHelp: preferDefault('loadCardHelp', pick('loadCardHelp'), [
       /choose a student/i,
       /—|–/,

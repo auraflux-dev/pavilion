@@ -1,4 +1,4 @@
-# Pre-send visual QA — SHMSPTO parent tour
+# Pre-send visual QA. SHMSPTO parent tour
 
 **Rule:** Do **not** ask Rob to watch a cut until **Gemini full-pass QA is PASS**. Agent watches via Gemini; Rob only opens the watch file after that gate.
 
@@ -13,7 +13,7 @@ NODE_PATH=~/cwn-c0/node_modules node scripts/gemini_parent_tour_qa.js
 
 Gemini must watch the **entire** video and enforce SEE=HEAR (menu pages appear when named, membership on membership, portal = Cove QR / no Staff chrome, no white/black flashes).
 
-## Cold open / outro cards (STAPLE — every video)
+## Cold open / outro cards (STAPLE. every video)
 
 **Required on every SHMSPTO promo:** ~5s cold open + ~4s outro from `scripts/staple_brand_bookends.js`.
 Seal + lime **SHMS PTO** under seal on both. Music bed; no VO on bookends.
@@ -28,14 +28,14 @@ Seal + lime **SHMS PTO** under seal on both. Music bed; no VO on bookends.
 - [ ] Exactly **one** logo: official Stone Hill seal only
 - [ ] No AI seal, no PTO ribbon peeking, no second emblem
 - [ ] No rectangular “plate” / mismatched green box behind logo
-- [ ] Logo sits on continuous `#085508` (site primary) — circular pad OK; square panel **fail**
+- [ ] Logo sits on continuous `#085508` (site primary). circular pad OK; square panel **fail**
 - [ ] Headline fully readable (not clipped by logo)
 - [ ] Banner lime ≈ `#98C818`; not purple / cream / lavender “NEW”
 - [ ] Outro copy: THANK YOU / Stingray families / Go Stingrays!
 
 ## Full cut (Gemini + agent checklist)
 
-- [ ] Cold open ~4–5s, **no captions**
+- [ ] Cold open ~4 to 5s, **no captions**
 - [ ] Captions = small regular bottom SRT (not Whisper center blocks)
 - [ ] No busy callout bars fighting captions
 - [ ] Menu VO shows each named page (not homepage hold for the list)
@@ -47,4 +47,4 @@ Seal + lime **SHMS PTO** under seal on both. Music bed; no VO on bookends.
 1. Agent assembles cut → `out/SHMSPTO_parent_tour_16x9.mp4`
 2. Agent runs **Gemini full-pass QA**
 3. **Only if PASS** → copy/open Downloads watch file for Rob
-4. If FAIL → fix from Gemini timestamps → reassemble → Gemini again — **no Rob rewatch loop**
+4. If FAIL → fix from Gemini timestamps → reassemble → Gemini again. **no Rob rewatch loop**

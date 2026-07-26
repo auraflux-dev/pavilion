@@ -73,10 +73,10 @@ function sleep(ms) {
   }
 
   if (page.url().includes('/auth')) {
-    throw new Error('Still on login page — log into Member Portal in the Chrome window, then re-run.');
+ throw new Error('Still on login page. log into Member Portal in the Chrome window, then re-run.');
   }
 
-  // Start recording via a new context page with recordVideo — CDP pages may not support recordVideo.
+ // Start recording via a new context page with recordVideo. CDP pages may not support recordVideo.
   // Fallback: screenshot burst → ffmpeg, plus a few key stills.
   console.log('Capturing portal store / Cove Digital Card…');
   await page.goto('https://www.shmspto.org/member-portal#store', { waitUntil: 'networkidle', timeout: 60000 }).catch(() => {});
@@ -126,7 +126,7 @@ function sleep(ms) {
   await page.screenshot({ path: path.join(STILL, '07_portal_qr_live.png'), fullPage: false });
   await snapBurst('ch03_p01', 9, 120); // QR primary
   await snapBurst('ch03_p02', 11, 80); // Photos / wallet
-  // Paid / free panels if visible — stay on store
+ // Paid / free panels if visible. stay on store
   await snapBurst('ch03_p03', 5, 60);
   await page.evaluate(() => window.scrollBy(0, 280));
   await sleep(500);
@@ -135,7 +135,7 @@ function sleep(ms) {
   await page.screenshot({ path: path.join(STILL, '03b_load_family_card_free.png'), fullPage: false });
 
   const outMp4 = path.join(OUT, 'portal_logged_in_tour.mp4');
-  // Full-bleed 16:9 — never letterbox with green pads (looks like "crazy borders")
+ // Full-bleed 16:9. never letterbox with green pads (looks like "crazy borders")
   execFileSync(ff, [
     '-y',
     '-framerate', '12',

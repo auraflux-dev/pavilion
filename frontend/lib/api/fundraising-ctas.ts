@@ -1,5 +1,5 @@
 /**
- * Fundraising CTAs — "How Can You Contribute?" cards on /fundraising.
+ * Fundraising CTAs. "How Can You Contribute?" cards on /fundraising.
  * Admins manage in: Wix Dashboard → Content Manager → Fundraising CTAs
  */
 
@@ -7,27 +7,27 @@ import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 
 export interface FundraisingCTA {
-  id: string
-  title: string
-  description: string
-  ctaLabel: string
-  href: string
-  icon: string
-  sortOrder: number
-  active: boolean
+ id: string
+ title: string
+ description: string
+ ctaLabel: string
+ href: string
+ icon: string
+ sortOrder: number
+ active: boolean
 }
 
 interface WixDataItem {
-  id?: string
-  data?: {
-    title?: string
-    description?: string
-    ctaLabel?: string
-    href?: string
-    icon?: string
-    sortOrder?: number
-    active?: boolean
-  }
+ id?: string
+ data?: {
+ title?: string
+ description?: string
+ ctaLabel?: string
+ href?: string
+ icon?: string
+ sortOrder?: number
+ active?: boolean
+ }
 }
 
 const FALLBACK_CTAS: FundraisingCTA[] = [
@@ -38,51 +38,51 @@ const FALLBACK_CTAS: FundraisingCTA[] = [
 ]
 
 export async function getFundraisingCTAs(): Promise<FundraisingCTA[]> {
-  const apiKey = process.env.WIX_API_KEY
-  const siteId = process.env.WIX_SITE_ID
-  if (!apiKey || !siteId) return FALLBACK_CTAS
+ const apiKey = process.env.WIX_API_KEY
+ const siteId = process.env.WIX_SITE_ID
+ if (!apiKey || !siteId) return FALLBACK_CTAS
 
-  try {
+ try {
     const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-      method: 'POST',
-      headers: {
+ method: 'POST',
+ headers: {
         'Content-Type': 'application/json',
-        Authorization: apiKey,
-        'wix-site-id': siteId,
-      },
-      body: JSON.stringify({
-        dataCollectionId: 'FundraisingCTAs',
-        query: {
-          filter: { active: { $eq: true } },
-          sort: [{ fieldName: 'sortOrder', order: 'ASC' }],
-          paging: { limit: 20 },
-        },
-      }),
-      next: { revalidate: 300 },
-    })
+ Authorization: apiKey,
+ 'wix-site-id': siteId,
+ },
+ body: JSON.stringify({
+ dataCollectionId: 'FundraisingCTAs',
+ query: {
+ filter: { active: { $eq: true } },
+ sort: [{ fieldName: 'sortOrder', order: 'ASC' }],
+ paging: { limit: 20 },
+ },
+ }),
+ next: { revalidate: 300 },
+ })
 
-    if (!res.ok) return FALLBACK_CTAS
+ if (!res.ok) return FALLBACK_CTAS
 
-    const data = await res.json()
-    const items = (data.dataItems ?? [])
-      .map((item: WixDataItem) => ({
-        id:          item.id ?? '',
-        title:       humanizePublicCopy(String(item.data?.title ?? '').trim()),
-        description: humanizePublicCopy(item.data?.description ?? ''),
-        ctaLabel:    humanizePublicCopy(item.data?.ctaLabel ?? 'Learn More'),
-        href:        item.data?.href        ?? '/',
-        icon:        item.data?.icon        ?? 'Star',
-        sortOrder:   item.data?.sortOrder   ?? 99,
-        active:      item.data?.active      ?? true,
-      }))
-      .filter(
-        (item: FundraisingCTA) =>
-          item.title &&
-          !isCmsQaItem(item.title, item.description, item.ctaLabel, item.href),
-      )
+ const data = await res.json()
+ const items = (data.dataItems ?? [])
+ .map((item: WixDataItem) => ({
+ id: item.id ?? '',
+ title: humanizePublicCopy(String(item.data?.title ?? '').trim()),
+ description: humanizePublicCopy(item.data?.description ?? ''),
+ ctaLabel: humanizePublicCopy(item.data?.ctaLabel ?? 'Learn More'),
+ href: item.data?.href ?? '/',
+ icon: item.data?.icon ?? 'Star',
+ sortOrder: item.data?.sortOrder ?? 99,
+ active: item.data?.active ?? true,
+ }))
+ .filter(
+ (item: FundraisingCTA) =>
+ item.title &&
+ !isCmsQaItem(item.title, item.description, item.ctaLabel, item.href),
+ )
 
-    return items.length > 0 ? items : FALLBACK_CTAS
-  } catch {
-    return FALLBACK_CTAS
-  }
+ return items.length > 0 ? items : FALLBACK_CTAS
+ } catch {
+ return FALLBACK_CTAS
+ }
 }

@@ -1,7 +1,7 @@
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 
 /**
- * Board members — fetched live from Wix CMS BoardMembers collection.
+ * Board members. fetched live from Wix CMS BoardMembers collection.
  *
  * Board admins can update names, bios, emails, photos, and sort order
  * directly from the Wix dashboard without any code changes.
@@ -43,7 +43,7 @@ export async function getBoardMembers(): Promise<BoardMember[]> {
   const siteId = process.env.WIX_SITE_ID
 
   if (!apiKey || !siteId) {
-    console.warn('[board] Missing WIX_API_KEY or WIX_SITE_ID — returning empty board')
+ console.warn('[board] Missing WIX_API_KEY or WIX_SITE_ID. returning empty board')
     return []
   }
 

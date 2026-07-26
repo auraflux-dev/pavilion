@@ -4,7 +4,7 @@ export const DONATION_MIN_DOLLARS = 1
 export const DONATION_MAX_DOLLARS = 10_000
 export const DONATION_PRESETS = [5, 15, 25] as const
 
-/** Whole dollars or cents (max 2 decimal places), $1–$10,000. */
+/** Whole dollars or cents (max 2 decimal places), $1 to $10,000. */
 export function isAllowedDonationAmount(dollars: number): boolean {
   if (!Number.isFinite(dollars)) return false
   const cents = Math.round(dollars * 100)

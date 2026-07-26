@@ -206,7 +206,7 @@ export default async function FundraisingPage() {
 
         <DonateBlock
           title="Make a gift to SHMS PTO"
-          body="Choose any amount. Your gift goes to the PTO — enrichment, The Cove, teacher support, and events for Stone Hill students. Not a donation to the school district."
+ body="Choose any amount. Your gift goes to the PTO: enrichment, The Cove, teacher support, and events for Stone Hill students. Not a donation to the school district."
         />
 
         {/* Initiative cards */}
@@ -297,7 +297,7 @@ export default async function FundraisingPage() {
                 Where the Funds Go
               </h2>
               <p className="text-[#5A6070] mt-3">
-                100% of gifts support SHMS PTO programs for Stone Hill students — not the school district.
+ 100% of gifts support SHMS PTO programs for Stone Hill students, not the school district.
               </p>
             </div>
 

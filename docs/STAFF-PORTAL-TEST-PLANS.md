@@ -1,4 +1,4 @@
-# Staff Portal & Session Gaps — Test Plans (July 2026)
+# Staff Portal & Session Gaps. Test Plans (July 2026)
 
 Covers every gap from the portal / board-roles / social / payments session.
 
@@ -14,12 +14,12 @@ Covers every gap from the portal / board-roles / social / payments session.
 | Legal docs | `/privacy`, `/terms`, `/photo-release` | TP-L |
 | Instructor → parent messaging | `/staff` Programs compose → ParentMessages | TP-I |
 | Board role homes | Staff shell panels per system role | TP-S |
-| Surveys + card-on-file + board Drive docs | Prior session + docs 23–26 | TP-E / TP-C / docs |
+| Surveys + card-on-file + board Drive docs | Prior session + docs 23 to 26 | TP-E / TP-C / docs |
 | Survey sharing, review, CSV export | `/staff` Surveys + `/api/staff/surveys` | TP-E |
 
 ---
 
-## TP-S — Staff shell & RBAC
+## TP-S. Staff shell & RBAC
 
 | # | Test | Pass |
 |---|------|------|
@@ -30,7 +30,7 @@ Covers every gap from the portal / board-roles / social / payments session.
 | S.5 | Board public `/board` still shows display titles from BoardMembers (unchanged) | |
 | S.6 | Navbar/footer link to Staff appears only when `staffRoles.length > 0` | |
 
-## TP-A — Admin lookup & act-as
+## TP-A. Admin lookup & act-as
 
 | # | Test | Pass |
 |---|------|------|
@@ -44,7 +44,7 @@ Covers every gap from the portal / board-roles / social / payments session.
 | A.8 | Archive disables auto top-off and blocks reload/balance/settings APIs | |
 | A.9 | Admin restores a student; student returns to parent portal | |
 
-## TP-R — Admin staff access
+## TP-R. Admin staff access
 
 | # | Test | Pass |
 |---|------|------|
@@ -54,7 +54,7 @@ Covers every gap from the portal / board-roles / social / payments session.
 | R.4 | Admin can deactivate and reactivate staff access | |
 | R.5 | Non-admin receives 403 from `/api/staff/roles` | |
 
-## TP-K — Marketing social compose
+## TP-K. Marketing social compose
 
 | # | Test | Pass |
 |---|------|------|
@@ -64,7 +64,7 @@ Covers every gap from the portal / board-roles / social / payments session.
 | K.4 | Non-marketing non-admin → 403 on `/api/staff/social` | |
 | K.5 | After FB/IG connect + flag true, publish path is ready (manual E2E) | |
 
-## TP-L — Legal docs
+## TP-L. Legal docs
 
 | # | Test | Pass |
 |---|------|------|
@@ -72,7 +72,7 @@ Covers every gap from the portal / board-roles / social / payments session.
 | L.2 | Footer links to all three | |
 | L.3 | Board can edit copy in PageContent without deploy | |
 
-## TP-I — Instructor / programs messaging
+## TP-I. Instructor / programs messaging
 
 | # | Test | Pass |
 |---|------|------|
@@ -81,7 +81,7 @@ Covers every gap from the portal / board-roles / social / payments session.
 | I.3 | Parent sees message in portal Messages quadrant | |
 | I.4 | Non-staff → 403 on send API | |
 
-## TP-M — Member portal (parent)
+## TP-M. Member portal (parent)
 
 | # | Test | Pass |
 |---|------|------|
@@ -90,13 +90,13 @@ Covers every gap from the portal / board-roles / social / payments session.
 | M.3 | Surveys list + help panel present | |
 | M.4 | Store card reload requires student + amount | |
 
-## TP-C — Card-on-file / auto top-off (prior build)
+## TP-C. Card-on-file / auto top-off (prior build)
 
 | # | Test | Pass |
 |---|------|------|
-| C.1–C.7 | See `docs/PARENT-PORTAL-PLAN.md` TP-C | |
+| C.1-C.7 | See `docs/PARENT-PORTAL-PLAN.md` TP-C | |
 
-## TP-E — Surveys
+## TP-E. Surveys
 
 | # | Test | Pass |
 |---|------|------|

@@ -24,7 +24,7 @@ const ICONS: LucideIcon[] = [
 type Item = { title: string; detail: string }
 
 function parseLine(line: string): Item {
-  // CMS lines often use em/en dashes: "Title — description"
+ // CMS lines often use em/en dashes: "Title. description"
   const parts = line.split(/\s*[\u2014\u2013\-]\s+/)
   if (parts.length >= 2) {
     return { title: parts[0].trim(), detail: parts.slice(1).join(' ').trim() }

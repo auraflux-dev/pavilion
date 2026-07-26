@@ -38,7 +38,7 @@ function canonicalOrigin(req: NextRequest): string {
 
 /**
  * Exchange a Wix sessionToken (from login/register/verify) for member tokens.
- * Uses redirect-session + authorize with the sessionToken — the documented
+ * Uses redirect-session + authorize with the sessionToken. the documented
  * mobile-safe path. Doing this server-side keeps the browser on our site.
  */
 async function issueMemberCookiesFromSession(
@@ -220,7 +220,7 @@ export async function POST(req: NextRequest) {
       })
     }
     // Wix site may require owner approval (or left older accounts PENDING).
-    // Parents proved email/password — approve PENDING and retry once.
+ // Parents proved email/password. approve PENDING and retry once.
     // Do not steer them to @shmspto.org staff login.
     if (result.loginState === LoginState.OWNER_APPROVAL_REQUIRED) {
       const healed = await approvePendingMemberByEmail(email)
@@ -252,7 +252,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            'This parent account is still pending approval. Use your personal email (not @shmspto.org). If this keeps happening, email membership@shmspto.org — do not use Staff login for family portal access.',
+ 'This parent account is still pending approval. Use your personal email (not @shmspto.org). If this keeps happening, email membership@shmspto.org. do not use Staff login for family portal access.',
           errorCode: 'ownerApprovalRequired',
         },
         { status: 403 },

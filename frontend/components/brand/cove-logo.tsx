@@ -1,7 +1,7 @@
 import Image from 'next/image'
 
 /**
- * The Cove brand mark — transparent PNGs in /public/brand/.
+ * The Cove brand mark. transparent PNGs in /public/brand/.
  *
  * Use cases:
  * - Web UI: `sm` / `md` / `lg`
@@ -9,12 +9,12 @@ import Image from 'next/image'
  * - Video overlays: `cove-logo-1080.png` (or master)
  */
 export const COVE_LOGO = {
-  /** Trimmed transparent master (variable aspect) — web / video overlays */
+ /** Trimmed transparent master (variable aspect). web / video overlays */
   master: '/brand/cove-logo-master.png',
   /** Default web square (transparent) */
   default: '/brand/cove-logo.png',
   /**
-   * WhatsApp group image — opaque cream JPEG (circle-safe, simplified).
+ * WhatsApp group image. opaque cream JPEG (circle-safe, simplified).
    * Do NOT use transparent PNGs for WhatsApp; they often look black/muddy.
    */
   whatsapp: '/brand/cove-logo-whatsapp.jpg',
@@ -56,7 +56,7 @@ export function CoveLogo({ size = 'md', className = '', priority = false }: Prop
   return (
     <Image
       src={SIZE_SRC[size]}
-      alt="The Cove — SHMS PTO"
+ alt="The Cove. SHMS PTO"
       width={px}
       height={px}
       priority={priority}

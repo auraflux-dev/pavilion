@@ -87,8 +87,8 @@ function normalizeBranding(raw: unknown): SurveyBranding {
   return {
     accentColor: String(row.accentColor ?? '#085508').trim() || '#085508',
     thankYouMessage:
-      String(row.thankYouMessage ?? 'Thank you. your response was recorded.').trim() ||
-      'Thank you. your response was recorded.',
+      String(row.thankYouMessage ?? 'Thank you. Your response was recorded.').trim() ||
+      'Thank you. Your response was recorded.',
   }
 }
 

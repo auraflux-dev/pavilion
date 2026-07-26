@@ -14,7 +14,7 @@ function pemFromEnv(raw: string | undefined): string {
   return v.replace(/\\n/g, '\n')
 }
 
-/** Minimal 29×29 green PNG (icon) — Apple requires icon.png */
+/** Minimal 29×29 green PNG (icon). Apple requires icon.png */
 function tinyGreenPng(): Buffer {
   // 1x1 green pixel PNG
   return Buffer.from(

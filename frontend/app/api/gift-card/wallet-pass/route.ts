@@ -185,8 +185,8 @@ export async function POST(req: NextRequest) {
       appleConfigured: appleWalletConfigured(),
       googleConfigured: googleWalletConfigured(),
       hint: litecardConfigured()
-        ? 'Litecard is configured but pass create failed — Save QR to Photos works at Square Stand.'
-        : 'Add Litecard credentials (LITECARD_*) in Vercel for native Wallet. Until then, Save the QR to Photos — Square Stand scans the GAN.',
+ ? 'Litecard is configured but pass create failed. Save QR to Photos works at Square Stand.'
+ : 'Add Litecard credentials (LITECARD_*) in Vercel for native Wallet. Until then, Save the QR to Photos. Square Stand scans the GAN.',
     })
   } catch (err) {
     console.error('/api/gift-card/wallet-pass', err)

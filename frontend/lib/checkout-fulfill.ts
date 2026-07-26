@@ -114,8 +114,8 @@ export async function resolveCheckoutIntent(
       amount: charge.amount,
       amountCents: Math.round(charge.amount * 100),
       description: charge.isUpgrade
-        ? `SHMS PTO membership upgrade — ${formatTierLabel(currentTier)} → ${match.name}`
-        : `SHMS PTO membership — ${match.name}`,
+ ? `SHMS PTO membership upgrade: ${formatTierLabel(currentTier)} → ${match.name}`
+ : `SHMS PTO membership: ${match.name}`,
       customId: `membership:${tier}`,
       meta: {
         tier,
@@ -142,7 +142,7 @@ export async function resolveCheckoutIntent(
       kind,
       amount: catalog.price,
       amountCents: Math.round(catalog.price * 100),
-      description: `The Cove — ${catalog.name}`,
+ description: `The Cove: ${catalog.name}`,
       customId: `cove:${productId.slice(0, 40)}`,
       meta: { productId, productName: catalog.name },
     }
@@ -158,7 +158,7 @@ export async function resolveCheckoutIntent(
     const program = await getProgramById(programId)
     if (!program || !program.registrationOpen) throw new Error('Program not open for registration')
     const fee = Number(program.fee ?? 0)
-    if (fee <= 0) throw new Error('This program does not require payment — use free registration')
+ if (fee <= 0) throw new Error('This program does not require payment. Use free registration')
 
     const client = getWixClient()
     const student = (await client.items.get('Students', studentId).catch(() => null)) as {
@@ -178,8 +178,8 @@ export async function resolveCheckoutIntent(
       amountCents: Math.round(amount * 100),
       description:
         discountDollars > 0
-          ? `Enrichment — ${program.name} (${percent}% member discount)`
-          : `Enrichment — ${program.name}`,
+ ? `Enrichment: ${program.name} (${percent}% member discount)`
+ : `Enrichment: ${program.name}`,
       customId: `program:${programId.slice(0, 36)}`,
       meta: {
         programId,
@@ -214,7 +214,7 @@ export async function resolveCheckoutIntent(
       kind,
       amount,
       amountCents: Math.round(amount * 100),
-      description: `Event tickets — ${offer.eventTitle} × ${quantity}`,
+ description: `Event tickets: ${offer.eventTitle} × ${quantity}`,
       customId: `event:${eventId.slice(0, 36)}`,
       meta: {
         eventId,
@@ -252,7 +252,7 @@ export async function resolveCheckoutIntent(
   const cfg = await getCatalogConfig()
   if (!Number.isInteger(amountCents) || !isAllowedStoreCardLoadAmount(amount, cfg)) {
     throw new Error(
-      `Invalid amount (use whole dollars $${cfg.storeCardMinAmount}–$${cfg.storeCardMaxAmount})`
+ `Invalid amount (use whole dollars $${cfg.storeCardMinAmount} to $${cfg.storeCardMaxAmount})`
     )
   }
   const family = await listFamilyStudents(parentEmail)
@@ -303,7 +303,7 @@ export async function fulfillPaidCheckout(opts: {
       feePaid: resolved.amount,
     })
     await client.items.insert('Payments', {
-      programName: `Enrichment — ${resolved.meta.programName}`,
+ programName: `Enrichment: ${resolved.meta.programName}`,
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
@@ -346,8 +346,8 @@ export async function fulfillPaidCheckout(opts: {
     })
     await client.items.insert('Payments', {
       programName: resolved.meta.isUpgrade === '1'
-        ? `Membership upgrade — ${resolved.meta.currentTier} → ${resolved.meta.tierName}`
-        : `Membership — ${resolved.meta.tierName}`,
+ ? `Membership upgrade: ${resolved.meta.currentTier} → ${resolved.meta.tierName}`
+ : `Membership: ${resolved.meta.tierName}`,
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
@@ -376,7 +376,7 @@ export async function fulfillPaidCheckout(opts: {
 
   if (resolved.kind === 'product') {
     await client.items.insert('Payments', {
-      programName: `The Cove — ${resolved.meta.productName}`,
+ programName: `The Cove: ${resolved.meta.productName}`,
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
@@ -418,7 +418,7 @@ export async function fulfillPaidCheckout(opts: {
       amount: resolved.amount,
     })
     await client.items.insert('Payments', {
-      programName: `Event — ${resolved.meta.eventTitle}`,
+ programName: `Event: ${resolved.meta.eventTitle}`,
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),

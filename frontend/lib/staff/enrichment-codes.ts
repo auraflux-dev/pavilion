@@ -68,7 +68,7 @@ export async function ensureSharedEnrichmentCode(tier: string): Promise<Discount
       percent,
       membershipTier: tier.trim().toLowerCase(),
       usageLimit: 0,
-      note: `Shared ${tier} enrichment code — all ${tier} members use the same code`,
+ note: `Shared ${tier} enrichment code. All ${tier} members use the same code`,
       expirationDays: 0,
     })
   } catch (err) {

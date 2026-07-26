@@ -513,7 +513,7 @@ export function StudentCard({
                               p.paymentMethod || null,
                             ]
                               .filter(Boolean)
-                              .join(' · ') || '—'}
+ .join(' · ') || '-'}
                           </p>
                           {p.detail ? (
                             <p className="text-[11px] text-[#5A6070] mt-0.5 leading-snug">{p.detail}</p>

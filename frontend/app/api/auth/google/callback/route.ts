@@ -4,7 +4,7 @@
  *
  * Used when GOOGLE_MEMBER_CLIENT_ID is set. Otherwise parent Google login
  * reuses /api/staff/workspace/connect/callback with state.flow=member
- * (same Google client — set that client to External, not Internal).
+ * (same Google client. set that client to External, not Internal).
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { TOKENS_COOKIE, TOKEN_MAX_AGE, isSecure } from '@/lib/auth-cookies'

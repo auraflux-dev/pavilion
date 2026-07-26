@@ -144,7 +144,7 @@ export function CoveCameraScanner({
   )
 }
 
-/** @deprecated Prefer coveDigitalCardScanPayload — kept for short PIN fallbacks. */
+/** @deprecated Prefer coveDigitalCardScanPayload. kept for short PIN fallbacks. */
 export function coveFamilyScanPayload(code: string): string {
   const digits = String(code).replace(/\D/g, '')
   return `SHMSCOVE:${digits}`
@@ -165,7 +165,7 @@ export function parseCoveScan(
   if (prefixed?.[1]) return { kind: 'family', code: prefixed[1] }
 
   const digits = value.replace(/\D/g, '')
-  // Square GAN / Wallet pass / Photos QR — long numeric only
+ // Square GAN / Wallet pass / Photos QR. long numeric only
   if (/^\d{12,24}$/.test(digits)) {
     return { kind: 'family', code: digits }
   }

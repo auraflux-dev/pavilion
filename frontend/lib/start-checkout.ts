@@ -2,7 +2,7 @@
 
 const COUPON_KEY = 'checkoutCouponCode'
 
-/** Client helper — opens headless Wix checkout in a new tab. */
+/** Client helper. opens headless Wix checkout in a new tab. */
 export async function startWixCheckout(body: Record<string, unknown>): Promise<void> {
   const couponFromBody = typeof body.couponCode === 'string' ? body.couponCode.trim() : ''
   const coupon =

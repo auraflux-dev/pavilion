@@ -11,10 +11,10 @@
   },
   "music": {
     "file": "assets/music/es_go_adelyn_paik_instrumental.mp3",
-    "title": "Go (Instrumental Version) — Adelyn Paik",
+ "title": "Go (Instrumental Version). Adelyn Paik",
     "mixedWithVo": "vo/parent_tour_vo_music.m4a",
     "bedVolume": "-22dB",
-    "note": "Was 0.12 (~-18dB linear) — remixed to -22dB under full VO; fade in/out; trim to VO length"
+ "note": "Was 0.12 (~-18dB linear). remixed to -22dB under full VO; fade in/out; trim to VO length"
   },
   "privacy": "Blur emails on portal frames before public post",
   "beats": [
@@ -138,7 +138,7 @@
     {
       "id": "c3_01",
       "chapter": 3,
-      "voCue": "Every signed in family gets a Cove Digital Card in the Member Portal — a QR to show at the snack window, plus a six digit code as backup.",
+ "voCue": "Every signed in family gets a Cove Digital Card in the Member Portal. a QR to show at the snack window, plus a six digit code as backup.",
       "asset": "assets/parent-tour/ch3/02b_store_cove_code_qr_free.png",
       "overlay": ["COVE DIGITAL CARD", "QR PRIMARY"],
       "mustShow": "QR primary + 6-digit backup",
@@ -147,7 +147,7 @@
     {
       "id": "c3_01b",
       "chapter": 3,
-      "voCue": "Show the QR at the snack window, or say the six digit backup. You can also save the QR to Photos. Apple and Google Wallet are coming soon — same digital card, even easier on a phone.",
+ "voCue": "Show the QR at the snack window, or say the six digit backup. You can also save the QR to Photos. Apple and Google Wallet are coming soon. same digital card, even easier on a phone.",
       "asset": "assets/parent-tour/ch3/02b_store_cove_code_qr_free.png",
       "overlay": ["SHOW QR", "SAVE TO PHOTOS", "WALLET COMING SOON"],
       "mustShow": "QR how-to + Photos + Wallet soon",

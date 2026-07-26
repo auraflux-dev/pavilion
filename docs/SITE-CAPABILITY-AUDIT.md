@@ -26,27 +26,27 @@ Audience shells: **visitor** · **free member** · **paid member** · **staff (b
 
 | ID | Gap | Surface | Status |
 |----|-----|---------|--------|
-| G-P0-1 | **wellness** role had no gated Staff workspace | Staff | **COVERED** — Wellness workspace (SiteSettings wish list / notes) |
+| G-P0-1 | **wellness** role had no gated Staff workspace | Staff | **COVERED**. Wellness workspace (SiteSettings wish list / notes) |
 
 ### P1
 
 | ID | Gap | Surface | Status |
 |----|-----|---------|--------|
-| G-P1-1 | `/board` BoardMembers roster | Visitor | **COVERED** — Board roster |
-| G-P1-2 | `/volunteer` VolunteerOpportunities | Visitor | **COVERED** — Volunteer ops |
-| G-P1-3 | `/fundraising` goals/CTAs | Visitor | **COVERED** — Fundraising workspace |
-| G-P1-4 | SiteSettings (announcement, contact, WhatsApp, …) | Visitor | **COVERED** — Site settings (role-scoped) |
-| G-P1-5 | Membership tier map / Catalog link | Visitor | **COVERED** — Membership tiers (paid display still Catalog) |
-| G-P1-6 | Events create/edit | Visitor | **COVERED** — Staff Events create/edit/cancel (Wix Events API) |
-| G-P1-7 | Marketing newsletter list/send | Visitor | **COVERED** — Newsletter workspace (Gmail + WhatsApp + portal; free/paid members) |
+| G-P1-1 | `/board` BoardMembers roster | Visitor | **COVERED**. Board roster |
+| G-P1-2 | `/volunteer` VolunteerOpportunities | Visitor | **COVERED**. Volunteer ops |
+| G-P1-3 | `/fundraising` goals/CTAs | Visitor | **COVERED**. Fundraising workspace |
+| G-P1-4 | SiteSettings (announcement, contact, WhatsApp, …) | Visitor | **COVERED**. Site settings (role-scoped) |
+| G-P1-5 | Membership tier map / Catalog link | Visitor | **COVERED**. Membership tiers (paid display still Catalog) |
+| G-P1-6 | Events create/edit | Visitor | **COVERED**. Staff Events create/edit/cancel (Wix Events API) |
+| G-P1-7 | Marketing newsletter list/send | Visitor | **COVERED**. Newsletter workspace (Gmail + WhatsApp + portal; free/paid members) |
 
 ### P2
 
 | ID | Gap | Surface | Status |
 |----|-----|---------|--------|
-| G-P2-1 | NavLinks | Visitor | **COVERED** — Nav & footer |
+| G-P2-1 | NavLinks | Visitor | **COVERED**. Nav & footer |
 | G-P2-2 | Parents cannot archive/remove students (admin Staff only) | Portal | INTENTIONAL / policy |
-| G-P2-3 | Membership FAQItems | Visitor | **COVERED** — FAQs |
+| G-P2-3 | Membership FAQItems | Visitor | **COVERED**. FAQs |
 | G-P2-4 | Legal PageContent rows may be missing from Page copy defaults | Visitor | PARTIAL |
 
 ---
@@ -90,7 +90,7 @@ Audience shells: **visitor** · **free member** · **paid member** · **staff (b
 
 ---
 
-## Member portal — free vs paid
+## Member portal. free vs paid
 
 | Area | Free | Paid |
 |------|------|------|
@@ -101,13 +101,13 @@ Audience shells: **visitor** · **free member** · **paid member** · **staff (b
 | Surveys / messages / help | Same | Same |
 | Archive student | **No** (admin) | **No** (admin) |
 
-Parent student management: **add** + **edit** yes; **archive/remove** staff-admin only (G-P2-2 — confirm policy).
+Parent student management: **add** + **edit** yes; **archive/remove** staff-admin only (G-P2-2. confirm policy).
 
 ---
 
 ## Test plans for execution
 
-### TP-V — Visitor
+### TP-V. Visitor
 
 | # | Test | Pass |
 |---|------|------|
@@ -118,7 +118,7 @@ Parent student management: **add** + **edit** yes; **archive/remove** staff-admi
 | V.5 | Footer legal links | |
 | V.6 | Active survey slug loads | |
 
-### TP-MF — Free portal
+### TP-MF. Free portal
 
 | # | Test | Pass |
 |---|------|------|
@@ -129,7 +129,7 @@ Parent student management: **add** + **edit** yes; **archive/remove** staff-admi
 | MF.5 | Surveys + messages when present | |
 | MF.6 | Store card load reachable or clear empty state | |
 
-### TP-MP — Paid portal
+### TP-MP. Paid portal
 
 | # | Test | Pass |
 |---|------|------|
@@ -138,7 +138,7 @@ Parent student management: **add** + **edit** yes; **archive/remove** staff-admi
 | MP.3 | Spirit coupon bar when configured | |
 | MP.4 | All MF.* still pass | |
 
-### TP-RBAC — Role isolation
+### TP-RBAC. Role isolation
 
 | # | Role | Must see | Must NOT see | Pass |
 |---|------|----------|--------------|------|
@@ -151,8 +151,8 @@ Parent student management: **add** + **edit** yes; **archive/remove** staff-admi
 | R.7 | secretary | Minutes, Surveys, Messages, Memberships, Events, Page copy | Payments* | |
 | R.8 | events | Events | Payments | |
 | R.9 | wellness | Base only | Document G-P0-1 | |
-| R.10 | admin | All | — | |
-| R.11 | any | Inbox after Connect Google | — | |
+| R.10 | admin | All |. | |
+| R.11 | any | Inbox after Connect Google |. | |
 
 ### TP-STAFF-MANAGE
 
@@ -169,7 +169,7 @@ Parent student management: **add** + **edit** yes; **archive/remove** staff-admi
 | SM.9 | Act-as parent | admin | Portal shows their kids | |
 | SM.10 | Create event | events | **Wix Events** (not Staff form) | |
 
-### TP-WS — Workspace hub
+### TP-WS. Workspace hub
 
 | # | Test | Pass |
 |---|------|------|
@@ -194,5 +194,5 @@ Parent student management: **add** + **edit** yes; **archive/remove** staff-admi
 ## Related
 
 - Repo: `docs/STAFF-HELP.md`, `docs/STAFF-PORTAL-TEST-PLANS.md`  
-- Drive: 30–36 how-tos; this audit also as Google Doc **37**  
+- Drive: 30 to 36 how-tos; this audit also as Google Doc **37** 
 - Staff Help tab lists role-relevant docs; Member Portal → Portal help for parents

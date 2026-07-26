@@ -8,12 +8,12 @@ Public legal statement: [/data-security](https://www.shmspto.org/data-security) 
 
 | Variable | Purpose |
 |---|---|
-| `ERROR_REPORTING_ENABLED=true` | **Master switch** — ErrorEvents CMS + optional webhook + `/api/errors/report` |
+| `ERROR_REPORTING_ENABLED=true` | **Master switch**. ErrorEvents CMS + optional webhook + `/api/errors/report` |
 | `ERROR_WEBHOOK_URL` | Optional POST sink (Slack/Discord/Make) when reporting is on |
 | `CRON_SECRET` | Protects `/api/cron/*` (Vercel Cron sends `Authorization: Bearer …`) |
 | `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BACKUP_BUCKET` | Cloudflare R2 nightly CMS backups (no Google Drive) |
 | `ALLOWED_ORIGINS` | Extra origins allowed for mutating browser API calls |
-| `UPTIMEROBOT_API_KEY` | SHMS UptimeRobot account (`president@shmspto.org`) — MCP create/list monitors |
+| `UPTIMEROBOT_API_KEY` | SHMS UptimeRobot account (`president@shmspto.org`). MCP create/list monitors |
 
 **No Sentry. No Drive backups.** Errors use Vercel logs + Wix `ErrorEvents` with pasteable `evt_…` ids. Backups go to R2 only.
 
@@ -85,7 +85,7 @@ Wix’s own commercial backups remain the vendor safety net; R2 is the PTO-contr
 
 1. Set `ERROR_REPORTING_ENABLED=true` on Vercel (already on for production).
 2. Optional: set `ERROR_WEBHOOK_URL` for Slack/Discord.
-3. When a parent/staff hits an error, they paste the on-screen `evt_…` / digest here — look up Wix CMS `ErrorEvents` or Vercel Runtime Logs.
+3. When a parent/staff hits an error, they paste the on-screen `evt_…` / digest here. look up Wix CMS `ErrorEvents` or Vercel Runtime Logs.
 
 ## Not SQLite
 

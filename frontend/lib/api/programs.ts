@@ -23,7 +23,7 @@ export interface Program {
   image?: string;
   /** Meeting day(s), e.g. "Tuesday" or "Mon & Wed" */
   dayOfWeek?: string;
-  /** Class time window, e.g. "3:30–4:30 PM" */
+ /** Class time window, e.g. "3:30 to 4:30 PM" */
   classTime?: string;
   /** Length of the session run */
   durationWeeks?: number;

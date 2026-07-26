@@ -12,7 +12,7 @@ export const GOOGLE_MEMBER_SCOPES = ['openid', 'email', 'profile'].join(' ')
 
 /**
  * Parent Google sign-in uses the same Google Cloud OAuth *client* as staff when
- * GOOGLE_MEMBER_* is unset — that is fine. The bug is User type = Internal
+ * GOOGLE_MEMBER_* is unset. that is fine. The bug is User type = Internal
  * (org-only), which Google brands as “Staff Portal” and blocks @gmail.com.
  *
  * Fix in Google Cloud (one client, no second app):

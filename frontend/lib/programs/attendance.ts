@@ -1,5 +1,5 @@
 /**
- * ProgramAttendance helpers — check-in / check-out marks per session date.
+ * ProgramAttendance helpers. check-in / check-out marks per session date.
  * Fields: programId, programName, sessionId?, sessionDate (YYYY-MM-DD),
  * studentId, studentName, parentEmail, status (Present|Absent|Late|CheckedOut),
  * checkedInAt, checkedOutAt, markedByEmail, notes

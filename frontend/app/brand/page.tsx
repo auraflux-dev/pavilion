@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 }
 
 /**
- * Hidden asset shelf — not linked from nav.
+ * Hidden asset shelf. not linked from nav.
  * After deploy, files are public at https://www.shmspto.org/brand/...
  * (and listed here) so Canva / tools can fetch HTTPS URLs.
  */

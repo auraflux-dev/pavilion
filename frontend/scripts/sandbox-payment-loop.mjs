@@ -1,5 +1,5 @@
 /**
- * THROWAWAY sandbox verification — mirrors frontend/lib/square.ts flow.
+ * THROWAWAY sandbox verification. mirrors frontend/lib/square.ts flow.
  * Run: cd frontend && node --env-file=.env.local scripts/sandbox-payment-loop.mjs
  * Safe: Square sandbox only (fake money). Refuses to run against production.
  */
@@ -106,7 +106,7 @@ async function main() {
   }
 
   const pass = bal === expectAfterRefill
-  console.log(`\n=== ${pass ? 'PASS' : 'FAIL'} — final balance ${dollars(bal)} ===\n`)
+ console.log(`\n=== ${pass ? 'PASS' : 'FAIL'}. final balance ${dollars(bal)} ===\n`)
   process.exit(pass ? 0 : 1)
 }
 

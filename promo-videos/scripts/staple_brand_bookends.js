@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * STAPLE brand bookends — same logo treatment for intro AND outro.
+ * STAPLE brand bookends. same logo treatment for intro AND outro.
  *
  *   node scripts/staple_brand_bookends.js
  */
@@ -32,7 +32,7 @@ const LABEL_Y = LOGO_Y + LOGO_W + 18;
 const PATHS = {
   coldOpenDefault: path.join(THUMBS, 'cold_open_thumb.png'),
   coldOpenBoard: path.join(THUMBS, 'cold_open_board_recruit.png'),
-  /** Board outro — SAME logo style as board intro (no white-plate variant) */
+ /** Board outro. SAME logo style as board intro (no white-plate variant) */
   outroBoard: path.join(THUMBS, 'outro_board_recruit.png'),
   /** Legacy parent-tour outro (kept for parent assembler) */
   outro: path.join(THUMBS, 'outro_thank_you.png'),

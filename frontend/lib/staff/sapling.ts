@@ -1,6 +1,6 @@
 /**
  * Sapling.ai grammar / spelling edits for staff email compose.
- * Uses server-only SAPLING_API_KEY — never expose to the browser.
+ * Uses server-only SAPLING_API_KEY. never expose to the browser.
  * @see https://sapling.ai/docs/api/edits-overview/
  */
 

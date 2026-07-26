@@ -44,7 +44,7 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **Wellness** | Wellness / events | Wish list & appreciation notes |
 | **Help** | Everyone | Links to Drive how-tos for your role |
 
-## Staff portal — start here
+## Staff portal. start here
 
 | Doc | Who | What |
 |-----|-----|------|
@@ -77,7 +77,7 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | Doc | Role | What |
 |-----|------|------|
 | **16** | Programs / instructor / secretary | Parent portal inbox messages |
-| **23–24** | Marketing / secretary | Surveys **create**, share, review, CSV |
+| **23 to 24** | Marketing / secretary | Surveys **create**, share, review, CSV |
 | **25** | Marketing | Facebook publish from Staff |
 | **12b** | Treasurer / support | Store card, auto top-off, Needs Reconciliation |
 | **13 / 15 / 19 / 21** | Marketing / programs / secretary / retail | Page copy, sessions, minutes, store & spirit UUID lists |

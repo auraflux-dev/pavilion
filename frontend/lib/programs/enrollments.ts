@@ -1,5 +1,5 @@
 /**
- * Shared program enrollment helpers — seats, waitlist, dual-write for portal.
+ * Shared program enrollment helpers. seats, waitlist, dual-write for portal.
  */
 import { getWixClient } from '@/lib/wix-client'
 

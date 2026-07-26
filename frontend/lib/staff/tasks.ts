@@ -1,5 +1,5 @@
 /**
- * StaffTasks — work items under a StaffProject, assignable to a person.
+ * StaffTasks. work items under a StaffProject, assignable to a person.
  * Still supports role ownership + triage for faculty/admin asks.
  */
 

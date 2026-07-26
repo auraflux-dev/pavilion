@@ -1,5 +1,5 @@
 /**
- * Expense reimbursement requests — staff submit, President/Admin approve,
+ * Expense reimbursement requests. staff submit, President/Admin approve,
  * Treasurer marks paid. Backed by the ExpenseReimbursements CMS collection.
  */
 import { getWixClient } from '@/lib/wix-client'

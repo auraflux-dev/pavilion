@@ -1,5 +1,5 @@
 /**
- * Program enrollment — in-app registration (free or paid via Square/PayPal).
+ * Program enrollment. in-app registration (free or paid via Square/PayPal).
  * Dual-writes ProgramEnrollments + legacy Enrollments; enforces capacity/waitlist.
  */
 import { getWixClient } from '@/lib/wix-client'
@@ -128,7 +128,7 @@ export async function enrollInProgram(opts: {
   const seatsTaken = capacity > 0 ? await countSeatsTaken(opts.programId) : 0
   const atCapacity = capacity > 0 && seatsTaken >= capacity
 
-  // Paid checkout already charged — still enroll if capacity opened between quote and pay.
+ // Paid checkout already charged. still enroll if capacity opened between quote and pay.
   // If still full, waitlist (staff can refund / promote).
   let status = fee > 0 ? 'Paid' : 'Enrolled'
   let waitlistPosition: number | undefined

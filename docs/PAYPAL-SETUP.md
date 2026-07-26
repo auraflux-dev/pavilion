@@ -1,4 +1,4 @@
-# PayPal setup — all SHMS PTO ecommerce
+# PayPal setup. all SHMS PTO ecommerce
 
 Use this when you want **PayPal (and optionally Venmo)** next to personal credit/debit card for:
 
@@ -19,7 +19,7 @@ Card payments already run **in-portal via Square**. Card + PayPal both run on th
    - Then create / copy credentials under **Live** for production.
 4. Copy:
    - **Client ID**
-   - **Secret** (Keep this private — only for server env, never in the browser.)
+ - **Secret** (Keep this private. only for server env, never in the browser.)
 
 ## 2. Enable products on the app
 
@@ -55,7 +55,7 @@ Once the sandbox app exists, paste **only**:
 
 1. Sandbox **Client ID**
 2. Sandbox **Secret** (or set them in Vercel/local yourself and say “PayPal env is set”)
-3. Confirm: **all ecommerce** (Cove + membership + store-card) — already the plan
+3. Confirm: **all ecommerce** (Cove + membership + store-card). already the plan
 
 I will wire PayPal Buttons on the same in-portal checkout modal as Square so free and paid parents can choose **Card** or **PayPal**.
 
@@ -64,7 +64,7 @@ I will wire PayPal Buttons on the same in-portal checkout modal as Square so fre
 1. Sandbox purchase test for Cove item, membership tier, and store-card reload.
 2. Swap env to **Live** Client ID + Secret + `PAYPAL_ENVIRONMENT=live`.
 3. Redeploy production.
-4. One live $1–test or real small purchase, then refund in PayPal if needed.
+4. One live $1-test or real small purchase, then refund in PayPal if needed.
 
 ## 6. Accounting note
 
@@ -72,4 +72,4 @@ Square and PayPal will both write to the site `Payments` CMS with a distinct `so
 
 ---
 
-**You do not need to change anything in Wix Payments for this path** — in-portal PayPal talks to PayPal’s API directly (same pattern as Square today).
+**You do not need to change anything in Wix Payments for this path**. in-portal PayPal talks to PayPal’s API directly (same pattern as Square today).

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * Agent-side smoothness QA — Rob doesn't need to scrub every cut.
+ * Agent-side smoothness QA. Rob doesn't need to scrub every cut.
  *
  * Scores scene-change density and flags snappy clusters.
  *   NODE_PATH=~/cwn-c0/node_modules node scripts/qa_tour_smoothness.js [video]
@@ -42,9 +42,9 @@ const report = {
   snappyWindows: windows.filter((w) => w.snappy),
   allWindows: windows,
   guidance: [
-    'snappyWindows = ≥4 hard scene cuts in 10s — usually page-tour or section exits',
+ 'snappyWindows = ≥4 hard scene cuts in 10s. usually page-tour or section exits',
     'Membership/portal CONTENT can look great while EXIT cuts still score snappy',
-    'Fix: longer padAfter + fade out/in (sectionExit) — not more speed-compress',
+ 'Fix: longer padAfter + fade out/in (sectionExit). not more speed-compress',
   ],
 };
 

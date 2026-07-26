@@ -26,7 +26,7 @@ export function brandifyCoveDigitalCard(input: string): string {
   protect(/\bcould not store card\b/gi)
   protect(/\bstore card amounts?\b/gi)
 
-  // Already-correct full name — protect so we don't double-rewrite
+ // Already-correct full name. protect so we don't double-rewrite
   protect(/\bCove Digital Cards?\b/g)
 
   s = s

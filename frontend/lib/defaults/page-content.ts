@@ -176,7 +176,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
       'What are Reef, Lagoon, and Tide?|Those are the paid PTO membership levels for the school year. Each tier includes different Cove Digital Card credit and member perks.\n\nStart free anytime, then upgrade from Membership when you are ready. Lagoon and Tide ask for Spirit Wear T-shirt size at checkout so we can fulfill your shirt. After payment, refresh the portal so your tier and credit appear.',
       'How do I join or upgrade membership?|Go to Membership (or Upgrade in this portal), pick Reef, Lagoon, or Tide, and complete checkout with card or PayPal.\n\nWhen payment clears, return here and refresh. If credit or tier is still missing after a few minutes, email membership@shmspto.org with your receipt.',
       'Where is my Cove Digital Card credit?|Open Store & Cove Digital Card. Your family balance and recent purchases show there.\n\nMembership credit loads after purchase. Use Load Cove Digital Card anytime to add more. First-load bonus (when offered) applies once; reloads are dollar-for-dollar.',
-      'What is the family Cove Digital Card?|In the member portal, Save the QR to Photos (or Wallet). That QR is the Square gift-card number — Square Stand / iPad at Cove and events scan it like a plastic card. Students do not need to remember a code.\n\nA 6-digit spoken backup still appears if the phone dies. Staff can type that code on the Cove register.\n\nLoad balance online first so the QR works at Stand.',
+ 'What is the family Cove Digital Card?|In the member portal, Save the QR to Photos (or Wallet). That QR is the Square gift-card number. Square Stand / iPad at Cove and events scan it like a plastic card. Students do not need to remember a code.\n\nA 6-digit spoken backup still appears if the phone dies. Staff can type that code on the Cove register.\n\nLoad balance online first so the QR works at Stand.',
       'How does The Cove snack window work?|Online checkout creates the family Square digital card balance and Cove code/QR. Staff look up by code at the register and tap products to charge.\n\nGuests without a portal login buy spirit wear or event merch on Square Stand with staff (card present). Spirit wear and other Cove merch also checkout online with card or PayPal.',
       'Do paid members get Cove coupons?|Often yes. When you are signed in as a paid member, look for the coupon bar on The Cove shop or checkout.\n\nIf a code fails, wait a minute, refresh, and try again, or email membership@shmspto.org.',
       'Can I pay with a credit card or PayPal?|Yes. Free and paid parents can pay with credit/debit (Square) or PayPal for membership, The Cove, and digital card reloads.\n\nSaving a payment card is optional for faster reloads. SHMS PTO never receives your full card number.',
@@ -188,10 +188,10 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
 
 /** Contact detail fallbacks (SiteSettings keys preferred). */
 export const CONTACT_DEFAULTS = {
-  /** info@ is not provisioned yet — use president until aliases exist */
+ /** info@ is not provisioned yet. use president until aliases exist */
   contactEmailGeneral: 'president@shmspto.org',
   contactEmailTreasurer: 'treasurer@shmspto.org',
-  /** vp-programs@ not provisioned — president until Programs alias exists */
+ /** vp-programs@ not provisioned. president until Programs alias exists */
   contactEmailPrograms: 'president@shmspto.org',
   contactEmailEvents: 'vp-events@shmspto.org',
   contactEmailSponsorship: 'vp-initiatives@shmspto.org',

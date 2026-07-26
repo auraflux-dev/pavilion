@@ -114,7 +114,7 @@ function fitStill(src, dest, { privacy = false } = {}) {
     privacyStill(src, blurred);
     input = blurred;
   }
-  // Static fit — Ken Burns skipped for crisp UI screenshots
+ // Static fit. Ken Burns skipped for crisp UI screenshots
   run(ff, [
     '-y', '-i', input,
     '-vf', `scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=0x0b1f17,format=rgb24`,
@@ -139,7 +139,7 @@ function stillToClip(stillPng, outMp4, seconds, overlayText) {
 }
 
 function montageClip(stills, outMp4, totalSec, overlayText) {
-  // Hard cuts through nav stills — keeps timing exact to VO part
+ // Hard cuts through nav stills. keeps timing exact to VO part
   const slice = Math.max(0.5, totalSec / stills.length);
   const clips = [];
   stills.forEach((s, i) => {
@@ -163,7 +163,7 @@ function concatClips(clips, outPath) {
 
 async function whisperSrt(audioOrVideoPath, srtPath) {
   const key = process.env.OPENAI_API_KEY;
-  if (!key) throw new Error('OPENAI_API_KEY missing — captions skipped');
+ if (!key) throw new Error('OPENAI_API_KEY missing. captions skipped');
   const mp3 = path.join(WORK, 'whisper_audio.mp3');
   run(ff, ['-y', '-i', audioOrVideoPath, '-vn', '-ac', '1', '-ar', '16000', '-b:a', '64k', mp3], { quiet: true });
   const form = new FormData();

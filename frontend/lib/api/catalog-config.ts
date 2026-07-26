@@ -156,7 +156,7 @@ export async function getCatalogConfig(): Promise<CatalogConfig> {
   }
 }
 
-/** Wix ecom catalog path — amount must have a matching product variant. */
+/** Wix ecom catalog path. amount must have a matching product variant. */
 export function isAllowedStoreCardAmount(
   amount: number,
   cfg: CatalogConfig
@@ -165,7 +165,7 @@ export function isAllowedStoreCardAmount(
 }
 
 /**
- * Square / PayPal in-portal loads: whole dollars from min–max (default $1–$500).
+ * Square / PayPal in-portal loads: whole dollars from min-max (default $1 to $500).
  */
 export function isAllowedStoreCardLoadAmount(
   amount: number,

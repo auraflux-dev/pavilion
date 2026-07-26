@@ -1,6 +1,6 @@
 /**
  * Aggregate Students CMS rows into parent membership roster records.
- * Pure helpers — unit-tested without Wix.
+ * Pure helpers. unit-tested without Wix.
  */
 
 export type StudentRosterRow = {

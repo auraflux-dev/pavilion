@@ -38,15 +38,15 @@ function sleep(ms) {
 
 /**
  * Chapters in VO / assemble beat order.
- * fromTop — show hero/top first (rare)
- * settleY — jump here before hold (default mid-content when not fromTop)
- * scrollPx + scrollMs — optional gentle ~1s scroll after settle/hold start
- * holdMs — dwell so assemble can take settled END of chapter
+ * fromTop. show hero/top first (rare)
+ * settleY. jump here before hold (default mid-content when not fromTop)
+ * scrollPx + scrollMs. optional gentle ~1s scroll after settle/hold start
+ * holdMs. dwell so assemble can take settled END of chapter
  */
 const CHAPTERS = [
-  // Establishing home hero — intentionally from top, then 1s scroll into site
+ // Establishing home hero. intentionally from top, then 1s scroll into site
   { id: 'ch01_p01', goto: '/', fromTop: true, holdMs: 7000, scrollPx: 220, scrollMs: 1000 },
-  // Nav tour — longer holds for why+what VO (~1 sentence pair per page)
+ // Nav tour. longer holds for why+what VO (~1 sentence pair per page)
   { id: 'ch01_p02', goto: '/programs', settleY: 80, holdMs: 6500, scrollPx: 100, scrollMs: 1000 },
   { id: 'ch01_p02b', goto: '/events', settleY: 80, holdMs: 6500, scrollPx: 100, scrollMs: 1000 },
   { id: 'ch01_p02c', goto: '/cove', settleY: 80, holdMs: 6500, scrollPx: 120, scrollMs: 1000 },
@@ -54,16 +54,16 @@ const CHAPTERS = [
   { id: 'ch01_p02e', goto: '/fundraising', settleY: 60, holdMs: 6000 },
   { id: 'ch01_p02f', goto: '/board', settleY: 60, holdMs: 6000 },
   { id: 'ch01_p02g', goto: '/meetings', settleY: 60, holdMs: 6000 },
-  // Membership — settle on tiers area
+ // Membership. settle on tiers area
   { id: 'ch01_p03', goto: '/membership', settleY: 180, holdMs: 5500, scrollPx: 160, scrollMs: 1000 },
   { id: 'ch02_p01', goto: '/membership', settleY: 280, holdMs: 5000, scrollPx: 160, scrollMs: 1000 },
   { id: 'ch02_p02', settleY: 360, holdMs: 5500 }, // Reef
   { id: 'ch02_p03', settleY: 480, holdMs: 6000 }, // Lagoon
   { id: 'ch02_p04', settleY: 600, holdMs: 6000 }, // Tide
   { id: 'ch02_p05', settleY: 400, holdMs: 4500 }, // bonus callouts on cards
-  // Funds / perks — stay on membership (SEE=HEAR)
+ // Funds / perks. stay on membership (SEE=HEAR)
   { id: 'ch02_p06', goto: '/membership', settleY: 280, holdMs: 7000, scrollPx: 100, scrollMs: 1000 },
-  // Login / create account — hold Create Account card only (do not navigate away)
+ // Login / create account. hold Create Account card only (do not navigate away)
   { id: 'ch02_p07', goto: '/auth/join', fromTop: true, holdMs: 8000 },
   { id: 'ch03_p05', goto: '/cove', settleY: 160, holdMs: 4500, scrollPx: 180, scrollMs: 1000 },
   { id: 'ch03_p06', goto: '/', fromTop: true, holdMs: 5000 },

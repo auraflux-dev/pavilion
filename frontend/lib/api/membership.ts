@@ -2,7 +2,7 @@
  * Membership tiers for the public page + checkout wiring.
  *
  * Display copy (name, price, description, perk bullets) comes from the linked
- * Wix Stores Catalog product description — edit products in Catalog, not a
+ * Wix Stores Catalog product description. edit products in Catalog, not a
  * duplicate CMS table.
  *
  * MembershipTiers CMS is only the thin map: tierId → productId, sortOrder,
@@ -27,7 +27,7 @@ export interface MembershipTier {
   productId: string
   /** Optional Wix Catalog variant UUID. */
   variantId: string
-  /** Default checkout discount % when issuing codes to members on this tier (5–75). */
+ /** Default checkout discount % when issuing codes to members on this tier (5 to 75). */
   discountPercent?: number
 }
 
@@ -256,7 +256,7 @@ export async function getMembershipTiers(): Promise<MembershipTier[]> {
   )
 }
 
-/** Paid (purchasable) tiers only — excludes faculty / blank. */
+/** Paid (purchasable) tiers only. excludes faculty / blank. */
 export async function getPaidMembershipTiers(): Promise<MembershipTier[]> {
   const tiers = await getMembershipTiers()
   return tiers.filter((t) => t.tierId && t.tierId !== 'faculty' && t.tierId !== 'free')

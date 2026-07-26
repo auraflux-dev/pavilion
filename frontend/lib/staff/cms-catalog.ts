@@ -149,7 +149,7 @@ export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
     sortField: 'sortOrder',
     activeField: 'active',
     fields: [
-      { key: 'tierId', label: 'Tier ID (slug — do not change after sales)', type: 'text', required: true },
+ { key: 'tierId', label: 'Tier ID (slug. do not change after sales)', type: 'text', required: true },
       { key: 'name', label: 'CMS fallback name (Catalog overrides paid tiers)', type: 'text', required: true },
       { key: 'price', label: 'CMS fallback price (Catalog overrides)', type: 'number' },
       { key: 'description', label: 'CMS fallback description', type: 'textarea' },
@@ -273,7 +273,7 @@ export const SITE_SETTING_GROUPS: {
     label: 'Announcement bar & WhatsApp grade links',
     roles: ['marketing', 'secretary', 'membership', 'admin'],
     keys: [
-      { key: 'schoolInSession', label: 'School in session (true/false) — shows Programs & Events' },
+ { key: 'schoolInSession', label: 'School in session (true/false). shows Programs & Events' },
       { key: 'announcementEnabled', label: 'Enabled (true/false)' },
       { key: 'announcementText', label: 'Banner text', multiline: true },
       { key: 'announcement6thLink', label: '6th grade WhatsApp invite URL' },
@@ -337,37 +337,37 @@ export const SITE_SETTING_GROUPS: {
     keys: [
       {
         key: 'fundraisingAnnualGoal',
-        label: 'Public annual goal ($) — shown on fundraising hero',
+ label: 'Public annual goal ($). shown on fundraising hero',
       },
       {
         key: 'goalMembership',
-        label: 'Internal goal — Membership ($) (staff only, not public)',
+ label: 'Internal goal. Membership ($) (staff only, not public)',
       },
       {
         key: 'goalStore',
-        label: 'Internal goal — The Cove store card ($) (staff only)',
+ label: 'Internal goal. The Cove store card ($) (staff only)',
       },
       {
         key: 'goalSpiritWear',
-        label: 'Internal goal — The Cove shop ($) (staff only)',
+ label: 'Internal goal. The Cove shop ($) (staff only)',
       },
       {
         key: 'goalDanceNight',
-        label: 'Internal goal — Dance night ($) (staff only)',
+ label: 'Internal goal. Dance night ($) (staff only)',
       },
       {
         key: 'goalNovaMath',
-        label: 'Internal goal — Nova Math ($) (staff only)',
+ label: 'Internal goal. Nova Math ($) (staff only)',
       },
       {
         key: 'goalSponsorship',
-        label: 'Internal goal — Sponsorships ($) (staff only)',
+ label: 'Internal goal. Sponsorships ($) (staff only)',
       },
       { key: 'sponsorshipRaised', label: 'Sponsorships raised (manual $)' },
       { key: 'volunteerHoursRaised', label: 'Volunteer hours raised' },
       {
         key: 'volunteerHoursGoal',
-        label: 'Internal goal — Volunteer hours (staff only)',
+ label: 'Internal goal. Volunteer hours (staff only)',
       },
       { key: 'allocStudentEnrichment', label: 'Alloc % student enrichment' },
       { key: 'allocSchoolEvents', label: 'Alloc % school events' },
@@ -381,9 +381,9 @@ export const SITE_SETTING_GROUPS: {
     label: 'Home hero stats & images',
     roles: ['marketing', 'secretary', 'admin'],
     keys: [
-      { key: 'heroStatFamilies', label: 'Hero stat — families' },
-      { key: 'heroStatPrograms', label: 'Hero stat — programs' },
-      { key: 'heroStatVolunteers', label: 'Hero stat — volunteers' },
+ { key: 'heroStatFamilies', label: 'Hero stat. families' },
+ { key: 'heroStatPrograms', label: 'Hero stat. programs' },
+ { key: 'heroStatVolunteers', label: 'Hero stat. volunteers' },
       { key: 'homeVolunteerImageUrl', label: 'Volunteer section image URL' },
       { key: 'homeVolunteerImageAlt', label: 'Volunteer image alt' },
       { key: 'homeCommunityImageUrl', label: 'Community section image URL' },

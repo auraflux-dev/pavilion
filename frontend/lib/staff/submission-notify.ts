@@ -1,7 +1,7 @@
 /**
  * Notify staff by email when a site/portal form is submitted.
  * Uses the shared Gmail send mailbox (GMAIL_*). Mail lands in the recipient’s
- * @shmspto.org Inbox — Gmail app + Staff → Inbox when Google is connected.
+ * @shmspto.org Inbox. Gmail app + Staff → Inbox when Google is connected.
  */
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { sendMassEmail, type SendMassEmailResult } from '@/lib/staff/mass-email'

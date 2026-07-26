@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * SHMSPTO parent tour — cut one long script-order capture to VO beats.
+ * SHMSPTO parent tour. cut one long script-order capture to VO beats.
  *
  * Method (Rob):
  *   1) capture_script_master.js → master_script_tour.mp4 + markers
@@ -57,9 +57,9 @@ const PORTAL_MASTER_PATH = a('assets/parent-tour/video/portal_logged_in_tour.mp4
  */
 /**
  * fitMode when chapter raw > VO speak:
- *   end      — take last speakSec (settled view; default)
- *   pages    — soft tour of settled ends of each sub-page (no speed-warp flash)
- *   start    — take first speakSec (rare)
+ * end. take last speakSec (settled view; default)
+ * pages. soft tour of settled ends of each sub-page (no speed-warp flash)
+ * start. take first speakSec (rare)
  */
 const BEATS = [
   { part: 'vo/_parts/ch01_website_p01.m4a', caption: 'Hi Stingray families · new PTO website', padAfter: 1.8, chapter: 'ch01_p01', fitMode: 'end' },
@@ -73,9 +73,9 @@ const BEATS = [
   },
   { part: 'vo/_parts/ch01_website_p03.m4a', caption: 'Membership is how you join', padAfter: 1.8, chapter: 'ch01_p03', fitMode: 'end' },
   { part: 'vo/_parts/ch02_membership_p01.m4a', caption: 'Reef · Lagoon · Tide', padAfter: 1.8, chapter: 'ch02_p01', fitMode: 'end' },
-  { part: 'vo/_parts/ch02_membership_p02.m4a', caption: 'Reef $79 — $20 card · 10% off', padAfter: 2.0, chapter: 'ch02_p02', fitMode: 'end' },
-  { part: 'vo/_parts/ch02_membership_p03.m4a', caption: 'Lagoon $149 — most popular', padAfter: 2.2, chapter: 'ch02_p03', fitMode: 'end' },
-  { part: 'vo/_parts/ch02_membership_p04.m4a', caption: 'Tide $249 — top tier benefits', padAfter: 2.8, chapter: 'ch02_p04', fitMode: 'end', sectionExit: true },
+ { part: 'vo/_parts/ch02_membership_p02.m4a', caption: 'Reef $79. $20 card · 10% off', padAfter: 2.0, chapter: 'ch02_p02', fitMode: 'end' },
+ { part: 'vo/_parts/ch02_membership_p03.m4a', caption: 'Lagoon $149. most popular', padAfter: 2.2, chapter: 'ch02_p03', fitMode: 'end' },
+ { part: 'vo/_parts/ch02_membership_p04.m4a', caption: 'Tide $249. top tier benefits', padAfter: 2.8, chapter: 'ch02_p04', fitMode: 'end', sectionExit: true },
   { part: 'vo/_parts/ch02_membership_p05.m4a', caption: 'First 30 days: +10% card credit', padAfter: 2.2, chapter: 'ch02_p05', fitMode: 'end' },
   {
     part: 'vo/_parts/ch02_membership_p06.m4a',
@@ -195,7 +195,7 @@ function concat(files, out) {
     '-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-r', String(FPS), '-an', out]);
 }
 
-/** Soft-dissolve concat — removes flashy hard cuts between pages/beats. */
+/** Soft-dissolve concat. removes flashy hard cuts between pages/beats. */
 function concatXfade(files, out, xfade = XF) {
   if (files.length === 1) {
     fs.copyFileSync(files[0], out);
@@ -308,7 +308,7 @@ function cutChapterToBeat(master, t0, t1, dest, speakSec, padSec, fitMode = 'end
         '-vf', vf,
         '-an', '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-r', String(FPS), rawSlice]);
     } else {
-      // end — settled view (skip early scroll fat). Never speed-warp (that flashes).
+ // end. settled view (skip early scroll fat). Never speed-warp (that flashes).
       const ss = Math.max(t0, t1 - speakSec);
       run(['-y', '-ss', String(ss), '-i', master, '-t', String(speakSec),
         '-vf', vf,
@@ -462,7 +462,7 @@ async function main() {
       '-vf', `fps=${FPS},format=yuv420p`,
       '-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-r', String(FPS), '-an', trimmed]);
 
-    // Soft breathe out of membership / portal (fade keeps duration — no VO desync)
+ // Soft breathe out of membership / portal (fade keeps duration. no VO desync)
     const fadeOut = b.sectionExit ? SECTION_BRIDGE : 0;
     const fadeIn = (i > 0 && BEATS[i - 1].sectionExit) ? SECTION_BRIDGE : (i === 0 ? 0.25 : 0);
     if (fadeOut > 0 || fadeIn > 0) {
@@ -476,7 +476,7 @@ async function main() {
   console.log({ visualSum: +visualSum.toFixed(2), voDur: +voDur.toFixed(2), delta: +(visualSum - voDur).toFixed(3) });
 
   const bodyVideo = path.join(WORK, 'body.mp4');
-  concat(beatClips, bodyVideo); // re-encode join (no flash); no xfade here — would shorten vs VO
+ concat(beatClips, bodyVideo); // re-encode join (no flash); no xfade here. would shorten vs VO
   const videoSilent = path.join(WORK, 'video_silent.mp4');
   concat([coldClip, bodyVideo, outroClip], videoSilent);
 

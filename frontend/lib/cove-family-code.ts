@@ -1,5 +1,5 @@
 /**
- * Family Cove window code — short PIN students recite at The Cove.
+ * Family Cove window code. short PIN students recite at The Cove.
  * Stored on Memberships (parent) and mirrored on Students.
  */
 import { getWixClient } from '@/lib/wix-client'
@@ -101,7 +101,7 @@ async function mirrorCodeOnStudents(email: string, code: string): Promise<void> 
         coveFamilyCode: code,
       } as Parameters<typeof client.items.update>[1])
     } catch {
-      // field may not exist yet on schema — ignore
+ // field may not exist yet on schema. ignore
     }
   }
 }
@@ -160,8 +160,8 @@ export async function resetCoveFamilyCode(parentEmail: string): Promise<string> 
 }
 
 /**
- * Lookup by short family PIN (4–8 digits) or Square gift-card GAN (raw digits in QR).
- * Square Stand / iPad scans encode the GAN only — no SHMSCOVE: prefix.
+ * Lookup by short family PIN (4 to 8 digits) or Square gift-card GAN (raw digits in QR).
+ * Square Stand / iPad scans encode the GAN only. no SHMSCOVE: prefix.
  */
 export async function lookupFamilyByCoveCode(rawCode: string): Promise<CoveFamilyLookup | null> {
   const digits = String(rawCode ?? '').replace(/\D/g, '')

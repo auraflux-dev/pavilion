@@ -1,5 +1,5 @@
 /**
- * Litecard — Apple / Google Wallet passes with Square GAN as the scannable barcode.
+ * Litecard. Apple / Google Wallet passes with Square GAN as the scannable barcode.
  * Litecard holds Pass Type signing; we only create/update cards via their API.
  *
  * Env (Vercel Production):
@@ -160,7 +160,7 @@ async function createCard(opts: {
   })
   const data = (await res.json().catch(() => ({}))) as Record<string, unknown>
   if (res.status === 409) {
-    // Already exists — try update by stored id or re-fetch via get
+ // Already exists. try update by stored id or re-fetch via get
     throw Object.assign(new Error('Litecard card already exists'), { code: 'EXISTS', data })
   }
   if (!res.ok) {

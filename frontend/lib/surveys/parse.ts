@@ -24,7 +24,7 @@ export function mapSurveyItem(item: any): SurveyDefinition | null {
     fields: safeJson<SurveyField[]>(data.fieldsJson, []),
     branding: safeJson<SurveyBranding>(data.brandingJson, {
       accentColor: '#085508',
-      thankYouMessage: 'Thank you — your response was recorded.',
+ thankYouMessage: 'Thank you. your response was recorded.',
     }),
     audience: data.audience === 'members' ? 'members' : 'all',
     showInPortal: data.showInPortal !== false,

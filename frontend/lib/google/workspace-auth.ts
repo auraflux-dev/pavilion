@@ -206,7 +206,7 @@ export async function getStaffGoogleAccess(
     return { accessToken, mode: 'personal', email }
   }
 
-  // Shared send mailbox only — limited (send path); not a full personal hub
+ // Shared send mailbox only. limited (send path); not a full personal hub
   const sender = process.env.GMAIL_SENDER?.trim().toLowerCase()
   if (workspaceLegacySendConfigured() && sender && sender === email) {
     const accessToken = await refreshUserAccessToken(process.env.GMAIL_REFRESH_TOKEN!.trim())

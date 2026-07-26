@@ -4,7 +4,7 @@
 **Pre-DNS / staging (now):** `https://shmspto.vercel.app`  
 **QA plan:** `docs/QA-TEST-PLAN.md`
 
-Do DNS last — after page-by-page visitor QA on staging.
+Do DNS last. after page-by-page visitor QA on staging.
 
 ---
 
@@ -42,7 +42,7 @@ Tell the agent **“DNS is live”** so the post-DNS updates below can be applie
 
 ---
 
-## B. Post-DNS updates — full list
+## B. Post-DNS updates. full list
 
 Everything that still points at staging / old hosts must move to `https://www.shmspto.org`.
 
@@ -73,7 +73,7 @@ Must match `SQUARE_NOTIFICATION_URL` character-for-character (signature = HMAC o
 
 ---
 
-### B3. CheddarUp / Zapier (you — currently backlog)
+### B3. CheddarUp / Zapier (you. currently backlog)
 
 | Item | Value |
 |------|--------|
@@ -85,7 +85,7 @@ Secret already lives in Vercel as `CHEDDARUP_WEBHOOK_SECRET`.
 
 ### B4. Wix OAuth app (you)
 
-**Wix Dashboard → OAuth / Headless app (SHMS PTO Web)** — Allowed redirect URIs must include:
+**Wix Dashboard → OAuth / Headless app (SHMS PTO Web)**. Allowed redirect URIs must include:
 
 - `https://www.shmspto.org/auth/callback`
 - `https://shmspto.org/auth/callback` (apex, if anyone hits it)
@@ -102,11 +102,11 @@ Code uses the **request host** for `redirect_uri` when possible (`frontend/lib/w
 | `membershipOrdersWebhookUrl` | `https://www.shmspto.org/api/webhooks/wix-orders?token=<WIX_ORDERS_WEBHOOK_SECRET>` |
 | `spiritWearBaseUrl` | `https://www.shmspto.org/store/product-page` (or the live product-page root you settle on) |
 
-Footer / social URLs (`socialFacebook`, etc.) already use absolute Meta URLs — no DNS change needed.
+Footer / social URLs (`socialFacebook`, etc.) already use absolute Meta URLs. no DNS change needed.
 
 ---
 
-### B6. GitHub Actions (agent — code change + push)
+### B6. GitHub Actions (agent. code change + push)
 
 File: `.github/workflows/sync-membership-orders.yml`
 
@@ -118,7 +118,7 @@ File: `.github/workflows/sync-membership-orders.yml`
 
 ---
 
-### B7. Code fallbacks (agent — optional cleanup after env is set)
+### B7. Code fallbacks (agent. optional cleanup after env is set)
 
 These hardcode staging as a **fallback** when env is missing. They keep working if `NEXT_PUBLIC_SITE_URL` is set correctly; update fallbacks later so a missing env doesn’t send people to staging:
 
@@ -134,9 +134,9 @@ These hardcode staging as a **fallback** when env is missing. They keep working 
 
 ---
 
-### B8. Docs / board Drive docs (agent — after cutover)
+### B8. Docs / board Drive docs (agent. after cutover)
 
-- `docs/QA-TEST-PLAN.md` — switch base URL to www  
+- `docs/QA-TEST-PLAN.md`. switch base URL to www 
 - `scripts/create-pto-docs.js` staging mentions → www (re-run Drive sync)  
 - Keep `shmspto.vercel.app` listed as staging alias only
 
@@ -150,7 +150,7 @@ These hardcode staging as a **fallback** when env is missing. They keep working 
 
 ---
 
-## C. Quick reference — final production URLs
+## C. Quick reference. final production URLs
 
 | Service | Production URL |
 |---------|----------------|
@@ -205,4 +205,4 @@ Re-run against **https://www.shmspto.org**:
 | GHA sync | staging cron URL | www cron URL |
 | OAuth | staging callback | www callback (+ keep staging temporarily) |
 | CheddarUp | backlog | www when ready |
-| Instagram | backlog | — |
+| Instagram | backlog |. |

@@ -1,5 +1,5 @@
 /**
- * CMS backup — Wix Data is the source of truth (not SQLite).
+ * CMS backup. Wix Data is the source of truth (not SQLite).
  * Nightly cron exports JSON.gz to Cloudflare R2.
  */
 
@@ -163,7 +163,7 @@ export async function runCmsBackup(): Promise<{
 
   if (!r2Configured()) {
     note =
-      'R2 not configured — set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BACKUP_BUCKET'
+ 'R2 not configured. set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BACKUP_BUCKET'
   } else {
     try {
       const datedKey = `shmspto/cms/shmspto-cms-backup-${day}.json.gz`

@@ -1,5 +1,5 @@
 /**
- * Program meeting schedule helpers — structured CMS fields + display strings.
+ * Program meeting schedule helpers to structured CMS fields + display strings.
  */
 
 export type ProgramScheduleFields = {
@@ -25,7 +25,7 @@ function formatShortDate(iso: string | null | undefined): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-/** One-line summary for cards / calendar: "Tuesdays · 3:30–4:30 PM · 8 weeks · Sep 9–Oct 28" */
+/** One-line summary for cards / calendar: "Tuesdays · 3:30 to 4:30 PM · 8 weeks · Sep 9 to Oct 28" */
 export function formatProgramSchedule(p: ProgramScheduleFields): string {
   const parts: string[] = []
   const day = String(p.dayOfWeek ?? '').trim()
@@ -37,7 +37,7 @@ export function formatProgramSchedule(p: ProgramScheduleFields): string {
   if (day) parts.push(day)
   if (time) parts.push(time)
   if (weeks > 0) parts.push(`${weeks} week${weeks === 1 ? '' : 's'}`)
-  if (start && end) parts.push(`${start} – ${end}`)
+  if (start && end) parts.push(`${start} to ${end}`)
   else if (start) parts.push(`Starts ${start}`)
   else if (end) parts.push(`Through ${end}`)
 

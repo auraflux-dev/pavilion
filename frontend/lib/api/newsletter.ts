@@ -10,7 +10,7 @@ export async function subscribeToNewsletter(email: string): Promise<void> {
     .find();
 
   if (existing.items.length > 0) {
-    return; // Already subscribed — silent success
+ return; // Already subscribed. silent success
   }
 
   await client.items.insert("NewsletterSubscribers", {

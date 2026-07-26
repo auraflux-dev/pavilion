@@ -1,5 +1,5 @@
 /**
- * StaffProjects — calendar-year work owned by a lead (president / VP).
+ * StaffProjects. calendar-year work owned by a lead (president / VP).
  * Tasks live under projects and can be assigned to specific staff members.
  */
 

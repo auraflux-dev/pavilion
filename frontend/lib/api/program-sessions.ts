@@ -1,5 +1,5 @@
 /**
- * ProgramSessions — concrete meeting times for enrolled programs.
+ * ProgramSessions. concrete meeting times for enrolled programs.
  * Wix CMS → Content Manager → Program Sessions
  *
  * Fields: programId, programName, title, startAt, endAt, location,

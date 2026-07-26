@@ -51,10 +51,10 @@ const PAD = 0.9;
 const TAIL_PAD = 1.2;
 
 /**
- * Universal type scale — same sizes on every slide (no per-slide scaling).
+ * Universal type scale. same sizes on every slide (no per-slide scaling).
  * Sized so the densest slide (5 bullets) still clears the wave crest.
  */
-/** Mid-left column — room for real bullet gaps without sitting on waves */
+/** Mid-left column. room for real bullet gaps without sitting on waves */
 const TEXT_X = 280;
 const BULLET_X = 310;
 const TYPE_EYEBROW = 40;
@@ -69,7 +69,7 @@ const STEP_FOOTER = 44;
 /** Glyph bottoms clear wave crest at this TEXT_X */
 const WAVE_SAFE_MAX_Y = 680;
 const CONTENT_MAX_Y = WAVE_SAFE_MAX_Y;
-/** Commitment under seal — breathing room below SHMS PTO */
+/** Commitment under seal. breathing room below SHMS PTO */
 const FOOTER_Y = LABEL_Y + 120;
 
 const BEATS = [
@@ -84,7 +84,7 @@ const BEATS = [
   { part: 'vo/_parts/board_p10_apply_board.m4a', still: 'assets/board-recruit/slide_apply.png', caption: 'Board Page On Our Website' },
   { part: 'vo/_parts/board_p11_volunteer_fallback.m4a', still: 'assets/board-recruit/slide_volunteer.png', caption: 'Cannot Join The Board? Volunteer' },
   { part: 'vo/_parts/board_p12_volunteer_ways.m4a', still: 'assets/board-recruit/03_volunteer_form.png', caption: 'SHMSPTO.ORG/Volunteer' },
-  { part: 'vo/_parts/board_p13_close.m4a', still: 'assets/board-recruit/slide_thanks.png', caption: 'Thank You — Go Stingrays!' },
+ { part: 'vo/_parts/board_p13_close.m4a', still: 'assets/board-recruit/slide_thanks.png', caption: 'Thank You. Go Stingrays!' },
 ];
 
 function a(rel) { return path.join(ROOT, rel); }
@@ -140,7 +140,7 @@ function makeSlide(outName, { eyebrow, title, bullets = [], footer }) {
     y: LABEL_Y,
   });
 
-  // Left column — universal type, same top as logo
+ // Left column. universal type, same top as logo
   let y = TEXT_TOP;
   if (eyebrow) {
     addText(eyebrow, { size: TYPE_EYEBROW, color: '0x98C818', x: TEXT_X, y });
@@ -160,7 +160,7 @@ function makeSlide(outName, { eyebrow, title, bullets = [], footer }) {
     y += STEP_BULLET;
   }
   if (footer) {
-    // Two lines under seal when · present — keeps commitment inside the frame
+ // Two lines under seal when · present. keeps commitment inside the frame
     const s = String(footer);
     const lines = s.includes(' · ')
       ? (() => { const [a, ...rest] = s.split(' · '); return [a, rest.join(' · ')]; })()
@@ -222,7 +222,7 @@ function buildAllSlides() {
       'Calendar & Communications',
       'Match Parents To Micro-Tasks',
     ],
-    footer: '~3–5 Hours / Month · Plus Board Meetings',
+ footer: '~3 to 5 Hours / Month · Plus Board Meetings',
   });
 
   makeSlide('slide_treasurer.png', {
@@ -233,7 +233,7 @@ function buildAllSlides() {
       'Payments & Reimbursements',
       'Insurance & Tax Filings',
     ],
-    footer: '~4–6 Hours / Month · Plus Board Meetings',
+ footer: '~4 to 6 Hours / Month · Plus Board Meetings',
   });
 
   makeSlide('slide_seac.png', {
@@ -255,7 +255,7 @@ function buildAllSlides() {
       'Staff Appreciation',
       'Bite-Sized Volunteer Tasks',
     ],
-    footer: '~2–4 Hours / Month',
+ footer: '~2 to 4 Hours / Month',
   });
 
   makeSlide('slide_initiatives.png', {
@@ -266,7 +266,7 @@ function buildAllSlides() {
       'Tournaments & Academic Events',
       'Local Business Sponsorships',
     ],
-    footer: '~2–4 Hours / Month',
+ footer: '~2 to 4 Hours / Month',
   });
 
   makeSlide('slide_benefits.png', {
@@ -275,8 +275,8 @@ function buildAllSlides() {
     bullets: [
       'Free Reef Membership (First Tier)',
       '75 Percent Off 1 Enrichment Program Per Season',
-      'Inside Knowledge — School Updates First',
-      'Direct Impact — Vote On How Funds Are Spent',
+ 'Inside Knowledge. School Updates First',
+ 'Direct Impact. Vote On How Funds Are Spent',
     ],
     footer: 'For These Open Board Seats',
   });
@@ -406,7 +406,7 @@ function main() {
     srt.push(`${i + 2}\n${tsFmt(start)} --> ${tsFmt(start + dur(vo))}\n${b.caption}\n`);
   }
 
-  // Silent matching outro — music only, AFTER thank-you VO fully ends
+ // Silent matching outro. music only, AFTER thank-you VO fully ends
   const outroA = path.join(WORK, 'outro_a.m4a');
   const outroClip = path.join(WORK, '99_outro.mp4');
   musicBed(music, outroA, OUTRO_SEC, { fadeOut: true, startAt: 28 });

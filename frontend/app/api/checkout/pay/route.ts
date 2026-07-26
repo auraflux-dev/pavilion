@@ -266,8 +266,8 @@ export async function POST(req: NextRequest) {
         referenceId: `membership:${tier}`,
         buyerEmailAddress: session.email,
         note: charge.isUpgrade
-          ? `SHMS PTO membership upgrade. ${formatTierLabel(currentTier)} → ${match.name}`
-          : `SHMS PTO membership. ${match.name}`,
+          ? `SHMS PTO membership upgrade: ${formatTierLabel(currentTier)} → ${match.name}`
+          : `SHMS PTO membership: ${match.name}`,
       })
 
       const applied = await applyPaidMembership({
@@ -287,8 +287,8 @@ export async function POST(req: NextRequest) {
 
       await client.items.insert('Payments', {
         programName: charge.isUpgrade
-          ? `Membership upgrade. ${formatTierLabel(currentTier)} → ${match.name}`
-          : `Membership. ${match.name}`,
+          ? `Membership upgrade: ${formatTierLabel(currentTier)} → ${match.name}`
+          : `Membership: ${match.name}`,
         amount: charge.amount,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
@@ -359,11 +359,11 @@ export async function POST(req: NextRequest) {
         customerId,
         referenceId: `cove:${productId.slice(0, 20)}`,
         buyerEmailAddress: session.email,
-        note: `The Cove. ${catalog.name}`,
+        note: `The Cove: ${catalog.name}`,
       })
 
       await client.items.insert('Payments', {
-        programName: `The Cove. ${catalog.name}`,
+        programName: `The Cove: ${catalog.name}`,
         amount: catalog.price,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
@@ -408,7 +408,7 @@ export async function POST(req: NextRequest) {
         customerId,
         referenceId: `donation:${session.email}`,
         buyerEmailAddress: session.email,
-        note: note ? `PTO donation — ${note}` : 'SHMS PTO donation',
+ note: note ? `PTO donation: ${note}` : 'SHMS PTO donation',
       })
 
       await client.items.insert('Payments', {

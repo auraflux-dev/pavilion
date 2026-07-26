@@ -311,7 +311,7 @@ export function MemberDashboard({
       {membershipSuccessNudge ? (
         <div className="rounded-xl border border-[#D4E8D4] bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-bold text-[#085508]">Membership confirmed — thank you!</p>
+ <p className="text-sm font-bold text-[#085508]">Membership confirmed. Thank you!</p>
             <p className="text-xs text-[#1A1A1A]/80 mt-0.5 leading-relaxed">
               {onboarding.complete
                 ? 'Your Cove Digital Card and perks are ready below.'

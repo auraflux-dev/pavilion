@@ -59,4 +59,4 @@ for (const name of ['cold_open_thumb.png', 'outro_thank_you.png']) {
 
 brand('cold_open_thumb_pre_shmspto.png', 'cold_open_thumb.png');
 brand('outro_thank_you_pre_shmspto.png', 'outro_thank_you.png');
-console.log('DONE — SHMS PTO under seal on intro + outro');
+console.log('DONE. SHMS PTO under seal on intro + outro');

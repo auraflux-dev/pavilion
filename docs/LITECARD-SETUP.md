@@ -1,4 +1,4 @@
-# Litecard setup — SHMS Cove Digital Card (Square GAN → Apple/Google Wallet)
+# Litecard setup. SHMS Cove Digital Card (Square GAN → Apple/Google Wallet)
 
 Litecard issues native Wallet passes and holds Apple/Google signing for you.
 Our app creates/updates passes with **barcode = Square gift card GAN** so Square
@@ -8,7 +8,7 @@ Stand / iPad at Cove and events can scan phones like plastic gift cards.
 
 Email **contact@litecard.com** (US) or **hello@litecard.com.au**:
 
-> Subject: API access — Stone Hill Middle School PTO (SHMS) / Square gift cards
+> Subject: API access. Stone Hill Middle School PTO (SHMS) / Square gift cards
 >
 > We run Cove snack + school store on Square Gift Cards (GANs already issued).
 > We need Litecard API access to issue Apple/Google Wallet passes whose QR
