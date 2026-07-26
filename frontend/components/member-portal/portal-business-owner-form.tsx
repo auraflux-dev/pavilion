@@ -151,7 +151,7 @@ export function PortalBusinessOwnerForm({
       <>
         <p className="text-sm text-[#5A6070] leading-relaxed">
           Tell us what you do and how you&apos;d like to show up for Stone Hill families. We&apos;ll
-          follow up with ideas that fit — no commitment required.
+          follow up with ideas that fit. No commitment required.
         </p>
         <div>
           <label htmlFor="biz-name" className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
@@ -213,7 +213,7 @@ export function PortalBusinessOwnerForm({
           <p className="mt-2 text-sm leading-relaxed text-[#5A6070]">
             Many Stone Hill families run local businesses. Tell us yours so SHMS PTO can
             celebrate you in the community, connect you with other parents, and explore
-            simple ways to help — shout-outs, event tables, or member-friendly offers.
+            simple ways to help: shout-outs, event tables, or member-friendly offers.
           </p>
           <p className="mt-2 text-sm leading-relaxed text-[#5A6070]">
             Share a yes/no below (and business details if yes). Our VP of Membership Experience
@@ -254,7 +254,7 @@ export function PortalBusinessOwnerForm({
         {yesNo}
         {ownerFields}
         {isOwner === 'no' ? (
-          <p className="text-sm text-[#5A6070]">Thanks — you can still submit so we have your response on file.</p>
+          <p className="text-sm text-[#5A6070]">Thanks. You can still submit so we have your response on file.</p>
         ) : null}
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
@@ -270,7 +270,7 @@ export function PortalBusinessOwnerForm({
             </>
           ) : (
             <>
-              Send to VP Membership Experience <ArrowRight className="w-4 h-4" />
+              Send introduction <ArrowRight className="w-4 h-4" />
             </>
           )}
         </Button>
@@ -297,7 +297,7 @@ export function PortalBusinessOwnerForm({
           </h2>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
             Why we ask: many SHMS PTO families run local businesses, and we want to celebrate
-            you in the school community — shout-outs, connections with other parents, and
+            you in the school community: shout-outs, connections with other parents, and
             simple ways to help each other.
           </p>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
@@ -334,7 +334,7 @@ export function PortalBusinessOwnerForm({
           )}
         </Button>
         <p className="text-[11px] text-[#5A6070]">
-          Goes to VP Membership Experience · vp-membershipexperience@shmspto.org
+          Goes to our VP of Membership Experience · usually within one business day
         </p>
       </form>
     </section>
