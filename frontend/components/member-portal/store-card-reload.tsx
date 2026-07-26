@@ -275,7 +275,7 @@ export function StoreCardReload({
 
       {/* Keep studentId for payment attribution; UI no longer asks parents to pick a card. */}
       {studentList.length === 0 ? (
-        <p className="text-xs text-amber-700">Add a student in the portal before loading the digital card.</p>
+        <p className="text-xs text-amber-700">Add a student in the portal before loading the Cove Digital Card.</p>
       ) : null}
 
       <div>
@@ -320,7 +320,7 @@ export function StoreCardReload({
         {appliedBonus > 0 ? (
           <p className="mt-2 text-[11px] text-[#085508] font-semibold">
             First-load bonus: pay ${amount} · get $
-            {(amount * (1 + appliedBonus / 100)).toFixed(2).replace(/\.00$/, '')} on the digital card (
+            {(amount * (1 + appliedBonus / 100)).toFixed(2).replace(/\.00$/, '')} on the Cove Digital Card (
             {appliedBonus}%). Reloads after this are dollar-for-dollar.
           </p>
         ) : bonusPercent > 0 ? (

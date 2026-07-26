@@ -2,6 +2,7 @@
  * Assemble member-portal UI strings from PageContent rows `portal` + `portal-hub`.
  */
 import { getPageContent } from '@/lib/api/page-content'
+import { brandifyCoveDigitalCard } from '@/lib/copy/brandify-cove-digital-card'
 import {
   PORTAL_COPY_DEFAULTS,
   parseKeyedLines,
@@ -13,12 +14,16 @@ function preferDefault(
   raw: string,
   stale: RegExp | RegExp[],
 ): string {
-  const value = raw.trim()
+  const value = brandifyCoveDigitalCard(raw.trim())
   const patterns = Array.isArray(stale) ? stale : [stale]
   if (!value || patterns.some((re) => re.test(value))) {
     return PORTAL_COPY_DEFAULTS[key]
   }
   return value
+}
+
+function portalText(raw: string): string {
+  return brandifyCoveDigitalCard(raw.trim())
 }
 
 export async function getPortalCopy(): Promise<PortalCopy> {
@@ -29,16 +34,16 @@ export async function getPortalCopy(): Promise<PortalCopy> {
 
   const keyed = parseKeyedLines(hub.bullets)
   const pick = (key: keyof PortalCopy) =>
-    keyed[key]?.trim() || PORTAL_COPY_DEFAULTS[key]
+    portalText(keyed[key] || '') || PORTAL_COPY_DEFAULTS[key]
 
   return {
-    paidTitle: portal.sectionTitle || PORTAL_COPY_DEFAULTS.paidTitle,
-    paidBody: portal.sectionBody || PORTAL_COPY_DEFAULTS.paidBody,
-    freeTitle: portal.title || PORTAL_COPY_DEFAULTS.freeTitle,
-    freeBody: portal.body || PORTAL_COPY_DEFAULTS.freeBody,
-    emptyTitle: portal.bullets[0] || PORTAL_COPY_DEFAULTS.emptyTitle,
-    emptyBody: portal.bullets[1] || PORTAL_COPY_DEFAULTS.emptyBody,
-    upgradeBody: portal.bullets[2] || PORTAL_COPY_DEFAULTS.upgradeBody,
+    paidTitle: portalText(portal.sectionTitle) || PORTAL_COPY_DEFAULTS.paidTitle,
+    paidBody: portalText(portal.sectionBody) || PORTAL_COPY_DEFAULTS.paidBody,
+    freeTitle: portalText(portal.title) || PORTAL_COPY_DEFAULTS.freeTitle,
+    freeBody: portalText(portal.body) || PORTAL_COPY_DEFAULTS.freeBody,
+    emptyTitle: portalText(portal.bullets[0] || '') || PORTAL_COPY_DEFAULTS.emptyTitle,
+    emptyBody: portalText(portal.bullets[1] || '') || PORTAL_COPY_DEFAULTS.emptyBody,
+    upgradeBody: portalText(portal.bullets[2] || '') || PORTAL_COPY_DEFAULTS.upgradeBody,
 
     calendarTitle: pick('calendarTitle'),
     accountTitle: pick('accountTitle'),

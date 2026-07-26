@@ -315,7 +315,7 @@ export function MemberDashboard({
             <p className="text-xs text-[#1A1A1A]/80 mt-0.5 leading-relaxed">
               {onboarding.complete
                 ? 'Your Cove Digital Card and perks are ready below.'
-                : 'Finish the family setup checklist so card credit and your QR attach to your students.'}
+                : 'Finish the family setup checklist so Cove Digital Card credit and your QR attach to your students.'}
             </p>
           </div>
           <button

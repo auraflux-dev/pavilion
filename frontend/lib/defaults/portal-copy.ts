@@ -123,7 +123,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
     'One family Cove Digital Card and balance. Choose $20 / $40 / $75, or enter any whole dollar amount. Pay with credit/debit card or PayPal. Saving a payment card is optional for faster reloads and auto top off.',
   paymentMethodsTitle: 'How you pay',
   paymentMethodsBody:
-    'Snack window: prepaid family Cove Digital Card (code or QR). Online: pay with credit/debit card or PayPal in this portal (membership, The Cove, and digital card reloads). Saving a payment card is optional.',
+    'Snack window: prepaid family Cove Digital Card (code or QR). Online: pay with credit/debit card or PayPal in this portal (membership, The Cove, and Cove Digital Card reloads). Saving a payment card is optional.',
 }
 
 /** Parse `key|value` lines (store-how style). Value may contain `|`. */

@@ -68,7 +68,7 @@ export function OnboardingChecklist({
           {!coveUnlocked ? (
             <p className="text-xs font-semibold mt-2 inline-flex items-center gap-1.5 text-[#8A6400]">
               <Lock className="w-3.5 h-3.5" />
-              The Cove digital card is locked until setup is complete
+              The Cove Digital Card is locked until setup is complete
             </p>
           ) : null}
         </div>
