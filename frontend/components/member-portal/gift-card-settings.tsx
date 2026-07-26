@@ -79,7 +79,7 @@ export function GiftCardSettings({ studentId, studentName }: Props) {
       {open && (
         <div className="px-4 py-4 space-y-4 border-t border-[#E8E4DC]">
           <p className="text-xs text-[#5A6070] leading-relaxed">
-            When {studentName}&apos;s balance reaches the threshold, Square securely charges your saved card and loads the student store card.
+            When {studentName}&apos;s balance reaches the threshold, Square securely charges your saved card and loads the Cove Digital Card.
           </p>
 
           {hasPaymentMethod ? (

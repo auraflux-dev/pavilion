@@ -1,3 +1,4 @@
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { getWixClient } from "@/lib/wix-client";
 import { formatProgramSchedule } from "@/lib/programs/schedule";
 
@@ -96,13 +97,13 @@ export async function getPrograms(): Promise<Program[]> {
     .eq("registrationOpen", true)
     .find();
 
-  return (result.items as Record<string, unknown>[]).map(mapProgramItem);
+  return publicPrograms(result.items as Record<string, unknown>[]);
 }
 
 export async function getAllPrograms(): Promise<Program[]> {
   const client = getWixClient();
   const result = await client.items.query("Programs").find();
-  return (result.items as Record<string, unknown>[]).map(mapProgramItem);
+  return publicPrograms(result.items as Record<string, unknown>[]);
 }
 
 export async function getFeaturedPrograms(): Promise<Program[]> {
@@ -112,7 +113,13 @@ export async function getFeaturedPrograms(): Promise<Program[]> {
     .eq("featured", true)
     .ascending("sortOrder")
     .find();
-  return (result.items as Record<string, unknown>[]).map(mapProgramItem);
+  return publicPrograms(result.items as Record<string, unknown>[]);
+}
+
+function publicPrograms(items: Record<string, unknown>[]): Program[] {
+  return items
+    .map(mapProgramItem)
+    .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags));
 }
 
 export async function getProgramById(id: string): Promise<Program | null> {

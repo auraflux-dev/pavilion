@@ -87,7 +87,7 @@ export function StoreCardHero({
     parseHowSteps([
       '1|Become a free member|Create a free parent account, then choose an amount and pay online.',
       `2|First load gets ${bonusPercent}% extra|${formatStoreCardBonusExample(50, bonusPercent)}. Reloads are dollar-for-dollar.`,
-      '3|Spend at The Cove|Students show the family digital card code or QR from the member portal.',
+      '3|Spend at The Cove|Students show the Cove Digital Card code or QR from the member portal.',
     ])
   const memberSteps = parseHowSteps([
     `1|Choose an amount|Load any whole dollar up to $${maxAmount}. ${formatStoreCardBonusExample(50, bonusPercent)} on your first load.`,
@@ -126,7 +126,7 @@ export function StoreCardHero({
                     </span>
                   </div>
                   <p className="text-sm text-white/75 hidden sm:block max-w-xs leading-snug">
-                    Snacks · spirit wear · family digital card
+                    Snacks · spirit wear · Cove Digital Card
                   </p>
                 </div>
               </div>
@@ -148,20 +148,31 @@ export function StoreCardHero({
             </div>
 
             <div className="lg:col-span-5">
-              <MemberGate label="Load a Cove Digital Card">
-                <div className="w-full max-w-md lg:ml-auto rounded-2xl bg-white/10 border border-white/15 p-4 sm:p-5 backdrop-blur-sm">
-                  <p className="text-xs font-bold tracking-widest uppercase text-white/70 mb-3">
-                    Load a Cove Digital Card
-                  </p>
+              {/* Always show a solid card so the CTA stays visible on the green hero
+                  (visitor MemberGate used to render green-on-green = invisible). */}
+              <div className="w-full max-w-md lg:ml-auto rounded-2xl bg-white p-5 sm:p-6 shadow-lg border border-white/40">
+                <p
+                  className="text-xs font-bold tracking-widest uppercase mb-3"
+                  style={{ color: '#085508' }}
+                >
+                  Cove Digital Card
+                </p>
+                <p className="text-sm text-[#5A6070] mb-4 leading-snug">
+                  Free parent account required. Load online, spend at The Cove with code or QR.
+                </p>
+                <MemberGate
+                  label="Load a Cove Digital Card"
+                  className="inline-flex items-center justify-center w-full font-bold text-sm px-5 py-3 rounded-lg bg-[#085508] text-white transition-opacity hover:opacity-90"
+                >
                   <StoreCardReload
                     amounts={denominations.map(({ amount }) => amount)}
                     bonusPercent={bonusPercent}
                     maxAmount={maxAmount}
-                    triggerLabel="Load digital card"
-                    triggerClassName="w-full justify-center !bg-white !text-[#085508] px-5 py-3"
+                    triggerLabel="Load Cove Digital Card"
+                    triggerClassName="w-full justify-center px-5 py-3 bg-[#085508] text-white"
                   />
-                </div>
-              </MemberGate>
+                </MemberGate>
+              </div>
             </div>
           </div>
         </div>

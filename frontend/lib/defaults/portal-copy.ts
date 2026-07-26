@@ -105,7 +105,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   storeCardsHint: 'Current Balance',
   recentBuysLabel: 'Recent buys',
   recentBuysHint: 'Payment History',
-  ctaLoadCard: 'Load digital card',
+  ctaLoadCard: 'Load Cove Digital Card',
   ctaSpiritWear: 'Spirit wear',
   ctaPrograms: 'Programs',
   purchasesEmpty:

@@ -75,7 +75,7 @@ function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation,
     const tier = input.meta?.tierName || input.meta?.tier || 'paid'
     const nextSteps = [
       `Your ${tier} membership is active.`,
-      'Open Member Portal for your store card credit and member perks.',
+      'Open Member Portal for your Cove Digital Card credit and member perks.',
       'Add or update students so enrichment discounts apply correctly.',
     ]
     return {

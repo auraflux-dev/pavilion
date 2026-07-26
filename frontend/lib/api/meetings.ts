@@ -1,3 +1,4 @@
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { getWixClient } from '@/lib/wix-client'
 
 export type Committee = 'PTO' | 'SEAC' | 'MSAAC' | 'LEAF'
@@ -23,8 +24,10 @@ export function sanitizeMeetingJoinUrl(url: unknown): string | undefined {
   return u
 }
 
-function mapMeeting(item: Record<string, unknown>): MeetingMinute {
+function mapMeeting(item: Record<string, unknown>): MeetingMinute | null {
   const row = item as unknown as MeetingMinute
+  if (isCmsQaItem(row.summary, row.minutesContent, row.takeaways, row.callToAction, row.joinUrl))
+    return null
   return {
     ...row,
     joinUrl: sanitizeMeetingJoinUrl(row.joinUrl),
@@ -39,7 +42,9 @@ export async function getMeetingsByCommittee(committee: Committee): Promise<Meet
     .eq('published', true)
     .descending('meetingDate')
     .find()
-  return result.items.map((item: any) => mapMeeting(item))
+  return result.items
+    .map((item: any) => mapMeeting(item))
+    .filter((m: MeetingMinute | null): m is MeetingMinute => m !== null)
 }
 
 export async function getAllPublishedMeetings(): Promise<MeetingMinute[]> {
@@ -49,5 +54,7 @@ export async function getAllPublishedMeetings(): Promise<MeetingMinute[]> {
     .eq('published', true)
     .descending('meetingDate')
     .find()
-  return result.items.map((item: any) => mapMeeting(item))
+  return result.items
+    .map((item: any) => mapMeeting(item))
+    .filter((m: MeetingMinute | null): m is MeetingMinute => m !== null)
 }

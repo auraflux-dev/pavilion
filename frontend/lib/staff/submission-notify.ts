@@ -16,6 +16,7 @@ export type SubmissionNotifyKind =
   | 'volunteer'
   | 'newsletter'
   | 'survey'
+  | 'membership-experience'
 
 function topicLabel(kind: SubmissionNotifyKind): string {
   switch (kind) {
@@ -33,6 +34,8 @@ function topicLabel(kind: SubmissionNotifyKind): string {
       return 'Newsletter signup'
     case 'survey':
       return 'Survey response'
+    case 'membership-experience':
+      return 'Membership experience'
   }
 }
 
@@ -60,6 +63,14 @@ export async function resolveSubmissionInbox(
   if (kind === 'sponsorship') {
     return normalizeStaffInbox(
       settings.get('contactEmailSponsorship', 'vp-initiatives@shmspto.org'),
+    )
+  }
+  if (kind === 'membership-experience') {
+    return normalizeStaffInbox(
+      settings.get(
+        'contactEmailMembershipExperience',
+        'vp-membershipexperience@shmspto.org',
+      ),
     )
   }
   if (kind === 'volunteer') {

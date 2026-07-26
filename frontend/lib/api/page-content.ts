@@ -9,6 +9,8 @@ import {
   PAGE_CONTENT_DEFAULTS,
   type PageContentFields,
 } from '@/lib/defaults/page-content'
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
+import { brandifyCoveDigitalCard } from '@/lib/copy/brandify-cove-digital-card'
 import { brandifyShmsPto } from '@/lib/copy/brandify-shms-pto'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 
@@ -68,15 +70,18 @@ function merge(
         flyerImage: cms.flyerImage || fallback.flyerImage || '',
       }
 
+  const pub = (text: string) =>
+    humanizePublicCopy(brandifyCoveDigitalCard(brandifyShmsPto(text)))
+
   return {
     ...merged,
-    eyebrow: brandifyShmsPto(merged.eyebrow),
-    title: humanizePublicCopy(brandifyShmsPto(merged.title)),
-    body: humanizePublicCopy(brandifyShmsPto(merged.body)),
-    sectionTitle: humanizePublicCopy(brandifyShmsPto(merged.sectionTitle)),
-    sectionBody: humanizePublicCopy(brandifyShmsPto(merged.sectionBody)),
-    bullets: merged.bullets.map((b) => humanizePublicCopy(brandifyShmsPto(b))),
-    ctaLabel: brandifyShmsPto(merged.ctaLabel),
+    eyebrow: brandifyCoveDigitalCard(brandifyShmsPto(merged.eyebrow)),
+    title: pub(merged.title),
+    body: pub(merged.body),
+    sectionTitle: pub(merged.sectionTitle),
+    sectionBody: pub(merged.sectionBody),
+    bullets: merged.bullets.map((b) => pub(b)),
+    ctaLabel: brandifyCoveDigitalCard(brandifyShmsPto(merged.ctaLabel)),
   }
 }
 
@@ -130,6 +135,19 @@ async function fetchPageRow(page: string): Promise<Partial<PageContentFields> | 
 
 export async function getPageContent(page: string): Promise<PageContentFields> {
   const cms = await fetchPageRow(page)
+  if (
+    cms &&
+    isCmsQaItem(
+      cms.eyebrow,
+      cms.title,
+      cms.body,
+      cms.sectionTitle,
+      cms.sectionBody,
+      ...(cms.bullets ?? []),
+    )
+  ) {
+    return merge(page, null)
+  }
   return merge(page, cms)
 }
 

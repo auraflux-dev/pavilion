@@ -10,12 +10,15 @@ interface Props {
   label?: string
   /** Extra returnTo query string (e.g. checkout=ruby&studentId=…) */
   returnToQuery?: string
+  /** Override visitor CTA classes (needed on dark/green heroes). */
+  className?: string
 }
 
 function MemberGateInner({
   children,
   label = 'Create your free account',
   returnToQuery,
+  className,
 }: Props) {
   const { status } = useAuth()
   const pathname = usePathname()
@@ -40,8 +43,11 @@ function MemberGateInner({
     return (
       <a
         href={`/auth/join?returnTo=${returnTo}`}
-        className="inline-flex items-center justify-center w-full font-bold text-sm px-4 py-2.5 rounded-lg text-white transition-opacity hover:opacity-90"
-        style={{ backgroundColor: '#085508', color: '#FFFFFF' }}
+        className={
+          className ??
+          'inline-flex items-center justify-center w-full font-bold text-sm px-4 py-2.5 rounded-lg text-white transition-opacity hover:opacity-90'
+        }
+        style={className ? undefined : { backgroundColor: '#085508', color: '#FFFFFF' }}
       >
         {label}
       </a>

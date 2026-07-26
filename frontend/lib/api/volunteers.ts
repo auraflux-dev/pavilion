@@ -1,3 +1,4 @@
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { getWixClient } from "@/lib/wix-client";
 
 export interface VolunteerOpportunity {
@@ -19,7 +20,11 @@ export async function getVolunteerOpportunities(): Promise<VolunteerOpportunity[
       .ascending("sortOrder")
       .find();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return result.items.map((item: any) => item as VolunteerOpportunity);
+    return (result.items as VolunteerOpportunity[]).filter(
+      (item) =>
+        item?.title &&
+        !isCmsQaItem(item.title, item.description, item.commitment),
+    );
   } catch {
     return [];
   }

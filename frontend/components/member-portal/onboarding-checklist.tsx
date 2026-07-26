@@ -32,7 +32,7 @@ export function OnboardingChecklist({
         <div>
           <p className="text-sm font-bold text-[#1A1A1A]">You&apos;re set up</p>
           <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed">
-            Student profiles are complete. Cove card and programs are unlocked.
+            Student profiles are complete. Cove Digital Card and programs are unlocked.
           </p>
         </div>
       </div>

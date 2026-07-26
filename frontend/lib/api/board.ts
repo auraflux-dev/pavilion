@@ -1,3 +1,5 @@
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
+
 /**
  * Board members — fetched live from Wix CMS BoardMembers collection.
  *
@@ -70,7 +72,8 @@ export async function getBoardMembers(): Promise<BoardMember[]> {
 
     const data = (await res.json()) as WixQueryResponse
 
-    return (data.dataItems ?? []).map((item) => ({
+    return (data.dataItems ?? [])
+      .map((item) => ({
       id:        item.id ?? '',
       name:      item.data?.name      ?? 'Open Position',
       role:      item.data?.role      ?? '',
@@ -80,6 +83,7 @@ export async function getBoardMembers(): Promise<BoardMember[]> {
       isExec:    item.data?.isExec    ?? false,
       sortOrder: item.data?.sortOrder ?? 99,
     }))
+      .filter((m) => !isCmsQaItem(m.name, m.role, m.bio, m.email))
   } catch (err) {
     console.error('[board] Fetch error:', err)
     return []

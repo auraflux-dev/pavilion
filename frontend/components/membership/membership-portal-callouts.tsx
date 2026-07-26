@@ -38,7 +38,7 @@ export function MembershipPortalCallouts({ lines }: { lines: string[] }) {
   if (!items.length) return null
 
   return (
-    <section className="border-t border-[#E8E4DC] bg-white py-14 md:py-16">
+    <section id="portal" className="scroll-mt-28 border-t border-[#E8E4DC] bg-white py-14 md:py-16">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
           <p

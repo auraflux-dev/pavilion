@@ -2,6 +2,7 @@
  * Knowledge base articles from Wix KbArticles, merged over code defaults.
  * Staff edits in Staff → Help (KbArticles collection). No deploy needed for copy changes.
  */
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 import { MEMBER_KB } from '@/lib/kb/member'
 import { STAFF_KB } from '@/lib/kb/staff'
@@ -84,7 +85,10 @@ async function fetchCmsArticles(audience: KbAudience): Promise<KbArticle[]> {
     const data = (await res.json()) as { dataItems?: CmsRow[] }
     return (data.dataItems ?? [])
       .map((row) => fromCms(row, audience))
-      .filter((a): a is KbArticle => Boolean(a))
+      .filter((a): a is KbArticle => {
+        if (!a) return false
+        return !isCmsQaItem(a.title, a.summary, a.body, a.slug)
+      })
   } catch {
     return []
   }

@@ -6,6 +6,8 @@
  * hrefs are internal paths only (e.g. /programs) — no external URLs.
  */
 
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
+
 export interface NavLink {
   id: string
   label: string
@@ -54,7 +56,8 @@ async function fetchNavLinks(): Promise<NavLink[]> {
 
     if (!res.ok) return []
     const data = await res.json()
-    return (data.dataItems ?? []).map((item: WixDataItem) => ({
+    return (data.dataItems ?? [])
+      .map((item: WixDataItem) => ({
       id:           item.id ?? '',
       label:        item.data?.label        ?? '',
       href:         item.data?.href         ?? '/',
@@ -63,6 +66,7 @@ async function fetchNavLinks(): Promise<NavLink[]> {
       showInFooter: item.data?.showInFooter ?? false,
       active:       item.data?.active       ?? true,
     }))
+      .filter((link: NavLink) => link.label && !isCmsQaItem(link.label, link.href))
   } catch {
     return []
   }

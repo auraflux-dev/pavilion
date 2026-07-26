@@ -37,6 +37,7 @@ import {
   CoveFeatureLockBanner,
   OnboardingChecklist,
 } from './onboarding-checklist'
+import { PortalBusinessOwnerForm } from './portal-business-owner-form'
 import {
   buildOnboardingChecklist,
   coveFeaturesUnlocked,
@@ -313,7 +314,7 @@ export function MemberDashboard({
             <p className="text-sm font-bold text-[#085508]">Membership confirmed — thank you!</p>
             <p className="text-xs text-[#1A1A1A]/80 mt-0.5 leading-relaxed">
               {onboarding.complete
-                ? 'Your Cove card and perks are ready below.'
+                ? 'Your Cove Digital Card and perks are ready below.'
                 : 'Finish the family setup checklist so card credit and your QR attach to your students.'}
             </p>
           </div>
@@ -742,7 +743,7 @@ export function MemberDashboard({
                 className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#8A8F9C] cursor-not-allowed"
                 title={coveGate.error}
               >
-                Load digital card (locked)
+                Load Cove Digital Card (locked)
               </button>
             )}
             <a
@@ -800,6 +801,10 @@ export function MemberDashboard({
             </ul>
           )}
         </PortalQuadrant>
+      </div>
+
+      <div className="mt-6">
+        <PortalBusinessOwnerForm memberName={member.name} memberEmail={member.email} />
       </div>
 
       <PortalSurveys />

@@ -26,7 +26,7 @@ export function storeCardLoadCents(payCents: number, bonusPercent: number): numb
 export function formatStoreCardBonusExample(payDollars: number, bonusPercent: number): string {
   const load = payDollars * (1 + bonusPercent / 100)
   const loadLabel = Number.isInteger(load) ? `$${load}` : `$${load.toFixed(2)}`
-  return `Pay $${payDollars} · get ${loadLabel} on the family card (${bonusPercent}% first-load bonus)`
+  return `Pay $${payDollars} · get ${loadLabel} on the Cove Digital Card (${bonusPercent}% first-load bonus)`
 }
 
 /**

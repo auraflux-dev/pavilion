@@ -67,14 +67,14 @@ export function coveFeaturesUnlocked(students: OnboardingStudent[]): {
   if (students.length === 0) {
     return {
       ok: false,
-      error: 'Add a student in the Member Portal, then complete their safety profile to unlock The Cove card.',
+      error: 'Add a student in the Member Portal, then complete their safety profile to unlock the Cove Digital Card.',
     }
   }
   if (incompleteSafetyStudents(students).length > 0) {
     return {
       ok: false,
       error:
-        'Complete each student’s safety profile (parent phone, emergency contact, and pick-up list) to unlock The Cove card.',
+        'Complete each student’s safety profile (parent phone, emergency contact, and pick-up list) to unlock the Cove Digital Card.',
     }
   }
   return { ok: true }

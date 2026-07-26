@@ -61,7 +61,7 @@ export function DonateBlock({
   return (
     <section
       id={id}
-      className={compact ? 'py-12 md:py-16' : 'py-14 md:py-20'}
+      className={`scroll-mt-28 ${compact ? 'py-12 md:py-16' : 'py-14 md:py-20'}`}
       style={{ backgroundColor: compact ? '#EEF6EE' : '#085508' }}
     >
       <div className={`max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 ${compact ? '' : 'text-center'}`}>

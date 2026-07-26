@@ -77,7 +77,7 @@ export function normalizePaymentLedgerRow(
       const loaded = Number(bonus[2])
       if (Number.isFinite(paid) && paid > 0) amount = paid
       if (Number.isFinite(loaded) && loaded > paid) {
-        detail = `Loaded $${loaded.toFixed(2)} on family card (${bonus[3]})`
+        detail = `Loaded $${loaded.toFixed(2)} on the Cove Digital Card (${bonus[3]})`
         if (!/bonus|first load/i.test(programName)) {
           programName = programName || 'Family Cove Digital Card First Load'
         }

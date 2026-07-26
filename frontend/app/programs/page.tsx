@@ -9,6 +9,7 @@ import { getAllPrograms, type Program } from '@/lib/api/programs'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 import { normalizeStaffInbox, STAFF_INBOX_FALLBACK } from '@/lib/staff/inbox'
+import { ProgramsSectionNav } from '@/components/jump-nav/public-section-navs'
 
 export const revalidate = 300 // revalidate every 5 minutes
 
@@ -48,10 +49,12 @@ export default async function ProgramsPage() {
                 }),
           }}
         />
+        <ProgramsSectionNav />
 
         {/* Programs grid */}
         <section
-          className="py-16 md:py-24"
+          id="programs-list"
+          className="scroll-mt-28 py-16 md:py-24"
           style={{ backgroundColor: '#F5F0E8' }}
           aria-labelledby="programs-list-heading"
         >
@@ -87,7 +90,7 @@ export default async function ProgramsPage() {
         {/* Questions → VP of Programs */}
         <section
           id="programs-contact"
-          className="border-t border-[#E8E4DC] bg-white py-14 md:py-20"
+          className="scroll-mt-28 border-t border-[#E8E4DC] bg-white py-14 md:py-20"
           aria-labelledby="programs-contact-heading"
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

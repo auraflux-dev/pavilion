@@ -1,6 +1,7 @@
 /**
  * Public sponsors list from Wix CMS Sponsors collection.
  */
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { getWixClient } from '@/lib/wix-client'
 
 export type Sponsor = {
@@ -39,7 +40,7 @@ export async function getActiveSponsors(): Promise<Sponsor[]> {
         tier: String(row.tier ?? 'Community').trim() || 'Community',
         sortOrder: Number(row.sortOrder ?? 0) || 0,
       }))
-      .filter((s: Sponsor) => s.name)
+      .filter((s: Sponsor) => s.name && !isCmsQaItem(s.name, s.blurb))
       .sort((a: Sponsor, b: Sponsor) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
   } catch {
     return []

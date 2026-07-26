@@ -301,6 +301,10 @@ export const SITE_SETTING_GROUPS: {
         label: 'VP Initiatives email (sponsorship form)',
       },
       {
+        key: 'contactEmailMembershipExperience',
+        label: 'VP Membership Experience email (portal business form)',
+      },
+      {
         key: 'contactEmailVolunteer',
         label: 'Volunteer signup inbox (events / volunteer VP)',
       },

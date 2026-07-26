@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     const code = await ensureCoveFamilyCode(session.email)
     if (requested && requested !== code) {
       return NextResponse.json(
-        { error: 'Code does not match your family digital card.' },
+        { error: 'Code does not match your Cove Digital Card.' },
         { status: 400 },
       )
     }

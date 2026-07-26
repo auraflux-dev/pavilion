@@ -115,7 +115,7 @@ export function StaffCoveRegister() {
 
   function setLineQty(product: Product, qty: number) {
     if (!family?.hasCard) {
-      setError('Look up the family digital card code first.')
+      setError('Look up the Cove Digital Card code first.')
       return
     }
     const variantId = product.variantId || ''

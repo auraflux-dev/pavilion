@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { getBoardMembers, type BoardMember } from '@/lib/api/board'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
+import { BoardSectionNav } from '@/components/jump-nav/public-section-navs'
 
 export const revalidate = 300 // refresh from Wix CMS every 5 minutes
 
@@ -33,10 +34,11 @@ export default async function BoardPage() {
 
       <main id="main-content" className="flex-1">
         <PageHero content={page} />
+        <BoardSectionNav />
 
         {/* Executive Board */}
         {execMembers.length > 0 && (
-          <section className="py-14 md:py-20" style={{ backgroundColor: '#F5F0E8' }}>
+          <section id="leadership" className="scroll-mt-28 py-14 md:py-20" style={{ backgroundColor: '#F5F0E8' }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
                 <div
@@ -61,7 +63,7 @@ export default async function BoardPage() {
 
         {/* Committee Chairs */}
         {committeeMembers.length > 0 && (
-          <section className="py-14 md:py-20 bg-white">
+          <section id="committees" className="scroll-mt-28 py-14 md:py-20 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
                 <div
@@ -85,7 +87,7 @@ export default async function BoardPage() {
         )}
 
         {/* Join the board CTA */}
-        <section className="py-16" style={{ backgroundColor: '#F5F0E8' }}>
+        <section id="join" className="scroll-mt-28 py-16" style={{ backgroundColor: '#F5F0E8' }}>
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div
               className="rounded-2xl p-8 md:p-12 text-center border border-[#E8E4DC]"

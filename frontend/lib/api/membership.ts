@@ -9,6 +9,8 @@
  * popular, and operational fields (giftCardCredit override, discountPercent).
  */
 
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
+
 export interface MembershipTier {
   id: string
   tierId: string // 'reef' | 'lagoon' | 'tide' | 'faculty' | legacy aliases
@@ -196,7 +198,8 @@ async function fetchCmsTiers(): Promise<CmsTier[]> {
     if (!res.ok) return []
 
     const data = await res.json()
-    return (data.dataItems ?? []).map((item: WixDataItem) => ({
+    return (data.dataItems ?? [])
+      .map((item: WixDataItem) => ({
       id: item.id ?? '',
       tierId: item.data?.tierId ?? '',
       name: item.data?.name ?? '',
@@ -214,6 +217,7 @@ async function fetchCmsTiers(): Promise<CmsTier[]> {
       variantId: String(item.data?.variantId ?? '').trim(),
       discountPercent: Number(item.data?.discountPercent ?? 0) || undefined,
     }))
+      .filter((t: CmsTier) => !isCmsQaItem(t.tierId, t.name, t.description))
   } catch {
     return []
   }

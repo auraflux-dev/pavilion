@@ -124,7 +124,7 @@ When payment clears, return here and refresh. If credit or tier is still missing
       order: 1,
       body: `Open **Store & Cove Digital Card**. Your family balance and **Payment History** show there.
 
-Membership gift-card credit loads after purchase. Use **Load family card** anytime to add more.
+Membership gift-card credit loads after purchase. Use **Load Cove Digital Card** anytime to add more.
 
 First-load bonus (when offered) applies once; reloads are dollar-for-dollar.`,
     },

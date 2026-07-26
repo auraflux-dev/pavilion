@@ -13,6 +13,7 @@ import { MembershipPortalCallouts } from '@/components/membership/membership-por
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
 import { EmphasizedCopy } from '@/components/emphasized-copy'
 import { DonateBlock } from '@/components/donate/donate-block'
+import { MembershipSectionNav } from '@/components/jump-nav/public-section-navs'
 
 export const revalidate = 60
 
@@ -41,11 +42,12 @@ export default async function MembershipPage() {
 
       <main id="main-content">
         <PageHero content={page} />
+        <MembershipSectionNav />
 
         {/* Tiers */}
         <section
           id="tiers"
-          className="relative overflow-hidden py-16 md:py-24"
+          className="relative overflow-hidden scroll-mt-28 py-16 md:py-24"
           style={{ backgroundColor: '#F5F0E8' }}
         >
           <BrandImageWash src="/home/community.jpg" side="right" />
@@ -66,7 +68,7 @@ export default async function MembershipPage() {
         <MembershipPortalCallouts lines={sharedBenefits} />
 
         {/* Faculty membership */}
-        <section className="py-14" style={{ backgroundColor: '#F5F0E8' }}>
+        <section id="faculty" className="scroll-mt-28 py-14" style={{ backgroundColor: '#F5F0E8' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-2xl p-6 lg:p-8 border border-[#E8E4DC] flex flex-col sm:flex-row sm:items-center gap-6">
               <div className="flex-1">
@@ -103,7 +105,7 @@ export default async function MembershipPage() {
         />
 
         {/* FAQ */}
-        <section className="py-16 bg-white border-t border-[#E8E4DC]">
+        <section id="faq" className="scroll-mt-28 py-16 bg-white border-t border-[#E8E4DC]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-2xl font-bold text-[#1A1A1A] mb-8 text-center">
               Common Questions

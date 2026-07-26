@@ -7,6 +7,7 @@ import { UpcomingEvents } from '@/components/upcoming-events'
 import { CommunityBanner } from '@/components/community-banner'
 import { Footer } from '@/components/footer'
 import { DonateBlock } from '@/components/donate/donate-block'
+import { HomeSectionNav } from '@/components/jump-nav/public-section-navs'
 import { isSchoolInSession } from '@/lib/api/visitor-season'
 
 export default async function HomePage() {
@@ -18,6 +19,7 @@ export default async function HomePage() {
       <Navbar />
       <main id="main-content">
         <Hero />
+        <HomeSectionNav showPrograms={inSession} showEvents={inSession} />
         {inSession ? <ProgramsPreview /> : null}
         <VolunteerSection />
         {inSession ? <UpcomingEvents /> : null}

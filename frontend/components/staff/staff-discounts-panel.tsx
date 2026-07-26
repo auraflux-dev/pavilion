@@ -154,7 +154,7 @@ export function StaffDiscountsPanel() {
           <h2 className="text-lg font-bold">Discount codes</h2>
           <p className="text-xs text-[#5A6070]">
             Create named percent-off codes (5 to 75%) for enrichment programs and retail checkout later.
-            Codes never apply to membership or store card purchases. Issue personal codes for
+            Codes never apply to membership or Cove Digital Card purchases. Issue personal codes for
             onboarding emails after membership purchase. Percent follows their paid tier (
             <code className="text-[11px]">discountPercent</code> on Membership Tiers), or override
             here.

@@ -1,4 +1,5 @@
 import { getSiteSettings } from '@/lib/api/site-settings'
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { isMemberRequest } from '@/lib/is-member-request'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 import { AnnouncementBarClient } from './announcement-bar-client'
@@ -15,6 +16,7 @@ export async function AnnouncementBar() {
 
   const text = humanizePublicCopy(settings.get('announcementText', '').trim())
   if (!text) return null
+  if (isCmsQaItem(text)) return null
 
   // WhatsApp / grade-group invites stay out of the top bar
   if (/whatsapp/i.test(text)) return null

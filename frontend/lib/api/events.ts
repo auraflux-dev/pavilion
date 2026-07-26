@@ -1,3 +1,4 @@
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { getWixClient } from "@/lib/wix-client";
 
 export interface WixEvent {
@@ -71,10 +72,11 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
       } satisfies WixEvent;
     });
 
-    // Hide Wix template placeholder events still in the Events catalog
+    // Hide Wix template / QA placeholder events still in the Events catalog
     const filtered = mapped.filter((ev) => {
       const desc = (ev.description || "").toLowerCase();
       const title = (ev.title || "").toLowerCase();
+      if (isCmsQaItem(ev.title, ev.description)) return false;
       if (desc.includes("click here to open up the event editor")) return false;
       if (desc.includes("i’m an event description") || desc.includes("i'm an event description"))
         return false;

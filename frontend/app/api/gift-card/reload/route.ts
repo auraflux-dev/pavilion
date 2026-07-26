@@ -221,7 +221,7 @@ export async function POST(req: NextRequest) {
         source: 'square_store_card_reload',
         notes:
           bonusPercent > 0
-            ? `Paid $${amount}; loaded $${(loadCents / 100).toFixed(2)} (+${bonusPercent}%) on family card`
+            ? `Paid $${amount}; loaded $${(loadCents / 100).toFixed(2)} (+${bonusPercent}%) on the Cove Digital Card`
             : 'Family Cove Digital Card load',
       })
       return NextResponse.json({

@@ -35,13 +35,16 @@ export function StoreCardCta({
         <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">{title}</h2>
         <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">{body}</p>
 
-        <MemberGate label="Load a Cove Digital Card">
+        <MemberGate
+          label="Load a Cove Digital Card"
+          className="inline-flex items-center justify-center w-full max-w-sm mx-auto font-bold text-sm px-5 py-3 rounded-lg bg-white text-[#085508] transition-opacity hover:opacity-90"
+        >
           <div className="max-w-sm mx-auto">
             <StoreCardReload
               amounts={amounts}
               bonusPercent={bonusPercent}
               maxAmount={maxAmount}
-              triggerLabel="Load digital card"
+              triggerLabel="Load Cove Digital Card"
               triggerClassName="w-full justify-center !bg-[#FFD700] !text-[#1A1A1A] px-8 py-3"
             />
           </div>

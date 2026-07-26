@@ -26,7 +26,7 @@ export async function ProgramsPreview() {
   return (
     <section
       id="programs"
-      className="relative overflow-hidden py-20 md:py-28"
+      className="scroll-mt-28 relative overflow-hidden py-20 md:py-28"
       style={{ backgroundColor: '#F5F0E8' }}
       aria-labelledby="programs-heading"
     >

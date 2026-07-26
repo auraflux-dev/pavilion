@@ -533,7 +533,7 @@ export async function fulfillPaidCheckout(opts: {
       source: `${sourcePrefix}_store_card_reload`,
       notes:
         bonusPercent > 0
-          ? `Paid $${resolved.amount}; loaded $${(loadCents / 100).toFixed(2)} (+${bonusPercent}%) on family card`
+          ? `Paid $${resolved.amount}; loaded $${(loadCents / 100).toFixed(2)} (+${bonusPercent}%) on the Cove Digital Card`
           : 'Family Cove Digital Card load',
     })
     return attachPurchaseConfirmation(

@@ -32,6 +32,14 @@ function resolveAssignedTo(
       settings.get('contactEmailSponsorship', 'vp-initiatives@shmspto.org'),
     )
   }
+  if (dept === 'membership-experience' || dept === 'membership') {
+    return normalizeStaffInbox(
+      settings.get(
+        'contactEmailMembershipExperience',
+        'vp-membershipexperience@shmspto.org',
+      ),
+    )
+  }
   if (dept === 'treasurer') {
     return normalizeStaffInbox(
       settings.get('contactEmailTreasurer', 'treasurer@shmspto.org'),
@@ -72,7 +80,9 @@ export async function POST(req: NextRequest) {
           ? 'events'
           : department === 'sponsorship' || department === 'initiatives'
             ? 'sponsorship'
-            : 'contact'
+            : department === 'membership-experience' || department === 'membership'
+              ? 'membership-experience'
+              : 'contact'
 
     const client = getWixClient()
     const routeLabel =
@@ -82,7 +92,9 @@ export async function POST(req: NextRequest) {
           ? 'VP Events'
           : kind === 'sponsorship'
             ? 'VP Initiatives'
-            : null
+            : kind === 'membership-experience'
+              ? 'VP Membership Experience'
+              : null
     const routedMessage = routeLabel
       ? `[Route: ${routeLabel} · ${assignedTo}]\n\n${message}`
       : message

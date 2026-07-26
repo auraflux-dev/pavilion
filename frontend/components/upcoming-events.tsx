@@ -29,7 +29,7 @@ export async function UpcomingEvents() {
   return (
     <section
       id="events"
-      className="py-20 md:py-28"
+      className="scroll-mt-28 py-20 md:py-28"
       style={{ backgroundColor: '#F5F0E8' }}
       aria-labelledby="events-heading"
     >

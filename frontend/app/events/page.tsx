@@ -7,6 +7,7 @@ import { DepartmentContactForm } from '@/components/programs/programs-contact-fo
 import { getUpcomingEvents, type WixEvent } from '@/lib/api/events'
 import { getPageContent } from '@/lib/api/page-content'
 import { Calendar, ArrowRight } from 'lucide-react'
+import { EventsSectionNav } from '@/components/jump-nav/public-section-navs'
 
 export const revalidate = 300
 
@@ -47,9 +48,11 @@ export default async function EventsPage() {
                 }),
           }}
         />
+        <EventsSectionNav />
 
         <section
-          className="py-16 md:py-24"
+          id="events-list"
+          className="scroll-mt-28 py-16 md:py-24"
           style={{ backgroundColor: '#F5F0E8' }}
           aria-labelledby="events-list-heading"
         >
@@ -104,7 +107,7 @@ export default async function EventsPage() {
           </div>
         </section>
 
-        <section className="py-14 bg-white border-t border-[#E8E4DC]">
+        <section id="newsletter" className="scroll-mt-28 py-14 bg-white border-t border-[#E8E4DC]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">
               Never miss an event

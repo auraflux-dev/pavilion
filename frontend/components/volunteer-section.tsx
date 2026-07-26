@@ -33,7 +33,7 @@ export async function VolunteerSection() {
   return (
     <section
       id="volunteer"
-      className="py-20 md:py-28 bg-white"
+      className="scroll-mt-28 py-20 md:py-28 bg-white"
       aria-labelledby="volunteer-heading"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

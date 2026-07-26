@@ -6,6 +6,7 @@
  *   'membership' | 'volunteer' | 'general'
  */
 
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 
 export interface FAQItem {
@@ -57,7 +58,8 @@ export async function getFAQItems(page?: string): Promise<FAQItem[]> {
 
     if (!res.ok) return []
     const data = await res.json()
-    return (data.dataItems ?? []).map((item: WixDataItem) => ({
+    return (data.dataItems ?? [])
+      .map((item: WixDataItem) => ({
       id:        item.id ?? '',
       question:  humanizePublicCopy(item.data?.question  ?? ''),
       answer:    humanizePublicCopy(item.data?.answer    ?? ''),
@@ -65,6 +67,7 @@ export async function getFAQItems(page?: string): Promise<FAQItem[]> {
       sortOrder: item.data?.sortOrder ?? 99,
       active:    item.data?.active    ?? true,
     }))
+      .filter((item: FAQItem) => item.question && !isCmsQaItem(item.question, item.answer))
   } catch {
     return []
   }

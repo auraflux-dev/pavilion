@@ -7,6 +7,7 @@ import { CheckCircle2 } from 'lucide-react'
 import { getVolunteerOpportunities } from '@/lib/api/volunteers'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
+import { VolunteerSectionNav } from '@/components/jump-nav/public-section-navs'
 
 export const revalidate = 300
 
@@ -29,6 +30,7 @@ export default async function VolunteerPage() {
 
       <main id="main-content">
         <PageHero content={page} />
+        <VolunteerSectionNav />
 
         {/* Two-column: why volunteer + form */}
         <section className="py-16 md:py-24 bg-white">
@@ -37,7 +39,7 @@ export default async function VolunteerPage() {
 
               {/* Left: benefits + opportunities */}
               <div>
-                <h2 className="text-3xl font-bold text-[#1A1A1A] mb-6">
+                <h2 id="why" className="scroll-mt-28 text-3xl font-bold text-[#1A1A1A] mb-6">
                   Why Volunteers Matter
                 </h2>
                 <ul className="space-y-3.5 mb-12" aria-label="Volunteer benefits">
@@ -53,7 +55,7 @@ export default async function VolunteerPage() {
                   ))}
                 </ul>
 
-                <h2 className="text-2xl font-bold text-[#1A1A1A] mb-6">
+                <h2 id="opportunities" className="scroll-mt-28 text-2xl font-bold text-[#1A1A1A] mb-6">
                   Ways to Get Involved
                 </h2>
                 <div className="space-y-4">
@@ -85,7 +87,7 @@ export default async function VolunteerPage() {
               </div>
 
               {/* Right: form. dropdown options from VolunteerOpportunities CMS */}
-              <div className="lg:sticky lg:top-8">
+              <div id="signup" className="scroll-mt-28 lg:sticky lg:top-8">
                 <VolunteerForm
                   opportunities={opportunities.map((o) => o.title).filter(Boolean)}
                 />

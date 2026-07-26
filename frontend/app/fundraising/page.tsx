@@ -6,10 +6,12 @@ import { getSiteSettings } from '@/lib/api/site-settings'
 import { getFundraisingCTAs } from '@/lib/api/fundraising-ctas'
 import { getPageContent } from '@/lib/api/page-content'
 import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
+import { PortalBusinessOwnerForm } from '@/components/member-portal/portal-business-owner-form'
 import { getActiveSponsors } from '@/lib/api/sponsors'
 import { normalizeStaffInbox } from '@/lib/staff/inbox'
 import { ArrowRight, Heart, TrendingUp, Users, ShoppingBag, Ticket, Star, RefreshCw, Handshake, type LucideIcon } from 'lucide-react'
 import { DonateBlock } from '@/components/donate/donate-block'
+import { FundraisingSectionNav } from '@/components/jump-nav/public-section-navs'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Star, ShoppingBag, Users, Heart, TrendingUp, Ticket, ArrowRight, RefreshCw,
@@ -84,7 +86,7 @@ export default async function FundraisingPage() {
       raised: totals.store,
       goal:   goals.store,
       href: '/cove',
-      cta: 'Load digital card',
+      cta: 'Load Cove Digital Card',
     },
     {
       id: 'spiritWear',
@@ -200,13 +202,15 @@ export default async function FundraisingPage() {
           </div>
         </section>
 
+        <FundraisingSectionNav />
+
         <DonateBlock
           title="Make a gift to SHMS PTO"
           body="Choose any amount. Your gift goes to the PTO — enrichment, The Cove, teacher support, and events for Stone Hill students. Not a donation to the school district."
         />
 
         {/* Initiative cards */}
-        <section className="py-14 md:py-20" style={{ backgroundColor: '#F5F0E8' }}>
+        <section id="initiatives" className="scroll-mt-28 py-14 md:py-20" style={{ backgroundColor: '#F5F0E8' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <div
@@ -219,7 +223,7 @@ export default async function FundraisingPage() {
                 Every Way You Can Help
               </h2>
               <p className="text-[#5A6070] mt-3 max-w-xl mx-auto">
-                Memberships, store cards, event tickets, and volunteering. It all adds up.
+                Memberships, Cove Digital Cards, event tickets, and volunteering. It all adds up.
               </p>
             </div>
 
@@ -280,7 +284,7 @@ export default async function FundraisingPage() {
         </section>
 
         {/* Where funds go */}
-        <section className="py-14 md:py-20 bg-white border-t border-[#E8E4DC]">
+        <section id="allocations" className="scroll-mt-28 py-14 md:py-20 bg-white border-t border-[#E8E4DC]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
               <div
@@ -346,8 +350,9 @@ export default async function FundraisingPage() {
                 Sponsorships
               </h2>
               <p className="text-[#5A6070] mt-3 max-w-2xl mx-auto">
-                Highlighting businesses and organizations who support Stone Hill students.
-                Suggest a sponsor or apply on behalf of your business. Submissions go to the VP of Initiatives.
+                Highlighting businesses and organizations who support Stone Hill students. Suggest a
+                sponsor or apply on behalf of your business (VP of Initiatives). Family business owners
+                can also introduce themselves below (VP of Membership Experience).
               </p>
             </div>
 
@@ -389,11 +394,15 @@ export default async function FundraisingPage() {
             )}
 
             <DepartmentContactForm toEmail={sponsorshipEmail} variant="sponsorship" />
+
+            <div className="mt-12 max-w-xl mx-auto">
+              <PortalBusinessOwnerForm mode="public" />
+            </div>
           </div>
         </section>
 
         {/* How to contribute */}
-        <section className="py-16" style={{ backgroundColor: '#F5F0E8' }}>
+        <section id="contribute" className="scroll-mt-28 py-16" style={{ backgroundColor: '#F5F0E8' }}>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold" style={{ color: '#1A1A1A' }}>

@@ -5,6 +5,7 @@ import { PageHero } from '@/components/page-hero'
 import { getMeetingsByCommittee } from '@/lib/api/meetings'
 import { getPageContent } from '@/lib/api/page-content'
 import { MeetingMonthFilter } from '@/components/meetings/meeting-month-filter'
+import { MeetingsSectionNav } from '@/components/jump-nav/public-section-navs'
 import { Users } from 'lucide-react'
 
 export const revalidate = 300
@@ -53,9 +54,10 @@ export default async function MeetingsPage() {
 
       <main id="main-content">
         <PageHero content={page} />
+        <MeetingsSectionNav />
 
         {/* PTO Section */}
-        <section className="py-16 md:py-20" style={{ backgroundColor: '#F5F0E8' }}>
+        <section id="pto" className="scroll-mt-28 py-16 md:py-20" style={{ backgroundColor: '#F5F0E8' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3 mb-2">
               <div
@@ -77,7 +79,7 @@ export default async function MeetingsPage() {
         </section>
 
         {/* Committee sections */}
-        <section className="py-16 md:py-20 bg-white border-t border-[#E8E4DC]">
+        <section id="committees" className="scroll-mt-28 py-16 md:py-20 bg-white border-t border-[#E8E4DC]">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
             <div className="text-center mb-4">
               <h2 className="text-3xl font-bold text-[#1A1A1A] mb-3">Advisory Committees</h2>
@@ -110,7 +112,7 @@ export default async function MeetingsPage() {
         </section>
 
         {/* Stay updated CTA */}
-        <section className="py-14 border-t border-[#E8E4DC]" style={{ backgroundColor: '#F5F0E8' }}>
+        <section id="join" className="scroll-mt-28 py-14 border-t border-[#E8E4DC]" style={{ backgroundColor: '#F5F0E8' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">
               Get notified when minutes are published

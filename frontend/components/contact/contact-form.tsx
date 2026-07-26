@@ -7,7 +7,7 @@ import { CheckCircle2, Loader2, ArrowRight } from 'lucide-react'
 const TOPICS = [
   'General Question',
   'Programs & Registration',
-  'School Store / Store Card',
+  'The Cove / Cove Digital Card',
   'Volunteer Opportunities',
   'Membership',
   'Fundraising',

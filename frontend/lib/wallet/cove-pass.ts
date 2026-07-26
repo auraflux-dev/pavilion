@@ -99,7 +99,7 @@ export async function buildCoveApplePass(opts: {
           key: 'howto',
           label: 'At The Cove',
           value:
-            'Show this pass or say the 6-digit code. Staff charges your prepaid family digital card balance. No cash at the snack window.',
+            'Show this pass or say the 6-digit code. Staff charges your prepaid Cove Digital Card balance. No cash at the snack window.',
         },
         {
           key: 'email',
