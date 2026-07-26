@@ -150,7 +150,8 @@ export function PortalBusinessOwnerForm({
     isOwner === 'yes' ? (
       <>
         <p className="text-sm text-[#5A6070] leading-relaxed">
-          We&apos;d like to connect and see how we can support your business in our school community.
+          Tell us what you do and how you&apos;d like to show up for Stone Hill families. We&apos;ll
+          follow up with ideas that fit — no commitment required.
         </p>
         <div>
           <label htmlFor="biz-name" className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
@@ -204,12 +205,20 @@ export function PortalBusinessOwnerForm({
       >
         <div className="text-left">
           <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#085508' }}>
-            VP of Membership Experience
+            For SHMS PTO families
           </p>
-          <h3 className="mt-1 text-xl font-bold text-[#1A1A1A]">Do you own a business?</h3>
-          <p className="mt-1 text-sm text-[#5A6070]">
-            Family business interest goes to vp-membershipexperience@shmspto.org. We usually reply
-            within one business day.
+          <h3 className="mt-1 text-xl font-bold text-[#1A1A1A]">
+            Own a business? We want to know you.
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-[#5A6070]">
+            Many Stone Hill families run local businesses. Tell us yours so SHMS PTO can
+            celebrate you in the community, connect you with other parents, and explore
+            simple ways to help — shout-outs, event tables, or member-friendly offers.
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-[#5A6070]">
+            Share a yes/no below (and business details if yes). Our VP of Membership Experience
+            replies within one business day. Formal sponsorship packages still go through
+            the sponsor form above.
           </p>
         </div>
 
@@ -283,10 +292,18 @@ export function PortalBusinessOwnerForm({
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#5A6070]">
             Membership experience
           </p>
-          <h2 className="mt-0.5 text-lg font-bold text-[#1A1A1A]">Do you own a business?</h2>
+          <h2 className="mt-0.5 text-lg font-bold text-[#1A1A1A]">
+            Own a business? We want to know you.
+          </h2>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
-            We love supporting SHMS PTO families in our school community. If you or your family owns a
-            business, tell us a little about it — free and paid members welcome.
+            Why we ask: many SHMS PTO families run local businesses, and we want to celebrate
+            you in the school community — shout-outs, connections with other parents, and
+            simple ways to help each other.
+          </p>
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
+            What happens next: answer yes or no below. If yes, add your business name and
+            anything you want us to know. Free and paid members welcome. Our VP of Membership
+            Experience follows up within one business day.
           </p>
         </div>
       </div>

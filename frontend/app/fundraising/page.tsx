@@ -351,8 +351,8 @@ export default async function FundraisingPage() {
               </h2>
               <p className="text-[#5A6070] mt-3 max-w-2xl mx-auto">
                 Highlighting businesses and organizations who support Stone Hill students. Suggest a
-                sponsor or apply on behalf of your business (VP of Initiatives). Family business owners
-                can also introduce themselves below (VP of Membership Experience).
+                sponsor or apply on behalf of your business (VP of Initiatives). Family-owned
+                businesses can introduce themselves below so Membership Experience can connect with you.
               </p>
             </div>
 
