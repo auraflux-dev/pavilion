@@ -127,3 +127,114 @@ export async function notifyStaffSubmission(opts: {
     recipients: [to],
   })
 }
+
+export type TransactionNotifyKind =
+  | 'membership'
+  | 'product'
+  | 'store-card'
+  | 'program'
+  | 'event'
+  | 'donation'
+
+function transactionLabel(kind: TransactionNotifyKind): string {
+  switch (kind) {
+    case 'membership':
+      return 'Membership sale'
+    case 'product':
+      return 'Cove / shop sale'
+    case 'store-card':
+      return 'Cove Digital Card load'
+    case 'program':
+      return 'Program enrollment'
+    case 'event':
+      return 'Event tickets'
+    case 'donation':
+      return 'Donation'
+  }
+}
+
+/** Paid checkout alerts → VP Membership Experience (CMS override supported). */
+export async function resolveTransactionInbox(overrideTo?: string): Promise<string> {
+  return resolveSubmissionInbox('membership-experience', overrideTo)
+}
+
+/**
+ * Email vp-membershipexperience@ (or CMS override) when a parent checkout succeeds.
+ * Best-effort. never blocks fulfillment.
+ */
+export async function notifyStaffTransaction(opts: {
+  kind: TransactionNotifyKind
+  parentEmail: string
+  parentName?: string
+  amount: number
+  description: string
+  transactionId: string
+  paymentMethod?: string
+  meta?: Record<string, string>
+}): Promise<SendMassEmailResult | { ok: false; mode: 'skipped'; reason: string }> {
+  const auth = await resolveGmailSendAuth().catch(() => null)
+  if (!auth) {
+    return { ok: false, mode: 'skipped', reason: 'Gmail send not configured' }
+  }
+
+  const to = await resolveTransactionInbox()
+  if (!to) {
+    return { ok: false, mode: 'skipped', reason: 'No staff inbox resolved' }
+  }
+
+  const amount =
+    Number.isFinite(opts.amount) ? `$${Number(opts.amount).toFixed(2)}` : String(opts.amount)
+  const name = (opts.parentName || '').trim() || '(no name)'
+  const lines = [
+    `A ${transactionLabel(opts.kind).toLowerCase()} just processed on shmspto.org.`,
+    '',
+    `Parent: ${name}`,
+    `Email: ${opts.parentEmail}`,
+    `Order: ${opts.description}`,
+    `Amount: ${amount}`,
+    `Reference: ${opts.transactionId}`,
+  ]
+  if (opts.paymentMethod) lines.push(`Payment: ${opts.paymentMethod}`)
+  if (opts.meta) {
+    for (const [k, v] of Object.entries(opts.meta)) {
+      if (v) lines.push(`${k}: ${v}`)
+    }
+  }
+
+  if (opts.kind === 'membership') {
+    const tier = String(opts.meta?.tier || opts.meta?.tierName || '').trim()
+    if (tier) {
+      const { buildMembershipEntitlements } = await import('@/lib/membership-entitlements')
+      const ents = buildMembershipEntitlements({
+        tier,
+        shirtSize: opts.meta?.shirtSize || null,
+      })
+      const physical = ents.filter((e) => e.kind === 'spirit_shirt' || e.kind === 'magnet')
+      const refreshments = ents.find((e) => e.kind === 'event_refreshments')
+      if (physical.length || refreshments) {
+        lines.push('', 'Fulfillment / member perks:')
+        for (const e of physical) {
+          lines.push(
+            `• ${e.label}${e.detail ? ` (${e.detail})` : ''} — ${e.status}. ${e.notes || ''}`.trim(),
+          )
+        }
+        if (refreshments) {
+          lines.push(
+            `• ${refreshments.label} — honor system at events (parent shows Membership benefits in portal).`,
+          )
+        }
+        lines.push('No mailing address is collected. plan pickup / event handout unless you email the parent.')
+      }
+    }
+  }
+
+  lines.push('', 'Staff → Members / Payments / Fulfillments for details.')
+
+  return sendMassEmail({
+    subject: `[SHMS PTO · ${transactionLabel(opts.kind)}] ${opts.description} · ${amount}`,
+    body: lines.join('\n'),
+    fromName: 'SHMS PTO Website',
+    replyTo: opts.parentEmail,
+    recipients: [to],
+  })
+}

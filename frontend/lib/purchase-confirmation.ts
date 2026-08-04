@@ -200,5 +200,23 @@ export async function sendPurchaseConfirmation(
     console.warn('[purchase-confirmation] email error', err)
   }
 
+  try {
+    const { notifyStaffTransaction } = await import('@/lib/staff/submission-notify')
+    const staff = await notifyStaffTransaction({
+      kind: input.kind,
+      parentEmail: input.parentEmail,
+      parentName: input.parentName,
+      amount: input.amount,
+      description: input.description,
+      transactionId: input.transactionId,
+      meta: input.meta,
+    })
+    if (!staff.ok) {
+      console.warn('[purchase-confirmation] staff sale alert skipped', staff)
+    }
+  } catch (err) {
+    console.warn('[purchase-confirmation] staff sale alert error', err)
+  }
+
   return { ...copy, emailed }
 }

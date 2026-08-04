@@ -310,6 +310,35 @@ export async function POST(req: NextRequest) {
         acks: consentCheck.acks,
       })
 
+      const { sendPurchaseConfirmation } = await import('@/lib/purchase-confirmation')
+      let confirmation: Record<string, unknown> | undefined
+      try {
+        const conf = await sendPurchaseConfirmation({
+          kind: 'membership',
+          parentEmail: session.email,
+          parentName: name,
+          amount: charge.amount,
+          description: charge.isUpgrade
+            ? `Membership upgrade: ${formatTierLabel(currentTier)} → ${match.name}`
+            : `Membership: ${match.name}`,
+          transactionId: payment.id ?? paymentKey,
+          meta: {
+            tier,
+            tierName: match.name,
+            ...(charge.isUpgrade ? { isUpgrade: '1', currentTier } : {}),
+            ...(shirtSize ? { shirtSize } : {}),
+          },
+        })
+        confirmation = {
+          subject: conf.subject,
+          nextSteps: conf.nextSteps,
+          portalHref: conf.portalHref,
+          emailed: conf.emailed,
+        }
+      } catch (err) {
+        console.warn('membership confirmation failed', err)
+      }
+
       return NextResponse.json({
         ok: true,
         kind,
@@ -321,6 +350,7 @@ export async function POST(req: NextRequest) {
         paymentMethod: stored
           ? { brand: stored.brand, last4: stored.last4 }
           : null,
+        confirmation,
       })
     }
 
@@ -375,6 +405,28 @@ export async function POST(req: NextRequest) {
         ...(resolvedStudentId ? { studentId: resolvedStudentId } : {}),
       })
 
+      const { sendPurchaseConfirmation } = await import('@/lib/purchase-confirmation')
+      let confirmation: Record<string, unknown> | undefined
+      try {
+        const conf = await sendPurchaseConfirmation({
+          kind: 'product',
+          parentEmail: session.email,
+          parentName: name,
+          amount: catalog.price,
+          description: `The Cove: ${catalog.name}`,
+          transactionId: payment.id ?? paymentKey,
+          meta: { productId, productName: catalog.name },
+        })
+        confirmation = {
+          subject: conf.subject,
+          nextSteps: conf.nextSteps,
+          portalHref: conf.portalHref,
+          emailed: conf.emailed,
+        }
+      } catch (err) {
+        console.warn('product confirmation failed', err)
+      }
+
       return NextResponse.json({
         ok: true,
         kind,
@@ -385,6 +437,7 @@ export async function POST(req: NextRequest) {
         paymentMethod: stored
           ? { brand: stored.brand, last4: stored.last4 }
           : null,
+        confirmation,
       })
     }
 
@@ -554,6 +607,31 @@ export async function POST(req: NextRequest) {
             ? `Paid $${amount}; loaded $${(loadCents / 100).toFixed(2)} (+${bonusPercent}%) on the Cove Digital Card`
             : 'Family Cove Digital Card load',
       })
+
+      const { sendPurchaseConfirmation } = await import('@/lib/purchase-confirmation')
+      let confirmation: Record<string, unknown> | undefined
+      try {
+        const conf = await sendPurchaseConfirmation({
+          kind: 'store-card',
+          parentEmail: session.email,
+          parentName: name,
+          amount,
+          description: isFirstLoad
+            ? `Family Cove Digital Card First Load (+${bonusPercent}% bonus)`
+            : 'Family Cove Digital Card Reload',
+          transactionId: payment.id ?? paymentKey,
+          extras: { newBalance },
+        })
+        confirmation = {
+          subject: conf.subject,
+          nextSteps: conf.nextSteps,
+          portalHref: conf.portalHref,
+          emailed: conf.emailed,
+        }
+      } catch (err) {
+        console.warn('store-card confirmation failed', err)
+      }
+
       return NextResponse.json({
         ok: true,
         kind,
@@ -565,6 +643,7 @@ export async function POST(req: NextRequest) {
         paymentMethod: stored
           ? { brand: stored.brand, last4: stored.last4 }
           : null,
+        confirmation,
       })
     } catch (loadError) {
       await client.items.insert('Payments', {

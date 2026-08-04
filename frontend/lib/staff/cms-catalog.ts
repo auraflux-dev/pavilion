@@ -302,7 +302,8 @@ export const SITE_SETTING_GROUPS: {
       },
       {
         key: 'contactEmailMembershipExperience',
-        label: 'VP Membership Experience email (portal business form)',
+        label:
+          'VP Membership Experience email (portal business form + sale alerts)',
       },
       {
         key: 'contactEmailVolunteer',

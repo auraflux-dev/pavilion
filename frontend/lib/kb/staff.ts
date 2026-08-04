@@ -316,13 +316,22 @@ Change one list at a time, save, then **View site** to confirm. Leave deep Wix E
       categoryId: 'admin',
       summary: 'What parents get after checkout.',
       order: 3,
-      body: `Successful membership, Cove load, and ticket purchases create a parent portal message (and email when Gmail send is connected).
+      body: `Successful membership, Cove load, ticket, donation, and shop purchases create a parent portal message (and email when Gmail send is connected). The same checkout also emails **vp-membershipexperience@shmspto.org** a staff sale alert (includes shirt size / magnet / refreshments notes when membership).
 
 If a parent paid but sees nothing:
 1. Confirm payment cleared in Square/PayPal
 2. Ask them to refresh Member Portal → Messages / Payment History
 3. Check Staff reports or Memberships roster
-4. Escalate to Treasurer for payment-side mismatches`,
+4. Escalate to Treasurer for payment-side mismatches
+
+## Physical perks (shirt & magnet)
+- **Shirt size** is required at Lagoon/Tide checkout and appears in Staff → Fulfillments.
+- **Magnet** is queued for Reef/Tide; no mailing address is collected (pickup / event handout).
+- Mark fulfilled in Staff → Fulfillments after handout.
+
+## Free food & refreshments at PTO events
+- Lagoon/Tide get an **info** perk in Member Portal → Membership benefits (not a redemption counter).
+- At events: ask the parent to open the portal benefits card, or check Staff → Members for paid tier. Honor system — no scan/log yet.`,
     },
     {
       slug: 'refunds-cancellations',
