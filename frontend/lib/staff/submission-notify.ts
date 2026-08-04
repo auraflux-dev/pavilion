@@ -189,9 +189,12 @@ export async function notifyStaffTransaction(opts: {
   const storeCoordinator = normalizeStaffInbox(
     settings.get('contactEmailStoreCoordinator', 'cove@shmspto.org'),
   )
+  const vpSales = normalizeStaffInbox(
+    settings.get('contactEmailVpSales', 'vp-sales@shmspto.org'),
+  )
   const recipients = Array.from(
     new Set(
-      [to, treasurer, storeCoordinator]
+      [to, treasurer, storeCoordinator, vpSales]
         .map((e) => e.trim().toLowerCase())
         .filter(Boolean),
     ),
