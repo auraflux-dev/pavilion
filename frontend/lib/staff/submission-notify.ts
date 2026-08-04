@@ -182,6 +182,14 @@ export async function notifyStaffTransaction(opts: {
     return { ok: false, mode: 'skipped', reason: 'No staff inbox resolved' }
   }
 
+  const settings = await getSiteSettings()
+  const treasurer = normalizeStaffInbox(
+    settings.get('contactEmailTreasurer', 'treasurer@shmspto.org'),
+  )
+  const recipients = Array.from(
+    new Set([to, treasurer].map((e) => e.trim().toLowerCase()).filter(Boolean)),
+  )
+
   const amount =
     Number.isFinite(opts.amount) ? `$${Number(opts.amount).toFixed(2)}` : String(opts.amount)
   const name = (opts.parentName || '').trim() || '(no name)'
@@ -237,6 +245,6 @@ export async function notifyStaffTransaction(opts: {
     body: lines.join('\n'),
     fromName: 'SHMS PTO Website',
     replyTo: opts.parentEmail,
-    recipients: [to],
+    recipients,
   })
 }

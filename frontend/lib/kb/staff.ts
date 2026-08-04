@@ -316,7 +316,7 @@ Change one list at a time, save, then **View site** to confirm. Leave deep Wix E
       categoryId: 'admin',
       summary: 'What parents get after checkout.',
       order: 3,
-      body: `Successful membership, Cove load, ticket, donation, and shop purchases create a parent portal message (and email when Gmail send is connected). The same checkout also emails **vp-membershipexperience@shmspto.org** a staff sale alert (includes shirt size / magnet / refreshments notes when membership).
+      body: `Successful membership, Cove load, ticket, donation, and shop purchases create a parent portal message (and email when Gmail send is connected). The same checkout also emails **vp-membershipexperience@shmspto.org** and **treasurer@shmspto.org** a staff sale alert (includes shirt size / magnet / refreshments notes when membership).
 
 If a parent paid but sees nothing:
 1. Confirm payment cleared in Square/PayPal
