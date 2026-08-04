@@ -186,8 +186,15 @@ export async function notifyStaffTransaction(opts: {
   const treasurer = normalizeStaffInbox(
     settings.get('contactEmailTreasurer', 'treasurer@shmspto.org'),
   )
+  const storeCoordinator = normalizeStaffInbox(
+    settings.get('contactEmailStoreCoordinator', 'cove@shmspto.org'),
+  )
   const recipients = Array.from(
-    new Set([to, treasurer].map((e) => e.trim().toLowerCase()).filter(Boolean)),
+    new Set(
+      [to, treasurer, storeCoordinator]
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean),
+    ),
   )
 
   const amount =
