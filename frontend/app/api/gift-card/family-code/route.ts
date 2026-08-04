@@ -63,6 +63,9 @@ export async function GET(req: NextRequest) {
       coveFamilyCode: code,
     })
 
+    const { isPaidMemberFamilyCode } = await import('@/lib/cove-family-code')
+    const paidMemberCode = isPaidMemberFamilyCode(code)
+
     return NextResponse.json({
       coveFamilyCode: code,
       balance,
@@ -70,8 +73,12 @@ export async function GET(req: NextRequest) {
       gan: card.gan ? `${card.gan.slice(0, 4)}…${card.gan.slice(-4)}` : '',
       hasCard: Boolean(card.gan),
       scanPayload,
- /** Raw GAN digits. same as Square Stand gift-card barcode when card is loaded */
+      /** Raw GAN digits. same as Square Stand gift-card barcode when card is loaded */
       squareScanReady: Boolean(card.gan && scanPayload === card.gan),
+      paidMemberCode,
+      codeHint: paidMemberCode
+        ? 'Paid PTO member code (ends in 9). Show this 6-digit code at event food tables for refreshment tickets.'
+        : 'Free-account Cove code. Paid membership codes end in 9 for event refreshments.',
     })
   } catch (err) {
     console.error('/api/gift-card/family-code GET', err)

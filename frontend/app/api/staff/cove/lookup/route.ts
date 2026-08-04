@@ -34,6 +34,9 @@ export async function GET(req: NextRequest) {
             students: family.students,
             balance: 0,
             hasCard: false,
+            paidMember: family.paidMember,
+            membershipTier: family.membershipTier,
+            paidMemberCode: (await import('@/lib/cove-family-code')).isPaidMemberFamilyCode(family.coveFamilyCode),
           },
         },
         { status: 409 }
@@ -46,6 +49,9 @@ export async function GET(req: NextRequest) {
       balance: family.balance,
       hasCard: true,
       students: family.students,
+      paidMember: family.paidMember,
+      membershipTier: family.membershipTier,
+      paidMemberCode: (await import('@/lib/cove-family-code')).isPaidMemberFamilyCode(family.coveFamilyCode),
       // full GAN only for staff redeem. never show to parents in UI lists
       gan: family.gan,
     })

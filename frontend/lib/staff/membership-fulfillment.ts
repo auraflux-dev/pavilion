@@ -102,6 +102,8 @@ export async function getMembershipEntitlements(
   shirtSize: string
   entitlements: MembershipEntitlement[]
   discountCode: string
+  coveFamilyCode: string
+  paidMemberCode: boolean
 } | null> {
   const email = parentEmail.trim().toLowerCase()
   const client = getWixClient()
@@ -115,10 +117,55 @@ export async function getMembershipEntitlements(
       ''
   )
 
+  const tier = String(row.tier ?? '')
+  const shirtSize = String(row.shirtSize ?? '')
+  const stored = parseEntitlementsJson(row.entitlementsJson)
+  const { buildMembershipEntitlements } = await import('@/lib/membership-entitlements')
+  const enrichmentCode =
+    String(row.enrichmentCode ?? '').trim() ||
+    discountCode ||
+    null
+  const fresh = buildMembershipEntitlements({
+    tier,
+    shirtSize,
+    enrichmentCode,
+  })
+  // Keep cove credit + fulfilled physical from stored; refresh pickup / refreshments copy
+  const entitlements: MembershipEntitlement[] = []
+  const storedCove = stored.find((s) => s.kind === 'cove_credit')
+  if (storedCove) entitlements.push(storedCove)
+  for (const f of fresh) {
+    if (f.kind === 'cove_credit') continue
+    const prev = stored.find((s) => s.kind === f.kind)
+    if (
+      prev &&
+      (f.kind === 'spirit_shirt' || f.kind === 'magnet') &&
+      prev.status === 'fulfilled'
+    ) {
+      entitlements.push({ ...f, status: 'fulfilled', notes: prev.notes || f.notes })
+    } else {
+      entitlements.push(f)
+    }
+  }
+
+  let coveFamilyCode = ''
+  let paidMemberCode = false
+  try {
+    const { ensureCoveFamilyCode, isPaidMemberFamilyCode } = await import(
+      '@/lib/cove-family-code'
+    )
+    coveFamilyCode = await ensureCoveFamilyCode(email)
+    paidMemberCode = isPaidMemberFamilyCode(coveFamilyCode)
+  } catch {
+    coveFamilyCode = String(row.coveFamilyCode ?? '')
+  }
+
   return {
-    tier: String(row.tier ?? ''),
-    shirtSize: String(row.shirtSize ?? ''),
-    entitlements: parseEntitlementsJson(row.entitlementsJson),
-    discountCode,
+    tier,
+    shirtSize,
+    entitlements,
+    discountCode: enrichmentCode || '',
+    coveFamilyCode,
+    paidMemberCode,
   }
 }

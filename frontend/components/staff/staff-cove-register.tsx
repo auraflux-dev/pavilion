@@ -10,6 +10,9 @@ type Family = {
   balance: number
   hasCard: boolean
   gan?: string
+  paidMember?: boolean
+  membershipTier?: string
+  paidMemberCode?: boolean
   students: Array<{ id: string; firstName: string; lastName: string }>
 }
 
@@ -346,6 +349,17 @@ export function StaffCoveRegister() {
               .join(', ') || family.parentEmail || 'Family'}
             <span className="font-normal text-[#5A6070]"> · code {family.coveFamilyCode}</span>
           </p>
+          {family.paidMember || family.paidMemberCode ? (
+            <p className="text-xs font-bold text-[#085508]">
+              Paid PTO member
+              {family.membershipTier ? ` · ${family.membershipTier}` : ''}
+              {family.paidMemberCode ? ' · code ends in 9' : ''} — refreshment tickets OK
+            </p>
+          ) : (
+            <p className="text-xs text-[#5A6070]">
+              Free account Cove code (does not end in 9) — no paid-member refreshment tickets
+            </p>
+          )}
           <p className="text-2xl font-bold tabular-nums" style={{ color: '#085508' }}>
             Cove Digital Card: ${Number(family.balance).toFixed(2)}
           </p>

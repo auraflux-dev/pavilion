@@ -386,6 +386,14 @@ export async function applyPaidMembership(opts: {
     // Memberships collection may be missing or permissioned differently
   }
 
+  // Reclassify Family Cove code to paid marker (ends in 9) for event refreshments checks
+  try {
+    const { ensureCoveFamilyCode } = await import('@/lib/cove-family-code')
+    await ensureCoveFamilyCode(email)
+  } catch (err) {
+    console.warn('ensureCoveFamilyCode after paid membership', err)
+  }
+
   return {
     updatedStudentIds,
     membershipUpserted,

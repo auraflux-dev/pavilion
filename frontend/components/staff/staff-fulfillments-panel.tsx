@@ -76,7 +76,8 @@ export function StaffFulfillmentsPanel() {
         </h2>
         <p className="text-xs text-[#5A6070] mt-1">
           Physical perks still owed after paid membership checkout. Mark fulfilled when the shirt or
-          magnet is handed out / mailed.
+          magnet is handed out at Open House (Aug 13) or a coordinated pickup
+          (vp-membershipexperience@shmspto.org).
         </p>
       </div>
 

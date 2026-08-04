@@ -14,6 +14,8 @@ export function CoveFamilyCodeCard() {
   const [scanPayload, setScanPayload] = useState('')
   const [squareScanReady, setSquareScanReady] = useState(false)
   const [hasCard, setHasCard] = useState(false)
+  const [paidMemberCode, setPaidMemberCode] = useState(false)
+  const [codeHint, setCodeHint] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -29,6 +31,8 @@ export function CoveFamilyCodeCard() {
       setScanPayload(String(d.scanPayload ?? ''))
       setSquareScanReady(Boolean(d.squareScanReady))
       setHasCard(Boolean(d.hasCard))
+      setPaidMemberCode(Boolean(d.paidMemberCode))
+      setCodeHint(String(d.codeHint ?? ''))
       if (d.message) setMessage(d.message)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load code')
@@ -190,6 +194,13 @@ export function CoveFamilyCodeCard() {
               Spoken backup (if phone dies)
             </p>
             <p className="text-2xl font-bold font-mono tracking-[0.2em] text-[#1A1A1A]">{code}</p>
+            {paidMemberCode ? (
+              <p className="text-[11px] font-bold text-[#085508] mt-1">
+                Paid PTO member code (ends in 9) — show at event food tables for refreshment tickets
+              </p>
+            ) : codeHint ? (
+              <p className="text-[11px] text-[#5A6070] mt-1">{codeHint}</p>
+            ) : null}
             <div className="flex flex-wrap gap-2 mt-2">
               <Button type="button" variant="outline" size="sm" onClick={() => void copy()} title="Copy code">
                 <Copy className="w-3.5 h-3.5" />

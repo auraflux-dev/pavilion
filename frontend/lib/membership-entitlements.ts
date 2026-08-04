@@ -34,6 +34,13 @@ export const SHIRT_SIZES = [
 
 export type ShirtSize = (typeof SHIRT_SIZES)[number]
 
+/** Until 3PL ships, physical perks are Open House / coordinated pickup. */
+export const PHYSICAL_PERK_PICKUP_NOTE =
+  'Pick up at Open House on August 13, or email vp-membershipexperience@shmspto.org to coordinate pickup.'
+
+export const EVENT_REFRESHMENTS_NOTE =
+  'At PTO events, show your Family Cove 6-digit code (paid member codes end in 9). Volunteers record the code and hand refreshment tickets.'
+
 export function tierNeedsShirtSize(tier: string): boolean {
   const t = tier.trim().toLowerCase()
   return t === 'lagoon' || t === 'tide' || t === 'supreme' || t === 'pearl' || t === 'trench'
@@ -42,6 +49,19 @@ export function tierNeedsShirtSize(tier: string): boolean {
 export function tierNeedsMagnet(tier: string): boolean {
   const t = tier.trim().toLowerCase()
   return t === 'reef' || t === 'tide' || t === 'ruby' || t === 'pearl' || t === 'trench'
+}
+
+export function tierNeedsEventRefreshments(tier: string): boolean {
+  const t = tier.trim().toLowerCase()
+  return (
+    t === 'reef' ||
+    t === 'lagoon' ||
+    t === 'tide' ||
+    t === 'ruby' ||
+    t === 'supreme' ||
+    t === 'pearl' ||
+    t === 'trench'
+  )
 }
 
 export function enrichmentDiscountPercent(tier: string): number {
@@ -86,12 +106,13 @@ export function buildMembershipEntitlements(opts: {
     })
   }
 
-  if (tier === 'lagoon' || tier === 'tide' || tier === 'supreme' || tier === 'pearl' || tier === 'trench') {
+  if (tierNeedsEventRefreshments(tier)) {
     out.push({
       kind: 'event_refreshments',
       label: 'Free food & refreshments at PTO events',
       status: 'info',
-      notes: 'Show your membership in the portal or tell volunteers at the event.',
+      detail: 'Cove code ends in 9',
+      notes: EVENT_REFRESHMENTS_NOTE,
     })
   }
 
@@ -103,8 +124,8 @@ export function buildMembershipEntitlements(opts: {
       status: 'pending',
       detail: size || 'Size needed',
       notes: size
- ? `Size ${size}. PTO will fulfill from Spirit Wear stock.`
-        : 'Choose a size so we can fulfill your shirt.',
+        ? `Size ${size}. ${PHYSICAL_PERK_PICKUP_NOTE}`
+        : `Choose a size so we can fulfill your shirt. ${PHYSICAL_PERK_PICKUP_NOTE}`,
     })
   }
 
@@ -113,7 +134,7 @@ export function buildMembershipEntitlements(opts: {
       kind: 'magnet',
       label: '1 SHMS PTO magnet',
       status: 'pending',
-      notes: 'PTO will fulfill from store stock (pickup or event handout).',
+      notes: PHYSICAL_PERK_PICKUP_NOTE,
     })
   }
 

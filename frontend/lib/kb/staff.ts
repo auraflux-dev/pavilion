@@ -326,12 +326,15 @@ If a parent paid but sees nothing:
 
 ## Physical perks (shirt & magnet)
 - **Shirt size** is required at Lagoon/Tide checkout and appears in Staff → Fulfillments.
-- **Magnet** is queued for Reef/Tide; no mailing address is collected (pickup / event handout).
+- **Magnet** is queued for Reef/Tide; no mailing address yet (3PL later).
+- Tell parents: pick up at **Open House on August 13**, or email **vp-membershipexperience@shmspto.org** to coordinate pickup.
 - Mark fulfilled in Staff → Fulfillments after handout.
 
 ## Free food & refreshments at PTO events
-- Lagoon/Tide get an **info** perk in Member Portal → Membership benefits (not a redemption counter).
-- At events: ask the parent to open the portal benefits card, or check Staff → Members for paid tier. Honor system — no scan/log yet.`,
+- Paid parent tiers (Reef / Lagoon / Tide) get this perk.
+- Family Cove **6-digit codes for paid members always end in 9** (free accounts never do).
+- At food trucks / tables: parent shows the 6-digit code → volunteer checks it ends in 9 (or looks up on Cove register) → record the code → hand refreshment tickets.
+- Portal Membership benefits also shows the code for paid members.`,
     },
     {
       slug: 'refunds-cancellations',

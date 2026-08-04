@@ -15,8 +15,14 @@ export type CoveFamilyLookup = {
   coveFamilyCode: string
   gan: string
   balance: number
+  /** Reef / Lagoon / Tide — refreshments + paid code marker (ends in 9). */
+  paidMember: boolean
+  membershipTier: string
   students: Array<{ id: string; firstName: string; lastName: string; grade?: string }>
 }
+
+/** Paid PTO member family codes always end in 9 (Reef / Lagoon / Tide). Free never do. */
+export const PAID_MEMBER_CODE_SUFFIX = '9'
 
 function normalizeCode(raw: string): string {
   return String(raw ?? '')
@@ -24,9 +30,41 @@ function normalizeCode(raw: string): string {
     .slice(0, 8)
 }
 
-function randomCode(): string {
+/** Quick volunteer rule: spoken/backup code ending in 9 ⇒ paid PTO member. */
+export function isPaidMemberFamilyCode(code: string): boolean {
+  const digits = normalizeCode(code)
+  return digits.length >= 4 && digits.endsWith(PAID_MEMBER_CODE_SUFFIX)
+}
+
+function randomCode(paidMember: boolean): string {
   // 6 digits, avoid leading zeros for easier verbal share
-  return String(Math.floor(100000 + Math.random() * 900000))
+  const head = String(Math.floor(10000 + Math.random() * 90000)) // 5 digits
+  if (paidMember) return head + PAID_MEMBER_CODE_SUFFIX
+  // Free: last digit 0–8 only
+  const last = String(Math.floor(Math.random() * 9))
+  return head + last
+}
+
+async function resolveParentPaidMember(email: string): Promise<boolean> {
+  const { isCovePaidMemberTier } = await import('@/lib/staff/members-roster')
+  const client = getWixClient()
+  try {
+    const membership = await client.items.query('Memberships').eq('email', email).limit(1).find()
+    const tier = String((membership.items?.[0] as { tier?: string } | undefined)?.tier ?? '')
+    if (isCovePaidMemberTier(tier)) return true
+  } catch {
+    // fall through
+  }
+  try {
+    const students = await client.items.query('Students').eq('parentEmail', email).limit(20).find()
+    for (const row of students.items ?? []) {
+      const tier = String((row as { membershipTier?: string }).membershipTier ?? '')
+      if (isCovePaidMemberTier(tier)) return true
+    }
+  } catch {
+    // ignore
+  }
+  return false
 }
 
 async function codeTaken(code: string, exceptEmail?: string): Promise<boolean> {
@@ -106,17 +144,31 @@ async function mirrorCodeOnStudents(email: string, code: string): Promise<void> 
   }
 }
 
-/** Return existing code or create a unique one for the family. */
+async function mintUniqueCode(email: string, paidMember: boolean): Promise<string> {
+  let code = randomCode(paidMember)
+  for (let i = 0; i < 16; i++) {
+    if (!(await codeTaken(code, email))) return code
+    code = randomCode(paidMember)
+  }
+  return code
+}
+
+function codeMatchesPaidClass(code: string, paidMember: boolean): boolean {
+  return isPaidMemberFamilyCode(code) === paidMember
+}
+
+/** Return existing code or create a unique one for the family. Reclassifies paid↔free marker when needed. */
 export async function ensureCoveFamilyCode(parentEmail: string): Promise<string> {
   const email = parentEmail.trim().toLowerCase()
   if (!email) throw new Error('parentEmail required')
 
+  const paidMember = await resolveParentPaidMember(email)
   const client = getWixClient()
   try {
     const membership = await client.items.query('Memberships').eq('email', email).limit(1).find()
     const row = membership.items?.[0] as { coveFamilyCode?: string } | undefined
     const existing = normalizeCode(String(row?.coveFamilyCode ?? ''))
-    if (existing.length >= 4) {
+    if (existing.length >= 4 && codeMatchesPaidClass(existing, paidMember)) {
       await mirrorCodeOnStudents(email, existing)
       return existing
     }
@@ -127,19 +179,14 @@ export async function ensureCoveFamilyCode(parentEmail: string): Promise<string>
   const students = await listFamilyStudents(email)
   for (const s of students as Array<FamilyStudentCardRow & { coveFamilyCode?: string }>) {
     const existing = normalizeCode(String(s.coveFamilyCode ?? ''))
-    if (existing.length >= 4) {
+    if (existing.length >= 4 && codeMatchesPaidClass(existing, paidMember)) {
       await upsertMembershipCode(email, existing)
       await mirrorCodeOnStudents(email, existing)
       return existing
     }
   }
 
-  let code = randomCode()
-  for (let i = 0; i < 12; i++) {
-    if (!(await codeTaken(code, email))) break
-    code = randomCode()
-  }
-
+  const code = await mintUniqueCode(email, paidMember)
   await upsertMembershipCode(email, code)
   await mirrorCodeOnStudents(email, code)
   return code
@@ -149,11 +196,8 @@ export async function resetCoveFamilyCode(parentEmail: string): Promise<string> 
   const email = parentEmail.trim().toLowerCase()
   if (!email) throw new Error('parentEmail required')
 
-  let code = randomCode()
-  for (let i = 0; i < 12; i++) {
-    if (!(await codeTaken(code, email))) break
-    code = randomCode()
-  }
+  const paidMember = await resolveParentPaidMember(email)
+  const code = await mintUniqueCode(email, paidMember)
   await upsertMembershipCode(email, code)
   await mirrorCodeOnStudents(email, code)
   return code
@@ -245,11 +289,24 @@ export async function lookupFamilyByCoveCode(rawCode: string): Promise<CoveFamil
     }
   }
 
+  const paidMember = await resolveParentPaidMember(parentEmail)
+  let membershipTier = 'free'
+  try {
+    const membership = await client.items.query('Memberships').eq('email', parentEmail).limit(1).find()
+    membershipTier = String(
+      (membership.items?.[0] as { tier?: string } | undefined)?.tier ?? 'free',
+    )
+  } catch {
+    // keep free
+  }
+
   return {
     parentEmail,
     coveFamilyCode,
     gan: card.gan || (digits.length >= 12 ? digits : ''),
     balance,
+    paidMember,
+    membershipTier,
     students: family.map((s) => ({
       id: s._id,
       firstName: String(s.firstName ?? ''),

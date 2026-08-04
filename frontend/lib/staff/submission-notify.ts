@@ -220,10 +220,12 @@ export async function notifyStaffTransaction(opts: {
         }
         if (refreshments) {
           lines.push(
-            `• ${refreshments.label} — honor system at events (parent shows Membership benefits in portal).`,
+            `• ${refreshments.label} — parent shows Family Cove 6-digit code (paid codes end in 9); record code and hand tickets.`,
           )
         }
-        lines.push('No mailing address is collected. plan pickup / event handout unless you email the parent.')
+        lines.push(
+          'No mailing address yet (3PL later). Pick up at Open House Aug 13, or parent emails vp-membershipexperience@shmspto.org to coordinate.',
+        )
       }
     }
   }

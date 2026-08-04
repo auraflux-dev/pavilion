@@ -9,6 +9,8 @@ type Benefits = {
   shirtSize: string
   entitlements: MembershipEntitlement[]
   discountCode: string
+  coveFamilyCode: string
+  paidMemberCode: boolean
 }
 
 export function MembershipBenefitsCard() {
@@ -33,6 +35,8 @@ export function MembershipBenefitsCard() {
         shirtSize: d.shirtSize || '',
         entitlements: d.entitlements || [],
         discountCode: d.discountCode || '',
+        coveFamilyCode: d.coveFamilyCode || '',
+        paidMemberCode: Boolean(d.paidMemberCode),
       })
     } catch {
       setData(null)
@@ -62,6 +66,18 @@ export function MembershipBenefitsCard() {
         Membership benefits
         {data.tier ? ` · ${data.tier}` : ''}
       </p>
+      {data.coveFamilyCode && data.paidMemberCode ? (
+        <p className="mt-2 text-sm text-[#1A1A1A]">
+          Event refreshments ID:{' '}
+          <span className="font-mono font-bold tracking-wider text-[#085508]">
+            {data.coveFamilyCode}
+          </span>
+          <span className="block text-[11px] text-[#5A6070] mt-0.5">
+            Show this 6-digit Family Cove code at food trucks / refreshment tables (paid codes end in
+            9).
+          </span>
+        </p>
+      ) : null}
       <ul className="mt-2 space-y-2">
         {data.entitlements.map((e) => (
           <li key={e.kind} className="text-sm">

@@ -59,6 +59,12 @@ export function isPaidTier(tier: string): boolean {
   return n !== 'free' && n !== 'none' && n !== ''
 }
 
+/** Parent paid PTO tiers that get paid Cove code marker (ends in 9) + event refreshments. */
+export function isCovePaidMemberTier(tier: string): boolean {
+  const n = normalizeMembershipTier(tier)
+  return n === 'reef' || n === 'lagoon' || n === 'tide'
+}
+
 export function tierRank(tier: string | undefined | null): number {
   const n = normalizeMembershipTier(tier)
   return TIER_RANK[n] ?? (isPaidTier(n) ? 10 : 0)
