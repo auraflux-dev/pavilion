@@ -289,6 +289,10 @@ export const SITE_SETTING_GROUPS: {
       { key: 'contactEmailGeneral', label: 'General email (contact form inbox)' },
       { key: 'contactEmailTreasurer', label: 'Treasurer email' },
       {
+        key: 'contactEmailStoreCoordinator',
+        label: 'Cove / store coordinator email (sale alerts)',
+      },
+      {
         key: 'contactEmailPrograms',
         label: 'VP Programs email (programs contact form)',
       },
