@@ -807,6 +807,49 @@ async function ensureStudentArchiveFields() {
   }
 }
 
+async function ensureCommsCalendarItemsCollection() {
+  try {
+    await wix('/wix-data/v2/collections', {
+      collection: {
+        id: 'CommsCalendarItems',
+        displayName: 'Comms Calendar Items',
+        fields: [
+          { key: 'title', displayName: 'Title', type: 'TEXT' },
+          { key: 'body', displayName: 'Body', type: 'TEXT' },
+          { key: 'audiences', displayName: 'Audiences', type: 'TEXT' },
+          { key: 'channel', displayName: 'Channel', type: 'TEXT' },
+          { key: 'kind', displayName: 'Planner Kind', type: 'TEXT' },
+          { key: 'status', displayName: 'Status', type: 'TEXT' },
+          { key: 'publishAt', displayName: 'Publish At', type: 'DATETIME' },
+          { key: 'ownerEmail', displayName: 'Owner Email', type: 'TEXT' },
+          { key: 'ownerName', displayName: 'Owner Name', type: 'TEXT' },
+          { key: 'assetUrl', displayName: 'Asset URL', type: 'TEXT' },
+          { key: 'notes', displayName: 'Notes', type: 'TEXT' },
+          { key: 'publishedAt', displayName: 'Published At', type: 'DATETIME' },
+          { key: 'publishedByEmail', displayName: 'Published By Email', type: 'TEXT' },
+          { key: 'createdByEmail', displayName: 'Created By Email', type: 'TEXT' },
+          { key: 'createdAt', displayName: 'Created At', type: 'DATETIME' },
+          { key: 'updatedAt', displayName: 'Updated At', type: 'DATETIME' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+        ],
+        permissions: {
+          insert: 'ADMIN',
+          update: 'ADMIN',
+          remove: 'ADMIN',
+          read: 'ADMIN',
+        },
+      },
+    })
+    console.log('Created CommsCalendarItems collection')
+  } catch (err) {
+    if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
+      console.log('CommsCalendarItems collection already exists')
+      return
+    }
+    console.warn('CommsCalendarItems create skipped:', err.message.slice(0, 200))
+  }
+}
+
 async function ensureStaffProjectsCollection() {
   try {
     await wix('/wix-data/v2/collections', {
@@ -1000,6 +1043,7 @@ async function main() {
   await ensureSocialPostsCollection()
   await ensureStaffProjectsCollection()
   await ensureStaffTasksCollection()
+  await ensureCommsCalendarItemsCollection()
   await upsertSiteSettings()
   await upsertPageContent()
   await upsertSurveys()

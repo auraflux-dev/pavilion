@@ -34,7 +34,7 @@ export const STAFF_KB: KbIndex = {
     {
       id: 'comms',
       title: 'Inbox & outreach',
-      summary: 'Gmail, Docs, memberships email, Facebook.',
+      summary: 'Comms calendar, Gmail, Docs, email, WhatsApp, Facebook.',
       order: 5,
     },
     {
@@ -57,6 +57,7 @@ export const STAFF_KB: KbIndex = {
 - **Home**: your role workspaces and activity notices
 - **Help**: this knowledge base
 - **Inbox / Calendar / Docs**. Connect Google once, then work stays in Staff
+- **Comms calendar**: plan parent / school / board messages and content
 - **The Cove**: register + products when you run the snack window
 
 ## Stay in Staff
@@ -279,11 +280,39 @@ Mass email and WhatsApp share actions open the compose/share flow for that campa
 Keep MoneyMinder / bank exports with Treasurer. Do not duplicate finance ledgers in the roster.`,
     },
     {
+      slug: 'comms-calendar',
+      title: 'Comms calendar',
+      categoryId: 'comms',
+      summary: 'Plan content and track sends to parents, school, and board.',
+      order: 4,
+      body: `Open **Comms & content** for the shared month calendar.
+
+## Two planners
+- **Communications** — email, WhatsApp, meetings to parents / school / board
+- **Content planner** — social posts, flyers, portal content
+
+## Views
+- **Month** — real calendar grid; click a day to schedule
+- **Agenda** — week list
+
+## How to use it
+1. Pick Communications or Content planner
+2. Click a day on the month grid (or use Agenda)
+3. Add title, draft, audience(s), channel, and status
+4. Attach a Canva/Doc/Drive link
+5. When ready to send, open Newsletter / WA or Social — those tools still publish
+6. Click **Mark published** after the send
+
+Projects also has a **Calendar** tab for tasks by due date.
+
+This is the schedule of record. It does not auto-send mail or posts.`,
+    },
+    {
       slug: 'facebook-from-staff',
       title: 'Facebook from Staff',
       categoryId: 'comms',
       summary: 'Marketing posts from the Staff Facebook tools.',
-      order: 4,
+      order: 5,
       need: 'marketing',
       body: `Use the Staff Facebook workspace your role allows for page posts and scheduled marketing.
 

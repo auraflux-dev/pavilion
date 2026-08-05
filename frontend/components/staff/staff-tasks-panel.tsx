@@ -2,6 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import {
+  StaffMonthCalendar,
+  eventDayKey,
+  type MonthCalendarEvent,
+  type MonthCalendarTone,
+} from '@/components/staff/staff-month-calendar'
 import { currentSchoolYear, type StaffDirectoryPerson, type StaffProject } from '@/lib/staff/projects'
 import type { StaffTask, TaskStatus } from '@/lib/staff/tasks'
 
@@ -11,7 +17,7 @@ type Props = {
   myEmail?: string
 }
 
-type ViewMode = 'year' | 'mine' | 'project'
+type ViewMode = 'year' | 'mine' | 'project' | 'calendar'
 
 const STATUS_LABEL: Record<TaskStatus, string> = {
   triage: 'Triage',
@@ -38,6 +44,8 @@ function personLabel(p: StaffDirectoryPerson) {
 
 export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Props) {
   const [view, setView] = useState<ViewMode>('year')
+  const [calMonth, setCalMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
+  const [calSelectedDate, setCalSelectedDate] = useState<string | null>(null)
   const [schoolYear, setSchoolYear] = useState(currentSchoolYear())
   const [projects, setProjects] = useState<StaffProject[]>([])
   const [directory, setDirectory] = useState<StaffDirectoryPerson[]>([])
@@ -87,6 +95,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
       params.set('view', 'project')
       params.set('projectId', selectedProjectId)
     } else {
+      // year + calendar both load the year board task set
       params.set('view', 'year')
     }
     if (includeDone) params.set('includeDone', 'true')
@@ -127,6 +136,40 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
     }
     return map
   }, [tasks])
+
+  const projectTitleById = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const p of projects) map.set(p.id, p.title)
+    return map
+  }, [projects])
+
+  const calendarEvents: MonthCalendarEvent[] = useMemo(() => {
+    return tasks
+      .filter((t) => t.dueAt)
+      .map((t) => {
+        const overdue =
+          Boolean(t.dueAt && Date.parse(t.dueAt) < Date.now() && t.status !== 'done')
+        let tone: MonthCalendarTone = 'slate'
+        if (t.status === 'done') tone = 'green'
+        else if (t.status === 'blocked' || overdue) tone = 'amber'
+        else if (t.status === 'triage') tone = 'rose'
+        else tone = 'blue'
+        return {
+          id: t.id,
+          date: t.dueAt as string,
+          title: t.title,
+          subtitle: `${projectTitleById.get(t.projectId) || 'Task'} · ${STATUS_LABEL[t.status]}`,
+          tone,
+        }
+      })
+  }, [tasks, projectTitleById])
+
+  const calDayTasks = useMemo(() => {
+    if (!calSelectedDate) return []
+    return tasks.filter((t) => t.dueAt && eventDayKey(t.dueAt) === calSelectedDate)
+  }, [tasks, calSelectedDate])
+
+  const undatedTasks = useMemo(() => tasks.filter((t) => !t.dueAt && t.status !== 'done'), [tasks])
 
   const assigneeChoices = useMemo(() => {
     const project = projects.find((p) => p.id === (taskProjectId || selectedProjectId))
@@ -351,6 +394,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
               ['year', 'Year board'],
               ['mine', 'My board'],
               ['project', 'Project'],
+              ['calendar', 'Calendar'],
             ] as const
           ).map(([id, label]) => (
             <button
@@ -609,6 +653,64 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
             {tasks.map((t) =>
               renderTaskCard(t, projects.find((p) => p.id === t.projectId)?.title),
             )}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Month calendar by due date */}
+      {!loading && view === 'calendar' ? (
+        <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
+          <StaffMonthCalendar
+            month={calMonth}
+            onMonthChange={(d) => {
+              setCalMonth(d)
+              setCalSelectedDate(null)
+            }}
+            events={calendarEvents}
+            selectedDate={calSelectedDate}
+            onSelectDate={(iso) => {
+              setCalSelectedDate(iso)
+              setTaskDueLocal(`${iso}T17:00`)
+            }}
+            onSelectEvent={(id) => {
+              const task = tasks.find((t) => t.id === id)
+              if (!task?.dueAt) return
+              setCalSelectedDate(task.dueAt.slice(0, 10))
+            }}
+          />
+          <div className="space-y-3">
+            <div className="rounded-xl border border-[#E8E4DC] bg-white p-3">
+              <h3 className="text-sm font-semibold">
+                {calSelectedDate
+                  ? new Date(`${calSelectedDate}T12:00:00`).toLocaleDateString(undefined, {
+                      weekday: 'long',
+                      month: 'short',
+                      day: 'numeric',
+                    })
+                  : 'Select a day'}
+              </h3>
+              <p className="mt-1 text-xs text-[#5A6070]">
+                Tasks with a due date appear on the grid. Click a day, then use Add a task above.
+              </p>
+              {calSelectedDate && calDayTasks.length === 0 ? (
+                <p className="mt-2 text-xs text-[#5A6070]">No tasks due this day.</p>
+              ) : null}
+              <div className="mt-2 space-y-2">
+                {calDayTasks.map((t) =>
+                  renderTaskCard(t, projectTitleById.get(t.projectId)),
+                )}
+              </div>
+            </div>
+            {undatedTasks.length > 0 ? (
+              <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] p-3">
+                <h3 className="text-sm font-semibold">No due date</h3>
+                <div className="mt-2 space-y-2">
+                  {undatedTasks.slice(0, 8).map((t) =>
+                    renderTaskCard(t, projectTitleById.get(t.projectId)),
+                  )}
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}

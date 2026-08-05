@@ -19,7 +19,8 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 
 | View | Roles | What |
 |------|-------|------|
-| Projects | Everyone | Year board / assign tasks |
+| Projects | Everyone | Year board, assign tasks, **Calendar** (tasks by due date) |
+| **Comms & content** | Marketing / secretary / membership / events | Month grid for **Communications** + **Content planner** (parents / school / board) |
 | Members / Staff access | Admin | Lookup, act-as, archive, roles |
 | Social | Marketing | Facebook publish |
 | Surveys | Marketing / secretary | **Create**, share, review, CSV |
@@ -60,6 +61,7 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **37 - Site Capability Audit & Test Plans** | Everyone / QA | Visitor · portal · staff gaps + TP checklists |
 | **38 - Parent Portal Checklist** | Staff helping parents | Free vs paid what parents can do |
 | **39 - Member Newsletter** | Marketing / secretary / membership | Email + WhatsApp to free/paid members |
+| **46 - Comms & Content Calendar** | Marketing / secretary / membership / events | Month + agenda planners; publish via Newsletter / Social / WA |
 | **40 - Visitor Site Content from Staff** | Role-scoped | Site settings, board, nav, FAQs, volunteers… |
 | **27 - Member Portal Parent Support Guide** | Everyone helping parents | Walk a parent through portal screens |
 

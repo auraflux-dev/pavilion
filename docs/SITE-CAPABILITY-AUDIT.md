@@ -39,6 +39,7 @@ Audience shells: **visitor** · **free member** · **paid member** · **staff (b
 | G-P1-5 | Membership tier map / Catalog link | Visitor | **COVERED**. Membership tiers (paid display still Catalog) |
 | G-P1-6 | Events create/edit | Visitor | **COVERED**. Staff Events create/edit/cancel (Wix Events API) |
 | G-P1-7 | Marketing newsletter list/send | Visitor | **COVERED**. Newsletter workspace (Gmail + WhatsApp + portal; free/paid members) |
+| G-P1-8 | Member / school / board comms + content calendar | Staff | **COVERED**. Comms & content workspace (month grid + agenda; CMS `CommsCalendarItems`) |
 
 ### P2
 
@@ -54,6 +55,7 @@ Audience shells: **visitor** · **free member** · **paid member** · **staff (b
 ## Role → Staff tools (code)
 
 **Everyone:** Home, Inbox, Calendar, Docs, Projects, Help.  
+**Marketing / secretary / membership / events:** Comms & content (month calendar).  
 **Inbox/Calendar/Docs:** all staff after Connect Google (not role-gated).
 
 | Role | Extra workspaces |

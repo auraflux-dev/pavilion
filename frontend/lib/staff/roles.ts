@@ -171,7 +171,7 @@ export const ROLE_HOME_COPY: Record<
  owns: 'Web messaging, newsletters, FB/IG, surveys, photo privacy',
  thisWeek: [
  'Draft social posts for upcoming events',
- 'Check open surveys and response channels',
+ 'Fill Comms calendar for the next two weeks',
  'Align promo asks from other VPs',
  ],
  },
@@ -180,7 +180,7 @@ export const ROLE_HOME_COPY: Record<
  owns: 'Minutes, calendar, legal docs, member comms calendar, talent matching',
  thisWeek: [
  'Publish latest meeting minutes',
- 'Review legal page copy',
+ 'Update Comms calendar (parents / school / board)',
  'Plan email / WhatsApp / in-app sends',
  ],
  },

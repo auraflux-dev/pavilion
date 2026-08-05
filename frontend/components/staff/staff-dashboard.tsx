@@ -22,6 +22,7 @@ import { StaffPageContentPanel } from '@/components/staff/staff-page-content-pan
 import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-panel'
 import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection-panel'
 import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
+import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
 import { StaffWhatsAppQueuePanel } from '@/components/staff/staff-whatsapp-queue-panel'
 import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
 import { StaffTimesheetsPanel } from '@/components/staff/staff-timesheets-panel'
@@ -87,6 +88,7 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'fundraising',
   'wellness',
   'newsletter',
+  'comms',
   'expenses',
   'timesheets',
   'reports',
@@ -231,6 +233,14 @@ export function StaffDashboard() {
         me.roles.includes('membership') ||
         me.isAdmin),
   )
+  const canComms = Boolean(
+    me &&
+      (me.roles.includes('marketing') ||
+        me.roles.includes('secretary') ||
+        me.roles.includes('membership') ||
+        me.roles.includes('events') ||
+        me.isAdmin),
+  )
 
   const navItems = useMemo(() => {
     if (!me) return []
@@ -268,6 +278,7 @@ export function StaffDashboard() {
     if (canVolunteers) items.push({ id: 'volunteers', label: STAFF_WORKSPACE_LABEL.volunteers })
     if (canFundraising) items.push({ id: 'fundraising', label: STAFF_WORKSPACE_LABEL.fundraising })
     if (canWellness) items.push({ id: 'wellness', label: STAFF_WORKSPACE_LABEL.wellness })
+    if (canComms) items.push({ id: 'comms', label: STAFF_WORKSPACE_LABEL.comms })
     if (canNewsletter) items.push({ id: 'newsletter', label: STAFF_WORKSPACE_LABEL.newsletter })
     if (
       canPrograms ||
@@ -303,6 +314,7 @@ export function StaffDashboard() {
     canVolunteers,
     canFundraising,
     canWellness,
+    canComms,
     canNewsletter,
   ])
 
@@ -499,7 +511,7 @@ export function StaffDashboard() {
                           inbox: 'Workspace mail + reply',
                           calendar: 'Google Calendar',
                           docs: 'Drive Docs to read/edit',
-                          projects: 'Year board, assign tasks',
+                          projects: 'Year board, tasks & calendar',
                           members: 'Lookup, act-as, archive',
                           access: 'Assign @shmspto.org roles',
                           social: 'Facebook from Staff',
@@ -521,6 +533,7 @@ export function StaffDashboard() {
                           volunteers: 'Volunteer opportunity cards',
                           fundraising: 'CTAs & fundraising goals',
                           wellness: 'Wish list & appreciation',
+                          comms: 'Month grid · communications & content',
                           newsletter: 'Member email & WhatsApp',
                           expenses: 'Submit & track reimbursements',
                           help: 'Staff knowledge base',
@@ -750,6 +763,9 @@ export function StaffDashboard() {
         ) : null}
         {active === 'wellness' && canWellness ? (
           <StaffSiteSettingsPanel title="Teacher & staff wellness" groupIds={['wellness']} />
+        ) : null}
+        {active === 'comms' && canComms ? (
+          <StaffCommsCalendarPanel onOpenWorkspace={(id) => go(id as StaffWorkspace)} />
         ) : null}
         {active === 'newsletter' && canNewsletter ? (
           <div className="space-y-4">

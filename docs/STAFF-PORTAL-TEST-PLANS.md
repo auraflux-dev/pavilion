@@ -107,6 +107,19 @@ Covers every gap from the portal / board-roles / social / payments session.
 | E.5 | Other staff roles receive 403 from `/api/staff/surveys` | |
 | E.6 | Parent submission tests: see `docs/PARENT-PORTAL-PLAN.md` TP-E | |
 
+## TP-COMMS. Comms & content calendar + Projects calendar
+
+| # | Test | Pass |
+|---|------|------|
+| C.1 | Marketing/secretary/membership/events see **Comms & content** nav; other roles do not | |
+| C.2 | Month grid shows Mon–Sun; Today / prev / next change month | |
+| C.3 | Click a day prefills publish datetime on the add form | |
+| C.4 | Communications vs Content planner tabs filter items by `kind` | |
+| C.5 | Create item → appears on correct day chip; Edit + Mark published works | |
+| C.6 | Open Newsletter / Social deep-links from channel | |
+| C.7 | Unauthenticated `GET/POST /api/staff/comms-calendar` → 403 | |
+| C.8 | Projects → **Calendar** plots tasks by due date; undated list shows | |
+
 ## Board role → system role (assignment checklist)
 
 | Board title | System roles |
