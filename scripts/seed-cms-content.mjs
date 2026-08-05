@@ -741,6 +741,13 @@ async function ensureStaffRolesCollection() {
   try {
     const collection = await wix('/wix-data/v2/collections/StaffRoles', undefined, 'GET')
     const existing = new Set((collection.collection?.fields ?? []).map((field) => field.key))
+    if (!existing.has('onboardingProgress')) {
+      await wix('/wix-data/v2/collections/create-field', {
+        dataCollectionId: 'StaffRoles',
+        field: { key: 'onboardingProgress', displayName: 'Onboarding Progress', type: 'TEXT' },
+      })
+      console.log('Created StaffRoles field onboardingProgress')
+    }
     if (!existing.has('assignedProgramIds')) {
       await wix('/wix-data/v2/collections/create-field', {
         dataCollectionId: 'StaffRoles',

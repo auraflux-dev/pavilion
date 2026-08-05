@@ -2,13 +2,18 @@
  * Litecard. Apple / Google Wallet passes with Square GAN as the scannable barcode.
  * Litecard holds Pass Type signing; we only create/update cards via their API.
  *
- * Env (Vercel Production):
+ * Env (Vercel):
  *   LITECARD_USERNAME, LITECARD_PASSWORD, LITECARD_TEMPLATE_ID
  * Optional:
- *   LITECARD_BASE_URL (default enterprise API)
- *   LITECARD_BUSINESS_ID (x-active-business-id for master/sub accounts)
- *   LITECARD_WELCOME_BASE (hosted download page base)
+ *   LITECARD_BASE_URL (demo: https://bff-api.demo.litecard.io)
+ *   LITECARD_BUSINESS_ID (x-active-business-id)
+ *   LITECARD_WELCOME_BASE (demo: https://main.demo.litecard.io/welcome?id=)
  *   LITECARD_FIELD_BARCODE / LITECARD_FIELD_BALANCE / LITECARD_FIELD_CARD_NUMBER
+ *   LITECARD_BALANCE_FORMAT=cents when Balance is an integer field (pointsKey)
+ *   LITECARD_SEND_LEGACY_ALIASES=true only if template allows memberId/giftcardgan
+ *
+ * Demo Cove template uses cardNumber = Square GAN (barcode.fieldMap) and
+ * pointsKey = balance in integer cents. Token expires_in is typically 24h.
  */
 import { getWixClient } from '@/lib/wix-client'
 
@@ -93,29 +98,54 @@ async function getAccessToken(): Promise<string> {
   return data.access_token
 }
 
+function balanceAsCents(): boolean {
+  const mode = (process.env.LITECARD_BALANCE_FORMAT || '').trim().toLowerCase()
+  if (mode === 'cents' || mode === 'integer') return true
+  // Demo Cove template uses pointsKey as integer cents.
+  return fieldBalance() === 'pointskey'
+}
+
 function buildCardPayload(opts: {
   email: string
   firstName?: string
   lastName?: string
   gan: string
   balanceDollars?: number
-}): Record<string, string> {
+}): Record<string, string | number> {
   const gan = opts.gan.replace(/\D/g, '')
-  const balance =
-    opts.balanceDollars != null && Number.isFinite(opts.balanceDollars)
-      ? `$${Number(opts.balanceDollars).toFixed(2)}`
-      : ''
-  const payload: Record<string, string> = {
+  const barcodeKey = fieldBarcode()
+  const cardNumberKey = fieldCardNumber()
+  const balanceKey = fieldBalance()
+  const payload: Record<string, string | number> = {
     email: opts.email.trim().toLowerCase(),
-    [fieldBarcode()]: gan,
-    [fieldCardNumber()]: gan.length > 4 ? `•••• ${gan.slice(-4)}` : gan,
   }
   if (opts.firstName?.trim()) payload.firstName = opts.firstName.trim()
   if (opts.lastName?.trim()) payload.lastName = opts.lastName.trim()
-  if (balance) payload[fieldBalance()] = balance
-  // Common alternate keys some Litecard gift-card templates use
-  payload.memberId = gan
-  payload.giftcardgan = gan
+
+  // Square GAN → scannable QR (template barcode.fieldMap should point at this key).
+  if (barcodeKey) payload[barcodeKey] = gan
+  // Optional display card number (may be the same key as barcode on Cove template).
+  if (cardNumberKey && cardNumberKey !== barcodeKey) {
+    const mask =
+      process.env.LITECARD_MASK_CARD_NUMBER === 'true' && gan.length > 4
+        ? `•••• ${gan.slice(-4)}`
+        : gan
+    payload[cardNumberKey] = mask
+  }
+
+  if (opts.balanceDollars != null && Number.isFinite(opts.balanceDollars) && balanceKey) {
+    if (balanceAsCents()) {
+      payload[balanceKey] = Math.round(Number(opts.balanceDollars) * 100)
+    } else {
+      payload[balanceKey] = `$${Number(opts.balanceDollars).toFixed(2)}`
+    }
+  }
+
+  // Only add legacy aliases when explicitly enabled (strict templates reject extras).
+  if (process.env.LITECARD_SEND_LEGACY_ALIASES === 'true') {
+    payload.memberId = gan
+    payload.giftcardgan = gan
+  }
   return payload
 }
 

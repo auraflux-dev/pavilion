@@ -40,6 +40,7 @@ Audience shells: **visitor** · **free member** · **paid member** · **staff (b
 | G-P1-6 | Events create/edit | Visitor | **COVERED**. Staff Events create/edit/cancel (Wix Events API) |
 | G-P1-7 | Marketing newsletter list/send | Visitor | **COVERED**. Newsletter workspace (Gmail + WhatsApp + portal; free/paid members) |
 | G-P1-8 | Member / school / board comms + content calendar | Staff | **COVERED**. Comms & content workspace (month grid + agenda; CMS `CommsCalendarItems`) |
+| G-P1-8b | Canva design browse from Staff | Staff | **BUILT**. Staff → Canva (OAuth Connect; CMS `StaffCanvaTokens`). Needs Canva Portal redirect URIs + deploy. |
 
 ### P2
 
@@ -61,7 +62,7 @@ Audience shells: **visitor** · **free member** · **paid member** · **staff (b
 | Role | Extra workspaces |
 |------|------------------|
 | admin | Members, Staff access, + all gated |
-| marketing | Social, Surveys, Events, Page copy, Site settings, Nav & footer, FAQs, Fundraising |
+| marketing | Social, Surveys, Events, Page copy, Site settings, Nav & footer, FAQs, Fundraising, **Canva**, Comms |
 | secretary | Surveys, Messages, Minutes, Memberships, Tiers, Events, Page copy, Site settings, Board, Nav, FAQs, Volunteers |
 | treasurer | Payments, Fundraising |
 | events | Events, Volunteers, Wellness |

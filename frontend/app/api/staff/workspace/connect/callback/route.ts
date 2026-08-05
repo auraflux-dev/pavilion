@@ -93,7 +93,15 @@ export async function GET(req: NextRequest) {
     }
 
     if (!googleMemberOauthConfigured()) return fail('google_not_configured')
-    if (oauthError) return fail('google_denied')
+    if (oauthError) {
+      const desc = (req.nextUrl.searchParams.get('error_description') || '').toLowerCase()
+      const reason =
+        /internal|organization|org-only|not completed the google verification/i.test(desc) ||
+        desc.includes('access blocked')
+          ? 'google_org_internal'
+          : 'google_denied'
+      return fail(reason)
+    }
     if (!code || !stateRaw || stateRaw !== cookieState) {
       return fail('google_state_mismatch')
     }

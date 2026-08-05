@@ -360,7 +360,7 @@ export const SITE_SETTING_GROUPS: {
       {
         key: 'contactEmailMembershipExperience',
         label:
-          'VP Membership Experience email (portal business form + sale alerts)',
+          'VP Membership Experience email (portal help + business form + sale alerts)',
       },
       {
         key: 'contactEmailVolunteer',
@@ -368,9 +368,12 @@ export const SITE_SETTING_GROUPS: {
       },
       {
         key: 'contactEmailMarketing',
-        label: 'Marketing inbox (newsletter + survey alerts)',
+        label: 'VP Marketing email (portal help + newsletter/survey alerts)',
       },
-      { key: 'presidentEmail', label: 'President email' },
+      {
+        key: 'presidentEmail',
+        label: 'President email (portal help + general)',
+      },
       { key: 'contactAddress', label: 'Address', multiline: true },
       { key: 'contactStoreHours', label: 'The Cove in-person snack window hours' },
       { key: 'storeHours', label: 'The Cove in-person hours (footer / alt)' },

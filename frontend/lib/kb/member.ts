@@ -34,6 +34,12 @@ export const MEMBER_KB: KbIndex = {
       summary: 'Enrichment, calendar, and feedback forms.',
       order: 5,
     },
+    {
+      id: 'support',
+      title: 'Get help',
+      summary: 'Ask the PTO from the portal.',
+      order: 6,
+    },
   ],
   articles: [
     {
@@ -46,7 +52,7 @@ export const MEMBER_KB: KbIndex = {
 
 Your sign-in email is your Wix login identity (often Google). Parents cannot change that email in the portal.
 
-If you need help with the login email, email membership@shmspto.org.`,
+If you need help with the login email, use **Ask the PTO** on Member Help, or email membership@shmspto.org.`,
     },
     {
       slug: 'free-or-paid',
@@ -92,7 +98,7 @@ Updates usually show within a few minutes. Refresh the portal if you still see t
       order: 3,
       body: `Parents can add and edit students in the portal.
 
-To archive or remove a student, email membership@shmspto.org so staff can update the record safely.`,
+To archive or remove a student, use **Ask the PTO** on Member Help so staff can update the record safely.`,
     },
     {
       slug: 'reef-lagoon-tide',
@@ -114,7 +120,7 @@ After payment, refresh the portal so your tier and credit appear.`,
       order: 2,
       body: `Go to **Membership** (or **Upgrade** in this portal), pick Reef, Lagoon, or Tide, and complete checkout with card or PayPal.
 
-When payment clears, return here and refresh. If credit or tier is still missing after a few minutes, email membership@shmspto.org with your receipt.`,
+When payment clears, return here and refresh. If credit or tier is still missing after a few minutes, use **Ask the PTO** on Member Help and include your receipt.`,
     },
     {
       slug: 'cove-card-balance',
@@ -160,7 +166,7 @@ Spirit wear and other Cove merch checkout online separately with card or PayPal.
       order: 4,
       body: `Often yes. When you are signed in as a paid member, look for the coupon bar on The Cove shop or checkout.
 
-If a code fails, wait a minute, refresh, and try again, or email membership@shmspto.org.`,
+If a code fails, wait a minute, refresh, and try again, or use **Ask the PTO** on Member Help.`,
     },
     {
       slug: 'pay-card-or-paypal',
@@ -195,6 +201,21 @@ Upcoming program sessions and school events tied to your household appear here.
 
 ## Messages
 Instructor and PTO messages for your students land in the same area. Refresh if something new just arrived.`,
+    },
+    {
+      slug: 'ask-the-pto',
+      title: 'How do I ask the PTO a question?',
+      categoryId: 'support',
+      summary: 'Use Ask the PTO on Member Help.',
+      order: 1,
+      body: `Open **Member Help** (or the Ask the PTO box on your portal home) and send a signed-in help request.
+
+Your message goes to:
+- **President**
+- **VP Membership Experience**
+- **VP Marketing**
+
+They reply to your portal sign-in email. Browse the help articles first for quick answers.`,
     },
   ],
 }

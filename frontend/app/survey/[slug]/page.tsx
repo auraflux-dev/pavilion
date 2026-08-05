@@ -34,7 +34,7 @@ export default async function SurveyPage({ params, searchParams }: Props) {
     const cookieStore = await cookies()
     const tokens = parseTokensCookie(cookieStore.get(TOKENS_COOKIE)?.value)
     if (!tokens || !isMemberTokens(tokens)) {
-      redirect(`/auth/login?returnTo=${encodeURIComponent(`/survey/${slug}`)}`)
+      redirect(`/auth/join?mode=login&returnTo=${encodeURIComponent(`/survey/${slug}`)}`)
     }
   }
 

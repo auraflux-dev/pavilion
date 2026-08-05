@@ -38,6 +38,7 @@ import {
   OnboardingChecklist,
 } from './onboarding-checklist'
 import { PortalBusinessOwnerForm } from './portal-business-owner-form'
+import { PortalHelpForm } from '@/components/member-portal/portal-help-form'
 import {
   buildOnboardingChecklist,
   coveFeaturesUnlocked,
@@ -833,6 +834,9 @@ export function MemberDashboard({
           >
             Open knowledge base
           </Link>
+        </div>
+        <div className="border-t border-[#E8E4DC] px-5 py-5">
+          <PortalHelpForm memberName={member.name} compact />
         </div>
       </section>
     </div>

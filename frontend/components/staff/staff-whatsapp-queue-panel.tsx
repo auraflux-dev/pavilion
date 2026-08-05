@@ -1,8 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import type { WhatsAppQueueItem } from '@/lib/staff/whatsapp-queue'
+import type {
+  WhatsAppQueueAttachment,
+  WhatsAppQueueItem,
+} from '@/lib/staff/whatsapp-queue'
+import { WHATSAPP_ATTACHMENT_MAX } from '@/lib/staff/whatsapp-queue'
 
 type Links = { grade6: string; grade7: string; grade8: string }
 
@@ -25,11 +29,41 @@ function defaultSendAtLocal() {
   return toLocalInputValue(d.toISOString())
 }
 
+function formatBytes(n?: number) {
+  if (!n || n <= 0) return ''
+  if (n < 1024) return `${n} B`
+  if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`
+}
+
+async function downloadAttachment(att: WhatsAppQueueAttachment) {
+  const qs = new URLSearchParams({
+    url: att.url,
+    fileName: att.fileName,
+  })
+  const r = await fetch(`/api/staff/whatsapp-queue/download?${qs.toString()}`)
+  if (!r.ok) {
+    const d = (await r.json().catch(() => ({}))) as { error?: string }
+    throw new Error(d.error || 'Could not download attachment')
+  }
+  const blob = await r.blob()
+  const objectUrl = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = objectUrl
+  a.download = att.fileName || 'whatsapp-attachment'
+  a.rel = 'noopener'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 30_000)
+}
+
 async function openWhatsAppPlan(plan: {
   message: string
   openUrls: string[]
   waMeShare: string
   instructions: string
+  attachments?: WhatsAppQueueAttachment[]
 }) {
   if (plan.message) {
     try {
@@ -38,6 +72,17 @@ async function openWhatsAppPlan(plan: {
       // clipboard may be blocked on some mobile browsers
     }
   }
+
+  const attachments = plan.attachments ?? []
+  for (const att of attachments) {
+    try {
+      await downloadAttachment(att)
+    } catch {
+      // Fall back to opening the file URL so staff can Save Image / Share
+      window.open(att.url, '_blank', 'noopener,noreferrer')
+    }
+  }
+
   for (const url of plan.openUrls) {
     window.open(url, '_blank', 'noopener,noreferrer')
   }
@@ -46,7 +91,47 @@ async function openWhatsAppPlan(plan: {
   }
 }
 
+function AttachmentList({
+  attachments,
+  onRemove,
+}: {
+  attachments: WhatsAppQueueAttachment[]
+  onRemove?: (index: number) => void
+}) {
+  if (!attachments.length) return null
+  return (
+    <ul className="space-y-1.5">
+      {attachments.map((att, i) => (
+        <li
+          key={`${att.url}-${i}`}
+          className="flex items-center justify-between gap-2 rounded-lg border border-[#E8E4DC] bg-[#FAFAF8] px-3 py-2 text-xs"
+        >
+          <div className="min-w-0">
+            <p className="font-semibold text-[#1A1A1A] truncate">{att.fileName}</p>
+            <p className="text-[#5A6070]">
+              {att.mimeType}
+              {att.size ? ` · ${formatBytes(att.size)}` : ''}
+            </p>
+          </div>
+          {onRemove ? (
+            <button
+              type="button"
+              onClick={() => onRemove(i)}
+              className="shrink-0 text-[#5A6070] underline"
+            >
+              Remove
+            </button>
+          ) : (
+            <span className="shrink-0 text-[#085508] font-semibold">Attached</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export function StaffWhatsAppQueuePanel() {
+  const fileRef = useRef<HTMLInputElement>(null)
   const [due, setDue] = useState<WhatsAppQueueItem[]>([])
   const [upcoming, setUpcoming] = useState<WhatsAppQueueItem[]>([])
   const [recent, setRecent] = useState<WhatsAppQueueItem[]>([])
@@ -54,6 +139,8 @@ export function StaffWhatsAppQueuePanel() {
   const [message, setMessage] = useState('')
   const [grade, setGrade] = useState('all')
   const [sendAt, setSendAt] = useState(defaultSendAtLocal)
+  const [attachments, setAttachments] = useState<WhatsAppQueueAttachment[]>([])
+  const [uploading, setUploading] = useState(false)
   const [busyId, setBusyId] = useState('')
   const [scheduling, setScheduling] = useState(false)
   const [status, setStatus] = useState('')
@@ -81,6 +168,42 @@ export function StaffWhatsAppQueuePanel() {
     return () => window.clearInterval(t)
   }, [load])
 
+  async function onPickFiles(files: FileList | null) {
+    if (!files?.length) return
+    const room = WHATSAPP_ATTACHMENT_MAX - attachments.length
+    if (room <= 0) {
+      setStatus(`Up to ${WHATSAPP_ATTACHMENT_MAX} attachments per message.`)
+      return
+    }
+    setUploading(true)
+    setStatus('')
+    try {
+      const next = [...attachments]
+      for (const file of Array.from(files).slice(0, room)) {
+        const body = new FormData()
+        body.set('file', file)
+        const r = await fetch('/api/staff/whatsapp-queue/upload', {
+          method: 'POST',
+          body,
+        })
+        const d = await r.json()
+        if (!r.ok) throw new Error(d.error ?? `Upload failed for ${file.name}`)
+        next.push(d.attachment as WhatsAppQueueAttachment)
+      }
+      setAttachments(next)
+      setStatus(
+        next.length === 1
+          ? 'Attachment ready. When confirmed, it will download so you can add it in WhatsApp.'
+          : `${next.length} attachments ready.`,
+      )
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
+
   async function schedule() {
     setScheduling(true)
     setStatus('')
@@ -93,11 +216,13 @@ export function StaffWhatsAppQueuePanel() {
           message,
           grade,
           sendAt: new Date(sendAt).toISOString(),
+          attachments,
         }),
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Could not schedule')
       setMessage('')
+      setAttachments([])
       setStatus(`Scheduled for ${new Date(d.item.sendAt).toLocaleString()}.`)
       await load()
     } catch (err) {
@@ -119,8 +244,11 @@ export function StaffWhatsAppQueuePanel() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Confirm failed')
       await openWhatsAppPlan(d.plan)
+      const hasFiles = (d.plan.attachments?.length ?? 0) > 0
       setStatus(
-        `${d.plan.instructions} Message copied when clipboard allows. Paste in WhatsApp and tap Send.`,
+        hasFiles
+          ? 'Message copied. Attachment(s) downloading. In WhatsApp: paste the text, tap +, add the saved file(s), then Send.'
+          : `${d.plan.instructions} Message copied when clipboard allows. Paste in WhatsApp and tap Send.`,
       )
       await load()
     } catch (err) {
@@ -155,9 +283,11 @@ export function StaffWhatsAppQueuePanel() {
       <div>
         <h2 className="text-lg font-bold">WhatsApp grade queue</h2>
         <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
-          Schedule a grade-group message, then any logged-in staffer (phone or desktop) taps
-          Confirm when it is due. That copies the text and opens the group link. You still paste
-          and Send in WhatsApp. {configuredCount}/3 grade invite links configured in Site Settings.
+          Schedule a grade-group message (optional flyer/PDF), then any logged-in staffer taps
+          Confirm when due. That copies the text, downloads attachments to your device, and opens
+          the group link. In WhatsApp: paste, attach the saved file, Send. Meta does not allow
+          auto-posting into groups. {configuredCount}/3 grade invite links configured in Site
+          Settings.
         </p>
       </div>
 
@@ -180,6 +310,7 @@ export function StaffWhatsAppQueuePanel() {
               <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap leading-relaxed">
                 {item.message}
               </p>
+              <AttachmentList attachments={item.attachments ?? []} />
               <Button
                 type="button"
                 disabled={Boolean(busyId)}
@@ -187,7 +318,11 @@ export function StaffWhatsAppQueuePanel() {
                 className="w-full min-h-12 text-base font-bold text-white"
                 style={{ backgroundColor: '#085508' }}
               >
-                {busyId === item.id ? 'Opening…' : 'Confirm & open WhatsApp'}
+                {busyId === item.id
+                  ? 'Opening…'
+                  : item.attachments?.length
+                    ? 'Confirm · copy · save file · open WhatsApp'
+                    : 'Confirm & open WhatsApp'}
               </Button>
               <button
                 type="button"
@@ -217,6 +352,42 @@ export function StaffWhatsAppQueuePanel() {
           placeholder="Message for the grade WhatsApp group…"
           className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-sm"
         />
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={uploading || attachments.length >= WHATSAPP_ATTACHMENT_MAX}
+              onClick={() => fileRef.current?.click()}
+              className="text-xs"
+            >
+              {uploading
+                ? 'Uploading…'
+                : attachments.length
+                  ? `Add another file (${attachments.length}/${WHATSAPP_ATTACHMENT_MAX})`
+                  : 'Attach file (image, PDF, MP4)'}
+            </Button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,video/mp4"
+              multiple
+              className="hidden"
+              disabled={uploading}
+              onChange={(e) => void onPickFiles(e.target.files)}
+            />
+            <p className="text-[11px] text-[#5A6070]">
+              Up to {WHATSAPP_ATTACHMENT_MAX} files, 12MB each. Saved to your phone/computer on
+              Confirm so you can attach in WhatsApp.
+            </p>
+          </div>
+          <AttachmentList
+            attachments={attachments}
+            onRemove={(index) =>
+              setAttachments((prev) => prev.filter((_, i) => i !== index))
+            }
+          />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <select
             value={grade}
@@ -237,7 +408,7 @@ export function StaffWhatsAppQueuePanel() {
         </div>
         <Button
           type="button"
-          disabled={scheduling || !message.trim() || !sendAt}
+          disabled={scheduling || uploading || !message.trim() || !sendAt}
           onClick={() => void schedule()}
           className="w-full sm:w-auto text-white"
           style={{ backgroundColor: '#085508' }}
@@ -257,11 +428,17 @@ export function StaffWhatsAppQueuePanel() {
                 key={item.id}
                 className="rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-sm flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
               >
-                <div className="min-w-0">
+                <div className="min-w-0 space-y-1.5">
                   <p className="font-semibold text-[#1A1A1A]">
                     {gradeLabel(item.grade)} · {new Date(item.sendAt).toLocaleString()}
                   </p>
-                  <p className="text-[#5A6070] line-clamp-2 mt-0.5">{item.message}</p>
+                  <p className="text-[#5A6070] line-clamp-2">{item.message}</p>
+                  {(item.attachments?.length ?? 0) > 0 ? (
+                    <p className="text-[11px] text-[#085508] font-semibold">
+                      {item.attachments!.length} attachment
+                      {item.attachments!.length === 1 ? '' : 's'}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <Button
@@ -297,6 +474,9 @@ export function StaffWhatsAppQueuePanel() {
                 {item.status === 'sent' ? 'Sent' : 'Cancelled'} · {gradeLabel(item.grade)} ·{' '}
                 {item.confirmedByName || item.confirmedByEmail || 'staff'} ·{' '}
                 {new Date(item.confirmedAt || item.createdAt).toLocaleString()}
+                {(item.attachments?.length ?? 0) > 0
+                  ? ` · ${item.attachments!.length} file${item.attachments!.length === 1 ? '' : 's'}`
+                  : ''}
               </li>
             ))}
           </ul>

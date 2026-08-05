@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
         sendAt: String(body.sendAt ?? ''),
         createdByEmail: gated.session.staff.email,
         createdByName: gated.session.staff.name || gated.session.staff.email,
+        attachments: body.attachments,
       })
       return NextResponse.json({ ok: true, item })
     }
@@ -114,7 +115,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         ok: true,
         item: updated,
-        plan,
+        plan: {
+          ...plan,
+          attachments: current.attachments ?? [],
+        },
       })
     }
 

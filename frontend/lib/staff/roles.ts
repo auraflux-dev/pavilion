@@ -170,7 +170,7 @@ export const ROLE_HOME_COPY: Record<
  title: 'VP Marketing',
  owns: 'Web messaging, newsletters, FB/IG, surveys, photo privacy',
  thisWeek: [
- 'Draft social posts for upcoming events',
+ 'Finish Marketing onboarding on Home (if new)',
  'Fill Comms calendar for the next two weeks',
  'Align promo asks from other VPs',
  ],
@@ -179,18 +179,18 @@ export const ROLE_HOME_COPY: Record<
  title: 'Secretary',
  owns: 'Minutes, calendar, legal docs, member comms calendar, talent matching',
  thisWeek: [
- 'Publish latest meeting minutes',
+ 'Finish Secretary onboarding on Home (if new)',
  'Update Comms calendar (parents / school / board)',
- 'Plan email / WhatsApp / in-app sends',
+ 'Publish latest meeting minutes',
  ],
  },
  treasurer: {
  title: 'Treasurer',
  owns: 'Funds, AR/AP, reimbursements, insurance, contractors',
  thisWeek: [
+ 'Finish Treasurer onboarding on Home (if new)',
  'Reconcile store-card and membership payments',
  'Clear reimbursement queue',
- 'Check insurance renewals',
  ],
  },
  events: {

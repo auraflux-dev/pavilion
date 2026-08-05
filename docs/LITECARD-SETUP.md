@@ -38,7 +38,68 @@ Barcode type: **QR**. Message must be **digits only** (the GAN).
 
 Colors: green `#085508`, gold accents; logo text “SHMS Cove”.
 
-## 3. Vercel env (Production)
+## 3. Sandbox (Jul 2026) vs Production
+
+| | Demo / sandbox | Production |
+| --- | --- | --- |
+| Dashboard | https://demo.litecard.io/ | https://litecard.io/ |
+| API | `https://bff-api.demo.litecard.io` | `https://bff-api.enterprise.litecard.io` |
+| Welcome page | `https://main.demo.litecard.io/welcome?id=` | `https://litecard.io/welcome?id=` (or app.litecard.io) |
+| Token TTL | 24h (`expires_in: 86400`) | same pattern |
+
+**SHMS demo account (from Litecard):** `shms@demo-litecard.com` + password they emailed.
+**Business id:** `-cr40RA4VkzBFN6GXuwcJ` → set as `LITECARD_BUSINESS_ID`.
+
+### Cove template fields (sandbox)
+
+Their sample payload used `templateId: roo5JkXsvf2Cx-0IsVFY1` / `XXXid`. That template is **not** on our business (403). Our active template is **The Cove Wallet Pass**.
+
+| Pass field | API key | Notes |
+| --- | --- | --- |
+| QR barcode | `cardNumber` | Template `barcode.fieldMap` must be `cardNumber`. Stock template originally used `${CUSTOM}` **without** fieldMap → `FIELDMAP_MISSING`. **Danny (Aug 4):** updated **The Cove Wallet Pass** (`fpmJ2qvrsZRY6kOubNxA2`) so `barcode.fieldMap = cardNumber`. Working clone also remains: `rr1N2P6DZoXOVAHfnZkdq` (**The Cove Wallet Pass GAN**). |
+| Balance | `pointsKey` | **Integer cents** (e.g. `$12.50` → `1250`), not `"$12.50"`. |
+| Notifications | `notificationKey` | Optional string |
+
+Working create body:
+
+```json
+{
+  "templateId": "rr1N2P6DZoXOVAHfnZkdq",
+  "externalId": "<Square GAN digits>",
+  "cardPayload": {
+    "firstName": "SHMS",
+    "lastName": "CoveQA",
+    "email": "parent@example.com",
+    "cardNumber": "<Square GAN digits>",
+    "pointsKey": 1250,
+    "notificationKey": "Cove Digital Card"
+  },
+  "options": { "emailInvitationEnabled": false, "fastCreate": true }
+}
+```
+
+Welcome URL: `https://main.demo.litecard.io/welcome?id=<downloadId>`.
+
+Signup form (manual UX): https://demo.litecard.io/form/custom/MIB_fiLuoE0Ak9MlneLba
+
+## 4. Vercel env
+
+**Preview / sandbox test**
+
+```
+LITECARD_USERNAME=shms@demo-litecard.com
+LITECARD_PASSWORD=...
+LITECARD_TEMPLATE_ID=rr1N2P6DZoXOVAHfnZkdq
+LITECARD_BASE_URL=https://bff-api.demo.litecard.io
+LITECARD_WELCOME_BASE=https://main.demo.litecard.io/welcome?id=
+LITECARD_BUSINESS_ID=-cr40RA4VkzBFN6GXuwcJ
+LITECARD_FIELD_BARCODE=cardNumber
+LITECARD_FIELD_CARD_NUMBER=cardNumber
+LITECARD_FIELD_BALANCE=pointsKey
+LITECARD_BALANCE_FORMAT=cents
+```
+
+**Production** (after Litecard live credentials + fixed template):
 
 ```
 LITECARD_USERNAME=...
@@ -51,7 +112,7 @@ LITECARD_TEMPLATE_ID=...
 Redeploy after setting. Portal → Cove Digital Card → **Wallet** opens Litecard’s
 Add to Apple / Google page. Photos QR still works without Litecard.
 
-## 4. CMS fields (Memberships)
+## 5. CMS fields (Memberships)
 
 Upserted automatically when a pass is created:
 
@@ -61,12 +122,12 @@ Upserted automatically when a pass is created:
 
 Add these in Wix CMS → Memberships if upserts fail on first create.
 
-## 5. Balance sync
+## 6. Balance sync
 
 Square webhook `/api/webhooks/square` already handles `gift_card.activity.created`.
 When Litecard is configured it PATCHes the pass balance after every activity.
 
-## 6. Smoke test
+## 7. Smoke test
 
 1. Parent with loaded Cove Digital Card → Member portal → Wallet.
 2. Confirm Welcome URL opens Add to Apple / Google.

@@ -27,10 +27,8 @@ function JoinInner() {
   )
   const initialMode = searchParams.get('mode') === 'login' ? 'login' : 'signup'
   const [mode, setMode] = useState<Mode>(initialMode)
-  const [panel, setPanel] = useState<Panel>(() => {
- // Login defaults to email. Google is blocked while the OAuth app is Internal.
-    return initialMode === 'login' ? 'email' : 'chooser'
-  })
+  const [panel, setPanel] = useState<Panel>('chooser')
+  const [resetSent, setResetSent] = useState<string | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -41,10 +39,11 @@ function JoinInner() {
 
   useEffect(() => {
     setMode(initialMode)
-    if (initialMode === 'login') setPanel('email')
+    setPanel('chooser')
+    setResetSent(null)
   }, [initialMode])
 
-  /** Google parent sign-in stays off until OAuth app is External (not Internal). */
+  /** Show Google when enabled in env (OAuth client must be External, not Internal). */
   const googleParentEnabled =
     process.env.NEXT_PUBLIC_GOOGLE_PARENT_SIGNIN === 'true'
 
@@ -80,6 +79,40 @@ function JoinInner() {
 
   function startGoogle() {
     window.location.href = `/api/auth/google?returnTo=${encodeURIComponent(returnTo)}`
+  }
+
+  async function onForgotPassword() {
+    setError(null)
+    setResetSent(null)
+    const trimmed = email.trim()
+    if (!trimmed) {
+      setError('Enter your email above, then tap Forgot password.')
+      return
+    }
+    setBusy(true)
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: trimmed, returnTo }),
+      })
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean
+        message?: string
+        error?: string
+      }
+      if (!res.ok) {
+        throw new Error(data.error || 'Could not send reset email.')
+      }
+      setResetSent(
+        data.message ||
+          'If an account exists for that email, we sent a reset link. Check your inbox (and spam).',
+      )
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not send reset email.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   async function onEmailSubmit(e: React.FormEvent) {
@@ -135,7 +168,13 @@ function JoinInner() {
         if (data.errorCode === 'ownerApprovalRequired') {
           throw new Error(
             data.error ||
- 'Your parent account is pending approval. Keep using your personal email. Staff (@shmspto.org) is only for board tools, not family portal login. Email membership@shmspto.org if this continues.',
+              'Your parent account is pending approval. Keep using your personal email. Staff (@shmspto.org) is only for board tools, not family portal login. Email membership@shmspto.org if this continues.',
+          )
+        }
+        if (data.errorCode === 'resetPassword') {
+          throw new Error(
+            data.error ||
+              'Please reset your password (Forgot password below), then try again.',
           )
         }
         throw new Error(data.error || (mode === 'signup' ? 'Could not create account' : 'Could not log in'))
@@ -150,6 +189,8 @@ function JoinInner() {
   }
 
   const isSignup = mode === 'signup'
+  const isStaffReturn =
+    returnTo === '/staff' || returnTo.startsWith('/staff/') || returnTo.startsWith('/staff?')
   const primaryBtn =
     'w-full inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60'
 
@@ -160,28 +201,23 @@ function JoinInner() {
           SHMS PTO
         </p>
         <h1 className="text-2xl font-bold text-[#1A1A1A] mb-1">
-          {isSignup ? 'Create Your Account' : 'Log In'}
+          {isStaffReturn
+            ? 'Staff Sign In'
+            : isSignup
+              ? 'Create Your Account'
+              : 'Log In'}
         </h1>
         <p className="text-sm text-[#5A6070] mb-6">
-          {isSignup
-            ? 'Sign up free with your personal email, then finish joining your membership tier.'
- : 'Parents: use your personal email (Gmail, etc.). @shmspto.org is for Staff tools only. not for Member Portal family login.'}
+          {isStaffReturn
+            ? 'Use your @shmspto.org Google account or email. Family Member Portal uses a personal email, not this staff path.'
+            : isSignup
+              ? 'Sign up free with your personal email, then finish joining your membership tier.'
+              : 'Parents: use your personal email (Gmail, etc.). @shmspto.org is for Staff tools only, not for Member Portal family login.'}
         </p>
 
         {panel === 'chooser' ? (
           <div className="space-y-3">
             {error ? <p className="text-sm text-red-700">{error}</p> : null}
-            <button
-              type="button"
-              onClick={() => {
-                setPanel('email')
-                setError(null)
-              }}
-              className={primaryBtn}
-              style={{ backgroundColor: '#085508' }}
-            >
-              {isSignup ? 'Sign up with Email' : 'Log in with Email'}
-            </button>
             {googleParentEnabled ? (
               <button
                 type="button"
@@ -190,28 +226,61 @@ function JoinInner() {
               >
                 {isSignup ? 'Sign up with Google' : 'Log in with Google'}
               </button>
-            ) : (
+            ) : null}
+            <button
+              type="button"
+              onClick={() => {
+                setPanel('email')
+                setError(null)
+                setResetSent(null)
+              }}
+              className={primaryBtn}
+              style={{ backgroundColor: '#085508' }}
+            >
+              {isSignup ? 'Sign up with Email' : 'Log in with Email'}
+            </button>
+            {!googleParentEnabled ? (
               <p className="text-xs text-[#5A6070] text-center pt-1">
-                Use your personal email and password. Google sign-in is temporarily off while we finish Google setup (the old button was aimed at Staff Portal).
+                Google sign-in is temporarily off. Use email and password, or email membership@shmspto.org for help.
               </p>
-            )}
+            ) : null}
+            {!isSignup && !isStaffReturn ? (
+              <p className="text-xs text-[#5A6070] text-center pt-1">
+                Board / staff (@shmspto.org)? Use{' '}
+                <a href="/staff" className="font-semibold underline" style={{ color: '#085508' }}>
+                  Staff tools
+                </a>
+                , not Member Portal.
+              </p>
+            ) : null}
+            {isStaffReturn ? (
+              <p className="text-xs text-[#5A6070] text-center pt-1">
+                Looking for family portal?{' '}
+                <a
+                  href="/auth/join?mode=login&returnTo=%2Fmember-portal"
+                  className="font-semibold underline"
+                  style={{ color: '#085508' }}
+                >
+                  Member Portal login
+                </a>
+              </p>
+            ) : null}
           </div>
         ) : (
           <form onSubmit={onEmailSubmit} className="space-y-3">
-            {isSignup || googleParentEnabled ? (
-              <button
-                type="button"
-                className="text-xs font-semibold underline mb-1"
-                style={{ color: '#085508' }}
-                onClick={() => {
-                  setPanel('chooser')
-                  setNeedsVerify(false)
-                  setError(null)
-                }}
-              >
-                ← Back to options
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className="text-xs font-semibold underline mb-1"
+              style={{ color: '#085508' }}
+              onClick={() => {
+                setPanel('chooser')
+                setNeedsVerify(false)
+                setError(null)
+                setResetSent(null)
+              }}
+            >
+              ← Back to options
+            </button>
             {!needsVerify ? (
               <>
                 <label className="block text-sm">
@@ -237,6 +306,19 @@ function JoinInner() {
                     className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-sm"
                   />
                 </label>
+                {!isSignup ? (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={onForgotPassword}
+                      className="text-xs font-semibold underline disabled:opacity-60"
+                      style={{ color: '#085508' }}
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                ) : null}
               </>
             ) : (
               <label className="block text-sm">
@@ -252,6 +334,7 @@ function JoinInner() {
             )}
 
             {error ? <p className="text-sm text-red-700">{error}</p> : null}
+            {resetSent ? <p className="text-sm text-[#085508]">{resetSent}</p> : null}
 
             <button
               type="submit"

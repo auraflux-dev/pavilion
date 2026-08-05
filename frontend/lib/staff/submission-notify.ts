@@ -17,6 +17,7 @@ export type SubmissionNotifyKind =
   | 'newsletter'
   | 'survey'
   | 'membership-experience'
+  | 'portal-help'
 
 function topicLabel(kind: SubmissionNotifyKind): string {
   switch (kind) {
@@ -36,6 +37,8 @@ function topicLabel(kind: SubmissionNotifyKind): string {
       return 'Survey response'
     case 'membership-experience':
       return 'Membership experience'
+    case 'portal-help':
+      return 'Member portal help'
   }
 }
 
@@ -81,7 +84,7 @@ export async function resolveSubmissionInbox(
       ),
     )
   }
-  if (kind === 'newsletter' || kind === 'survey') {
+  if (kind === 'newsletter' || kind === 'survey' || kind === 'portal-help') {
     return normalizeStaffInbox(
       settings.get(
         'contactEmailMarketing',
@@ -94,10 +97,32 @@ export async function resolveSubmissionInbox(
   )
 }
 
+/** Member portal help form → president + membership + marketing. */
+export async function resolvePortalHelpRecipients(): Promise<string[]> {
+  const settings = await getSiteSettings()
+  const president = normalizeStaffInbox(
+    settings.get('presidentEmail', settings.get('contactEmailGeneral', STAFF_INBOX_FALLBACK)),
+  )
+  const membership = normalizeStaffInbox(
+    settings.get(
+      'contactEmailMembershipExperience',
+      'vp-membershipexperience@shmspto.org',
+    ),
+  )
+  const marketing = normalizeStaffInbox(
+    settings.get('contactEmailMarketing', 'vp-marketing@shmspto.org'),
+  )
+  return Array.from(
+    new Set([president, membership, marketing].map((e) => e.trim().toLowerCase()).filter(Boolean)),
+  )
+}
+
 export async function notifyStaffSubmission(opts: {
   kind: SubmissionNotifyKind
   /** Override inbox (e.g. contact assignedTo). */
   to?: string
+  /** When set, emails all of these instead of a single resolved inbox. */
+  recipients?: string[]
   subject: string
   body: string
   /** Parent/submitter email for Reply-To. */
@@ -109,8 +134,18 @@ export async function notifyStaffSubmission(opts: {
     return { ok: false, mode: 'skipped', reason: 'Gmail send not configured' }
   }
 
-  const to = await resolveSubmissionInbox(opts.kind, opts.to)
-  if (!to) {
+  const recipients =
+    opts.recipients && opts.recipients.length
+      ? Array.from(
+          new Set(
+            opts.recipients
+              .map((e) => normalizeStaffInbox(e).trim().toLowerCase())
+              .filter(Boolean),
+          ),
+        )
+      : [await resolveSubmissionInbox(opts.kind, opts.to)]
+
+  if (!recipients.length || !recipients[0]) {
     return { ok: false, mode: 'skipped', reason: 'No staff inbox resolved' }
   }
 
@@ -124,7 +159,7 @@ export async function notifyStaffSubmission(opts: {
     body: opts.body.trim(),
     fromName: opts.fromName || 'SHMS PTO Website',
     replyTo: opts.replyTo || undefined,
-    recipients: [to],
+    recipients,
   })
 }
 

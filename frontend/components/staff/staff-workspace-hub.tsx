@@ -285,6 +285,16 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  }, [searchParams, router])
 
  useEffect(() => {
+ const googleError = searchParams.get('googleError')
+ if (!googleError) return
+ setError(decodeURIComponent(googleError))
+ const params = new URLSearchParams(searchParams.toString())
+ params.delete('googleError')
+ const qs = params.toString()
+ router.replace(qs ? `/staff?${qs}` : '/staff?view=inbox')
+ }, [searchParams, router])
+
+ useEffect(() => {
  setSelectedEvent(null)
  setEmbedUrl(null)
  setEmbedTitle('')

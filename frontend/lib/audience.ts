@@ -38,6 +38,7 @@ export type StaffWorkspace =
  | 'wellness'
  | 'newsletter'
  | 'comms'
+ | 'canva'
  | 'expenses'
  | 'timesheets'
  | 'reports'
@@ -72,6 +73,7 @@ export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
  wellness: 'Wellness',
  newsletter: 'Newsletter',
  comms: 'Comms & content',
+ canva: 'Canva',
  expenses: 'Expenses',
  timesheets: 'Timesheets',
  reports: 'Reports',

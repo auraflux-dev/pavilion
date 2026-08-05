@@ -23,6 +23,8 @@ import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-p
 import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection-panel'
 import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
 import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
+import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
+import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
 import { StaffWhatsAppQueuePanel } from '@/components/staff/staff-whatsapp-queue-panel'
 import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
 import { StaffTimesheetsPanel } from '@/components/staff/staff-timesheets-panel'
@@ -89,6 +91,7 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'wellness',
   'newsletter',
   'comms',
+  'canva',
   'expenses',
   'timesheets',
   'reports',
@@ -279,6 +282,7 @@ export function StaffDashboard() {
     if (canFundraising) items.push({ id: 'fundraising', label: STAFF_WORKSPACE_LABEL.fundraising })
     if (canWellness) items.push({ id: 'wellness', label: STAFF_WORKSPACE_LABEL.wellness })
     if (canComms) items.push({ id: 'comms', label: STAFF_WORKSPACE_LABEL.comms })
+    if (canMarketing) items.push({ id: 'canva', label: STAFF_WORKSPACE_LABEL.canva })
     if (canNewsletter) items.push({ id: 'newsletter', label: STAFF_WORKSPACE_LABEL.newsletter })
     if (
       canPrograms ||
@@ -461,6 +465,7 @@ export function StaffDashboard() {
               initialEmail={me.personalEmail ?? ''}
               onSaved={(email) => setMe((current) => (current ? { ...current, personalEmail: email } : current))}
             />
+            <StaffOnboardingPanel onOpenWorkspace={go} />
             {activityItems.length > 0 ? (
               <div className="rounded-xl border border-[#085508]/25 bg-[#E8F3E8] p-4 space-y-2">
                 <p className="text-sm font-bold text-[#085508]">Needs your attention</p>
@@ -534,6 +539,7 @@ export function StaffDashboard() {
                           fundraising: 'CTAs & fundraising goals',
                           wellness: 'Wish list & appreciation',
                           comms: 'Month grid · communications & content',
+                          canva: 'Connect Canva · browse designs',
                           newsletter: 'Member email & WhatsApp',
                           expenses: 'Submit & track reimbursements',
                           help: 'Staff knowledge base',
@@ -766,6 +772,9 @@ export function StaffDashboard() {
         ) : null}
         {active === 'comms' && canComms ? (
           <StaffCommsCalendarPanel onOpenWorkspace={(id) => go(id as StaffWorkspace)} />
+        ) : null}
+        {active === 'canva' && canMarketing ? (
+          <StaffCanvaPanel onOpenWorkspace={(id) => go(id as StaffWorkspace)} />
         ) : null}
         {active === 'newsletter' && canNewsletter ? (
           <div className="space-y-4">

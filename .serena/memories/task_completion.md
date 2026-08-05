@@ -1,9 +1,8 @@
-## July 22 2026 — Task completion
+# Shipping preference (Rob)
 
-Shipped & pushed `4148f1d` (Gmail Staff Connect send, activity notices, CheddarUp UI removed). Deployed prod.
+**Always** when work is done unless Rob says otherwise:
+1. Commit all project work (exclude secrets, `.DS_Store`, noise build artifacts if unrelated)
+2. Push to `origin`
+3. Deploy (Vercel production for `frontend`)
 
-Drive docs created/updated: 41–45 + appends to index, 02, 02c, 27, 30, 32, 33. Script: scripts/update-ship-docs-july22.js
-
-Browser smoke: visitor home/events/programs; staff Reports (purchase emails ready as treasurer@); Programs has Attendance/Calendar, no CheddarUp; /auth/join OK.
-
-Serena review memory: July22 ship review (ticket oversell / refund seat semantics = follow-ups).
+Do not wait for "say the word" — ship by default.

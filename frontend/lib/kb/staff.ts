@@ -34,7 +34,7 @@ export const STAFF_KB: KbIndex = {
     {
       id: 'comms',
       title: 'Inbox & outreach',
-      summary: 'Comms calendar, Gmail, Docs, email, WhatsApp, Facebook.',
+      summary: 'Onboarding, comms calendar, Gmail, Docs, email, WhatsApp, Facebook.',
       order: 5,
     },
     {
@@ -54,7 +54,7 @@ export const STAFF_KB: KbIndex = {
       body: `Sign in with your **@shmspto.org** Google account. Staff access is granted by a **StaffRoles** row. Ask President/Treasurer if the Staff button is missing.
 
 ## First stops
-- **Home**: your role workspaces and activity notices
+- **Home**: role onboarding checklists (Marketing / Secretary / Treasurer), personal email, activity notices
 - **Help**: this knowledge base
 - **Inbox / Calendar / Docs**. Connect Google once, then work stays in Staff
 - **Comms calendar**: plan parent / school / board messages and content
@@ -121,7 +121,7 @@ Reconnect if you see permission errors after a password reset. Purchase confirma
 4. **Store & Cove Digital Card**: balance, family code, Payment History
 5. **Calendar & Messages**: program info and inbox
 
-Point them to **Member Help** (\`/member-portal/help\`) for full articles. For stuck records, use Lookup / act-as (admin) rather than guessing.`,
+Point them to **Member Help** (\`/member-portal/help\`) for articles, or **Ask the PTO** on that page (emails President, VP Membership Experience, and VP Marketing). For stuck records, use Lookup / act-as (admin) rather than guessing.`,
     },
     {
       slug: 'parent-portal-checklist',
@@ -278,6 +278,29 @@ Prefer portal messages + email for official notices so parents are not chased on
 Mass email and WhatsApp share actions open the compose/share flow for that campaign. WhatsApp may leave Staff briefly to the WhatsApp app. That is intentional for sharing, not a second CMS.
 
 Keep MoneyMinder / bank exports with Treasurer. Do not duplicate finance ledgers in the roster.`,
+    },
+    {
+      slug: 'role-onboarding',
+      title: 'Role onboarding (Marketing · Secretary · Treasurer)',
+      categoryId: 'start',
+      summary: 'First-week checklists on Staff Home for key board roles.',
+      order: 4,
+      body: `Staff **Home** shows a role onboarding checklist when your StaffRoles include **marketing**, **secretary**, or **treasurer** (admins see all three).
+
+## How it works
+1. Open each step’s workspace (or external money tool for Treasurer)
+2. Click **Mark done** when finished
+3. Personal email and Google Connect auto-check when already set
+4. When every step is done, the card collapses to “Role onboarding complete”
+
+Progress is saved on your StaffRoles row so it follows you across devices.
+
+## Tracks
+- **VP Marketing** — Google, Comms & content, Social, Newsletter, page copy, surveys
+- **Secretary** — Google, Minutes, Comms calendar, Board roster, Events, Newsletter
+- **Treasurer** — Google, Payments, Expenses, Reports, MoneyMinder, Square
+
+See Drive doc **47 - Staff Role Onboarding** for the board-facing guide.`,
     },
     {
       slug: 'comms-calendar',
