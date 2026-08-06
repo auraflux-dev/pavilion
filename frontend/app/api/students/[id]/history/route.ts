@@ -26,7 +26,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const studentRes = await adminClient.items.get('Students', id)
     const student = studentRes as { parentEmail?: string; archived?: boolean }
-    if (!student || student.archived === true || student.parentEmail !== email) {
+    const { canViewerAccessStudent } = await import('@/lib/family-guardians')
+    if (!student || !(await canViewerAccessStudent(email, student))) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 

@@ -1,0 +1,162 @@
+/**
+ * GET  /api/portal/guardians — list co-parents for this household
+ * POST /api/portal/guardians — invite { email }
+ * DELETE /api/portal/guardians — revoke { email }
+ */
+import { NextRequest, NextResponse } from 'next/server'
+import { getMemberSession } from '@/lib/auth-member'
+import { sendMassEmail } from '@/lib/staff/mass-email'
+import {
+  createGuardianInvite,
+  listGuardianRowsForPrimary,
+  listStudentsForViewer,
+  resolvePrimaryParentEmail,
+  revokeGuardianLink,
+} from '@/lib/family-guardians'
+
+function siteBase(req: NextRequest) {
+  const host = (req.headers.get('x-forwarded-host') || req.headers.get('host') || '')
+    .split(',')[0]
+    .trim()
+  if (host.includes('localhost') || host.startsWith('127.0.0.1')) return `http://${host}`
+  if (host.includes('shmspto.org') || host.endsWith('.vercel.app')) return `https://${host}`
+  return (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org').replace(/\/$/, '')
+}
+
+export async function GET(req: NextRequest) {
+  const session = await getMemberSession(req)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  try {
+    const primary = await resolvePrimaryParentEmail(session.email)
+    const isPrimary = primary === session.email.trim().toLowerCase()
+    const rows = isPrimary ? await listGuardianRowsForPrimary(primary) : []
+    const students = await listStudentsForViewer(session.email)
+
+    return NextResponse.json({
+      viewerEmail: session.email.trim().toLowerCase(),
+      primaryParentEmail: primary,
+      isPrimary,
+      guardians: rows
+        .filter((r) => r.status !== 'revoked' && r.active !== false)
+        .map((r) => ({
+          email: String(r.guardianEmail ?? ''),
+          status: String(r.status ?? ''),
+          invitedAt: r.invitedAt || null,
+          acceptedAt: r.acceptedAt || null,
+        })),
+      studentCount: students.length,
+      note: isPrimary
+        ? 'Invite another parent or guardian to use their own login with the same kids. Cove card stays on your account unless they buy separately.'
+        : 'You are linked as a co-parent. Cove membership and family code belong to the primary parent.',
+    })
+  } catch (err) {
+    console.error('/api/portal/guardians GET', err)
+    return NextResponse.json({ error: 'Could not load family links' }, { status: 500 })
+  }
+}
+
+export async function POST(req: NextRequest) {
+  const session = await getMemberSession(req)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  try {
+    const primary = await resolvePrimaryParentEmail(session.email)
+    if (primary !== session.email.trim().toLowerCase()) {
+      return NextResponse.json(
+        { error: 'Only the primary parent can invite co-parents.' },
+        { status: 403 },
+      )
+    }
+
+    const students = await listStudentsForViewer(session.email)
+    if (students.length === 0) {
+      return NextResponse.json(
+        { error: 'Add a student first, then invite a co-parent.' },
+        { status: 400 },
+      )
+    }
+
+    const body = await req.json().catch(() => ({}))
+    const guardianEmail = String(body.email ?? '').trim().toLowerCase()
+    if (!guardianEmail.includes('@')) {
+      return NextResponse.json({ error: 'Enter a valid email.' }, { status: 400 })
+    }
+
+    const invitedByName =
+      `${session.member?.contact?.firstName ?? ''} ${session.member?.contact?.lastName ?? ''}`.trim() ||
+      session.email
+
+    const { token, expiresAt } = await createGuardianInvite({
+      primaryParentEmail: primary,
+      guardianEmail,
+      invitedByName,
+    })
+
+    const acceptUrl = `${siteBase(req)}/member-portal/join-family?token=${encodeURIComponent(token)}`
+    const kidNames = students
+      .map((s) => `${s.firstName || ''} ${s.lastName || ''}`.trim())
+      .filter(Boolean)
+      .slice(0, 5)
+      .join(', ')
+
+    const mail = await sendMassEmail({
+      subject: 'You’re invited to the SHMS PTO family portal',
+      body: [
+        `You’ve been invited to share the Stone Hill Middle School PTO member portal${
+          kidNames ? ` for: ${kidNames}` : ''
+        }.`,
+        '',
+        `Accept invite (sign in or create an account as ${guardianEmail}):`,
+        acceptUrl,
+        '',
+        'You’ll see the same students. Cove Digital Card stays with the primary parent unless you purchase separately.',
+        `Link expires ${new Date(expiresAt).toLocaleDateString()}.`,
+      ].join('\n'),
+      fromName: 'SHMS PTO',
+      replyTo: primary,
+      recipients: [guardianEmail],
+    })
+
+    return NextResponse.json({
+      ok: true,
+      guardianEmail,
+      expiresAt,
+      emailed: Boolean(mail?.ok),
+      // Always return link so primary can copy/share if email fails
+      acceptUrl,
+      message: mail?.ok
+        ? `Invite sent to ${guardianEmail}.`
+        : `Invite created. Copy and share this link with them: ${acceptUrl}`,
+    })
+  } catch (err) {
+    console.error('/api/portal/guardians POST', err)
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Could not send invite' },
+      { status: 400 },
+    )
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await getMemberSession(req)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  try {
+    const primary = await resolvePrimaryParentEmail(session.email)
+    if (primary !== session.email.trim().toLowerCase()) {
+      return NextResponse.json({ error: 'Only the primary parent can remove co-parents.' }, { status: 403 })
+    }
+    const body = await req.json().catch(() => ({}))
+    const guardianEmail = String(body.email ?? '').trim().toLowerCase()
+    if (!guardianEmail) return NextResponse.json({ error: 'email required' }, { status: 400 })
+    await revokeGuardianLink({ primaryParentEmail: primary, guardianEmail })
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('/api/portal/guardians DELETE', err)
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Could not remove' },
+      { status: 500 },
+    )
+  }
+}

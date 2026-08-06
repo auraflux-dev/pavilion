@@ -62,17 +62,11 @@ export async function GET(req: NextRequest) {
     const actingAs = Boolean(effective?.actingAs)
 
     const admin = getWixClient()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const studentsRes: any = await admin.items
-      .query('Students')
-      .eq('parentEmail', email)
-      .find()
-      .catch(() => ({ items: [] }))
+    const { listStudentsForViewer } = await import('@/lib/family-guardians')
+    const studentRows = await listStudentsForViewer(email)
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const students = (studentsRes.items ?? [])
-      .filter((s: any) => s.archived !== true)
-      .map((s: any) => ({
+    const students = studentRows.map((s: any) => ({
       id: s._id as string,
       firstName: String(s.firstName ?? ''),
       lastName: String(s.lastName ?? ''),

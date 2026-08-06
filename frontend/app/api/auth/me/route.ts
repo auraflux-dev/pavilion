@@ -90,13 +90,33 @@ export async function GET(req: NextRequest) {
       membershipStatus: string
     }[] = []
     try {
-      const studentsResult = await adminClient.items
-        .query('Students')
-        .eq('parentEmail', email)
-        .find()
-      students = (studentsResult.items ?? [])
-        .filter((item) => (item as { archived?: boolean }).archived !== true)
-        .map((item) => {
+      const { listStudentsForViewer, resolvePrimaryParentEmail } = await import(
+        '@/lib/family-guardians'
+      )
+      const householdEmail = await resolvePrimaryParentEmail(email)
+      // Membership benefits follow the primary (paying) household email
+      if (householdEmail !== email) {
+        try {
+          const membershipResult = await adminClient.items
+            .query('Memberships')
+            .eq('email', householdEmail)
+            .find()
+          const hm = membershipResult.items?.[0] as
+            | { tier?: string; expiresAt?: string; status?: string }
+            | undefined
+          if (hm?.tier && !membership) {
+            membership = {
+              tier: hm.tier,
+              expiresAt: hm.expiresAt ?? '',
+              status: hm.status,
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+      const rows = await listStudentsForViewer(email)
+      students = rows.map((item) => {
         const s = item as {
           _id?: string
           firstName?: string

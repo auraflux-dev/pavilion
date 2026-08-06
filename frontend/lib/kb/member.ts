@@ -81,11 +81,26 @@ Refresh the portal after payment if your tier or credit has not appeared yet.`,
 Add every student in your household so programs, The Cove balance, and messages stay tied to the right kids.`,
     },
     {
+      slug: 'invite-coparent',
+      title: 'How do I add a co-parent or second login?',
+      categoryId: 'students',
+      summary: 'Invite another adult to the same kids with their own login.',
+      order: 2,
+      body: `On **My Students**, open **Family access**.
+
+1. Enter the other parent’s email → **Send invite**
+2. They open the link, sign in (or create an account) with **that email**, then **Accept invite**
+3. Both of you see the same students
+4. Cove Digital Card stays with the primary parent unless they ask for a separate card
+
+You can remove a co-parent anytime from Family access.`,
+    },
+    {
       slug: 'edit-student',
       title: 'How do I fix a student name or grade?',
       categoryId: 'students',
       summary: 'Edit student details from the student card.',
-      order: 2,
+      order: 3,
       body: `Open the student card, choose **Edit student**, make your changes, and save.
 
 Updates usually show within a few minutes. Refresh the portal if you still see the old info.`,
@@ -95,7 +110,7 @@ Updates usually show within a few minutes. Refresh the portal if you still see t
       title: 'Can I remove a student from my account?',
       categoryId: 'students',
       summary: 'Parents can add and edit; staff archives removals.',
-      order: 3,
+      order: 4,
       body: `Parents can add and edit students in the portal.
 
 To archive or remove a student, use **Ask the PTO** on Member Help so staff can update the record safely.`,

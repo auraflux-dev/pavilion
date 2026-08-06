@@ -25,39 +25,35 @@ export async function GET(req: NextRequest) {
   const email = effective.parentEmail
 
   try {
-    const adminClient = getWixClient()
-    const result = await adminClient.items
-      .query('Students')
-      .eq('parentEmail', email)
-      .find()
+    const { listStudentsForViewer } = await import('@/lib/family-guardians')
+    const rows = await listStudentsForViewer(email)
 
-    const students = (result.items ?? [])
-      .filter((item: any) => item.archived !== true)
-      .map((item: any) => ({
-        id: item._id,
-        firstName: item.firstName ?? '',
-        lastName: item.lastName ?? '',
-        grade: item.grade ?? '',
-        membershipTier: item.membershipTier ?? 'free',
-        membershipStatus: item.membershipStatus ?? 'active',
-        discountCode: item.discountCode ?? null,
-        storeCardBalance: item.storeCardBalance ?? 0,
-        parentPhone: item.parentPhone ?? '',
-        secondaryPhone: item.secondaryPhone ?? '',
-        emergencyContact: item.emergencyContact ?? '',
-        emergencyPhone: item.emergencyPhone ?? '',
-        allergies: item.allergies ?? '',
-        medicalConditions: item.medicalConditions ?? '',
-        medications: item.medications ?? '',
-        pickupAuthorized: item.pickupAuthorized ?? '',
-        selfRelease: Boolean(item.selfRelease),
-        photoMediaConsent:
-          item.photoMediaConsent === true
-            ? true
-            : item.photoMediaConsent === false
-              ? false
-              : null,
-      }))
+    const students = rows.map((item: any) => ({
+      id: item._id,
+      firstName: item.firstName ?? '',
+      lastName: item.lastName ?? '',
+      grade: item.grade ?? '',
+      membershipTier: item.membershipTier ?? 'free',
+      membershipStatus: item.membershipStatus ?? 'active',
+      discountCode: item.discountCode ?? null,
+      storeCardBalance: item.storeCardBalance ?? 0,
+      parentPhone: item.parentPhone ?? '',
+      secondaryPhone: item.secondaryPhone ?? '',
+      emergencyContact: item.emergencyContact ?? '',
+      emergencyPhone: item.emergencyPhone ?? '',
+      allergies: item.allergies ?? '',
+      medicalConditions: item.medicalConditions ?? '',
+      medications: item.medications ?? '',
+      pickupAuthorized: item.pickupAuthorized ?? '',
+      selfRelease: Boolean(item.selfRelease),
+      photoMediaConsent:
+        item.photoMediaConsent === true
+          ? true
+          : item.photoMediaConsent === false
+            ? false
+            : null,
+      primaryParentEmail: item.parentEmail ?? email,
+    }))
 
     return NextResponse.json({
       students,
@@ -82,6 +78,9 @@ export async function POST(req: NextRequest) {
     const email = member?.loginEmail ?? ''
     if (!email) return NextResponse.json({ error: 'No email on account' }, { status: 400 })
 
+    const { resolvePrimaryParentEmail } = await import('@/lib/family-guardians')
+    const primaryEmail = await resolvePrimaryParentEmail(email)
+
     const body = await req.json()
     const { firstName, lastName, grade } = body
     if (!firstName?.trim() || !lastName?.trim() || !grade?.trim()) {
@@ -93,7 +92,7 @@ export async function POST(req: NextRequest) {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       grade: grade.trim(),
-      parentEmail: email,
+      parentEmail: primaryEmail,
       parentFirstName: member?.contact?.firstName ?? '',
       parentLastName: member?.contact?.lastName ?? '',
       membershipTier: 'free',
