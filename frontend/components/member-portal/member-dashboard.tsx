@@ -38,6 +38,7 @@ import {
   OnboardingChecklist,
 } from './onboarding-checklist'
 import { PortalBusinessOwnerForm } from './portal-business-owner-form'
+import { PortalHelpForm } from '@/components/member-portal/portal-help-form'
 import { InviteCoParentPanel } from './invite-co-parent-panel'
 import {
   buildOnboardingChecklist,
