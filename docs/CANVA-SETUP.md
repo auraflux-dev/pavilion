@@ -6,7 +6,8 @@ VP Marketing works in one designated folder:
 
 **https://www.canva.com/folder/FAHMLjYIWX0**
 
-- Owner: `president@shmspto.org` (invite Diane / Marketing as a Canva team member on that folder/team)
+- **Current owner:** `gregory.robert.c@gmail.com` (temporary — share/invite Diane & Marketing from that Canva account)
+- Later: move ownership to `president@shmspto.org` when that Canva account is ready
 - Staff → **Canva** → **Open Marketing folder**
 - Paste design edit links into Comms & content or Social
 - Brand PNGs: https://www.shmspto.org/brand
@@ -23,7 +24,7 @@ No Developer Portal needed for this path.
 
 ## Optional later: Canva Connect API
 
-In-Staff browse/search when you create a **PTO-only** private integration under `president@shmspto.org` (not CWN).
+In-Staff browse/search when you create a **PTO-only** private integration (prefer `president@` once that Canva exists; not CWN).
 
 1. [Your integrations](https://www.canva.com/developers/integrations) → Create → Private → **SHMS PTO Staff**
 2. Scopes: design:meta Read; design:content Read+Write; folder Read; asset Read; profile Read

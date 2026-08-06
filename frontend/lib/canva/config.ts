@@ -7,7 +7,7 @@ export const CANVA_AUTH_URL = 'https://www.canva.com/api/oauth/authorize'
 export const CANVA_TOKEN_URL = 'https://api.canva.com/rest/v1/oauth/token'
 export const CANVA_API_BASE = 'https://api.canva.com/rest/v1'
 
-/** VP Marketing working folder (president@ owns; Diane invited). */
+/** VP Marketing working folder (currently under gregory.robert.c@gmail.com Canva). */
 export const CANVA_MARKETING_FOLDER_URL =
   process.env.NEXT_PUBLIC_CANVA_MARKETING_FOLDER_URL?.trim() ||
   'https://www.canva.com/folder/FAHMLjYIWX0'

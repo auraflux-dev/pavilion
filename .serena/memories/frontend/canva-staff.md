@@ -1,23 +1,11 @@
-# Staff Canva Connect
+# Staff Canva
 
-Staff → **Canva** (`?workspace=canva`) for marketing/admin.
+**Primary (live):** VP Marketing folder https://www.canva.com/folder/FAHMLjYIWX0 — Staff → Canva → Open Marketing folder.
 
-## Code
-- Lib: `frontend/lib/canva/{config,oauth,tokens,client}.ts`
-- APIs: `/api/staff/canva/{status,connect,connect/callback,designs,disconnect}`
-- UI: `frontend/components/staff/staff-canva-panel.tsx`
-- CMS: `StaffCanvaTokens` (email, refreshToken, accessToken, accessExpiresAt, active)
-- Docs: `docs/CANVA-SETUP.md`
+**Current owner:** `gregory.robert.c@gmail.com` (temporary). Share/invite Diane from that Canva. Later move to `president@shmspto.org`.
 
-## Env
-- `CANVA_CLIENT_ID` / `CANVA_CLIENT_SECRET` (same Connect app as CWN; on Vercel Production + Development)
-- Optional: `CANVA_REFRESH_TOKEN`, `CANVA_ACCESS_TOKEN`, `CANVA_OAUTH_REDIRECT_BASE`
+Constant `CANVA_MARKETING_FOLDER_URL` / optional `NEXT_PUBLIC_CANVA_MARKETING_FOLDER_URL`.
 
-## Manual before first Connect works
-1. Canva Developer Portal → add redirect:
-   - `https://www.shmspto.org/api/staff/canva/connect/callback`
-   - `http://localhost:3022/api/staff/canva/connect/callback`
-2. Enable scopes matching `CANVA_SCOPES` in config.ts
-3. Deploy code; Marketing/Admin clicks **Connect Canva**
+**Optional:** OAuth Connect API under a PTO-only app (`docs/CANVA-SETUP.md`). Do not reuse CWN.
 
-Do not commit `.env.local` Canva secrets.
+Code: `frontend/lib/canva/*`, `staff-canva-panel.tsx`, APIs under `/api/staff/canva/`.

@@ -140,9 +140,9 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
       <div>
         <h2 className="text-lg font-semibold text-[#1B2A4A]">Canva</h2>
         <p className="mt-1 max-w-2xl text-sm text-[#5A6070]">
-          VP Marketing works in the designated PTO Canva folder (owner:{' '}
-          <strong>president@shmspto.org</strong>). Save designs there, then paste edit links into
-          Comms & content or Social. Brand logos:{' '}
+          VP Marketing works in the designated PTO Canva folder (currently owned by{' '}
+          <strong>gregory.robert.c@gmail.com</strong> — invite Marketing / Diane for access). Save
+          designs there, then paste edit links into Comms & content or Social. Brand logos:{' '}
           <a href="/brand" className="underline" target="_blank" rel="noreferrer">
             /brand
           </a>
@@ -156,8 +156,8 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
       <div className="rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] p-4 space-y-3">
         <p className="text-sm font-semibold text-[#1A1A1A]">Marketing Canva folder</p>
         <p className="text-xs text-[#5A6070] leading-relaxed">
-          Open this folder to create and edit PTO graphics. Invite Diane here as a Canva team
-          member if she doesn’t have access yet. No Developer Portal needed for day-to-day work.
+          Open this folder to create and edit PTO graphics. Ask Rob to share/invite if you can’t
+          open it. No Developer Portal needed for day-to-day work.
         </p>
         <p className="text-[11px] break-all text-[#5A6070]">{folderUrl}</p>
         <div className="flex flex-wrap gap-2">
@@ -294,7 +294,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
             <div className="space-y-3 pt-1">
               <p className="text-xs text-[#5A6070] leading-relaxed">
                 Optional later. Day-to-day Marketing only needs the folder link above. API Connect
-                needs a PTO-only app under <strong>president@shmspto.org</strong> — see{' '}
+                can wait until a PTO-owned Canva app exists — see{' '}
                 <code className="text-[11px]">docs/CANVA-SETUP.md</code>.
               </p>
               {!status?.clientConfigured ? (
