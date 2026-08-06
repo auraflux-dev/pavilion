@@ -62,7 +62,8 @@ export async function GET(req: NextRequest) {
     const actingAs = Boolean(effective?.actingAs)
 
     const admin = getWixClient()
-    const { listStudentsForViewer } = await import('@/lib/family-guardians')
+    const { listStudentsForViewer, resolvePrimaryParentEmail } = await import('@/lib/family-guardians')
+    const householdEmail = await resolvePrimaryParentEmail(email)
     const studentRows = await listStudentsForViewer(email)
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,7 +96,7 @@ export async function GET(req: NextRequest) {
       // Membership charges are parent-level; include when not tied to a studentId.
       admin.items
         .query('Payments')
-        .eq('parentEmail', email)
+        .eq('parentEmail', householdEmail)
         .descending('paymentDate')
         .limit(20)
         .find()
@@ -134,7 +135,7 @@ export async function GET(req: NextRequest) {
           .catch(() => ({ items: [] })),
         admin.items
           .query('Memberships')
-          .eq('email', email)
+          .eq('email', householdEmail)
           .limit(1)
           .find()
           .catch(() => ({ items: [] })),
@@ -284,7 +285,7 @@ export async function GET(req: NextRequest) {
       String(membershipRow.tier) !== 'free' &&
       String(membershipRow.status ?? '') !== 'expired'
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const paidFromStudentRows = (studentsRes.items ?? []).some((raw: any) => {
+    const paidFromStudentRows = studentRows.some((raw: any) => {
       if (raw.archived === true) return false
       return String(raw.membershipTier ?? 'free') !== 'free'
     })
