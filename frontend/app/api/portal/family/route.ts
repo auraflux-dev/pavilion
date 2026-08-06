@@ -387,6 +387,9 @@ export async function GET(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const item of enrollRes.items ?? []) {
       const e = item as any
+      const status = String(e.status ?? '').toLowerCase()
+      // Skip Jumbula / prior-year and cancelled rows so Purchases looks like current season only
+      if (status === 'historical' || status === 'cancelled') continue
       if (!e.paymentAmount) continue
       purchases.push({
         id: `en-${e._id}`,

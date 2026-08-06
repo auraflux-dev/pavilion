@@ -37,6 +37,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       getAllPrograms().catch(() => []),
     ])
 
+    const PAST_STATUSES = new Set(['historical', 'cancelled'])
     const mappedEnrollments = enrollments.map((item) => ({
       id: item._id,
       programName: item.programName ?? '',
@@ -46,6 +47,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       paymentAmount: item.feePaid ?? item.paymentAmount ?? 0,
       waitlistPosition: item.waitlistPosition ?? null,
     }))
+    const currentEnrollments = mappedEnrollments.filter(
+      (e) => !PAST_STATUSES.has(String(e.status).toLowerCase()),
+    )
+    const pastEnrollments = mappedEnrollments.filter((e) =>
+      PAST_STATUSES.has(String(e.status).toLowerCase()),
+    )
 
     const payments = (payRes.items ?? []).map((item: Record<string, unknown>) => {
       const norm = normalizePaymentLedgerRow(item)
@@ -69,7 +76,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       }))
       .filter((p) => p.id && p.name)
 
-    return NextResponse.json({ enrollments: mappedEnrollments, payments, transferOptions })
+    return NextResponse.json({
+      enrollments: currentEnrollments,
+      pastEnrollments,
+      payments,
+      transferOptions,
+    })
   } catch (err) {
     console.error('/api/students/[id]/history error:', err)
     return NextResponse.json({ error: 'Failed to load history' }, { status: 500 })
