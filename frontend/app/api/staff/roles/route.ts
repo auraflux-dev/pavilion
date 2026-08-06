@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
 import {
+  isPresidentAdminEmail,
   isStaffEmail,
   isValidPersonalEmail,
   normalizePersonalEmail,
@@ -94,6 +95,12 @@ export async function POST(req: NextRequest) {
     }
     if (!roles.length) {
       return NextResponse.json({ error: 'Choose at least one role.' }, { status: 400 })
+    }
+    if (roles.includes('admin') && !isPresidentAdminEmail(email)) {
+      return NextResponse.json(
+        { error: 'Admin can only be assigned to president@shmspto.org.' },
+        { status: 400 },
+      )
     }
     if (personalEmail && !isValidPersonalEmail(personalEmail)) {
       return NextResponse.json(

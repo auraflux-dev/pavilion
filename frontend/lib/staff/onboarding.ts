@@ -4,9 +4,10 @@
  * president@ skips onboarding (see onboardingRolesFor / shouldShowStaffOnboarding).
  */
 import type { StaffRole } from '@/lib/staff/roles'
+import { isPresidentAdminEmail, PRESIDENT_ADMIN_EMAIL } from '@/lib/staff/roles'
 import type { StaffWorkspace } from '@/lib/audience'
 
-export const PRESIDENT_STAFF_EMAIL = 'president@shmspto.org'
+export const PRESIDENT_STAFF_EMAIL = PRESIDENT_ADMIN_EMAIL
 
 export const STAFF_ONBOARDING_ROLES = [
   'marketing',
@@ -476,7 +477,7 @@ export function isStaffOnboardingRole(role: string): role is StaffOnboardingRole
 
 /** President mailbox skips checklists; everyone else gets matching role tracks. */
 export function shouldShowStaffOnboarding(email: string): boolean {
-  return email.trim().toLowerCase() !== PRESIDENT_STAFF_EMAIL
+  return !isPresidentAdminEmail(email)
 }
 
 /**

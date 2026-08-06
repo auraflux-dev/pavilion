@@ -27,8 +27,28 @@ export type StaffRole = (typeof STAFF_ROLES)[number]
  */
 export const STAFF_EMAIL_DOMAIN = 'shmspto.org'
 
+/** Only this mailbox may hold the admin role (President). */
+export const PRESIDENT_ADMIN_EMAIL = `president@${STAFF_EMAIL_DOMAIN}`
+
 export function isStaffEmail(email: string): boolean {
  return email.trim().toLowerCase().endsWith(`@${STAFF_EMAIL_DOMAIN}`)
+}
+
+export function isPresidentAdminEmail(email: string): boolean {
+ return email.trim().toLowerCase() === PRESIDENT_ADMIN_EMAIL
+}
+
+/**
+ * Admin is reserved for president@. Strip it from every other mailbox;
+ * ensure president@ always has admin when they have any StaffRoles row.
+ */
+export function enforceAdminEmailPolicy(email: string, roles: StaffRole[]): StaffRole[] {
+ const normalized = email.trim().toLowerCase()
+ const withoutAdmin = roles.filter((r) => r !== 'admin')
+ if (isPresidentAdminEmail(normalized)) {
+   return ['admin', ...withoutAdmin]
+ }
+ return withoutAdmin
 }
 
 export type StaffProfile = {
@@ -105,7 +125,7 @@ export async function getStaffProfile(email: string): Promise<StaffProfile | nul
  }
  | undefined
  if (!row) return null
- const roles = parseRoles(row.roles)
+ const roles = enforceAdminEmailPolicy(normalized, parseRoles(row.roles))
  if (!roles.length) return null
  return {
  email: normalized,
@@ -159,7 +179,7 @@ export const ROLE_HOME_COPY: Record<
 > = {
  admin: {
  title: 'President / Admin',
- owns: 'Stack health, member support, board training, act-as troubleshooting',
+ owns: 'Stack health, member support, board training, act-as troubleshooting (president@ only)',
  thisWeek: [
  'Review Needs Reconciliation payments',
  'Lookup / act-as parents who need help',

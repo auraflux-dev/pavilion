@@ -76,8 +76,9 @@ Day-to-day tools open inside Staff. The only intentional exits for money ops are
 - On Staff **Home**, save your **personal email** for the parent portal (students, Cove). That address must not be @shmspto.org
 - Personal Gmail will not unlock Staff; @shmspto.org will not own your students. Two logins, one hierarchy
 - After a role change, sign out and back in so permissions refresh
+- **Admin** is only **president@shmspto.org** (Staff access UI and server enforce this)
 
-If tools are missing that your role should have, President/Treasurer can update StaffRoles.`,
+If tools are missing that your role should have, President (\`president@\`) can update StaffRoles.`,
     },
     {
       slug: 'year-project-board',

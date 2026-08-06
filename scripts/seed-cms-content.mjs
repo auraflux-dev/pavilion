@@ -996,14 +996,22 @@ async function ensureSocialPostsCollection() {
 }
 
 async function upsertStaffRoles() {
-  // Policy: staff logins must be @shmspto.org. Board members use their
-  // personal email only for the parent portal (students, store cards).
+  // Policy: staff logins must be @shmspto.org. Admin is president@ only.
   const rows = [
     {
-      email: 'treasurer@shmspto.org',
+      email: 'president@shmspto.org',
       name: 'Robert Gregory',
       boardTitle: 'President',
       roles: 'admin',
+      personalEmail: 'gregory.robert.c@gmail.com',
+      active: true,
+    },
+    {
+      email: 'treasurer@shmspto.org',
+      name: 'Robert Gregory',
+      boardTitle: 'Treasurer',
+      roles: 'treasurer',
+      personalEmail: 'gregory.robert.c@gmail.com',
       active: true,
     },
   ]

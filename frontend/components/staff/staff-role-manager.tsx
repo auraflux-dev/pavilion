@@ -120,11 +120,15 @@ export function StaffRoleManager() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {availableRoles.map((role) => (
+        {availableRoles.map((role) => {
+          const adminLocked = role === 'admin' && email.trim().toLowerCase() !== 'president@shmspto.org'
+          return (
           <label key={role} className="inline-flex items-center gap-1.5 rounded-lg border border-[#E8E4DC] px-2.5 py-1.5 text-xs">
             <input
               type="checkbox"
               checked={roles.includes(role)}
+              disabled={adminLocked}
+              title={adminLocked ? 'Admin is only for president@shmspto.org' : undefined}
               onChange={(event) =>
                 setRoles((current) =>
                   event.target.checked ? [...current, role] : current.filter((item) => item !== role),
@@ -132,8 +136,10 @@ export function StaffRoleManager() {
               }
             />
             {role}
+            {adminLocked ? ' (president@ only)' : ''}
           </label>
-        ))}
+          )
+        })}
         <label className="inline-flex items-center gap-1.5 rounded-lg border border-[#E8E4DC] px-2.5 py-1.5 text-xs">
           <input type="checkbox" checked={active} onChange={(event) => setActive(event.target.checked)} />
           Active
