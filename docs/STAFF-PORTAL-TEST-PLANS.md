@@ -107,13 +107,14 @@ Covers every gap from the portal / board-roles / social / payments session.
 | E.5 | Other staff roles receive 403 from `/api/staff/surveys` | |
 | E.6 | Parent submission tests: see `docs/PARENT-PORTAL-PLAN.md` TP-E | |
 
-## TP-ONB. Role onboarding (Marketing · Secretary · Treasurer)
+## TP-ONB. Role onboarding (all staff roles except president@)
 
 | # | Test | Pass |
 |---|------|------|
 | O.1 | Staff with marketing role sees Marketing onboarding on Home | |
-| O.2 | Secretary / treasurer see their tracks; unrelated roles see none | |
-| O.3 | Admin sees all three tracks | |
+| O.2 | Secretary / treasurer / events / programs / retail / membership / wellness / instructor / coordinator each see their track | |
+| O.3 | Admin (non-president@) sees all tracks | |
+| O.3b | `president@shmspto.org` sees **no** onboarding checklist | |
 | O.4 | Mark done persists after refresh; Undo clears | |
 | O.5 | Personal email + Google Connect auto-complete when already set | |
 | O.6 | Workspace buttons navigate to the correct Staff tab | |
