@@ -82,18 +82,20 @@ Add every student in your household so programs, The Cove balance, and messages 
     },
     {
       slug: 'invite-coparent',
-      title: 'How do I add a co-parent or second login?',
+      title: 'How do I add a spouse, co-parent, or guardian?',
       categoryId: 'students',
       summary: 'Invite another adult to the same kids with their own login.',
       order: 2,
-      body: `On **My Students**, open **Family access**.
+      body: `On **My Students**, open **Household adults**.
 
-1. Enter the other parent’s email → **Send invite**
+This is for **any** second adult — married spouses, separated co-parents, or guardians with no parents on the account.
+
+1. Enter their email → **Send invite**
 2. They open the link, sign in (or create an account) with **that email**, then **Accept invite**
-3. Both of you see the same students
-4. Cove Digital Card stays with the primary parent unless they ask for a separate card
+3. Both logins see the same students
+4. Cove Digital Card stays with the **primary account holder** (whoever signed up first) unless they ask for a separate card
 
-You can remove a co-parent anytime from Family access.`,
+You can remove an adult anytime from Household adults.`,
     },
     {
       slug: 'edit-student',

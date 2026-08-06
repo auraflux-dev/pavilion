@@ -60,7 +60,7 @@ export function JoinFamilyClient() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-12 space-y-4">
-      <h1 className="text-2xl font-semibold text-[#1B2A4A]">Join a family portal</h1>
+      <h1 className="text-2xl font-semibold text-[#1B2A4A]">Join a family account</h1>
       {preview?.error ? (
         <p className="text-sm text-red-700">{preview.error}</p>
       ) : preview ? (
@@ -73,7 +73,7 @@ export function JoinFamilyClient() {
             ) : (
               'You’ve been invited'
             )}{' '}
-            to share the SHMS PTO member portal
+            to share an SHMS PTO family account
             {preview.primaryParentEmail ? (
               <>
                 {' '}
@@ -83,8 +83,9 @@ export function JoinFamilyClient() {
             .
           </p>
           <p className="text-xs text-[#5A6070]">
-            Sign in as <strong>{preview.guardianEmail}</strong>. You’ll see the same students.
-            Cove Digital Card stays with the primary parent unless you buy separately.
+            Sign in as <strong>{preview.guardianEmail}</strong>. You’ll see the same students —
+            whether you’re a spouse, co-parent, or guardian. Cove Digital Card stays with the
+            primary household account unless you buy separately.
           </p>
           <p className="text-[11px] text-[#5A6070]">Status: {preview.status}</p>
         </div>

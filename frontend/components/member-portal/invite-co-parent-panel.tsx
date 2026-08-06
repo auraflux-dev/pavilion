@@ -68,7 +68,7 @@ export function InviteCoParentPanel() {
   }
 
   async function revoke(guardianEmail: string) {
-    if (!confirm(`Remove ${guardianEmail} from your family portal?`)) return
+    if (!confirm(`Remove ${guardianEmail} from this family account?`)) return
     setBusy(true)
     try {
       const r = await fetch('/api/portal/guardians', {
@@ -88,14 +88,14 @@ export function InviteCoParentPanel() {
   }
 
   if (loading) {
-    return <p className="text-sm text-[#5A6070]">Loading family access…</p>
+    return <p className="text-sm text-[#5A6070]">Loading household adults…</p>
   }
 
   return (
     <div className="rounded-xl border border-[#E8E4DC] bg-white p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Users className="h-4 w-4 text-[#085508]" />
-        <h3 className="text-sm font-semibold text-[#1A1A1A]">Family access</h3>
+        <h3 className="text-sm font-semibold text-[#1A1A1A]">Household adults</h3>
       </div>
       <p className="text-xs text-[#5A6070] leading-relaxed">{note}</p>
 
@@ -110,8 +110,8 @@ export function InviteCoParentPanel() {
             required
             value={email}
             onChange={(ev) => setEmail(ev.target.value)}
-            placeholder="Co-parent email"
-            className="min-w-[12rem] flex-1 rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm"
+            placeholder="Spouse, co-parent, or guardian email"
+            className="min-w-[14rem] flex-1 rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm"
           />
           <Button
             type="submit"
@@ -150,7 +150,10 @@ export function InviteCoParentPanel() {
           ))}
         </ul>
       ) : isPrimary ? (
-        <p className="text-xs text-[#5A6070]">No co-parents linked yet.</p>
+        <p className="text-xs text-[#5A6070]">
+          No other adults linked yet. Invite a spouse, co-parent, or guardian so both logins see the
+          same students.
+        </p>
       ) : null}
 
       {msg ? <p className="text-xs text-[#1B2A4A]">{msg}</p> : null}

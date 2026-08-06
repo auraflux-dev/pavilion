@@ -46,9 +46,9 @@ export async function GET(req: NextRequest) {
           acceptedAt: r.acceptedAt || null,
         })),
       studentCount: students.length,
-      note: isPrimary
-        ? 'Invite another parent or guardian to use their own login with the same kids. Cove card stays on your account unless they buy separately.'
-        : 'You are linked as a co-parent. Cove membership and family code belong to the primary parent.',
+      note:       isPrimary
+        ? 'Invite another adult (spouse, co-parent, or guardian) to use their own login with the same students. Cove Digital Card stays on this household account unless they buy separately.'
+        : 'You are linked as a household adult. Cove membership and family code belong to the primary account holder.',
     })
   } catch (err) {
     console.error('/api/portal/guardians GET', err)
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     const primary = await resolvePrimaryParentEmail(session.email)
     if (primary !== session.email.trim().toLowerCase()) {
       return NextResponse.json(
-        { error: 'Only the primary parent can invite co-parents.' },
+        { error: 'Only the primary account holder can invite other adults.' },
         { status: 403 },
       )
     }
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     const students = await listStudentsForViewer(session.email)
     if (students.length === 0) {
       return NextResponse.json(
-        { error: 'Add a student first, then invite a co-parent.' },
+        { error: 'Add a student first, then invite another adult.' },
         { status: 400 },
       )
     }
@@ -103,14 +103,14 @@ export async function POST(req: NextRequest) {
     const mail = await sendMassEmail({
       subject: 'You’re invited to the SHMS PTO family portal',
       body: [
-        `You’ve been invited to share the Stone Hill Middle School PTO member portal${
+        `You’ve been invited to share a Stone Hill Middle School PTO family account${
           kidNames ? ` for: ${kidNames}` : ''
         }.`,
         '',
         `Accept invite (sign in or create an account as ${guardianEmail}):`,
         acceptUrl,
         '',
-        'You’ll see the same students. Cove Digital Card stays with the primary parent unless you purchase separately.',
+        'You’ll see the same students. Cove Digital Card stays with the primary household account unless you purchase separately.',
         `Link expires ${new Date(expiresAt).toLocaleDateString()}.`,
       ].join('\n'),
       fromName: 'SHMS PTO',
@@ -145,7 +145,10 @@ export async function DELETE(req: NextRequest) {
   try {
     const primary = await resolvePrimaryParentEmail(session.email)
     if (primary !== session.email.trim().toLowerCase()) {
-      return NextResponse.json({ error: 'Only the primary parent can remove co-parents.' }, { status: 403 })
+      return NextResponse.json(
+        { error: 'Only the primary account holder can remove household adults.' },
+        { status: 403 },
+      )
     }
     const body = await req.json().catch(() => ({}))
     const guardianEmail = String(body.email ?? '').trim().toLowerCase()

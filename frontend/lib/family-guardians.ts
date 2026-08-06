@@ -1,6 +1,7 @@
 /**
- * Co-parent / second guardian sharing.
- * Students stay owned by primaryParentEmail; guardians get portal view of the same kids.
+ * Household adult sharing (spouse, co-parent, or guardian).
+ * Students stay owned by primaryParentEmail (first account holder);
+ * additional adults get portal view of the same kids.
  * Cove membership + family code stay on the primary login unless they buy separately.
  */
 import { createHash, randomBytes } from 'node:crypto'
@@ -139,7 +140,7 @@ export async function createGuardianInvite(opts: {
   const primary = norm(opts.primaryParentEmail)
   const guardian = norm(opts.guardianEmail)
   if (!primary || !guardian) throw new Error('Emails required')
-  if (primary === guardian) throw new Error('Use a different email for the co-parent')
+  if (primary === guardian) throw new Error('Use a different email for the other adult')
   if (!guardian.includes('@') || guardian.startsWith('@')) throw new Error('Enter a valid email')
 
   const client = getWixClient()
@@ -152,7 +153,7 @@ export async function createGuardianInvite(opts: {
 
   for (const row of (existing.items ?? []) as FamilyGuardianRow[]) {
     if (row.status === 'active' && row.active !== false) {
-      throw new Error('That email is already linked to your family')
+      throw new Error('That email is already linked to this household')
     }
   }
 

@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
     const householdEmail = await resolvePrimaryParentEmail(session.email)
     if (householdEmail !== session.email.trim().toLowerCase()) {
       return NextResponse.json(
-        { error: 'Only the primary parent can reset the family Cove code.' },
+        { error: 'Only the primary account holder can reset the family Cove code.' },
         { status: 403 },
       )
     }
