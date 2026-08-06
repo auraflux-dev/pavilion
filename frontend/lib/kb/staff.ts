@@ -281,11 +281,11 @@ Keep MoneyMinder / bank exports with Treasurer. Do not duplicate finance ledgers
     },
     {
       slug: 'role-onboarding',
-      title: 'Role onboarding (Marketing · Secretary · Treasurer)',
+      title: 'Role onboarding (all staff roles)',
       categoryId: 'start',
-      summary: 'First-week checklists on Staff Home for key board roles.',
+      summary: 'First-week checklists on Staff Home for every staff role except president@.',
       order: 4,
-      body: `Staff **Home** shows a role onboarding checklist when your StaffRoles include **marketing**, **secretary**, or **treasurer** (admins see all three).
+      body: `Staff **Home** shows a role onboarding checklist for your StaffRoles (marketing, secretary, treasurer, events, programs, retail, membership, wellness, instructor, coordinator). **Admins** see every track. **president@shmspto.org** is skipped.
 
 ## How it works
 1. Open each step’s workspace (or external money tool for Treasurer)
@@ -296,9 +296,10 @@ Keep MoneyMinder / bank exports with Treasurer. Do not duplicate finance ledgers
 Progress is saved on your StaffRoles row so it follows you across devices.
 
 ## Tracks
-- **VP Marketing** — Google, Comms & content, Social, Newsletter, page copy, surveys
-- **Secretary** — Google, Minutes, Comms calendar, Board roster, Events, Newsletter
-- **Treasurer** — Google, Payments, Expenses, Reports, MoneyMinder, Square
+- **VP Marketing** — Google, Projects, Comms, Canva folder, Social, Newsletter, page copy, surveys
+- **Secretary** — Minutes, Comms, Board roster, Events, Newsletter
+- **Treasurer** — Payments, Expenses, Reports, MoneyMinder, Square
+- **Events / Programs / Retail / Membership / Wellness / Instructor / Coordinator** — role-specific workspaces
 
 See Drive doc **47 - Staff Role Onboarding** for the board-facing guide.`,
     },

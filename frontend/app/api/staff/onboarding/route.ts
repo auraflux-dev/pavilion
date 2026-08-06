@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const roles = onboardingRolesFor(session.staff.roles)
+  const roles = onboardingRolesFor(session.staff.roles, session.email)
   if (!roles.length) {
     return NextResponse.json({ tracks: [], progress: {}, roles: [] })
   }
@@ -89,7 +89,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const allowed = new Set(onboardingRolesFor(session.staff.roles))
+  const allowed = new Set(onboardingRolesFor(session.staff.roles, session.email))
   if (!allowed.size) {
     return NextResponse.json({ error: 'No onboarding track for your role' }, { status: 403 })
   }
