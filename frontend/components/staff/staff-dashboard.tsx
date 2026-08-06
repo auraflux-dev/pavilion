@@ -539,7 +539,7 @@ export function StaffDashboard() {
                           fundraising: 'CTAs & fundraising goals',
                           wellness: 'Wish list & appreciation',
                           comms: 'Month grid · communications & content',
-                          canva: 'Connect Canva · browse designs',
+                          canva: 'Marketing folder · optional API',
                           newsletter: 'Member email & WhatsApp',
                           expenses: 'Submit & track reimbursements',
                           help: 'Staff knowledge base',

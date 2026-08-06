@@ -21,7 +21,7 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 |------|-------|------|
 | Projects | Everyone | Year board, assign tasks, **Calendar** (tasks by due date) |
 | **Comms & content** | Marketing / secretary / membership / events | Month grid for **Communications** + **Content planner** (parents / school / board) |
-| **Canva** | Marketing / admin | Connect Canva · browse designs · copy edit links into Comms / Social |
+| **Canva** | Marketing / admin | Designated Marketing folder · optional API Connect |
 | Members / Staff access | Admin | Lookup, act-as, archive, roles |
 | Social | Marketing | Facebook publish |
 | Surveys | Marketing / secretary | **Create**, share, review, CSV |

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { CANVA_MARKETING_FOLDER_URL } from '@/lib/canva/config'
 import type { CanvaDesign } from '@/lib/canva/client'
 
 type Status = {
@@ -13,6 +14,7 @@ type Status = {
   user?: { displayName: string; teamName: string } | null
   error?: string
   brandAssetsUrl?: string
+  marketingFolderUrl?: string
   setup?: { redirectUriProd: string; redirectUriLocal: string; docs: string }
 }
 
@@ -29,6 +31,9 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState('')
   const [copiedId, setCopiedId] = useState('')
+  const [showConnect, setShowConnect] = useState(false)
+
+  const folderUrl = status?.marketingFolderUrl || CANVA_MARKETING_FOLDER_URL
 
   const loadStatus = useCallback(async () => {
     const r = await fetch('/api/staff/canva/status')
@@ -121,69 +126,69 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
     }
   }
 
+  async function copyFolderUrl() {
+    try {
+      await navigator.clipboard.writeText(folderUrl)
+      setMsg('Marketing folder link copied.')
+    } catch {
+      setMsg(folderUrl)
+    }
+  }
+
   return (
     <div className="space-y-5">
       <div>
         <h2 className="text-lg font-semibold text-[#1B2A4A]">Canva</h2>
         <p className="mt-1 max-w-2xl text-sm text-[#5A6070]">
-          Connect the PTO Canva account, browse recent designs, copy edit links into Comms &
-          content or Social. Brand logos live on the public{' '}
+          VP Marketing works in the designated PTO Canva folder (owner:{' '}
+          <strong>president@shmspto.org</strong>). Save designs there, then paste edit links into
+          Comms & content or Social. Brand logos:{' '}
           <a href="/brand" className="underline" target="_blank" rel="noreferrer">
             /brand
-          </a>{' '}
-          shelf for Canva uploads.
+          </a>
+          .
         </p>
       </div>
 
       {msg ? <p className="text-sm text-[#1B2A4A]">{msg}</p> : null}
       {loading ? <p className="text-sm text-[#5A6070]">Loading…</p> : null}
 
-      {status && !status.connected ? (
-        <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] p-4 space-y-3">
-          <p className="text-sm font-semibold text-[#1A1A1A]">Connect Canva</p>
-          {!status.clientConfigured ? (
-            <p className="text-xs text-[#5A6070] leading-relaxed">
-              Server needs <code className="text-[11px]">CANVA_CLIENT_ID</code> and{' '}
-              <code className="text-[11px]">CANVA_CLIENT_SECRET</code> (same Connect app as CWN).
-              Add redirect URI{' '}
-              <code className="text-[11px] break-all">{status.setup?.redirectUriProd}</code> in the
-              Canva Developer Portal. See <code className="text-[11px]">docs/CANVA-SETUP.md</code>.
-            </p>
-          ) : (
-            <p className="text-xs text-[#5A6070] leading-relaxed">
-              Connect the <strong>SHMS PTO–only</strong> Canva account (owner:{' '}
-              <strong>president@shmspto.org</strong>; Marketing is invited as a team member). Do
-              not use personal or other-project Canva logins.
-            </p>
-          )}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              disabled={!status.clientConfigured || busy}
-              className="text-white"
-              style={{ backgroundColor: '#085508' }}
-              onClick={() => {
-                window.location.href = '/api/staff/canva/connect'
-              }}
-            >
-              Connect Canva
+      <div className="rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] p-4 space-y-3">
+        <p className="text-sm font-semibold text-[#1A1A1A]">Marketing Canva folder</p>
+        <p className="text-xs text-[#5A6070] leading-relaxed">
+          Open this folder to create and edit PTO graphics. Invite Diane here as a Canva team
+          member if she doesn’t have access yet. No Developer Portal needed for day-to-day work.
+        </p>
+        <p className="text-[11px] break-all text-[#5A6070]">{folderUrl}</p>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            className="text-white"
+            style={{ backgroundColor: '#085508' }}
+            onClick={() => window.open(folderUrl, '_blank', 'noopener,noreferrer')}
+          >
+            Open Marketing folder
+          </Button>
+          <Button type="button" variant="outline" onClick={() => void copyFolderUrl()}>
+            Copy folder link
+          </Button>
+          <Button type="button" variant="outline" onClick={() => window.open('/brand', '_blank')}>
+            Brand asset URLs
+          </Button>
+          {onOpenWorkspace ? (
+            <Button type="button" variant="outline" onClick={() => onOpenWorkspace('comms')}>
+              Open Comms calendar
             </Button>
-            <Button type="button" variant="outline" onClick={() => window.open('/brand', '_blank')}>
-              Brand asset URLs
-            </Button>
-          </div>
-          {status.error ? (
-            <p className="text-xs text-amber-900">Last token error: {status.error}</p>
           ) : null}
         </div>
-      ) : null}
+      </div>
 
       {status?.connected ? (
         <>
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] px-4 py-3">
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] px-4 py-3">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-[#1A1A1A]">
-                Connected{status.user?.displayName ? ` · ${status.user.displayName}` : ''}
+                API connected{status.user?.displayName ? ` · ${status.user.displayName}` : ''}
               </p>
               <p className="text-xs text-[#5A6070]">
                 {status.user?.teamName ? `${status.user.teamName} · ` : ''}
@@ -200,11 +205,6 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
             {status.staffConnected ? (
               <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void disconnect()}>
                 Disconnect
-              </Button>
-            ) : null}
-            {onOpenWorkspace ? (
-              <Button type="button" size="sm" variant="outline" onClick={() => onOpenWorkspace('comms')}>
-                Open Comms calendar
               </Button>
             ) : null}
           </div>
@@ -230,7 +230,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
           </form>
 
           {designs.length === 0 && !loading ? (
-            <p className="text-sm text-[#5A6070]">No designs found.</p>
+            <p className="text-sm text-[#5A6070]">No designs found via API.</p>
           ) : null}
 
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -281,7 +281,45 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
             </Button>
           ) : null}
         </>
-      ) : null}
+      ) : (
+        <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] p-4 space-y-2">
+          <button
+            type="button"
+            className="text-sm font-semibold text-[#1A1A1A] underline-offset-2 hover:underline"
+            onClick={() => setShowConnect((v) => !v)}
+          >
+            {showConnect ? 'Hide' : 'Optional'}: Connect Canva API (browse in Staff)
+          </button>
+          {showConnect ? (
+            <div className="space-y-3 pt-1">
+              <p className="text-xs text-[#5A6070] leading-relaxed">
+                Optional later. Day-to-day Marketing only needs the folder link above. API Connect
+                needs a PTO-only app under <strong>president@shmspto.org</strong> — see{' '}
+                <code className="text-[11px]">docs/CANVA-SETUP.md</code>.
+              </p>
+              {!status?.clientConfigured ? (
+                <p className="text-xs text-[#5A6070]">
+                  Client id/secret not configured yet — folder workflow still works.
+                </p>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => {
+                    window.location.href = '/api/staff/canva/connect'
+                  }}
+                >
+                  Connect Canva API
+                </Button>
+              )}
+              {status?.error ? (
+                <p className="text-xs text-amber-900">Last token error: {status.error}</p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      )}
     </div>
   )
 }

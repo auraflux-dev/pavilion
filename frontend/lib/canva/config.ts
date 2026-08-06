@@ -1,11 +1,16 @@
 /**
  * Canva Connect config for Staff Marketing.
- * Reuses the CWN Connect app client id/secret when set on Vercel;
- * redirect URI must be registered in the Canva Developer Portal.
+ * Primary path for VP Marketing: open the designated PTO folder in Canva.
+ * Optional OAuth Connect browses designs in-Staff when client id/secret are set.
  */
 export const CANVA_AUTH_URL = 'https://www.canva.com/api/oauth/authorize'
 export const CANVA_TOKEN_URL = 'https://api.canva.com/rest/v1/oauth/token'
 export const CANVA_API_BASE = 'https://api.canva.com/rest/v1'
+
+/** VP Marketing working folder (president@ owns; Diane invited). */
+export const CANVA_MARKETING_FOLDER_URL =
+  process.env.NEXT_PUBLIC_CANVA_MARKETING_FOLDER_URL?.trim() ||
+  'https://www.canva.com/folder/FAHMLjYIWX0'
 
 /** Scopes for browse + open designs + brand assets awareness. */
 export const CANVA_SCOPES = [

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
-import { canvaClientConfigured, canvaSharedTokenConfigured } from '@/lib/canva/config'
+import { canvaClientConfigured, canvaSharedTokenConfigured, CANVA_MARKETING_FOLDER_URL } from '@/lib/canva/config'
 import {
   canvaConnectionAvailable,
   getCanvaAccessTokenForStaff,
@@ -48,9 +48,10 @@ export async function GET(req: NextRequest) {
     user,
     error: error || undefined,
     brandAssetsUrl: '/brand',
+    marketingFolderUrl: CANVA_MARKETING_FOLDER_URL,
     setup: {
       redirectUriProd: 'https://www.shmspto.org/api/staff/canva/connect/callback',
-      redirectUriLocal: 'http://localhost:3022/api/staff/canva/connect/callback',
+      redirectUriLocal: 'http://127.0.0.1:3022/api/staff/canva/connect/callback',
       docs: 'docs/CANVA-SETUP.md',
     },
   })

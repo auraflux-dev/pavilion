@@ -60,8 +60,9 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
       },
       {
         id: 'mkt_canva',
-        title: 'Connect Canva in Staff',
-        detail: 'Staff → Canva. Browse designs and copy edit links into Comms / Social.',
+        title: 'Open the Marketing Canva folder',
+        detail:
+          'Staff → Canva → Open Marketing folder. Work only in that PTO folder (not personal Canva).',
         workspace: 'canva',
         actionLabel: 'Open Canva',
       },
