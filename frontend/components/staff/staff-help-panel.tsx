@@ -18,6 +18,7 @@ export function StaffHelpPanel({
   canDiscounts,
   canSite,
   canMarketing,
+  canRetail,
   canEditKb,
 }: {
   isAdmin: boolean
@@ -26,6 +27,7 @@ export function StaffHelpPanel({
   canDiscounts: boolean
   canSite: boolean
   canMarketing: boolean
+  canRetail: boolean
   canEditKb?: boolean
 }) {
   const searchParams = useSearchParams()
@@ -44,8 +46,9 @@ export function StaffHelpPanel({
       canDiscounts,
       canSite,
       canMarketing,
+      canRetail,
     }),
-    [isAdmin, canMessage, canMembership, canDiscounts, canSite, canMarketing],
+    [isAdmin, canMessage, canMembership, canDiscounts, canSite, canMarketing, canRetail],
   )
 
   useEffect(() => {

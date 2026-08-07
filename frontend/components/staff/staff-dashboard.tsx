@@ -799,6 +799,7 @@ export function StaffDashboard() {
             canDiscounts={canDiscounts}
             canSite={canSite}
             canMarketing={canMarketing}
+            canRetail={canRetail}
             canEditKb={canFaq}
           />
         ) : null}

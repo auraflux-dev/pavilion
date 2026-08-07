@@ -167,13 +167,17 @@ Reset the code anytime if it was shared or lost.`,
       slug: 'cove-snack-window',
       title: 'How does The Cove snack window work?',
       categoryId: 'cove',
-      summary: 'Online balance + code; plastic card optional.',
+      summary: 'Wallet QR or 6-digit code; Stand for guests.',
       order: 3,
-      body: `Online checkout creates the family Square balance and Cove code. Plastic cards are optional for faster tapping.
+      body: `Load the Cove Digital Card online first (portal → Store & Cove Digital Card).
 
-Until a physical card is issued, staff can look up your family by code at the register.
+At the snack window, your student shows the **Wallet / Photos QR** or says the **6-digit Family Cove code**. Staff looks up the family, confirms names and balance, then charges snacks to the prepaid card.
 
-Spirit wear and other Cove merch checkout online separately with card or PayPal.`,
+Until a physical card is issued, the code or Wallet QR is enough.
+
+No balance or no portal login? Staff can take a **card-present** sale on Square Stand (iPad) for that purchase. Reloads still happen online — Stand does not create a new family card.
+
+Spirit wear and other Cove merch can also checkout online with card or PayPal.`,
     },
     {
       slug: 'cove-coupons',

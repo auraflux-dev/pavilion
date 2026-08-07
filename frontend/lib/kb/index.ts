@@ -12,6 +12,7 @@ export type KbGateOpts = {
   canDiscounts?: boolean
   canSite?: boolean
   canMarketing?: boolean
+  canRetail?: boolean
 }
 
 function indexFor(audience: KbAudience): KbIndex {
@@ -37,6 +38,7 @@ export function filterArticles(
       if (a.need === 'discounts' && !opts?.canDiscounts) return false
       if (a.need === 'site' && !opts?.canSite) return false
       if (a.need === 'marketing' && !opts?.canMarketing) return false
+      if (a.need === 'retail' && !opts?.canRetail) return false
       return true
     })
   }

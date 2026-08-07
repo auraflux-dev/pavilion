@@ -1,6 +1,6 @@
 export type KbAudience = 'member' | 'staff'
 
-export type StaffKbNeed = 'message' | 'membership' | 'discounts' | 'site' | 'marketing'
+export type StaffKbNeed = 'message' | 'membership' | 'discounts' | 'site' | 'marketing' | 'retail'
 
 export type KbCategory = {
   id: string

@@ -218,23 +218,78 @@ Do not send parents to the old Wix Events dashboard for day-to-day work. Stay in
       slug: 'cove-register',
       title: 'Cove register (sell snacks)',
       categoryId: 'cove',
-      summary: 'Family code → full names → balance → charge.',
+      summary: 'Lookup family → confirm kids + balance → tap products → Charge.',
       order: 1,
-      body: `Staff → **The Cove** → Cove register.
+      need: 'retail',
+      body: `Staff → **The Cove** → Cove register (laptop or tablet browser).
 
-1. Student says what they want
-2. Student gives the 6-digit family code. Staff enters it
-3. Confirm **full student names** and **Family Cove Digital Card balance**
-4. Scan or tap products, then **Charge**
+**Member with a loaded Cove Digital Card**
+1. Ask what they want
+2. Get identity: Wallet / Photos QR, spoken **6-digit family code**, or long Square GAN
+3. Enter / paste into **Scan QR / GAN or 6-digit backup** → Lookup
+4. Confirm **student full names** and **balance** on screen
+5. Tap product tiles (deals first), adjust qty, then **Charge**
+6. Hand over the snack — balance updates on the family card
 
-If there is no card yet, the parent must load online first. Plastic cards are optional; the code is enough.`,
+**Not enough balance** — stop Charge; parent loads online in the portal, or take a **guest** sale on Square Stand (card present).
+
+**No card / guest** — do not invent a code. Use Square Stand (see **In-person Cove + Square Stand**).
+
+Prefer the Staff register for prepaid digital-card redemptions so inventory and reports stay in sync.`,
+    },
+    {
+      slug: 'cove-in-person-square-stand',
+      title: 'In-person Cove + Square Stand (iPad)',
+      categoryId: 'cove',
+      summary: 'Two lanes: digital-card register vs guest card-present on Stand.',
+      order: 2,
+      need: 'retail',
+      body: `Cove window usually runs **two devices**:
+
+1. **Laptop / tablet** signed into Staff as cove@ (or retail) → **The Cove** register
+2. **iPad + Square Stand** signed into the PTO Square location → card-present + gift-card scan
+
+### Lane A — Prepaid Cove Digital Card (preferred for snacks)
+Parent already loaded the card online.
+
+- Student shows **Apple/Google Wallet** QR, Photos QR, or says the **6-digit family code**
+- On Stand: use Square **gift card** / scan flow when you are redeeming the Wallet QR as a Square gift card
+- Or on Staff register: type/paste code or GAN → confirm names + balance → tap products → **Charge**
+
+Never ask them to pay again on Stand if the digital card already covers the snack.
+
+### Lane B — Guest / no portal / no balance (Square Stand)
+Use when there is **no** loaded Cove Digital Card, or they want spirit/event merch **card present**.
+
+1. Ring the item(s) on Square Stand as a normal sale
+2. Take card (or other Stand tender)
+3. Hand over the item
+
+Digital card **loads** still happen online in the parent portal — Stand does not open a new family account.
+
+### Setup checklist (before the bell)
+- Staff browser logged in as cove@shmspto.org → The Cove products load
+- Square Stand online, correct location, receipt printer / drawer ready
+- Know today's deals (featured products on register)
+- Low stock: update qty in **Cove products** (same workspace)
+
+### Troubleshooting
+| Issue | What to do |
+|-------|------------|
+| Code not found | Confirm 6 digits; paid member codes end in **9**; parent must have portal + card |
+| Balance too low | Parent loads online, or switch to Lane B Stand sale |
+| Wallet QR will not scan on Stand | Type 6-digit backup on Staff register |
+| Parent charged twice | Stop. Email treasurer@ — do not take another payment |
+| Square Stand offline | Staff register still works for digital-card Charge if the laptop is online |
+
+Longer guide: docs/COVE-IN-PERSON.md`,
     },
     {
       slug: 'cove-products-inventory',
       title: 'Cove products & inventory',
       categoryId: 'cove',
       summary: 'Add/restock products; advanced inventory when needed.',
-      order: 2,
+      order: 3,
       body: `In **The Cove**, use **Cove products** to add items, prices, barcodes, and restock quantities.
 
 Multiple staff can work products at once. Spirit wear stock is separate (Wix Stores / Cove shop merch), not the snack register catalog.
@@ -246,7 +301,7 @@ Use advanced inventory only when you need deeper stock tools. Day-to-day is prod
       title: 'Discount codes & spirit coupons',
       categoryId: 'cove',
       summary: 'Create and manage promo codes in Staff.',
-      order: 3,
+      order: 4,
       need: 'discounts',
       body: `Open the discounts / coupons workspace your role can access.
 
