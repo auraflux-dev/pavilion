@@ -85,7 +85,9 @@ Advanced **Cove inventory** table is backup only.
 
 ## Training video
 
-Generate / refresh with HeyGen (staff training): “SHMS Cove in-person sales — Staff register + Square Stand.”  
-Link the published URL here when ready:
+~90s staff training (HeyGen): **SHMS PTO — The Cove Staff Training**
 
-- Video: _(pending)_
+- Watch in HeyGen: https://app.heygen.com/videos/a1887b7ddf2d4656ab11f09a93a1b171
+- Captioned MP4: https://resource2.heygen.ai/aws_pacific/avatar_tmp/ac2ab3f8d5404c4f8c3fcb46abb43f46/v4482e2293b4f41059aa6d9572abb01e5/caption_a1887b7ddf2d4656ab11f09a93a1b171.mp4
+
+Also linked from Staff → Help → **In-person Cove + Square Stand**.

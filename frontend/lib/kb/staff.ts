@@ -282,7 +282,9 @@ Digital card **loads** still happen online in the parent portal — Stand does n
 | Parent charged twice | Stop. Email treasurer@ — do not take another payment |
 | Square Stand offline | Staff register still works for digital-card Charge if the laptop is online |
 
-Longer guide: docs/COVE-IN-PERSON.md`,
+Longer guide: docs/COVE-IN-PERSON.md
+
+**Training video (~90s):** https://app.heygen.com/videos/a1887b7ddf2d4656ab11f09a93a1b171`,
     },
     {
       slug: 'cove-products-inventory',
