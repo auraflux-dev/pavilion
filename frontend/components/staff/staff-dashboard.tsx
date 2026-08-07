@@ -193,7 +193,11 @@ export function StaffDashboard() {
     me && (me.roles.includes('retail') || me.roles.includes('membership') || me.isAdmin),
   )
   const canContent = Boolean(
-    me && (me.roles.includes('marketing') || me.roles.includes('secretary') || me.isAdmin),
+    me &&
+      (me.roles.includes('marketing') ||
+        me.roles.includes('secretary') ||
+        me.roles.includes('retail') ||
+        me.isAdmin),
   )
   const canSite = Boolean(
     me &&
@@ -530,7 +534,7 @@ export function StaffDashboard() {
                           discounts: 'Named & member discount codes',
                           membership: 'Roster, email, WhatsApp groups',
                           tiers: 'Tier map & Catalog product IDs',
-                          content: 'Page heroes & marketing copy',
+                          content: 'Page heroes & Cove / marketing copy',
                           site: 'Announcement, contact, goals…',
                           board: 'Public /board roster',
                           nav: 'Top nav & footer links',

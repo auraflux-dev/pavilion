@@ -301,15 +301,22 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
   retail: {
     role: 'retail',
     title: 'Retail / Cove onboarding',
-    summary: 'Store allowlists, discounts, and Cove-facing site settings.',
+    summary: 'Cove register, products, discounts, and public /cove page copy.',
     steps: [
       ...sharedStart('rtl'),
       {
         id: 'rtl_retail',
         title: 'Open The Cove (store) workspace',
-        detail: 'Product ID allowlists for spirit wear and merch.',
+        detail: 'Register (scan codes), Cove products, and inventory.',
         workspace: 'retail',
         actionLabel: 'Open The Cove',
+      },
+      {
+        id: 'rtl_page_copy',
+        title: 'Edit Cove page copy',
+        detail: 'Hero / how-it-works / CTA / spirit wear copy on public /cove.',
+        workspace: 'content',
+        actionLabel: 'Open Page copy',
       },
       {
         id: 'rtl_discounts',
@@ -326,11 +333,11 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
         actionLabel: 'Open Site settings',
       },
       {
-        id: 'rtl_payments',
-        title: 'Know Payments (read path)',
-        detail: 'Understand where Cove loads show up; Treasurer owns reconciliation.',
-        workspace: 'payments',
-        actionLabel: 'Open Payments',
+        id: 'rtl_reports',
+        title: 'Open Cove reports',
+        detail: 'See Cove / store-card sales; Treasurer still owns Payments reconciliation.',
+        workspace: 'reports',
+        actionLabel: 'Open Reports',
       },
       ...sharedEnd('rtl'),
     ],

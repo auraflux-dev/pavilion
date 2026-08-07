@@ -233,11 +233,11 @@ export const ROLE_HOME_COPY: Record<
  },
  retail: {
  title: 'Digital & Retail Sales',
- owns: 'Spirit wear, inventory, pop-ups, e-com drops',
+ owns: 'Spirit wear, Cove register, inventory, /cove page copy',
  thisWeek: [
  'Review low-stock products',
+ 'Keep /cove page copy current',
  'Create or issue discount codes for members',
- 'Schedule next spirit drop with Marketing',
  ],
  },
  membership: {

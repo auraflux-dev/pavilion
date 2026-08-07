@@ -26,6 +26,8 @@ export function StaffPageContentPanel() {
   const [form, setForm] = useState<PageRow | null>(null)
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
+  const [scope, setScope] = useState<'all' | 'cove'>('all')
+  const [canBrandFix, setCanBrandFix] = useState(true)
 
   const load = useCallback(async () => {
     try {
@@ -34,6 +36,8 @@ export function StaffPageContentPanel() {
       if (!r.ok) throw new Error(d.error ?? 'Load failed')
       const list = (d.pages ?? []) as PageRow[]
       setPages(list)
+      setScope(d.scope === 'cove' ? 'cove' : 'all')
+      setCanBrandFix(d.canBrandFix !== false)
       if (!selected && list[0]) {
         setSelected(list[0].page)
         setForm(list[0])
@@ -103,17 +107,21 @@ export function StaffPageContentPanel() {
         <div>
           <h2 className="text-lg font-bold">Page copy</h2>
           <p className="text-xs text-[#5A6070]">
-            Edit heroes and section copy without Wix CMS. Changes show after refresh / ~5 minutes.
+            {scope === 'cove'
+              ? 'Edit The Cove public page copy (store / how / CTA / spirit wear). Changes show after refresh / ~5 minutes.'
+              : 'Edit heroes and section copy without Wix CMS. Changes show after refresh / ~5 minutes.'}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" disabled={busy} onClick={() => void brandFix(false)}>
-            Preview SHMS → SHMS PTO
-          </Button>
-          <Button type="button" variant="outline" disabled={busy} onClick={() => void brandFix(true)}>
-            Apply SHMS → SHMS PTO
-          </Button>
-        </div>
+        {canBrandFix ? (
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="outline" disabled={busy} onClick={() => void brandFix(false)}>
+              Preview SHMS → SHMS PTO
+            </Button>
+            <Button type="button" variant="outline" disabled={busy} onClick={() => void brandFix(true)}>
+              Apply SHMS → SHMS PTO
+            </Button>
+          </div>
+        ) : null}
       </div>
       <select
         value={selected}

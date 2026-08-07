@@ -1,12 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
-import { PAGE_CONTENT_DEFAULTS } from '@/lib/defaults/page-content'
+import {
+  COVE_PAGE_CONTENT_KEYS,
+  isCovePageContentKey,
+  PAGE_CONTENT_DEFAULTS,
+} from '@/lib/defaults/page-content'
+import type { StaffProfile } from '@/lib/staff/roles'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!requireStaffRole(session?.staff ?? null, ['marketing', 'secretary', 'admin'])) return null
+  if (!requireStaffRole(session?.staff ?? null, ['marketing', 'secretary', 'admin', 'retail'])) {
+    return null
+  }
   return session
+}
+
+function canEditAllPageCopy(staff: StaffProfile | null) {
+  return requireStaffRole(staff, ['marketing', 'secretary', 'admin'])
+}
+
+function canEditPageCopy(staff: StaffProfile | null, page: string) {
+  if (canEditAllPageCopy(staff)) return true
+  return requireStaffRole(staff, 'retail') && isCovePageContentKey(page)
 }
 
 function mapRow(item: Record<string, unknown>) {
@@ -27,33 +43,47 @@ function mapRow(item: Record<string, unknown>) {
 }
 
 export async function GET(req: NextRequest) {
-  if (!(await gate(req))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const session = await gate(req)
+  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   try {
+    const staff = session.staff
+    const allPages = canEditAllPageCopy(staff)
     const client = getWixClient()
     const result = await client.items.query('PageContent').ascending('page').limit(100).find()
-    const pages = (result.items ?? []).map((i) => mapRow(i as Record<string, unknown>))
+    let pages = (result.items ?? []).map((i) => mapRow(i as Record<string, unknown>))
     const known = new Set(pages.map((p) => p.page))
-    const missing = Object.keys(PAGE_CONTENT_DEFAULTS)
+    const defaultKeys = allPages
+      ? Object.keys(PAGE_CONTENT_DEFAULTS)
+      : [...COVE_PAGE_CONTENT_KEYS]
+    const missing = defaultKeys
       .filter((page) => !known.has(page))
       .map((page) => {
         const d = PAGE_CONTENT_DEFAULTS[page]
         return {
           id: '',
           page,
-          eyebrow: d.eyebrow,
-          title: d.title,
-          body: d.body,
-          sectionTitle: d.sectionTitle,
-          sectionBody: d.sectionBody,
-          bullets: d.bullets.join('\n'),
-          ctaLabel: d.ctaLabel,
-          ctaHref: d.ctaHref,
-          flyerImage: d.flyerImage ?? '',
+          eyebrow: d?.eyebrow ?? '',
+          title: d?.title ?? '',
+          body: d?.body ?? '',
+          sectionTitle: d?.sectionTitle ?? '',
+          sectionBody: d?.sectionBody ?? '',
+          bullets: (d?.bullets ?? []).join('\n'),
+          ctaLabel: d?.ctaLabel ?? '',
+          ctaHref: d?.ctaHref ?? '',
+          flyerImage: d?.flyerImage ?? '',
           active: true,
           fromDefault: true,
         }
       })
-    return NextResponse.json({ pages: [...pages, ...missing] })
+    let merged = [...pages, ...missing]
+    if (!allPages) {
+      merged = merged.filter((p) => isCovePageContentKey(p.page))
+    }
+    return NextResponse.json({
+      pages: merged,
+      scope: allPages ? 'all' : 'cove',
+      canBrandFix: allPages,
+    })
   } catch (err) {
     console.error('/api/staff/page-content GET', err)
     return NextResponse.json({ error: 'Could not load page copy' }, { status: 500 })
@@ -61,11 +91,18 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!(await gate(req))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const session = await gate(req)
+  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   try {
     const body = await req.json()
     const page = String(body.page ?? '').trim()
     if (!page) return NextResponse.json({ error: 'page is required' }, { status: 400 })
+    if (!canEditPageCopy(session.staff, page)) {
+      return NextResponse.json(
+        { error: 'Retail may only edit Cove page copy (store, store-how, store-cta, spirit-wear)' },
+        { status: 403 },
+      )
+    }
 
     const row = {
       page,

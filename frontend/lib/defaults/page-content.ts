@@ -18,6 +18,18 @@ export type PageContentFields = {
   flyerImage?: string
 }
 
+/** PageContent.page keys that power public /cove (retail may edit only these). */
+export const COVE_PAGE_CONTENT_KEYS = [
+  'store',
+  'store-how',
+  'store-cta',
+  'spirit-wear',
+] as const
+
+export function isCovePageContentKey(page: string): boolean {
+  return (COVE_PAGE_CONTENT_KEYS as readonly string[]).includes(page)
+}
+
 const empty = (page: string, partial: Partial<PageContentFields>): PageContentFields => ({
   page,
   eyebrow: '',
