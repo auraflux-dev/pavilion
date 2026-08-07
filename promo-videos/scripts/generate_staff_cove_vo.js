@@ -16,6 +16,15 @@ const PARTS = path.join(ROOT, 'vo', '_parts');
 const VOICE = process.env.SHMS_STAFF_VOICE_ID || process.env.ELEVENLABS_VOICE_ID || 'HipISpBLZRLPyPUfTGkV';
 const SCRIPT = 'scripts/staff_cove_inperson_elevenlabs.txt';
 
+// Prefer sk_ from env after dotenv; if multiple keys were set, keep sk_
+if (!String(process.env.ELEVENLABS_API_KEY || '').startsWith('sk_')) {
+  const envText = fs.readFileSync('/Users/robertgregory/cwn-c0/.env', 'utf8');
+  const match = [...envText.matchAll(/^ELEVENLABS_API_KEY=(.+)$/gm)]
+    .map((m) => m[1].trim().replace(/^["']|["']$/g, ''))
+    .find((k) => k.startsWith('sk_'));
+  if (match) process.env.ELEVENLABS_API_KEY = match;
+}
+
 if (!String(process.env.ELEVENLABS_API_KEY || '').startsWith('sk_')) {
   console.error(
     'ELEVENLABS_API_KEY must be a real key starting with sk_.\n' +
@@ -27,12 +36,18 @@ if (!String(process.env.ELEVENLABS_API_KEY || '').startsWith('sk_')) {
 }
 
 const NAMES = [
-  'p01_two_devices',
-  'p02_before_bell',
-  'p03_lane_a',
-  'p04_low_balance',
-  'p05_lane_b',
-  'p06_close',
+  'p01_open_staff',
+  'p02_nav_cove',
+  'p03_see_register',
+  'p04_ask_code',
+  'p05_lookup',
+  'p06_confirm',
+  'p07_tap_items',
+  'p08_charge',
+  'p09_low_balance',
+  'p10_square_stand',
+  'p11_events_perk',
+  'p12_close',
 ];
 
 function linesOf(file) {

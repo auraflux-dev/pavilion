@@ -110,6 +110,6 @@ Spirit inventory may live on Square Stand item list + online Cove shop — follo
 | VO gen | `generate_staff_cove_vo.js` |
 | Assemble | `assemble_staff_cove_inperson.js` |
 | Master | `promo-videos/out/SHMSPTO_staff_cove_inperson_16x9.mp4` |
-| **Watch file** | `~/Downloads/SHMSPTO_WATCH_THIS_staff_cove_inperson_16x9.mp4` |
+| **Watch file** | `~/Downloads/SHMSPTO_WATCH_THIS_staff_cove_inperson_16x9.mp4` (~2:10, 12 steps) |
 
 Also linked from Staff → Help → **In-person sales + Square Stand**.

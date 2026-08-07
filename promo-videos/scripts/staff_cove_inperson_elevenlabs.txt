@@ -1,6 +1,12 @@
-Same two devices for The Cove snack window and for in-person PTO events. Staff on a laptop, Square Stand on the iPad.
-Before you open the window or an event table, sign into Staff as cove at shmspto.org, open The Cove, and wake Square Stand on the right location.
-Lane A is a prepaid Cove Digital Card. Enter the six digit family code or Wallet QR number, confirm the kids and the balance, then Charge snacks or event catalog items on Staff.
-If the balance is too low, stop. The parent reloads online, or you switch that sale to Square Stand.
-Lane B is guests with no card, plus card present spirit wear and event merch. Ring those on Square Stand.
-At events, paid member refreshment perks use a family code that ends in nine. Check the code, hand the tickets, and do not charge again for that perk. Never charge a family twice. Full steps are in Staff Help.
+Open your laptop browser and go to SHMSPTO dot org slash staff. Sign in with Google using your cove at shmspto.org account, not a personal Gmail.
+After sign-in, look at the dark green Staff top nav. Open The Cove. If you do not see it, tap More, then The Cove.
+You are now on The Cove workspace. The top section is Cove register. That is where you charge a prepaid Cove Digital Card.
+Ask the student what they want. Then ask for their six digit Family Cove code, or have them show the Wallet or Photos QR.
+Type or paste that code into the box labeled Scan QR, GAN, or six digit backup. Press return or tap Lookup.
+Check the screen. You should see the student full names and the family digital card balance. If the name is wrong, stop and look up again.
+Tap each snack or item tile to add it. Use plus and minus to change quantity. Watch the cart total and the remaining balance.
+When the order looks right and the balance covers it, tap Charge. Hand over the items. The family card is now updated.
+If the balance is too low, do not tap Charge. Tell them to reload online in the member portal, or switch this sale to the iPad Square Stand.
+Wake the Square Stand iPad on the SHMS PTO location. Use Stand for guests with no card, and for spirit wear or event merch sold card present. Ring the items and take a normal card payment.
+At PTO events, paid member refreshment perks are different. Ask for the six digit code. Paid member codes end in nine. Confirm on Staff if unsure, then hand tickets. Do not charge for that free perk.
+You now know both lanes. Digital card on Staff register. Guests and extras on Square Stand. Never charge a family twice. Open Staff Help anytime for In person sales and Square Stand.

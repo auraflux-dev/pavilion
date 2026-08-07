@@ -67,37 +67,67 @@ const WAVE_SAFE_MAX_Y = 680;
 const CONTENT_MAX_Y = WAVE_SAFE_MAX_Y;
 const FOOTER_Y = LABEL_Y + 120;
 
-/** SEE = HEAR beats */
+/** SEE = HEAR beats — assume zero prior knowledge; name every click */
 const BEATS = [
   {
-    part: 'vo/_parts/staff_cove_p01_two_devices.m4a',
-    still: 'assets/staff-cove/slide_two_devices.png',
-    caption: 'Window + Events · Two Devices',
+    part: 'vo/_parts/staff_cove_p01_open_staff.m4a',
+    still: 'assets/staff-cove/screen_staff_home.png',
+    caption: 'Step 1 · Open Staff · Sign In As Cove@',
   },
   {
-    part: 'vo/_parts/staff_cove_p02_before_bell.m4a',
-    still: 'assets/staff-cove/slide_before_bell.png',
-    caption: 'Before You Open · Staff + Stand',
+    part: 'vo/_parts/staff_cove_p02_nav_cove.m4a',
+    still: 'assets/staff-cove/slide_nav_cove.png',
+    caption: 'Step 2 · Top Nav · Open The Cove',
   },
   {
-    part: 'vo/_parts/staff_cove_p03_lane_a.m4a',
-    still: 'assets/staff-cove/screen_register.png',
-    caption: 'Lane A · Digital Card On Staff',
+    part: 'vo/_parts/staff_cove_p03_see_register.m4a',
+    still: 'assets/staff-cove/screen_register_overview.png',
+    caption: 'Step 3 · Cove Register · Lane A',
   },
   {
-    part: 'vo/_parts/staff_cove_p04_low_balance.m4a',
+    part: 'vo/_parts/staff_cove_p04_ask_code.m4a',
+    still: 'assets/staff-cove/slide_ask_code.png',
+    caption: 'Step 4 · Ask For Code Or Wallet QR',
+  },
+  {
+    part: 'vo/_parts/staff_cove_p05_lookup.m4a',
+    still: 'assets/staff-cove/screen_register_code.png',
+    caption: 'Step 5 · Paste Code · Lookup',
+  },
+  {
+    part: 'vo/_parts/staff_cove_p06_confirm.m4a',
+    still: 'assets/staff-cove/screen_register_confirm.png',
+    caption: 'Step 6 · Confirm Names + Balance',
+  },
+  {
+    part: 'vo/_parts/staff_cove_p07_tap_items.m4a',
+    still: 'assets/staff-cove/screen_register_tap.png',
+    caption: 'Step 7 · Tap Items · Adjust Qty',
+  },
+  {
+    part: 'vo/_parts/staff_cove_p08_charge.m4a',
+    still: 'assets/staff-cove/screen_register_charge.png',
+    caption: 'Step 8 · Tap Charge',
+  },
+  {
+    part: 'vo/_parts/staff_cove_p09_low_balance.m4a',
     still: 'assets/staff-cove/slide_low_balance.png',
-    caption: 'Low Balance · Stop · Reload Or Stand',
+    caption: 'Step 9 · Low Balance · Do Not Charge',
   },
   {
-    part: 'vo/_parts/staff_cove_p05_lane_b.m4a',
+    part: 'vo/_parts/staff_cove_p10_square_stand.m4a',
     still: 'assets/staff-cove/slide_lane_b.png',
-    caption: 'Lane B · Guest / Spirit On Stand',
+    caption: 'Step 10 · Square Stand · Guests + Spirit',
   },
   {
-    part: 'vo/_parts/staff_cove_p06_close.m4a',
+    part: 'vo/_parts/staff_cove_p11_events_perk.m4a',
+    still: 'assets/staff-cove/slide_events_perk.png',
+    caption: 'Step 11 · Events · Code Ends In 9',
+  },
+  {
+    part: 'vo/_parts/staff_cove_p12_close.m4a',
     still: 'assets/staff-cove/slide_close.png',
-    caption: 'Events · Code Ends In 9 · Never Twice',
+    caption: 'Step 12 · Never Charge Twice · Help',
   },
 ];
 
@@ -200,53 +230,63 @@ function makeSlide(outName, { eyebrow, title, bullets = [], footer }) {
 
 function buildSlides() {
   fs.mkdirSync(ASSETS, { recursive: true });
-  makeSlide('slide_two_devices.png', {
-    eyebrow: 'Staff Training · In-Person Sales',
-    title: 'Window + Events',
+  makeSlide('slide_nav_cove.png', {
+    eyebrow: 'Step 2',
+    title: 'Open The Cove',
     bullets: [
-      'Cove snack window',
-      'PTO event tables & trucks',
-      'Laptop Staff + Square Stand',
+      'Dark green Staff top nav',
+      'Tap The Cove',
+      'Or More → The Cove',
     ],
-    footer: 'Same Two Lanes Everywhere',
+    footer: 'Cove@ Sees The Cove Workspace',
   });
-  makeSlide('slide_before_bell.png', {
-    eyebrow: 'Setup',
-    title: 'Before You Open',
+  makeSlide('slide_ask_code.png', {
+    eyebrow: 'Step 4',
+    title: 'Get Their ID',
     bullets: [
-      'Sign in as cove@shmspto.org',
-      'Open Staff → The Cove',
-      'Wake Square Stand · right location',
+      'Ask what they want first',
+      'Six digit Family Cove code',
+      'Or Wallet / Photos QR',
     ],
-    footer: 'SHMSPTO.ORG/Staff',
+    footer: 'Do Not Invent A Code',
   });
   makeSlide('slide_low_balance.png', {
-    eyebrow: 'Lane A · Stop Rule',
+    eyebrow: 'Step 9 · Stop Rule',
     title: 'Balance Too Low',
     bullets: [
-      'Do not Charge',
+      'Do not tap Charge',
       'Parent reloads online',
-      'Or switch that sale to Stand',
+      'Or switch sale to Square Stand',
     ],
     footer: 'No Double Charge',
   });
   makeSlide('slide_lane_b.png', {
-    eyebrow: 'Lane B',
-    title: 'Guest / Spirit / Extras',
+    eyebrow: 'Step 10 · Lane B',
+    title: 'Square Stand iPad',
     bullets: [
-      'No Cove Digital Card',
-      'Spirit & event merch',
-      'Ring on Square Stand',
+      'Wake Stand · SHMS PTO location',
+      'Guests with no digital card',
+      'Spirit / event merch · card present',
     ],
-    footer: 'Stand Does Not Create A Family Card',
+    footer: 'Normal Card Sale On Stand',
+  });
+  makeSlide('slide_events_perk.png', {
+    eyebrow: 'Step 11 · Events',
+    title: 'Paid Refreshment Perk',
+    bullets: [
+      'Ask for six digit family code',
+      'Paid member codes end in 9',
+      'Hand tickets · do not charge perk',
+    ],
+    footer: 'Extras Still Go On Stand',
   });
   makeSlide('slide_close.png', {
-    eyebrow: 'Events + Close',
+    eyebrow: 'Step 12',
     title: 'Never Charge Twice',
     bullets: [
-      'Paid refreshments. code ends in 9',
-      'Hand tickets. do not re-charge',
-      'Staff Help has the full guide',
+      'Lane A. Staff register digital card',
+      'Lane B. Square Stand guests + extras',
+      'Staff Help. In-person sales guide',
     ],
     footer: 'Go Stingrays!',
   });
@@ -304,7 +344,7 @@ function main() {
   const outroImg = path.join(ASSETS, 'outro.png');
   makeBrandCard(coldImg, {
     title: 'IN-PERSON SALES',
-    subtitle: 'Cove Window + PTO Events',
+    subtitle: 'Step-By-Step · Window + Events',
   });
   makeBrandCard(outroImg, {
     title: 'THANK YOU',
@@ -324,6 +364,9 @@ function main() {
         `Missing VO ${b.part}\nRun with a valid sk_ key:\n  ELEVENLABS_API_KEY=sk_... NODE_PATH=~/cwn-c0/node_modules node scripts/generate_staff_cove_vo.js`
       );
     }
+    if (!fs.existsSync(a(b.still))) {
+      throw new Error(`Missing still ${b.still}`);
+    }
   }
 
   const coldA = path.join(WORK, 'cold_a.m4a');
@@ -334,7 +377,7 @@ function main() {
   const bodyClips = [];
   const srt = [];
   let t = COLD_SEC;
-  srt.push(`1\n${tsFmt(0)} --> ${tsFmt(COLD_SEC - 0.05)}\nIn-Person Sales · Cove Window + PTO Events\n`);
+  srt.push(`1\n${tsFmt(0)} --> ${tsFmt(COLD_SEC - 0.05)}\nIn-Person Sales · Step-By-Step Walkthrough\n`);
 
   for (let i = 0; i < BEATS.length; i++) {
     const b = BEATS[i];
