@@ -15,7 +15,6 @@ const path = require('path');
 const os = require('os');
 const { execFileSync } = require('child_process');
 const {
-  COLD_SEC,
   OUTRO_SEC,
   TEXT_TOP,
   LOGO_W,
@@ -26,6 +25,9 @@ const {
   PATHS: STAPLE,
   assertStapleAssets,
 } = require('./staple_brand_bookends');
+
+/** Staff training: short brand sting, then VO immediately (parent tour uses 5s cold). */
+const COLD_SEC = 1.2;
 
 const ROOT = path.resolve(__dirname, '..');
 const OUT_DIR = path.join(ROOT, 'out');
