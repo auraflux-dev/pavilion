@@ -13,7 +13,7 @@ const { synthesizeSpeech } = require('/Users/robertgregory/cwn-c0/lib/clip_comp_
 
 const ROOT = path.resolve(__dirname, '..');
 const PARTS = path.join(ROOT, 'vo', '_parts');
-const VOICE = process.env.SHMS_PARENT_VOICE_ID || 'Cw9uRGud1Qq3szlTqQXG';
+const VOICE = process.env.SHMS_STAFF_VOICE_ID || process.env.ELEVENLABS_VOICE_ID || 'HipISpBLZRLPyPUfTGkV';
 const SCRIPT = 'scripts/staff_cove_inperson_elevenlabs.txt';
 
 if (!String(process.env.ELEVENLABS_API_KEY || '').startsWith('sk_')) {

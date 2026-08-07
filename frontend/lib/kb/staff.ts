@@ -291,7 +291,7 @@ Many paid memberships include free food / tickets at PTO events.
 
 Longer guide: docs/COVE-IN-PERSON.md
 
-**Training video:** parent-tour style (stills + VO) — see docs/COVE-IN-PERSON.md when the watch file is ready.`,
+**Training video:** ~/Downloads/SHMSPTO_WATCH_THIS_staff_cove_inperson_16x9.mp4 (parent-tour style: stills + VO).`,
     },
     {
       slug: 'cove-products-inventory',

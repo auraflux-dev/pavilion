@@ -102,13 +102,14 @@ Spirit inventory may live on Square Stand item list + online Cove shop — follo
 
 ## Training video
 
-**Style:** Parent-tour pipeline — screen stills + BTM ElevenLabs VO + music bookends. **Not** HeyGen.
+**Style:** Parent-tour pipeline — screen stills + ElevenLabs VO + music bookends. **Not** HeyGen.
 
 | Artifact | Path |
 |----------|------|
 | Script | `promo-videos/scripts/staff_cove_inperson_elevenlabs.txt` |
 | VO gen | `generate_staff_cove_vo.js` |
 | Assemble | `assemble_staff_cove_inperson.js` |
-| Output | `promo-videos/out/SHMSPTO_staff_cove_inperson_16x9.mp4` |
+| Master | `promo-videos/out/SHMSPTO_staff_cove_inperson_16x9.mp4` |
+| **Watch file** | `~/Downloads/SHMSPTO_WATCH_THIS_staff_cove_inperson_16x9.mp4` |
 
-Needs a valid `ELEVENLABS_API_KEY` starting with `sk_`.
+Also linked from Staff → Help → **In-person sales + Square Stand**.
