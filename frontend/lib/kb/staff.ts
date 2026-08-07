@@ -216,12 +216,12 @@ Do not send parents to the old Wix Events dashboard for day-to-day work. Stay in
     },
     {
       slug: 'cove-register',
-      title: 'Cove register (sell snacks)',
+      title: 'Cove register (window + events)',
       categoryId: 'cove',
       summary: 'Lookup family → confirm kids + balance → tap products → Charge.',
       order: 1,
       need: 'retail',
-      body: `Staff → **The Cove** → Cove register (laptop or tablet browser).
+      body: `Staff → **The Cove** → Cove register (laptop or tablet). Same tool at the **snack window** and at **event tables** when you are charging a prepaid Cove Digital Card.
 
 **Member with a loaded Cove Digital Card**
 1. Ask what they want
@@ -229,62 +229,69 @@ Do not send parents to the old Wix Events dashboard for day-to-day work. Stay in
 3. Enter / paste into **Scan QR / GAN or 6-digit backup** → Lookup
 4. Confirm **student full names** and **balance** on screen
 5. Tap product tiles (deals first), adjust qty, then **Charge**
-6. Hand over the snack — balance updates on the family card
+6. Hand over the item — balance updates on the family card
 
-**Not enough balance** — stop Charge; parent loads online in the portal, or take a **guest** sale on Square Stand (card present).
+**Not enough balance** — stop Charge; parent loads online, or take a **guest** sale on Square Stand (card present).
 
-**No card / guest** — do not invent a code. Use Square Stand (see **In-person Cove + Square Stand**).
+**No card / guest / spirit pop-up** — do not invent a code. Use Square Stand (see **In-person sales + Square Stand**).
 
 Prefer the Staff register for prepaid digital-card redemptions so inventory and reports stay in sync.`,
     },
     {
       slug: 'cove-in-person-square-stand',
-      title: 'In-person Cove + Square Stand (iPad)',
+      title: 'In-person sales + Square Stand (window & events)',
       categoryId: 'cove',
-      summary: 'Two lanes: digital-card register vs guest card-present on Stand.',
+      summary: 'Snack window and PTO events: digital card vs guest Stand.',
       order: 2,
       need: 'retail',
-      body: `Cove window usually runs **two devices**:
+      body: `Use **two devices** at the Cove window **and** at in-person PTO events (tables, food trucks, spirit pop-ups):
 
-1. **Laptop / tablet** signed into Staff as cove@ (or retail) → **The Cove** register
-2. **iPad + Square Stand** signed into the PTO Square location → card-present + gift-card scan
+1. **Laptop / tablet** → Staff → **The Cove** register (Lane A)
+2. **iPad + Square Stand** → card-present + gift-card scan (Lane B / Wallet)
 
-### Lane A — Prepaid Cove Digital Card (preferred for snacks)
+### Lane A — Prepaid Cove Digital Card
 Parent already loaded the card online.
 
-- Student shows **Apple/Google Wallet** QR, Photos QR, or says the **6-digit family code**
-- On Stand: use Square **gift card** / scan flow when you are redeeming the Wallet QR as a Square gift card
-- Or on Staff register: type/paste code or GAN → confirm names + balance → tap products → **Charge**
+- Show **Wallet** QR / Photos QR or say the **6-digit family code**
+- Staff register: lookup → confirm names + balance → tap items → **Charge**
+- Or Stand gift-card scan when redeeming a Wallet QR as a Square gift card
 
-Never ask them to pay again on Stand if the digital card already covers the snack.
+Never also run a credit card on Stand for the same items.
 
-### Lane B — Guest / no portal / no balance (Square Stand)
-Use when there is **no** loaded Cove Digital Card, or they want spirit/event merch **card present**.
+### Lane B — Guest / card-present (Square Stand)
+No loaded card, or spirit / event merch sold card-present:
 
-1. Ring the item(s) on Square Stand as a normal sale
+1. Ring items on Square Stand as a normal sale
 2. Take card (or other Stand tender)
 3. Hand over the item
 
-Digital card **loads** still happen online in the parent portal — Stand does not open a new family account.
+Stand does **not** create a family Cove account.
 
-### Setup checklist (before the bell)
-- Staff browser logged in as cove@shmspto.org → The Cove products load
-- Square Stand online, correct location, receipt printer / drawer ready
-- Know today's deals (featured products on register)
-- Low stock: update qty in **Cove products** (same workspace)
+### Events — paid-member refreshments
+Many paid memberships include free food / tickets at PTO events.
+
+1. Show the **6-digit Family Cove code**
+2. Paid member codes **end in 9** (confirm on Staff lookup if unsure)
+3. Record the code if the event lead requires it → hand tickets
+4. Do **not** charge Lane A/B for the free perk; extras go on Stand
+
+### Setup (window or event table)
+- Staff logged in as cove@ (or retail) → The Cove loads
+- Square Stand online, correct location
+- Brief volunteers: two lanes, never charge twice
 
 ### Troubleshooting
 | Issue | What to do |
 |-------|------------|
-| Code not found | Confirm 6 digits; paid member codes end in **9**; parent must have portal + card |
-| Balance too low | Parent loads online, or switch to Lane B Stand sale |
-| Wallet QR will not scan on Stand | Type 6-digit backup on Staff register |
-| Parent charged twice | Stop. Email treasurer@ — do not take another payment |
-| Square Stand offline | Staff register still works for digital-card Charge if the laptop is online |
+| Code not found | Confirm 6 digits; paid codes end in **9**; need portal + card |
+| Balance too low | Reload online, or Lane B Stand for that sale |
+| Wallet QR will not scan | Type 6-digit backup on Staff register |
+| Parent charged twice | Stop. Email treasurer@ |
+| Stand offline | Staff register still works for Lane A if laptop is online |
 
 Longer guide: docs/COVE-IN-PERSON.md
 
-**Training video:** parent-tour style (screen stills + VO) — see docs/COVE-IN-PERSON.md when the watch file is ready.`,
+**Training video:** parent-tour style (stills + VO) — see docs/COVE-IN-PERSON.md when the watch file is ready.`,
     },
     {
       slug: 'cove-products-inventory',

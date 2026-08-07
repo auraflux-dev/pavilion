@@ -65,7 +65,7 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **46 - Comms & Content Calendar** | Marketing / secretary / membership / events | Month + agenda planners; publish via Newsletter / Social / WA |
 | **47 - Staff Role Onboarding** | All staff except president@ | First-week checklists on Staff Home (all system roles) |
 | **Canva setup** (`docs/CANVA-SETUP.md`) | Marketing / admin | Connect app redirect URIs, env vars, Staff → Canva |
-| **Cove in-person** (`docs/COVE-IN-PERSON.md`) | Retail / Cove | Staff register + Square Stand (iPad) two-lane sales |
+| **Cove in-person** (`docs/COVE-IN-PERSON.md`) | Retail / Cove / event volunteers | Staff register + Square Stand — snack window **and** PTO events |
 | **40 - Visitor Site Content from Staff** | Role-scoped | Site settings, board, nav, FAQs, volunteers… |
 | **27 - Member Portal Parent Support Guide** | Everyone helping parents | Walk a parent through portal screens |
 

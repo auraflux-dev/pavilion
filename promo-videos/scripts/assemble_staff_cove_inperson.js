@@ -70,17 +70,17 @@ const BEATS = [
   {
     part: 'vo/_parts/staff_cove_p01_two_devices.m4a',
     still: 'assets/staff-cove/slide_two_devices.png',
-    caption: 'Two Devices · Laptop + Square Stand',
+    caption: 'Window + Events · Two Devices',
   },
   {
     part: 'vo/_parts/staff_cove_p02_before_bell.m4a',
     still: 'assets/staff-cove/slide_before_bell.png',
-    caption: 'Before The Bell · Staff + Stand',
+    caption: 'Before You Open · Staff + Stand',
   },
   {
     part: 'vo/_parts/staff_cove_p03_lane_a.m4a',
     still: 'assets/staff-cove/screen_register.png',
-    caption: 'Lane A · Digital Card On Staff Register',
+    caption: 'Lane A · Digital Card On Staff',
   },
   {
     part: 'vo/_parts/staff_cove_p04_low_balance.m4a',
@@ -90,12 +90,12 @@ const BEATS = [
   {
     part: 'vo/_parts/staff_cove_p05_lane_b.m4a',
     still: 'assets/staff-cove/slide_lane_b.png',
-    caption: 'Lane B · Guest On Square Stand',
+    caption: 'Lane B · Guest / Spirit On Stand',
   },
   {
     part: 'vo/_parts/staff_cove_p06_close.m4a',
     still: 'assets/staff-cove/slide_close.png',
-    caption: 'Never Charge Twice · Staff Help',
+    caption: 'Events · Code Ends In 9 · Never Twice',
   },
 ];
 
@@ -199,18 +199,18 @@ function makeSlide(outName, { eyebrow, title, bullets = [], footer }) {
 function buildSlides() {
   fs.mkdirSync(ASSETS, { recursive: true });
   makeSlide('slide_two_devices.png', {
-    eyebrow: 'Staff Training · The Cove',
-    title: 'Two Devices',
+    eyebrow: 'Staff Training · In-Person Sales',
+    title: 'Window + Events',
     bullets: [
-      'Laptop. Staff The Cove register',
-      'iPad. Square Stand',
-      'One rule. Never charge twice',
+      'Cove snack window',
+      'PTO event tables & trucks',
+      'Laptop Staff + Square Stand',
     ],
-    footer: 'Cove Coordinator · Retail',
+    footer: 'Same Two Lanes Everywhere',
   });
   makeSlide('slide_before_bell.png', {
     eyebrow: 'Setup',
-    title: 'Before The Bell',
+    title: 'Before You Open',
     bullets: [
       'Sign in as cove@shmspto.org',
       'Open Staff → The Cove',
@@ -230,20 +230,21 @@ function buildSlides() {
   });
   makeSlide('slide_lane_b.png', {
     eyebrow: 'Lane B',
-    title: 'Guest / Card Present',
+    title: 'Guest / Spirit / Extras',
     bullets: [
       'No Cove Digital Card',
-      'Ring items on Square Stand',
-      'Take a normal card payment',
+      'Spirit & event merch',
+      'Ring on Square Stand',
     ],
     footer: 'Stand Does Not Create A Family Card',
   });
   makeSlide('slide_close.png', {
-    eyebrow: 'Done',
+    eyebrow: 'Events + Close',
     title: 'Never Charge Twice',
     bullets: [
-      'Staff Help. In-person Cove + Square Stand',
-      'Questions. cove@ or president@',
+      'Paid refreshments. code ends in 9',
+      'Hand tickets. do not re-charge',
+      'Staff Help has the full guide',
     ],
     footer: 'Go Stingrays!',
   });
@@ -300,8 +301,8 @@ function main() {
   const coldImg = path.join(ASSETS, 'cold_open.png');
   const outroImg = path.join(ASSETS, 'outro.png');
   makeBrandCard(coldImg, {
-    title: 'THE COVE WINDOW',
-    subtitle: 'Staff Register + Square Stand',
+    title: 'IN-PERSON SALES',
+    subtitle: 'Cove Window + PTO Events',
   });
   makeBrandCard(outroImg, {
     title: 'THANK YOU',
@@ -331,7 +332,7 @@ function main() {
   const bodyClips = [];
   const srt = [];
   let t = COLD_SEC;
-  srt.push(`1\n${tsFmt(0)} --> ${tsFmt(COLD_SEC - 0.05)}\nThe Cove Window · Staff + Square Stand\n`);
+  srt.push(`1\n${tsFmt(0)} --> ${tsFmt(COLD_SEC - 0.05)}\nIn-Person Sales · Cove Window + PTO Events\n`);
 
   for (let i = 0; i < BEATS.length; i++) {
     const b = BEATS[i];
