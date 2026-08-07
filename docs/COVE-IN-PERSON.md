@@ -85,9 +85,15 @@ Advanced **Cove inventory** table is backup only.
 
 ## Training video
 
-~90s staff training (HeyGen): **SHMS PTO — The Cove Staff Training**
+**Style:** Same as parent tour — screen stills + BTM ElevenLabs VO + music bookends. **Not** HeyGen avatar.
 
-- Watch in HeyGen: https://app.heygen.com/videos/a1887b7ddf2d4656ab11f09a93a1b171
-- Captioned MP4: https://resource2.heygen.ai/aws_pacific/avatar_tmp/ac2ab3f8d5404c4f8c3fcb46abb43f46/v4482e2293b4f41059aa6d9572abb01e5/caption_a1887b7ddf2d4656ab11f09a93a1b171.mp4
+| Status | Artifact |
+|--------|----------|
+| Script | `promo-videos/scripts/staff_cove_inperson_elevenlabs.txt` |
+| VO gen | `NODE_PATH=~/cwn-c0/node_modules node promo-videos/scripts/generate_staff_cove_vo.js` |
+| Assemble | `NODE_PATH=~/cwn-c0/node_modules node promo-videos/scripts/assemble_staff_cove_inperson.js` |
+| Output | `promo-videos/out/SHMSPTO_staff_cove_inperson_16x9.mp4` |
 
-Also linked from Staff → Help → **In-person Cove + Square Stand**.
+Needs a valid `ELEVENLABS_API_KEY` starting with `sk_` (CWN env currently has an API key **ID**, which ElevenLabs rejects).
+
+Staff Help article links the finished watch file once VO is generated.

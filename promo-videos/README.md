@@ -27,6 +27,7 @@
 | Video | Focus | Length |
 |-------|--------|--------|
 | **Parent tour (stitched)** | Website → membership → Cove Digital Card | ~1:50 VO (+ music) |
+| **Staff Cove in-person** | Register + Square Stand walkthrough (stills + BTM VO) | `staff_cove_inperson_elevenlabs.txt` · assemble_staff_cove_inperson.js |
 | **Long portal walkthrough** | Free vs paid deep dive (`VO_AND_SCENES.md`) | later |
 | **Board recruit** | 5 open seats + volunteer form fallback | `board_recruit_elevenlabs.txt` · assemble_board_recruit.js |
 

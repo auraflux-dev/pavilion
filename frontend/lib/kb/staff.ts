@@ -284,7 +284,7 @@ Digital card **loads** still happen online in the parent portal — Stand does n
 
 Longer guide: docs/COVE-IN-PERSON.md
 
-**Training video (~90s):** https://app.heygen.com/videos/a1887b7ddf2d4656ab11f09a93a1b171`,
+**Training video:** parent-tour style (screen stills + VO) — see docs/COVE-IN-PERSON.md when the watch file is ready.`,
     },
     {
       slug: 'cove-products-inventory',
