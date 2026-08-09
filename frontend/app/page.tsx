@@ -1,6 +1,7 @@
 import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Hero } from '@/components/hero'
+import { OpenHousePromo } from '@/components/open-house-promo'
 import { ProgramsPreview } from '@/components/programs-preview'
 import { VolunteerSection } from '@/components/volunteer-section'
 import { UpcomingEvents } from '@/components/upcoming-events'
@@ -19,6 +20,7 @@ export default async function HomePage() {
       <Navbar />
       <main id="main-content">
         <Hero />
+        <OpenHousePromo />
         <HomeSectionNav showPrograms={inSession} showEvents={inSession} />
         {inSession ? <ProgramsPreview /> : null}
         <VolunteerSection />
