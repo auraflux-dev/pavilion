@@ -34,7 +34,7 @@ const COPY: Record<
     title: 'Ask about a program',
     intro: 'Questions go to',
     optionalLabel: 'Program name',
-    optionalPlaceholder: 'e.g. Chess Club, NOVA Math',
+    optionalPlaceholder: 'e.g. Robotics, MATHCOUNTS, Young Entrepreneurs',
     messagePlaceholder: 'What would you like to know?',
     submitLabel: 'Send to VP of Programs',
     successBody:
