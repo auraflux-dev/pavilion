@@ -57,57 +57,61 @@ export async function ProgramsPreview() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {display.map((program) => {
             const Icon = iconForProgram(program)
-            const tagList = program.tags
-              ? program.tags.split(',').map((t: string) => t.trim()).filter(Boolean)
-              : []
+            const summary = String(program.description ?? '')
+              .replace(/<[^>]+>/g, ' ')
+              .replace(/&amp;/g, '&')
+              .replace(/\s+/g, ' ')
+              .trim()
+            const when = formatProgramSchedule(program) || program.schedule
             const detailPills = [
-              program.grades,
-              formatProgramSchedule(program) || program.schedule,
+              program.grades ? `Grades ${program.grades}` : null,
+              when,
               program.detail,
             ].filter(Boolean) as string[]
 
             return (
               <article
                 key={program._id}
-                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col"
+                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col border border-[#E8E4DC]"
               >
-                {/* Card top accent */}
                 <div
                   className="h-1.5 w-full"
                   style={{ backgroundColor: '#085508' }}
                   aria-hidden="true"
                 />
-                <div className="p-6 lg:p-7 flex flex-col flex-1">
-                  {/* Icon + tag row */}
-                  <div className="flex items-start justify-between mb-4">
+                <div className="p-5 lg:p-6 flex flex-col flex-1">
+                  <div className="flex items-start justify-between mb-3">
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      className="w-11 h-11 rounded-xl flex items-center justify-center"
                       style={{ backgroundColor: '#EEF6EE' }}
                       aria-hidden="true"
                     >
-                      <Icon className="w-6 h-6" style={{ color: '#085508' }} />
+                      <Icon className="w-5 h-5" style={{ color: '#085508' }} />
                     </div>
-                    {(tagList[0] || program.category) && (
+                    {program.category ? (
                       <span
                         className="text-xs font-semibold px-2.5 py-1 rounded-full"
                         style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
                       >
-                        {tagList[0] ?? program.category}
+                        {program.category}
                       </span>
-                    )}
+                    ) : null}
                   </div>
 
-                  <h3 className="text-xl font-bold text-[#1A1A1A] mb-3">
+                  <h3 className="text-lg font-bold text-[#1A1A1A] leading-snug mb-2">
                     {program.name}
                   </h3>
 
-                  <p className="text-sm text-[#5A6070] leading-relaxed mb-5 flex-1">
-                    {program.description}
-                  </p>
+                  {summary ? (
+                    <p className="text-sm text-[#5A6070] leading-relaxed mb-4 flex-1 line-clamp-3">
+                      {summary}
+                    </p>
+                  ) : (
+                    <div className="flex-1" />
+                  )}
 
-                  {/* Details pills */}
                   {detailPills.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <div className="flex flex-wrap gap-2 mb-5">
                       {detailPills.map((d) => (
                         <span
                           key={d}
@@ -125,7 +129,7 @@ export async function ProgramsPreview() {
                     asChild
                   >
                     <a href="/programs">
-                      {program.registrationOpen ? 'Register Now' : 'Learn More'}
+                      {program.registrationOpen ? 'Register Now' : 'View details'}
                       <ArrowRight
                         className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
                         aria-hidden="true"

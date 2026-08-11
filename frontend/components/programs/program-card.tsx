@@ -35,6 +35,17 @@ function hasTag(program: Program, tag: string) {
     .includes(tag.toLowerCase())
 }
 
+function plainText(html: string) {
+  return html
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<\/p>/gi, ' ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 export function ProgramCard({ program }: ProgramCardProps) {
   const colors = getColors(program.category)
   const [registerOpen, setRegisterOpen] = useState(false)
@@ -42,11 +53,14 @@ export function ProgramCard({ program }: ProgramCardProps) {
   const comingSoon = !program.registrationOpen && (program.featured || hasTag(program, 'coming-soon'))
   const feeTbd = hasTag(program, 'fee-tbd')
   const statusLabel = program.registrationOpen ? 'Open' : comingSoon ? 'Coming Soon' : 'Closed'
+  const summary = plainText(program.description || '')
+  const springNote = String(program.detail ?? '').trim()
+  const feeLabel = feeTbd ? 'Tuition TBD' : program.fee === 0 ? 'Free' : program.fee != null ? `$${program.fee}` : null
 
   return (
-    <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
+    <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col border border-[#E8E4DC]">
       {program.image ? (
-        <div className="h-48 w-full overflow-hidden bg-[#F5F0E8]">
+        <div className="h-40 w-full overflow-hidden bg-[#F5F0E8]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={program.image}
@@ -55,19 +69,11 @@ export function ProgramCard({ program }: ProgramCardProps) {
           />
         </div>
       ) : (
-        <div
-          className="h-28 w-full flex items-center justify-center"
-          style={{ backgroundColor: colors.bg }}
-          aria-hidden="true"
-        >
-          <span className="text-xs font-semibold" style={{ color: colors.text }}>
-            Flyer coming soon
-          </span>
-        </div>
+        <div className="h-1.5 w-full" style={{ backgroundColor: colors.accent }} aria-hidden="true" />
       )}
 
-      <div className="p-6 lg:p-7 flex flex-col flex-1">
-        <div className="flex items-start justify-between mb-4">
+      <div className="p-5 lg:p-6 flex flex-col flex-1">
+        <div className="flex items-start justify-between gap-3 mb-3">
           <span
             className="text-xs font-semibold px-2.5 py-1 rounded-full"
             style={{ backgroundColor: colors.bg, color: colors.text }}
@@ -76,7 +82,7 @@ export function ProgramCard({ program }: ProgramCardProps) {
           </span>
 
           <span
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+            className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${
               program.registrationOpen
                 ? 'bg-green-50 text-green-700'
                 : comingSoon
@@ -88,48 +94,56 @@ export function ProgramCard({ program }: ProgramCardProps) {
           </span>
         </div>
 
-        <h3 className="text-xl font-bold text-[#1A1A1A] mb-3">{program.name}</h3>
+        <h3 className="text-lg font-bold text-[#1A1A1A] leading-snug mb-2">{program.name}</h3>
 
-        {program.description && (
-          <p
-            className="text-sm text-[#5A6070] leading-relaxed mb-4 flex-1"
-            dangerouslySetInnerHTML={{
-              __html: program.description,
-            }}
-          />
+        {summary ? (
+          <p className="text-sm text-[#5A6070] leading-relaxed mb-4 flex-1">{summary}</p>
+        ) : (
+          <div className="flex-1" />
         )}
 
-        {scheduleLine ? (
-          <p className="inline-flex items-start gap-2 text-sm font-semibold text-[#1A1A1A] mb-4">
-            <CalendarClock
-              className="w-4 h-4 mt-0.5 shrink-0"
-              style={{ color: colors.accent }}
-              aria-hidden="true"
-            />
-            <span>{scheduleLine}</span>
-          </p>
-        ) : null}
+        <dl className="space-y-2 mb-4 text-sm border-t border-[#E8E4DC] pt-4">
+          {program.grades ? (
+            <div className="flex gap-2">
+              <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5">
+                <GraduationCap className="w-3.5 h-3.5" aria-hidden="true" />
+                Grades
+              </dt>
+              <dd className="font-medium text-[#1A1A1A]">{program.grades}</dd>
+            </div>
+          ) : null}
+          {scheduleLine ? (
+            <div className="flex gap-2">
+              <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5">
+                <CalendarClock className="w-3.5 h-3.5" aria-hidden="true" />
+                When
+              </dt>
+              <dd className="font-medium text-[#1A1A1A]">{scheduleLine}</dd>
+            </div>
+          ) : null}
+          {feeLabel ? (
+            <div className="flex gap-2">
+              <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5">
+                <DollarSign className="w-3.5 h-3.5" aria-hidden="true" />
+                Tuition
+              </dt>
+              <dd className="font-medium text-[#1A1A1A]">{feeLabel}</dd>
+            </div>
+          ) : null}
+          {program.capacity > 0 ? (
+            <div className="flex gap-2">
+              <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5" aria-hidden="true" />
+                Spots
+              </dt>
+              <dd className="font-medium text-[#1A1A1A]">{program.capacity}</dd>
+            </div>
+          ) : null}
+        </dl>
 
-        <div className="flex flex-wrap gap-2 mb-6">
-          {program.grades && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-[#EEF6EE] text-[#5A6070]">
-              <GraduationCap className="w-3 h-3" aria-hidden="true" />
-              Grades {program.grades}
-            </span>
-          )}
-          {(feeTbd || program.fee != null) && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-[#EEF6EE] text-[#5A6070]">
-              <DollarSign className="w-3 h-3" aria-hidden="true" />
-              {feeTbd ? 'Tuition TBD' : program.fee === 0 ? 'Free' : `$${program.fee}`}
-            </span>
-          )}
-          {program.capacity > 0 && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-[#EEF6EE] text-[#5A6070]">
-              <Users className="w-3 h-3" aria-hidden="true" />
-              {program.capacity} spots
-            </span>
-          )}
-        </div>
+        {springNote ? (
+          <p className="text-xs text-[#5A6070] mb-4">{springNote}</p>
+        ) : null}
 
         {program.registrationOpen ? (
           <MemberGate label="Register for this program">
@@ -146,8 +160,8 @@ export function ProgramCard({ program }: ProgramCardProps) {
             </Button>
           </MemberGate>
         ) : (
-          <Button className="w-full font-semibold group" variant="outline" disabled>
-            {comingSoon ? 'Details confirming this week' : 'Registration Closed'}
+          <Button className="w-full font-semibold" variant="outline" disabled>
+            {comingSoon ? 'Registration opens soon' : 'Registration closed'}
           </Button>
         )}
       </div>

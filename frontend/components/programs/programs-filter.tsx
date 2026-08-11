@@ -60,14 +60,14 @@ export function ProgramsFilter({ programs }: ProgramsFilterProps) {
         </>
       )}
 
-      {/* Closed programs */}
+      {/* Coming soon / closed — keep full contrast for review */}
       {closed.length > 0 && (
         <>
-          <h3 className="text-lg font-bold text-[#5A6070] mb-6">
-            Coming Soon / Closed
-            <span className="ml-2 text-sm font-normal">({closed.length})</span>
+          <h3 className="text-lg font-bold text-[#1A1A1A] mb-6">
+            {open.length > 0 ? 'Coming soon' : 'Fall 2026 lineup'}
+            <span className="ml-2 text-sm font-normal text-[#5A6070]">({closed.length})</span>
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 opacity-70">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {closed.map((program) => (
               <ProgramCard key={program._id} program={program} />
             ))}
