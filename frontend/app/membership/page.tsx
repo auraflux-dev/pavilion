@@ -33,7 +33,9 @@ export default async function MembershipPage() {
 
   const facultyTier = allTiers.find(t => t.tierId === 'faculty')
   const facultyPrice = facultyTier?.price ?? 20
-  const facultyDescription = facultyTier?.description ?? 'Faculty and staff memberships are $20 for the school year. Choose one included perk: Stone Hill car magnet or Spirit Wear T-shirt. We appreciate everything SHMS PTO educators do for our students.'
+  const facultyDescription =
+    facultyTier?.description ??
+    'Faculty and staff memberships are $20 for the school year. We appreciate everything SHMS PTO educators do for our students.'
   return (
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />

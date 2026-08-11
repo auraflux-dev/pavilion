@@ -100,11 +100,10 @@ function HandlerInner() {
         <p className="text-sm font-bold text-[#1A1A1A]">Finish joining {tierName}</p>
         {needsFacultyChoice ? (
           <>
-            <p className="text-xs text-[#5A6070]">
-              Faculty membership includes one perk — choose Stone Hill car magnet or Spirit Wear T-shirt.
-            </p>
             <fieldset className="space-y-2">
-              <legend className="sr-only">Included perk</legend>
+              <legend className="text-xs font-semibold text-[#5A6070]">
+                Included perk — choose one
+              </legend>
               <label className="flex items-start gap-2 text-sm text-[#1A1A1A] cursor-pointer">
                 <input
                   type="radio"
