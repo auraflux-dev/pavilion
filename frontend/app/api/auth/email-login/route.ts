@@ -45,6 +45,7 @@ async function issueMemberCookiesFromSession(
   sessionToken: string,
   returnTo: string,
   origin: string,
+  contactName?: { firstName: string; lastName: string },
 ): Promise<NextResponse> {
   const clientId = process.env.NEXT_PUBLIC_WIX_CLIENT_ID
   if (!clientId) {
@@ -129,6 +130,29 @@ async function issueMemberCookiesFromSession(
     return NextResponse.json({ error: 'Could not issue member tokens' }, { status: 502 })
   }
 
+  if (contactName?.firstName && contactName?.lastName) {
+    try {
+      const { members } = await import('@wix/members')
+      const named = createClient({
+        modules: { members },
+        auth: OAuthStrategy({ clientId }),
+      })
+      named.auth.setTokens(tokens)
+      const current = await named.members.getCurrentMember({ fieldsets: ['FULL'] })
+      const memberId = current.member?._id
+      if (memberId) {
+        await named.members.updateMember(memberId, {
+          contact: {
+            firstName: contactName.firstName,
+            lastName: contactName.lastName,
+          },
+        } as Parameters<typeof named.members.updateMember>[1])
+      }
+    } catch (err) {
+      console.error('email-login: could not save signup name', err)
+    }
+  }
+
   const res = NextResponse.json({ ok: true, redirectTo: returnTo })
   res.cookies.set(TOKENS_COOKIE, JSON.stringify(tokens), {
     httpOnly: true,
@@ -146,16 +170,32 @@ export async function POST(req: NextRequest) {
       mode?: 'login' | 'signup'
       email?: string
       password?: string
+      firstName?: string
+      lastName?: string
       verificationCode?: string
       stateToken?: string
       returnTo?: string
     }
     const email = String(body.email || '').trim()
     const password = String(body.password || '')
+    const signupFirstName = String(body.firstName || '').trim()
+    const signupLastName = String(body.lastName || '').trim()
     const returnTo = safeReturnTo(body.returnTo)
     const origin = canonicalOrigin(req)
     const mode = body.mode === 'signup' ? 'signup' : 'login'
     const verificationCode = String(body.verificationCode || '').trim()
+
+    const signupName =
+      signupFirstName && signupLastName
+        ? { firstName: signupFirstName, lastName: signupLastName }
+        : undefined
+
+    if (mode === 'signup' && !signupName) {
+      return NextResponse.json(
+        { error: 'First and last name are required to create an account.' },
+        { status: 400 },
+      )
+    }
 
     const client = createClient({
       auth: OAuthStrategy({
@@ -193,6 +233,7 @@ export async function POST(req: NextRequest) {
         verified.data.sessionToken,
         returnTo,
         origin,
+        signupName,
       )
     }
 
@@ -236,6 +277,7 @@ export async function POST(req: NextRequest) {
             retry.data.sessionToken,
             returnTo,
             origin,
+            signupName,
           )
         }
       }
@@ -294,6 +336,7 @@ export async function POST(req: NextRequest) {
       result.data.sessionToken,
       returnTo,
       origin,
+      signupName,
     )
   } catch (err) {
     console.error('email-login', err)

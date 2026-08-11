@@ -47,8 +47,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payment amount mismatch. contact the PTO' }, { status: 409 })
     }
 
-    const name =
+    let name =
       `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim()
+    if (!name || !/\s/.test(name)) {
+      return NextResponse.json(
+        {
+          error: 'Enter your first and last name in My Account before paying with PayPal.',
+          errorCode: 'parentNameRequired',
+        },
+        { status: 400 },
+      )
+    }
 
     const transactionId = captured.captureId || captured.id
     const result = await fulfillPaidCheckout({

@@ -21,11 +21,13 @@ interface Props {
   payBody: PortalPayBody
   onPaid?: (data: Record<string, unknown>) => void
   onError?: (message: string) => void
+  /** Save required parent name (etc.) before PayPal create/capture. */
+  onBeforePay?: () => Promise<void>
   /** Remount key when modal opens */
   active: boolean
 }
 
-export function PortalPayPalButtons({ payBody, onPaid, onError, active }: Props) {
+export function PortalPayPalButtons({ payBody, onPaid, onError, onBeforePay, active }: Props) {
   const hostRef = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
   const [missing, setMissing] = useState(false)
@@ -67,6 +69,7 @@ export function PortalPayPalButtons({ payBody, onPaid, onError, active }: Props)
         .Buttons({
           style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
           createOrder: async () => {
+            if (onBeforePay) await onBeforePay()
             const res = await fetch('/api/checkout/paypal/create-order', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },

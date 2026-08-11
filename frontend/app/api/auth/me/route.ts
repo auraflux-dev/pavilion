@@ -149,10 +149,17 @@ export async function GET(req: NextRequest) {
     const hasPaidMembership = paidFromStudents || paidFromMemberships
     const accountType: 'free' | 'paid' = hasPaidMembership ? 'paid' : 'free'
 
+    const firstName = String(member.contact?.firstName ?? '').trim()
+    const lastName = String(member.contact?.lastName ?? '').trim()
+    const name = `${firstName} ${lastName}`.trim()
+
     return NextResponse.json({
       member: {
         id: member._id,
-        name: `${member.contact?.firstName ?? ''} ${member.contact?.lastName ?? ''}`.trim(),
+        name,
+        firstName,
+        lastName,
+        needsName: !firstName || !lastName,
         email: actorEmail,
         profileImage: member.profile?.photo?.url ?? null,
         memberSince: member._createdDate ?? null,

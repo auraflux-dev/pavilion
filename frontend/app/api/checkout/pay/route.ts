@@ -90,8 +90,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }
 
-    const name =
+    let name =
       `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim()
+    const bodyFirst = String(body.firstName ?? '').trim()
+    const bodyLast = String(body.lastName ?? '').trim()
+    if ((!name || bodyFirst || bodyLast) && bodyFirst && bodyLast) {
+      try {
+        await session.oauthClient.members.updateMember(session.memberId, {
+          contact: { firstName: bodyFirst, lastName: bodyLast },
+        } as Parameters<typeof session.oauthClient.members.updateMember>[1])
+        name = `${bodyFirst} ${bodyLast}`
+      } catch (err) {
+        console.error('checkout pay: could not save parent name', err)
+        return NextResponse.json(
+          { error: 'Could not save your name. Try again or update My Account.' },
+          { status: 502 },
+        )
+      }
+    }
+    if (!name || !/\s/.test(name)) {
+      return NextResponse.json(
+        {
+          error: 'Enter your first and last name before paying.',
+          errorCode: 'parentNameRequired',
+        },
+        { status: 400 },
+      )
+    }
     const client = getWixClient()
     let stored = await findStoredMethod(session.email)
     let paymentSource = sourceId

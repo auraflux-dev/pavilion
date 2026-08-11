@@ -96,7 +96,12 @@ export function PortalCardCheckout({
   const [emailed, setEmailed] = useState(false)
   const [consents, setConsents] = useState<ConsentAck[] | null>(prefilledConsents ?? null)
   const [consentComplete, setConsentComplete] = useState(Boolean(prefilledConsents?.length))
+  const [needsName, setNeedsName] = useState(false)
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const cardRef = useRef<SquareCard | null>(null)
+
+  const nameReady = !needsName || (firstName.trim().length > 0 && lastName.trim().length > 0)
 
   const consentKind: CheckoutConsentKind =
     payBody.kind === 'membership' || payBody.kind === 'program' || payBody.kind === 'event'
@@ -122,6 +127,9 @@ export function PortalCardCheckout({
     if (!open) return
     setError('')
     setSuccess('')
+    setNeedsName(false)
+    setFirstName('')
+    setLastName('')
     fetch('/api/gift-card/payment-method')
       .then((r) => r.json())
       .then((data) => {
@@ -132,6 +140,24 @@ export function PortalCardCheckout({
         setSaveCard(false)
       })
       .catch(() => setError('Payment settings could not be loaded.'))
+    fetch('/api/auth/me')
+      .then((r) => r.json())
+      .then((data) => {
+        const member = data?.member
+        const missing =
+          Boolean(member?.needsName) ||
+          !String(member?.firstName ?? '').trim() ||
+          !String(member?.lastName ?? '').trim()
+        setNeedsName(missing)
+        if (!missing) {
+          setFirstName(String(member?.firstName ?? '').trim())
+          setLastName(String(member?.lastName ?? '').trim())
+        }
+      })
+      .catch(() => {
+        // If we cannot load profile, still allow checkout UI; pay API will enforce name.
+        setNeedsName(true)
+      })
   }, [open])
 
   useEffect(() => {
@@ -177,6 +203,25 @@ export function PortalCardCheckout({
     }
   }, [open, config, useStored, containerId])
 
+  async function ensureParentNameSaved() {
+    if (!needsName) return
+    const first = firstName.trim()
+    const last = lastName.trim()
+    if (!first || !last) {
+      throw new Error('Enter your first and last name before paying.')
+    }
+    const profileRes = await fetch('/api/auth/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName: first, lastName: last }),
+    })
+    const profileData = await profileRes.json().catch(() => ({}))
+    if (!profileRes.ok) {
+      throw new Error(profileData.error || 'Could not save your name.')
+    }
+    setNeedsName(false)
+  }
+
   async function submit() {
     setBusy(true)
     setError('')
@@ -185,6 +230,7 @@ export function PortalCardCheckout({
       if (needsConsent && (!consentComplete || !consents)) {
         throw new Error('Please review and accept the required terms before paying.')
       }
+      await ensureParentNameSaved()
       let sourceId: string | undefined
       if (!useStored) {
         if (!cardRef.current || !ready) throw new Error('Card form is not ready yet.')
@@ -200,6 +246,8 @@ export function PortalCardCheckout({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...payBody,
+          firstName: firstName.trim() || undefined,
+          lastName: lastName.trim() || undefined,
           consents: needsConsent ? consents : undefined,
           sourceId,
           useStoredCard: useStored,
@@ -254,6 +302,36 @@ export function PortalCardCheckout({
           Pay with your own credit or debit card. Free and paid parent accounts can checkout here.
           You do not need a saved card.
         </p>
+
+        {needsName ? (
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block text-xs text-[#5A6070]">
+              First name
+              <input
+                type="text"
+                required
+                autoComplete="given-name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm text-[#1A1A1A]"
+              />
+            </label>
+            <label className="block text-xs text-[#5A6070]">
+              Last name
+              <input
+                type="text"
+                required
+                autoComplete="family-name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm text-[#1A1A1A]"
+              />
+            </label>
+            <p className="col-span-2 text-[11px] text-[#5A6070]">
+              We need your name on the membership / purchase record.
+            </p>
+          </div>
+        ) : null}
 
         {storedCard ? (
           <div className="space-y-2">
@@ -323,7 +401,8 @@ export function PortalCardCheckout({
             busy ||
             !config?.configured ||
             (!useStored && !ready) ||
-            (needsConsent && !consentComplete)
+            (needsConsent && !consentComplete) ||
+            !nameReady
           }
           className="w-full text-white font-bold"
           style={{ backgroundColor: '#085508' }}
@@ -339,10 +418,13 @@ export function PortalCardCheckout({
         </Button>
 
         <PortalPayPalButtons
-          active={open && !busy && !success && (!needsConsent || consentComplete)}
+          active={open && !busy && !success && nameReady && (!needsConsent || consentComplete)}
           payBody={{
             ...payBody,
             consents: needsConsent ? consents ?? undefined : undefined,
+          }}
+          onBeforePay={async () => {
+            await ensureParentNameSaved()
           }}
           onPaid={(data) => {
             const conf = data.confirmation as

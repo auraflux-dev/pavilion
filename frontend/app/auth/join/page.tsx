@@ -31,6 +31,8 @@ function JoinInner() {
   const [resetSent, setResetSent] = useState<string | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [verifyCode, setVerifyCode] = useState('')
@@ -126,8 +128,11 @@ function JoinInner() {
         body: JSON.stringify(
           needsVerify
             ? {
+                mode,
                 email: email.trim(),
                 password,
+                firstName: firstName.trim(),
+                lastName: lastName.trim(),
                 verificationCode: verifyCode.trim(),
                 stateToken: verifyStateToken,
                 returnTo,
@@ -136,6 +141,9 @@ function JoinInner() {
                 mode,
                 email: email.trim(),
                 password,
+                ...(mode === 'signup'
+                  ? { firstName: firstName.trim(), lastName: lastName.trim() }
+                  : {}),
                 returnTo,
               },
         ),
@@ -283,6 +291,32 @@ function JoinInner() {
             </button>
             {!needsVerify ? (
               <>
+                {isSignup ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="block text-sm">
+                      <span className="font-semibold text-[#1A1A1A]">First name</span>
+                      <input
+                        type="text"
+                        required
+                        autoComplete="given-name"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-sm"
+                      />
+                    </label>
+                    <label className="block text-sm">
+                      <span className="font-semibold text-[#1A1A1A]">Last name</span>
+                      <input
+                        type="text"
+                        required
+                        autoComplete="family-name"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-sm"
+                      />
+                    </label>
+                  </div>
+                ) : null}
                 <label className="block text-sm">
                   <span className="font-semibold text-[#1A1A1A]">Email</span>
                   <input
