@@ -72,9 +72,10 @@ Day-to-day tools open inside Staff. The only intentional exits for money ops are
       body: `Each board/staff person has a role (President, Treasurer, VP Events, Cove lead, and so on). The Staff shell only shows workspaces your role can use.
 
 ## Login rules
-- Use the **@shmspto.org** Google identity tied to your StaffRoles email for Staff tools
-- On Staff **Home**, save your **personal email** for the parent portal (students, Cove). That address must not be @shmspto.org
-- Personal Gmail will not unlock Staff; @shmspto.org will not own your students. Two logins, one hierarchy
+- Sign in with your **@shmspto.org** board address (or your linked personal email once saved)
+- Use the header tabs **Member** · **Staff** · **View site** to switch views without signing out
+- On Staff **Home**, save your **personal email** once. Member view then loads that household (students, Cove). Must not be @shmspto.org
+- After linking, either login works for both views
 - After a role change, sign out and back in so permissions refresh
 - **Admin** is only **president@shmspto.org** (Staff access UI and server enforce this)
 
@@ -241,31 +242,33 @@ Prefer the Staff register for prepaid digital-card redemptions so inventory and 
       slug: 'cove-in-person-square-stand',
       title: 'In-person sales + Square Stand (window & events)',
       categoryId: 'cove',
-      summary: 'Snack window and PTO events: digital card vs guest Stand.',
+      summary: 'Snacks on register + spirit wear on Stand (window & events).',
       order: 2,
       need: 'retail',
-      body: `Use **two devices** at the Cove window **and** at in-person PTO events (tables, food trucks, spirit pop-ups):
+      body: `Use **two devices** at the Cove snack window **and** at spirit / event tables:
 
-1. **Laptop / tablet** → Staff → **The Cove** register (Lane A)
-2. **iPad + Square Stand** → card-present + gift-card scan (Lane B / Wallet)
+1. **Laptop / tablet** → Staff → **The Cove** register (**Lane A** — snacks & candy on prepaid digital card)
+2. **iPad + Square Stand** → (**Lane B** — spirit wear with sizes, guests, card-present merch)
 
-### Lane A — Prepaid Cove Digital Card
+### Lane A — Snacks / candy on prepaid Cove Digital Card
 Parent already loaded the card online.
 
 - Show **Wallet** QR / Photos QR or say the **6-digit family code**
-- Staff register: lookup → confirm names + balance → tap items → **Charge**
+- Staff register: lookup → confirm names + balance → tap snack tiles → **Charge**
 - Or Stand gift-card scan when redeeming a Wallet QR as a Square gift card
 
-Never also run a credit card on Stand for the same items.
+Never also run a credit card on Stand for the same snack items.
 
-### Lane B — Guest / card-present (Square Stand)
-No loaded card, or spirit / event merch sold card-present:
+### Lane B — Spirit wear + guests (Square Stand)
+**Spirit wear** (shirts, hoodies, hats, sized merch) and anyone **without** a loaded Cove card:
 
-1. Ring items on Square Stand as a normal sale
-2. Take card (or other Stand tender)
+1. Wake Stand on the SHMS PTO location
+2. Confirm size / item, then ring as a normal card-present sale
 3. Hand over the item
 
-Stand does **not** create a family Cove account.
+Do **not** also **Charge** those spirit items on the Staff snack register.
+
+Stand does **not** create a family Cove account. Online spirit orders also live on **/cove** → Stingrays Pride.
 
 ### Events — paid-member refreshments
 Many paid memberships include free food / tickets at PTO events.
@@ -301,7 +304,7 @@ Longer guide: docs/COVE-IN-PERSON.md
       order: 3,
       body: `In **The Cove**, use **Cove products** to add items, prices, barcodes, and restock quantities.
 
-Multiple staff can work products at once. Spirit wear stock is separate (Wix Stores / Cove shop merch), not the snack register catalog.
+Multiple staff can work products at once. **Spirit wear** stock is separate (Wix Stores / Cove shop merch + Square Stand items) — not the snack register catalog. In person, sell spirit on **Square Stand**; browse online under **/cove → Stingrays Pride**.
 
 Use advanced inventory only when you need deeper stock tools. Day-to-day is products + register.`,
     },
@@ -434,7 +437,7 @@ Change one list at a time, save, then **View site** to confirm. Leave deep Wix E
       categoryId: 'admin',
       summary: 'What parents get after checkout.',
       order: 3,
-      body: `Successful membership, Cove load, ticket, donation, and shop purchases create a parent portal message (and email when Gmail send is connected). The same checkout also emails **vp-membershipexperience@shmspto.org**, **treasurer@shmspto.org**, **cove@shmspto.org** (Cove Coordinator), and **vp-sales@shmspto.org** (VP Digital & Retail Sales) a staff sale alert (includes shirt size / magnet / refreshments notes when membership).
+      body: `Successful membership, Cove load, ticket, donation, and shop purchases create a parent portal message (and email when Gmail send is connected). The same checkout also emails **vp-membershipexperience@shmspto.org**, **president@shmspto.org**, **treasurer@shmspto.org**, **cove@shmspto.org** (Cove Coordinator), and **vp-sales@shmspto.org** (VP Digital & Retail Sales) a staff sale alert (includes shirt size / magnet / refreshments notes when membership).
 
 If a parent paid but sees nothing:
 1. Confirm payment cleared in Square/PayPal

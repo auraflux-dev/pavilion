@@ -149,7 +149,7 @@ export function StaffReportsPanel({
                 <a href={gmailStatus.connectUrl} className="underline font-semibold">
                   Connect Google
                 </a>{' '}
-                while signed in as membership@ or treasurer@
+                while signed in as president@, treasurer@, or vp-membershipexperience@
               </>
             ) : null}
           </p>

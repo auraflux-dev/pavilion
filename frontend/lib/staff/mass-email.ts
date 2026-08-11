@@ -78,7 +78,7 @@ export function emailConfigured(): boolean {
 }
 
 export function gmailSenderAddress(): string {
-  return process.env.GMAIL_SENDER?.trim().toLowerCase() || 'membership@shmspto.org'
+  return process.env.GMAIL_SENDER?.trim().toLowerCase() || 'president@shmspto.org'
 }
 
 export function gmailFromHeader(fromName: string, senderEmail?: string): string {
@@ -144,7 +144,7 @@ export async function sendMassEmail(
       sent: 0,
       failed: recipients.length,
       errors: [
-        'Gmail send is not ready. In Staff → Inbox, Connect Google while signed in as membership@shmspto.org (or treasurer@), or set GMAIL_REFRESH_TOKEN + GMAIL_SENDER on Vercel.',
+        'Gmail send is not ready. In Staff → Inbox, Connect Google while signed in as president@shmspto.org (or treasurer@ / vp-membershipexperience@), or set GMAIL_REFRESH_TOKEN + GMAIL_SENDER on Vercel.',
       ],
     }
   }

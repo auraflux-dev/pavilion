@@ -26,9 +26,22 @@ async function signOut() {
  */
 export function MemberShell({ children }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const { member, accountType, isStaff, status } = useAuth()
+  const {
+    member,
+    accountType,
+    isStaff,
+    status,
+    boardTitle,
+    staffName,
+    needsPersonalEmail,
+    linkedHousehold,
+    viewingEmail,
+  } = useAuth()
   const isPaid = accountType === 'paid'
   const audienceLabel = status === 'loading' ? '…' : isPaid ? 'Paid member' : 'Free member'
+  const displayName = isStaff
+    ? boardTitle || staffName || member?.name || 'Board member'
+    : member?.name || 'Member portal'
 
   // Cove opens the full Cove page; PortalReturnBar brings members back.
   const links = [
@@ -47,11 +60,9 @@ export function MemberShell({ children }: Props) {
             <Image src="/shms-logo.png" alt="" width={36} height={36} className="shrink-0" />
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#085508' }}>
-                {audienceLabel}
+                {isStaff ? 'Member view' : audienceLabel}
               </p>
-              <p className="text-sm font-semibold text-[#1A1A1A] truncate">
-                {member?.name || 'Member portal'}
-              </p>
+              <p className="text-sm font-semibold text-[#1A1A1A] truncate">{displayName}</p>
             </div>
           </Link>
 
@@ -69,17 +80,31 @@ export function MemberShell({ children }: Props) {
 
           <div className="hidden md:flex items-center gap-2 shrink-0">
             {isStaff ? (
-              <Link href="/staff">
-                <Button size="sm" variant="outline" className="h-8 text-xs font-semibold">
-                  Staff
+              <>
+                <span className="inline-flex rounded-md border border-[#E8E4DC] p-0.5">
+                  <span className="px-2.5 py-1 rounded text-xs font-semibold bg-[#085508] text-white">
+                    Member
+                  </span>
+                  <Link
+                    href="/staff"
+                    className="px-2.5 py-1 rounded text-xs font-semibold text-[#1A1A1A] hover:bg-[#EEF6EE]"
+                  >
+                    Staff
+                  </Link>
+                </span>
+                <Link href="/">
+                  <Button size="sm" variant="outline" className="h-8 text-xs">
+                    View site
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <Link href="/">
+                <Button size="sm" variant="outline" className="h-8 text-xs">
+                  View site
                 </Button>
               </Link>
-            ) : null}
-            <Link href="/">
-              <Button size="sm" variant="outline" className="h-8 text-xs">
-                View site
-              </Button>
-            </Link>
+            )}
             <Button
               size="sm"
               className="h-8 text-xs text-white font-semibold"
@@ -114,11 +139,16 @@ export function MemberShell({ children }: Props) {
             ))}
             <div className="pt-2 mt-2 border-t border-[#E8E4DC] space-y-2">
               {isStaff ? (
-                <Link href="/staff" onClick={() => setMenuOpen(false)}>
-                  <Button size="sm" variant="outline" className="w-full font-semibold">
-                    Staff workspace
+                <div className="grid grid-cols-2 gap-2">
+                  <Button size="sm" className="w-full text-white font-semibold" style={{ backgroundColor: '#085508' }}>
+                    Member
                   </Button>
-                </Link>
+                  <Link href="/staff" onClick={() => setMenuOpen(false)}>
+                    <Button size="sm" variant="outline" className="w-full font-semibold">
+                      Staff
+                    </Button>
+                  </Link>
+                </div>
               ) : null}
               <Link href="/" onClick={() => setMenuOpen(false)}>
                 <Button size="sm" variant="outline" className="w-full">
@@ -137,6 +167,28 @@ export function MemberShell({ children }: Props) {
           </div>
         ) : null}
       </header>
+
+      {isStaff && needsPersonalEmail ? (
+        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-950">
+          <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <p>
+              Link your personal email in Staff → Home so Member view shows your family (students,
+              Cove). Right now this board login has no household linked.
+            </p>
+            <Link href="/staff" className="font-semibold underline shrink-0">
+              Open Staff to link
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
+      {isStaff && linkedHousehold && viewingEmail ? (
+        <div className="border-b border-[#D4E8D4] bg-[#FAFCF9] px-4 py-1.5 text-[11px] text-[#5A6070]">
+          <div className="max-w-6xl mx-auto">
+            Member household: <span className="font-semibold text-[#1A1A1A]">{viewingEmail}</span>
+          </div>
+        </div>
+      ) : null}
 
       {children}
 

@@ -127,7 +127,7 @@ const SITE_SETTINGS = {
     'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1440&h=400&fit=crop&crop=center',
   homeCommunityImageAlt: 'Stone Hill Middle School PTO community',
   portalGrades: '6,7,8',
-  contactEmailGeneral: 'info@shmspto.org',
+  contactEmailGeneral: 'president@shmspto.org',
   contactEmailTreasurer: 'treasurer@shmspto.org',
   contactAddress: '23415 Evergreen Ridge Drive, Ashburn, VA 20148',
   contactStoreHours: 'Open during lunch periods, Mon–Fri',
@@ -1008,10 +1008,10 @@ async function upsertStaffRoles() {
     },
     {
       email: 'treasurer@shmspto.org',
-      name: 'Robert Gregory',
+      name: 'Ravi Batchu',
       boardTitle: 'Treasurer',
       roles: 'treasurer',
-      personalEmail: 'gregory.robert.c@gmail.com',
+      personalEmail: '',
       active: true,
     },
   ]

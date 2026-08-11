@@ -22,6 +22,12 @@ export interface AuthInfo {
   studentCount: number
   isStaff: boolean
   staffRoles: string[]
+  boardTitle: string
+  staffName: string
+  personalEmail: string
+  needsPersonalEmail: boolean
+  linkedHousehold: boolean
+  viewingEmail: string
   refresh: () => void
 }
 
@@ -40,6 +46,12 @@ async function fetchAuth(): Promise<AuthSnapshot> {
     studentCount: 0,
     isStaff: false,
     staffRoles: [],
+    boardTitle: '',
+    staffName: '',
+    personalEmail: '',
+    needsPersonalEmail: false,
+    linkedHousehold: false,
+    viewingEmail: '',
   }
   try {
     const r = await fetch('/api/auth/me', { credentials: 'include' })
@@ -54,6 +66,12 @@ async function fetchAuth(): Promise<AuthSnapshot> {
       studentCount: Number(data.studentCount ?? 0),
       isStaff: Boolean(data.isStaff),
       staffRoles: Array.isArray(data.staffRoles) ? data.staffRoles : [],
+      boardTitle: String(data.boardTitle ?? ''),
+      staffName: String(data.staffName ?? ''),
+      personalEmail: String(data.personalEmail ?? ''),
+      needsPersonalEmail: Boolean(data.needsPersonalEmail),
+      linkedHousehold: Boolean(data.linkedHousehold),
+      viewingEmail: String(data.viewingEmail ?? data.member?.email ?? ''),
     }
   } catch {
     return visitor
@@ -89,6 +107,12 @@ export function useAuth(): AuthInfo {
         studentCount: 0,
         isStaff: false,
         staffRoles: [],
+        boardTitle: '',
+        staffName: '',
+        personalEmail: '',
+        needsPersonalEmail: false,
+        linkedHousehold: false,
+        viewingEmail: '',
       }
   )
   const [tick, setTick] = useState(0)

@@ -151,22 +151,24 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
           </nav>
 
           <div className="hidden md:flex items-center gap-2 shrink-0">
-            <Link href="/member-portal">
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-white/40 text-white hover:bg-white/10 bg-transparent h-8 text-xs"
+            <span className="inline-flex rounded-md border border-white/30 p-0.5">
+              <Link
+                href="/member-portal"
+                className="px-2.5 py-1 rounded text-xs font-semibold text-white/90 hover:bg-white/10"
               >
-                Parent portal
-              </Button>
-            </Link>
+                Member
+              </Link>
+              <span className="px-2.5 py-1 rounded text-xs font-semibold bg-white text-[#0B3D0B]">
+                Staff
+              </span>
+            </span>
             <Link href="/">
               <Button
                 size="sm"
                 variant="outline"
                 className="border-white/40 text-white hover:bg-white/10 bg-transparent h-8 text-xs"
               >
-                Site home
+                View site
               </Button>
             </Link>
             <Button
@@ -207,22 +209,27 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
             ))}
             <div className="pt-2 mt-2 border-t border-white/15 space-y-2">
               <p className="text-[11px] text-white/60 px-1 truncate">{email}</p>
-              <Link href="/member-portal" className="block" onClick={() => setMenuOpen(false)}>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full border-white/40 text-white bg-transparent"
-                >
-                  Parent portal
+              <div className="grid grid-cols-2 gap-2">
+                <Link href="/member-portal" className="block" onClick={() => setMenuOpen(false)}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-white/40 text-white bg-transparent"
+                  >
+                    Member
+                  </Button>
+                </Link>
+                <Button size="sm" className="w-full bg-white text-[#0B3D0B] font-semibold">
+                  Staff
                 </Button>
-              </Link>
+              </div>
               <Link href="/" className="block" onClick={() => setMenuOpen(false)}>
                 <Button
                   size="sm"
                   variant="outline"
                   className="w-full border-white/40 text-white bg-transparent"
                 >
-                  Site home
+                  View site
                 </Button>
               </Link>
               <Button

@@ -243,7 +243,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             error:
-              'This account is blocked. Email membership@shmspto.org for help.',
+              'This account is blocked. Email vp-membershipexperience@shmspto.org for help.',
             errorCode: 'memberBlocked',
           },
           { status: 403 },
@@ -252,7 +252,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
- 'This parent account is still pending approval. Use your personal email (not @shmspto.org). If this keeps happening, email membership@shmspto.org. do not use Staff login for family portal access.',
+ 'This parent account is still pending approval. Use your personal email (not @shmspto.org). If this keeps happening, email vp-membershipexperience@shmspto.org. do not use Staff login for family portal access.',
           errorCode: 'ownerApprovalRequired',
         },
         { status: 403 },

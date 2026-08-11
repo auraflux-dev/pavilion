@@ -97,6 +97,53 @@ function parseAssignedProgramIds(raw: unknown): string[] {
  .filter(Boolean)
 }
 
+/**
+ * Resolve staff profile for the signed-in email.
+ * - @shmspto.org → StaffRoles.email
+ * - personal Gmail linked on StaffRoles.personalEmail → that board row
+ */
+export async function resolveStaffForSession(email: string): Promise<StaffProfile | null> {
+  const normalized = email.trim().toLowerCase()
+  if (!normalized) return null
+  if (isStaffEmail(normalized)) return getStaffProfile(normalized)
+
+  try {
+    const client = getWixClient()
+    const result = await client.items
+      .query('StaffRoles')
+      .eq('personalEmail', normalized)
+      .eq('active', true)
+      .limit(1)
+      .find()
+    const row = result.items?.[0] as
+      | {
+          email?: string
+          roles?: string
+          boardTitle?: string
+          name?: string
+          emailSignature?: string
+          assignedProgramIds?: string
+          personalEmail?: string
+        }
+      | undefined
+    if (!row?.email || !isStaffEmail(String(row.email))) return null
+    const staffEmail = String(row.email).trim().toLowerCase()
+    const roles = enforceAdminEmailPolicy(staffEmail, parseRoles(row.roles))
+    if (!roles.length) return null
+    return {
+      email: staffEmail,
+      roles,
+      boardTitle: String(row.boardTitle ?? ''),
+      name: String(row.name ?? ''),
+      emailSignature: String(row.emailSignature ?? ''),
+      assignedProgramIds: parseAssignedProgramIds(row.assignedProgramIds),
+      personalEmail: normalizePersonalEmail(String(row.personalEmail ?? '')),
+    }
+  } catch {
+    return null
+  }
+}
+
 export async function getStaffProfile(email: string): Promise<StaffProfile | null> {
  const normalized = email.trim().toLowerCase()
  if (!normalized) return null

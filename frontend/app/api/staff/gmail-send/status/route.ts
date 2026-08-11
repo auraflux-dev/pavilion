@@ -26,6 +26,6 @@ export async function GET(req: NextRequest) {
     ...status,
     connectUrl: '/api/staff/workspace/connect',
     preferredSenderHint:
-      'Sign in to Staff as membership@shmspto.org (or treasurer@), open Inbox, then Connect Google. That enables purchase confirmation emails.',
+      'Sign in to Staff as president@shmspto.org (or treasurer@ / vp-membershipexperience@), open Inbox, then Connect Google. That enables purchase confirmation emails.',
   })
 }

@@ -10,10 +10,9 @@ import {
 } from '@/lib/google/workspace-auth'
 
 const DEFAULT_SENDERS = [
-  'membership@shmspto.org',
+  'president@shmspto.org',
   'treasurer@shmspto.org',
-  'programs@shmspto.org',
-  'noreply@shmspto.org',
+  'vp-membershipexperience@shmspto.org',
 ]
 
 export type GmailSendAuth = {

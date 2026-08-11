@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       message:
-        'If an account exists for that email, we sent a reset link. Check your inbox (and spam). If nothing arrives, email membership@shmspto.org.',
+        'If an account exists for that email, we sent a reset link. Check your inbox (and spam). If nothing arrives, email vp-membershipexperience@shmspto.org.',
     })
   }
 }

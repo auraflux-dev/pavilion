@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
 import { getWixClient } from '@/lib/wix-client'
 import { requireStaffRole } from '@/lib/staff/session'
-import { getStaffProfile, isStaffEmail, ROLE_HOME_COPY, STAFF_EMAIL_DOMAIN, type StaffRole } from '@/lib/staff/roles'
+import {
+  isStaffEmail,
+  resolveStaffForSession,
+  ROLE_HOME_COPY,
+  STAFF_EMAIL_DOMAIN,
+  type StaffRole,
+} from '@/lib/staff/roles'
 
 /**
  * Self-registration: first @shmspto.org login creates a StaffRoles row with no
@@ -31,23 +37,22 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Sign in to continue.' }, { status: 401 })
   }
 
-  if (!isStaffEmail(session.email)) {
-    return NextResponse.json(
-      {
-        error: `Staff tools require your @${STAFF_EMAIL_DOMAIN} login. You are signed in as ${session.email}. use that personal email in the member portal for your students, and sign in with your @${STAFF_EMAIL_DOMAIN} email for staff work.`,
-      },
-      { status: 403 },
-    )
-  }
-
-  const staff = await getStaffProfile(session.email)
+  const staff = await resolveStaffForSession(session.email)
   if (!staff) {
-    const displayName = `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim()
-    await ensureStaffRegistration(session.email.trim().toLowerCase(), displayName)
+    if (isStaffEmail(session.email)) {
+      const displayName = `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim()
+      await ensureStaffRegistration(session.email.trim().toLowerCase(), displayName)
+      return NextResponse.json(
+        {
+          error: `You're registered as ${session.email}, but no role is assigned yet. Ask the PTO admin to assign your role in Staff → Admin · Staff access.`,
+          registered: true,
+        },
+        { status: 403 },
+      )
+    }
     return NextResponse.json(
       {
-        error: `You're registered as ${session.email}, but no role is assigned yet. Ask the PTO admin to assign your role in Staff → Admin · Staff access.`,
-        registered: true,
+        error: `Staff tools need your @${STAFF_EMAIL_DOMAIN} login, or a personal email linked on your StaffRoles row. You are signed in as ${session.email}.`,
       },
       { status: 403 },
     )
@@ -59,7 +64,8 @@ export async function GET(req: NextRequest) {
   }))
 
   return NextResponse.json({
-    email: session.email,
+    email: staff.email,
+    sessionEmail: session.email,
     name: staff.name || `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim(),
     boardTitle: staff.boardTitle,
     roles: staff.roles,

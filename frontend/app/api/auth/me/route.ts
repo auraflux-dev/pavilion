@@ -8,7 +8,7 @@ import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { getWixClient } from '@/lib/wix-client'
 import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
-import { getStaffProfile } from '@/lib/staff/roles'
+import { resolveStaffForSession } from '@/lib/staff/roles'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractEmail(member: any): string {
@@ -44,7 +44,8 @@ export async function GET(req: NextRequest) {
     const effective = await getEffectiveParentEmail(req)
     const email = effective?.parentEmail ?? actorEmail
     const actingAs = Boolean(effective?.actingAs)
-    const staff = effective?.staff ?? (await getStaffProfile(actorEmail))
+    const linkedHousehold = Boolean(effective?.linkedHousehold)
+    const staff = effective?.staff ?? (await resolveStaffForSession(actorEmail))
     const adminClient = getWixClient()
 
     let storeCards: { balance: number; studentName: string }[] = []
@@ -163,9 +164,13 @@ export async function GET(req: NextRequest) {
       hasPaidMembership,
       accountType,
       actingAs,
+      linkedHousehold,
       viewingEmail: email,
       staffRoles: staff?.roles ?? [],
       boardTitle: staff?.boardTitle ?? '',
+      staffName: staff?.name ?? '',
+      personalEmail: staff?.personalEmail ?? '',
+      needsPersonalEmail: Boolean(staff?.roles?.length) && !staff?.personalEmail,
       isStaff: Boolean(staff?.roles?.length),
     })
   } catch (err) {

@@ -52,7 +52,7 @@ export const MEMBER_KB: KbIndex = {
 
 Your sign-in email is your Wix login identity (often Google). Parents cannot change that email in the portal.
 
-If you need help with the login email, use **Ask the PTO** on Member Help, or email membership@shmspto.org.`,
+If you need help with the login email, use **Ask the PTO** on Member Help, or email vp-membershipexperience@shmspto.org.`,
     },
     {
       slug: 'free-or-paid',

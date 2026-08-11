@@ -714,7 +714,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  value={signatureDraft}
  onChange={(e) => setSignatureDraft(e.target.value)}
  rows={5}
- placeholder={'Jane Doe\nVP Membership · SHMS PTO\nmembership@shmspto.org'}
+ placeholder={'Jane Doe\nVP Membership · SHMS PTO\nvp-membershipexperience@shmspto.org'}
  className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
  />
  <Button
@@ -740,8 +740,8 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
           <p className="font-bold">Google connected as {status.email}</p>
  <p className="mt-1 text-[#1A1A1A]/80">
  This is your Workspace inbox (same mail as Gmail). Bold rows are unread. Purchase
- confirmation and form-notify emails send from a connected mailbox (membership@ /
- treasurer@ preferred).
+ confirmation and form-notify emails send from a connected mailbox (president@ /
+ treasurer@ / vp-membershipexperience@ preferred).
           </p>
         </div>
  ) : null}

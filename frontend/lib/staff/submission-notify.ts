@@ -218,6 +218,9 @@ export async function notifyStaffTransaction(opts: {
   }
 
   const settings = await getSiteSettings()
+  const president = normalizeStaffInbox(
+    settings.get('presidentEmail', 'president@shmspto.org'),
+  )
   const treasurer = normalizeStaffInbox(
     settings.get('contactEmailTreasurer', 'treasurer@shmspto.org'),
   )
@@ -229,7 +232,7 @@ export async function notifyStaffTransaction(opts: {
   )
   const recipients = Array.from(
     new Set(
-      [to, treasurer, storeCoordinator, vpSales]
+      [to, president, treasurer, storeCoordinator, vpSales]
         .map((e) => e.trim().toLowerCase())
         .filter(Boolean),
     ),

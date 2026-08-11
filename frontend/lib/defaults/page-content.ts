@@ -181,19 +181,19 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     title: 'Portal help',
     body: 'Parent guides. Member portal only.',
     bullets: [
-      'How do I update My Account?|Open My Account and choose Edit profile. You can update your display name and phone number here.\n\nYour sign-in email is your Wix login identity (often Google). Parents cannot change that email in the portal. Email membership@shmspto.org if you need help with the login email.',
+      'How do I update My Account?|Open My Account and choose Edit profile. You can update your display name and phone number here.\n\nYour sign-in email is your Wix login identity (often Google). Parents cannot change that email in the portal. Email vp-membershipexperience@shmspto.org if you need help with the login email.',
       'How do I add another student?|Scroll to My Students and choose Add a student. Enter first name, last name, and grade (6, 7, or 8).\n\nAdd every student in your household so programs, The Cove balance, and messages stay tied to the right kids.',
       'How do I fix a student name or grade?|Open the student card, choose Edit student, make your changes, and save. Updates usually show within a few minutes. Refresh the portal if you still see the old info.',
       'Am I free or paid?|My Account shows Free parent account or Paid PTO membership.\n\nFree means you can log in, add students, shop The Cove, and load a family Cove Digital Card. Paid means you purchased Reef, Lagoon, or Tide for the school year. Perks and digital card credit sync after checkout.',
       'What are Reef, Lagoon, and Tide?|Those are the paid PTO membership levels for the school year. Each tier includes different Cove Digital Card credit and member perks.\n\nStart free anytime, then upgrade from Membership when you are ready. Lagoon and Tide ask for Spirit Wear T-shirt size at checkout so we can fulfill your shirt. After payment, refresh the portal so your tier and credit appear.',
-      'How do I join or upgrade membership?|Go to Membership (or Upgrade in this portal), pick Reef, Lagoon, or Tide, and complete checkout with card or PayPal.\n\nWhen payment clears, return here and refresh. If credit or tier is still missing after a few minutes, email membership@shmspto.org with your receipt.',
+      'How do I join or upgrade membership?|Go to Membership (or Upgrade in this portal), pick Reef, Lagoon, or Tide, and complete checkout with card or PayPal.\n\nWhen payment clears, return here and refresh. If credit or tier is still missing after a few minutes, email vp-membershipexperience@shmspto.org with your receipt.',
       'Where is my Cove Digital Card credit?|Open Store & Cove Digital Card. Your family balance and recent purchases show there.\n\nMembership credit loads after purchase. Use Load Cove Digital Card anytime to add more. First-load bonus (when offered) applies once; reloads are dollar-for-dollar.',
  'What is the family Cove Digital Card?|In the member portal, Save the QR to Photos (or Wallet). That QR is the Square gift-card number. Square Stand / iPad at Cove and events scan it like a plastic card. Students do not need to remember a code.\n\nA 6-digit spoken backup still appears if the phone dies. Staff can type that code on the Cove register.\n\nLoad balance online first so the QR works at Stand.',
       'How does The Cove snack window work?|Online checkout creates the family Square digital card balance and Cove code/QR. Staff look up by code at the register and tap products to charge.\n\nGuests without a portal login buy spirit wear or event merch on Square Stand with staff (card present). Spirit wear and other Cove merch also checkout online with card or PayPal.',
-      'Do paid members get Cove coupons?|Often yes. When you are signed in as a paid member, look for the coupon bar on The Cove shop or checkout.\n\nIf a code fails, wait a minute, refresh, and try again, or email membership@shmspto.org.',
+      'Do paid members get Cove coupons?|Often yes. When you are signed in as a paid member, look for the coupon bar on The Cove shop or checkout.\n\nIf a code fails, wait a minute, refresh, and try again, or email vp-membershipexperience@shmspto.org.',
       'Can I pay with a credit card or PayPal?|Yes. Free and paid parents can pay with credit/debit (Square) or PayPal for membership, The Cove, and digital card reloads.\n\nSaving a payment card is optional for faster reloads. SHMS PTO never receives your full card number.',
       'Where do surveys appear?|Active surveys list under Surveys for you on this portal. You will get the same branded form by email, text, or WhatsApp. Always on shmspto.org, never an outside link.',
-      'Can I remove a student from my account?|Parents can add and edit students. To archive or remove a student, email membership@shmspto.org so staff can update the record safely.',
+      'Can I remove a student from my account?|Parents can add and edit students. To archive or remove a student, email vp-membershipexperience@shmspto.org so staff can update the record safely.',
     ],
   }),
 }
@@ -203,8 +203,8 @@ export const CONTACT_DEFAULTS = {
  /** info@ is not provisioned yet. use president until aliases exist */
   contactEmailGeneral: 'president@shmspto.org',
   contactEmailTreasurer: 'treasurer@shmspto.org',
- /** vp-programs@ not provisioned. president until Programs alias exists */
-  contactEmailPrograms: 'president@shmspto.org',
+ /** Programs inbox shares Initiatives alias until vp-programs@ exists */
+  contactEmailPrograms: 'vp-initiatives@shmspto.org',
   contactEmailEvents: 'vp-events@shmspto.org',
   contactEmailSponsorship: 'vp-initiatives@shmspto.org',
   contactAddress: '23415 Evergreen Ridge Drive, Ashburn, VA 20148',
