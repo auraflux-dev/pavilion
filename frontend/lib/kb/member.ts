@@ -161,23 +161,25 @@ First-load bonus (when offered) applies once; reloads are dollar-for-dollar.`,
       slug: 'family-cove-code',
       title: 'What is the family Cove code?',
       categoryId: 'cove',
-      summary: 'The 6-digit code students give at the snack window.',
+      summary: 'QR, word passcode, or 6-digit backup at the snack window.',
       order: 2,
-      body: `In **Store & Cove Digital Card** you will see a 6-digit **Family Cove code**. Give that code to your student(s).
+      body: `In **Store & Cove Digital Card** you will see:
 
-At the snack window they tell staff the code (or show the QR) so the family balance can be charged.
+1. **Photos QR** — best at Square Stand / the window
+2. **Word passcode (new)** — easier to say (suggested from your last name + first letters of your first name)
+3. **6-digit backup** — if the phone dies (paid member codes end in **9**)
 
-Reset the code anytime if it was shared or lost.`,
+Give your student the QR or the word passcode. Reset the 6-digit backup anytime if it was shared or lost.`,
     },
     {
       slug: 'cove-snack-window',
       title: 'How does The Cove snack window work?',
       categoryId: 'cove',
-      summary: 'Wallet QR or 6-digit code; Stand for guests.',
+      summary: 'QR, word passcode, or 6-digit; Stand for guests.',
       order: 3,
       body: `Load the Cove Digital Card online first (portal → Store & Cove Digital Card).
 
-At the snack window, your student shows the **Wallet / Photos QR** or says the **6-digit Family Cove code**. Staff looks up the family, confirms names and balance, then charges snacks to the prepaid card.
+At the snack window, your student shows the **Photos / Wallet QR**, says the **word passcode**, or the **6-digit backup**. Staff looks up the family, confirms names and balance, then charges snacks to the prepaid card.
 
 Until a physical card is issued, the code or Wallet QR is enough.
 

@@ -44,12 +44,26 @@ function getProductImage(product: Record<string, unknown>): string | undefined {
  try {
  const media = product.media as Record<string, unknown> | undefined;
  if (!media) return undefined;
+ // Prefer main media — Wix often omits itemsInfo on query responses.
+ const main = media.main as Record<string, unknown> | undefined;
+ const mainImage = main?.image as Record<string, unknown> | undefined;
+ const fromMain =
+ wixMediaIdToUrl(mainImage?.url) ??
+ wixMediaIdToUrl(mainImage?.id) ??
+ wixMediaIdToUrl(main?.id) ??
+ wixMediaIdToUrl(main?.url);
+ if (fromMain) return fromMain;
  const itemsInfo = media.itemsInfo as Record<string, unknown> | undefined;
  const items = itemsInfo?.items as Array<Record<string, unknown>> | undefined;
  const first = items?.[0];
  if (!first) return undefined;
- // id is the wix media id
- return wixMediaIdToUrl(first.id) ?? wixMediaIdToUrl(first.url);
+ const firstImage = first.image as Record<string, unknown> | undefined;
+ return (
+ wixMediaIdToUrl(firstImage?.url) ??
+ wixMediaIdToUrl(firstImage?.id) ??
+ wixMediaIdToUrl(first.id) ??
+ wixMediaIdToUrl(first.url)
+ );
  } catch {
  return undefined;
  }
@@ -126,7 +140,7 @@ export async function getStoreItems(): Promise<StoreItem[]> {
  },
  fields: ["PLAIN_DESCRIPTION", "MEDIA_ITEMS_INFO", "MIN_PRICE_VARIANT"],
  }),
- next: { revalidate: 300 },
+ next: { revalidate: 60 },
  });
 
  if (!res.ok) return [];
@@ -167,7 +181,7 @@ export async function getSpiritWearItems(): Promise<SpiritItem[]> {
  query: { filter: { visible: { $eq: true } }, paging: { limit: 100 } },
  fields: ["MEDIA_ITEMS_INFO", "MIN_PRICE_VARIANT"],
  }),
- next: { revalidate: 300 },
+ next: { revalidate: 60 },
  });
 
  if (!res.ok) return [];

@@ -226,8 +226,8 @@ Do not send parents to the old Wix Events dashboard for day-to-day work. Stay in
 
 **Member with a loaded Cove Digital Card**
 1. Ask what they want
-2. Get identity: Wallet / Photos QR, spoken **6-digit family code**, or long Square GAN
-3. Enter / paste into **Scan QR / GAN or 6-digit backup** → Lookup
+2. Get identity: Photos / Wallet QR, **word passcode**, spoken **6-digit backup**, or long Square GAN
+3. Enter / paste into **Scan QR / GAN, word passcode, or 6-digit backup** → Lookup
 4. Confirm **student full names** and **balance** on screen
 5. Tap product tiles (deals first), adjust qty, then **Charge**
 6. Hand over the item — balance updates on the family card

@@ -23,10 +23,12 @@ Same lanes at the **snack window** and at **event tables**. Do **not** double-ch
 
 | Setting | Typical Lane A | Typical Lane B |
 |---------|----------------|----------------|
-| **Cove / snack window** | Snacks & deals on Staff register | Guest wants snacks without a loaded card |
-| **Spirit / merch table** | Prepaid card if item is on register catalog | Most spirit / size sales card-present on Stand |
-| **Food truck / refreshment table** | Paid-member perk check (code ends in **9**) — usually **no charge** | Anyone buying extras card-present on Stand |
+| **Cove / snack window** | Snacks & candy on Staff register (digital card) | Guest snacks without a loaded card → Stand |
+| **Spirit / merch table** | Rare — snack catalog only | **Default:** shirts / hoodies / hats / sizes on Stand (card present) |
+| **Food truck / refreshment table** | Paid-member perk check (code ends in **9**) — usually **no charge** | Anyone buying extras or spirit → Stand |
 | **Ticket / entry table** | Rarely Cove card — follow the event flyer | Stand or online tickets as planned |
+
+**Rule of thumb:** candy/snacks → Staff register when they have a Cove Digital Card. **Spirit wear → Square Stand** (confirm size, card present).
 
 ---
 
@@ -60,15 +62,17 @@ Wallet QR = Square GAN → Stand **gift card** / scan flow (not a new credit-car
 
 ---
 
-## Lane B — Guest / card-present (Square Stand)
+## Lane B — Spirit wear + guests (Square Stand)
 
-No loaded Cove Digital Card, or spirit/event merch sold card-present:
+**Default for spirit wear** (shirts, hoodies, hats, sized merch) and anyone with **no** loaded Cove Digital Card:
 
-1. Ring item(s) on Square Stand as a normal sale.
-2. Take card (or other Stand tender).
-3. Hand over the item.
+1. Wake Square Stand on the SHMS PTO location.
+2. Confirm size / item with the buyer.
+3. Ring as a normal card-present sale → take payment → hand over the item.
 
-Stand does **not** create a family Cove account. Reloads happen online in the member portal.
+Do **not** also **Charge** those spirit items on the Staff snack register.
+
+Stand does **not** create a family Cove account. Online spirit browse: **/cove** → Stingrays Pride. Reloads for snacks happen online in the member portal.
 
 ---
 

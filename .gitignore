@@ -24,6 +24,12 @@ promo-videos/assets/parent-tour/video/_frames/
 promo-videos/assets/parent-tour/video/*.bak
 promo-videos/assets/parent-tour/thumbs/*_pre_shmspto.png
 promo-videos/assets/parent-tour/thumbs/*_evergreen*
+promo-videos/assets/_pw_scroll_tmp/
+promo-videos/assets/_remap_tmp/
+promo-videos/.pw-portal-profile/
+promo-videos/vo/_parts/
+promo-videos/assets/membership-tiers/scrolls/
+promo-videos/assets/portal-walkthrough/
 *.tsbuildinfo
 promo-videos/**/*.bak.mp4
 

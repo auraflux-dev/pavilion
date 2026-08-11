@@ -9,3 +9,10 @@ scripts/shots
 *.tsbuildinfo
 frontend/tsconfig.tsbuildinfo
 .git
+promo-videos
+docs
+out
+frontend/out
+*.mp4
+*.webm
+*.pdf

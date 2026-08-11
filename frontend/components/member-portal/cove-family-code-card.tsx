@@ -1,9 +1,11 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Copy, Download, Loader2, RefreshCw, Share2, Wallet } from 'lucide-react'
+import { Copy, Download, Loader2, RefreshCw, Share2, Sparkles, Wallet, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CoveLogo } from '@/components/brand/cove-logo'
+
+const PASSCODE_CALLOUT_KEY = 'shms_cove_passcode_callout_v1'
 
 /**
  * Family Cove Digital Card. QR encodes Square GAN when loaded (Stand / iPad / Photos / Wallet).
@@ -24,6 +26,26 @@ export function CoveFamilyCodeCard() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [showPasscodeCallout, setShowPasscodeCallout] = useState(false)
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && !window.localStorage.getItem(PASSCODE_CALLOUT_KEY)) {
+        setShowPasscodeCallout(true)
+      }
+    } catch {
+      setShowPasscodeCallout(true)
+    }
+  }, [])
+
+  function dismissPasscodeCallout() {
+    setShowPasscodeCallout(false)
+    try {
+      window.localStorage.setItem(PASSCODE_CALLOUT_KEY, '1')
+    } catch {
+      // ignore
+    }
+  }
 
   const load = useCallback(async () => {
     setBusy(true)
@@ -322,8 +344,84 @@ export function CoveFamilyCodeCard() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-[#E8E4DC] bg-white px-3 py-2.5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
+          {showPasscodeCallout ? (
+            <div
+              className="rounded-xl border-2 px-3 py-3 mb-1 relative overflow-hidden"
+              style={{
+                borderColor: '#C4A035',
+                background:
+                  'linear-gradient(135deg, #FFF9E8 0%, #EEF6EE 55%, #FAFCF9 100%)',
+              }}
+            >
+              <div className="flex items-start gap-2.5">
+                <span
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white shadow-sm animate-pulse"
+                  style={{ backgroundColor: '#085508' }}
+                  aria-hidden
+                >
+                  <Sparkles className="w-4 h-4" />
+                </span>
+                <div className="min-w-0 flex-1 pr-6">
+                  <p className="flex flex-wrap items-center gap-2">
+                    <span
+                      className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded text-white"
+                      style={{ backgroundColor: '#C4A035' }}
+                    >
+                      New
+                    </span>
+                    <span className="text-sm font-bold text-[#1A1A1A]">
+                      Word passcode — easier at The Cove
+                    </span>
+                  </p>
+                  <p className="text-[12px] text-[#5A6070] mt-1 leading-relaxed">
+                    Students can say a short word instead of six digits. We suggest your{' '}
+                    <strong>last name + first letters of your first name</strong>. Set it below once,
+                    then teach them the word.
+                  </p>
+                  <button
+                    type="button"
+                    className="mt-2 text-[11px] font-bold underline"
+                    style={{ color: '#085508' }}
+                    onClick={() => {
+                      document.getElementById('cove-word-passcode')?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                      })
+                      dismissPasscodeCallout()
+                    }}
+                  >
+                    Set my word passcode
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Dismiss"
+                  className="absolute top-2 right-2 p-1 rounded-md text-[#5A6070] hover:bg-white/70"
+                  onClick={dismissPasscodeCallout}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          <div
+            id="cove-word-passcode"
+            className="rounded-lg border-2 px-3 py-2.5 scroll-mt-4"
+            style={{
+              borderColor: passcode ? '#D4E8D4' : '#C4A035',
+              backgroundColor: passcode ? '#fff' : '#FFFCF3',
+            }}
+          >
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070] flex items-center gap-1.5">
+              {!passcode ? (
+                <span
+                  className="text-[9px] font-bold uppercase tracking-wider px-1 py-0.5 rounded text-white"
+                  style={{ backgroundColor: '#C4A035' }}
+                >
+                  New
+                </span>
+              ) : null}
               Word passcode (easier to say)
             </p>
             {passcode ? (

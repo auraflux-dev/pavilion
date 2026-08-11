@@ -82,12 +82,12 @@ const BEATS = [
   {
     part: 'vo/_parts/staff_cove_p03_see_register.m4a',
     still: 'assets/staff-cove/screen_register_overview.png',
-    caption: 'Step 3 · Cove Register · Lane A',
+    caption: 'Step 3 · Register = Snacks · Stand = Spirit',
   },
   {
     part: 'vo/_parts/staff_cove_p04_ask_code.m4a',
     still: 'assets/staff-cove/slide_ask_code.png',
-    caption: 'Step 4 · Ask For Code Or Wallet QR',
+    caption: 'Step 4 · Snacks · Ask Code Or Wallet QR',
   },
   {
     part: 'vo/_parts/staff_cove_p05_lookup.m4a',
@@ -102,22 +102,22 @@ const BEATS = [
   {
     part: 'vo/_parts/staff_cove_p07_tap_items.m4a',
     still: 'assets/staff-cove/screen_register_tap.png',
-    caption: 'Step 7 · Tap Items · Adjust Qty',
+    caption: 'Step 7 · Tap Snacks · Adjust Qty',
   },
   {
     part: 'vo/_parts/staff_cove_p08_charge.m4a',
     still: 'assets/staff-cove/screen_register_charge.png',
-    caption: 'Step 8 · Tap Charge',
+    caption: 'Step 8 · Charge Snacks On Digital Card',
   },
   {
     part: 'vo/_parts/staff_cove_p09_low_balance.m4a',
     still: 'assets/staff-cove/slide_low_balance.png',
-    caption: 'Step 9 · Low Balance · Do Not Charge',
+    caption: 'Step 9 · Low Balance · Stand Or Reload',
   },
   {
     part: 'vo/_parts/staff_cove_p10_square_stand.m4a',
-    still: 'assets/staff-cove/slide_lane_b.png',
-    caption: 'Step 10 · Square Stand · Guests + Spirit',
+    still: 'assets/staff-cove/screen_spirit_wear.png',
+    caption: 'Step 10 · Spirit Wear On Square Stand',
   },
   {
     part: 'vo/_parts/staff_cove_p11_events_perk.m4a',
@@ -127,7 +127,7 @@ const BEATS = [
   {
     part: 'vo/_parts/staff_cove_p12_close.m4a',
     still: 'assets/staff-cove/slide_close.png',
-    caption: 'Step 12 · Never Charge Twice · Help',
+    caption: 'Step 12 · Snacks + Spirit · Never Twice',
   },
 ];
 
@@ -241,52 +241,52 @@ function buildSlides() {
     footer: 'Cove@ Sees The Cove Workspace',
   });
   makeSlide('slide_ask_code.png', {
-    eyebrow: 'Step 4',
+    eyebrow: 'Step 4 · Snacks',
     title: 'Get Their ID',
     bullets: [
       'Ask what they want first',
       'Six digit Family Cove code',
-      'Or Wallet / Photos QR',
+      'QR, word passcode, or 6-digit',
     ],
-    footer: 'Do Not Invent A Code',
+    footer: 'Digital Card Snacks Only Here',
   });
   makeSlide('slide_low_balance.png', {
     eyebrow: 'Step 9 · Stop Rule',
     title: 'Balance Too Low',
     bullets: [
-      'Do not tap Charge',
+      'Do not tap Charge on Staff',
       'Parent reloads online',
-      'Or switch sale to Square Stand',
+      'Or snack sale → Square Stand',
     ],
-    footer: 'No Double Charge',
+    footer: 'Spirit Wear Still Uses Stand',
   });
   makeSlide('slide_lane_b.png', {
-    eyebrow: 'Step 10 · Lane B',
+    eyebrow: 'Step 10 · Spirit Wear',
     title: 'Square Stand iPad',
     bullets: [
       'Wake Stand · SHMS PTO location',
-      'Guests with no digital card',
-      'Spirit / event merch · card present',
+      'Shirts · hoodies · hats · sizes',
+      'Guests with no digital card too',
     ],
-    footer: 'Normal Card Sale On Stand',
+    footer: 'Card Present · Confirm Size',
   });
   makeSlide('slide_events_perk.png', {
     eyebrow: 'Step 11 · Events',
     title: 'Paid Refreshment Perk',
     bullets: [
-      'Ask for six digit family code',
+      'Ask for QR, word passcode, or 6-digit',
       'Paid member codes end in 9',
       'Hand tickets · do not charge perk',
     ],
-    footer: 'Extras Still Go On Stand',
+    footer: 'Extra Snacks Or Spirit → Stand',
   });
   makeSlide('slide_close.png', {
     eyebrow: 'Step 12',
     title: 'Never Charge Twice',
     bullets: [
-      'Lane A. Staff register digital card',
-      'Lane B. Square Stand guests + extras',
-      'Staff Help. In-person sales guide',
+      'Snacks / candy · Staff register',
+      'Spirit wear · Square Stand',
+      'Staff Help · In-person sales guide',
     ],
     footer: 'Go Stingrays!',
   });
@@ -344,7 +344,7 @@ function main() {
   const outroImg = path.join(ASSETS, 'outro.png');
   makeBrandCard(coldImg, {
     title: 'IN-PERSON SALES',
-    subtitle: 'Step-By-Step · Window + Events',
+    subtitle: 'Snacks + Spirit Wear · Window + Events',
   });
   makeBrandCard(outroImg, {
     title: 'THANK YOU',

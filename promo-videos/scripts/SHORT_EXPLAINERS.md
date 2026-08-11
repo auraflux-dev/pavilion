@@ -138,7 +138,7 @@ Home · Programs · Events · Membership · The Cove · Volunteer · Fundraising
 - **No HeyGen / no avatar**. ever on this PTO tour (different production line)
 - Membership URL → **`shmspto.org/membership`**
 - Free account → **`shmspto.org/auth/join`**
-- Cove Digital Card (Member Portal) → **QR is primary** (Square gift-card scan for Stand/iPad); **6-digit code is spoken backup**  
+- Cove Digital Card (Member Portal) → **QR is primary** (Square gift-card scan for Stand/iPad); **word passcode** (name-based) is the easy spoken path; **6-digit code** remains backup (paid ends in 9)  
   - Save QR to **Photos** for easy open at The Cove · **Apple/Google Wallet coming soon** (same digital card; native Wallet not required today)  
   - **Paid** (Reef / Lagoon / Tide) → membership **preloads** card credit  
   - **Free** parent account → same portal card; **load your own** funds anytime
