@@ -103,7 +103,7 @@ export async function ProgramsPreview() {
                   </h3>
 
                   {summary ? (
-                    <p className="text-sm text-[#5A6070] leading-relaxed mb-4 flex-1 line-clamp-3">
+                    <p className="text-sm text-[#5A6070] leading-relaxed mb-4 flex-1 line-clamp-5">
                       {summary}
                     </p>
                   ) : (

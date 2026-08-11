@@ -82,8 +82,7 @@ export default async function ProgramsPage() {
             {!error && programs.length > 0 && (
               <>
                 <p className="mb-10 max-w-2xl text-sm sm:text-base text-[#5A6070] leading-relaxed">
-                  Shared for all three: weekly evening at Stone Hill · instructors, exact day/time, and
-                  tuition confirm this week · spring continuation is a separate series.
+                  At Stone Hill · weekly evening · details confirming this week · spring is separate.
                 </p>
                 <ProgramsFilter programs={programs} />
               </>
