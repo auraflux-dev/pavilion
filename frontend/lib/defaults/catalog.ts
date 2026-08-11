@@ -43,15 +43,13 @@ export const CATALOG_DEFAULTS = {
     'd9ed5b01-324d-4136-809d-21a3211b9d89',
     '9e7d4b13-4437-4c51-b63d-4942d18edf64',
   ].join(','),
-  /** Comma-separated Wix Catalog product UUIDs shown on /spirit-wear */
+  /** Comma-separated Wix Catalog product UUIDs shown on /cove#shop (spirit wear).
+   * Yard sign + water bottle omitted (not selling).
+   * Hat / drawstring / long sleeve omitted until matching product photos exist. */
   spiritWearProductIds: [
-    '82ee7b02-5b3e-4383-8cd8-fcf089b45370',
-    '1c0e1c1c-23f8-4095-8e4d-a9c467e6fef8',
-    'd0bed142-0410-4442-a8e9-f1a5232862ef',
-    'd5730ad6-8d4a-4757-93fa-05aa3ff1e244',
-    'e9fbcab5-ae25-418e-a4ac-81889d93acc7',
-    'f3eedab0-bfd5-4f30-ad8f-7586b783b78f',
-    '791e1007-b926-4416-8a90-24dd641d0887',
+    'e9fbcab5-ae25-418e-a4ac-81889d93acc7', // Hoodie (green)
+    '791e1007-b926-4416-8a90-24dd641d0887', // Spirit T-Shirt (pastel tie-dye)
+    '7c8778e4-61e0-4ea6-95ed-cac3ae40c8cd', // Stone Hill Car Magnet ($10)
   ].join(','),
 } as const
 

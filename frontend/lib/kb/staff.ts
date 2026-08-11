@@ -446,9 +446,12 @@ If a parent paid but sees nothing:
 4. Escalate to Treasurer for payment-side mismatches
 
 ## Physical perks (shirt & magnet)
-- **Shirt size** is required at Lagoon/Tide checkout and appears in Staff → Fulfillments.
-- **Magnet** is queued for Reef/Tide; no mailing address yet (3PL later).
-- Tell parents: pick up at **Open House on August 13**, or email **vp-membershipexperience@shmspto.org** to coordinate pickup.
+- **Lagoon / Tide (parents):** get **both** a Spirit Wear T-shirt (size at checkout) and a Stone Hill car magnet.
+- **Reef:** includes a magnet (no shirt).
+- **Faculty ($20):** choose **magnet OR T-shirt** at checkout (not both).
+- Queued in Staff → Fulfillments. No mailing address yet (3PL later).
+- Tell members: pick up at **Open House on August 13**, or email **vp-membershipexperience@shmspto.org** to coordinate pickup.
+- Standalone **Stone Hill car magnet** is also sold in the spirit shop for $10.
 - Mark fulfilled in Staff → Fulfillments after handout.
 
 ## Free food & refreshments at PTO events

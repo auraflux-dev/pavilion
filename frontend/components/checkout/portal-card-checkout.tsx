@@ -38,6 +38,7 @@ export type PortalPayBody =
       tier: string
       studentId?: string | null
       shirtSize?: string | null
+      physicalPerk?: 'spirit_shirt' | 'magnet' | null
       consents?: ConsentAck[]
     }
   | { kind: 'product'; productId: string; consents?: ConsentAck[] }

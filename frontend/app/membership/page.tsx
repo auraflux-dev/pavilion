@@ -4,9 +4,9 @@ import { Footer } from '@/components/footer'
 import { MembershipTiers } from '@/components/membership/membership-tiers'
 import { MembershipCheckoutHandler } from '@/components/membership/membership-checkout-handler'
 import { PageHero } from '@/components/page-hero'
-import { ArrowRight } from 'lucide-react'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getMembershipTiers } from '@/lib/api/membership'
+import { FacultyMembershipJoin } from '@/components/membership/faculty-membership-join'
 import { getFAQItems } from '@/lib/api/faq'
 import { getPageContent } from '@/lib/api/page-content'
 import { MembershipPortalCallouts } from '@/components/membership/membership-portal-callouts'
@@ -32,9 +32,8 @@ export default async function MembershipPage() {
     .filter(Boolean)
 
   const facultyTier = allTiers.find(t => t.tierId === 'faculty')
-  const facultyPrice = facultyTier?.price ?? 15
-  const facultyDescription = facultyTier?.description ?? 'Faculty and staff memberships are $15 for the school year. We appreciate everything SHMS PTO educators do for our students.'
-  const presidentEmail = settings.get('presidentEmail', 'president@shmspto.org')
+  const facultyPrice = facultyTier?.price ?? 20
+  const facultyDescription = facultyTier?.description ?? 'Faculty and staff memberships are $20 for the school year. Choose one included perk: Stone Hill car magnet or Spirit Wear T-shirt. We appreciate everything SHMS PTO educators do for our students.'
   return (
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
@@ -86,14 +85,10 @@ export default async function MembershipPage() {
               <div className="text-center shrink-0">
                 <div className="text-3xl font-bold text-[#085508] mb-1">${facultyPrice}</div>
                 <div className="text-xs text-[#5A6070] mb-4">per school year</div>
-                <a
-                  href={`mailto:${presidentEmail}?subject=Faculty%20PTO%20Membership`}
-                  className="inline-flex items-center gap-2 font-semibold text-white px-5 py-2.5 rounded-lg text-sm transition-opacity hover:opacity-90"
-                  style={{ backgroundColor: '#085508' }}
-                >
-                  Email to Join
-                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                </a>
+                <p className="text-[11px] text-[#5A6070] mb-3 max-w-[14rem] mx-auto">
+                  Includes one perk: car magnet or Spirit Wear T-shirt.
+                </p>
+                <FacultyMembershipJoin price={facultyPrice} />
               </div>
             </div>
           </div>

@@ -256,10 +256,10 @@ export async function getMembershipTiers(): Promise<MembershipTier[]> {
   )
 }
 
-/** Paid (purchasable) tiers only. excludes faculty / blank. */
+/** Purchasable memberships (Reef / Lagoon / Tide / Faculty). Excludes free / blank. */
 export async function getPaidMembershipTiers(): Promise<MembershipTier[]> {
   const tiers = await getMembershipTiers()
-  return tiers.filter((t) => t.tierId && t.tierId !== 'faculty' && t.tierId !== 'free')
+  return tiers.filter((t) => t.tierId && t.tierId !== 'free' && t.price > 0)
 }
 
 export async function getMembershipTierById(

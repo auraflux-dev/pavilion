@@ -41,14 +41,39 @@ export const PHYSICAL_PERK_PICKUP_NOTE =
 export const EVENT_REFRESHMENTS_NOTE =
   'At PTO events, show your Family Cove 6-digit code (paid member codes end in 9). Volunteers record the code and hand refreshment tickets.'
 
-export function tierNeedsShirtSize(tier: string): boolean {
+/** Faculty/teacher membership: choose magnet OR Spirit Wear T-shirt at purchase. */
+export type PhysicalPerkChoice = 'spirit_shirt' | 'magnet'
+
+export function tierOffersPhysicalPerkChoice(tier: string): boolean {
+  const t = tier.trim().toLowerCase()
+  // Faculty/teacher membership only — parents on Lagoon/Tide get both shirt + magnet.
+  return t === 'faculty'
+}
+
+/** Reef always includes a magnet (no choice UI). */
+export function tierAutoMagnet(tier: string): boolean {
+  const t = tier.trim().toLowerCase()
+  return t === 'reef' || t === 'ruby'
+}
+
+/** Parent Lagoon/Tide (and legacy aliases) include a Spirit Wear T-shirt. */
+export function tierIncludesShirt(tier: string): boolean {
   const t = tier.trim().toLowerCase()
   return t === 'lagoon' || t === 'tide' || t === 'supreme' || t === 'pearl' || t === 'trench'
 }
 
+/** Parent Lagoon/Tide include a magnet in addition to the shirt. */
+export function tierIncludesMagnetWithShirt(tier: string): boolean {
+  return tierIncludesShirt(tier)
+}
+
+/** Shirt size required when the tier includes a shirt, or faculty chose shirt. */
+export function tierNeedsShirtSize(tier: string): boolean {
+  return tierIncludesShirt(tier)
+}
+
 export function tierNeedsMagnet(tier: string): boolean {
-  const t = tier.trim().toLowerCase()
-  return t === 'reef' || t === 'tide' || t === 'ruby' || t === 'pearl' || t === 'trench'
+  return tierAutoMagnet(tier) || tierIncludesMagnetWithShirt(tier)
 }
 
 export function tierNeedsEventRefreshments(tier: string): boolean {
@@ -75,6 +100,8 @@ export function enrichmentDiscountPercent(tier: string): number {
 export function buildMembershipEntitlements(opts: {
   tier: string
   shirtSize?: string | null
+  /** Faculty only: magnet OR shirt. Parents Lagoon/Tide get both. */
+  physicalPerk?: PhysicalPerkChoice | null
   coveCreditDollars?: number
   enrichmentCode?: string | null
 }): MembershipEntitlement[] {
@@ -116,26 +143,51 @@ export function buildMembershipEntitlements(opts: {
     })
   }
 
-  if (tierNeedsShirtSize(tier)) {
-    const size = String(opts.shirtSize ?? '').trim()
-    out.push({
-      kind: 'spirit_shirt',
-      label: '1 Spirit Wear T-shirt',
-      status: 'pending',
-      detail: size || 'Size needed',
-      notes: size
-        ? `Size ${size}. ${PHYSICAL_PERK_PICKUP_NOTE}`
-        : `Choose a size so we can fulfill your shirt. ${PHYSICAL_PERK_PICKUP_NOTE}`,
-    })
-  }
+  const choice = normalizePhysicalPerk(opts.physicalPerk)
 
-  if (tierNeedsMagnet(tier)) {
-    out.push({
-      kind: 'magnet',
-      label: '1 SHMS PTO magnet',
-      status: 'pending',
-      notes: PHYSICAL_PERK_PICKUP_NOTE,
-    })
+  if (tierOffersPhysicalPerkChoice(tier)) {
+    // Faculty: exclusive magnet OR T-shirt
+    if (choice === 'spirit_shirt') {
+      const size = String(opts.shirtSize ?? '').trim()
+      out.push({
+        kind: 'spirit_shirt',
+        label: '1 Spirit Wear T-shirt',
+        status: 'pending',
+        detail: size || 'Size needed',
+        notes: size
+          ? `Size ${size}. ${PHYSICAL_PERK_PICKUP_NOTE}`
+          : `Choose a size so we can fulfill your shirt. ${PHYSICAL_PERK_PICKUP_NOTE}`,
+      })
+    } else {
+      out.push({
+        kind: 'magnet',
+        label: '1 Stone Hill car magnet',
+        status: 'pending',
+        notes: PHYSICAL_PERK_PICKUP_NOTE,
+      })
+    }
+  } else {
+    // Parents: Lagoon/Tide get shirt + magnet; Reef gets magnet only
+    if (tierIncludesShirt(tier)) {
+      const size = String(opts.shirtSize ?? '').trim()
+      out.push({
+        kind: 'spirit_shirt',
+        label: '1 Spirit Wear T-shirt',
+        status: 'pending',
+        detail: size || 'Size needed',
+        notes: size
+          ? `Size ${size}. ${PHYSICAL_PERK_PICKUP_NOTE}`
+          : `Choose a size so we can fulfill your shirt. ${PHYSICAL_PERK_PICKUP_NOTE}`,
+      })
+    }
+    if (tierAutoMagnet(tier) || tierIncludesMagnetWithShirt(tier)) {
+      out.push({
+        kind: 'magnet',
+        label: '1 Stone Hill car magnet',
+        status: 'pending',
+        notes: PHYSICAL_PERK_PICKUP_NOTE,
+      })
+    }
   }
 
   if (tier === 'tide' || tier === 'pearl' || tier === 'trench') {
@@ -148,6 +200,23 @@ export function buildMembershipEntitlements(opts: {
   }
 
   return out
+}
+
+function normalizePhysicalPerk(
+  raw: PhysicalPerkChoice | string | null | undefined,
+): PhysicalPerkChoice | null {
+  const v = String(raw ?? '').trim().toLowerCase()
+  if (v === 'spirit_shirt' || v === 'shirt' || v === 'tshirt' || v === 't-shirt') {
+    return 'spirit_shirt'
+  }
+  if (v === 'magnet' || v === 'car_magnet') return 'magnet'
+  return null
+}
+
+export function parsePhysicalPerk(
+  raw: PhysicalPerkChoice | string | null | undefined,
+): PhysicalPerkChoice | null {
+  return normalizePhysicalPerk(raw)
 }
 
 export function parseEntitlementsJson(raw: unknown): MembershipEntitlement[] {

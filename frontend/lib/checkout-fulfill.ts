@@ -33,6 +33,7 @@ export type CheckoutIntent = {
   studentId?: string | null
   /** Spirit Wear size when membership includes a free T-shirt */
   shirtSize?: string | null
+  physicalPerk?: string | null
   productId?: string
   programId?: string
   eventId?: string
@@ -122,6 +123,7 @@ export async function resolveCheckoutIntent(
         tierName: match.name,
         studentId: intent.studentId ? String(intent.studentId) : '',
         shirtSize: intent.shirtSize ? String(intent.shirtSize) : '',
+        physicalPerk: intent.physicalPerk ? String(intent.physicalPerk) : '',
         isUpgrade: charge.isUpgrade ? '1' : '',
         currentTier,
         listPrice: String(charge.listPrice),
@@ -343,6 +345,7 @@ export async function fulfillPaidCheckout(opts: {
       orderId: transactionId,
       parentName: parentName || null,
       shirtSize: resolved.meta.shirtSize || null,
+      physicalPerk: (resolved.meta.physicalPerk as 'spirit_shirt' | 'magnet' | null) || null,
     })
     await client.items.insert('Payments', {
       programName: resolved.meta.isUpgrade === '1'

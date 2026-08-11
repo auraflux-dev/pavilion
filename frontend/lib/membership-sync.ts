@@ -120,8 +120,10 @@ export async function applyPaidMembership(opts: {
   expiresAt?: string | null
   orderId?: string | null
   parentName?: string | null
-  /** Spirit Wear size when the tier includes a free T-shirt */
+  /** Spirit Wear size when the parent chose the included T-shirt */
   shirtSize?: string | null
+  /** Lagoon/Tide: magnet OR spirit_shirt */
+  physicalPerk?: 'spirit_shirt' | 'magnet' | null
 }): Promise<{
   updatedStudentIds: string[]
   membershipUpserted: boolean
@@ -351,6 +353,7 @@ export async function applyPaidMembership(opts: {
   const entitlements = buildMembershipEntitlements({
     tier,
     shirtSize: opts.shirtSize,
+    physicalPerk: opts.physicalPerk,
     coveCreditDollars: giftCardResult?.creditDollars || fullCredit,
     enrichmentCode,
   })

@@ -213,8 +213,29 @@ export async function POST(req: NextRequest) {
       const tier = String(body.tier ?? '').trim().toLowerCase()
       const studentId = typeof body.studentId === 'string' ? body.studentId : null
       const shirtSize = typeof body.shirtSize === 'string' ? body.shirtSize.trim() : ''
-      const { tierNeedsShirtSize } = await import('@/lib/membership-entitlements')
-      if (tierNeedsShirtSize(tier) && !shirtSize) {
+      const {
+        tierOffersPhysicalPerkChoice,
+        tierNeedsShirtSize,
+        parsePhysicalPerk,
+      } = await import('@/lib/membership-entitlements')
+      const physicalPerk = parsePhysicalPerk(
+        typeof body.physicalPerk === 'string' ? body.physicalPerk : null,
+      )
+      // Faculty: magnet OR shirt. Parents Lagoon/Tide: shirt size (they get shirt + magnet).
+      if (tierOffersPhysicalPerkChoice(tier)) {
+        if (!physicalPerk) {
+          return NextResponse.json(
+            { error: 'Choose your faculty perk: Stone Hill car magnet or Spirit Wear T-shirt.' },
+            { status: 400 },
+          )
+        }
+        if (physicalPerk === 'spirit_shirt' && !shirtSize) {
+          return NextResponse.json(
+            { error: 'Select a Spirit Wear T-shirt size for this membership.' },
+            { status: 400 },
+          )
+        }
+      } else if (tierNeedsShirtSize(tier) && !shirtSize) {
         return NextResponse.json(
           { error: 'Select a Spirit Wear T-shirt size for this membership.' },
           { status: 400 },
@@ -276,7 +297,11 @@ export async function POST(req: NextRequest) {
         studentId,
         orderId: payment.id ?? paymentKey,
         parentName: name || null,
-        shirtSize: shirtSize || null,
+        shirtSize:
+          physicalPerk === 'spirit_shirt' || (!physicalPerk && shirtSize)
+            ? shirtSize || null
+            : null,
+        physicalPerk: physicalPerk || null,
       })
 
       const membershipStudentId =
@@ -327,6 +352,7 @@ export async function POST(req: NextRequest) {
             tierName: match.name,
             ...(charge.isUpgrade ? { isUpgrade: '1', currentTier } : {}),
             ...(shirtSize ? { shirtSize } : {}),
+            ...(physicalPerk ? { physicalPerk } : {}),
           },
         })
         confirmation = {
