@@ -1,0 +1,77 @@
+import { ParentVideoEmbed } from '@/components/videos/parent-video-embed'
+import {
+  parentVideosFor,
+  type ParentVideo,
+  getParentVideo,
+  type ParentVideoId,
+} from '@/lib/videos/parent-videos'
+
+interface ParentVideoSectionProps {
+  placement?: ParentVideo['placements'][number]
+  /** Show a single video by id instead of all for a placement */
+  videoId?: ParentVideoId
+  eyebrow?: string
+  title: string
+  body?: string
+  /** Section anchor id */
+  id?: string
+  className?: string
+  background?: string
+}
+
+export function ParentVideoSection({
+  placement,
+  videoId,
+  eyebrow = 'Watch',
+  title,
+  body,
+  id = 'videos',
+  className = '',
+  background = '#F5F0E8',
+}: ParentVideoSectionProps) {
+  const videos = videoId
+    ? ([getParentVideo(videoId)].filter(Boolean) as ParentVideo[])
+    : placement
+      ? parentVideosFor(placement)
+      : []
+
+  if (videos.length === 0) return null
+
+  const single = videos.length === 1
+
+  return (
+    <section
+      id={id}
+      className={`scroll-mt-28 py-12 md:py-16 ${className}`}
+      style={{ backgroundColor: background }}
+      aria-labelledby={`${id}-heading`}
+    >
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className={`mb-8 ${single ? 'max-w-3xl' : 'max-w-2xl'}`}>
+          <div
+            className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest text-white"
+            style={{ backgroundColor: '#085508' }}
+          >
+            {eyebrow}
+          </div>
+          <h2 id={`${id}-heading`} className="text-2xl font-bold text-[#1A1A1A] sm:text-3xl">
+            {title}
+          </h2>
+          {body ? <p className="mt-3 text-[#5A6070] leading-relaxed">{body}</p> : null}
+        </div>
+
+        {single ? (
+          <div className="mx-auto max-w-3xl">
+            <ParentVideoEmbed video={videos[0]} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {videos.map((video) => (
+              <ParentVideoEmbed key={video.id} video={video} compact />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}

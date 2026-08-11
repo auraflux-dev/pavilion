@@ -8,6 +8,7 @@ import { getBoardMembers, type BoardMember } from '@/lib/api/board'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 import { BoardSectionNav } from '@/components/jump-nav/public-section-navs'
+import { ParentVideoSection } from '@/components/videos/parent-video-section'
 
 export const revalidate = 300 // refresh from Wix CMS every 5 minutes
 
@@ -35,6 +36,14 @@ export default async function BoardPage() {
       <main id="main-content" className="flex-1">
         <PageHero content={page} />
         <BoardSectionNav />
+        <ParentVideoSection
+          videoId="board-recruit"
+          id="board-video"
+          eyebrow="Watch"
+          title="Thinking about joining the board?"
+          body="A short look at why parents volunteer and how to get involved."
+          background="#FFFFFF"
+        />
 
         {/* Executive Board */}
         {execMembers.length > 0 && (
@@ -135,6 +144,17 @@ export default async function BoardPage() {
   )
 }
 
+/** Public role → volunteer position description PDF (open seats). */
+const OPEN_ROLE_PDFS: Record<string, string> = {
+  'Events Coordinator': '/forms/events-coordinator.pdf',
+  'Initiatives Coordinator': '/forms/initiatives-coordinator.pdf',
+}
+
+function isOpenBoardSeat(name: string | undefined | null): boolean {
+  const n = (name ?? '').trim().toLowerCase()
+  return !n || n === 'open' || n === 'open position'
+}
+
 function BoardCard({
   member,
   featured = false,
@@ -142,7 +162,9 @@ function BoardCard({
   member: BoardMember
   featured?: boolean
 }) {
-  const isOpen = member.name === 'Open Position' || !member.name
+  const isOpen = isOpenBoardSeat(member.name)
+  const positionPdf = OPEN_ROLE_PDFS[member.role]
+  const displayName = isOpen ? 'OPEN' : member.name
 
   return (
     <article className={`bg-white rounded-2xl overflow-hidden shadow-sm border flex flex-col ${featured ? 'border-[#085508]/20' : 'border-[#E8E4DC]'}`}>
@@ -158,7 +180,7 @@ function BoardCard({
         className="w-full aspect-square flex items-center justify-center"
         style={{ backgroundColor: '#EEF6EE' }}
       >
-        {member.photo ? (
+        {member.photo && !isOpen ? (
           <Image
             src={member.photo}
             alt={member.name}
@@ -202,21 +224,45 @@ function BoardCard({
         >
           {member.role}
         </p>
-        <h3 className="font-bold text-[#1A1A1A] mb-2">{member.name}</h3>
+        <h3 className="font-bold text-[#1A1A1A] mb-2">{displayName}</h3>
         <p className="text-xs text-[#5A6070] leading-relaxed flex-1 mb-4">
           {member.bio}
         </p>
-        {member.email && (
-          <a
-            href={`mailto:${member.email}`}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors hover:underline"
-            style={{ color: '#085508' }}
-            aria-label={`Email ${member.role}`}
-          >
-            <Mail className="w-3.5 h-3.5" aria-hidden="true" />
-            {member.email}
-          </a>
-        )}
+        <div className="mt-auto space-y-2">
+          {positionPdf && isOpen ? (
+            <a
+              href={positionPdf}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors hover:underline"
+              style={{ color: '#085508' }}
+            >
+              View position description (PDF)
+              <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+            </a>
+          ) : null}
+          {member.email && !isOpen ? (
+            <a
+              href={`mailto:${member.email}`}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors hover:underline"
+              style={{ color: '#085508' }}
+              aria-label={`Email ${member.role}`}
+            >
+              <Mail className="w-3.5 h-3.5" aria-hidden="true" />
+              {member.email}
+            </a>
+          ) : null}
+          {isOpen ? (
+            <a
+              href={`mailto:president@shmspto.org?subject=${encodeURIComponent(`Board interest: ${member.role}`)}`}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors hover:underline"
+              style={{ color: '#085508' }}
+            >
+              <Mail className="w-3.5 h-3.5" aria-hidden="true" />
+              Express interest
+            </a>
+          ) : null}
+        </div>
       </div>
     </article>
   )

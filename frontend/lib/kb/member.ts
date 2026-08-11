@@ -35,10 +35,16 @@ export const MEMBER_KB: KbIndex = {
       order: 5,
     },
     {
+      id: 'videos',
+      title: 'Parent videos',
+      summary: 'Short guides for the website, portal, and membership.',
+      order: 6,
+    },
+    {
       id: 'support',
       title: 'Get help',
       summary: 'Ask the PTO from the portal.',
-      order: 6,
+      order: 7,
     },
   ],
   articles: [
@@ -222,6 +228,18 @@ Upcoming program sessions and school events tied to your household appear here.
 
 ## Messages
 Instructor and PTO messages for your students land in the same area. Refresh if something new just arrived.`,
+    },
+    {
+      slug: 'parent-videos',
+      title: 'Where are the parent how-to videos?',
+      categoryId: 'videos',
+      summary: 'Member Portal → Videos, plus Help and key public pages.',
+      order: 1,
+      body: `Open **Videos** in the Member Portal menu for the full parent library (website tour, portal walkthrough, membership tiers, board).
+
+The same clips also appear on Help and on matching public pages (Home, Membership, The Cove, Board).
+
+Staff training videos are separate and stay in the Staff workspace.`,
     },
     {
       slug: 'ask-the-pto',

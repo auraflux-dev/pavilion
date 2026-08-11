@@ -14,6 +14,7 @@ import { BrandImageWash } from '@/components/brand/brand-image-wash'
 import { EmphasizedCopy } from '@/components/emphasized-copy'
 import { DonateBlock } from '@/components/donate/donate-block'
 import { MembershipSectionNav } from '@/components/jump-nav/public-section-navs'
+import { ParentVideoSection } from '@/components/videos/parent-video-section'
 
 export const revalidate = 60
 
@@ -44,6 +45,14 @@ export default async function MembershipPage() {
       <main id="main-content">
         <PageHero content={page} />
         <MembershipSectionNav />
+        <ParentVideoSection
+          videoId="membership-tiers"
+          id="membership-video"
+          eyebrow="Watch"
+          title="Membership tiers in about 3 minutes"
+          body="Reef, Lagoon, and Tide explained before you choose a plan."
+          background="#FFFFFF"
+        />
 
         {/* Tiers */}
         <section

@@ -49,6 +49,7 @@ export function MemberShell({ children }: Props) {
     { href: '/membership', label: isPaid ? 'Membership' : 'Upgrade' },
     { href: '/cove', label: 'The Cove' },
     { href: '/programs', label: 'Programs' },
+    { href: '/member-portal/videos', label: 'Videos' },
     { href: '/member-portal/help', label: 'Help' },
   ]
 

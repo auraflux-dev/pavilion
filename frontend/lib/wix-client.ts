@@ -12,7 +12,11 @@ export function getWixClient() {
   }
 
   return createClient({
-    modules: { items, wixEventsV2: wixEvents.wixEventsV2 },
+    modules: {
+      items,
+      wixEventsV2: wixEvents.wixEventsV2,
+      categories: wixEvents.categories,
+    },
     auth: ApiKeyStrategy({ siteId, apiKey }),
   });
 }

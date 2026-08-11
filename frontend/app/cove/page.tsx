@@ -13,6 +13,7 @@ import { getSiteSettings } from '@/lib/api/site-settings'
 import { getStoreCardBonusPercent } from '@/lib/store-card-bonus'
 import { SpiritWearBuyButton } from '@/components/spirit-wear/spirit-wear-buy-button'
 import { SpiritWearCouponBar } from '@/components/spirit-wear/spirit-wear-coupon-bar'
+import { ParentVideoSection } from '@/components/videos/parent-video-section'
 
 export const revalidate = 300
 
@@ -72,6 +73,15 @@ export default async function CovePage() {
           howItWorks={parseHowSteps(howCopy.bullets)}
           bonusPercent={bonusPercent}
           maxAmount={catalog.storeCardMaxAmount}
+        />
+
+        <ParentVideoSection
+          videoId="parent-tour"
+          id="cove-card-video"
+          eyebrow="Watch"
+          title="See how the Cove Digital Card works"
+          body="The website tour covers loading your family card and using it at The Cove."
+          background="#FFFFFF"
         />
 
         <DealsStrip items={featuredItems} />

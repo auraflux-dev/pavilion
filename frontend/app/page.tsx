@@ -2,6 +2,7 @@ import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Hero } from '@/components/hero'
 import { OpenHousePromo } from '@/components/open-house-promo'
+import { ParentVideoSection } from '@/components/videos/parent-video-section'
 import { ProgramsPreview } from '@/components/programs-preview'
 import { VolunteerSection } from '@/components/volunteer-section'
 import { UpcomingEvents } from '@/components/upcoming-events'
@@ -21,6 +22,14 @@ export default async function HomePage() {
       <main id="main-content">
         <Hero />
         <OpenHousePromo />
+        <ParentVideoSection
+          videoId="parent-tour"
+          id="parent-tour"
+          eyebrow="New this year"
+          title="Take a 3-minute website tour"
+          body="See how families use shmspto.org for membership, The Cove Digital Card, and more."
+          background="#FFFFFF"
+        />
         <HomeSectionNav showPrograms={inSession} showEvents={inSession} />
         {inSession ? <ProgramsPreview /> : null}
         <VolunteerSection />

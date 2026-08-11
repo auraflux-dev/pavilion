@@ -1,6 +1,7 @@
 import { MemberShell } from '@/components/shells/member-shell'
 import { KnowledgeBase } from '@/components/kb/knowledge-base'
 import { PortalHelpForm } from '@/components/member-portal/portal-help-form'
+import { ParentVideoSection } from '@/components/videos/parent-video-section'
 import { getMergedKbArticles } from '@/lib/api/kb-articles'
 import { articlesByCategoryWithExtras } from '@/lib/kb'
 
@@ -21,6 +22,17 @@ export default async function MemberHelpIndexPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
           <div className="mb-8">
             <PortalHelpForm />
+          </div>
+          <div className="mb-10">
+            <ParentVideoSection
+              placement="help"
+              id="help-videos"
+              eyebrow="Parent videos"
+              title="Watch a guide"
+              body="Short explainers for the website, portal, membership, and board. Full library also lives under Videos in the portal menu."
+              background="transparent"
+              className="!py-0"
+            />
           </div>
           <KnowledgeBase
             title="Member Help"

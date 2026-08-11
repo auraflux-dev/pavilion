@@ -1,7 +1,7 @@
 import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { EventCard } from '@/components/events/event-card'
+import { EventsFilter } from '@/components/events/events-filter'
 import { PageHero } from '@/components/page-hero'
 import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
 import { getUpcomingEvents, type WixEvent } from '@/lib/api/events'
@@ -75,13 +75,7 @@ export default async function EventsPage() {
               </div>
             )}
 
-            {!error && events.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {events.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </div>
-            )}
+            {!error && events.length > 0 && <EventsFilter events={events} />}
           </div>
         </section>
 

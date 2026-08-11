@@ -12,6 +12,9 @@ interface EventCardProps {
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; accent: string }> = {
+  'PTO led': { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  'SHMS led': { bg: '#E8F0FE', text: '#1A56A8', accent: '#1A56A8' },
+  'PTO/SHMS': { bg: '#FFF4E5', text: '#9A5B00', accent: '#9A5B00' },
   Meeting: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
   Social: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
   Competition: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },

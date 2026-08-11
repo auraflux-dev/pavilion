@@ -137,7 +137,15 @@ export function OpenHousePromo() {
               />
             </div>
             <figcaption className="mt-3 text-xs sm:text-sm text-white/65 text-center">
-              Sips &amp; Sweets menu · Follow @Sipsnsweets.truck
+              Sips &amp; Sweets menu ·{' '}
+              <a
+                href="https://www.instagram.com/sipsnsweets.truck"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-white transition-colors"
+              >
+                Follow @Sipsnsweets.truck
+              </a>
             </figcaption>
           </figure>
         </div>
