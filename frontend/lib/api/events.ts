@@ -23,6 +23,26 @@ export interface WixEvent {
   }
 }
 
+/** Turn a Wix image URI or URL into a browser-safe static URL. */
+function resolveWixImageUrl(image: unknown): string | undefined {
+  if (!image) return undefined
+  if (typeof image === 'string') {
+    const s = image.trim()
+    if (!s) return undefined
+    if (s.startsWith('http://') || s.startsWith('https://')) return s
+    const m = s.match(/^wix:image:\/\/v1\/([^#]+)/)
+    if (m?.[1]) return `https://static.wixstatic.com/media/${m[1]}`
+    return undefined
+  }
+  if (typeof image === 'object') {
+    const obj = image as { url?: string; id?: string }
+    if (obj.url && (obj.url.startsWith('http://') || obj.url.startsWith('https://'))) return obj.url
+    if (obj.url) return resolveWixImageUrl(obj.url)
+    if (obj.id) return `https://static.wixstatic.com/media/${obj.id}`
+  }
+  return undefined
+}
+
 /** Extract plain text from a Wix rich-text description node tree or return the string as-is. */
 function extractPlainText(desc: unknown): string | undefined {
   if (!desc) return undefined
@@ -64,7 +84,7 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
   try {
     const client = getWixClient()
     const result = await client.wixEventsV2
-      .queryEvents()
+      .queryEvents({ fields: ['DETAILS', 'TEXTS', 'CATEGORIES', 'URLS'] })
       .eq('status', 'UPCOMING')
       .ascending('dateAndTimeSettings.startDate')
       .limit(limit)
@@ -87,7 +107,10 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
                 endDate: dts.endDate ? String(dts.endDate) : undefined,
               }
             : undefined,
-          mainImage: ev.mainImage as WixEvent['mainImage'],
+          mainImage: (() => {
+            const url = resolveWixImageUrl(ev.mainImage)
+            return url ? { url } : undefined
+          })(),
           slug: ev.slug as string,
           tags,
         } satisfies WixEvent

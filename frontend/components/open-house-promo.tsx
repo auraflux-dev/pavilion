@@ -125,19 +125,19 @@ export function OpenHousePromo() {
             </div>
           </div>
 
-          <figure className="lg:sticky lg:top-28">
+          <figure className="lg:sticky lg:top-28 space-y-4">
             <div className="relative rounded-xl overflow-hidden bg-white shadow-[0_24px_48px_-24px_rgba(0,0,0,0.55)]">
               <Image
-                src="/events/sips-and-sweets-menu.png"
-                alt="Sips & Sweets food truck menu: iced lattes, dirty sodas, refreshers $6; popsicles and treats $4"
+                src="/events/open-house-2026-08-13.png"
+                alt="SHMS PTO Open House flyer for August 13: 6th grade 9 to 11 AM, 7th and 8th grade 1 to 3 PM, cafeteria"
                 width={1200}
-                height={900}
+                height={1500}
                 className="w-full h-auto"
                 priority
               />
             </div>
-            <figcaption className="mt-3 text-xs sm:text-sm text-white/65 text-center">
-              Sips &amp; Sweets menu ·{' '}
+            <figcaption className="text-xs sm:text-sm text-white/65 text-center">
+              Official Open House flyer ·{' '}
               <a
                 href="https://www.instagram.com/sipsnsweets.truck"
                 target="_blank"
