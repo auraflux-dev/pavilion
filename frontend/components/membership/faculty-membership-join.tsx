@@ -29,7 +29,7 @@ export function FacultyMembershipJoin({ price }: Props) {
       label={`Join Faculty · $${price.toFixed(0)}`}
       returnToQuery="checkout=faculty"
     >
-      <div className="space-y-3 text-left max-w-xs mx-auto sm:mx-0">
+      <div className="space-y-3 text-left w-full">
         <fieldset className="space-y-2">
           <legend className="text-xs font-semibold text-[#5A6070]">
             Included perk — choose one

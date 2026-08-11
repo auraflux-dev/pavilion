@@ -69,8 +69,8 @@ export default async function MembershipPage() {
         {/* Faculty membership */}
         <section id="faculty" className="scroll-mt-28 py-14" style={{ backgroundColor: '#F5F0E8' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-2xl p-6 lg:p-8 border border-[#E8E4DC] flex flex-col sm:flex-row sm:items-center gap-6">
-              <div className="flex-1">
+            <div className="bg-white rounded-2xl p-6 lg:p-8 border border-[#E8E4DC] flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-10">
+              <div className="flex-1 min-w-0">
                 <div
                   className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
                   style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
@@ -78,16 +78,13 @@ export default async function MembershipPage() {
                   SHMS PTO Faculty & Staff
                 </div>
                 <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Faculty Membership</h3>
-                <p className="text-[#5A6070] text-sm">
+                <p className="text-[#5A6070] text-sm leading-relaxed max-w-xl">
                   {facultyDescription}
                 </p>
               </div>
-              <div className="text-center shrink-0">
-                <div className="text-3xl font-bold text-[#085508] mb-1">${facultyPrice}</div>
-                <div className="text-xs text-[#5A6070] mb-4">per school year</div>
-                <p className="text-[11px] text-[#5A6070] mb-3 max-w-[14rem] mx-auto">
-                  Includes one perk: car magnet or Spirit Wear T-shirt.
-                </p>
+              <div className="w-full sm:w-64 shrink-0 text-left sm:border-l sm:border-[#E8E4DC] sm:pl-8">
+                <div className="text-3xl font-bold text-[#085508] leading-none">${facultyPrice}</div>
+                <div className="text-xs text-[#5A6070] mt-1 mb-4">per school year</div>
                 <FacultyMembershipJoin price={facultyPrice} />
               </div>
             </div>
