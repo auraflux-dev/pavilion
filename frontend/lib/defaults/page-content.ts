@@ -90,7 +90,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   programs: empty('programs', {
     eyebrow: 'Fall 2026 Enrichment',
     title: 'Enrichment Programs',
-    body: 'Evening enrichment for grades 6–8: Robotics, MATHCOUNTS & math enrichment, and Young Entrepreneurs. Instructors, exact day/time, tuition, and syllabus confirm this week. Spring continuation sessions are offered separately.',
+    body: 'Evening enrichment for grades 6-8: Robotics, MATHCOUNTS & math enrichment, and Young Entrepreneurs. Instructors, exact day/time, tuition, and syllabus confirm this week. Spring continuation sessions are offered separately.',
   }),
   volunteer: empty('volunteer', {
     eyebrow: 'Get Involved',

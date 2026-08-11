@@ -60,7 +60,7 @@ export function ProgramsFilter({ programs }: ProgramsFilterProps) {
         </>
       )}
 
-      {/* Coming soon / closed — keep full contrast for review */}
+      {/* Coming soon / closed: keep full contrast for review */}
       {closed.length > 0 && (
         <>
           <h3 className="text-lg font-bold text-[#1A1A1A] mb-6">
