@@ -88,9 +88,9 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body: 'Stay connected with everything happening at Stone Hill Middle School: meetings, celebrations, competitions, and more.',
   }),
   programs: empty('programs', {
-    eyebrow: 'Student Enrichment',
+    eyebrow: 'Fall 2026 Enrichment',
     title: 'Enrichment Programs',
-    body: 'PTO-funded programs designed to challenge, inspire, and connect students beyond the standard curriculum.',
+    body: 'New evening series for grades 6–8: Robotics, MATHCOUNTS & math enrichment, and Young Entrepreneurs. Instructors, exact day/time, and tuition are confirming this week — spring continuation sessions will be offered separately. Registration opens once details are locked.',
   }),
   volunteer: empty('volunteer', {
     eyebrow: 'Get Involved',

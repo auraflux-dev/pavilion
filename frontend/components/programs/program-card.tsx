@@ -27,10 +27,21 @@ function getColors(category?: string) {
   return CATEGORY_COLORS[category] ?? CATEGORY_COLORS.default
 }
 
+function hasTag(program: Program, tag: string) {
+  return String(program.tags ?? '')
+    .toLowerCase()
+    .split(/[,|;]/)
+    .map((t) => t.trim())
+    .includes(tag.toLowerCase())
+}
+
 export function ProgramCard({ program }: ProgramCardProps) {
   const colors = getColors(program.category)
   const [registerOpen, setRegisterOpen] = useState(false)
   const scheduleLine = formatProgramSchedule(program)
+  const comingSoon = !program.registrationOpen && (program.featured || hasTag(program, 'coming-soon'))
+  const feeTbd = hasTag(program, 'fee-tbd')
+  const statusLabel = program.registrationOpen ? 'Open' : comingSoon ? 'Coming Soon' : 'Closed'
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
@@ -68,10 +79,12 @@ export function ProgramCard({ program }: ProgramCardProps) {
             className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
               program.registrationOpen
                 ? 'bg-green-50 text-green-700'
-                : 'bg-gray-100 text-gray-500'
+                : comingSoon
+                  ? 'bg-amber-50 text-amber-800'
+                  : 'bg-gray-100 text-gray-500'
             }`}
           >
-            {program.registrationOpen ? 'Open' : 'Closed'}
+            {statusLabel}
           </span>
         </div>
 
@@ -104,13 +117,13 @@ export function ProgramCard({ program }: ProgramCardProps) {
               Grades {program.grades}
             </span>
           )}
-          {program.fee != null && (
+          {(feeTbd || program.fee != null) && (
             <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-[#EEF6EE] text-[#5A6070]">
               <DollarSign className="w-3 h-3" aria-hidden="true" />
-              {program.fee === 0 ? 'Free' : `$${program.fee}`}
+              {feeTbd ? 'Tuition TBD' : program.fee === 0 ? 'Free' : `$${program.fee}`}
             </span>
           )}
-          {program.capacity != null && (
+          {program.capacity > 0 && (
             <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-[#EEF6EE] text-[#5A6070]">
               <Users className="w-3 h-3" aria-hidden="true" />
               {program.capacity} spots
@@ -134,7 +147,7 @@ export function ProgramCard({ program }: ProgramCardProps) {
           </MemberGate>
         ) : (
           <Button className="w-full font-semibold group" variant="outline" disabled>
-            Registration Closed
+            {comingSoon ? 'Details confirming this week' : 'Registration Closed'}
           </Button>
         )}
       </div>

@@ -119,7 +119,9 @@ export async function getFeaturedPrograms(): Promise<Program[]> {
 function publicPrograms(items: Record<string, unknown>[]): Program[] {
   return items
     .map(mapProgramItem)
-    .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags));
+    .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags))
+    // Public catalog: open registration and/or featured (keeps legacy closed CMS rows off the site).
+    .filter((p) => p.registrationOpen || p.featured)
 }
 
 export async function getProgramById(id: string): Promise<Program | null> {
