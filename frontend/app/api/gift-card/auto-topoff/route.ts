@@ -67,12 +67,13 @@ export async function POST(req: NextRequest) {
     if (!studentId) return NextResponse.json({ error: 'studentId required' }, { status: 400 })
 
     const adminClient = getWixClient()
-    const student = (await adminClient.items.get('Students', studentId)) as {
+    const student = (await adminClient.items.get('Students', studentId)) as Record<
+      string,
+      unknown
+    > & {
+      _id?: string
       parentEmail?: string
       archived?: boolean
-      autoTopOff?: boolean
-      topOffThreshold?: number
-      topOffAmount?: number
     }
     if (!(await canViewerAccessStudent(email, student))) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -84,7 +85,10 @@ export async function POST(req: NextRequest) {
         .eq('parentEmail', email)
         .eq('active', true)
         .find()
-      const method = methods.items?.[0] as any
+      const method = methods.items?.[0] as {
+        squareCardId?: string
+        squareCustomerId?: string
+      }
       if (!method?.squareCardId || !method?.squareCustomerId) {
         return NextResponse.json(
           { error: 'Save a payment card before enabling auto top-off' },
@@ -95,10 +99,11 @@ export async function POST(req: NextRequest) {
 
     await adminClient.items.update('Students', {
       ...student,
+      _id: String(student._id ?? studentId),
       autoTopOff: enabled,
       topOffThreshold: thresholdDollars ?? 10,
       topOffAmount: reloadDollars ?? 20,
-    })
+    } as never)
 
     return NextResponse.json({ ok: true })
   } catch (err) {
