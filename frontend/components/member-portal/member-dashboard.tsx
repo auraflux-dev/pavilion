@@ -464,9 +464,9 @@ export function MemberDashboard({
                         {item.whenLabel}
                       </p>
                       <p className="text-xs text-[#5A6070]">{item.subtitle}</p>
-                      {item.studentNames.length > 0 && (
+                      {(item.studentNames?.length ?? 0) > 0 && (
                         <p className="text-[11px] text-[#5A6070] mt-1.5">
-                          For: {item.studentNames.join(', ')}
+                          For: {(item.studentNames ?? []).join(', ')}
                         </p>
                       )}
                     </a>

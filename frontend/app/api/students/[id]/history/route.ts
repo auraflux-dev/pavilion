@@ -4,23 +4,20 @@
  * Validates the student belongs to the logged-in parent before returning.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { getWixClient } from '@/lib/wix-client'
-import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { listEnrollmentsForStudent } from '@/lib/programs/enrollments'
 import { normalizePaymentLedgerRow } from '@/lib/payment-ledger'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const tokensCookie = req.cookies.get(TOKENS_COOKIE)?.value
-  if (!tokensCookie) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const tokens = JSON.parse(tokensCookie)
-    const oauthClient = createOAuthClient(tokens)
-    const { member } = await oauthClient.members.getCurrentMember({ fieldsets: ['FULL'] })
-    const email = member?.loginEmail ?? ''
-    if (!email) return NextResponse.json({ error: 'No email' }, { status: 400 })
+    const { getEffectiveParentEmail } = await import('@/lib/staff/session')
+    const effective = await getEffectiveParentEmail(req)
+    if (!effective?.parentEmail) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const email = effective.parentEmail
 
     const adminClient = getWixClient()
 

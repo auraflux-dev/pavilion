@@ -5,21 +5,19 @@
  * Payment is handled by Wix Payments. this route is called after payment succeeds.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { getWixClient } from '@/lib/wix-client'
-import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { loadGiftCard } from '@/lib/square'
 import { randomUUID } from 'crypto'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
+import { canViewerAccessStudent } from '@/lib/family-guardians'
 
 export async function POST(req: NextRequest) {
-  const tokensCookie = req.cookies.get(TOKENS_COOKIE)?.value
-  if (!tokensCookie) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
   try {
-    const tokens = JSON.parse(tokensCookie)
-    const oauthClient = createOAuthClient(tokens)
-    const { member } = await oauthClient.members.getCurrentMember({ fieldsets: ['FULL'] })
-    const email = member?.loginEmail ?? ''
+    const effective = await getEffectiveParentEmail(req)
+    if (!effective?.parentEmail) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const email = effective.parentEmail
 
     const { studentId, amountCents } = await req.json()
     if (!studentId || !amountCents || amountCents < 100) {
@@ -27,8 +25,12 @@ export async function POST(req: NextRequest) {
     }
 
     const adminClient = getWixClient()
-    const student = await adminClient.items.get('Students', studentId) as any
-    if (!student || student.archived === true || student.parentEmail !== email) {
+    const student = (await adminClient.items.get('Students', studentId)) as {
+      parentEmail?: string
+      archived?: boolean
+      squareGiftCardGan?: string
+    }
+    if (!(await canViewerAccessStudent(email, student))) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 

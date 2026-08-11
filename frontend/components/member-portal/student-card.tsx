@@ -156,8 +156,19 @@ export function StudentCard({
   useEffect(() => {
     setGiftCardLoading(true)
     fetch(`/api/gift-card/balance?studentId=${student.id}`)
-      .then(r => r.json())
-      .then(d => setGiftCard(d))
+      .then(async (r) => {
+        const d = await r.json().catch(() => null)
+        if (!r.ok || !d || d.hasCard == null) {
+          setGiftCard({ hasCard: false, balance: 0, activities: [] })
+          return
+        }
+        setGiftCard({
+          hasCard: Boolean(d.hasCard),
+          gan: d.gan,
+          balance: Number(d.balance) || 0,
+          activities: Array.isArray(d.activities) ? d.activities : [],
+        })
+      })
       .catch(() => setGiftCard({ hasCard: false, balance: 0, activities: [] }))
       .finally(() => setGiftCardLoading(false))
   }, [student.id])
@@ -170,7 +181,16 @@ export function StudentCard({
         fetch('/api/portal/programs/attendance').then((r) => r.json()).catch(() => ({ attendance: [] })),
       ])
         .then(([hist, att]) => {
-          setHistory(hist)
+          setHistory({
+            enrollments: Array.isArray(hist?.enrollments) ? hist.enrollments : [],
+            pastEnrollments: Array.isArray(hist?.pastEnrollments)
+              ? hist.pastEnrollments
+              : [],
+            payments: Array.isArray(hist?.payments) ? hist.payments : [],
+            transferOptions: Array.isArray(hist?.transferOptions)
+              ? hist.transferOptions
+              : [],
+          })
           const marks = (att.attendance ?? []) as AttendanceMark[]
           setAttendance(marks.filter((m) => !m.studentId || m.studentId === student.id))
         })
@@ -351,9 +371,9 @@ export function StudentCard({
                 ) : (
                   <div className="space-y-3">
                     {/* Recent activity */}
-                    {giftCard.activities.length > 0 && (
+                    {(giftCard.activities?.length ?? 0) > 0 && (
                       <div className="space-y-1.5">
-                        {giftCard.activities.slice(0, 5).map(a => (
+                        {(giftCard.activities ?? []).slice(0, 5).map(a => (
                           <div key={a.id} className="flex items-center justify-between text-sm py-1.5 border-b border-[#F5F0E8] last:border-0">
                             <div>
                               <span className={`text-xs font-bold px-2 py-0.5 rounded-full mr-2 ${
@@ -412,7 +432,7 @@ export function StudentCard({
                   <BookOpen className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Programs & Enrollments</h4>
                 </div>
-                {history.enrollments.length === 0 ? (
+                {(history.enrollments?.length ?? 0) === 0 ? (
                   <p className="text-sm text-[#5A6070]">No current enrollments.</p>
                 ) : (
                   <div className="space-y-2">
@@ -505,7 +525,7 @@ export function StudentCard({
                   <BookOpen className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Attendance</h4>
                 </div>
-                {attendance.length === 0 ? (
+                {(attendance?.length ?? 0) === 0 ? (
                   <p className="text-sm text-[#5A6070]">No check-in records yet.</p>
                 ) : (
                   <div className="space-y-2">
@@ -537,7 +557,7 @@ export function StudentCard({
                   <Receipt className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Payment History</h4>
                 </div>
-                {history.payments.length === 0 ? (
+                {(history.payments?.length ?? 0) === 0 ? (
                   <p className="text-sm text-[#5A6070]">No payments yet.</p>
                 ) : (
                   <div className="space-y-2">

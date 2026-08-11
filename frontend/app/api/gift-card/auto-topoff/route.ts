@@ -4,18 +4,14 @@
  * Body: { studentId, enabled, thresholdDollars, reloadDollars }
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { getWixClient } from '@/lib/wix-client'
-import { TOKENS_COOKIE } from '@/lib/auth-cookies'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
+import { canViewerAccessStudent } from '@/lib/family-guardians'
 
 async function getEmailFromRequest(req: NextRequest): Promise<string | null> {
-  const tokensCookie = req.cookies.get(TOKENS_COOKIE)?.value
-  if (!tokensCookie) return null
   try {
-    const tokens = JSON.parse(tokensCookie)
-    const oauthClient = createOAuthClient(tokens)
-    const { member } = await oauthClient.members.getCurrentMember({ fieldsets: ['FULL'] })
-    return member?.loginEmail ?? null
+    const effective = await getEffectiveParentEmail(req)
+    return effective?.parentEmail ?? null
   } catch {
     return null
   }
@@ -30,8 +26,14 @@ export async function GET(req: NextRequest) {
 
   try {
     const adminClient = getWixClient()
-    const student = await adminClient.items.get('Students', studentId) as any
-    if (!student || student.archived === true || student.parentEmail !== email) {
+    const student = (await adminClient.items.get('Students', studentId)) as {
+      parentEmail?: string
+      archived?: boolean
+      autoTopOff?: boolean
+      topOffThreshold?: number
+      topOffAmount?: number
+    }
+    if (!(await canViewerAccessStudent(email, student))) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
     const methods = await adminClient.items
@@ -65,8 +67,14 @@ export async function POST(req: NextRequest) {
     if (!studentId) return NextResponse.json({ error: 'studentId required' }, { status: 400 })
 
     const adminClient = getWixClient()
-    const student = await adminClient.items.get('Students', studentId) as any
-    if (!student || student.archived === true || student.parentEmail !== email) {
+    const student = (await adminClient.items.get('Students', studentId)) as {
+      parentEmail?: string
+      archived?: boolean
+      autoTopOff?: boolean
+      topOffThreshold?: number
+      topOffAmount?: number
+    }
+    if (!(await canViewerAccessStudent(email, student))) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 

@@ -4,27 +4,28 @@
  * Validates the student belongs to the logged-in parent.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { getWixClient } from '@/lib/wix-client'
-import { TOKENS_COOKIE } from '@/lib/auth-cookies'
-import { getGiftCardBalance, getGiftCardActivities, getGiftCardById } from '@/lib/square'
+import { getGiftCardBalance, getGiftCardActivities } from '@/lib/square'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
+import { canViewerAccessStudent } from '@/lib/family-guardians'
 
 export async function GET(req: NextRequest) {
-  const tokensCookie = req.cookies.get(TOKENS_COOKIE)?.value
-  if (!tokensCookie) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
   const studentId = req.nextUrl.searchParams.get('studentId')
   if (!studentId) return NextResponse.json({ error: 'studentId required' }, { status: 400 })
 
   try {
-    const tokens = JSON.parse(tokensCookie)
-    const oauthClient = createOAuthClient(tokens)
-    const { member } = await oauthClient.members.getCurrentMember({ fieldsets: ['FULL'] })
-    const email = member?.loginEmail ?? ''
+    const effective = await getEffectiveParentEmail(req)
+    if (!effective) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const email = effective.parentEmail
 
     const adminClient = getWixClient()
-    const student = await adminClient.items.get('Students', studentId) as any
-    if (!student || student.archived === true || student.parentEmail !== email) {
+    const student = (await adminClient.items.get('Students', studentId)) as {
+      parentEmail?: string
+      archived?: boolean
+      squareGiftCardGan?: string
+      squareGiftCardId?: string
+    }
+    if (!(await canViewerAccessStudent(email, student))) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 
