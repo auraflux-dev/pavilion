@@ -18,8 +18,23 @@ function allowedOrigins(): string[] {
   if (process.env.NODE_ENV !== 'production') {
     set.add('http://localhost:3000')
     set.add('http://127.0.0.1:3000')
+    set.add('http://localhost:3001')
+    set.add('http://127.0.0.1:3001')
   }
   return [...set]
+}
+
+function isLocalDevOrigin(origin: string): boolean {
+  if (process.env.NODE_ENV === 'production') return false
+  try {
+    const u = new URL(origin)
+    return (
+      (u.hostname === 'localhost' || u.hostname === '127.0.0.1') &&
+      (u.protocol === 'http:' || u.protocol === 'https:')
+    )
+  } catch {
+    return false
+  }
 }
 
 export function isSameOriginRequest(req: Request): boolean {
@@ -31,12 +46,14 @@ export function isSameOriginRequest(req: Request): boolean {
   const allowed = allowedOrigins()
 
   if (origin) {
-    return allowed.some((a) => origin === a || origin.startsWith(`${a}/`))
+    if (allowed.some((a) => origin === a || origin.startsWith(`${a}/`))) return true
+    return isLocalDevOrigin(origin)
   }
   if (referer) {
     try {
       const refOrigin = new URL(referer).origin
-      return allowed.includes(refOrigin)
+      if (allowed.includes(refOrigin)) return true
+      return isLocalDevOrigin(refOrigin)
     } catch {
       return false
     }

@@ -52,6 +52,10 @@ type StaffMe = {
 
 type MemberHit = {
   parentEmail: string
+  parentFirstName?: string
+  parentLastName?: string
+  membershipTier?: string
+  accountType?: 'free' | 'paid'
   students: {
     id: string
     firstName: string
@@ -109,6 +113,7 @@ export function StaffDashboard() {
   const [me, setMe] = useState<StaffMe | null>(null)
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
+  const [memberSort, setMemberSort] = useState<'email' | 'name'>('email')
   const [members, setMembers] = useState<MemberHit[]>([])
   const [lookupBusy, setLookupBusy] = useState(false)
   const [actAsStatus, setActAsStatus] = useState('')
@@ -340,20 +345,31 @@ export function StaffDashboard() {
     router.replace(q ? `/staff?${q}` : '/staff', { scroll: false })
   }
 
-  async function lookup() {
+  async function loadMembers(opts?: { q?: string; sort?: 'email' | 'name' }) {
     setLookupBusy(true)
     setActAsStatus('')
     try {
-      const r = await fetch(`/api/staff/members?q=${encodeURIComponent(query)}`)
+      const params = new URLSearchParams({
+        sort: opts?.sort ?? memberSort,
+      })
+      const q = (opts?.q ?? query).trim()
+      if (q) params.set('q', q)
+      const r = await fetch(`/api/staff/members?${params}`)
       const d = await r.json()
-      if (!r.ok) throw new Error(d.error ?? 'Lookup failed')
+      if (!r.ok) throw new Error(d.error ?? 'Could not load members')
       setMembers(d.members ?? [])
     } catch (err) {
-      setActAsStatus(err instanceof Error ? err.message : 'Lookup failed')
+      setActAsStatus(err instanceof Error ? err.message : 'Could not load members')
     } finally {
       setLookupBusy(false)
     }
   }
+
+  useEffect(() => {
+    if (!me?.isAdmin || active !== 'members') return
+    void loadMembers({ q: query, sort: memberSort })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- open Members / sort change; filter is manual
+  }, [me?.isAdmin, active, memberSort])
 
   async function actAs(parentEmail: string) {
     setActAsStatus('')
@@ -583,68 +599,108 @@ export function StaffDashboard() {
             <div>
               <h1 className="text-xl font-bold">Members</h1>
               <p className="text-xs text-[#5A6070] mt-1">
-                Search parents, open their portal view, or archive / restore a student.
+                All parents with students. Filter if you want, sort by email or name, act-as, or
+                archive / restore a student.
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 items-center">
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') void lookup()
+                  if (e.key === 'Enter') void loadMembers()
                 }}
-                placeholder="email or student name"
-                className="flex-1 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                placeholder="Filter by email or student name"
+                className="flex-1 min-w-[12rem] border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
               />
+              <select
+                value={memberSort}
+                onChange={(e) => setMemberSort(e.target.value === 'name' ? 'name' : 'email')}
+                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                aria-label="Sort members"
+              >
+                <option value="email">Sort by email</option>
+                <option value="name">Sort by name</option>
+              </select>
               <Button
-                onClick={() => void lookup()}
+                onClick={() => void loadMembers()}
+                disabled={lookupBusy}
+                variant="outline"
+              >
+                {lookupBusy ? '…' : 'Filter'}
+              </Button>
+              <Button
+                onClick={() => {
+                  setQuery('')
+                  void loadMembers({ q: '', sort: memberSort })
+                }}
                 disabled={lookupBusy}
                 className="text-white"
                 style={{ backgroundColor: '#085508' }}
               >
-                {lookupBusy ? '…' : 'Search'}
+                Show all
               </Button>
             </div>
-            {actAsStatus ? <p className="text-xs text-[#5A6070]">{actAsStatus}</p> : null}
-            <div className="space-y-2">
-              {members.map((m) => (
-                <div
-                  key={m.parentEmail}
-                  className="flex items-start justify-between gap-3 border-t border-[#F0EBE3] pt-2"
-                >
-                  <div>
-                    <p className="text-sm font-semibold">{m.parentEmail}</p>
-                    <div className="mt-1 space-y-1">
-                      {m.students.map((student) => (
-                        <div
-                          key={student.id}
-                          className="flex flex-wrap items-center gap-2 text-xs text-[#5A6070]"
-                        >
-                          <span className={student.archived ? 'line-through opacity-60' : ''}>
-                            {student.firstName} {student.lastName} (G{student.grade})
-                            {student.archived ? ' · Archived' : ''}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => void setStudentArchived(student.id, !student.archived)}
-                            className="font-bold underline text-[#085508]"
-                          >
-                            {student.archived ? 'Restore' : 'Archive'}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => void actAs(m.parentEmail)}
-                    className="text-xs font-bold px-3 py-1.5 rounded-lg text-white shrink-0"
-                    style={{ backgroundColor: '#085508' }}
+            <p className="text-xs text-[#5A6070]">
+              {lookupBusy ? 'Loading…' : `${members.length} parent${members.length === 1 ? '' : 's'}`}
+              {actAsStatus ? ` · ${actAsStatus}` : ''}
+            </p>
+            <div className="space-y-2 max-h-[70vh] overflow-y-auto">
+              {members.map((m) => {
+                const parentName = `${m.parentFirstName ?? ''} ${m.parentLastName ?? ''}`.trim()
+                return (
+                  <div
+                    key={m.parentEmail}
+                    className="flex items-start justify-between gap-3 border-t border-[#F0EBE3] pt-2"
                   >
-                    Act as
-                  </button>
-                </div>
-              ))}
+                    <div>
+                      <p className="text-sm font-semibold">
+                        {parentName || m.parentEmail}
+                        {parentName ? (
+                          <span className="font-normal text-[#5A6070]"> · {m.parentEmail}</span>
+                        ) : null}
+                      </p>
+                      {m.accountType || m.membershipTier ? (
+                        <p className="text-[11px] text-[#5A6070] mt-0.5">
+                          {m.accountType === 'paid' ? 'Paid' : 'Free'}
+                          {m.membershipTier ? ` · ${m.membershipTier}` : ''}
+                        </p>
+                      ) : null}
+                      <div className="mt-1 space-y-1">
+                        {m.students.map((student) => (
+                          <div
+                            key={student.id}
+                            className="flex flex-wrap items-center gap-2 text-xs text-[#5A6070]"
+                          >
+                            <span className={student.archived ? 'line-through opacity-60' : ''}>
+                              {student.firstName} {student.lastName} (G{student.grade})
+                              {student.archived ? ' · Archived' : ''}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => void setStudentArchived(student.id, !student.archived)}
+                              className="font-bold underline text-[#085508]"
+                            >
+                              {student.archived ? 'Restore' : 'Archive'}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void actAs(m.parentEmail)}
+                      className="text-xs font-bold px-3 py-1.5 rounded-lg text-white shrink-0"
+                      style={{ backgroundColor: '#085508' }}
+                    >
+                      Act as
+                    </button>
+                  </div>
+                )
+              })}
+              {!lookupBusy && members.length === 0 ? (
+                <p className="text-sm text-[#5A6070] py-4">No members match.</p>
+              ) : null}
             </div>
           </section>
         ) : null}

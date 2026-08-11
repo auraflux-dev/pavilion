@@ -7,10 +7,15 @@ import { CoveLogo } from '@/components/brand/cove-logo'
 
 /**
  * Family Cove Digital Card. QR encodes Square GAN when loaded (Stand / iPad / Photos / Wallet).
- * 6-digit PIN stays as spoken backup if the phone dies.
+ * Word passcode (name-based suggestion) + 6-digit PIN as spoken backups.
  */
 export function CoveFamilyCodeCard() {
   const [code, setCode] = useState<string | null>(null)
+  const [passcode, setPasscode] = useState<string | null>(null)
+  const [suggestedPasscode, setSuggestedPasscode] = useState('')
+  const [passcodeDraft, setPasscodeDraft] = useState('')
+  const [passcodeRules, setPasscodeRules] = useState('')
+  const [isPrimary, setIsPrimary] = useState(true)
   const [scanPayload, setScanPayload] = useState('')
   const [squareScanReady, setSquareScanReady] = useState(false)
   const [hasCard, setHasCard] = useState(false)
@@ -28,6 +33,15 @@ export function CoveFamilyCodeCard() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Could not load code')
       setCode(d.coveFamilyCode ?? null)
+      setPasscode(d.coveFamilyPasscode ?? null)
+      setSuggestedPasscode(String(d.suggestedPasscode ?? ''))
+      setPasscodeRules(String(d.passcodeRules ?? ''))
+      setIsPrimary(d.isPrimary !== false)
+      if (!d.coveFamilyPasscode && d.suggestedPasscode) {
+        setPasscodeDraft(String(d.suggestedPasscode))
+      } else if (d.coveFamilyPasscode) {
+        setPasscodeDraft(String(d.coveFamilyPasscode))
+      }
       setScanPayload(String(d.scanPayload ?? ''))
       setSquareScanReady(Boolean(d.squareScanReady))
       setHasCard(Boolean(d.hasCard))
@@ -64,7 +78,7 @@ export function CoveFamilyCodeCard() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Reset failed')
       setCode(d.coveFamilyCode)
-      setMessage('New spoken backup code ready. Phone QR is unchanged.')
+      setMessage('New 6-digit backup code ready. Phone QR is unchanged.')
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Reset failed')
@@ -73,13 +87,58 @@ export function CoveFamilyCodeCard() {
     }
   }
 
-  async function copy() {
-    if (!code) return
+  async function savePasscode() {
+    setBusy(true)
+    setError('')
     try {
-      await navigator.clipboard.writeText(code)
-      setMessage('Backup code copied')
+      const r = await fetch('/api/gift-card/family-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'set-passcode', passcode: passcodeDraft }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not save passcode')
+      setPasscode(d.coveFamilyPasscode)
+      setMessage('Word passcode saved. Students can say this at The Cove.')
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save passcode')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function useSuggestion() {
+    if (suggestedPasscode) {
+      setPasscodeDraft(suggestedPasscode)
+      return
+    }
+    setBusy(true)
+    setError('')
+    try {
+      const r = await fetch('/api/gift-card/family-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'suggest-passcode' }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not suggest')
+      setSuggestedPasscode(String(d.suggestedPasscode ?? ''))
+      setPasscodeDraft(String(d.suggestedPasscode ?? ''))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not suggest')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function copy(text: string, label: string) {
+    if (!text) return
+    try {
+      await navigator.clipboard.writeText(text)
+      setMessage(`${label} copied`)
     } catch {
- setMessage('Could not copy. write the code down for your student')
+      setMessage('Could not copy — write it down for your student')
     }
   }
 
@@ -97,9 +156,9 @@ export function CoveFamilyCodeCard() {
         await navigator.share({
           files: [file],
           title: 'SHMS PTO Cove Digital Card',
- text: `Family Cove Digital Card. show this QR at The Cove or school store`,
+          text: `Family Cove Digital Card. show this QR at The Cove or school store`,
         })
- setMessage('Shared. add to Photos so your student can open it at checkout')
+        setMessage('Shared. add to Photos so your student can open it at checkout')
         return
       }
       const url = URL.createObjectURL(blob)
@@ -136,13 +195,13 @@ export function CoveFamilyCodeCard() {
         a.download = `shms-cove-${code}.pkpass`
         a.click()
         URL.revokeObjectURL(url)
- setMessage('Apple Wallet pass downloaded. open it to Add to Wallet.')
+        setMessage('Apple Wallet pass downloaded. open it to Add to Wallet.')
         return
       }
       const d = await r.json().catch(() => ({}))
       if (d.walletUrl || d.litecard?.welcomeUrl) {
         window.open(String(d.walletUrl || d.litecard.welcomeUrl), '_blank', 'noopener,noreferrer')
- setMessage('Opening Wallet pass. Add to Apple Wallet or Google Wallet on the next screen.')
+        setMessage('Opening Wallet pass. Add to Apple Wallet or Google Wallet on the next screen.')
         return
       }
       if (d.appleWalletUrl) {
@@ -178,80 +237,154 @@ export function CoveFamilyCodeCard() {
       {busy && !code ? (
         <Loader2 className="w-4 h-4 animate-spin mt-2 text-[#085508]" />
       ) : code ? (
-        <div className="mt-2 flex flex-wrap items-start gap-4">
-          {qrUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={qrUrl}
-              alt="Cove Digital Card QR for Square Stand and Cove"
-              width={140}
-              height={140}
-              className="rounded-lg border border-[#E8E4DC] bg-white"
-            />
-          ) : null}
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
-              Spoken backup (if phone dies)
-            </p>
-            <p className="text-2xl font-bold font-mono tracking-[0.2em] text-[#1A1A1A]">{code}</p>
-            {paidMemberCode ? (
-              <p className="text-[11px] font-bold text-[#085508] mt-1">
-                Paid PTO member code (ends in 9) — show at event food tables for refreshment tickets
-              </p>
-            ) : codeHint ? (
-              <p className="text-[11px] text-[#5A6070] mt-1">{codeHint}</p>
+        <div className="mt-2 space-y-3">
+          <div className="flex flex-wrap items-start gap-4">
+            {qrUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={qrUrl}
+                alt="Cove Digital Card QR for Square Stand and Cove"
+                width={140}
+                height={140}
+                className="rounded-lg border border-[#E8E4DC] bg-white"
+              />
             ) : null}
-            <div className="flex flex-wrap gap-2 mt-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => void copy()} title="Copy code">
-                <Copy className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={busy || !qrUrl}
-                onClick={() => void saveQrToDevice()}
-                title="Save QR to Photos"
-              >
-                <Download className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={busy || !hasCard}
-                onClick={() => void addWalletPass()}
-                title="Add to wallet / Photos"
-              >
-                <Wallet className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={busy}
-                onClick={() => void reset()}
-                title="New backup code"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-              </Button>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
+                6-digit backup (if phone dies)
+              </p>
+              <p className="text-2xl font-bold font-mono tracking-[0.2em] text-[#1A1A1A]">{code}</p>
+              {paidMemberCode ? (
+                <p className="text-[11px] font-bold text-[#085508] mt-1">
+                  Paid PTO member code (ends in 9) — show at event food tables for refreshment tickets
+                </p>
+              ) : codeHint ? (
+                <p className="text-[11px] text-[#5A6070] mt-1">{codeHint}</p>
+              ) : null}
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void copy(code, 'Backup code')}
+                  title="Copy code"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={busy || !qrUrl}
+                  onClick={() => void saveQrToDevice()}
+                  title="Save QR to Photos"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={busy || !hasCard}
+                  onClick={() => void addWalletPass()}
+                  title="Add to wallet / Photos"
+                >
+                  <Wallet className="w-3.5 h-3.5" />
+                </Button>
+                {isPrimary ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={busy}
+                    onClick={() => void reset()}
+                    title="New 6-digit backup code"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  </Button>
+                ) : null}
+              </div>
+              <p className="text-[11px] text-[#5A6070] mt-2 leading-relaxed">
+                {squareScanReady ? (
+                  <>
+                    Save this QR to <strong>Photos</strong> (or Wallet). Students open it at Cove /
+                    store / events. Square Stand and iPad scan it like a gift card.
+                  </>
+                ) : hasCard ? (
+                  <>Load or refresh the Cove Digital Card, then Save QR again.</>
+                ) : (
+                  <>
+                    Load the Cove Digital Card first. Then Save QR to Photos — that QR is what Square
+                    Stand scans.
+                  </>
+                )}
+              </p>
             </div>
-            <p className="text-[11px] text-[#5A6070] mt-2 leading-relaxed">
-              {squareScanReady ? (
-                <>
-                  Save this QR to <strong>Photos</strong> (or Wallet). Students open it at Cove /
- store / events. Square Stand and iPad scan it like a gift card. Kids do not need
-                  to remember the 6-digit code.
-                </>
-              ) : hasCard ? (
-                <>Load or refresh the Cove Digital Card, then Save QR again.</>
-              ) : (
-                <>
- Load the Cove Digital Card first. Then Save QR to Photos. that QR is what Square
-                  Stand scans.
-                </>
-              )}
+          </div>
+
+          <div className="rounded-lg border border-[#E8E4DC] bg-white px-3 py-2.5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
+              Word passcode (easier to say)
             </p>
+            {passcode ? (
+              <p className="text-lg font-bold font-mono tracking-wide text-[#1A1A1A] mt-0.5">
+                {passcode}
+              </p>
+            ) : (
+              <p className="text-[11px] text-[#5A6070] mt-1">
+                Not set yet. Staff can look up your family with this instead of the 6-digit code.
+              </p>
+            )}
+            {isPrimary ? (
+              <div className="mt-2 space-y-2">
+                <p className="text-[11px] text-[#5A6070] leading-relaxed">
+                  {passcodeRules ||
+                    '6–24 letters or numbers, at least one letter, no spaces. Suggested from your last name + first letters of your first name.'}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    value={passcodeDraft}
+                    onChange={(e) => setPasscodeDraft(e.target.value.replace(/[^a-zA-Z0-9]/g, ''))}
+                    placeholder={suggestedPasscode || 'e.g. GregoryRo'}
+                    maxLength={24}
+                    className="min-w-[10rem] flex-1 border border-[#E8E4DC] rounded-lg px-3 py-1.5 text-sm font-mono"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={busy}
+                    onClick={() => void useSuggestion()}
+                  >
+                    Use suggestion
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={busy || passcodeDraft.length < 6}
+                    onClick={() => void savePasscode()}
+                    className="text-white"
+                    style={{ backgroundColor: '#085508' }}
+                  >
+                    Save
+                  </Button>
+                  {passcode ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void copy(passcode, 'Passcode')}
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            ) : (
+              <p className="text-[11px] text-[#5A6070] mt-1">
+                Ask the primary account holder to set the word passcode.
+              </p>
+            )}
           </div>
         </div>
       ) : (

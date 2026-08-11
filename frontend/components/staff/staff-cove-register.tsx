@@ -87,9 +87,17 @@ export function StaffCoveRegister() {
   )
 
   async function lookup(nextCode = code) {
-    const trimmed = nextCode.replace(/\D/g, '').trim()
-    if (trimmed.length < 4) {
-      setError('Scan the phone QR / gift-card number, or enter the 6-digit backup code.')
+    const raw = nextCode.trim()
+    const hasLetters = /[a-z]/i.test(raw)
+    const trimmed = hasLetters
+      ? raw.toLowerCase().replace(/[^a-z0-9]/g, '')
+      : raw.replace(/\D/g, '')
+    if (!hasLetters && trimmed.length < 4) {
+      setError('Scan the phone QR / gift-card number, enter the word passcode, or the 6-digit backup.')
+      return
+    }
+    if (hasLetters && trimmed.length < 6) {
+      setError('Word passcode must be at least 6 letters or numbers.')
       return
     }
     setBusy(true)
@@ -301,7 +309,7 @@ export function StaffCoveRegister() {
         </h2>
         <p className="mt-1 text-xs text-[#5A6070] leading-relaxed">
           Prefer Square Stand / iPad scanning the student&apos;s Photos or Wallet QR (Square gift
-          card). Or type the 6-digit spoken backup / paste a long GAN here → tap products → Charge.
+          card). Or type the word passcode / 6-digit backup / paste a long GAN → tap products → Charge.
           Guests without a loaded Cove Digital Card pay card-present on Square Stand.
         </p>
       </div>
@@ -314,14 +322,14 @@ export function StaffCoveRegister() {
         }}
       >
         <label className="flex-1 min-w-[10rem] text-xs font-bold text-[#5A6070]">
-          Scan QR / GAN or 6-digit backup
+          Scan QR / GAN, word passcode, or 6-digit backup
           <input
             ref={codeRef}
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 24))}
             inputMode="numeric"
             autoComplete="off"
-            placeholder="Scan or 6-digit code"
+            placeholder="QR / passcode / 6-digit"
             className="mt-1 w-full border-2 border-[#085508] rounded-lg px-3 py-3 text-xl font-mono tracking-widest"
           />
         </label>

@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
 
   const mode = String(req.nextUrl.searchParams.get('mode') ?? '').trim() || 'search'
   const q = String(req.nextUrl.searchParams.get('q') ?? '').trim().toLowerCase()
+  const sort = String(req.nextUrl.searchParams.get('sort') ?? 'email').trim().toLowerCase()
 
   try {
     const raw = await loadAllStudents()
@@ -55,6 +56,21 @@ export async function GET(req: NextRequest) {
       })),
     )
 
+    function sortRoster(rows: ParentRosterRow[]): ParentRosterRow[] {
+      const copy = [...rows]
+      if (sort === 'name') {
+        copy.sort((a, b) => {
+          const an = `${a.parentLastName} ${a.parentFirstName}`.trim().toLowerCase()
+          const bn = `${b.parentLastName} ${b.parentFirstName}`.trim().toLowerCase()
+          if (an && bn && an !== bn) return an.localeCompare(bn)
+          return a.parentEmail.localeCompare(b.parentEmail)
+        })
+      } else {
+        copy.sort((a, b) => a.parentEmail.localeCompare(b.parentEmail))
+      }
+      return copy
+    }
+
     // Full roster for VP Memberships / secretary / admin
     if (mode === 'list') {
       if (!canList) {
@@ -65,12 +81,14 @@ export async function GET(req: NextRequest) {
       const includeArchived =
         req.nextUrl.searchParams.get('includeArchived') === '1' ||
         req.nextUrl.searchParams.get('includeArchived') === 'true'
-      const filtered = filterParentRoster(roster, {
-        q,
-        tier,
-        grade,
-        includeArchived,
-      })
+      const filtered = sortRoster(
+        filterParentRoster(roster, {
+          q,
+          tier,
+          grade,
+          includeArchived,
+        }),
+      )
       const paid = filtered.filter((r) => r.accountType === 'paid').length
       const free = filtered.filter((r) => r.accountType === 'free').length
       return NextResponse.json({
@@ -84,18 +102,17 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Legacy admin search (act-as / archive)
+    // Admin Members workspace — full list by default; optional filter via q
     if (!canLookup) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
-    if (q.length < 2) {
-      return NextResponse.json({ error: 'Enter at least 2 characters' }, { status: 400 })
-    }
 
-    const members: ParentRosterRow[] = filterParentRoster(roster, {
-      q,
-      includeArchived: true,
-    }).slice(0, 40)
+    const members: ParentRosterRow[] = sortRoster(
+      filterParentRoster(roster, {
+        q: q.length >= 1 ? q : undefined,
+        includeArchived: true,
+      }),
+    )
 
     return NextResponse.json({
       members: members.map((m) => ({

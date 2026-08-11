@@ -411,6 +411,49 @@ This is the schedule of record. It does not auto-send mail or posts.`,
 Do not post payment or private parent data. Link parents back to shmspto.org pages (events, Cove, membership) rather than off-site forms.`,
     },
     {
+      slug: 'where-form-emails-go',
+      title: 'Where form emails go',
+      categoryId: 'comms',
+      summary: 'Help, contact forms, sale alerts — which @shmspto.org inbox gets each.',
+      order: 6,
+      need: 'message',
+      body: `Use this when a parent asks who got their message, or when your inbox did or did not get an alert.
+
+All website and portal form mail sends from the shared SHMS PTO Gmail mailbox. **Reply-To** is usually the parent. Change destinations in **Staff → Site settings → Contact**. Dead aliases (info@, membership@, etc.) route to **president@**.
+
+## Member Portal → Help (Ask the PTO)
+Goes to **all three**:
+1. **president@shmspto.org**
+2. **vp-membershipexperience@shmspto.org**
+3. **vp-marketing@shmspto.org**
+
+Same for free and paid. The request is also logged for follow-up.
+
+## Public website forms
+| Form | Goes to |
+|------|--------|
+| Contact (/contact) | president@ (general) |
+| Programs (/programs) | vp-initiatives@ |
+| Event idea (/events) | vp-events@ |
+| Sponsorship (/fundraising) | vp-initiatives@ |
+| Business owner (public) | vp-membershipexperience@ |
+| Volunteer (logged in) | volunteer inbox, else president@ |
+| Newsletter | vp-marketing@, else president@ |
+| Survey | vp-marketing@, else president@ |
+
+## Portal (free & paid)
+- **Business owner** → vp-membershipexperience@
+- **Guardian invite** → invitee’s email (Reply-To = primary parent)
+- **Program refund/transfer** → no staff email; parent gets a portal message
+
+## Paid checkout sale alert
+Parent gets confirmation email + portal Messages.
+
+Staff alert goes to **all of**: vp-membershipexperience@, president@, treasurer@, cove@, vp-sales@.
+
+Drive doc **48 - Where form emails go** is the shareable copy for WhatsApp / onboarding.`,
+    },
+    {
       slug: 'staff-reports',
       title: 'Staff Reports',
       categoryId: 'admin',

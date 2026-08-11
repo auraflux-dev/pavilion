@@ -13,12 +13,67 @@ import { getGiftCardBalance } from '@/lib/square'
 export type CoveFamilyLookup = {
   parentEmail: string
   coveFamilyCode: string
+  /** Spoken word passcode (letters+digits). routes to same family as numeric code. */
+  coveFamilyPasscode: string
   gan: string
   balance: number
   /** Reef / Lagoon / Tide — refreshments + paid code marker (ends in 9). */
   paidMember: boolean
   membershipTier: string
   students: Array<{ id: string; firstName: string; lastName: string; grade?: string }>
+}
+
+export const PASSCODE_MIN = 6
+export const PASSCODE_MAX = 24
+
+/** Normalize spoken passcode for storage/lookup (letters+digits, lowercase). */
+export function normalizePasscode(raw: string): string {
+  return String(raw ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .slice(0, PASSCODE_MAX)
+}
+
+export type PasscodeValidation =
+  | { ok: true; passcode: string }
+  | { ok: false; error: string }
+
+/** Rules: 6–24 letters/numbers, at least one letter. Case-insensitive. */
+export function validateCovePasscode(raw: string): PasscodeValidation {
+  const passcode = normalizePasscode(raw)
+  if (passcode.length < PASSCODE_MIN) {
+    return {
+      ok: false,
+      error: `Passcode must be at least ${PASSCODE_MIN} letters or numbers (no spaces).`,
+    }
+  }
+  if (!/[a-z]/.test(passcode)) {
+    return { ok: false, error: 'Passcode must include at least one letter.' }
+  }
+  // Pure digits are reserved for the 6-digit Cove code / GAN path
+  if (/^\d+$/.test(passcode)) {
+    return {
+      ok: false,
+      error: 'Use letters (and optional numbers). Digits-only is the backup code path.',
+    }
+  }
+  return { ok: true, passcode }
+}
+
+/** Suggest LastName + first letters of FirstName (e.g. GregoryRo). */
+export function suggestCovePasscode(lastName: string, firstName: string): string {
+  const last = String(lastName ?? '')
+    .toLowerCase()
+    .replace(/[^a-z]/g, '')
+  const first = String(firstName ?? '')
+    .toLowerCase()
+    .replace(/[^a-z]/g, '')
+  const firstChars = first.slice(0, 2)
+  let base = `${last}${firstChars}`
+  if (base.length < PASSCODE_MIN) {
+    base = (base + 'family').slice(0, PASSCODE_MIN)
+  }
+  return base.slice(0, PASSCODE_MAX)
 }
 
 /** Paid PTO member family codes always end in 9 (Reef / Lagoon / Tide). Free never do. */
@@ -203,20 +258,137 @@ export async function resetCoveFamilyCode(parentEmail: string): Promise<string> 
   return code
 }
 
+async function passcodeTaken(passcode: string, exceptEmail?: string): Promise<boolean> {
+  const client = getWixClient()
+  const email = exceptEmail?.trim().toLowerCase()
+  try {
+    const byMembership = await client.items
+      .query('Memberships')
+      .eq('coveFamilyPasscode', passcode)
+      .limit(5)
+      .find()
+    for (const row of (byMembership.items ?? []) as Array<{ email?: string }>) {
+      const e = String(row.email ?? '')
+        .trim()
+        .toLowerCase()
+      if (e && e !== email) return true
+    }
+  } catch {
+    // field may not exist yet
+  }
+  return false
+}
+
+export async function getCoveFamilyPasscode(parentEmail: string): Promise<string> {
+  const email = parentEmail.trim().toLowerCase()
+  if (!email) return ''
+  const client = getWixClient()
+  try {
+    const membership = await client.items.query('Memberships').eq('email', email).limit(1).find()
+    return normalizePasscode(
+      String((membership.items?.[0] as { coveFamilyPasscode?: string } | undefined)?.coveFamilyPasscode ?? ''),
+    )
+  } catch {
+    return ''
+  }
+}
+
+/** Unique suggestion from parent name (LastName + first letters of FirstName). */
+export async function suggestUniqueCovePasscode(
+  parentEmail: string,
+  lastName: string,
+  firstName: string,
+): Promise<string> {
+  const email = parentEmail.trim().toLowerCase()
+  let base = suggestCovePasscode(lastName, firstName)
+  const validated = validateCovePasscode(base)
+  if (!validated.ok) base = 'family' + String(Math.floor(1000 + Math.random() * 9000))
+  else base = validated.passcode
+
+  if (!(await passcodeTaken(base, email))) return base
+  for (let i = 0; i < 20; i++) {
+    const candidate = `${base.slice(0, PASSCODE_MAX - 2)}${String(Math.floor(10 + Math.random() * 90))}`
+    const v = validateCovePasscode(candidate)
+    if (v.ok && !(await passcodeTaken(v.passcode, email))) return v.passcode
+  }
+  return `${base.slice(0, 8)}${Date.now().toString(36).slice(-4)}`.slice(0, PASSCODE_MAX)
+}
+
+/** Set spoken word passcode for the family (primary parent). */
+export async function setCoveFamilyPasscode(
+  parentEmail: string,
+  rawPasscode: string,
+): Promise<string> {
+  const email = parentEmail.trim().toLowerCase()
+  if (!email) throw new Error('parentEmail required')
+  const validated = validateCovePasscode(rawPasscode)
+  if (!validated.ok) throw new Error(validated.error)
+  if (await passcodeTaken(validated.passcode, email)) {
+    throw new Error('That passcode is already in use. Try another (add a number).')
+  }
+
+  const client = getWixClient()
+  const existing = await client.items.query('Memberships').eq('email', email).limit(1).find()
+  const row = existing.items?.[0] as Record<string, unknown> | undefined
+  if (row?._id) {
+    await client.items.update('Memberships', {
+      ...(row as object),
+      _id: String(row._id),
+      email,
+      coveFamilyPasscode: validated.passcode,
+    } as Parameters<typeof client.items.update>[1])
+  } else {
+    await client.items.insert('Memberships', {
+      email,
+      coveFamilyPasscode: validated.passcode,
+      status: 'active',
+      tier: 'free',
+    } as Parameters<typeof client.items.insert>[1])
+  }
+  return validated.passcode
+}
+
 /**
- * Lookup by short family PIN (4 to 8 digits) or Square gift-card GAN (raw digits in QR).
+ * Lookup by word passcode, short family PIN (4–8 digits), or Square gift-card GAN.
  * Square Stand / iPad scans encode the GAN only. no SHMSCOVE: prefix.
  */
 export async function lookupFamilyByCoveCode(rawCode: string): Promise<CoveFamilyLookup | null> {
-  const digits = String(rawCode ?? '').replace(/\D/g, '')
-  if (digits.length < 4) return null
+  const raw = String(rawCode ?? '').trim()
+  const passcode = normalizePasscode(raw)
+  const hasLetters = /[a-z]/i.test(raw)
+  const digits = raw.replace(/\D/g, '')
+
+  if (!hasLetters && digits.length < 4) return null
+  if (hasLetters && passcode.length < PASSCODE_MIN) return null
 
   const client = getWixClient()
   let parentEmail = ''
   let matchedCode = ''
+  let matchedPasscode = ''
+
+  // Word passcode → Memberships.coveFamilyPasscode
+  if (hasLetters && passcode.length >= PASSCODE_MIN) {
+    try {
+      const byPass = await client.items
+        .query('Memberships')
+        .eq('coveFamilyPasscode', passcode)
+        .limit(1)
+        .find()
+      const row = byPass.items?.[0] as { email?: string; coveFamilyCode?: string } | undefined
+      parentEmail = String(row?.email ?? '')
+        .trim()
+        .toLowerCase()
+      if (parentEmail) {
+        matchedPasscode = passcode
+        matchedCode = normalizeCode(String(row?.coveFamilyCode ?? ''))
+      }
+    } catch {
+      // field may not exist yet
+    }
+  }
 
   // Long numeric → Square GAN on a student row (Wallet / Photos QR / Stand scan)
-  if (digits.length >= 12) {
+  if (!parentEmail && digits.length >= 12) {
     try {
       const byGan = await client.items
         .query('Students')
@@ -232,7 +404,7 @@ export async function lookupFamilyByCoveCode(rawCode: string): Promise<CoveFamil
     }
   }
 
-  const code = normalizeCode(digits.length <= 8 ? digits : '')
+  const code = normalizeCode(!hasLetters && digits.length <= 8 ? digits : '')
   if (!parentEmail && code.length >= 4) {
     try {
       const membership = await client.items
@@ -289,6 +461,10 @@ export async function lookupFamilyByCoveCode(rawCode: string): Promise<CoveFamil
     }
   }
 
+  if (!matchedPasscode) {
+    matchedPasscode = await getCoveFamilyPasscode(parentEmail)
+  }
+
   const paidMember = await resolveParentPaidMember(parentEmail)
   let membershipTier = 'free'
   try {
@@ -303,6 +479,7 @@ export async function lookupFamilyByCoveCode(rawCode: string): Promise<CoveFamil
   return {
     parentEmail,
     coveFamilyCode,
+    coveFamilyPasscode: matchedPasscode,
     gan: card.gan || (digits.length >= 12 ? digits : ''),
     balance,
     paidMember,
