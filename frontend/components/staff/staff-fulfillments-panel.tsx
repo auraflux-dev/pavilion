@@ -64,8 +64,8 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
       if (!r.ok) throw new Error(d.error ?? 'Update failed')
       setStatus(
         action === 'ordered'
-          ? `Marked ${item.label} ordered for ${item.parentEmail}`
-          : `Marked ${item.label} picked up for ${item.parentEmail}`,
+          ? `Set aside ${item.label} for ${item.parentEmail}`
+          : `Marked ${item.label} handed out to ${item.parentEmail}`,
       )
       await load()
     } catch (err) {
@@ -94,7 +94,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
                 : ' · 1 magnet'}
             {' · '}
             <span className={ordered ? 'font-semibold text-[#085508]' : 'font-semibold text-[#8A6400]'}>
-              {ordered ? 'Ordered — ready for pickup' : 'Not ordered yet'}
+              {ordered ? 'Ready for pickup' : 'Needs set-aside'}
             </span>
           </p>
         </div>
@@ -108,7 +108,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
               onClick={() => void setAction(item, 'ordered')}
             >
               <Truck className="w-3.5 h-3.5 mr-1" />
-              Ordered
+              Set aside
             </Button>
           ) : null}
           <Button
@@ -120,7 +120,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
             onClick={() => void setAction(item, 'picked_up')}
           >
             <Check className="w-3.5 h-3.5 mr-1" />
-            Picked up
+            Handed out
           </Button>
         </div>
       </li>
@@ -136,8 +136,8 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
         </h2>
         <p className="text-xs text-[#5A6070] mt-1">
           {cove
-            ? 'On-site handoff for paid memberships. Tap Ordered when inventory is in, then Picked up when the parent collects it.'
-            : 'Physical perks after paid checkout. Mark Ordered when shirts/magnets are in hand, then Picked up when the member collects them at The Cove or Open House.'}
+            ? 'These memberships are already paid. Set aside the shirt/magnet, then mark Handed out when the parent collects it.'
+            : 'These memberships are already paid. Shirt and/or magnet are included benefits. Mark Set aside when you pull inventory, then Handed out at The Cove or Open House.'}
         </p>
       </div>
 

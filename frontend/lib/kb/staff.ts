@@ -495,7 +495,7 @@ If a parent paid but sees nothing:
 - Queued in Staff → Fulfillments. No mailing address yet (3PL later).
 - Tell members: pick up at **Open House on August 13**, or email **vp-membershipexperience@shmspto.org** to coordinate pickup.
 - Standalone **Stone Hill car magnet** is also sold in the spirit shop for $10.
-- Mark fulfilled in Staff → Fulfillments after handout.
+- Mark **Set aside** when inventory is pulled, then **Handed out** after handoff.
 
 ## Free food & refreshments at PTO events
 - Paid parent tiers (Reef / Lagoon / Tide) get this perk.
