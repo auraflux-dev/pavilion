@@ -15,7 +15,9 @@ const FLYER_SRC = resolve(
   process.env.HOME,
   '.cursor/projects/Users-robertgregory-wix-shmspto/assets/R4C2026-1__1_-2522e732-e79a-47a5-bea5-f8a240f70532.png',
 )
-const REGISTER_URL = 'https://www.bestrunners.org/register/signup'
+const REGISTER_URL = 'https://www.shmspto.org/run-for-charity'
+const BEST_RUNNERS_SIGNUP =
+  'https://www.bestrunners.org/register/signup?schoolReferralCode=SHMS'
 const SCHOOL_CODE = 'SHMS'
 const CATEGORY_PTO_SHMS = '1d7d7957-439e-4c6b-bafd-2a46d1716d34'
 
@@ -97,7 +99,8 @@ function descriptionText() {
     'Best Runners handles race day; SHMS PTO shares the invite with our community.',
     'Early bird through Aug 15: Adults $25 · Kids $15. After Aug 15: Adults $30 · Kids $20.',
     'Includes race shirt, finisher medal, and post-race snacks.',
-    `Register: ${REGISTER_URL}`,
+    `Register (copies school code ${SCHOOL_CODE} first): ${REGISTER_URL}`,
+    `Best Runners signup (paste ${SCHOOL_CODE} in School / Referral Code): ${BEST_RUNNERS_SIGNUP}`,
   ].join('\n\n')
 }
 
@@ -184,8 +187,8 @@ async function main() {
   if (!eventId) throw new Error('No event id')
 
   try {
-    await wix(`/events/v1/categories/${CATEGORY_PTO_SHMS}/assign-events`, {
-      eventIds: [eventId],
+    await wix(`/events/v1/categories/${CATEGORY_PTO_SHMS}/events`, {
+      eventId: [eventId],
     })
     console.log('Assigned category PTO/SHMS')
   } catch (err) {
@@ -204,9 +207,9 @@ async function main() {
   )
   const ctaData = {
     title: 'Run for Charity (school code SHMS)',
-    description: `Register for Best Runners’ 1K/5K on Sep 13 at Rock Ridge. Enter school code ${SCHOOL_CODE} so Stone Hill receives 100% of your registration fee. Early bird through Aug 15.`,
+    description: `Copy school code ${SCHOOL_CODE}, then register for Best Runners’ 1K/5K on Sep 13 at Rock Ridge. Stone Hill receives 100% of your registration fee. Early bird through Aug 15.`,
     ctaLabel: 'Register with code SHMS',
-    href: REGISTER_URL,
+    href: '/run-for-charity',
     icon: 'Ticket',
     sortOrder: 5,
     active: true,
