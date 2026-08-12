@@ -42,6 +42,7 @@ export const SHIRT_SIZES = [
   'Youth S',
   'Youth M',
   'Youth L',
+  'Youth XL',
   'Adult S',
   'Adult M',
   'Adult L',
