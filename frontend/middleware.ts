@@ -17,6 +17,16 @@ const PROTECTED_ROUTES = ['/member-portal', '/staff']
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
+  // Short table QR URL → free signup (hard redirect for scanners / SMS links)
+  if (pathname === '/join') {
+    const url = req.nextUrl.clone()
+    url.pathname = '/auth/join'
+    if (!url.searchParams.has('returnTo')) {
+      url.searchParams.set('returnTo', '/member-portal')
+    }
+    return NextResponse.redirect(url)
+  }
+
   // Wix login UI needs /_api, /__auth, /_serverless, /_partials on www.
  // After DNS cutover those hit Vercel. rewrite to the Node proxy.
   if (
