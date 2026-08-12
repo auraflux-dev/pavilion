@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Calendar, Clock, MapPin, Ticket } from 'lucide-react'
+import { Calendar, Clock, ExternalLink, MapPin, Ticket } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import type { WixEvent } from '@/lib/api/events'
@@ -177,6 +177,22 @@ export function EventCard({ event }: EventCardProps) {
                 onPaid={() => setCheckoutOpen(false)}
               />
             </>
+          ) : null}
+          {!canBuy && event.externalRegistrationUrl ? (
+            <Button
+              className="w-full text-white font-semibold"
+              style={{ backgroundColor: colors.accent }}
+              asChild
+            >
+              <a
+                href={event.externalRegistrationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" aria-hidden="true" />
+                Register
+              </a>
+            </Button>
           ) : null}
           <Button
             variant="outline"

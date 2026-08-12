@@ -15,12 +15,22 @@ export interface WixEvent {
   slug?: string
   /** Host / lead category names (PTO led, SHMS led, PTO/SHMS, …) */
   tags?: string[]
+  /** Partner / off-site registration (e.g. Best Runners). Parsed from description when present. */
+  externalRegistrationUrl?: string
   ticket?: {
     price: number
     capacity: number
     soldCount: number
     onSale: boolean
   }
+}
+
+/** First https URL in event copy (used for partner register CTAs). */
+export function extractExternalRegistrationUrl(text?: string): string | undefined {
+  if (!text) return undefined
+  const m = text.match(/https:\/\/[^\s<>"']+/i)
+  if (!m?.[0]) return undefined
+  return m[0].replace(/[.,);]+$/, '')
 }
 
 /** Turn a Wix image URI or URL into a browser-safe static URL. */
@@ -30,7 +40,7 @@ function resolveWixImageUrl(image: unknown): string | undefined {
     const s = image.trim()
     if (!s) return undefined
     if (s.startsWith('http://') || s.startsWith('https://')) return s
-    const m = s.match(/^wix:image:\/\/v1\/([^#]+)/)
+    const m = s.match(/^wix:image:\/\/v1\/([^/#]+)/)
     if (m?.[1]) return `https://static.wixstatic.com/media/${m[1]}`
     return undefined
   }
@@ -96,10 +106,16 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
         const dts = ev.dateAndTimeSettings as Record<string, unknown> | undefined
         const id = ((ev._id as string) ?? (ev.id as string) ?? '').trim()
         const tags = id ? await categoryNamesForEvent(client, id) : []
+        const description = extractPlainText(ev.description)
+        const shortDescription =
+          typeof ev.shortDescription === 'string' ? ev.shortDescription : undefined
+        const externalRegistrationUrl =
+          extractExternalRegistrationUrl(description) ||
+          extractExternalRegistrationUrl(shortDescription)
         return {
           id,
           title: ev.title as string,
-          description: extractPlainText(ev.description),
+          description,
           location: ev.location as WixEvent['location'],
           dateAndTimeSettings: dts
             ? {
@@ -113,6 +129,7 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
           })(),
           slug: ev.slug as string,
           tags,
+          externalRegistrationUrl,
         } satisfies WixEvent
       }),
     )
