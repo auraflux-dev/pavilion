@@ -7,9 +7,9 @@ export const RUN_FOR_CHARITY_BRIDGE_PATH = '/run-for-charity'
 export const RUN_FOR_CHARITY_BRIDGE_URL = 'https://www.shmspto.org/run-for-charity'
 
 /**
- * Best Runners signup. Their form does not read school codes from query params
- * (schoolReferralCode defaults to empty). We still append the param in case they
- * add support later; the bridge page is what makes the code hard to miss.
+ * Best Runners race page (cold-load safe).
+ * Direct /register/signup hard-loads blank on their SPA; /run4charity works, and
+ * parents tap Register Now there (client nav) to reach the form. School code is
+ * not accepted via URL — paste SHMS in School / Referral Code on the form.
  */
-export const BEST_RUNNERS_SIGNUP_URL =
-  'https://www.bestrunners.org/register/signup?schoolReferralCode=SHMS'
+export const BEST_RUNNERS_SIGNUP_URL = 'https://www.bestrunners.org/run4charity'

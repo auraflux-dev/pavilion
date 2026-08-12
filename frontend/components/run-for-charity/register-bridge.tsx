@@ -63,7 +63,9 @@ export function RunForCharityRegisterBridge() {
 
       <ol className="space-y-2 text-sm text-[#5A6070] list-decimal pl-5">
         <li>Copy the school code above.</li>
-        <li>Open Best Runners registration.</li>
+        <li>
+          Open the Best Runners race page, then tap <strong>Register Now</strong>.
+        </li>
         <li>
           Paste <strong>SHMS</strong> in the School / Referral Code field before you
           pay.
@@ -77,7 +79,7 @@ export function RunForCharityRegisterBridge() {
       >
         <a href={BEST_RUNNERS_SIGNUP_URL} target="_blank" rel="noopener noreferrer">
           <ExternalLink className="w-4 h-4 mr-2" aria-hidden="true" />
-          Continue to Best Runners registration
+          Continue to Best Runners
         </a>
       </Button>
 

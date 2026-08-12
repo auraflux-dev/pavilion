@@ -16,8 +16,7 @@ const FLYER_SRC = resolve(
   '.cursor/projects/Users-robertgregory-wix-shmspto/assets/R4C2026-1__1_-2522e732-e79a-47a5-bea5-f8a240f70532.png',
 )
 const REGISTER_URL = 'https://www.shmspto.org/run-for-charity'
-const BEST_RUNNERS_SIGNUP =
-  'https://www.bestrunners.org/register/signup?schoolReferralCode=SHMS'
+const BEST_RUNNERS_SIGNUP = 'https://www.bestrunners.org/run4charity'
 const SCHOOL_CODE = 'SHMS'
 const CATEGORY_PTO_SHMS = '1d7d7957-439e-4c6b-bafd-2a46d1716d34'
 
