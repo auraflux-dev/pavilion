@@ -31,7 +31,7 @@ export async function PATCH(req: NextRequest) {
             ? existingPhones
             : undefined,
       },
-    } as Parameters<typeof oauthClient.members.updateMember>[1])
+    } as unknown as Parameters<typeof oauthClient.members.updateMember>[1])
 
     return NextResponse.json({
       member: {

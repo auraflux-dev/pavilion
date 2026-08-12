@@ -15,11 +15,15 @@ export type OnboardingStudent = Omit<StudentSafety, '_id'> & {
   firstName?: string
   lastName?: string
   grade?: string
+  parentFirstName?: string
+  parentLastName?: string
+  familyProfileConfirmedAt?: string
 }
 
 export type ChecklistItemId =
   | 'add_student'
   | 'student_safety'
+  | 'confirm_family'
   | 'membership_optional'
 
 export type ChecklistItem = {
@@ -52,13 +56,26 @@ export function isStudentSafetyComplete(s: OnboardingStudent): boolean {
   }).ok === true
 }
 
+export function isParentNameComplete(s: OnboardingStudent): boolean {
+  return (
+    Boolean(String(s.parentFirstName ?? '').trim()) &&
+    Boolean(String(s.parentLastName ?? '').trim())
+  )
+}
+
+/** Explicit confirm/update after first login (esp. bulk-imported families). */
+export function isFamilyProfileConfirmed(students: OnboardingStudent[]): boolean {
+  if (students.length === 0) return false
+  return students.every((s) => Boolean(String(s.familyProfileConfirmedAt ?? '').trim()))
+}
+
 export function incompleteSafetyStudents(students: OnboardingStudent[]): OnboardingStudent[] {
-  return students.filter((s) => !isStudentSafetyComplete(s))
+  return students.filter((s) => !isStudentSafetyComplete(s) || !isParentNameComplete(s))
 }
 
 /**
- * Cove digital card / load money require at least one student with a complete
- * safety profile. Programs already enforce per-student safety at enroll time.
+ * Cove digital card / load money require confirmed family details (parent name +
+ * safety) on every active student. Programs also enforce per-student safety at enroll.
  */
 export function coveFeaturesUnlocked(students: OnboardingStudent[]): {
   ok: boolean
@@ -67,14 +84,15 @@ export function coveFeaturesUnlocked(students: OnboardingStudent[]): {
   if (students.length === 0) {
     return {
       ok: false,
-      error: 'Add a student in the Member Portal, then complete their safety profile to unlock the Cove Digital Card.',
+      error:
+        'Add a student in the Member Portal, then confirm your family details to unlock the Cove Digital Card.',
     }
   }
-  if (incompleteSafetyStudents(students).length > 0) {
+  if (!isFamilyProfileConfirmed(students) || incompleteSafetyStudents(students).length > 0) {
     return {
       ok: false,
       error:
-        'Complete each student’s safety profile (parent phone, emergency contact, and pick-up list) to unlock the Cove Digital Card.',
+        'Confirm your family details (parent name, phone, emergency contact, and pick-up list) to unlock the Cove Digital Card.',
     }
   }
   return { ok: true }
@@ -93,16 +111,21 @@ export function buildOnboardingChecklist(opts: {
   const { students, accountType } = opts
   const hasStudent = students.length > 0
   const incomplete = incompleteSafetyStudents(students)
-  const safetyDone = hasStudent && incomplete.length === 0
+  const confirmed = isFamilyProfileConfirmed(students)
+  const familyDone = hasStudent && confirmed && incomplete.length === 0
   const cove = coveFeaturesUnlocked(students)
 
-  const safetyDetail = !hasStudent
-    ? 'After you add a student, add parent phone, emergency contact, and who may pick them up.'
-    : incomplete.length === 0
-      ? 'Parent phone, emergency contact, and pick-up list are on file for every student.'
-      : incomplete.length === 1
-        ? `Finish the profile for ${studentDisplayName(incomplete[0])} (phone, emergency contact, pick-up).`
-        : `Finish safety profiles for ${incomplete.length} students (phone, emergency contact, pick-up).`
+  const familyDetail = !hasStudent
+    ? 'After you add a student, confirm parent name, phone, emergency contact, and who may pick them up.'
+    : familyDone
+      ? 'Parent name, phone, emergency contact, and pick-up list are confirmed for your family.'
+      : confirmed && incomplete.length > 0
+        ? incomplete.length === 1
+          ? `Update details for ${studentDisplayName(incomplete[0])} (name, phone, emergency, pick-up).`
+          : `Update safety details for ${incomplete.length} students.`
+        : hasStudent
+          ? 'We may already have your students from school lists. Confirm or update your details below to unlock Cove.'
+          : 'Confirm parent name, phone, emergency contact, and pick-up.'
 
   const items: ChecklistItem[] = [
     {
@@ -110,20 +133,20 @@ export function buildOnboardingChecklist(opts: {
       title: 'Add your student(s)',
       detail: hasStudent
         ? `${students.length} student${students.length === 1 ? '' : 's'} on your account.`
- : 'Name and grade. needed for Cove credit, programs, and your family QR.',
+        : 'Name and grade. needed for Cove credit, programs, and your family QR.',
       done: hasStudent,
       required: true,
       href: '#portal-students',
       actionLabel: hasStudent ? 'View students' : 'Add a student',
     },
     {
-      id: 'student_safety',
-      title: 'Complete student safety profile',
-      detail: safetyDetail,
-      done: safetyDone,
+      id: 'confirm_family',
+      title: 'Confirm your family details',
+      detail: familyDetail,
+      done: familyDone,
       required: true,
-      href: '#portal-students',
-      actionLabel: safetyDone ? 'Review profiles' : 'Complete profile',
+      href: '#portal-confirm-family',
+      actionLabel: familyDone ? 'Review details' : 'Confirm / update',
     },
     {
       id: 'membership_optional',
@@ -159,12 +182,15 @@ export async function loadFamilyOnboardingStudents(
   if (!email) return []
   const client = getWixClient()
   const result = await client.items.query('Students').eq('parentEmail', email).limit(100).find()
-  return ((result.items ?? []) as OnboardingStudent[])
+    return ((result.items ?? []) as OnboardingStudent[])
     .filter((s) => (s as { archived?: boolean }).archived !== true)
     .map((s) => ({
       ...s,
       _id: String(s._id ?? s.id ?? ''),
       id: String(s.id ?? s._id ?? ''),
+      parentFirstName: String(s.parentFirstName ?? ''),
+      parentLastName: String(s.parentLastName ?? ''),
+      familyProfileConfirmedAt: String(s.familyProfileConfirmedAt ?? ''),
     }))
 }
 

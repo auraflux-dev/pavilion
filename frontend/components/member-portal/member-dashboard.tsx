@@ -37,6 +37,7 @@ import {
   CoveFeatureLockBanner,
   OnboardingChecklist,
 } from './onboarding-checklist'
+import { ConfirmFamilyDetailsForm } from './confirm-family-details-form'
 import { PortalBusinessOwnerForm } from './portal-business-owner-form'
 import { PortalHelpForm } from '@/components/member-portal/portal-help-form'
 import { InviteCoParentPanel } from './invite-co-parent-panel'
@@ -52,6 +53,9 @@ interface MemberData {
     email: string
     profileImage: string | null
     memberSince: string | null
+    firstName?: string
+    lastName?: string
+    phone?: string
   }
   accountType?: 'free' | 'paid'
 }
@@ -72,6 +76,9 @@ interface Student {
   medicalConditions?: string
   medications?: string
   pickupAuthorized?: string
+  parentFirstName?: string
+  parentLastName?: string
+  familyProfileConfirmedAt?: string
 }
 
 interface CalendarItem {
@@ -305,6 +312,7 @@ export function MemberDashboard({
   const coveGate = coveFeaturesUnlocked(students)
   const highlightChecklist =
     membershipSuccessNudge || !onboarding.complete || accountType === 'paid'
+  const showConfirmFamily = students.length > 0 && !coveGate.ok
 
   return (
     <div className="space-y-4">
@@ -317,7 +325,7 @@ export function MemberDashboard({
             <p className="text-xs text-[#1A1A1A]/80 mt-0.5 leading-relaxed">
               {onboarding.complete
                 ? 'Your Cove Digital Card and perks are ready below.'
-                : 'Finish the family setup checklist so Cove Digital Card credit and your QR attach to your students.'}
+                : 'Finish confirming your family details so Cove Digital Card credit and your QR attach to your students.'}
             </p>
           </div>
           <button
@@ -340,6 +348,25 @@ export function MemberDashboard({
         onJumpStudents={() => setMembershipSuccessNudge(false)}
       />
 
+      {showConfirmFamily ? (
+        <ConfirmFamilyDetailsForm
+          key={`confirm-${students.map((s) => s.id).join('-')}`}
+          students={students}
+          member={member}
+          onConfirmed={({ students: next, member: nextMember }) => {
+            setStudents(next as Student[])
+            if (nextMember && member) {
+              setMember({
+                ...member,
+                name: nextMember.name,
+                firstName: nextMember.firstName,
+                lastName: nextMember.lastName,
+                phone: nextMember.phone,
+              })
+            }
+          }}
+        />
+      ) : null}
       {!dismissedActivity && newMessageCount > 0 ? (
         <div className="rounded-xl border border-[#085508]/30 bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-start gap-2 min-w-0">

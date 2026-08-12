@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
   const mode = String(req.nextUrl.searchParams.get('mode') ?? '').trim() || 'search'
   const q = String(req.nextUrl.searchParams.get('q') ?? '').trim().toLowerCase()
   const sort = String(req.nextUrl.searchParams.get('sort') ?? 'email').trim().toLowerCase()
+  const tier = String(req.nextUrl.searchParams.get('tier') ?? 'all').trim().toLowerCase() || 'all'
 
   try {
     const raw = await loadAllStudents()
@@ -76,7 +77,6 @@ export async function GET(req: NextRequest) {
       if (!canList) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      const tier = String(req.nextUrl.searchParams.get('tier') ?? 'all')
       const grade = String(req.nextUrl.searchParams.get('grade') ?? '')
       const includeArchived =
         req.nextUrl.searchParams.get('includeArchived') === '1' ||
@@ -110,6 +110,7 @@ export async function GET(req: NextRequest) {
     const members: ParentRosterRow[] = sortRoster(
       filterParentRoster(roster, {
         q: q.length >= 1 ? q : undefined,
+        tier,
         includeArchived: true,
       }),
     )

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Check, Loader2, Package } from 'lucide-react'
+import { Check, Loader2, Package, Truck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 type Item = {
@@ -13,9 +13,15 @@ type Item = {
   label: string
   detail: string
   notes: string
+  status: 'pending' | 'ordered' | string
 }
 
-export function StaffFulfillmentsPanel() {
+type Props = {
+  /** Compact copy for The Cove on-site handoff */
+  variant?: 'membership' | 'cove'
+}
+
+export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
   const [items, setItems] = useState<Item[]>([])
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
@@ -40,7 +46,7 @@ export function StaffFulfillmentsPanel() {
     void load()
   }, [load])
 
-  async function fulfill(item: Item) {
+  async function setAction(item: Item, action: 'ordered' | 'picked_up') {
     setBusy(true)
     setError('')
     setStatus('')
@@ -51,11 +57,16 @@ export function StaffFulfillmentsPanel() {
         body: JSON.stringify({
           membershipId: item.membershipId,
           kind: item.kind,
+          action,
         }),
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Update failed')
-      setStatus(`Marked ${item.label} fulfilled for ${item.parentEmail}`)
+      setStatus(
+        action === 'ordered'
+          ? `Marked ${item.label} ordered for ${item.parentEmail}`
+          : `Marked ${item.label} picked up for ${item.parentEmail}`,
+      )
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Update failed')
@@ -66,25 +77,74 @@ export function StaffFulfillmentsPanel() {
 
   const shirts = items.filter((i) => i.kind === 'spirit_shirt')
   const magnets = items.filter((i) => i.kind === 'magnet')
+  const cove = variant === 'cove'
+
+  function Row({ item }: { item: Item }) {
+    const ordered = item.status === 'ordered'
+    return (
+      <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#E8E4DC] px-3 py-2.5">
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-[#1A1A1A]">{item.parentEmail}</p>
+          <p className="text-xs text-[#5A6070]">
+            {item.tier}
+            {item.kind === 'spirit_shirt'
+              ? ` · Size ${item.detail || item.shirtSize || '—'}`
+              : item.detail
+                ? ` · ${item.detail}`
+                : ' · 1 magnet'}
+            {' · '}
+            <span className={ordered ? 'font-semibold text-[#085508]' : 'font-semibold text-[#8A6400]'}>
+              {ordered ? 'Ordered — ready for pickup' : 'Not ordered yet'}
+            </span>
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {!ordered ? (
+            <Button
+              type="button"
+              size="sm"
+              disabled={busy}
+              variant="outline"
+              onClick={() => void setAction(item, 'ordered')}
+            >
+              <Truck className="w-3.5 h-3.5 mr-1" />
+              Ordered
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            size="sm"
+            disabled={busy}
+            className="text-white"
+            style={{ backgroundColor: '#085508' }}
+            onClick={() => void setAction(item, 'picked_up')}
+          >
+            <Check className="w-3.5 h-3.5 mr-1" />
+            Picked up
+          </Button>
+        </div>
+      </li>
+    )
+  }
 
   return (
     <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
       <div>
         <h2 className="text-lg font-bold flex items-center gap-2">
           <Package className="w-5 h-5" style={{ color: '#085508' }} />
-          Membership fulfillment queue
+          {cove ? 'Magnet & shirt pickup' : 'Membership fulfillment queue'}
         </h2>
         <p className="text-xs text-[#5A6070] mt-1">
-          Physical perks still owed after paid membership checkout. Mark fulfilled when the shirt or
-          magnet is handed out at Open House (Aug 13) or a coordinated pickup
-          (vp-membershipexperience@shmspto.org).
+          {cove
+            ? 'On-site handoff for paid memberships. Tap Ordered when inventory is in, then Picked up when the parent collects it.'
+            : 'Physical perks after paid checkout. Mark Ordered when shirts/magnets are in hand, then Picked up when the member collects them at The Cove or Open House.'}
         </p>
       </div>
 
       {busy && items.length === 0 ? (
         <Loader2 className="w-5 h-5 animate-spin text-[#085508]" />
       ) : items.length === 0 ? (
- <p className="text-sm text-[#5A6070]">Queue clear. nothing pending.</p>
+        <p className="text-sm text-[#5A6070]">Queue clear — nothing waiting.</p>
       ) : (
         <div className="space-y-5">
           {shirts.length > 0 ? (
@@ -94,28 +154,7 @@ export function StaffFulfillmentsPanel() {
               </p>
               <ul className="space-y-2">
                 {shirts.map((item) => (
-                  <li
-                    key={`${item.membershipId}:${item.kind}`}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#E8E4DC] px-3 py-2.5"
-                  >
-                    <div>
-                      <p className="text-sm font-bold text-[#1A1A1A]">{item.parentEmail}</p>
-                      <p className="text-xs text-[#5A6070]">
- {item.tier} · Size {item.detail || item.shirtSize || '-'}
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={busy}
-                      className="text-white"
-                      style={{ backgroundColor: '#085508' }}
-                      onClick={() => void fulfill(item)}
-                    >
-                      <Check className="w-3.5 h-3.5 mr-1" />
-                      Fulfilled
-                    </Button>
-                  </li>
+                  <Row key={`${item.membershipId}:${item.kind}`} item={item} />
                 ))}
               </ul>
             </div>
@@ -128,26 +167,7 @@ export function StaffFulfillmentsPanel() {
               </p>
               <ul className="space-y-2">
                 {magnets.map((item) => (
-                  <li
-                    key={`${item.membershipId}:${item.kind}`}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#E8E4DC] px-3 py-2.5"
-                  >
-                    <div>
-                      <p className="text-sm font-bold text-[#1A1A1A]">{item.parentEmail}</p>
-                      <p className="text-xs text-[#5A6070]">{item.tier} · 1 magnet</p>
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={busy}
-                      className="text-white"
-                      style={{ backgroundColor: '#085508' }}
-                      onClick={() => void fulfill(item)}
-                    >
-                      <Check className="w-3.5 h-3.5 mr-1" />
-                      Fulfilled
-                    </Button>
-                  </li>
+                  <Row key={`${item.membershipId}:${item.kind}`} item={item} />
                 ))}
               </ul>
             </div>

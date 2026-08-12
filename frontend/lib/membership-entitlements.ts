@@ -10,7 +10,24 @@ export type MembershipEntitlementKind =
   | 'magnet'
   | 'partner_discounts'
 
-export type MembershipEntitlementStatus = 'fulfilled' | 'pending' | 'info'
+export type MembershipEntitlementStatus =
+  | 'fulfilled'
+  | 'pending'
+  | 'ordered'
+  | 'picked_up'
+  | 'info'
+
+/** Physical perk still owed (not yet handed to member). */
+export function isPhysicalPerkOpen(status: MembershipEntitlementStatus | string): boolean {
+  const s = String(status ?? '').trim().toLowerCase()
+  return s === 'pending' || s === 'ordered'
+}
+
+/** Physical perk already given to the member. */
+export function isPhysicalPerkPickedUp(status: MembershipEntitlementStatus | string): boolean {
+  const s = String(status ?? '').trim().toLowerCase()
+  return s === 'picked_up' || s === 'fulfilled'
+}
 
 export type MembershipEntitlement = {
   kind: MembershipEntitlementKind
@@ -163,6 +180,7 @@ export function buildMembershipEntitlements(opts: {
         kind: 'magnet',
         label: '1 Stone Hill car magnet',
         status: 'pending',
+        detail: 'Circle 5-3/4″ · full color',
         notes: PHYSICAL_PERK_PICKUP_NOTE,
       })
     }
@@ -185,6 +203,7 @@ export function buildMembershipEntitlements(opts: {
         kind: 'magnet',
         label: '1 Stone Hill car magnet',
         status: 'pending',
+        detail: 'Circle 5-3/4″ · full color',
         notes: PHYSICAL_PERK_PICKUP_NOTE,
       })
     }

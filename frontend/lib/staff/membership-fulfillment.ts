@@ -1,11 +1,15 @@
 /**
  * Staff fulfillment queue for membership physical perks (shirt, magnet).
+ * Flow: pending → ordered → picked_up (legacy: fulfilled = picked_up).
  */
 import { getWixClient } from '@/lib/wix-client'
 import {
+  isPhysicalPerkOpen,
+  isPhysicalPerkPickedUp,
   parseEntitlementsJson,
   type MembershipEntitlement,
   type MembershipEntitlementKind,
+  type MembershipEntitlementStatus,
 } from '@/lib/membership-entitlements'
 
 export type FulfillmentQueueItem = {
@@ -17,15 +21,17 @@ export type FulfillmentQueueItem = {
   label: string
   detail: string
   notes: string
-  status: MembershipEntitlement['status']
+  status: MembershipEntitlementStatus
   expiresAt: string
 }
+
+export type FulfillmentAction = 'ordered' | 'picked_up'
 
 function isFulfillable(kind: string) {
   return kind === 'spirit_shirt' || kind === 'magnet'
 }
 
-export async function listPendingFulfillments(): Promise<FulfillmentQueueItem[]> {
+export async function listOpenFulfillments(): Promise<FulfillmentQueueItem[]> {
   const client = getWixClient()
   const res = await client.items.query('Memberships').limit(200).find()
   const out: FulfillmentQueueItem[] = []
@@ -40,7 +46,7 @@ export async function listPendingFulfillments(): Promise<FulfillmentQueueItem[]>
     const entitlements = parseEntitlementsJson(rec.entitlementsJson)
     for (const e of entitlements) {
       if (!isFulfillable(e.kind)) continue
-      if (e.status !== 'pending') continue
+      if (!isPhysicalPerkOpen(e.status)) continue
       out.push({
         membershipId: id,
         parentEmail: email,
@@ -56,14 +62,27 @@ export async function listPendingFulfillments(): Promise<FulfillmentQueueItem[]>
     }
   }
 
-  out.sort((a, b) => a.parentEmail.localeCompare(b.parentEmail) || a.kind.localeCompare(b.kind))
+  out.sort((a, b) => {
+    // Ordered first (ready for pickup), then pending
+    if (a.status !== b.status) {
+      if (a.status === 'ordered') return -1
+      if (b.status === 'ordered') return 1
+    }
+    return a.parentEmail.localeCompare(b.parentEmail) || a.kind.localeCompare(b.kind)
+  })
   return out
 }
 
-export async function markEntitlementFulfilled(opts: {
+/** @deprecated use listOpenFulfillments */
+export async function listPendingFulfillments(): Promise<FulfillmentQueueItem[]> {
+  return listOpenFulfillments()
+}
+
+export async function updateEntitlementFulfillment(opts: {
   membershipId: string
   kind: MembershipEntitlementKind
-  fulfilledByEmail: string
+  action: FulfillmentAction
+  byEmail: string
   note?: string
 }): Promise<MembershipEntitlement[]> {
   const client = getWixClient()
@@ -72,16 +91,22 @@ export async function markEntitlementFulfilled(opts: {
 
   const entitlements = parseEntitlementsJson(row.entitlementsJson)
   const now = new Date().toISOString().slice(0, 10)
+  const label = opts.action === 'ordered' ? 'Ordered' : 'Picked up'
+  const nextStatus: MembershipEntitlementStatus =
+    opts.action === 'ordered' ? 'ordered' : 'picked_up'
+
   const next = entitlements.map((e) => {
     if (e.kind !== opts.kind) return e
+    if (opts.action === 'ordered' && isPhysicalPerkPickedUp(e.status)) {
+      throw new Error('Already picked up — cannot mark ordered')
+    }
+    if (opts.action === 'ordered' && e.status === 'ordered') {
+      return e
+    }
     return {
       ...e,
-      status: 'fulfilled' as const,
-      notes: [
-        e.notes,
-        `Fulfilled ${now} by ${opts.fulfilledByEmail}`,
-        opts.note?.trim() || '',
-      ]
+      status: nextStatus,
+      notes: [e.notes, `${label} ${now} by ${opts.byEmail}`, opts.note?.trim() || '']
         .filter(Boolean)
         .join(' · '),
     }
@@ -93,6 +118,21 @@ export async function markEntitlementFulfilled(opts: {
     entitlementsJson: JSON.stringify(next),
   } as never)
   return next
+}
+
+export async function markEntitlementFulfilled(opts: {
+  membershipId: string
+  kind: MembershipEntitlementKind
+  fulfilledByEmail: string
+  note?: string
+}): Promise<MembershipEntitlement[]> {
+  return updateEntitlementFulfillment({
+    membershipId: opts.membershipId,
+    kind: opts.kind,
+    action: 'picked_up',
+    byEmail: opts.fulfilledByEmail,
+    note: opts.note,
+  })
 }
 
 export async function getMembershipEntitlements(
@@ -114,38 +154,38 @@ export async function getMembershipEntitlements(
   const students = await client.items.query('Students').eq('parentEmail', email).limit(5).find()
   const discountCode = String(
     (students.items ?? []).map((s) => (s as { discountCode?: string }).discountCode).find(Boolean) ??
-      ''
+      '',
   )
 
   const tier = String(row.tier ?? '')
   const shirtSize = String(row.shirtSize ?? '')
   const stored = parseEntitlementsJson(row.entitlementsJson)
   const { buildMembershipEntitlements } = await import('@/lib/membership-entitlements')
-  const enrichmentCode =
-    String(row.enrichmentCode ?? '').trim() ||
-    discountCode ||
-    null
+  const enrichmentCode = String(row.enrichmentCode ?? '').trim() || discountCode || null
   const fresh = buildMembershipEntitlements({
     tier,
     shirtSize,
     enrichmentCode,
   })
-  // Keep cove credit + fulfilled physical from stored; refresh pickup / refreshments copy
+  // Keep cove credit + physical fulfillment progress from stored; refresh copy
   const entitlements: MembershipEntitlement[] = []
   const storedCove = stored.find((s) => s.kind === 'cove_credit')
   if (storedCove) entitlements.push(storedCove)
   for (const f of fresh) {
     if (f.kind === 'cove_credit') continue
     const prev = stored.find((s) => s.kind === f.kind)
-    if (
-      prev &&
-      (f.kind === 'spirit_shirt' || f.kind === 'magnet') &&
-      prev.status === 'fulfilled'
-    ) {
-      entitlements.push({ ...f, status: 'fulfilled', notes: prev.notes || f.notes })
-    } else {
-      entitlements.push(f)
+    if (prev && (f.kind === 'spirit_shirt' || f.kind === 'magnet')) {
+      if (isPhysicalPerkPickedUp(prev.status) || prev.status === 'ordered') {
+        entitlements.push({
+          ...f,
+          status: prev.status === 'fulfilled' ? 'picked_up' : prev.status,
+          detail: prev.detail || f.detail,
+          notes: prev.notes || f.notes,
+        })
+        continue
+      }
     }
+    entitlements.push(f)
   }
 
   let coveFamilyCode = ''

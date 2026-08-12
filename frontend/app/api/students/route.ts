@@ -53,6 +53,9 @@ export async function GET(req: NextRequest) {
             ? false
             : null,
       primaryParentEmail: item.parentEmail ?? email,
+      parentFirstName: item.parentFirstName ?? '',
+      parentLastName: item.parentLastName ?? '',
+      familyProfileConfirmedAt: item.familyProfileConfirmedAt ?? '',
     }))
 
     return NextResponse.json({

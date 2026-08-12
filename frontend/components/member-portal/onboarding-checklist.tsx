@@ -62,8 +62,8 @@ export function OnboardingChecklist({
             </span>
           </p>
           <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed">
-            You can browse anytime. Cove QR, card loads, and enrichment stay locked until the
-            required steps below are done.
+            You can browse anytime. Cove QR, card loads, and enrichment stay locked until you confirm
+            family details (parent name, phone, emergency contact, pick-up).
           </p>
           {!coveUnlocked ? (
             <p className="text-xs font-semibold mt-2 inline-flex items-center gap-1.5 text-[#8A6400]">

@@ -114,6 +114,7 @@ export function StaffDashboard() {
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
   const [memberSort, setMemberSort] = useState<'email' | 'name'>('email')
+  const [memberTier, setMemberTier] = useState<'all' | 'paid' | 'free'>('all')
   const [members, setMembers] = useState<MemberHit[]>([])
   const [lookupBusy, setLookupBusy] = useState(false)
   const [actAsStatus, setActAsStatus] = useState('')
@@ -345,12 +346,17 @@ export function StaffDashboard() {
     router.replace(q ? `/staff?${q}` : '/staff', { scroll: false })
   }
 
-  async function loadMembers(opts?: { q?: string; sort?: 'email' | 'name' }) {
+  async function loadMembers(opts?: {
+    q?: string
+    sort?: 'email' | 'name'
+    tier?: 'all' | 'paid' | 'free'
+  }) {
     setLookupBusy(true)
     setActAsStatus('')
     try {
       const params = new URLSearchParams({
         sort: opts?.sort ?? memberSort,
+        tier: opts?.tier ?? memberTier,
       })
       const q = (opts?.q ?? query).trim()
       if (q) params.set('q', q)
@@ -367,9 +373,9 @@ export function StaffDashboard() {
 
   useEffect(() => {
     if (!me?.isAdmin || active !== 'members') return
-    void loadMembers({ q: query, sort: memberSort })
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- open Members / sort change; filter is manual
-  }, [me?.isAdmin, active, memberSort])
+    void loadMembers({ q: query, sort: memberSort, tier: memberTier })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- open Members / sort·tier change; text filter is manual
+  }, [me?.isAdmin, active, memberSort, memberTier])
 
   async function actAs(parentEmail: string) {
     setActAsStatus('')
@@ -599,8 +605,8 @@ export function StaffDashboard() {
             <div>
               <h1 className="text-xl font-bold">Members</h1>
               <p className="text-xs text-[#5A6070] mt-1">
-                All parents with students. Filter if you want, sort by email or name, act-as, or
-                archive / restore a student.
+                All parents with students. Filter paid vs free, search by email or student name,
+                sort, act-as, or archive / restore a student.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 items-center">
@@ -613,6 +619,19 @@ export function StaffDashboard() {
                 placeholder="Filter by email or student name"
                 className="flex-1 min-w-[12rem] border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
               />
+              <select
+                value={memberTier}
+                onChange={(e) => {
+                  const v = e.target.value
+                  setMemberTier(v === 'paid' || v === 'free' ? v : 'all')
+                }}
+                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                aria-label="Filter paid or free"
+              >
+                <option value="all">All accounts</option>
+                <option value="paid">Paid only</option>
+                <option value="free">Free only</option>
+              </select>
               <select
                 value={memberSort}
                 onChange={(e) => setMemberSort(e.target.value === 'name' ? 'name' : 'email')}
@@ -632,7 +651,8 @@ export function StaffDashboard() {
               <Button
                 onClick={() => {
                   setQuery('')
-                  void loadMembers({ q: '', sort: memberSort })
+                  setMemberTier('all')
+                  void loadMembers({ q: '', sort: memberSort, tier: 'all' })
                 }}
                 disabled={lookupBusy}
                 className="text-white"
@@ -642,7 +662,15 @@ export function StaffDashboard() {
               </Button>
             </div>
             <p className="text-xs text-[#5A6070]">
-              {lookupBusy ? 'Loading…' : `${members.length} parent${members.length === 1 ? '' : 's'}`}
+              {lookupBusy
+                ? 'Loading…'
+                : `${members.length} parent${members.length === 1 ? '' : 's'}${
+                    memberTier === 'paid'
+                      ? ' · paid only'
+                      : memberTier === 'free'
+                        ? ' · free only'
+                        : ''
+                  }`}
               {actAsStatus ? ` · ${actAsStatus}` : ''}
             </p>
             <div className="space-y-2 max-h-[70vh] overflow-y-auto">
@@ -789,7 +817,12 @@ export function StaffDashboard() {
             />
           </div>
         ) : null}
-        {active === 'retail' && canRetail ? <StaffRetailPanel /> : null}
+        {active === 'retail' && canRetail ? (
+          <div className="space-y-4">
+            <StaffFulfillmentsPanel variant="cove" />
+            <StaffRetailPanel />
+          </div>
+        ) : null}
         {active === 'discounts' && canDiscounts ? <StaffDiscountsPanel /> : null}
         {active === 'membership' && canMembership ? (
           <div className="space-y-4">
