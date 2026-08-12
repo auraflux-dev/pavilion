@@ -31,10 +31,16 @@ function getColors(tags?: string[]) {
 function formatDate(dateStr?: string) {
   if (!dateStr) return { month: 'n/a', day: 'n/a', time: '' }
   const d = new Date(dateStr)
+  const tz = 'America/New_York'
   return {
-    month: d.toLocaleString('en-US', { month: 'short' }).toUpperCase(),
-    day: String(d.getDate()),
-    time: d.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+    month: d.toLocaleString('en-US', { month: 'short', timeZone: tz }).toUpperCase(),
+    day: String(d.toLocaleString('en-US', { day: 'numeric', timeZone: tz })),
+    time: d.toLocaleString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: tz,
+    }),
   }
 }
 
