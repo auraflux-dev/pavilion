@@ -5,7 +5,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPaidMembershipTiers } from '@/lib/api/membership'
 import { getCatalogConfig } from '@/lib/api/catalog-config'
-import { fetchCatalogProductPrice } from '@/lib/catalog-price'
+import {
+  fetchCatalogProductDetail,
+  fetchCatalogVariantPrice,
+} from '@/lib/catalog-price'
 import { getMemberSession } from '@/lib/auth-member'
 import {
   getParentHighestTier,
@@ -69,18 +72,37 @@ export async function POST(req: NextRequest) {
 
     if (kind === 'product') {
       const productId = String(body.productId ?? '').trim()
+      const variantId = String(body.variantId ?? '').trim()
       const cfg = await getCatalogConfig()
       const allowed = new Set([...cfg.spiritWearProductIds, ...cfg.storeProductIds])
       if (!productId || !allowed.has(productId)) {
         return NextResponse.json({ error: 'Product not available' }, { status: 404 })
       }
-      const catalog = await fetchCatalogProductPrice(productId)
-      if (!catalog) return NextResponse.json({ error: 'Price unavailable' }, { status: 404 })
+      if (variantId) {
+        const variant = await fetchCatalogVariantPrice(productId, variantId)
+        if (!variant) return NextResponse.json({ error: 'Price unavailable' }, { status: 404 })
+        return NextResponse.json({
+          kind,
+          productId,
+          variantId,
+          name: variant.name,
+          variantLabel: variant.variantLabel,
+          amount: variant.price,
+        })
+      }
+      const detail = await fetchCatalogProductDetail(productId)
+      if (!detail) return NextResponse.json({ error: 'Price unavailable' }, { status: 404 })
+      if (detail.variants.length > 1) {
+        return NextResponse.json(
+          { error: 'Choose a color or size before checkout' },
+          { status: 400 },
+        )
+      }
       return NextResponse.json({
         kind,
         productId,
-        name: catalog.name,
-        amount: catalog.price,
+        name: detail.name,
+        amount: detail.variants[0]?.price ?? detail.price,
       })
     }
 

@@ -14,6 +14,7 @@ import {
   Store,
   Tag,
   Users,
+  UserPlus,
 } from 'lucide-react'
 import { SectionJumpNav } from '@/components/section-jump-nav'
 
@@ -24,6 +25,7 @@ export function StaffMembershipSectionNav() {
       eyebrow="Jump to"
       ariaLabel="Membership sections"
       items={[
+        { href: '#membership-invite', label: 'Invite', hint: 'Free signup at table', icon: UserPlus },
         { href: '#membership-roster', label: 'Roster', hint: 'Parents & tiers', icon: Users },
         { href: '#membership-outreach', label: 'Outreach', hint: 'Email & WhatsApp', icon: Mail },
         {

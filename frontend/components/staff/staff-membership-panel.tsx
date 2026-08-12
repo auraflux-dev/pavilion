@@ -50,6 +50,15 @@ export function StaffMembershipPanel() {
   const [alsoPortal, setAlsoPortal] = useState(true)
   const [waGrade, setWaGrade] = useState<'6' | '7' | '8' | 'all'>('all')
 
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteFirst, setInviteFirst] = useState('')
+  const [inviteLast, setInviteLast] = useState('')
+  const [invitePhone, setInvitePhone] = useState('')
+  const [inviteBusy, setInviteBusy] = useState(false)
+  const [inviteStatus, setInviteStatus] = useState('')
+  const [inviteJoinUrl, setInviteJoinUrl] = useState('')
+  const [inviteSmsText, setInviteSmsText] = useState('')
+
   const loadChannels = useCallback(async () => {
     const r = await fetch('/api/staff/membership/outreach')
     const d = await r.json()
@@ -224,6 +233,51 @@ export function StaffMembershipPanel() {
     }
   }
 
+  async function inviteFreeParent(sendEmail: boolean) {
+    setInviteBusy(true)
+    setInviteStatus('')
+    try {
+      const r = await fetch('/api/staff/membership/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: inviteEmail,
+          firstName: inviteFirst,
+          lastName: inviteLast,
+          phone: invitePhone,
+          sendEmail,
+        }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Invite failed')
+      setInviteJoinUrl(String(d.joinUrl || ''))
+      setInviteSmsText(String(d.smsText || ''))
+      setInviteStatus(String(d.message || 'Invite ready.'))
+      if (!sendEmail && d.smsText) {
+        try {
+          await navigator.clipboard.writeText(String(d.smsText))
+          setInviteStatus(`${d.message} SMS text copied.`)
+        } catch {
+          // clipboard may be blocked
+        }
+      }
+    } catch (err) {
+      setInviteStatus(err instanceof Error ? err.message : 'Invite failed')
+    } finally {
+      setInviteBusy(false)
+    }
+  }
+
+  async function copyInviteField(value: string, label: string) {
+    if (!value) return
+    try {
+      await navigator.clipboard.writeText(value)
+      setInviteStatus(`${label} copied.`)
+    } catch {
+      setInviteStatus(`Copy failed — select the ${label.toLowerCase()} manually.`)
+    }
+  }
+
   function exportCsv() {
     const lines = [
       ['email', 'first', 'last', 'phone', 'tier', 'account', 'students'].join(','),
@@ -250,8 +304,131 @@ export function StaffMembershipPanel() {
     URL.revokeObjectURL(url)
   }
 
+  const publicJoinUrl =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/join`
+      : 'https://www.shmspto.org/join'
+  const joinQrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&ecc=M&margin=6&data=${encodeURIComponent(publicJoinUrl)}`
+
   return (
     <div className="space-y-5">
+      <section
+        id="membership-invite"
+        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold">Invite free parent</h2>
+            <p className="text-xs text-[#5A6070] mt-1">
+              At the table: create/find a free account and send a join link by email, or copy SMS
+              text to paste from your phone. Parents can also scan the QR.
+            </p>
+          </div>
+          <a
+            href="/staff/in-person"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-bold underline shrink-0"
+            style={{ color: '#085508' }}
+          >
+            Print table card
+          </a>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-[1fr_auto]">
+          <div className="space-y-3">
+            <div className="grid sm:grid-cols-2 gap-2">
+              <input
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder="Parent email *"
+                type="email"
+                autoComplete="email"
+                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm sm:col-span-2"
+              />
+              <input
+                value={inviteFirst}
+                onChange={(e) => setInviteFirst(e.target.value)}
+                placeholder="First name"
+                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              />
+              <input
+                value={inviteLast}
+                onChange={(e) => setInviteLast(e.target.value)}
+                placeholder="Last name"
+                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              />
+              <input
+                value={invitePhone}
+                onChange={(e) => setInvitePhone(e.target.value)}
+                placeholder="Phone (for your notes / SMS)"
+                type="tel"
+                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm sm:col-span-2"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                disabled={inviteBusy || !inviteEmail.trim()}
+                onClick={() => void inviteFreeParent(true)}
+                className="text-white"
+                style={{ backgroundColor: '#085508' }}
+              >
+                Send join link
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={inviteBusy || !inviteEmail.trim()}
+                onClick={() => void inviteFreeParent(false)}
+              >
+                Create + copy SMS text
+              </Button>
+              {inviteSmsText ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void copyInviteField(inviteSmsText, 'SMS text')}
+                >
+                  Copy SMS again
+                </Button>
+              ) : null}
+              {inviteJoinUrl ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void copyInviteField(inviteJoinUrl, 'Join link')}
+                >
+                  Copy join link
+                </Button>
+              ) : null}
+              {invitePhone.replace(/\D/g, '').length >= 10 && inviteSmsText ? (
+                <a
+                  href={`sms:${invitePhone.replace(/\D/g, '')}?&body=${encodeURIComponent(inviteSmsText)}`}
+                  className="inline-flex items-center rounded-lg border border-[#E8E4DC] px-3 py-2 text-xs font-bold"
+                  style={{ color: '#085508' }}
+                >
+                  Open Messages
+                </a>
+              ) : null}
+            </div>
+            {inviteStatus ? (
+              <p className="text-xs text-[#5A6070]">{inviteStatus}</p>
+            ) : null}
+            {inviteJoinUrl ? (
+              <p className="text-[11px] text-[#5A6070] break-all">Link: {inviteJoinUrl}</p>
+            ) : null}
+          </div>
+
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-[#E8E4DC] bg-[#F7F4EE] p-4 min-w-[160px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={joinQrSrc} alt="Scan to join free" width={140} height={140} />
+            <p className="text-xs font-bold text-[#085508]">Scan to join free</p>
+            <p className="text-[10px] text-[#5A6070] text-center break-all px-1">{publicJoinUrl}</p>
+          </div>
+        </div>
+      </section>
+
       <section
         id="membership-roster"
         className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"

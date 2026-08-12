@@ -17,6 +17,22 @@ export function StaffRetailPanel() {
           <strong>Square Stand</strong> (iPad) as a normal card-present sale. Digital card loads still
           require a parent portal login online.
         </p>
+        <p>
+          Free signup at the table:{' '}
+          <a href="/staff?view=membership" className="font-bold underline" style={{ color: '#085508' }}>
+            Membership → Invite free parent
+          </a>
+          {' · '}
+          <a
+            href="/staff/in-person"
+            target="_blank"
+            rel="noreferrer"
+            className="font-bold underline"
+            style={{ color: '#085508' }}
+          >
+            Print table card (Scan to join)
+          </a>
+        </p>
       </div>
       <StaffCmsCollectionPanel
         collection="CoveInventory"

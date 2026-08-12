@@ -41,7 +41,7 @@ export type PortalPayBody =
       physicalPerk?: 'spirit_shirt' | 'magnet' | null
       consents?: ConsentAck[]
     }
-  | { kind: 'product'; productId: string; consents?: ConsentAck[] }
+  | { kind: 'product'; productId: string; variantId?: string; consents?: ConsentAck[] }
   | { kind: 'store-card'; studentId: string; amountCents: number; consents?: ConsentAck[] }
   | {
       kind: 'program'

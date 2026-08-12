@@ -50,6 +50,7 @@ export const CATALOG_DEFAULTS = {
     'e9fbcab5-ae25-418e-a4ac-81889d93acc7', // Hoodie (green)
     '791e1007-b926-4416-8a90-24dd641d0887', // Spirit T-Shirt (pastel tie-dye)
     '7c8778e4-61e0-4ea6-95ed-cac3ae40c8cd', // Stone Hill Car Magnet ($10)
+    'd5730ad6-8d4a-4757-93fa-05aa3ff1e244', // Stingrays Drawstring Bag ($10)
   ].join(','),
 } as const
 

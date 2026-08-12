@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
 import { getCatalogConfig, isAllowedStoreCardLoadAmount } from '@/lib/api/catalog-config'
 import { getPaidMembershipTiers } from '@/lib/api/membership'
-import { fetchCatalogProductPrice } from '@/lib/catalog-price'
+
 import { applyPaidMembership } from '@/lib/membership-sync'
 import {
   listFamilyStudents,
@@ -408,6 +408,7 @@ export async function POST(req: NextRequest) {
     // ── Cove / spirit product ───────────────────────────────────
     if (kind === 'product') {
       const productId = String(body.productId ?? '').trim()
+      const variantId = String(body.variantId ?? '').trim()
       const productStudentId = String(body.studentId ?? '').trim()
       const cfg = await getCatalogConfig()
       const allowed = new Set([
@@ -417,11 +418,40 @@ export async function POST(req: NextRequest) {
       if (!productId || !allowed.has(productId)) {
         return NextResponse.json({ error: 'Product not available for checkout' }, { status: 400 })
       }
-      const catalog = await fetchCatalogProductPrice(productId)
-      if (!catalog) {
-        return NextResponse.json({ error: 'Could not resolve product price' }, { status: 400 })
+      const { fetchCatalogProductDetail, fetchCatalogVariantPrice } = await import(
+        '@/lib/catalog-price'
+      )
+      let catalogName = ''
+      let catalogPrice = 0
+      let variantLabel = ''
+      if (variantId) {
+        const variant = await fetchCatalogVariantPrice(productId, variantId)
+        if (!variant) {
+          return NextResponse.json({ error: 'Could not resolve product price' }, { status: 400 })
+        }
+        catalogName = variant.name
+        catalogPrice = variant.price
+        variantLabel = variant.variantLabel
+      } else {
+        const detail = await fetchCatalogProductDetail(productId)
+        if (!detail) {
+          return NextResponse.json({ error: 'Could not resolve product price' }, { status: 400 })
+        }
+        if (detail.variants.length > 1) {
+          return NextResponse.json(
+            { error: 'Choose a color or size before checkout' },
+            { status: 400 },
+          )
+        }
+        catalogName = detail.name
+        catalogPrice = detail.variants[0]?.price ?? detail.price
+        variantLabel = detail.variants[0]?.label ?? ''
       }
-      const amountCents = Math.round(catalog.price * 100)
+      const displayName =
+        variantLabel && variantLabel !== 'Default'
+          ? `${catalogName} (${variantLabel})`
+          : catalogName
+      const amountCents = Math.round(catalogPrice * 100)
       if (amountCents < 100) {
         return NextResponse.json({ error: 'Invalid product price' }, { status: 400 })
       }
@@ -440,19 +470,19 @@ export async function POST(req: NextRequest) {
         customerId,
         referenceId: `cove:${productId.slice(0, 20)}`,
         buyerEmailAddress: session.email,
-        note: `The Cove: ${catalog.name}`,
+        note: `The Cove: ${displayName}`,
       })
 
       await client.items.insert('Payments', {
-        programName: `The Cove: ${catalog.name}`,
-        amount: catalog.price,
+        programName: `The Cove: ${displayName}`,
+        amount: catalogPrice,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
         paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
         transactionId: payment.id ?? paymentKey,
         source: 'square_cove_product',
         parentEmail: session.email,
-        notes: productId,
+        notes: variantId ? `${productId}:${variantId}` : productId,
         ...(resolvedStudentId ? { studentId: resolvedStudentId } : {}),
       })
 
@@ -463,10 +493,15 @@ export async function POST(req: NextRequest) {
           kind: 'product',
           parentEmail: session.email,
           parentName: name,
-          amount: catalog.price,
-          description: `The Cove: ${catalog.name}`,
+          amount: catalogPrice,
+          description: `The Cove: ${displayName}`,
           transactionId: payment.id ?? paymentKey,
-          meta: { productId, productName: catalog.name },
+          meta: {
+            productId,
+            productName: displayName,
+            ...(variantId ? { variantId } : {}),
+            ...(variantLabel ? { variantLabel } : {}),
+          },
         })
         confirmation = {
           subject: conf.subject,
@@ -483,8 +518,9 @@ export async function POST(req: NextRequest) {
         kind,
         paymentId: payment.id,
         productId,
-        productName: catalog.name,
-        amount: catalog.price,
+        productName: displayName,
+        amount: catalogPrice,
+        ...(variantId ? { variantId } : {}),
         paymentMethod: stored
           ? { brand: stored.brand, last4: stored.last4 }
           : null,

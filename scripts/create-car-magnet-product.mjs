@@ -26,10 +26,10 @@ const WIX_PRODUCTS = 'https://www.wixapis.com/stores/v3/products'
 const WIX_PRODUCTS_INV = 'https://www.wixapis.com/stores/v3/products-with-inventory'
 const WIX_DATA = 'https://www.wixapis.com/wix-data/v2/items'
 const SKU = 'SHMS-CAR-MAGNET'
-const NAME = 'Stone Hill Car Magnet'
+const NAME = 'Stone Hill Car Magnet — Circle 5-3/4″ Full Color'
 const PRICE = '10.00'
 const DESC =
-  '<p>Official Stone Hill Middle School PTO car magnet. Show your Stingray pride on the go.</p><p>$10 · Available in the spirit shop.</p>'
+  '<p>Circle 5-3/4″ Diameter Car Sign Magnet — Full Color.</p><p>Official Stone Hill Middle School PTO car magnet. Show your Stingray pride on the go.</p><p>$10 · Available in the spirit shop and with paid memberships.</p>'
 const IMAGE = path.join(
   ROOT,
   'promo-videos/assets/membership-tiers/stills/car_magnet_mockup.png'

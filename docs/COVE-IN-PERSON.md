@@ -62,6 +62,16 @@ Wallet QR = Square GAN → Stand **gift card** / scan flow (not a new credit-car
 
 ---
 
+## Free signup at the table (Scan / email invite)
+
+Parents without an account can join free without borrowing the staff laptop for long:
+
+1. **Scan to join** — QR on the printed table card (`/staff/in-person`) or Staff → Membership → Invite opens `https://www.shmspto.org/join`.
+2. **Staff invite** — Staff → Membership → **Invite free parent**: enter email → **Send join link** (creates/finds free Wix member + emails set-password / join). If email fails or they prefer text: **Create + copy SMS text** / **Open Messages**.
+3. Spirit purchase still goes on **Lane B (Stand)** — membership is not required for the shirt.
+
+---
+
 ## Lane B — Spirit wear + guests (Square Stand)
 
 **Default for spirit wear** (shirts, hoodies, hats, sized merch) and anyone with **no** loaded Cove Digital Card:

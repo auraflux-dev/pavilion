@@ -3,7 +3,10 @@
  */
 import { getCatalogConfig, isAllowedStoreCardLoadAmount } from '@/lib/api/catalog-config'
 import { getPaidMembershipTiers } from '@/lib/api/membership'
-import { fetchCatalogProductPrice } from '@/lib/catalog-price'
+import {
+  fetchCatalogProductDetail,
+  fetchCatalogVariantPrice,
+} from '@/lib/catalog-price'
 import { applyPaidMembership } from '@/lib/membership-sync'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import {
@@ -35,6 +38,8 @@ export type CheckoutIntent = {
   shirtSize?: string | null
   physicalPerk?: string | null
   productId?: string
+  /** Wix Catalog variant when the product has Color/Size options */
+  variantId?: string
   programId?: string
   eventId?: string
   quantity?: number
@@ -133,20 +138,47 @@ export async function resolveCheckoutIntent(
 
   if (kind === 'product') {
     const productId = String(intent.productId ?? '').trim()
+    const variantId = String(intent.variantId ?? '').trim()
     const cfg = await getCatalogConfig()
     const allowed = new Set([...cfg.spiritWearProductIds, ...cfg.storeProductIds])
     if (!productId || !allowed.has(productId)) {
       throw new Error('Product not available for checkout')
     }
-    const catalog = await fetchCatalogProductPrice(productId)
-    if (!catalog || catalog.price < 1) throw new Error('Could not resolve product price')
+    let amount = 0
+    let productName = ''
+    let variantLabel = ''
+    if (variantId) {
+      const variant = await fetchCatalogVariantPrice(productId, variantId)
+      if (!variant || variant.price < 1) throw new Error('Could not resolve product price')
+      amount = variant.price
+      productName = variant.name
+      variantLabel = variant.variantLabel
+    } else {
+      const detail = await fetchCatalogProductDetail(productId)
+      if (!detail || detail.price < 1) throw new Error('Could not resolve product price')
+      if (detail.variants.length > 1) {
+        throw new Error('Choose a color or size before checkout')
+      }
+      amount = detail.variants[0]?.price ?? detail.price
+      productName = detail.name
+      variantLabel = detail.variants[0]?.label ?? ''
+    }
+    const label =
+      variantLabel && variantLabel !== 'Default'
+        ? `${productName} (${variantLabel})`
+        : productName
     return {
       kind,
-      amount: catalog.price,
-      amountCents: Math.round(catalog.price * 100),
- description: `The Cove: ${catalog.name}`,
+      amount,
+      amountCents: Math.round(amount * 100),
+      description: `The Cove: ${label}`,
       customId: `cove:${productId.slice(0, 40)}`,
-      meta: { productId, productName: catalog.name },
+      meta: {
+        productId,
+        productName: label,
+        ...(variantId ? { variantId } : {}),
+        ...(variantLabel ? { variantLabel } : {}),
+      },
     }
   }
 
@@ -387,7 +419,9 @@ export async function fulfillPaidCheckout(opts: {
       transactionId,
       source: `${sourcePrefix}_cove_product`,
       parentEmail,
-      notes: resolved.meta.productId,
+      notes: resolved.meta.variantId
+        ? `${resolved.meta.productId}:${resolved.meta.variantId}`
+        : resolved.meta.productId,
     })
     return attachPurchaseConfirmation(
       {

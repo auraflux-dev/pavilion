@@ -259,6 +259,11 @@ Parent already loaded the card online.
 
 Never also run a credit card on Stand for the same snack items.
 
+### Free signup at the table
+- **Scan QR** → shmspto.org/join (also on Staff → Membership and printable /staff/in-person)
+- Or Staff → Membership → **Invite free parent** → email join link / copy SMS text
+- Spirit still rings on Stand — free account is for portal + later Cove card / paid upgrade
+
 ### Lane B — Spirit wear + guests (Square Stand)
 **Spirit wear** (shirts, hoodies, hats, sized merch) and anyone **without** a loaded Cove card:
 
