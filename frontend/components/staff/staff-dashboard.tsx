@@ -17,6 +17,15 @@ import { StaffRetailPanel } from '@/components/staff/staff-retail-panel'
 import { StaffDiscountsPanel } from '@/components/staff/staff-discounts-panel'
 import { StaffMembershipPanel } from '@/components/staff/staff-membership-panel'
 import { StaffFulfillmentsPanel } from '@/components/staff/staff-fulfillments-panel'
+import {
+  StaffDiscountsSectionNav,
+  StaffEventsSectionNav,
+  StaffExpensesSectionNav,
+  StaffFundraisingSectionNav,
+  StaffMembershipSectionNav,
+  StaffNewsletterSectionNav,
+  StaffRetailSectionNav,
+} from '@/components/staff/staff-section-navs'
 import { StaffWorkspaceHub } from '@/components/staff/staff-workspace-hub'
 import { StaffPageContentPanel } from '@/components/staff/staff-page-content-panel'
 import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-panel'
@@ -810,22 +819,31 @@ export function StaffDashboard() {
         ) : null}
         {active === 'events' && canEvents ? (
           <div className="space-y-4">
+            <StaffEventsSectionNav />
             <StaffEventsPanel />
             <StaffCmsCollectionPanel
               collection="PortalCalendarEvents"
               title="Portal calendar events (member portal)"
+              sectionId="portal-calendar-events"
             />
           </div>
         ) : null}
         {active === 'retail' && canRetail ? (
           <div className="space-y-4">
+            <StaffRetailSectionNav />
             <StaffFulfillmentsPanel variant="cove" />
             <StaffRetailPanel />
           </div>
         ) : null}
-        {active === 'discounts' && canDiscounts ? <StaffDiscountsPanel /> : null}
+        {active === 'discounts' && canDiscounts ? (
+          <div className="space-y-4">
+            <StaffDiscountsSectionNav />
+            <StaffDiscountsPanel />
+          </div>
+        ) : null}
         {active === 'membership' && canMembership ? (
           <div className="space-y-4">
+            <StaffMembershipSectionNav />
             <StaffMembershipPanel />
             <StaffFulfillmentsPanel />
           </div>
@@ -849,11 +867,21 @@ export function StaffDashboard() {
         ) : null}
         {active === 'fundraising' && canFundraising ? (
           <div className="space-y-4">
-            <StaffCmsCollectionPanel collection="FundraisingCTAs" title="Fundraising CTAs" />
-            <StaffCmsCollectionPanel collection="Sponsors" title="Sponsors (public list)" />
+            <StaffFundraisingSectionNav />
+            <StaffCmsCollectionPanel
+              collection="FundraisingCTAs"
+              title="Fundraising CTAs"
+              sectionId="fundraising-ctas"
+            />
+            <StaffCmsCollectionPanel
+              collection="Sponsors"
+              title="Sponsors (public list)"
+              sectionId="fundraising-sponsors"
+            />
             <StaffSiteSettingsPanel
               title="Fundraising goals (Site settings)"
               groupIds={['fundraising']}
+              sectionId="fundraising-goals"
             />
           </div>
         ) : null}
@@ -871,15 +899,22 @@ export function StaffDashboard() {
         ) : null}
         {active === 'newsletter' && canNewsletter ? (
           <div className="space-y-4">
+            <StaffNewsletterSectionNav />
             <StaffWhatsAppQueuePanel />
             <StaffNewsletterPanel />
             <StaffCmsCollectionPanel
               collection="Newsletters"
               title="Newsletter archive → portal Messages"
+              sectionId="newsletter-archive"
             />
           </div>
         ) : null}
-        {active === 'expenses' ? <StaffExpensesPanel /> : null}
+        {active === 'expenses' ? (
+          <div className="space-y-4">
+            <StaffExpensesSectionNav />
+            <StaffExpensesPanel />
+          </div>
+        ) : null}
         {active === 'help' ? (
           <StaffHelpPanel
             isAdmin={me.isAdmin}

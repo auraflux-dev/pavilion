@@ -185,7 +185,10 @@ export function StaffExpensesPanel() {
   return (
     <div className="space-y-5">
       {/* Submit form */}
-      <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+      <section
+        id="expense-submit"
+        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+      >
         <div>
           <h1 className="text-xl font-bold text-[#1A1A1A]">PTO Expense Reimbursement</h1>
           <p className="text-xs text-[#5A6070] mt-1">
@@ -361,7 +364,10 @@ export function StaffExpensesPanel() {
       </section>
 
       {/* List */}
-      <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3">
+      <section
+        id="expense-requests"
+        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3"
+      >
         <h2 className="text-sm font-semibold text-[#1A1A1A]">
           {canManage ? 'All reimbursement requests' : 'My reimbursement requests'}
         </h2>

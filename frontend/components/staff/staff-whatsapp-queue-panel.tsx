@@ -279,7 +279,10 @@ export function StaffWhatsAppQueuePanel() {
   }
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-4 sm:p-5 space-y-5">
+    <section
+      id="whatsapp-queue"
+      className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-4 sm:p-5 space-y-5"
+    >
       <div>
         <h2 className="text-lg font-bold">WhatsApp grade queue</h2>
         <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">

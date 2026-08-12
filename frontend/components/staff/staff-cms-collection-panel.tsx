@@ -27,9 +27,12 @@ const emptyRow = (fields: Field[]): Row => {
 export function StaffCmsCollectionPanel({
   collection,
   title,
+  sectionId,
 }: {
   collection: string
   title?: string
+  /** Anchor for Jump to links on multi-section staff views. */
+  sectionId?: string
 }) {
   const [fields, setFields] = useState<Field[]>([])
   const [items, setItems] = useState<Row[]>([])
@@ -112,7 +115,10 @@ export function StaffCmsCollectionPanel({
   }
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section
+      id={sectionId}
+      className={`rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4${sectionId ? ' scroll-mt-28' : ''}`}
+    >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h2 className="text-lg font-bold">{label}</h2>

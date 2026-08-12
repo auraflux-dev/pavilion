@@ -21,6 +21,7 @@ export function StaffRetailPanel() {
       <StaffCmsCollectionPanel
         collection="CoveInventory"
         title="Cove inventory (advanced)"
+        sectionId="cove-inventory"
       />
       <p className="text-[11px] text-[#5A6070] px-1">
         Prefer <strong>Cove products</strong> above to key in restock quantities. This table is a

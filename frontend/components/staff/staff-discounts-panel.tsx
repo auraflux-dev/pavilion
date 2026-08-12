@@ -149,7 +149,10 @@ export function StaffDiscountsPanel() {
 
   return (
     <section className="space-y-6">
-      <div className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3">
+      <div
+        id="discount-create"
+        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3"
+      >
         <div>
           <h2 className="text-lg font-bold">Discount codes</h2>
           <p className="text-xs text-[#5A6070]">
@@ -221,7 +224,10 @@ export function StaffDiscountsPanel() {
         </Button>
       </div>
 
-      <div className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3">
+      <div
+        id="discount-issue"
+        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3"
+      >
         <div>
           <h3 className="text-base font-bold">Issue to member</h3>
           <p className="text-xs text-[#5A6070]">
@@ -291,7 +297,10 @@ export function StaffDiscountsPanel() {
         </Button>
       </div>
 
-      <div className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3">
+      <div
+        id="discount-active"
+        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3"
+      >
         <h3 className="text-base font-bold">Active codes</h3>
         {codes.length === 0 ? (
           <p className="text-xs text-[#5A6070]">No codes yet.</p>

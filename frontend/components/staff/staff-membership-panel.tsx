@@ -252,7 +252,10 @@ export function StaffMembershipPanel() {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+      <section
+        id="membership-roster"
+        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+      >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold">Membership roster</h1>
@@ -360,7 +363,10 @@ export function StaffMembershipPanel() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+      <section
+        id="membership-outreach"
+        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+      >
         <div>
           <h2 className="text-lg font-bold">Outreach</h2>
           <p className="text-xs text-[#5A6070] mt-1">

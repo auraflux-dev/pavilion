@@ -166,7 +166,10 @@ export function StaffEventsPanel() {
   }
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section
+      id="staff-events"
+      className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+    >
       <div className="flex flex-wrap justify-between gap-2">
         <div>
           <h2 className="text-lg font-bold">Events</h2>

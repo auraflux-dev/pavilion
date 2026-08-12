@@ -9,10 +9,13 @@ type Group = { id: string; label: string; keys: SettingKey[] }
 export function StaffSiteSettingsPanel({
   title = 'Site settings',
   groupIds,
+  sectionId,
 }: {
   title?: string
   /** When set, only show these SiteSettings groups (still role-filtered by API). */
   groupIds?: string[]
+  /** Anchor for Jump to links on multi-section staff views. */
+  sectionId?: string
 }) {
   const [groups, setGroups] = useState<Group[]>([])
   const [settings, setSettings] = useState<Record<string, string>>({})
@@ -57,7 +60,10 @@ export function StaffSiteSettingsPanel({
   const group = groups.find((g) => g.id === activeGroup) ?? groups[0]
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section
+      id={sectionId}
+      className={`rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4${sectionId ? ' scroll-mt-28' : ''}`}
+    >
       <div>
         <h2 className="text-lg font-bold">{title}</h2>
         <p className="text-xs text-[#5A6070]">

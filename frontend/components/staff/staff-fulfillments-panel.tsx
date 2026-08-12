@@ -128,7 +128,10 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
   }
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section
+      id={cove ? 'cove-fulfillment' : 'membership-fulfillment'}
+      className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+    >
       <div>
         <h2 className="text-lg font-bold flex items-center gap-2">
           <Package className="w-5 h-5" style={{ color: '#085508' }} />

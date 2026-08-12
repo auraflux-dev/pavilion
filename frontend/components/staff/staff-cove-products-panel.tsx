@@ -224,7 +224,10 @@ export function StaffCoveProductsPanel() {
   }
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-5">
+    <section
+      id="cove-products"
+      className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-5"
+    >
       <div>
         <h2 className="text-lg font-bold">Cove products</h2>
         <p className="text-xs text-[#5A6070] mt-1">
