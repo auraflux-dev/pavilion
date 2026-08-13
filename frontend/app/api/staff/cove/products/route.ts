@@ -12,6 +12,7 @@ import {
   type StaffCoveVariantInput,
 } from '@/lib/staff/cove-products'
 import { listCoveInventory } from '@/lib/cove-inventory'
+import { syncWixProductToSquareBestEffort } from '@/lib/square-pos-catalog-sync'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
 
 export const dynamic = 'force-dynamic'
@@ -93,7 +94,8 @@ export async function POST(req: NextRequest) {
       optionName: body.optionName != null ? String(body.optionName) : undefined,
       variants: parseVariants(body.variants),
     })
-    return NextResponse.json({ ok: true, product })
+    const squareSync = await syncWixProductToSquareBestEffort(product.id)
+    return NextResponse.json({ ok: true, product, squareSync })
   } catch (err) {
     console.error('cove products POST', err)
     return NextResponse.json(
@@ -120,7 +122,17 @@ export async function PATCH(req: NextRequest) {
       optionName: body.optionName != null ? String(body.optionName) : undefined,
       variants: parseVariants(body.variants),
     })
-    return NextResponse.json({ ok: true, product })
+    // Sync when shown on Cove, SKU/price/variants changed, or newly allowlisted
+    const shouldSync =
+      body.showOnCove === true ||
+      body.sku != null ||
+      body.price != null ||
+      body.variants != null ||
+      product.onCove
+    const squareSync = shouldSync
+      ? await syncWixProductToSquareBestEffort(product.id)
+      : { ok: true, skipped: true, reason: 'no Square-relevant fields' }
+    return NextResponse.json({ ok: true, product, squareSync })
   } catch (err) {
     console.error('cove products PATCH', err)
     return NextResponse.json(

@@ -143,7 +143,7 @@ Stand sales **decrement Wix inventory only when the Square item SKU matches** a 
 - Ring items from the synced catalog (**Stingrays Spirit T-Shirt**, snacks with SKUs, etc.).
 - Do **not** recreate loose “T Shirt / Hats / Vintage” items without SKUs — those used to log as Paid · review inventory with no stock change.
 - Tee / hoodie sizes on Stand often share one SKU → one stock pool (not per size).
-- After catalog changes: on the iPad, refresh Library / Favorites.
+- **New Cove products added in Staff** (with a SKU, shown on Cove) auto-push to Square Stand. Refresh Library / Favorites on the iPad after adding.
 - Audit anytime: `node --env-file=frontend/.env.local scripts/audit-square-wix-skus.mjs`
 
 ## 9. What Staff does **not** handle at the table

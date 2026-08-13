@@ -146,7 +146,18 @@ export function StaffCoveProductsPanel() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Create failed')
       setForm(emptyForm)
-      setStatus(`Added “${d.product.name}”. Live on /cove within a few minutes.`)
+      const syncNote =
+        d.squareSync?.createdSkus?.length
+          ? ` Square Stand: added ${d.squareSync.createdSkus.join(', ')} — refresh Library on the iPad.`
+          : d.squareSync?.skipped && d.squareSync?.reason === 'already on Square'
+            ? ' Already on Square Stand.'
+            : d.squareSync?.ok === false
+              ? ` Square sync note: ${d.squareSync.reason || 'failed'} — run sync script if needed.`
+              : d.squareSync?.reason === 'variants missing SKU'
+                ? ' Add a SKU so Stand can sync inventory.'
+                : ''
+      setStatus(`Added “${d.product.name}”. Live on /cove within a few minutes.${syncNote}`)
+
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Create failed')
@@ -190,7 +201,16 @@ export function StaffCoveProductsPanel() {
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Save failed')
-      setStatus(`Saved “${d.product.name}”.`)
+      const syncNote =
+        d.squareSync?.createdSkus?.length
+          ? ` Square Stand: added ${d.squareSync.createdSkus.join(', ')} — refresh Library on the iPad.`
+          : d.squareSync?.skipped && d.squareSync?.reason === 'already on Square'
+            ? ' Already on Square Stand.'
+            : d.squareSync?.ok === false
+              ? ` Square sync note: ${d.squareSync.reason || 'failed'}.`
+              : ''
+      setStatus(`Saved “${d.product.name}”.${syncNote}`)
+
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
