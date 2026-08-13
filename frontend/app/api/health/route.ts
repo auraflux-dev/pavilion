@@ -1,18 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getWixClient } from '@/lib/wix-client'
 
 export const dynamic = 'force-dynamic'
 
 /**
  * GET /api/health. UptimeRobot / load balancer probe.
- * Returns 200 when the app process and Wix CMS credentials respond.
+ * Default is a cheap process-alive check (no Wix). Pass ?deep=1 to verify CMS.
  */
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   const started = Date.now()
-  const checks: Record<string, { ok: boolean; ms?: number; error?: string }> = {}
+  const deep = req.nextUrl.searchParams.get('deep') === '1'
 
+  if (!deep) {
+    return NextResponse.json(
+      {
+        ok: true,
+        service: 'shmspto',
+        ms: Date.now() - started,
+        at: new Date().toISOString(),
+      },
+      {
+        status: 200,
+        headers: { 'Cache-Control': 'public, max-age=15' },
+      },
+    )
+  }
+
+  const checks: Record<string, { ok: boolean; ms?: number; error?: string }> = {}
   try {
     const t0 = Date.now()
+    const { getWixClient } = await import('@/lib/wix-client')
     const client = getWixClient()
     await client.items.query('SiteSettings').limit(1).find()
     checks.wixCms = { ok: true, ms: Date.now() - t0 }
@@ -24,18 +40,15 @@ export async function GET(_req: NextRequest) {
   }
 
   const ok = Object.values(checks).every((c) => c.ok)
-  const body = {
-    ok,
-    service: 'shmspto',
-    engine: 'wix-cms',
-    sqlite: false,
-    errorReporting: ['1', 'true', 'yes', 'on'].includes(
-      (process.env.ERROR_REPORTING_ENABLED || '').trim().toLowerCase(),
-    ),
-    checks,
-    ms: Date.now() - started,
-    at: new Date().toISOString(),
-  }
-
-  return NextResponse.json(body, { status: ok ? 200 : 503 })
+  return NextResponse.json(
+    {
+      ok,
+      service: 'shmspto',
+      engine: 'wix-cms',
+      checks,
+      ms: Date.now() - started,
+      at: new Date().toISOString(),
+    },
+    { status: ok ? 200 : 503 },
+  )
 }

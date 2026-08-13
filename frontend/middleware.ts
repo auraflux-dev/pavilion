@@ -1,14 +1,15 @@
 /**
- * Next.js middleware. runs on every request.
+ * Next.js middleware. runs on matched requests.
  *
  * 1. Protect member-only routes with a real member session (not visitor tokens).
- * 2. Generate anonymous visitor tokens for everyone else.
- * 3. Same-origin CSRF guard for mutating API routes.
+ * 2. Same-origin CSRF guard for mutating API routes.
+ * 3. Wix auth path rewrites after DNS cutover.
+ *
+ * Visitor Wix tokens are minted in auth routes (login/join/email/google), not here —
+ * eager generateVisitorTokens on every first page hit burned Fluid Active CPU.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, OAuthStrategy } from '@wix/sdk'
-import { members } from '@wix/members'
-import { TOKENS_COOKIE, TOKEN_MAX_AGE, isSecure } from '@/lib/auth-cookies'
+import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
 import { isSameOriginRequest } from '@/lib/security/csrf'
 
@@ -28,7 +29,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Wix login UI needs /_api, /__auth, /_serverless, /_partials on www.
- // After DNS cutover those hit Vercel. rewrite to the Node proxy.
+  // After DNS cutover those hit Vercel. rewrite to the Node proxy.
   if (
     pathname.startsWith('/_api/') ||
     pathname.startsWith('/__auth/') ||
@@ -44,10 +45,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden origin' }, { status: 403 })
   }
 
-  const res = NextResponse.next()
-  const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
-
   if (PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
+    const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
     if (!isMemberTokens(tokens)) {
       const loginUrl = req.nextUrl.clone()
       loginUrl.pathname = '/auth/join'
@@ -55,47 +54,17 @@ export async function middleware(req: NextRequest) {
       loginUrl.searchParams.set('returnTo', pathname + (req.nextUrl.search || ''))
       return NextResponse.redirect(loginUrl)
     }
-    return res
   }
 
-  // Skip visitor bootstrap for auth + API + Wix login proxy paths
-  if (
-    pathname.startsWith('/auth') ||
-    pathname.startsWith('/api') ||
-    pathname.startsWith('/_api') ||
-    pathname.startsWith('/__auth') ||
-    pathname.startsWith('/_serverless') ||
-    pathname.startsWith('/_partials')
-  ) {
-    return res
-  }
-
-  if (!tokens) {
-    try {
-      const client = createClient({
-        modules: { members },
-        auth: OAuthStrategy({
-          clientId: process.env.NEXT_PUBLIC_WIX_CLIENT_ID!,
-        }),
-      })
-      const visitorTokens = await client.auth.generateVisitorTokens()
-      res.cookies.set(TOKENS_COOKIE, JSON.stringify(visitorTokens), {
-        maxAge: TOKEN_MAX_AGE,
-        httpOnly: true,
-        secure: isSecure(),
-        sameSite: 'lax',
-        path: '/',
-      })
-    } catch {
-      // Non-fatal
-    }
-  }
-
-  return res
+  return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    /*
+     * Skip static assets, Next internals, and Vercel probes — they do not need
+     * auth/CSRF and were inflating middleware Active CPU under Open House load.
+     */
+    '/((?!_next/static|_next/image|_vercel|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|woff2?)$).*)',
   ],
 }
