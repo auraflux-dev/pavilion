@@ -48,9 +48,11 @@ function squareClient() {
   })
 }
 
-async function listSpiritVariantIndex(): Promise<Map<string, WixVariantHit>> {
+async function listPosVariantIndex(): Promise<Map<string, WixVariantHit>> {
   const cfg = await getCatalogConfig()
-  const ids = Array.from(cfg.spiritWearProductIds)
+  const ids = Array.from(
+    new Set([...cfg.spiritWearProductIds, ...cfg.storeProductIds]),
+  )
   const bySku = new Map<string, WixVariantHit>()
   if (!ids.length) return bySku
 
@@ -120,7 +122,7 @@ async function listSpiritVariantIndex(): Promise<Map<string, WixVariantHit>> {
         })
       }
     } catch (err) {
-      console.warn('spirit index skip', productId, err)
+      console.warn('POS index skip', productId, err)
     }
   }
   return bySku
@@ -280,7 +282,7 @@ export async function fulfillSquarePosPayment(paymentId: string): Promise<PosSyn
     return { ok: true, paymentId: id, totalDollars, lines: [] }
   }
 
-  const index = await listSpiritVariantIndex()
+  const index = await listPosVariantIndex()
   const lines: PosSyncLine[] = []
 
   for (const li of squareLines) {
