@@ -1,8 +1,8 @@
 'use client'
 
 /**
- * Printable Open House / event table card for staff.
- * Live ringing: Staff → The Cove + Square Stand (see docs/COVE-IN-PERSON.md).
+ * Printable Open House / window table card.
+ * Sell first — login and Cove card are optional.
  */
 import { useMemo } from 'react'
 import Link from 'next/link'
@@ -23,7 +23,7 @@ export default function StaffInPersonCardPage() {
     <div className="min-h-screen bg-[#F7F4EE] text-[#1A1A1A]">
       <div className="print:hidden mx-auto max-w-3xl px-4 py-4 flex flex-wrap gap-2 items-center justify-between">
         <p className="text-sm text-[#5A6070]">
-          Printable cheat sheet — Cove on Staff laptop · card on Square Stand · never charge twice.
+          Printable cheat sheet — no login required to buy · never charge twice.
         </p>
         <div className="flex gap-2">
           <Link href="/staff" className="text-xs font-bold underline" style={{ color: '#085508' }}>
@@ -46,12 +46,12 @@ export default function StaffInPersonCardPage() {
           style={{ borderColor: '#085508', backgroundColor: '#EEF6EE' }}
         >
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#085508]">
-            SHMS PTO · Event / window table
+            SHMS PTO · Event / snack window
           </p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight">How to take payment</h1>
           <p className="mt-2 text-sm text-[#1A1A1A] leading-relaxed">
-            Parents can also pay themselves online (portal / site). At the table: Cove wallet → Staff ·
-            Card → Stand · Cash → Staff. Never charge the same item twice.
+            <strong>Sell first.</strong> Guests do not need a portal login or Cove card. Offer Join QR
+            after (or while they wait). Memberships are portal-only.
           </p>
         </header>
 
@@ -59,27 +59,34 @@ export default function StaffInPersonCardPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-[#EEF6EE] text-[#085508]">
               <tr>
-                <th className="p-3 font-bold">Situation</th>
+                <th className="p-3 font-bold">How are they paying?</th>
                 <th className="p-3 font-bold">Do this</th>
               </tr>
             </thead>
             <tbody className="text-[#1A1A1A]">
               <tr className="border-t border-[#E8E4DC]">
-                <td className="p-3 align-top">Cove Digital Card balance</td>
+                <td className="p-3 align-top font-semibold">Card / Apple Pay / Google Pay</td>
                 <td className="p-3 align-top">
-                  Staff → The Cove → lookup → <strong>Charge Cove</strong>
+                  <strong>Square Stand (iPad)</strong> — ring → take payment → stop. Do not also ring
+                  in Staff.
                 </td>
               </tr>
               <tr className="border-t border-[#E8E4DC]">
-                <td className="p-3 align-top">Card tap / swipe (anyone)</td>
+                <td className="p-3 align-top font-semibold">Cash</td>
                 <td className="p-3 align-top">
-                  <strong>Square Stand only</strong> — ring → take card → stop
+                  Staff → <strong>Cash</strong> → tap items → record
                 </td>
               </tr>
               <tr className="border-t border-[#E8E4DC]">
-                <td className="p-3 align-top">Cash</td>
+                <td className="p-3 align-top font-semibold">Cove Digital Card balance</td>
                 <td className="p-3 align-top">
-                  Staff → Guest → cart → <strong>Cash</strong>
+                  Staff → lookup code/QR → <strong>Charge Cove</strong> (only if they have balance)
+                </td>
+              </tr>
+              <tr className="border-t border-[#E8E4DC]">
+                <td className="p-3 align-top font-semibold">Zelle / PayPal / phone Square</td>
+                <td className="p-3 align-top">
+                  Staff → <strong>External pay</strong> → log amount (AM / no Stand)
                 </td>
               </tr>
               <tr className="border-t border-[#E8E4DC]">
@@ -101,43 +108,39 @@ export default function StaffInPersonCardPage() {
         <section className="mt-4 grid gap-4 sm:grid-cols-2">
           <div
             className="rounded-2xl border-2 bg-white p-5 print:border-black print:rounded-none"
-            style={{ borderColor: '#085508' }}
+            style={{ borderColor: '#0B3D0B' }}
           >
-            <h2 className="text-base font-bold text-[#085508]">Laptop · Staff</h2>
-            <ul className="mt-2 list-disc pl-5 text-sm text-[#5A6070] space-y-1 leading-relaxed">
-              <li>Cove Charge</li>
-              <li>Cash</li>
-              <li>Pickup</li>
-              <li>Join invite (after sale)</li>
-            </ul>
+            <h2 className="text-base font-bold text-[#0B3D0B]">Snack window (school days)</h2>
+            <p className="mt-2 text-sm text-[#5A6070] leading-relaxed">
+              Until most families use Cove cards, expect <strong>Stand or cash</strong>. Cove lookup
+              when they show a code.
+            </p>
           </div>
           <div
             className="rounded-2xl border-2 bg-white p-5 print:border-black print:rounded-none"
-            style={{ borderColor: '#0B3D0B' }}
+            style={{ borderColor: '#085508' }}
           >
-            <h2 className="text-base font-bold text-[#0B3D0B]">iPad · Square Stand</h2>
-            <ul className="mt-2 list-disc pl-5 text-sm text-[#5A6070] space-y-1 leading-relaxed">
-              <li>Spirit sizes / colors</li>
-              <li>Any card-present sale</li>
-              <li>No Guest needed for card</li>
-              <li>Syncs to Staff Payments</li>
-            </ul>
+            <h2 className="text-base font-bold text-[#085508]">Events (Open House)</h2>
+            <p className="mt-2 text-sm text-[#5A6070] leading-relaxed">
+              Stand dominates (wallet/card). Cash is the minority. Soft-ask Join QR — purchases will
+              outnumber joins.
+            </p>
           </div>
         </section>
 
         <section className="mt-4 grid gap-4 md:grid-cols-[1fr_220px] print:grid-cols-[1fr_200px]">
           <div className="rounded-2xl border border-[#D9D2C5] bg-white p-5 space-y-3 print:border-black print:rounded-none">
-            <h2 className="text-lg font-bold">Online · parents</h2>
+            <h2 className="text-lg font-bold">Memberships · online</h2>
             <ul className="space-y-2 text-sm leading-relaxed text-[#5A6070]">
               <li>
-                <strong>No membership:</strong> join free if they want · shop · pay with card on the
-                site.
+                <strong>Reef / Lagoon / Tide:</strong> parent pays in the <strong>portal</strong> only
+                (not Stand).
               </li>
               <li>
-                <strong>Members:</strong> portal · pay with Cove balance and/or card.
+                <strong>Free join:</strong> optional QR — not required to buy spirit or snacks.
               </li>
               <li>
-                <strong>At table after online pay:</strong> pickup only.
+                <strong>Cove load:</strong> parents do later in portal when ready.
               </li>
             </ul>
           </div>
@@ -152,7 +155,7 @@ export default function StaffInPersonCardPage() {
               className="w-[200px] h-[200px] print:w-[180px] print:h-[180px]"
             />
             <p className="text-sm font-bold text-[#085508]">Optional · join free</p>
-            <p className="text-[11px] text-[#5A6070] px-1">Sale first · not required to buy</p>
+            <p className="text-[11px] text-[#5A6070] px-1">After the sale · not a gate</p>
             <p className="text-[10px] text-[#5A6070] break-all px-1">{joinUrl}</p>
           </div>
         </section>

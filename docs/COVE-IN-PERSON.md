@@ -5,33 +5,47 @@
 **Staff:** https://www.shmspto.org/staff → **The Cove** (Retail)  
 **Printable table card:** https://www.shmspto.org/staff/in-person  
 
+**Sell first.** Guests do **not** need a portal login or Cove Digital Card.  
 **Never charge the same item twice** (Stand + Staff, or online + table).
 
 ---
 
-## Quick decision (at the table)
+## Quick decision — how are they paying?
 
 | Situation | What to do |
 |-----------|------------|
-| Has **Cove Digital Card balance** — wants snacks / items at the window | **Staff → The Cove** → lookup → Charge Cove |
-| Has membership / Cove — prefers to shop themselves | They use the **member portal / site** (Cove balance and/or card) — no table charge if already paid online |
-| Wants **card tap/swipe** (member or not) — spirit or snacks | **Square Stand only** → ring → take card → hand item. Do **not** also Mark paid / Charge in Staff |
-| **Cash** | **Staff → Guest** (optional) → tap items → **Cash**. Or take cash on Stand if you use that |
-| No account — wants free portal later | Sell first (Stand or Cash), **then** join QR / Staff invite |
+| **Card / Apple Pay / Google Pay** (anyone) | **Square Stand only** → ring → take payment → stop |
+| **Cash** | Staff → **Cash** → tap items → record |
+| **Cove Digital Card balance** | Staff → lookup → **Charge Cove** |
+| **Zelle / PayPal / phone Square** (no Stand) | Staff → **External pay** → log amount |
+| Already paid online | Staff → Retail → **Pickup** · no new charge |
+| Free join | Soft ask **after** sale — QR optional |
 | Paid member · free food / refreshment perk | Code ends in **9** → hand ticket · **no charge** |
-| Already ordered online | Staff → Retail → **Pickup** · no new charge |
+| Membership (Reef / Lagoon / Tide) | **Portal only** — not Stand |
+
+---
+
+## What to expect
+
+### Events (Open House)
+- Stand (wallet/card) dominates once the iPad is up  
+- Cash is a minority (~single digits %)  
+- Joins lag purchases — normal  
+- Morning / before Stand: Zelle, phone Square, PayPal → External pay logger  
+
+### Snack window (school days)
+- Until Cove cards are common → expect **Stand or cash**  
+- Cove lookup when they show a code/QR  
 
 ---
 
 ## Online (parents do this themselves)
 
-No membership required to shop on the site.
-
-| Who | What they can do on shmspto.org |
-|-----|----------------------------------|
-| Anyone | Browse / buy spirit & Cove shop · pay with **card** (or PayPal where offered) · free **Join** anytime |
-| Free or paid member | Member portal · load **Cove Digital Card** · buy with **Cove balance** and/or card |
-| Paid member | Same + membership perks (shirt/magnet/refreshments as applicable) |
+| Who | What |
+|-----|------|
+| Anyone | Browse / buy on site · pay with card · free Join anytime |
+| Free or paid member | Portal · load Cove · pay with Cove and/or card |
+| Paid member | Same + membership perks |
 
 At the table: if they already paid online → **pickup only**.
 
@@ -39,90 +53,52 @@ At the table: if they already paid online → **pickup only**.
 
 ## Devices
 
-### Laptop / tablet — Staff → The Cove
+### iPad — Square Stand (primary card lane)
+1. Library → ring spirit / snacks  
+2. Wallet or physical card → done  
+3. Syncs to Staff Payments (+ inventory when SKU matches)  
+4. Optional: add customer email on Stand so the sale attaches to a person  
 
-Use for:
-
-1. **Cove Digital Card** — scan family QR / passcode / 6-digit → Charge Cove  
-2. **Cash** — Guest (or lookup) → cart → Record cash  
-3. **Pickup** queue for online orders  
-4. **Backup only:** “Mark paid on Stand” if card was taken on Stand and the sale did **not** show in Staff Payments  
-
-Do **not** use Staff cart + Mark paid on Stand for a normal Stand card sale (double inventory).
-
-### iPad — Square Stand
-
-Use for:
-
-1. **Any card-present sale** — spirit (sizes/colors) and guest snacks  
-2. Ring the item in Square’s **Library** → tap / swipe / dip → done  
-
-Stand sales sync into Staff **Payments** + inventory by SKU.  
-You do **not** need Guest in Staff for a Stand card sale.
+### Laptop — Staff
+1. **How paying?** chooser → Cash / Cove / External  
+2. Cove Charge · Cash cart · External logger · Pickup  
+3. Backup only: “Mark paid on Stand” if sync failed  
 
 ---
 
 ## Walkthroughs
 
-### A — Cove balance at the window
+### A — Card on Stand (guest or member)
+1. Confirm item  
+2. Stand: ring → take payment  
+3. Optional Join QR  
+4. Do **not** also charge in Staff  
 
-1. Staff → The Cove → In-person sales  
-2. Scan QR or type passcode / 6-digit → Look up  
-3. Confirm names + balance  
-4. Tap products → **Charge Cove**  
-5. Hand items  
+### B — Cash
+1. Staff → Cash  
+2. Tap products → Record cash  
+3. Optional email for join invite  
 
-Low balance → parent reloads in portal, **or** take that sale on **Stand** (card) / Cash.
+### C — Cove balance
+1. Staff → lookup QR / code  
+2. Confirm kids + balance → Charge Cove  
 
-### B — Card on Stand (member or guest)
-
-1. Confirm item / size / color  
-2. On Stand: Library → ring → take card  
-3. Hand item  
-4. Stop — no Staff Mark paid  
-
-Optional after: free join QR.
-
-### C — Cash
-
-1. Staff → Guest (name/email optional)  
-2. Tap products → **Cash**  
-3. Hand items  
-
-### D — Free join (not required to buy)
-
-1. Finish the sale first  
-2. Scan join QR on table card, **or** Staff → Membership → Invite free parent  
+### D — External (AM / overflow)
+1. Staff → External pay  
+2. Pick Zelle / PayPal / phone Square / Other  
+3. Amount + optional note / email  
 
 ---
 
-## Spirit wear note
+## Double-charge rule
 
-- **Card / most spirit at the table** → Square Stand  
-- **Online** → site / portal (card or Cove balance)  
-- Staff Spirit tiles are for Cove charge, cash, or sync backup — not the primary card lane  
-
----
-
-## Before open
-
-1. Staff laptop online · The Cove loads  
-2. Stand: SHMS PTO location · Wi‑Fi · Library shows spirit items  
-3. Brief volunteers: Cove → Staff · Card → Stand · Cash → Staff · never twice  
-
-## After
-
-- Spot-check Staff → Payments for Stand sync (`Square Stand`)  
-- Cove Charges in Reports as usual  
-- Stuck payment → **treasurer@** · membership help → **vp-membershipexperience@**  
+| Lane | Also ring in Staff cart? |
+|------|---------------------------|
+| Stand card | **No** |
+| Cash on Staff | No second Stand charge |
+| Cove Charge | No Stand charge for same items |
+| External log | No second tender for same sale |
 
 ---
 
-## Training video
-
-| Artifact | Path |
-|----------|------|
-| Script | `promo-videos/scripts/staff_cove_inperson_elevenlabs.txt` |
-| Watch file | `~/Downloads/SHMSPTO_WATCH_THIS_staff_cove_inperson_16x9.mp4` |
-
-Also: Staff → Help → **In-person sales + Square Stand**.
+Also: Staff → Help · Printable: `/staff/in-person`

@@ -13,6 +13,19 @@ export function StaffRetailPanel() {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div
+          className="rounded-xl border-2 p-4"
+          style={{ borderColor: '#0B3D0B', backgroundColor: '#F5F7F4' }}
+        >
+          <p className="text-xs font-bold uppercase tracking-wider text-[#0B3D0B] flex items-center gap-1.5">
+            <Smartphone className="w-3.5 h-3.5" aria-hidden />
+            Card / wallet
+          </p>
+          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Square Stand first</p>
+          <p className="mt-1 text-xs text-[#5A6070] leading-relaxed">
+            Ring on the <strong>iPad Stand</strong> only — syncs to Staff. Do not also charge below.
+          </p>
+        </div>
         <a
           href="#cove-register"
           className="rounded-xl border-2 p-4 hover:opacity-95 transition-opacity"
@@ -20,28 +33,13 @@ export function StaffRetailPanel() {
         >
           <p className="text-xs font-bold uppercase tracking-wider text-[#085508] flex items-center gap-1.5">
             <CreditCard className="w-3.5 h-3.5" aria-hidden />
-            Path 1 · Cove Digital Card
+            Cash · Cove · External
           </p>
-          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Staff laptop</p>
+          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Staff · How paying?</p>
           <p className="mt-1 text-xs text-[#5A6070] leading-relaxed">
-            Scan / look up → tap products → Charge Cove. Parents can also spend Cove balance in the
-            portal.
+            Cash cart, Cove lookup, or Zelle/PayPal/phone logger. Guests OK — no login required.
           </p>
         </a>
-        <div
-          className="rounded-xl border-2 p-4"
-          style={{ borderColor: '#0B3D0B', backgroundColor: '#F5F7F4' }}
-        >
-          <p className="text-xs font-bold uppercase tracking-wider text-[#0B3D0B] flex items-center gap-1.5">
-            <Smartphone className="w-3.5 h-3.5" aria-hidden />
-            Path 2 · Square Stand / cash
-          </p>
-          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Card on iPad Stand</p>
-          <p className="mt-1 text-xs text-[#5A6070] leading-relaxed">
-            Any tap/swipe → ring on <strong>Square Stand</strong> only (syncs to Staff). Cash → this
-            screen. Do not double-charge.
-          </p>
-        </div>
       </div>
 
       <p className="text-xs text-[#5A6070]">

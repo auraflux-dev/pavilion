@@ -69,9 +69,18 @@ function normalizeLookupInput(raw: string): string {
 
 /**
  * In-person sales (window + event tables).
- * Member QR/passcode OR Guest → tap products (snacks + spirit) → Cove card / Square card / cash.
+ * How paying? → Stand hint / Cash cart / Cove charge / External logger.
  */
 export function StaffCoveRegister() {
+  type VenueMode = 'event' | 'window'
+  type PayLane = 'stand' | 'cash' | 'cove' | 'external' | 'pickup'
+  type ExternalTender = 'zelle' | 'paypal' | 'phone_square' | 'other'
+
+  const [venueMode, setVenueMode] = useState<VenueMode>(() => {
+    if (typeof window === 'undefined') return 'event'
+    return window.localStorage.getItem('cove-venue-mode') === 'window' ? 'window' : 'event'
+  })
+  const [payLane, setPayLane] = useState<PayLane | null>(null)
   const [code, setCode] = useState('')
   const [mode, setMode] = useState<SessionMode>('idle')
   const [family, setFamily] = useState<Family | null>(null)
@@ -84,7 +93,10 @@ export function StaffCoveRegister() {
   const [guestEmail, setGuestEmail] = useState('')
   const [guestPhone, setGuestPhone] = useState('')
   const [sendJoinInvite, setSendJoinInvite] = useState(true)
-  const [payTab, setPayTab] = useState<'cove' | 'stand' | 'cash'>('cove')
+  const [showStandBackup, setShowStandBackup] = useState(false)
+  const [externalTender, setExternalTender] = useState<ExternalTender>('zelle')
+  const [externalAmount, setExternalAmount] = useState('')
+  const [externalNote, setExternalNote] = useState('')
   const [variantPicker, setVariantPicker] = useState<Product | null>(null)
   const codeRef = useRef<HTMLInputElement>(null)
 
@@ -113,8 +125,15 @@ export function StaffCoveRegister() {
     void loadProducts().catch((err) =>
       setError(err instanceof Error ? err.message : 'Product load failed'),
     )
-    codeRef.current?.focus()
   }, [loadProducts])
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('cove-venue-mode', venueMode)
+    } catch {
+      /* ignore */
+    }
+  }, [venueMode])
 
   const deals = useMemo(() => products.filter((p) => p.featured), [products])
   const regular = useMemo(() => products.filter((p) => !p.featured), [products])
@@ -154,14 +173,55 @@ export function StaffCoveRegister() {
   }, [deals, productQuery])
 
   const selling = mode === 'guest' || mode === 'member'
+  const needsCart = payLane === 'cash' || payLane === 'cove'
   const canUseCove =
-    mode === 'member' && Boolean(family?.hasCard) && Number(family?.balance ?? 0) > 0
+    payLane === 'cove' &&
+    mode === 'member' &&
+    Boolean(family?.hasCard) &&
+    Number(family?.balance ?? 0) > 0
 
-  useEffect(() => {
-    if (!selling) return
-    if (canUseCove) setPayTab('cove')
-    else setPayTab('stand')
-  }, [selling, canUseCove, family?.coveFamilyCode, mode])
+  function chooseLane(lane: PayLane) {
+    setPayLane(lane)
+    setError('')
+    setStatus('')
+    setCart([])
+    setShowStandBackup(false)
+    if (lane === 'stand') {
+      setMode('idle')
+      setFamily(null)
+      setStatus(
+        venueMode === 'event'
+          ? 'Ring on Square Stand · do not also charge here.'
+          : 'Card/wallet → Square Stand. Cash or Cove below if needed.',
+      )
+      return
+    }
+    if (lane === 'pickup') {
+      setMode('idle')
+      setFamily(null)
+      setStatus('Already paid online — use Pickup queue (no new charge).')
+      return
+    }
+    if (lane === 'cash') {
+      setMode('guest')
+      setFamily(null)
+      setCode('')
+      setStatus('Cash — tap products, then Record cash. Guest OK.')
+      return
+    }
+    if (lane === 'cove') {
+      setMode('idle')
+      setFamily(null)
+      setStatus('Scan or type Cove code, then Charge Cove.')
+      setTimeout(() => codeRef.current?.focus(), 50)
+      return
+    }
+    if (lane === 'external') {
+      setMode('guest')
+      setFamily(null)
+      setStatus('External pay — amount + method. Optional email for join.')
+    }
+  }
 
   async function lookup(nextCode = code) {
     const trimmed = normalizeLookupInput(nextCode)
@@ -185,7 +245,7 @@ export function StaffCoveRegister() {
         setFamily({ ...d.family, hasCard: false, balance: 0 })
         setMode('member')
         setCode(trimmed)
-        setStatus('Member found — no Cove card loaded. Take card or cash below.')
+        setStatus('Member found — no Cove card. Use Cash or Stand instead.')
         setError('')
         return
       }
@@ -193,10 +253,13 @@ export function StaffCoveRegister() {
       setFamily(d)
       setMode('member')
       setCode(trimmed)
+      const ends9 = String(d.coveFamilyCode || '').endsWith('9')
       setStatus(
-        d.hasCard
-          ? `Cove balance $${Number(d.balance).toFixed(2)} — or take card / cash`
-          : 'Member found — take card or cash (no Cove balance)',
+        ends9
+          ? 'Paid-member perk (code ends in 9) — refreshments free · no charge'
+          : d.hasCard
+            ? `Cove balance $${Number(d.balance).toFixed(2)}`
+            : 'Member found — no Cove balance (use Cash / Stand)',
       )
     } catch (err) {
       setFamily(null)
@@ -207,14 +270,13 @@ export function StaffCoveRegister() {
     }
   }
 
-  function startGuest() {
+  function startGuestCash() {
     setMode('guest')
     setFamily(null)
     setCode('')
     setCart([])
     setError('')
-    setStatus('Guest sale — inventory tracked. Optional email/phone for free join invite.')
-    setPayTab('stand')
+    setStatus('Guest cash — inventory tracked. Optional email for join.')
   }
 
   function onCameraScan(value: string) {
@@ -230,7 +292,7 @@ export function StaffCoveRegister() {
 
   function setLineQty(product: Product, qty: number) {
     if (!selling) {
-      setError('Look up a family or tap Guest first.')
+      setError(payLane === 'cove' ? 'Look up a family first.' : 'Choose Cash or Guest first.')
       return
     }
     const variantId = product.variantId || ''
@@ -264,7 +326,7 @@ export function StaffCoveRegister() {
 
   function requestAdd(product: Product) {
     if (!selling) {
-      setError('Look up a family or tap Guest first.')
+      setError(payLane === 'cove' ? 'Look up a family first.' : 'Choose Cash lane first.')
       return
     }
     if (product.variants && product.variants.length > 1) {
@@ -313,7 +375,6 @@ export function StaffCoveRegister() {
     setLineQty(product, current + delta)
   }
 
-  /** Total qty across all variants of a product (spirit tile badge). */
   function qtyForProduct(product: Product) {
     return cart
       .filter((l) => l.productId === product.id)
@@ -350,7 +411,7 @@ export function StaffCoveRegister() {
     if (!family?.hasCard || !cart.length) return
     if (remainingAfter < 0) {
       setError(
-        `Not enough Cove balance ($${balance.toFixed(2)}). Use card or cash, or remove items.`,
+        `Not enough Cove balance ($${balance.toFixed(2)}). Use Cash or Stand, or remove items.`,
       )
       return
     }
@@ -369,7 +430,7 @@ export function StaffCoveRegister() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Checkout failed')
       setStatus(
-        `Cove card charged $${Number(d.total).toFixed(2)}. New balance $${Number(d.newBalance).toFixed(2)}.`,
+        `Cove charged $${Number(d.total).toFixed(2)}. New balance $${Number(d.newBalance).toFixed(2)}.`,
       )
       resetSale()
       await loadProducts()
@@ -408,7 +469,7 @@ export function StaffCoveRegister() {
           : d.invite?.error
             ? ` Invite: ${d.invite.error}`
             : ''
-      const label = tender === 'stand' ? 'Stand / card' : 'Cash'
+      const label = tender === 'stand' ? 'Marked Stand' : 'Cash'
       setStatus(`${label} $${Number(d.total).toFixed(2)} — inventory updated.${inviteNote}`)
       resetSale()
       await loadProducts()
@@ -419,9 +480,54 @@ export function StaffCoveRegister() {
     }
   }
 
+  async function logExternal() {
+    const amount = Math.round(Number(externalAmount) * 100) / 100
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setError('Enter a valid amount.')
+      return
+    }
+    setBusy(true)
+    setError('')
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/cove/sale', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tender: externalTender,
+          amount,
+          lines: cart.length ? cartPayload() : undefined,
+          note: externalNote || undefined,
+          guestEmail: guestEmail || undefined,
+          guestPhone: guestPhone || undefined,
+          guestName: guestName || undefined,
+          sendJoinInvite: sendJoinInvite && Boolean(guestEmail.trim()),
+        }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not log payment')
+      const inviteNote = d.invite?.emailed
+        ? ' Join invite emailed.'
+        : d.invite?.error
+          ? ` Invite: ${d.invite.error}`
+          : ''
+      setStatus(
+        `Logged ${externalTender.replace('_', ' ')} $${Number(d.total).toFixed(2)}.${inviteNote}`,
+      )
+      setExternalAmount('')
+      setExternalNote('')
+      resetSale()
+      await loadProducts()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not log payment')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   function resetSale() {
     setFamily(null)
-    setMode('idle')
+    setMode(payLane === 'cash' || payLane === 'external' ? 'guest' : 'idle')
     setCart([])
     setCode('')
     setGuestEmail('')
@@ -430,11 +536,25 @@ export function StaffCoveRegister() {
     setProductQuery('')
     setLetterFilter('All')
     setCategoryFilter('All')
-    codeRef.current?.focus()
+    setShowStandBackup(false)
+    if (payLane === 'cove') codeRef.current?.focus()
   }
 
   function clearSession() {
-    resetSale()
+    setPayLane(null)
+    setFamily(null)
+    setMode('idle')
+    setCart([])
+    setCode('')
+    setGuestEmail('')
+    setGuestPhone('')
+    setGuestName('')
+    setExternalAmount('')
+    setExternalNote('')
+    setProductQuery('')
+    setLetterFilter('All')
+    setCategoryFilter('All')
+    setShowStandBackup(false)
     setStatus('')
     setError('')
   }
@@ -448,56 +568,48 @@ export function StaffCoveRegister() {
   }) {
     const qty = qtyFor(product)
     const inCart = qty > 0
+    const out =
+      product.available === false ||
+      (product.quantity != null && product.quantity <= 0 && !(product.variants?.length))
     return (
       <div
-        className={`rounded-2xl border overflow-hidden flex flex-col ${
-          inCart ? 'border-[#085508] ring-2 ring-[#085508]/25' : 'border-[#E8E4DC]'
-        } bg-white ${compact ? 'min-w-[9.5rem] w-[9.5rem] shrink-0' : ''}`}
+        className={`rounded-xl border-2 overflow-hidden flex flex-col ${
+          inCart ? 'border-[#085508] bg-[#EEF6EE]' : 'border-[#E8E4DC] bg-white'
+        } ${out ? 'opacity-50' : ''} ${compact ? 'min-w-[8.5rem] w-[8.5rem]' : ''}`}
       >
         <button
           type="button"
+          disabled={out || !selling}
           onClick={() => requestAdd(product)}
-          disabled={!selling}
-          className="text-left flex-1 disabled:opacity-50"
+          className="text-left flex-1 disabled:cursor-not-allowed"
         >
-          <div className={`${compact ? 'aspect-[4/3]' : 'aspect-square'} bg-[#FAFCF9] relative`}>
-            {product.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={product.image}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-[#C5CFC5] text-xs font-bold">
-                Cove
-              </div>
-            )}
-            {product.featured ? (
-              <span className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-wide bg-[#FFD700] text-[#1A1A1A] px-2 py-0.5 rounded-full">
-                {product.dealLabel || 'Deal'}
-              </span>
-            ) : null}
-            {inCart ? (
-              <span className="absolute top-2 right-2 min-w-7 h-7 rounded-full bg-[#085508] text-white text-sm font-bold flex items-center justify-center px-1.5">
-                {qty}
-              </span>
-            ) : null}
-          </div>
-          <div className={compact ? 'p-2' : 'p-2.5'}>
-            <p
-              className={`font-bold text-[#1A1A1A] leading-snug line-clamp-2 ${
-                compact ? 'text-xs min-h-[2rem]' : 'text-sm min-h-[2.5rem]'
-              }`}
+          {product.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={product.image}
+              alt=""
+              className={`w-full object-cover ${compact ? 'h-16' : 'h-24'}`}
+            />
+          ) : (
+            <div
+              className={`w-full ${compact ? 'h-16' : 'h-24'} bg-[#F5F7F4] flex items-center justify-center text-[#5A6070] text-xs`}
             >
+              {product.category}
+            </div>
+          )}
+          <div className="px-2 pt-2 pb-1">
+            {product.dealLabel ? (
+              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800">
+                {product.dealLabel}
+              </p>
+            ) : null}
+            <p className={`font-bold text-[#1A1A1A] leading-snug ${compact ? 'text-xs' : 'text-sm'}`}>
               {product.name}
             </p>
-            <p className="text-sm font-bold mt-1" style={{ color: '#085508' }}>
+            <p className="text-xs font-bold mt-0.5" style={{ color: '#085508' }}>
               ${product.price.toFixed(2)}
-              {product.variants && product.variants.length > 1 ? (
-                <span className="ml-1 text-[11px] font-semibold text-[#5A6070]">
-                  · pick {product.optionName?.toLowerCase() || 'option'}
-                </span>
+              {qty > 0 ? (
+                <span className="ml-1 text-[#5A6070] font-semibold">· {qty}</span>
               ) : null}
             </p>
           </div>
@@ -528,29 +640,220 @@ export function StaffCoveRegister() {
     )
   }
 
+  const laneBtn = (lane: PayLane, label: string, hint: string) => (
+    <button
+      key={lane}
+      type="button"
+      onClick={() => chooseLane(lane)}
+      className={`rounded-xl border-2 px-3 py-3 text-left transition-colors ${
+        payLane === lane
+          ? 'border-[#085508] bg-[#EEF6EE]'
+          : 'border-[#E8E4DC] bg-white hover:border-[#085508]/50'
+      }`}
+    >
+      <p className="text-sm font-bold text-[#1A1A1A]">{label}</p>
+      <p className="text-[11px] text-[#5A6070] mt-0.5 leading-snug">{hint}</p>
+    </button>
+  )
+
   return (
     <section
       id="cove-register"
       className="scroll-mt-28 rounded-xl border-2 border-[#085508] bg-white p-4 sm:p-5 space-y-4"
     >
-      <div className="flex flex-wrap items-start justify-between gap-2">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <h2 className="text-lg font-bold flex items-center gap-2">
           <ShoppingCart className="w-5 h-5" style={{ color: '#085508' }} />
           In-person sales
         </h2>
-        <Button
-          type="button"
-          variant={mode === 'guest' ? 'default' : 'outline'}
-          onClick={startGuest}
-          className={mode === 'guest' ? 'text-white' : ''}
-          style={mode === 'guest' ? { backgroundColor: '#0B3D0B' } : undefined}
-        >
-          <UserRound className="w-4 h-4 mr-1.5" />
-          Guest
-        </Button>
+        <div className="flex rounded-lg border border-[#E8E4DC] overflow-hidden">
+          {(
+            [
+              { id: 'event' as const, label: 'Event' },
+              { id: 'window' as const, label: 'Window' },
+            ] as const
+          ).map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              onClick={() => setVenueMode(v.id)}
+              className={`px-3 py-1.5 text-xs font-bold ${
+                venueMode === v.id
+                  ? 'bg-[#085508] text-white'
+                  : 'bg-white text-[#5A6070]'
+              }`}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {mode !== 'guest' ? (
+      <p className="text-xs text-[#5A6070] leading-relaxed rounded-lg bg-[#FAFCF9] border border-[#E8E4DC] px-3 py-2">
+        {venueMode === 'event'
+          ? 'Event mode: card/wallet on Square Stand first. Cash · Cove · External only when needed. Join QR optional after sale.'
+          : 'Window mode: until Cove cards are common → Stand or cash. Lookup when they show a code.'}
+        {' · '}
+        <span className="font-semibold text-[#0B3D0B]">
+          Optional — buy first, join anytime
+        </span>
+      </p>
+
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wider text-[#5A6070] mb-2">
+          How paying?
+        </p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          {laneBtn(
+            'stand',
+            'Card / wallet',
+            venueMode === 'event' ? '→ Square Stand only' : '→ iPad Stand',
+          )}
+          {laneBtn('cash', 'Cash', 'Staff cart · record')}
+          {laneBtn('cove', 'Cove code', 'Lookup → Charge Cove')}
+          {laneBtn('external', 'External', 'Zelle · PayPal · phone')}
+        </div>
+        <button
+          type="button"
+          onClick={() => chooseLane('pickup')}
+          className={`mt-2 text-xs font-bold underline ${
+            payLane === 'pickup' ? 'text-[#085508]' : 'text-[#5A6070]'
+          }`}
+        >
+          Already paid online → Pickup
+        </button>
+        {payLane ? (
+          <Button type="button" variant="outline" size="sm" className="ml-3 mt-2" onClick={clearSession}>
+            <X className="w-3.5 h-3.5 mr-1" /> Change lane
+          </Button>
+        ) : null}
+      </div>
+
+      {payLane === 'stand' ? (
+        <div className="rounded-xl border-2 border-[#0B3D0B] bg-[#F5F7F4] p-4 space-y-2">
+          <p className="text-sm font-bold text-[#1A1A1A]">Use the iPad Square Stand</p>
+          <ol className="text-sm text-[#5A6070] list-decimal pl-5 space-y-1">
+            <li>Ring snacks / spirit on Stand</li>
+            <li>Take wallet or card</li>
+            <li>Stop — do not also ring this sale in Staff</li>
+          </ol>
+          <p className="text-xs text-[#5A6070]">
+            Optional: add customer email on Stand so the Payment attaches to them.
+          </p>
+        </div>
+      ) : null}
+
+      {payLane === 'pickup' ? (
+        <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-4">
+          <p className="text-sm text-[#5A6070]">
+            No new charge.{' '}
+            <a href="#cove-fulfillment" className="font-bold underline" style={{ color: '#085508' }}>
+              Open pickup queue
+            </a>
+          </p>
+        </div>
+      ) : null}
+
+      {payLane === 'external' ? (
+        <div className="rounded-xl border-2 border-[#085508] p-4 space-y-3 bg-[#FAFCF9]">
+          <p className="text-sm font-bold text-[#1A1A1A]">External pay logger</p>
+          <p className="text-xs text-[#5A6070]">
+            Morning / no Stand — log money that landed outside cash drawer or Stand.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {(
+              [
+                { id: 'zelle' as const, label: 'Zelle' },
+                { id: 'paypal' as const, label: 'PayPal' },
+                { id: 'phone_square' as const, label: 'Phone Square' },
+                { id: 'other' as const, label: 'Other' },
+              ] as const
+            ).map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setExternalTender(t.id)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-bold border ${
+                  externalTender === t.id
+                    ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
+                    : 'border-[#E8E4DC] text-[#5A6070]'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <label className="text-xs font-bold text-[#5A6070]">
+              Amount ($)
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={externalAmount}
+                onChange={(e) => setExternalAmount(e.target.value)}
+                className="mt-1 w-full rounded-lg border-2 border-[#085508] px-3 py-3 text-xl font-bold tabular-nums"
+                placeholder="0.00"
+              />
+            </label>
+            <label className="text-xs font-bold text-[#5A6070]">
+              Note (optional)
+              <input
+                value={externalNote}
+                onChange={(e) => setExternalNote(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-2 py-3 text-sm"
+                placeholder="Open House AM · spiritwear"
+              />
+            </label>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <label className="text-xs font-bold text-[#5A6070]">
+              Name (optional)
+              <input
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-2 py-2 text-sm"
+              />
+            </label>
+            <label className="text-xs font-bold text-[#5A6070]">
+              Email (join invite)
+              <input
+                type="email"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-2 py-2 text-sm"
+              />
+            </label>
+            <label className="text-xs font-bold text-[#5A6070]">
+              Phone
+              <input
+                type="tel"
+                value={guestPhone}
+                onChange={(e) => setGuestPhone(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-2 py-2 text-sm"
+              />
+            </label>
+          </div>
+          <label className="flex items-center gap-2 text-xs text-[#5A6070]">
+            <input
+              type="checkbox"
+              checked={sendJoinInvite}
+              onChange={(e) => setSendJoinInvite(e.target.checked)}
+            />
+            Email free join link if email provided
+          </label>
+          <Button
+            disabled={busy || !externalAmount}
+            onClick={() => void logExternal()}
+            className="text-white text-base px-8 py-6 font-bold"
+            style={{ backgroundColor: '#085508' }}
+          >
+            {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : `Log ${externalTender.replace('_', ' ')}`}
+          </Button>
+        </div>
+      ) : null}
+
+      {(payLane === 'cash' || payLane === 'cove') && mode !== 'guest' ? (
         <>
           <CoveCameraScanner onScan={onCameraScan} label="Scan family QR" />
           <form
@@ -586,6 +889,11 @@ export function StaffCoveRegister() {
             >
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Look up'}
             </Button>
+            {payLane === 'cash' ? (
+              <Button type="button" variant="outline" className="py-3" onClick={startGuestCash}>
+                <UserRound className="w-4 h-4 mr-1" /> Guest instead
+              </Button>
+            ) : null}
             {selling ? (
               <Button type="button" variant="outline" className="py-3" onClick={clearSession}>
                 <X className="w-4 h-4 mr-1" /> Next
@@ -593,14 +901,30 @@ export function StaffCoveRegister() {
             ) : null}
           </form>
         </>
-      ) : (
+      ) : null}
+
+      {payLane === 'cash' && mode === 'guest' ? (
         <div className="flex flex-wrap gap-2 items-center">
-          <p className="text-sm font-bold text-[#0B3D0B]">Guest checkout</p>
+          <p className="text-sm font-bold text-[#0B3D0B]">Guest cash</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setMode('idle')
+              setFamily(null)
+              setCart([])
+              setStatus('Look up member for cash, or stay Guest.')
+              setTimeout(() => codeRef.current?.focus(), 50)
+            }}
+          >
+            Look up member instead
+          </Button>
           <Button type="button" variant="outline" size="sm" onClick={clearSession}>
-            <X className="w-4 h-4 mr-1" /> Cancel guest
+            <X className="w-4 h-4 mr-1" /> Cancel
           </Button>
         </div>
-      )}
+      ) : null}
 
       {mode === 'member' && family ? (
         <div className="rounded-xl px-4 py-3 space-y-1" style={{ backgroundColor: '#EEF6EE' }}>
@@ -612,6 +936,9 @@ export function StaffCoveRegister() {
               family.parentEmail ||
               'Family'}
             <span className="font-normal text-[#5A6070]"> · code {family.coveFamilyCode}</span>
+            {String(family.coveFamilyCode || '').endsWith('9') ? (
+              <span className="ml-2 text-amber-900 font-bold">· perk · free food</span>
+            ) : null}
           </p>
           {family.hasCard ? (
             <p className="text-2xl font-bold tabular-nums" style={{ color: '#085508' }}>
@@ -619,13 +946,13 @@ export function StaffCoveRegister() {
             </p>
           ) : (
             <p className="text-sm font-bold text-amber-900">
-              No Cove card on file — use card or cash (still tracks inventory).
+              No Cove card — switch to Cash or Stand.
             </p>
           )}
         </div>
       ) : null}
 
-      {mode === 'guest' ? (
+      {(payLane === 'cash' || payLane === 'external') && mode === 'guest' && payLane !== 'external' ? (
         <div className="grid gap-2 sm:grid-cols-3 rounded-xl border border-[#E8E4DC] p-3 bg-[#FAFCF9]">
           <label className="text-xs font-bold text-[#5A6070]">
             Name (optional)
@@ -661,12 +988,12 @@ export function StaffCoveRegister() {
               checked={sendJoinInvite}
               onChange={(e) => setSendJoinInvite(e.target.checked)}
             />
-            Email free join link after this sale (Open House / Friday follow-up)
+            Email free join link after this sale
           </label>
         </div>
       ) : null}
 
-      {selling ? (
+      {needsCart && selling ? (
         <>
           <div className="sticky top-0 z-[5] -mx-1 px-1 py-2 bg-white/95 backdrop-blur-sm space-y-2 border-b border-[#E8E4DC]">
             <label className="block text-xs font-bold text-[#5A6070]">
@@ -798,69 +1125,29 @@ export function StaffCoveRegister() {
           </div>
 
           <div className="sticky bottom-2 z-10 rounded-2xl border-2 border-[#085508] bg-white shadow-lg p-3 space-y-3">
-            <div className="flex flex-wrap items-end justify-between gap-2">
-              <div className="text-sm">
-                <p>
-                  Order <span className="font-bold tabular-nums">${cartTotal.toFixed(2)}</span>
-                  {cart.length ? (
-                    <span className="text-[#5A6070]">
-                      {' '}
-                      · {cart.reduce((n, l) => n + l.qty, 0)} items
-                    </span>
-                  ) : null}
-                </p>
-                {canUseCove ? (
-                  <p className="text-xs" style={{ color: remainingAfter < 0 ? '#b91c1c' : '#085508' }}>
-                    Cove left after charge:{' '}
-                    {remainingAfter < 0 ? 'Not enough' : `$${remainingAfter.toFixed(2)}`}
-                  </p>
+            <div className="text-sm">
+              <p>
+                Order <span className="font-bold tabular-nums">${cartTotal.toFixed(2)}</span>
+                {cart.length ? (
+                  <span className="text-[#5A6070]">
+                    {' '}
+                    · {cart.reduce((n, l) => n + l.qty, 0)} items
+                  </span>
                 ) : null}
-              </div>
+              </p>
+              {canUseCove ? (
+                <p className="text-xs" style={{ color: remainingAfter < 0 ? '#b91c1c' : '#085508' }}>
+                  Cove left after charge:{' '}
+                  {remainingAfter < 0 ? 'Not enough' : `$${remainingAfter.toFixed(2)}`}
+                </p>
+              ) : null}
             </div>
 
             {cart.length === 0 ? (
               <p className="text-xs text-[#5A6070]">Tap a product tile to add it.</p>
             ) : (
               <>
-                <div className="flex flex-wrap gap-2">
-                  {canUseCove ? (
-                    <button
-                      type="button"
-                      onClick={() => setPayTab('cove')}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-bold border ${
-                        payTab === 'cove'
-                          ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
-                          : 'border-[#E8E4DC] text-[#5A6070]'
-                      }`}
-                    >
-                      Cove card
-                    </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={() => setPayTab('stand')}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-bold border ${
-                      payTab === 'stand'
-                        ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
-                        : 'border-[#E8E4DC] text-[#5A6070]'
-                    }`}
-                  >
-                    Square Stand
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPayTab('cash')}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-bold border ${
-                      payTab === 'cash'
-                        ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
-                        : 'border-[#E8E4DC] text-[#5A6070]'
-                    }`}
-                  >
-                    Cash
-                  </button>
-                </div>
-
-                {payTab === 'cove' && canUseCove ? (
+                {payLane === 'cove' && canUseCove ? (
                   <Button
                     disabled={busy || remainingAfter < 0}
                     onClick={() => void chargeCove()}
@@ -875,32 +1162,13 @@ export function StaffCoveRegister() {
                   </Button>
                 ) : null}
 
-                {payTab === 'stand' ? (
-                  <div className="space-y-2 rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-3">
-                    <p className="text-xs text-[#5A6070] leading-relaxed">
-                      <strong>Preferred:</strong> ring this sale on the <strong>iPad Square Stand</strong>{' '}
-                      (or phone Square app). Payment lands in Square; Staff picks it up via webhook
-                      (Payments + inventory by SKU).
-                    </p>
-                    <p className="text-[11px] text-[#5A6070] leading-relaxed">
-                      Backup if you already took card on Stand and need this cart recorded here:
-                    </p>
-                    <Button
-                      disabled={busy || !cart.length}
-                      onClick={() => void chargeTender('stand')}
-                      className="text-white text-base px-8 py-6 font-bold w-full sm:w-auto"
-                      style={{ backgroundColor: '#085508' }}
-                    >
-                      {busy ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        `Mark paid on Stand · $${cartTotal.toFixed(2)}`
-                      )}
-                    </Button>
-                  </div>
+                {payLane === 'cove' && !canUseCove ? (
+                  <p className="text-xs text-amber-900 font-semibold">
+                    Need Cove balance to charge here — switch lane to Cash or Stand.
+                  </p>
                 ) : null}
 
-                {payTab === 'cash' ? (
+                {payLane === 'cash' ? (
                   <Button
                     disabled={busy}
                     onClick={() => void chargeTender('cash')}
@@ -913,6 +1181,38 @@ export function StaffCoveRegister() {
                       `Record cash $${cartTotal.toFixed(2)}`
                     )}
                   </Button>
+                ) : null}
+
+                {payLane === 'cash' ? (
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      className="text-[11px] font-bold underline text-[#5A6070]"
+                      onClick={() => setShowStandBackup((v) => !v)}
+                    >
+                      {showStandBackup ? 'Hide' : 'Backup'}: already took card on Stand?
+                    </button>
+                    {showStandBackup ? (
+                      <div className="mt-2 space-y-2 rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-3">
+                        <p className="text-xs text-[#5A6070] leading-relaxed">
+                          Only if Stand sync failed and you need this cart recorded here. Prefer
+                          ringing on Stand alone.
+                        </p>
+                        <Button
+                          disabled={busy || !cart.length}
+                          onClick={() => void chargeTender('stand')}
+                          className="text-white text-sm px-6 py-4 font-bold"
+                          style={{ backgroundColor: '#085508' }}
+                        >
+                          {busy ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            `Mark paid on Stand · $${cartTotal.toFixed(2)}`
+                          )}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
                 ) : null}
 
                 <ul className="flex flex-wrap gap-2 text-xs text-[#5A6070]">

@@ -203,6 +203,29 @@ async function resolveSkuForCatalogObject(catalogObjectId: string): Promise<stri
   }
 }
 
+async function resolveBuyerEmail(
+  client: ReturnType<typeof squareClient>,
+  payment: Record<string, unknown>,
+): Promise<string> {
+  const customerId = String(payment.customerId ?? '').trim()
+  if (customerId) {
+    try {
+      const res = await client.customers.get({ customerId })
+      const email = String(
+        (res as { customer?: { emailAddress?: string } }).customer?.emailAddress ?? '',
+      )
+        .trim()
+        .toLowerCase()
+      if (email.includes('@')) return email
+    } catch (err) {
+      console.warn('POS sync: customer lookup failed', customerId, err)
+    }
+  }
+  const buyer = String(payment.buyerEmailAddress ?? '').trim().toLowerCase()
+  if (buyer.includes('@')) return buyer
+  return 'guest@register.local'
+}
+
 /**
  * Fulfill a completed Square POS payment into Staff Payments + inventory.
  * Idempotent on Payments.transactionId = paymentId.
@@ -268,8 +291,9 @@ export async function fulfillSquarePosPayment(paymentId: string): Promise<PosSyn
       (payment.amountMoney as { amount?: number | string | bigint } | undefined)?.amount ?? 0,
     )
     const totalDollars = amountCents / 100
+    const parentEmail = await resolveBuyerEmail(client, payment)
     await wix.items.insert('Payments', {
-      parentEmail: 'guest@register.local',
+      parentEmail,
       amount: totalDollars,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
@@ -335,9 +359,10 @@ export async function fulfillSquarePosPayment(paymentId: string): Promise<PosSyn
     ) / 100
   const summary = lines.map((l) => `${l.qty}× ${l.name}`).join(', ')
   const unmatched = lines.filter((l) => !l.productId).map((l) => l.name)
+  const parentEmail = await resolveBuyerEmail(client, payment)
 
   await wix.items.insert('Payments', {
-    parentEmail: 'guest@register.local',
+    parentEmail,
     amount: totalDollars,
     status: unmatched.length ? 'Paid · review inventory' : 'Paid',
     paymentDate: new Date().toISOString(),
@@ -349,6 +374,7 @@ export async function fulfillSquarePosPayment(paymentId: string): Promise<PosSyn
       summary,
       unmatched.length ? `Unmatched SKUs (ledger only): ${unmatched.join(', ')}` : '',
       note ? `Square note: ${note}` : '',
+      parentEmail !== 'guest@register.local' ? `Square customer ${parentEmail}` : '',
     ]
       .filter(Boolean)
       .join(' · '),

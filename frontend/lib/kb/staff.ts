@@ -222,56 +222,54 @@ Do not send parents to the old Wix Events dashboard for day-to-day work. Stay in
       summary: 'Lookup family → confirm kids + balance → tap products → Charge.',
       order: 1,
       need: 'retail',
-      body: `Staff → **The Cove** → In-person sales (laptop or tablet). Use this for **Cove Digital Card** charges and **cash**. Card tap/swipe goes on **Square Stand** (see Help: In-person sales + Square Stand).
+      body: `Staff → **The Cove** → In-person sales. Guests do **not** need a login or Cove card.
 
-**Cove Digital Card (loaded balance)**
-1. Ask what they want
-2. Scan family QR, or type passcode / 6-digit → Look up
-3. Confirm student names and balance
-4. Tap products → **Charge Cove**
-5. Hand items
+**How paying?**
+1. **Card / wallet** → Square Stand only (do not also ring Staff)
+2. **Cash** → Staff Cash lane → tap products → record
+3. **Cove balance** → lookup code/QR → Charge Cove
+4. **Zelle / PayPal / phone Square** → External pay logger
 
-**Not enough balance** — stop. Parent reloads in the portal, or take that sale on Square Stand (card) / Cash.
+**Cove Digital Card (when they have balance)**
+1. Scan family QR or type passcode / 6-digit → Look up
+2. Confirm student names and balance
+3. Tap products → **Charge Cove**
+4. Low balance → Stand (card) or Cash instead
 
-**Cash** — Guest (optional) → tap products → **Cash**.
+**Window expectation:** until Cove cards are common → Stand or cash.
 
-**Do not** invent a Cove code for guests. Card-present → Square Stand only.
-
-Parents can also buy and pay themselves on the **website / member portal** (card or Cove balance). If already paid online → Pickup queue, no new charge.`,
+Parents can also buy online (portal / site). Already paid online → Pickup queue.`,
     },
     {
       slug: 'cove-in-person-square-stand',
       title: 'In-person sales + Square Stand (window & events)',
       categoryId: 'cove',
-      summary: 'Cove on Staff · card on Stand · cash on Staff · online in portal.',
+      summary: 'Sell first · Stand for card · Cash/Cove/External on Staff · join optional.',
       order: 2,
       need: 'retail',
-      body: `### Quick decision
+      body: `### Quick decision — how are they paying?
 
 | Situation | Do this |
 |-----------|---------|
-| Cove balance at the window | Staff → lookup → Charge Cove |
-| Card tap/swipe (anyone) | Square Stand only — do not also Mark paid in Staff |
-| Cash | Staff → Guest → Cash |
+| Card / Apple Pay / Google Pay | **Square Stand only** — do not also Mark paid in Staff |
+| Cash | Staff → Cash |
+| Cove balance | Staff → lookup → Charge Cove |
+| Zelle / PayPal / phone Square | Staff → External pay |
 | Already paid online | Pickup only |
-| Free join | After the sale — QR or Membership invite |
+| Free join | Soft ask **after** sale — QR optional |
+| Membership | Portal only |
 | Paid-member free food perk | Code ends in **9** → ticket · no charge |
 
-### Online (parents)
-Anyone can shop on the site (join free if needed) and pay with card. Members can also pay with **Cove balance** or card in the portal.
+### What to expect
+- **Events:** Stand dominates; cash minority; joins lag purchases  
+- **Snack window:** Stand or cash until Cove cards are common  
 
-### Staff laptop
-- Cove Charge · Cash · Pickup · Mark paid on Stand **only if** sync failed
-
-### Square Stand (iPad)
-- Ring spirit / guest card sales in Library → take card → done
-- Sales sync to Staff Payments — no Guest step required for card
+### Online
+Anyone can shop on the site. Memberships pay in the **portal**. Members can load Cove later.
 
 Never charge the same item on Stand and Staff.
 
-Longer guide: docs/COVE-IN-PERSON.md · Printable: /staff/in-person
-
-**Training video:** \`~/Downloads/SHMSPTO_WATCH_THIS_staff_cove_inperson_16x9.mp4\`.`,
+Longer guide: docs/COVE-IN-PERSON.md · Printable: /staff/in-person`,
     },
     {
       slug: 'cove-products-inventory',

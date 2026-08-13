@@ -1,13 +1,13 @@
 /**
  * POST /api/staff/cove/sale
- * Cash or Square Stand (card-present) in-person sales — inventory + ledger.
- * Tap/swipe happens on Stand / reader, not in this browser.
+ * Cash, Stand backup, or external (Zelle / PayPal / phone Square) — inventory + ledger.
  *
  * Body: {
- *   tender: 'cash' | 'stand',
- *   lines: [{ productId, variantId?, qty }],
+ *   tender: 'cash' | 'stand' | 'zelle' | 'paypal' | 'phone_square' | 'other',
+ *   lines?: [{ productId, variantId?, qty }],
+ *   amount?: number,  // external when no lines
  *   code?: string,
- *   guestEmail?, guestPhone?, guestName?,
+ *   guestEmail?, guestPhone?, guestName?, note?,
  *   sendJoinInvite?: boolean,
  *   idempotencyKey?: string,
  * }
@@ -34,6 +34,32 @@ import { getWixClient } from '@/lib/wix-client'
 
 export const dynamic = 'force-dynamic'
 
+const EXTERNAL_TENDERS = new Set(['zelle', 'paypal', 'phone_square', 'other'])
+const ALL_TENDERS = new Set(['cash', 'stand', ...EXTERNAL_TENDERS])
+
+function tenderLabel(tender: string) {
+  switch (tender) {
+    case 'cash':
+      return 'Cash'
+    case 'stand':
+      return 'Square Stand'
+    case 'zelle':
+      return 'Zelle'
+    case 'paypal':
+      return 'PayPal'
+    case 'phone_square':
+      return 'Phone Square'
+    default:
+      return 'Other external'
+  }
+}
+
+function tenderSource(tender: string) {
+  if (tender === 'stand') return 'cove_register_stand'
+  if (tender === 'cash') return 'cove_register_cash'
+  return `cove_register_${tender}`
+}
+
 export async function POST(req: NextRequest) {
   const session = await getStaffSession(req)
   if (!requireStaffRole(session?.staff ?? null, ['retail', 'admin'])) {
@@ -43,8 +69,11 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const tender = String(body.tender ?? '').trim().toLowerCase()
-    if (tender !== 'cash' && tender !== 'stand') {
-      return NextResponse.json({ error: 'tender must be cash or stand' }, { status: 400 })
+    if (!ALL_TENDERS.has(tender)) {
+      return NextResponse.json(
+        { error: 'tender must be cash, stand, zelle, paypal, phone_square, or other' },
+        { status: 400 },
+      )
     }
 
     const lines = (Array.isArray(body.lines) ? body.lines : []) as RegisterLineIn[]
@@ -54,8 +83,10 @@ export async function POST(req: NextRequest) {
       .toLowerCase()
     const guestPhone = String(body.guestPhone ?? '').trim()
     const guestName = String(body.guestName ?? '').trim()
+    const staffNote = String(body.note ?? '').trim()
     const sendJoinInvite = Boolean(body.sendJoinInvite)
     const idempotencyKey = String(body.idempotencyKey ?? randomUUID()).slice(0, 45)
+    const isExternal = EXTERNAL_TENDERS.has(tender)
 
     let parentEmail = ''
     let coveFamilyCode = ''
@@ -74,7 +105,7 @@ export async function POST(req: NextRequest) {
       parentEmail = 'guest@register.local'
     }
 
-    const source = tender === 'stand' ? 'cove_register_stand' : 'cove_register_cash'
+    const source = tenderSource(tender)
     const client = getWixClient()
     const priorSale = await client.items
       .query('Payments')
@@ -94,18 +125,43 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    const { priced, totalDollars } = await priceRegisterCart(lines)
-    await decrementPricedInventory(priced)
+    let priced: Awaited<ReturnType<typeof priceRegisterCart>>['priced'] = []
+    let totalDollars = 0
+    let lineSummary = ''
 
-    const lineSummary = registerLineSummary(priced)
+    if (lines.length > 0) {
+      const cart = await priceRegisterCart(lines)
+      priced = cart.priced
+      totalDollars = cart.totalDollars
+      lineSummary = registerLineSummary(priced)
+      await decrementPricedInventory(priced)
+    } else if (isExternal) {
+      totalDollars = Math.round(Number(body.amount) * 100) / 100
+      if (!Number.isFinite(totalDollars) || totalDollars <= 0) {
+        return NextResponse.json(
+          { error: 'Enter an amount (or add product lines)' },
+          { status: 400 },
+        )
+      }
+      lineSummary = staffNote || 'External / no itemized cart'
+    } else {
+      return NextResponse.json({ error: 'Add at least one product' }, { status: 400 })
+    }
+
     const who = code
       ? `Code ${coveFamilyCode || code}`
       : guestName || guestEmail || guestPhone || 'Guest'
     const contactBits = [guestEmail, guestPhone].filter(Boolean).join(' · ')
+    const methodNote = isExternal
+      ? `${tenderLabel(tender)} (logged by staff)`
+      : tender === 'stand'
+        ? 'Paid on Square Stand / reader (tap·swipe·dip)'
+        : 'Cash at table'
     const notes = [
       `${who}: ${lineSummary}`,
       contactBits ? `Contact ${contactBits}` : '',
-      tender === 'stand' ? 'Paid on Square Stand / reader (tap·swipe·dip)' : 'Cash at table',
+      methodNote,
+      staffNote && lines.length ? `Note: ${staffNote}` : '',
     ]
       .filter(Boolean)
       .join(' · ')
@@ -117,10 +173,10 @@ export async function POST(req: NextRequest) {
         amount: totalDollars,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
-        paymentMethod: tender === 'stand' ? 'Square Stand' : 'Cash',
+        paymentMethod: tenderLabel(tender),
         transactionId: idempotencyKey,
         source,
-        programName: 'In-person sales',
+        programName: isExternal ? 'In-person sales (external)' : 'In-person sales',
         notes,
       })
     } catch (err) {
