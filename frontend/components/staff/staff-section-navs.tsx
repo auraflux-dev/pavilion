@@ -1,6 +1,5 @@
 import {
   CalendarDays,
-  ClipboardList,
   FileText,
   Goal,
   HandCoins,
@@ -47,20 +46,14 @@ export function StaffRetailSectionNav() {
       eyebrow="Jump to"
       ariaLabel="Cove retail sections"
       items={[
+        { href: '#cove-register', label: 'In-person', hint: 'Any table sale', icon: ShoppingCart },
         {
           href: '#cove-fulfillment',
-          label: 'Pickup queue',
-          hint: 'Shirts & magnets',
+          label: 'Pickup',
+          hint: 'Online orders',
           icon: Package,
         },
-        { href: '#cove-register', label: 'Register', hint: 'Charge digital cards', icon: ShoppingCart },
-        { href: '#cove-products', label: 'Products', hint: 'Snacks & restock', icon: Store },
-        {
-          href: '#cove-inventory',
-          label: 'Inventory',
-          hint: 'Advanced table',
-          icon: ClipboardList,
-        },
+        { href: '#cove-stock-admin', label: 'Stock setup', hint: 'Admin · not sales', icon: Store },
       ]}
       variant="card"
     />

@@ -12,6 +12,7 @@ import { formatProgramSchedule } from '@/lib/programs/schedule'
 import { getUpcomingProgramSessions } from '@/lib/api/program-sessions'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
 import { listEnrollmentsForStudent } from '@/lib/programs/enrollments'
+import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 
 export const dynamic = 'force-dynamic'
 
@@ -254,14 +255,17 @@ export async function GET(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const item of portalEventRes.items ?? []) {
       const e = item as any
+      const title = String(e.title ?? 'Event')
+      const subtitle = String(e.subtitle ?? '')
+      if (isCmsQaItem(title, subtitle, e.href)) continue
       const audience = String(e.audience ?? 'all').toLowerCase()
       const grade = e.grade ? String(e.grade) : ''
       if (audience === 'grade' && grade && !grades.has(grade)) continue
       staffEventItems.push({
         id: `staff-event-${e._id}`,
         kind: 'event',
-        title: String(e.title ?? 'Event'),
-        subtitle: String(e.subtitle ?? ''),
+        title,
+        subtitle,
         whenLabel: formatEventWhen(e.startAt, e.endAt),
         startDate: (e.startAt as string | null) ?? null,
         href: String(e.href ?? '/events').trim() || '/events',
@@ -315,6 +319,7 @@ export async function GET(req: NextRequest) {
       else if (!parentEmail && !audience && !studentId && !grade) visible = true // broadcast drafts marked active
 
       if (!visible) continue
+      if (isCmsQaItem(m.fromName, m.subject, m.body, m.programName)) continue
 
       messages.push({
         id: m._id,
@@ -331,6 +336,7 @@ export async function GET(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const item of newsletterRes.items ?? []) {
       const n = item as any
+      if (isCmsQaItem(n.fromName, n.title, n.body)) continue
       const audience = String(n.audience ?? 'all').toLowerCase()
       const grade = n.grade ? String(n.grade) : ''
       let visible = false

@@ -1,6 +1,5 @@
 import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
-import { getMemberSession } from '@/lib/auth-member'
 import { getCatalogConfig, isAllowedStoreCardLoadAmount } from '@/lib/api/catalog-config'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import {
@@ -8,6 +7,7 @@ import {
   resolveFamilyGiftCard,
   syncFamilyStoreCard,
 } from '@/lib/family-store-card'
+import { resolvePrimaryParentEmail } from '@/lib/family-guardians'
 import { getWixClient } from '@/lib/wix-client'
 import {
   getStoreCardBonusPercent,
@@ -21,6 +21,7 @@ import {
   loadGiftCard,
   upsertSquareCustomer,
 } from '@/lib/square'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 
 type StudentRow = {
   _id: string
@@ -54,8 +55,11 @@ async function findStoredMethod(email: string): Promise<StoredMethod | null> {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getMemberSession(req)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const effective = await getEffectiveParentEmail(req)
+  if (!effective) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (effective.actingAs) {
+    return NextResponse.json({ error: 'Act-as is read-only for Cove loads.' }, { status: 403 })
+  }
 
   try {
     const {
@@ -67,6 +71,8 @@ export async function POST(req: NextRequest) {
     } = await req.json()
     const amount = Number(amountCents) / 100
     const cfg = await getCatalogConfig()
+    const householdEmail = await resolvePrimaryParentEmail(effective.parentEmail)
+    const { session } = effective
 
     if (!Number.isInteger(amountCents) || !isAllowedStoreCardLoadAmount(amount, cfg)) {
       return NextResponse.json(
@@ -78,7 +84,7 @@ export async function POST(req: NextRequest) {
     }
 
     const client = getWixClient()
-    const family = await listFamilyStudents(session.email)
+    const family = await listFamilyStudents(householdEmail)
     if (family.length === 0) {
       return NextResponse.json(
         { error: 'Add a student before loading the family Cove Digital Card.' },
@@ -86,7 +92,7 @@ export async function POST(req: NextRequest) {
       )
     }
     const { requireCoveUnlocked } = await import('@/lib/onboarding-checklist')
-    const gate = await requireCoveUnlocked(session.email)
+    const gate = await requireCoveUnlocked(householdEmail)
     if (!gate.ok) {
       return NextResponse.json(
         { error: gate.error, code: 'ONBOARDING_INCOMPLETE' },
@@ -104,7 +110,7 @@ export async function POST(req: NextRequest) {
 
     const name =
       `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim()
-    let stored = await findStoredMethod(session.email)
+    let stored = await findStoredMethod(householdEmail)
     let paymentSource = sourceId as string | undefined
     let customerId = stored?.squareCustomerId
 
@@ -116,7 +122,7 @@ export async function POST(req: NextRequest) {
       customerId = stored.squareCustomerId
     } else if (saveCard) {
       if (!sourceId) return NextResponse.json({ error: 'Card token required' }, { status: 400 })
-      const customer = await upsertSquareCustomer(session.email, name)
+      const customer = await upsertSquareCustomer(householdEmail, name)
       if (!customer?.id) throw new Error('Could not create Square customer')
       const card = await createCardOnFile({
         sourceId,
@@ -131,7 +137,7 @@ export async function POST(req: NextRequest) {
       const row = {
         ...(stored ?? {}),
         _id: stored?._id,
-        parentEmail: session.email,
+        parentEmail: householdEmail,
         wixMemberId: session.memberId,
         squareCustomerId: customer.id,
         squareCardId: card.id,
@@ -161,14 +167,14 @@ export async function POST(req: NextRequest) {
       amountCents,
       idempotencyKey: paymentKey,
       customerId,
-      referenceId: `store-card:${session.email}`,
-      buyerEmailAddress: session.email,
+      referenceId: `store-card:${householdEmail}`,
+      buyerEmailAddress: householdEmail,
       note: 'SHMS PTO family Cove Digital Card load',
     })
 
     const settings = await getSiteSettings()
     const configuredBonus = getStoreCardBonusPercent(settings.get('storeCardBonusPercent', '10'))
-    const bonusPercent = await resolveParentLoadBonusPercent(session.email, configuredBonus)
+    const bonusPercent = await resolveParentLoadBonusPercent(householdEmail, configuredBonus)
     const loadCents = storeCardLoadCents(amountCents, bonusPercent)
     const isFirstLoad = bonusPercent > 0
 
@@ -201,7 +207,7 @@ export async function POST(req: NextRequest) {
       }
 
       await syncFamilyStoreCard({
-        parentEmail: session.email,
+        parentEmail: householdEmail,
         gan,
         giftCardId,
         balanceDollars: newBalance ?? loadCents / 100,
@@ -209,7 +215,7 @@ export async function POST(req: NextRequest) {
 
       await client.items.insert('Payments', {
         studentId: student._id,
-        parentEmail: session.email,
+        parentEmail: householdEmail,
         programName: isFirstLoad
           ? `Family Cove Digital Card First Load (+${bonusPercent}% bonus)`
           : 'Family Cove Digital Card Reload',
@@ -238,7 +244,7 @@ export async function POST(req: NextRequest) {
     } catch (loadError) {
       await client.items.insert('Payments', {
         studentId: student._id,
-        parentEmail: session.email,
+        parentEmail: householdEmail,
         programName: 'Family Cove Digital Card Reload',
         amount,
         status: 'Needs Reconciliation',

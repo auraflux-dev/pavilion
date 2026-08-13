@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getMemberSession } from '@/lib/auth-member'
 import {
   ensureCoveFamilyCode,
   getCoveFamilyPasscode,
@@ -12,20 +11,25 @@ import { listFamilyStudents, resolveFamilyGiftCard } from '@/lib/family-store-ca
 import { getGiftCardBalance } from '@/lib/square'
 import { syncFamilyCoveRedeems } from '@/lib/cove-redeem-sync'
 import { resolvePrimaryParentEmail } from '@/lib/family-guardians'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 
 /**
  * GET  /api/gift-card/family-code — numeric code + word passcode + QR payload
  * POST { action: 'reset' } — rotate 6-digit backup (primary only)
  * POST { action: 'set-passcode', passcode } — set spoken word passcode (primary only)
  * POST { action: 'suggest-passcode' } — name-based suggestion
+ *
+ * Uses getEffectiveParentEmail so staff with linked personalEmail (or act-as)
+ * see the same household as /api/students — not an empty staff@ mailbox.
  */
 export async function GET(req: NextRequest) {
-  const session = await getMemberSession(req)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const effective = await getEffectiveParentEmail(req)
+  if (!effective) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const householdEmail = await resolvePrimaryParentEmail(session.email)
-    const isPrimary = householdEmail === session.email.trim().toLowerCase()
+    const viewerHousehold = effective.parentEmail.trim().toLowerCase()
+    const householdEmail = await resolvePrimaryParentEmail(viewerHousehold)
+    const isPrimary = householdEmail === viewerHousehold
 
     const family = await listFamilyStudents(householdEmail)
     if (family.length === 0) {
@@ -34,8 +38,10 @@ export async function GET(req: NextRequest) {
         coveFamilyPasscode: null,
         balance: 0,
         gan: '',
+        hasCard: false,
         locked: true,
-        message: 'Add a student before a Cove family code is issued.',
+        reason: 'no_students',
+        message: 'Add a student first, then you can load money onto your Cove Digital Card.',
       })
     }
 
@@ -47,7 +53,9 @@ export async function GET(req: NextRequest) {
         coveFamilyPasscode: null,
         balance: 0,
         gan: '',
+        hasCard: false,
         locked: true,
+        reason: 'onboarding',
         message: gate.error,
       })
     }
@@ -78,8 +86,8 @@ export async function GET(req: NextRequest) {
     const { isPaidMemberFamilyCode } = await import('@/lib/cove-family-code')
     const paidMemberCode = isPaidMemberFamilyCode(code)
 
-    const firstName = String(session.member?.contact?.firstName ?? '').trim()
-    const lastName = String(session.member?.contact?.lastName ?? '').trim()
+    const firstName = String(effective.session.member?.contact?.firstName ?? '').trim()
+    const lastName = String(effective.session.member?.contact?.lastName ?? '').trim()
     const suggestedPasscode =
       firstName && lastName
         ? await suggestUniqueCovePasscode(householdEmail, lastName, firstName)
@@ -101,6 +109,10 @@ export async function GET(req: NextRequest) {
       primaryParentEmail: householdEmail,
       parentFirstName: firstName,
       parentLastName: lastName,
+      reason: card.gan ? 'ready' : 'needs_load',
+      message: card.gan
+        ? undefined
+        : 'Load money to activate your phone QR for The Cove and Square Stand. Free accounts can use the card anytime after a load — paid membership is optional.',
       codeHint: paidMemberCode
         ? 'Paid PTO member code (ends in 9). Show this 6-digit code at event food tables for refreshment tickets.'
         : 'Free-account Cove code. Paid membership codes end in 9 for event refreshments.',
@@ -115,12 +127,16 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getMemberSession(req)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const effective = await getEffectiveParentEmail(req)
+  if (!effective) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (effective.actingAs) {
+    return NextResponse.json({ error: 'Act-as is read-only for Cove codes.' }, { status: 403 })
+  }
 
   try {
-    const householdEmail = await resolvePrimaryParentEmail(session.email)
-    if (householdEmail !== session.email.trim().toLowerCase()) {
+    const viewerHousehold = effective.parentEmail.trim().toLowerCase()
+    const householdEmail = await resolvePrimaryParentEmail(viewerHousehold)
+    if (householdEmail !== viewerHousehold) {
       return NextResponse.json(
         { error: 'Only the primary account holder can change the family Cove codes.' },
         { status: 403 },
@@ -146,8 +162,10 @@ export async function POST(req: NextRequest) {
 
     if (action === 'suggest-passcode') {
       const firstName =
-        String(body.firstName ?? session.member?.contact?.firstName ?? '').trim()
-      const lastName = String(body.lastName ?? session.member?.contact?.lastName ?? '').trim()
+        String(body.firstName ?? effective.session.member?.contact?.firstName ?? '').trim()
+      const lastName = String(
+        body.lastName ?? effective.session.member?.contact?.lastName ?? '',
+      ).trim()
       if (!firstName || !lastName) {
         return NextResponse.json(
           { error: 'Add your first and last name in My Account to get a suggestion.' },

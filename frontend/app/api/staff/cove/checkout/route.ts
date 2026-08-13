@@ -4,10 +4,7 @@ import { lookupFamilyByCoveCode } from '@/lib/cove-family-code'
 import { decrementCoveInventory } from '@/lib/cove-inventory'
 import { syncFamilyStoreCard } from '@/lib/family-store-card'
 import { getGiftCardBalance, redeemGiftCard } from '@/lib/square'
-import {
-  flattenRegisterProducts,
-  listStaffCoveProducts,
-} from '@/lib/staff/cove-products'
+import { listInPersonSellProducts } from '@/lib/staff/cove-products'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
 import { getWixClient } from '@/lib/wix-client'
 
@@ -78,7 +75,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    const catalog = flattenRegisterProducts(await listStaffCoveProducts())
+    const catalog = await listInPersonSellProducts()
     const byKey = new Map(
       catalog.map((p) => [`${p.id}:${p.variantId || ''}`, p] as const)
     )

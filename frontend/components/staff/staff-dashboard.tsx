@@ -831,8 +831,8 @@ export function StaffDashboard() {
         {active === 'retail' && canRetail ? (
           <div className="space-y-4">
             <StaffRetailSectionNav />
-            <StaffFulfillmentsPanel variant="cove" />
             <StaffRetailPanel />
+            <StaffFulfillmentsPanel variant="cove" />
           </div>
         ) : null}
         {active === 'discounts' && canDiscounts ? (

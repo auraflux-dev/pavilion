@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
-import { getMemberSession } from '@/lib/auth-member'
+import { resolvePrimaryParentEmail } from '@/lib/family-guardians'
 import { getWixClient } from '@/lib/wix-client'
 import {
   createCardOnFile,
@@ -8,6 +8,7 @@ import {
   getSquareWebPaymentsConfig,
   upsertSquareCustomer,
 } from '@/lib/square'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 
 type StoredMethod = {
   _id?: string
@@ -31,11 +32,18 @@ async function findMethod(email: string): Promise<StoredMethod | null> {
   return (result.items?.[0] as StoredMethod | undefined) ?? null
 }
 
-export async function GET(req: NextRequest) {
-  const session = await getMemberSession(req)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+async function householdFromRequest(req: NextRequest) {
+  const effective = await getEffectiveParentEmail(req)
+  if (!effective) return null
+  const householdEmail = await resolvePrimaryParentEmail(effective.parentEmail)
+  return { effective, householdEmail }
+}
 
-  const method = await findMethod(session.email)
+export async function GET(req: NextRequest) {
+  const resolved = await householdFromRequest(req)
+  if (!resolved) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const method = await findMethod(resolved.householdEmail)
   const config = getSquareWebPaymentsConfig()
   return NextResponse.json({
     configured: Boolean(config.applicationId && config.locationId),
@@ -54,8 +62,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getMemberSession(req)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const resolved = await householdFromRequest(req)
+  if (!resolved) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (resolved.effective.actingAs) {
+    return NextResponse.json({ error: 'Act-as is read-only for payment methods.' }, { status: 403 })
+  }
 
   try {
     const { sourceId } = await req.json()
@@ -63,9 +74,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Card token required' }, { status: 400 })
     }
 
+    const { session } = resolved.effective
+    const householdEmail = resolved.householdEmail
     const name =
       `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim()
-    const customer = await upsertSquareCustomer(session.email, name)
+    const customer = await upsertSquareCustomer(householdEmail, name)
     if (!customer?.id) throw new Error('Could not create Square customer')
 
     const card = await createCardOnFile({
@@ -77,11 +90,11 @@ export async function POST(req: NextRequest) {
     if (!card?.id) throw new Error('Could not store card')
 
     const client = getWixClient()
-    const existing = await findMethod(session.email)
+    const existing = await findMethod(householdEmail)
     const row = {
       ...(existing ?? {}),
       _id: existing?._id,
-      parentEmail: session.email,
+      parentEmail: householdEmail,
       wixMemberId: session.memberId,
       squareCustomerId: customer.id,
       squareCardId: card.id,
@@ -116,11 +129,15 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await getMemberSession(req)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const resolved = await householdFromRequest(req)
+  if (!resolved) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (resolved.effective.actingAs) {
+    return NextResponse.json({ error: 'Act-as is read-only for payment methods.' }, { status: 403 })
+  }
 
   try {
-    const method = await findMethod(session.email)
+    const householdEmail = resolved.householdEmail
+    const method = await findMethod(householdEmail)
     if (!method?._id) return NextResponse.json({ ok: true })
     if (method.squareCardId) await disableCardOnFile(method.squareCardId)
 
@@ -134,7 +151,7 @@ export async function DELETE(req: NextRequest) {
 
     const students = await client.items
       .query('Students')
-      .eq('parentEmail', session.email)
+      .eq('parentEmail', householdEmail)
       .eq('autoTopOff', true)
       .find()
     for (const student of students.items ?? []) {

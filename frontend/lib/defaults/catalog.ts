@@ -43,14 +43,14 @@ export const CATALOG_DEFAULTS = {
     'd9ed5b01-324d-4136-809d-21a3211b9d89',
     '9e7d4b13-4437-4c51-b63d-4942d18edf64',
   ].join(','),
-  /** Comma-separated Wix Catalog product UUIDs shown on /cove#shop (spirit wear).
-   * Yard sign + water bottle omitted (not selling).
-   * Hat / drawstring / long sleeve omitted until matching product photos exist. */
+  /** Comma-separated Wix Catalog product UUIDs for spirit / in-person merch.
+   * Order = display order: short sleeve → long sleeve → hoodie → magnet → drawstring. */
   spiritWearProductIds: [
-    'e9fbcab5-ae25-418e-a4ac-81889d93acc7', // Hoodie (green)
-    '791e1007-b926-4416-8a90-24dd641d0887', // Spirit T-Shirt (pastel tie-dye)
-    '7c8778e4-61e0-4ea6-95ed-cac3ae40c8cd', // Stone Hill Car Magnet ($10)
-    'd5730ad6-8d4a-4757-93fa-05aa3ff1e244', // Stingrays Drawstring Bag ($10)
+    '791e1007-b926-4416-8a90-24dd641d0887', // Spirit T-Shirt (short sleeve)
+    'f3eedab0-bfd5-4f30-ad8f-7586b783b78f', // Long Sleeve Shirt
+    'e9fbcab5-ae25-418e-a4ac-81889d93acc7', // Hoodie
+    '7c8778e4-61e0-4ea6-95ed-cac3ae40c8cd', // Car Magnet
+    'd5730ad6-8d4a-4757-93fa-05aa3ff1e244', // Drawstring Bag
   ].join(','),
 } as const
 

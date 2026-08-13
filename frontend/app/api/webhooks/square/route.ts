@@ -1,13 +1,13 @@
 /**
  * POST /api/webhooks/square
- * Receives Square gift_card.activity.created events.
- * On REDEEM: checks if balance dropped below auto top-off threshold.
- * If so, and parent has auto top-off enabled, fires a LOAD activity.
+ * - gift_card.activity.created → Litecard sync + auto top-off on REDEEM
+ * - payment.updated (COMPLETED) → Square Stand / POS → Staff Payments + inventory
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac } from 'crypto'
 import { getWixClient } from '@/lib/wix-client'
 import { chargePayment, loadGiftCard } from '@/lib/square'
+import { fulfillSquarePosPayment } from '@/lib/square-pos-sync'
 
 const SQUARE_WEBHOOK_SIGNATURE_KEY = process.env.SQUARE_WEBHOOK_SIGNATURE_KEY ?? ''
 const SQUARE_NOTIFICATION_URL = process.env.SQUARE_NOTIFICATION_URL ?? ''
@@ -34,6 +34,22 @@ export async function POST(req: NextRequest) {
     event = JSON.parse(body)
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+
+  if (event.type === 'payment.updated') {
+    const payment = event.data?.object?.payment
+    const paymentId = String(payment?.id ?? event.data?.id ?? '')
+    const status = String(payment?.status ?? '')
+    if (paymentId && status === 'COMPLETED') {
+      try {
+        const result = await fulfillSquarePosPayment(paymentId)
+        return NextResponse.json({ ok: true, posSync: result })
+      } catch (err) {
+        console.error('Square POS → Staff sync failed:', err)
+        return NextResponse.json({ error: 'POS sync failed' }, { status: 500 })
+      }
+    }
+    return NextResponse.json({ ok: true })
   }
 
   if (event.type !== 'gift_card.activity.created') {

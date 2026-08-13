@@ -6,6 +6,7 @@
  * Cove allowlist, and CoveInventory qty/SKU per variant.
  */
 import { getCatalogConfig } from '@/lib/api/catalog-config'
+import { CATALOG_DEFAULTS } from '@/lib/defaults/catalog'
 import { listCoveInventory } from '@/lib/cove-inventory'
 import { uploadMediaBuffer } from '@/lib/social/wix-media'
 import { upsertSiteSetting } from '@/lib/staff/cms-catalog'
@@ -90,17 +91,49 @@ function getProductImage(raw: Record<string, unknown>): string | undefined {
  }
 }
 
-function variantLabel(variant: Record<string, unknown>): string {
- const choices =
- (variant.choices as Array<{
- optionChoiceNames?: { choiceName?: string }
- choiceName?: string
- }> | undefined) ?? []
- const labels = choices
- .map((c) => c.optionChoiceNames?.choiceName || c.choiceName || '')
- .map((s) => String(s).trim())
- .filter(Boolean)
- return labels.join(' / ') || 'Default'
+function choiceLabelMap(raw: Record<string, unknown>): Map<string, string> {
+  const map = new Map<string, string>()
+  const options = (raw.options as Array<Record<string, unknown>> | undefined) ?? []
+  for (const opt of options) {
+    const optionId = String(opt.id ?? '')
+    const choices =
+      ((opt.choicesSettings as { choices?: Array<Record<string, unknown>> } | undefined)
+        ?.choices as Array<Record<string, unknown>> | undefined) ?? []
+    for (const c of choices) {
+      const choiceId = String(c.choiceId ?? c.id ?? '')
+      const name = String(c.name ?? c.key ?? '').trim()
+      if (optionId && choiceId && name) map.set(`${optionId}:${choiceId}`, name)
+    }
+  }
+  return map
+}
+
+function variantLabel(
+  variant: Record<string, unknown>,
+  labels?: Map<string, string>,
+): string {
+  const choices =
+    (variant.choices as Array<{
+      optionChoiceNames?: { choiceName?: string }
+      choiceName?: string
+      optionChoiceIds?: { optionId?: string; choiceId?: string }
+    }> | undefined) ?? []
+  const fromNames = choices
+    .map((c) => c.optionChoiceNames?.choiceName || c.choiceName || '')
+    .map((s) => String(s).trim())
+    .filter(Boolean)
+  if (fromNames.length) return fromNames.join(' / ')
+  if (labels?.size) {
+    const fromIds = choices
+      .map((c) => {
+        const optionId = String(c.optionChoiceIds?.optionId ?? '')
+        const choiceId = String(c.optionChoiceIds?.choiceId ?? '')
+        return labels.get(`${optionId}:${choiceId}`) || ''
+      })
+      .filter(Boolean)
+    if (fromIds.length) return fromIds.join(' / ')
+  }
+  return 'Default'
 }
 
 async function readAllowlist(): Promise<string[]> {
@@ -176,6 +209,7 @@ function mapVariants(
  raw: Record<string, unknown>,
  invByKey: Map<string, { quantity: number; sku: string }>
 ): StaffCoveVariant[] {
+ const labels = choiceLabelMap(raw)
  const variants =
  ((raw.variantsInfo as { variants?: Array<Record<string, unknown>> } | undefined)
  ?.variants as Array<Record<string, unknown>> | undefined) ?? []
@@ -205,7 +239,7 @@ function mapVariants(
  : null
  return {
  id,
- label: variantLabel(variant),
+ label: variantLabel(variant, labels),
  price,
  sku,
  quantity,
@@ -342,63 +376,158 @@ export async function listStaffCoveProducts(): Promise<StaffCoveProduct[]> {
  })
 }
 
-/** Flatten products to one sellable line per variant for the register. */
-export function flattenRegisterProducts(products: StaffCoveProduct[]): Array<{
- id: string
- variantId: string
- name: string
- price: number
- category: string
- sku: string
- quantity: number | null
- available: boolean
- image?: string
- featured?: boolean
- dealLabel?: string
-}> {
- const lines: Array<{
- id: string
- variantId: string
- name: string
- price: number
- category: string
- sku: string
- quantity: number | null
- available: boolean
- image?: string
- featured?: boolean
- dealLabel?: string
- }> = []
+export type RegisterProductLine = {
+  id: string
+  variantId: string
+  name: string
+  price: number
+  category: string
+  sku: string
+  quantity: number | null
+  available: boolean
+  image?: string
+  featured?: boolean
+  dealLabel?: string
+  /** Spirit (and multi-option) items: pick size/color after tapping the product tile. */
+  optionName?: string
+  variants?: Array<{
+    id: string
+    label: string
+    price: number
+    sku: string
+    quantity: number | null
+    available: boolean
+  }>
+}
 
- for (const p of products) {
- if (!p.onCove && !p.visible) continue
- const variants = p.variants.length ? p.variants : []
- for (const v of variants) {
- const qty = v.quantity
- const available = qty == null ? p.wixInStock : qty > 0
- if (!available) continue
- const label =
- v.label && v.label !== 'Default' ? `${p.name} · ${v.label}` : p.name
- lines.push({
- id: p.id,
- variantId: v.id,
- name: label,
- price: v.price,
- category: 'Snacks',
- sku: v.sku || p.sku || p.id.slice(0, 8).toUpperCase(),
- quantity: qty,
- available,
- image: p.image,
- featured: Boolean(p.featured),
- dealLabel: p.dealLabel,
- })
- }
- }
+/** Flatten products already selected for in-person selling (snacks + spirit, etc.).
+ * Spirit: one tile per product + variants for a picker (not one tile per size/color).
+ * Snacks: one tile per sellable variant line.
+ */
+export function flattenRegisterProducts(
+  products: StaffCoveProduct[],
+  opts?: { spiritIds?: Set<string>; spiritOrder?: string[] },
+): RegisterProductLine[] {
+  const spiritIds = opts?.spiritIds ?? new Set<string>()
+  const spiritOrder = opts?.spiritOrder ?? []
+  const orderIndex = new Map(spiritOrder.map((id, i) => [id, i]))
+  const lines: RegisterProductLine[] = []
 
- return lines.sort((a, b) => {
- if (Boolean(a.featured) !== Boolean(b.featured)) return a.featured ? -1 : 1
- return a.name.localeCompare(b.name)
- })
+  for (const p of products) {
+    const isSpirit = spiritIds.has(p.id)
+    const variants = p.variants.length ? p.variants : []
+
+    if (isSpirit) {
+      const sellable = variants
+        .map((v) => {
+          const available = v.quantity == null ? p.wixInStock : v.quantity > 0
+          return {
+            id: v.id,
+            label: v.label && v.label !== 'Default' ? v.label : v.sku || 'Option',
+            price: v.price,
+            sku: v.sku || p.sku || '',
+            quantity: v.quantity,
+            available,
+          }
+        })
+        .filter((v) => v.available || variants.length <= 1)
+
+      const anyAvailable =
+        sellable.some((v) => v.available) || (variants.length === 0 && p.wixInStock)
+      if (!anyAvailable && sellable.length === 0) continue
+
+      const primary = sellable.find((v) => v.available) ?? sellable[0]
+      lines.push({
+        id: p.id,
+        variantId: primary?.id ?? p.variantId ?? '',
+        name: p.name,
+        price: primary?.price ?? p.price,
+        category: 'Spirit',
+        sku: primary?.sku || p.sku || p.id.slice(0, 8).toUpperCase(),
+        quantity: primary?.quantity ?? p.quantity,
+        available: true,
+        image: p.image,
+        featured: Boolean(p.featured),
+        dealLabel: p.dealLabel,
+        optionName: p.optionName || (sellable.length > 1 ? 'Option' : undefined),
+        variants: sellable.length > 1 ? sellable : undefined,
+      })
+      continue
+    }
+
+    for (const v of variants) {
+      const qty = v.quantity
+      const available = qty == null ? p.wixInStock : qty > 0
+      if (!available) continue
+      const label =
+        v.label && v.label !== 'Default' ? `${p.name} · ${v.label}` : p.name
+      lines.push({
+        id: p.id,
+        variantId: v.id,
+        name: label,
+        price: v.price,
+        category: p.onCove ? 'Snacks' : 'Merch',
+        sku: v.sku || p.sku || p.id.slice(0, 8).toUpperCase(),
+        quantity: qty,
+        available,
+        image: p.image,
+        featured: Boolean(p.featured),
+        dealLabel: p.dealLabel,
+      })
+    }
+  }
+
+  return lines.sort((a, b) => {
+    if (Boolean(a.featured) !== Boolean(b.featured)) return a.featured ? -1 : 1
+    if (a.category !== b.category) {
+      if (a.category === 'Snacks') return -1
+      if (b.category === 'Snacks') return 1
+      return a.category.localeCompare(b.category)
+    }
+    if (a.category === 'Spirit' && b.category === 'Spirit') {
+      const ai = orderIndex.has(a.id) ? orderIndex.get(a.id)! : 999
+      const bi = orderIndex.has(b.id) ? orderIndex.get(b.id)! : 999
+      if (ai !== bi) return ai - bi
+    }
+    return a.name.localeCompare(b.name)
+  })
+}
+
+/**
+ * Membership dues + Cove Digital Card *load* products — never sold as table tiles.
+ * Spirit wear and Cove snacks are in-person sellable.
+ */
+export async function registerBlockedProductIds(): Promise<Set<string>> {
+  const cfg = await getCatalogConfig()
+  const ids = new Set<string>()
+  ids.add(cfg.storeCardProductId)
+  for (const entry of Object.values(cfg.membershipByTier)) {
+    if (entry.productId) ids.add(entry.productId)
+  }
+  const d = CATALOG_DEFAULTS
+  ids.add(d.storeCardProductId)
+  if (d.membershipRubyProductId) ids.add(d.membershipRubyProductId)
+  if (d.membershipSupremeProductId) ids.add(d.membershipSupremeProductId)
+  if (d.membershipPearlProductId) ids.add(d.membershipPearlProductId)
+  return ids
+}
+
+/** In-person catalog: Cove snacks allowlist + spirit wear, minus membership / card-load SKUs. */
+export async function listInPersonSellProducts() {
+  const [products, blocked, cfg] = await Promise.all([
+    listStaffCoveProducts(),
+    registerBlockedProductIds(),
+    getCatalogConfig(),
+  ])
+  const spiritOrder = Array.from(cfg.spiritWearProductIds)
+  // Prefer CMS/default list order (Set iteration order follows insertion in parseIdList)
+  const sellable = products.filter(
+    (p) => !blocked.has(p.id) && (p.onCove || cfg.spiritWearProductIds.has(p.id)),
+  )
+  return flattenRegisterProducts(sellable, {
+    spiritIds: cfg.spiritWearProductIds,
+    spiritOrder,
+  })
 }
 
 function buildOptionAndVariants(

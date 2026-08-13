@@ -13,7 +13,7 @@
 | Lane | Who | Device | Money path |
 |------|-----|--------|------------|
 | **A — Digital card** | Family already loaded Cove Digital Card online | Staff register **or** Square gift-card scan of Wallet QR | Debit prepaid card / Staff Charge |
-| **B — Guest** | No portal, no balance, or wants card-present merch | **Square Stand only** | Card-present Square sale |
+| **B — Guest** | No portal, no balance, or wants card-present merch | **Square Stand** (primary) | Card-present Square sale → syncs to Staff Payments + inventory by SKU |
 
 Same lanes at the **snack window** and at **event tables**. Do **not** double-charge.
 

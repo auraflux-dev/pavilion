@@ -93,6 +93,18 @@ export function normalizePaymentLedgerRow(
     if (status === 'Paid') status = 'Spent'
   }
 
+  if (source === 'square_pos_stand' || source === 'cove_register_stand') {
+    if (!programName) programName = 'In-person · Square Stand'
+    if (!paymentMethod) paymentMethod = 'Square Stand'
+    if (notes) detail = notes
+  }
+
+  if (source === 'cove_register_cash') {
+    if (!programName) programName = 'In-person · cash'
+    if (!paymentMethod) paymentMethod = 'Cash'
+    if (notes) detail = notes
+  }
+
   if (!programName) programName = 'Payment'
 
   return {

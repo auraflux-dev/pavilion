@@ -354,9 +354,16 @@ export async function setCoveFamilyPasscode(
  */
 export async function lookupFamilyByCoveCode(rawCode: string): Promise<CoveFamilyLookup | null> {
   const raw = String(rawCode ?? '').trim()
+
+  // Photos / portal QR before load: SHMSCOVE:408617 (must not be treated as a word passcode)
+  const prefixed = raw.match(/^(?:SHMSCOVE:|shmscove\/|cove:)\s*(\d{4,8})$/i)
+  const digitsOnly = raw.replace(/\D/g, '')
+  const isPrefixedPin = Boolean(prefixed?.[1])
+  const pinFromPrefix = prefixed?.[1] ? normalizeCode(prefixed[1]) : ''
+
   const passcode = normalizePasscode(raw)
-  const hasLetters = /[a-z]/i.test(raw)
-  const digits = raw.replace(/\D/g, '')
+  const hasLetters = /[a-z]/i.test(raw) && !isPrefixedPin
+  const digits = isPrefixedPin ? pinFromPrefix : digitsOnly
 
   if (!hasLetters && digits.length < 4) return null
   if (hasLetters && passcode.length < PASSCODE_MIN) return null
@@ -404,7 +411,13 @@ export async function lookupFamilyByCoveCode(rawCode: string): Promise<CoveFamil
     }
   }
 
-  const code = normalizeCode(!hasLetters && digits.length <= 8 ? digits : '')
+  const code = normalizeCode(
+    isPrefixedPin
+      ? pinFromPrefix
+      : !hasLetters && digits.length <= 8
+        ? digits
+        : '',
+  )
   if (!parentEmail && code.length >= 4) {
     try {
       const membership = await client.items

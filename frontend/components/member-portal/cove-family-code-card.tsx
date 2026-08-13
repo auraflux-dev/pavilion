@@ -11,7 +11,7 @@ const PASSCODE_CALLOUT_KEY = 'shms_cove_passcode_callout_v1'
  * Family Cove Digital Card. QR encodes Square GAN when loaded (Stand / iPad / Photos / Wallet).
  * Word passcode (name-based suggestion) + 6-digit PIN as spoken backups.
  */
-export function CoveFamilyCodeCard() {
+export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) {
   const [code, setCode] = useState<string | null>(null)
   const [passcode, setPasscode] = useState<string | null>(null)
   const [suggestedPasscode, setSuggestedPasscode] = useState('')
@@ -69,7 +69,7 @@ export function CoveFamilyCodeCard() {
       setHasCard(Boolean(d.hasCard))
       setPaidMemberCode(Boolean(d.paidMemberCode))
       setCodeHint(String(d.codeHint ?? ''))
-      if (d.message) setMessage(d.message)
+      setMessage(typeof d.message === 'string' ? d.message : '')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load code')
     } finally {
@@ -79,7 +79,7 @@ export function CoveFamilyCodeCard() {
 
   useEffect(() => {
     void load()
-  }, [load])
+  }, [load, refreshKey])
 
   async function reset() {
     if (
@@ -336,8 +336,12 @@ export function CoveFamilyCodeCard() {
                   <>Load or refresh the Cove Digital Card, then Save QR again.</>
                 ) : (
                   <>
-                    Load the Cove Digital Card first. Then Save QR to Photos — that QR is what Square
-                    Stand scans.
+                    <strong className="text-[#1A1A1A]">Load money</strong> to activate your phone QR
+                    for The Cove. Free accounts can use the card after a load — paid membership is
+                    optional.{' '}
+                    <a href="/cove" className="font-bold underline" style={{ color: '#085508' }}>
+                      Load Cove Digital Card
+                    </a>
                   </>
                 )}
               </p>
@@ -486,12 +490,18 @@ export function CoveFamilyCodeCard() {
           </div>
         </div>
       ) : (
-        <p className="text-xs text-[#5A6070] mt-1">
-          {message || 'Add a student to get a family Cove Digital Card.'}
+        <p className="text-xs text-[#5A6070] mt-2 leading-relaxed">
+          {message ||
+            'Add a student, confirm family details, then load money to start using your Cove Digital Card.'}
         </p>
       )}
       {error ? <p className="text-[11px] text-red-600 mt-1">{error}</p> : null}
-      {message && code ? <p className="text-[11px] text-green-700 mt-1">{message}</p> : null}
+      {message && code && !hasCard ? (
+        <p className="text-[11px] font-semibold text-[#7A4200] mt-2 leading-relaxed">{message}</p>
+      ) : null}
+      {message && code && hasCard ? (
+        <p className="text-[11px] text-green-700 mt-1">{message}</p>
+      ) : null}
       <p className="sr-only">
         <Share2 aria-hidden />
       </p>

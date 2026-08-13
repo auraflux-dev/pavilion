@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import {
   createStaffCoveProduct,
-  flattenRegisterProducts,
+  listInPersonSellProducts,
   listStaffCoveProducts,
   updateStaffCoveProduct,
   type StaffCoveVariantInput,
@@ -43,13 +43,10 @@ export async function GET(req: NextRequest) {
 
   try {
     if (mode === 'register') {
-      const [products, inventory] = await Promise.all([
-        listStaffCoveProducts(),
+      const [registerProducts, inventory] = await Promise.all([
+        listInPersonSellProducts(),
         listCoveInventory(),
       ])
-      const registerProducts = flattenRegisterProducts(
-        products.filter((p) => p.onCove || p.visible)
-      )
       const invBySku = new Map(
         inventory.filter((r) => r.sku).map((r) => [r.sku!, r] as const)
       )

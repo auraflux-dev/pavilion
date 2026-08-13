@@ -1,23 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getMemberSession } from '@/lib/auth-member'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import {
   getStoreCardBonusPercent,
   resolveParentLoadBonusPercent,
 } from '@/lib/store-card-bonus'
+import { resolvePrimaryParentEmail } from '@/lib/family-guardians'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 
 /**
  * GET /api/gift-card/bonus
  * Whether this family still qualifies for the first-load bonus.
  */
 export async function GET(req: NextRequest) {
-  const session = await getMemberSession(req)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const effective = await getEffectiveParentEmail(req)
+  if (!effective) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
+    const householdEmail = await resolvePrimaryParentEmail(effective.parentEmail)
     const settings = await getSiteSettings()
     const configured = getStoreCardBonusPercent(settings.get('storeCardBonusPercent', '10'))
-    const bonusPercent = await resolveParentLoadBonusPercent(session.email, configured)
+    const bonusPercent = await resolveParentLoadBonusPercent(householdEmail, configured)
 
     return NextResponse.json({
       configuredBonusPercent: configured,

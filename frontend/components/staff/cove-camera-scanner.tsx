@@ -131,9 +131,6 @@ export function CoveCameraScanner({
             <CameraOff className="w-4 h-4 mr-1.5" /> Stop camera
           </Button>
         )}
-        <p className="text-[11px] text-[#5A6070]">
-          Point at the student&apos;s family QR. Product barcodes are optional (staff, behind the counter).
-        </p>
       </div>
       <div
         id={elementId}
