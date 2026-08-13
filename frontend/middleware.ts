@@ -45,7 +45,14 @@ export async function middleware(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden origin' }, { status: 403 })
   }
 
-  if (PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
+  // Printable payment cheat sheet — no session (table QR / print without Staff login)
+  const staffPublic =
+    pathname === '/staff/in-person' || pathname.startsWith('/staff/in-person/')
+
+  if (
+    !staffPublic &&
+    PROTECTED_ROUTES.some((r) => pathname.startsWith(r))
+  ) {
     const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
     if (!isMemberTokens(tokens)) {
       const loginUrl = req.nextUrl.clone()

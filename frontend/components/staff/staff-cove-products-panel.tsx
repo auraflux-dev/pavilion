@@ -154,7 +154,7 @@ export function StaffCoveProductsPanel() {
             : d.squareSync?.ok === false
               ? ` Square sync note: ${d.squareSync.reason || 'failed'} — run sync script if needed.`
               : d.squareSync?.reason === 'variants missing SKU'
-                ? ' Add a SKU so Stand can sync inventory.'
+                ? ' SKU was missing — try Save again (SKUs auto-fill from the name).'
                 : ''
       setStatus(`Added “${d.product.name}”. Live on /cove within a few minutes.${syncNote}`)
 
@@ -243,17 +243,56 @@ export function StaffCoveProductsPanel() {
     }
   }
 
+  async function backfillMissingSkus() {
+    setBusy(true)
+    setError('')
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/cove/products', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ backfillSkus: true }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Backfill failed')
+      const n = d.backfill?.updated?.length ?? 0
+      setStatus(
+        n === 0
+          ? 'All products already have SKUs.'
+          : `Assigned SKUs on ${n} product${n === 1 ? '' : 's'} and synced Square Stand where possible.`
+      )
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Backfill failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <section
       id="cove-products"
       className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-5"
     >
-      <div>
-        <h2 className="text-lg font-bold">Cove products</h2>
-        <p className="text-xs text-[#5A6070] mt-1">
-          Add snacks, photos, flavors/sizes, and restock here. No Wix Dashboard needed. “On Cove”
-          controls the visitor menu; barcodes feed the register scanner.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-bold">Cove products</h2>
+          <p className="text-xs text-[#5A6070] mt-1">
+            Add snacks, photos, flavors/sizes, and restock here. No Wix Dashboard needed. “On Cove”
+            controls the visitor menu. Leave SKU blank — we generate one from the name so Square Stand
+            can track inventory.
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={busy}
+          onClick={() => void backfillMissingSkus()}
+          className="shrink-0"
+        >
+          Fill missing SKUs
+        </Button>
       </div>
 
       <div className="rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] p-4 space-y-3">
@@ -284,8 +323,9 @@ export function StaffCoveProductsPanel() {
               <input
                 value={form.sku}
                 onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
-                placeholder="Barcode / SKU"
+                placeholder="SKU (auto from name)"
                 className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-mono"
+                title="Leave blank — we generate from the product name"
               />
             </>
           ) : null}
@@ -374,7 +414,7 @@ export function StaffCoveProductsPanel() {
                       ),
                     }))
                   }
-                  placeholder="Barcode"
+                  placeholder="SKU (auto)"
                   className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm font-mono"
                 />
                 <button
@@ -569,7 +609,7 @@ export function StaffCoveProductsPanel() {
                         [p.id]: { ...e, sku: ev.target.value },
                       }))
                     }
-                    placeholder="Barcode"
+                    placeholder="SKU (auto)"
                     className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm font-mono"
                   />
                 </div>
@@ -649,7 +689,7 @@ export function StaffCoveProductsPanel() {
                             },
                           }))
                         }
-                        placeholder="Barcode"
+                        placeholder="SKU (auto)"
                         className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm font-mono"
                       />
                       <button

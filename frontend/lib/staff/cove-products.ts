@@ -530,6 +530,76 @@ export async function listInPersonSellProducts() {
   })
 }
 
+/** Short uppercase SKU from a product / variant name (Staff never has to invent these). */
+export function slugifyCoveSku(raw: string): string {
+  const cleaned = String(raw || '')
+    .normalize('NFKD')
+    .replace(/[^\w\s-]/g, ' ')
+    .trim()
+    .toUpperCase()
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 28)
+  return cleaned || 'ITEM'
+}
+
+export async function collectExistingCoveSkus(): Promise<Set<string>> {
+  const products = await listStaffCoveProducts()
+  const used = new Set<string>()
+  for (const p of products) {
+    const primary = String(p.sku || '')
+      .trim()
+      .toUpperCase()
+    if (primary) used.add(primary)
+    for (const v of p.variants || []) {
+      const sku = String(v.sku || '')
+        .trim()
+        .toUpperCase()
+      if (sku) used.add(sku)
+    }
+  }
+  return used
+}
+
+export function allocateUniqueCoveSku(base: string, used: Set<string>): string {
+  const root = slugifyCoveSku(base)
+  if (!used.has(root)) {
+    used.add(root)
+    return root
+  }
+  for (let i = 2; i < 200; i++) {
+    const candidate = `${root.slice(0, 24)}-${i}`
+    if (!used.has(candidate)) {
+      used.add(candidate)
+      return candidate
+    }
+  }
+  const fallback = `${root.slice(0, 18)}-${Date.now().toString(36).toUpperCase()}`
+  used.add(fallback)
+  return fallback
+}
+
+function ensureVariantSkus(
+  productName: string,
+  variants: StaffCoveVariantInput[],
+  used: Set<string>,
+): StaffCoveVariantInput[] {
+  return variants.map((v) => {
+    const existing = String(v.sku ?? '')
+      .trim()
+      .toUpperCase()
+    if (existing) {
+      used.add(existing)
+      return { ...v, sku: existing }
+    }
+    const base =
+      variants.length > 1 && v.label.trim() && v.label.trim().toLowerCase() !== 'default'
+        ? `${productName}-${v.label}`
+        : productName
+    return { ...v, sku: allocateUniqueCoveSku(base, used) }
+  })
+}
+
 function buildOptionAndVariants(
  optionName: string,
  variants: StaffCoveVariantInput[],
@@ -591,53 +661,56 @@ export async function createStaffCoveProduct(input: {
  const name = input.name.trim()
  if (!name) throw new Error('Name is required')
 
- const multi =
- input.variants && input.variants.length > 0
- ? input.variants
- : [
- {
- label: 'Default',
- price: Number(input.price),
- sku: input.sku,
- quantity: input.quantity,
- },
- ]
+  const multiRaw =
+    input.variants && input.variants.length > 0
+      ? input.variants
+      : [
+          {
+            label: 'Default',
+            price: Number(input.price),
+            sku: input.sku,
+            quantity: input.quantity,
+          },
+        ]
 
- for (const v of multi) {
- if (!v.label.trim()) throw new Error('Each variant needs a label')
- if (!Number.isFinite(Number(v.price)) || Number(v.price) <= 0) {
- throw new Error(`Price must be greater than 0 for “${v.label}”`)
- }
- }
+  for (const v of multiRaw) {
+    if (!v.label.trim()) throw new Error('Each variant needs a label')
+    if (!Number.isFinite(Number(v.price)) || Number(v.price) <= 0) {
+      throw new Error(`Price must be greater than 0 for “${v.label}”`)
+    }
+  }
 
- const useOptions = multi.length > 1 || Boolean(input.optionName?.trim())
- const optionName = input.optionName?.trim() || 'Option'
+  const usedSkus = await collectExistingCoveSkus()
+  const multi = ensureVariantSkus(name, multiRaw, usedSkus)
 
- const productBody: Record<string, unknown> = {
- name,
- visible: true,
- visibleInPos: true,
- productType: 'PHYSICAL',
- physicalProperties: {},
- }
+  const useOptions = multi.length > 1 || Boolean(input.optionName?.trim())
+  const optionName = input.optionName?.trim() || 'Option'
 
- if (useOptions) {
- Object.assign(productBody, buildOptionAndVariants(optionName, multi))
- } else {
- const v = multi[0]
- productBody.variantsInfo = {
- variants: [
- {
- sku: String(v.sku ?? '').trim().toUpperCase() || undefined,
- visible: true,
- price: { actualPrice: { amount: Number(v.price).toFixed(2) } },
- inventoryItem: {
- quantity: Math.max(0, Math.floor(Number(v.quantity) || 0)),
- },
- },
- ],
- }
- }
+  const productBody: Record<string, unknown> = {
+    name,
+    visible: true,
+    visibleInPos: true,
+    productType: 'PHYSICAL',
+    physicalProperties: {},
+  }
+
+  if (useOptions) {
+    Object.assign(productBody, buildOptionAndVariants(optionName, multi))
+  } else {
+    const v = multi[0]
+    productBody.variantsInfo = {
+      variants: [
+        {
+          sku: String(v.sku ?? '').trim().toUpperCase() || undefined,
+          visible: true,
+          price: { actualPrice: { amount: Number(v.price).toFixed(2) } },
+          inventoryItem: {
+            quantity: Math.max(0, Math.floor(Number(v.quantity) || 0)),
+          },
+        },
+      ],
+    }
+  }
 
  if (input.imageMediaId || input.imageUrl) {
  productBody.media = {
@@ -731,81 +804,100 @@ export async function updateStaffCoveProduct(input: {
  input.quantity != null ||
  input.sku != null
 
- if (input.variants && input.variants.length > 0) {
- const optionName =
- input.optionName?.trim() ||
- existingOptions[0]?.name?.trim() ||
- 'Option'
- const useOptions = input.variants.length > 1 || Boolean(optionName)
- if (useOptions && input.variants.length >= 1) {
- Object.assign(
- patchProduct,
- buildOptionAndVariants(optionName, input.variants, existingVariants)
- )
- } else {
- const v = input.variants[0]
- const existing = existingVariants[0]
- if (!existing?.id) throw new Error('Product has no variant to update')
- patchProduct.variantsInfo = {
- variants: [
- {
- id: existing.id,
- sku: String(v.sku ?? '').trim().toUpperCase() || undefined,
- visible: true,
- price: { actualPrice: { amount: Number(v.price).toFixed(2) } },
- inventoryItem: {
- quantity: Math.max(0, Math.floor(Number(v.quantity) || 0)),
- },
- },
- ],
- }
- }
- } else if (touchingVariants) {
- const variant = existingVariants[0]
- if (!variant?.id) throw new Error('Product has no variant to update')
- const currentPrice =
- parseFloat(
- String(
- (variant.price as { actualPrice?: { amount?: string } } | undefined)?.actualPrice
- ?.amount ?? '0'
- )
- ) || 0
- const price =
- input.price != null && Number.isFinite(Number(input.price))
- ? Number(input.price)
- : currentPrice
- const sku =
- input.sku != null
- ? String(input.sku).trim().toUpperCase()
- : String(variant.sku ?? '').trim().toUpperCase()
- const quantity =
- input.quantity != null
- ? Math.max(0, Math.floor(Number(input.quantity) || 0))
- : undefined
+  if (input.variants && input.variants.length > 0) {
+    const usedSkus = await collectExistingCoveSkus()
+    // Allow keeping this product's own SKUs when re-saving
+    for (const ev of existingVariants) {
+      const s = String(ev.sku ?? '')
+        .trim()
+        .toUpperCase()
+      if (s) usedSkus.delete(s)
+    }
+    const variants = ensureVariantSkus(name, input.variants, usedSkus)
+    const optionName =
+      input.optionName?.trim() ||
+      existingOptions[0]?.name?.trim() ||
+      'Option'
+    const useOptions = variants.length > 1 || Boolean(optionName)
+    if (useOptions && variants.length >= 1) {
+      Object.assign(
+        patchProduct,
+        buildOptionAndVariants(optionName, variants, existingVariants)
+      )
+    } else {
+      const v = variants[0]
+      const existing = existingVariants[0]
+      if (!existing?.id) throw new Error('Product has no variant to update')
+      patchProduct.variantsInfo = {
+        variants: [
+          {
+            id: existing.id,
+            sku: String(v.sku ?? '').trim().toUpperCase() || undefined,
+            visible: true,
+            price: { actualPrice: { amount: Number(v.price).toFixed(2) } },
+            inventoryItem: {
+              quantity: Math.max(0, Math.floor(Number(v.quantity) || 0)),
+            },
+          },
+        ],
+      }
+    }
+  } else if (touchingVariants) {
+    const variant = existingVariants[0]
+    if (!variant?.id) throw new Error('Product has no variant to update')
+    const currentPrice =
+      parseFloat(
+        String(
+          (variant.price as { actualPrice?: { amount?: string } } | undefined)?.actualPrice
+            ?.amount ?? '0'
+        )
+      ) || 0
+    const price =
+      input.price != null && Number.isFinite(Number(input.price))
+        ? Number(input.price)
+        : currentPrice
+    let sku =
+      input.sku != null
+        ? String(input.sku).trim().toUpperCase()
+        : String(variant.sku ?? '').trim().toUpperCase()
+    if (!sku) {
+      const usedSkus = await collectExistingCoveSkus()
+      for (const ev of existingVariants) {
+        const s = String(ev.sku ?? '')
+          .trim()
+          .toUpperCase()
+        if (s) usedSkus.delete(s)
+      }
+      sku = allocateUniqueCoveSku(name, usedSkus)
+    }
+    const quantity =
+      input.quantity != null
+        ? Math.max(0, Math.floor(Number(input.quantity) || 0))
+        : undefined
 
- // Preserve sibling variants when only editing the primary row
- patchProduct.variantsInfo = {
- variants: existingVariants.map((v, idx) => {
- if (idx !== 0) {
- return {
- id: v.id,
- sku: v.sku,
- visible: v.visible !== false,
- choices: v.choices,
- price: v.price,
- inventoryItem: v.inventoryItem,
- }
- }
- return {
- id: variant.id,
- sku: sku || undefined,
- visible: true,
- choices: variant.choices,
- price: { actualPrice: { amount: price.toFixed(2) } },
- ...(quantity != null ? { inventoryItem: { quantity } } : {}),
- }
- }),
- }
+    // Preserve sibling variants when only editing the primary row
+    patchProduct.variantsInfo = {
+      variants: existingVariants.map((v, idx) => {
+        if (idx !== 0) {
+          return {
+            id: v.id,
+            sku: v.sku,
+            visible: v.visible !== false,
+            choices: v.choices,
+            price: v.price,
+            inventoryItem: v.inventoryItem,
+          }
+        }
+        return {
+          id: variant.id,
+          sku: sku || undefined,
+          visible: true,
+          choices: variant.choices,
+          price: { actualPrice: { amount: price.toFixed(2) } },
+          ...(quantity != null ? { inventoryItem: { quantity } } : {}),
+        }
+      }),
+    }
  if (existingOptions.length) {
  patchProduct.options = existingOptions
  }
@@ -862,6 +954,55 @@ export async function updateStaffCoveProduct(input: {
  const updated = listed.find((p) => p.id === id)
  if (!updated) throw new Error('Product updated but could not be reloaded')
  return updated
+}
+
+/** Assign unique SKUs to every Cove catalog variant that is still blank. */
+export async function backfillMissingCoveSkus(): Promise<{
+  updated: Array<{ id: string; name: string; skus: string[] }>
+  skipped: number
+}> {
+  const products = await listStaffCoveProducts()
+  const used = await collectExistingCoveSkus()
+  const updated: Array<{ id: string; name: string; skus: string[] }> = []
+  let skipped = 0
+
+  for (const p of products) {
+    const blanks = p.variants.filter((v) => !String(v.sku || '').trim())
+    if (blanks.length === 0) {
+      skipped += 1
+      continue
+    }
+
+    for (const v of p.variants) {
+      const s = String(v.sku || '')
+        .trim()
+        .toUpperCase()
+      if (s) used.delete(s)
+    }
+
+    const variants: StaffCoveVariantInput[] = p.variants.map((v) => ({
+      id: v.id,
+      label: v.label,
+      price: v.price,
+      sku: v.sku || undefined,
+      quantity: v.quantity ?? undefined,
+    }))
+    const withSkus = ensureVariantSkus(p.name, variants, used)
+
+    await updateStaffCoveProduct({
+      id: p.id,
+      variants: withSkus,
+      optionName: p.optionName || undefined,
+    })
+
+    updated.push({
+      id: p.id,
+      name: p.name,
+      skus: withSkus.map((v) => String(v.sku || '')),
+    })
+  }
+
+  return { updated, skipped }
 }
 
 export async function uploadStaffCoveProductImage(

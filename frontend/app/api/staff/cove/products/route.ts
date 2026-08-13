@@ -5,6 +5,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import {
+  backfillMissingCoveSkus,
   createStaffCoveProduct,
   listInPersonSellProducts,
   listStaffCoveProducts,
@@ -109,6 +110,24 @@ export async function PATCH(req: NextRequest) {
   if (!(await gate(req))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   try {
     const body = await req.json()
+
+    if (body.backfillSkus === true) {
+      const result = await backfillMissingCoveSkus()
+      const squareResults = []
+      for (const row of result.updated) {
+        squareResults.push({
+          id: row.id,
+          name: row.name,
+          skus: row.skus,
+          squareSync: await syncWixProductToSquareBestEffort(row.id),
+        })
+      }
+      return NextResponse.json({
+        ok: true,
+        backfill: { skipped: result.skipped, updated: squareResults },
+      })
+    }
+
     const product = await updateStaffCoveProduct({
       id: String(body.id ?? ''),
       name: body.name != null ? String(body.name) : undefined,

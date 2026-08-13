@@ -179,11 +179,11 @@ Give your student the QR or the word passcode. Reset the 6-digit backup anytime 
       order: 3,
       body: `Load the Cove Digital Card online first (portal → Store & Cove Digital Card).
 
-At the snack window, your student shows the **Photos / Wallet QR**, says the **word passcode**, or the **6-digit backup**. Staff looks up the family, confirms names and balance, then charges snacks to the prepaid card.
+At the snack window, open **Apple/Google Wallet** or show the **Photos QR**. Square Stand scans it as a **gift card** — same Cove balance as the portal.
 
-Until a physical card is issued, the code or Wallet QR is enough.
+Word passcode / 6-digit is backup if Wallet is not open (staff looks up the family).
 
-No balance or no portal login? Staff can take a **card-present** sale on Square Stand (iPad) for that purchase. Reloads still happen online — Stand does not create a new family card.
+No balance or no portal login? Pay cash or card on Square Stand. Reloads still happen online in the portal.
 
 Spirit wear and other Cove merch can also checkout online with card or PayPal.`,
     },

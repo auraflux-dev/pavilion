@@ -74,14 +74,21 @@ export default function StaffInPersonCardPage() {
               <tr className="border-t border-[#E8E4DC]">
                 <td className="p-3 align-top font-semibold">Cash · card · Apple Pay · Google Pay</td>
                 <td className="p-3 align-top">
-                  <strong>Square Stand</strong> — ring → take payment → stop. Guests and members
-                  (even if they have a Cove card). Do not also charge in Staff.
+                  <strong>Square Stand</strong> — ring → take payment → stop. Do not also charge in
+                  Staff.
                 </td>
               </tr>
               <tr className="border-t border-[#E8E4DC]">
-                <td className="p-3 align-top font-semibold">Cove Digital Card balance</td>
+                <td className="p-3 align-top font-semibold">Cove Digital Card (Wallet / Photos QR)</td>
                 <td className="p-3 align-top">
-                  Staff → lookup code/QR → <strong>Charge Cove</strong>
+                  <strong>Square Stand</strong> — tender <strong>Gift card</strong> → scan → stop.
+                  Same Square balance as the portal.
+                </td>
+              </tr>
+              <tr className="border-t border-[#E8E4DC]">
+                <td className="p-3 align-top font-semibold">Cove passcode only (no Wallet)</td>
+                <td className="p-3 align-top">
+                  Staff → lookup → <strong>Charge Cove</strong> (backup)
                 </td>
               </tr>
               <tr className="border-t border-[#E8E4DC]">
@@ -114,8 +121,8 @@ export default function StaffInPersonCardPage() {
           >
             <h2 className="text-base font-bold text-[#0B3D0B]">Snack window (school days)</h2>
             <p className="mt-2 text-sm text-[#5A6070] leading-relaxed">
-              Default: <strong>cash or card on Stand</strong>. Staff Cove only when they want to
-              spend Cove balance.
+              Default: <strong>Stand</strong> for cash, card, and Cove Wallet scan. Staff Charge
+              Cove only when they have a passcode but no Wallet open.
             </p>
           </div>
           <div
@@ -124,7 +131,7 @@ export default function StaffInPersonCardPage() {
           >
             <h2 className="text-base font-bold text-[#085508]">Events (Open House)</h2>
             <p className="mt-2 text-sm text-[#5A6070] leading-relaxed">
-              Stand dominates (wallet/card). Cash is the minority. Soft-ask Join QR — purchases will
+              Stand owns cash, card, and Cove gift-card scans. Soft-ask Join QR — purchases will
               outnumber joins.
             </p>
           </div>

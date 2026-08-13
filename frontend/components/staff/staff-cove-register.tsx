@@ -69,7 +69,7 @@ function normalizeLookupInput(raw: string): string {
 
 /**
  * In-person sales (window + event tables).
- * How paying? → Stand (cash+card) / Cove charge / External logger.
+ * How paying? → Stand (cash+card+Cove gift card) / Cove backup / External logger.
  */
 export function StaffCoveRegister() {
   type VenueMode = 'event' | 'window'
@@ -187,7 +187,7 @@ export function StaffCoveRegister() {
     if (lane === 'stand') {
       setMode('idle')
       setFamily(null)
-      setStatus('Cash or card/wallet → Square Stand. Members may skip Cove and use Stand anytime.')
+      setStatus('Cash, card/wallet, or Cove Wallet QR → Square Stand (gift-card tender). Staff Charge Cove is backup only.')
       return
     }
     if (lane === 'pickup') {
@@ -199,7 +199,7 @@ export function StaffCoveRegister() {
     if (lane === 'cove') {
       setMode('idle')
       setFamily(null)
-      setStatus('Scan or type Cove code, then Charge Cove.')
+      setStatus('Backup only — passcode / PIN when Wallet QR is not available. Prefer Stand gift-card scan.')
       setTimeout(() => codeRef.current?.focus(), 50)
       return
     }
@@ -628,8 +628,8 @@ export function StaffCoveRegister() {
 
       <p className="text-xs text-[#5A6070] leading-relaxed rounded-lg bg-[#FAFCF9] border border-[#E8E4DC] px-3 py-2">
         {venueMode === 'event'
-          ? 'Event mode: cash/card on Stand · Cove on Staff · or they pay in the member portal (then Pickup only). Join QR optional after sale.'
-          : 'Window mode: Stand for cash/card · Staff for Cove · portal checkout → Pickup only.'}
+          ? 'Event mode: Stand owns cash + card + Cove gift-card scan · Staff Charge Cove is backup · portal paid → Pickup only. Join QR optional after sale.'
+          : 'Window mode: Stand for cash/card/Cove Wallet · Staff Charge Cove only if no Wallet · portal checkout → Pickup only.'}
         {' · '}
         <span className="font-semibold text-[#0B3D0B]">
           Optional — buy first, join anytime
@@ -643,10 +643,10 @@ export function StaffCoveRegister() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {laneBtn(
             'stand',
-            'Cash or card / wallet',
-            '→ Square Stand (anyone, incl. members skipping Cove)',
+            'Cash · card · Cove Wallet',
+            '→ Square Stand (gift-card tender for Cove Digital Card)',
           )}
-          {laneBtn('cove', 'Cove Digital Card', 'Staff · lookup → Charge Cove')}
+          {laneBtn('cove', 'Cove backup (passcode)', 'Staff only when Wallet QR is not open')}
           {laneBtn('external', 'External (AM)', 'Zelle · PayPal · phone · no Stand')}
         </div>
         <button
@@ -667,15 +667,15 @@ export function StaffCoveRegister() {
 
       {payLane === 'stand' ? (
         <div className="rounded-xl border-2 border-[#0B3D0B] bg-[#F5F7F4] p-4 space-y-2">
-          <p className="text-sm font-bold text-[#1A1A1A]">Use Square Stand (cash or card)</p>
+          <p className="text-sm font-bold text-[#1A1A1A]">Use Square Stand (cash, card, or Cove gift card)</p>
           <ol className="text-sm text-[#5A6070] list-decimal pl-5 space-y-1">
             <li>Ring snacks / spirit on Stand</li>
-            <li>Take cash, wallet, or card</li>
-            <li>Stop — do not also charge in Staff</li>
+            <li>Take cash, card/wallet, or Gift card (scan Cove Wallet / Photos QR)</li>
+            <li>Stop — do not also Charge Cove in Staff</li>
           </ol>
           <p className="text-xs text-[#5A6070]">
-            Guests and members (even with a Cove card) can pay here if they prefer cash/card.
-            Optional: add customer email on Stand so the Payment attaches to them.
+            Cove Digital Card balance is that Square gift card — Stand redeem updates the portal.
+            Passcode-only? Use Cove backup below. Optional: add customer email on Stand.
           </p>
         </div>
       ) : null}
@@ -1034,7 +1034,7 @@ export function StaffCoveRegister() {
 
                 {payLane === 'cove' && !canUseCove ? (
                   <p className="text-xs text-amber-900 font-semibold">
-                    Need Cove balance to charge here — switch to Square Stand (cash or card).
+                    Need Cove balance to charge here — switch to Square Stand (cash, card, or load Cove online).
                   </p>
                 ) : null}
 
