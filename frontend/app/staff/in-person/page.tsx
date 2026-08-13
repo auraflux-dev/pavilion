@@ -84,9 +84,10 @@ export default function StaffInPersonCardPage() {
                 </td>
               </tr>
               <tr className="border-t border-[#E8E4DC]">
-                <td className="p-3 align-top">Already paid online</td>
+                <td className="p-3 align-top font-semibold">Member portal / site checkout</td>
                 <td className="p-3 align-top">
-                  Staff → Retail → <strong>Pickup</strong> · no new charge
+                  They pay themselves online → Staff → <strong>Pickup</strong> only · no Stand / no
+                  Cove charge
                 </td>
               </tr>
               <tr className="border-t border-[#E8E4DC]">

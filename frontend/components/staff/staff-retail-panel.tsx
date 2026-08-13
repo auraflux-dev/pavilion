@@ -44,7 +44,7 @@ export function StaffRetailPanel() {
       </div>
 
       <p className="text-xs text-[#5A6070]">
-        Already ordered online?{' '}
+        Paid in member portal / site checkout?{' '}
         <a href="#cove-fulfillment" className="font-bold underline" style={{ color: '#085508' }}>
           Pickup queue
         </a>

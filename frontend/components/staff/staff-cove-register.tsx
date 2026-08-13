@@ -193,7 +193,7 @@ export function StaffCoveRegister() {
     if (lane === 'pickup') {
       setMode('idle')
       setFamily(null)
-      setStatus('Already paid online — use Pickup queue (no new charge).')
+      setStatus('Paid in portal/site — Pickup only. Do not use Stand or Charge Cove.')
       return
     }
     if (lane === 'cove') {
@@ -628,8 +628,8 @@ export function StaffCoveRegister() {
 
       <p className="text-xs text-[#5A6070] leading-relaxed rounded-lg bg-[#FAFCF9] border border-[#E8E4DC] px-3 py-2">
         {venueMode === 'event'
-          ? 'Event mode: cash + card/wallet on Square Stand. Cove balance → Staff. Members can skip Cove and use Stand. Join QR optional after sale.'
-          : 'Window mode: cash + card on Stand. Cove lookup only when they want to spend Cove balance.'}
+          ? 'Event mode: cash/card on Stand · Cove on Staff · or they pay in the member portal (then Pickup only). Join QR optional after sale.'
+          : 'Window mode: Stand for cash/card · Staff for Cove · portal checkout → Pickup only.'}
         {' · '}
         <span className="font-semibold text-[#0B3D0B]">
           Optional — buy first, join anytime
@@ -656,7 +656,7 @@ export function StaffCoveRegister() {
             payLane === 'pickup' ? 'text-[#085508]' : 'text-[#5A6070]'
           }`}
         >
-          Already paid online → Pickup
+          Paid in portal / site checkout → Pickup only
         </button>
         {payLane ? (
           <Button type="button" variant="outline" size="sm" className="ml-3 mt-2" onClick={clearSession}>

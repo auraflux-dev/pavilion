@@ -18,7 +18,7 @@
 | **Cove Digital Card balance** | Staff → lookup → **Charge Cove** |
 | Member has Cove but prefers cash/card | **Stand** — fine anytime |
 | **Zelle / PayPal / phone Square** (no Stand) | Staff → **External pay** → log amount |
-| Already paid online | Staff → Retail → **Pickup** · no new charge |
+| **Member portal / site checkout** | They pay themselves → Staff **Pickup** only (no Stand / no Cove charge) |
 | Free join | Soft ask **after** sale — QR optional |
 | Paid member · free food / refreshment perk | Code ends in **9** → hand ticket · **no charge** |
 | Membership (Reef / Lagoon / Tide) | **Portal only** — not Stand |

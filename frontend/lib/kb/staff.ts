@@ -252,7 +252,7 @@ Parents can also buy online (portal / site). Already paid online → Pickup queu
 | Cove balance | Staff → lookup → Charge Cove |
 | Member skips Cove | Stand (cash or card) — fine anytime |
 | Zelle / PayPal / phone Square | Staff → External pay |
-| Already paid online | Pickup only |
+| Member portal / site checkout | Pickup only — no Stand / no Cove charge |
 | Free join | Soft ask **after** sale — QR optional |
 | Membership | Portal only |
 | Paid-member free food perk | Code ends in **9** → ticket · no charge |
