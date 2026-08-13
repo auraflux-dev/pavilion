@@ -2,8 +2,7 @@
 
 /**
  * Printable Open House / event table card for staff.
- * Not the live POS — that is Staff → Retail → In-person sales.
- * Nav: Staff → Membership → Print table card, or Staff → Retail → Print table card.
+ * Live ringing: Staff → The Cove + Square Stand (see docs/COVE-IN-PERSON.md).
  */
 import { useMemo } from 'react'
 import Link from 'next/link'
@@ -24,14 +23,10 @@ export default function StaffInPersonCardPage() {
     <div className="min-h-screen bg-[#F7F4EE] text-[#1A1A1A]">
       <div className="print:hidden mx-auto max-w-3xl px-4 py-4 flex flex-wrap gap-2 items-center justify-between">
         <p className="text-sm text-[#5A6070]">
-          Printable cheat sheet for the table — live ringing is Staff → Retail → In-person sales.
+          Printable cheat sheet — Cove on Staff laptop · card on Square Stand · never charge twice.
         </p>
         <div className="flex gap-2">
-          <Link
-            href="/staff"
-            className="text-xs font-bold underline"
-            style={{ color: '#085508' }}
-          >
+          <Link href="/staff" className="text-xs font-bold underline" style={{ color: '#085508' }}>
             ← Staff
           </Link>
           <button
@@ -53,75 +48,96 @@ export default function StaffInPersonCardPage() {
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#085508]">
             SHMS PTO · Event / window table
           </p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight">
-            In-person sales
-          </h1>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight">How to take payment</h1>
           <p className="mt-2 text-sm text-[#1A1A1A] leading-relaxed">
-            One staff screen for snacks <strong>and</strong> spirit: Staff → <strong>Retail</strong> →{' '}
-            <strong>In-person sales</strong>. Cove card, Square card, cash, or Guest. Inventory
-            tracks every tender. Never charge the same item twice.
+            Parents can also pay themselves online (portal / site). At the table: Cove wallet → Staff ·
+            Card → Stand · Cash → Staff. Never charge the same item twice.
           </p>
         </header>
+
+        <section className="mt-4 overflow-hidden rounded-2xl border-2 border-[#085508] bg-white print:border-black print:rounded-none">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[#EEF6EE] text-[#085508]">
+              <tr>
+                <th className="p-3 font-bold">Situation</th>
+                <th className="p-3 font-bold">Do this</th>
+              </tr>
+            </thead>
+            <tbody className="text-[#1A1A1A]">
+              <tr className="border-t border-[#E8E4DC]">
+                <td className="p-3 align-top">Cove Digital Card balance</td>
+                <td className="p-3 align-top">
+                  Staff → The Cove → lookup → <strong>Charge Cove</strong>
+                </td>
+              </tr>
+              <tr className="border-t border-[#E8E4DC]">
+                <td className="p-3 align-top">Card tap / swipe (anyone)</td>
+                <td className="p-3 align-top">
+                  <strong>Square Stand only</strong> — ring → take card → stop
+                </td>
+              </tr>
+              <tr className="border-t border-[#E8E4DC]">
+                <td className="p-3 align-top">Cash</td>
+                <td className="p-3 align-top">
+                  Staff → Guest → cart → <strong>Cash</strong>
+                </td>
+              </tr>
+              <tr className="border-t border-[#E8E4DC]">
+                <td className="p-3 align-top">Already paid online</td>
+                <td className="p-3 align-top">
+                  Staff → Retail → <strong>Pickup</strong> · no new charge
+                </td>
+              </tr>
+              <tr className="border-t border-[#E8E4DC]">
+                <td className="p-3 align-top">Paid member · free food ticket</td>
+                <td className="p-3 align-top">
+                  Code ends in <strong>9</strong> → hand ticket · no charge
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
 
         <section className="mt-4 grid gap-4 sm:grid-cols-2">
           <div
             className="rounded-2xl border-2 bg-white p-5 print:border-black print:rounded-none"
             style={{ borderColor: '#085508' }}
           >
-            <h2 className="text-base font-bold text-[#085508]">
-              Has Cove Digital Card
-            </h2>
-            <p className="mt-2 text-sm text-[#5A6070] leading-relaxed">
-              Scan family QR (camera) <em>or</em> type passcode / 6-digit → tap products →{' '}
-              <strong>Charge Cove</strong> (or Card / Cash if they prefer).
-            </p>
+            <h2 className="text-base font-bold text-[#085508]">Laptop · Staff</h2>
+            <ul className="mt-2 list-disc pl-5 text-sm text-[#5A6070] space-y-1 leading-relaxed">
+              <li>Cove Charge</li>
+              <li>Cash</li>
+              <li>Pickup</li>
+              <li>Join invite (after sale)</li>
+            </ul>
           </div>
           <div
             className="rounded-2xl border-2 bg-white p-5 print:border-black print:rounded-none"
             style={{ borderColor: '#0B3D0B' }}
           >
-            <h2 className="text-base font-bold text-[#0B3D0B]">
-              Guest / no Cove card
-            </h2>
-            <p className="mt-2 text-sm text-[#5A6070] leading-relaxed">
-              Ring snacks or spirit on <strong>Square Stand</strong> (iPad) or phone Square app —
-              tap / swipe there. Sales sync into Staff. Or use Staff → Guest → <strong>Cash</strong>.
-            </p>
+            <h2 className="text-base font-bold text-[#0B3D0B]">iPad · Square Stand</h2>
+            <ul className="mt-2 list-disc pl-5 text-sm text-[#5A6070] space-y-1 leading-relaxed">
+              <li>Spirit sizes / colors</li>
+              <li>Any card-present sale</li>
+              <li>No Guest needed for card</li>
+              <li>Syncs to Staff Payments</li>
+            </ul>
           </div>
-        </section>
-
-        <section className="mt-4 rounded-2xl border-2 border-[#0B3D0B] bg-white p-5 print:border-black print:rounded-none">
-          <h2 className="text-lg font-bold text-[#0B3D0B]">
-            Open House / spirit at the table
-          </h2>
-          <ol className="mt-3 list-decimal pl-5 text-sm space-y-2 leading-relaxed">
-            <li>Confirm size / item.</li>
-            <li>
-              Ring on <strong>Square Stand</strong> (preferred for card) — syncs to Staff. Or Staff →
-              In-person sales → Cash / Mark paid on Stand backup.
-            </li>
-            <li>Hand the item.</li>
-            <li>
-              Optional: free join QR below — <strong>after</strong> the sale, never instead.
-            </li>
-          </ol>
         </section>
 
         <section className="mt-4 grid gap-4 md:grid-cols-[1fr_220px] print:grid-cols-[1fr_200px]">
           <div className="rounded-2xl border border-[#D9D2C5] bg-white p-5 space-y-3 print:border-black print:rounded-none">
-            <h2 className="text-lg font-bold">Also common</h2>
-            <ul className="space-y-3 text-sm leading-relaxed">
+            <h2 className="text-lg font-bold">Online · parents</h2>
+            <ul className="space-y-2 text-sm leading-relaxed text-[#5A6070]">
               <li>
-                <strong>Already ordered online</strong> — Staff → Retail → Pickup. Hand bag → mark
-                handed out. No new charge.
+                <strong>No membership:</strong> join free if they want · shop · pay with card on the
+                site.
               </li>
               <li>
-                <strong>Paid member · free food ticket</strong> — 6-digit Cove code ending in{' '}
-                <strong>9</strong>. Hand ticket. No charge for the perk.
+                <strong>Members:</strong> portal · pay with Cove balance and/or card.
               </li>
               <li>
-                <strong>Wants free portal account</strong> — Scan QR or Guest email invite after
-                sale.
+                <strong>At table after online pay:</strong> pickup only.
               </li>
             </ul>
           </div>
@@ -136,25 +152,14 @@ export default function StaffInPersonCardPage() {
               className="w-[200px] h-[200px] print:w-[180px] print:h-[180px]"
             />
             <p className="text-sm font-bold text-[#085508]">Optional · join free</p>
-            <p className="text-[11px] text-[#5A6070] px-1">
-              Not required for spirit. Sale first.
-            </p>
+            <p className="text-[11px] text-[#5A6070] px-1">Sale first · not required to buy</p>
             <p className="text-[10px] text-[#5A6070] break-all px-1">{joinUrl}</p>
           </div>
         </section>
 
         <section className="mt-4 rounded-2xl border border-[#D9D2C5] bg-white p-5 print:border-black print:rounded-none">
-          <h2 className="text-base font-bold">Stuck / no phone for free join</h2>
-          <ol className="mt-2 list-decimal pl-5 text-sm space-y-1 text-[#5A6070]">
-            <li>Still complete the sale on In-person sales (or Stand) first.</li>
-            <li>
-              Staff → Membership → Invite free parent (email or copy SMS) if they want an account
-              later.
-            </li>
-          </ol>
-          <p className="mt-3 text-xs text-[#5A6070]">
-            Stuck payment / double charge → treasurer@ · Membership help →
-            vp-membershipexperience@
+          <p className="text-xs text-[#5A6070]">
+            Stuck payment / double charge → treasurer@ · Membership → vp-membershipexperience@
           </p>
         </section>
       </article>

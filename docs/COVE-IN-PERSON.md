@@ -1,129 +1,128 @@
-# In-person sales — Cove window + PTO events
+# In-person + online sales — what we use now
 
-**Audience:** Cove Coordinator (`cove@`), VP Digital & Retail Sales (`vp-sales@`), Events volunteers, trained table staff  
-**Where this applies:** Snack / Cove window **and** in-person PTO events (tables, food trucks, spirit pop-ups, membership refreshment check-in)  
-**Devices:** Laptop/tablet (Staff) + iPad with Square Stand  
-**Live Staff:** https://www.shmspto.org/staff → **The Cove**  
-**In-app Help:** Staff → Help → *Cove register* · *In-person Cove + Square Stand*
+**Audience:** Table staff, Cove window, Open House / event volunteers  
+**Devices:** Laptop/tablet (Staff) + iPad in **Square Stand**  
+**Staff:** https://www.shmspto.org/staff → **The Cove** (Retail)  
+**Printable table card:** https://www.shmspto.org/staff/in-person  
 
----
-
-## Mental model (two lanes, every location)
-
-| Lane | Who | Device | Money path |
-|------|-----|--------|------------|
-| **A — Digital card** | Family already loaded Cove Digital Card online | Staff register **or** Square gift-card scan of Wallet QR | Debit prepaid card / Staff Charge |
-| **B — Guest** | No portal, no balance, or wants card-present merch | **Square Stand** (primary) | Card-present Square sale → syncs to Staff Payments + inventory by SKU |
-
-Same lanes at the **snack window** and at **event tables**. Do **not** double-charge.
+**Never charge the same item twice** (Stand + Staff, or online + table).
 
 ---
 
-## Where you use this
+## Quick decision (at the table)
 
-| Setting | Typical Lane A | Typical Lane B |
-|---------|----------------|----------------|
-| **Cove / snack window** | Snacks & candy on Staff register (digital card) | Guest snacks without a loaded card → Stand |
-| **Spirit / merch table** | Rare — snack catalog only | **Default:** shirts / hoodies / hats / sizes on Stand (card present) |
-| **Food truck / refreshment table** | Paid-member perk check (code ends in **9**) — usually **no charge** | Anyone buying extras or spirit → Stand |
-| **Ticket / entry table** | Rarely Cove card — follow the event flyer | Stand or online tickets as planned |
-
-**Rule of thumb:** candy/snacks → Staff register when they have a Cove Digital Card. **Spirit wear → Square Stand** (confirm size, card present).
-
----
-
-## Before open (window or event)
-
-1. Sign into Staff as `cove@shmspto.org` (or retail) on laptop/tablet.
-2. Open **The Cove** — confirm products load (window) or know today’s event SKUs / Stand items.
-3. Wake **Square Stand** — correct SHMS PTO location, Wi‑Fi, reader paired.
-4. Cash/drawer/printer if you use them.
-5. Brief volunteers: **two lanes**, **never charge twice**, who to call (`cove@` / `president@`).
+| Situation | What to do |
+|-----------|------------|
+| Has **Cove Digital Card balance** — wants snacks / items at the window | **Staff → The Cove** → lookup → Charge Cove |
+| Has membership / Cove — prefers to shop themselves | They use the **member portal / site** (Cove balance and/or card) — no table charge if already paid online |
+| Wants **card tap/swipe** (member or not) — spirit or snacks | **Square Stand only** → ring → take card → hand item. Do **not** also Mark paid / Charge in Staff |
+| **Cash** | **Staff → Guest** (optional) → tap items → **Cash**. Or take cash on Stand if you use that |
+| No account — wants free portal later | Sell first (Stand or Cash), **then** join QR / Staff invite |
+| Paid member · free food / refreshment perk | Code ends in **9** → hand ticket · **no charge** |
+| Already ordered online | Staff → Retail → **Pickup** · no new charge |
 
 ---
 
-## Lane A — Prepaid Cove Digital Card
+## Online (parents do this themselves)
 
-### On Staff register (snacks + catalog items)
+No membership required to shop on the site.
 
-1. Ask what they want.
-2. Collect ID: Wallet / Photos QR, spoken **6-digit Family Cove code**, or long Square GAN.
-3. Paste/type → Lookup.
-4. Confirm **full student names** and **balance**.
-5. Tap products → **Charge** → hand over items.
+| Who | What they can do on shmspto.org |
+|-----|----------------------------------|
+| Anyone | Browse / buy spirit & Cove shop · pay with **card** (or PayPal where offered) · free **Join** anytime |
+| Free or paid member | Member portal · load **Cove Digital Card** · buy with **Cove balance** and/or card |
+| Paid member | Same + membership perks (shirt/magnet/refreshments as applicable) |
 
-**Balance too low:** stop. Parent reloads online, *or* switch that purchase to Lane B on Stand.
-
-**Code not found:** recheck digits. Paid-member family codes end in **9**. Parent needs portal + card load.
-
-### On Square Stand (Wallet as Square gift card)
-
-Wallet QR = Square GAN → Stand **gift card** / scan flow (not a new credit-card charge). Scan fail → Staff register + 6-digit code.
+At the table: if they already paid online → **pickup only**.
 
 ---
 
-## Free signup at the table (Scan / email invite)
+## Devices
 
-Parents without an account can join free without borrowing the staff laptop for long:
+### Laptop / tablet — Staff → The Cove
 
-1. **Scan to join** — QR on the printed table card (`/staff/in-person`) or Staff → Membership → Invite opens `https://www.shmspto.org/join`.
-2. **Staff invite** — Staff → Membership → **Invite free parent**: enter email → **Send join link** (creates/finds free Wix member + emails set-password / join). If email fails or they prefer text: **Create + copy SMS text** / **Open Messages**.
-3. Spirit purchase still goes on **Lane B (Stand)** — membership is not required for the shirt.
+Use for:
 
----
+1. **Cove Digital Card** — scan family QR / passcode / 6-digit → Charge Cove  
+2. **Cash** — Guest (or lookup) → cart → Record cash  
+3. **Pickup** queue for online orders  
+4. **Backup only:** “Mark paid on Stand” if card was taken on Stand and the sale did **not** show in Staff Payments  
 
-## Lane B — Spirit wear + guests (Square Stand)
+Do **not** use Staff cart + Mark paid on Stand for a normal Stand card sale (double inventory).
 
-**Default for spirit wear** (shirts, hoodies, hats, sized merch) and anyone with **no** loaded Cove Digital Card:
+### iPad — Square Stand
 
-1. Wake Square Stand on the SHMS PTO location.
-2. Confirm size / item with the buyer.
-3. Ring as a normal card-present sale → take payment → hand over the item.
+Use for:
 
-Do **not** also **Charge** those spirit items on the Staff snack register.
+1. **Any card-present sale** — spirit (sizes/colors) and guest snacks  
+2. Ring the item in Square’s **Library** → tap / swipe / dip → done  
 
-Stand does **not** create a family Cove account. Online spirit browse: **/cove** → Stingrays Pride. Reloads for snacks happen online in the member portal.
-
----
-
-## Event-only: paid-member refreshments
-
-Many memberships include free food / refreshment tickets at PTO events.
-
-1. Parent/student shows the **6-digit Family Cove code** (or Staff lookup).
-2. **Paid member codes end in 9** — quick visual check; confirm on Staff register if unsure.
-3. Record the code on the volunteer sheet if the event lead requires it.
-4. Hand refreshment tickets — **do not** also charge Lane A/B for the free perk.
-
-Extras beyond the perk → Lane B on Stand.
+Stand sales sync into Staff **Payments** + inventory by SKU.  
+You do **not** need Guest in Staff for a Stand card sale.
 
 ---
 
-## Products & restock
+## Walkthroughs
 
-Staff → **The Cove** → **Cove products** for snack catalog / deals.  
-Spirit inventory may live on Square Stand item list + online Cove shop — follow the event lead’s sheet.
+### A — Cove balance at the window
+
+1. Staff → The Cove → In-person sales  
+2. Scan QR or type passcode / 6-digit → Look up  
+3. Confirm names + balance  
+4. Tap products → **Charge Cove**  
+5. Hand items  
+
+Low balance → parent reloads in portal, **or** take that sale on **Stand** (card) / Cash.
+
+### B — Card on Stand (member or guest)
+
+1. Confirm item / size / color  
+2. On Stand: Library → ring → take card  
+3. Hand item  
+4. Stop — no Staff Mark paid  
+
+Optional after: free join QR.
+
+### C — Cash
+
+1. Staff → Guest (name/email optional)  
+2. Tap products → **Cash**  
+3. Hand items  
+
+### D — Free join (not required to buy)
+
+1. Finish the sale first  
+2. Scan join QR on table card, **or** Staff → Membership → Invite free parent  
 
 ---
 
-## After the rush
+## Spirit wear note
 
-- Spot-check **Reports → Cove** for digital-card Charges.
-- Flag stuck “paid but card didn’t load” to **treasurer@** — never ask the parent to pay again.
-- Return Stand + laptop; note low stock for the next window or event.
+- **Card / most spirit at the table** → Square Stand  
+- **Online** → site / portal (card or Cove balance)  
+- Staff Spirit tiles are for Cove charge, cash, or sync backup — not the primary card lane  
+
+---
+
+## Before open
+
+1. Staff laptop online · The Cove loads  
+2. Stand: SHMS PTO location · Wi‑Fi · Library shows spirit items  
+3. Brief volunteers: Cove → Staff · Card → Stand · Cash → Staff · never twice  
+
+## After
+
+- Spot-check Staff → Payments for Stand sync (`Square Stand`)  
+- Cove Charges in Reports as usual  
+- Stuck payment → **treasurer@** · membership help → **vp-membershipexperience@**  
 
 ---
 
 ## Training video
 
-**Style:** Parent-tour pipeline — screen stills + ElevenLabs VO + music bookends. **Not** HeyGen.
-
 | Artifact | Path |
 |----------|------|
 | Script | `promo-videos/scripts/staff_cove_inperson_elevenlabs.txt` |
-| VO gen | `generate_staff_cove_vo.js` |
-| Assemble | `assemble_staff_cove_inperson.js` |
-| Master | `promo-videos/out/SHMSPTO_staff_cove_inperson_16x9.mp4` |
-| **Watch file** | `~/Downloads/SHMSPTO_WATCH_THIS_staff_cove_inperson_16x9.mp4` (~2:10, 12 steps) |
+| Watch file | `~/Downloads/SHMSPTO_WATCH_THIS_staff_cove_inperson_16x9.mp4` |
 
-Also linked from Staff → Help → **In-person sales + Square Stand**.
+Also: Staff → Help → **In-person sales + Square Stand**.

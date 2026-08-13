@@ -22,11 +22,10 @@ export function StaffRetailPanel() {
             <CreditCard className="w-3.5 h-3.5" aria-hidden />
             Path 1 · Cove Digital Card
           </p>
-          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">
-            Member (or anyone with a loaded Cove card)
-          </p>
+          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Staff laptop</p>
           <p className="mt-1 text-xs text-[#5A6070] leading-relaxed">
-            Scan family QR → tap products → Charge Cove card.
+            Scan / look up → tap products → Charge Cove. Parents can also spend Cove balance in the
+            portal.
           </p>
         </a>
         <div
@@ -37,12 +36,10 @@ export function StaffRetailPanel() {
             <Smartphone className="w-3.5 h-3.5" aria-hidden />
             Path 2 · Square Stand / cash
           </p>
-          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">
-            Card-present on iPad Stand
-          </p>
+          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Card on iPad Stand</p>
           <p className="mt-1 text-xs text-[#5A6070] leading-relaxed">
-            Ring snacks or spirit on <strong>Square Stand</strong> (or phone app). Sales sync into
-            Staff Payments + inventory. Use Cash on this screen when needed.
+            Any tap/swipe → ring on <strong>Square Stand</strong> only (syncs to Staff). Cash → this
+            screen. Do not double-charge.
           </p>
         </div>
       </div>
