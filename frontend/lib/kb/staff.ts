@@ -216,63 +216,106 @@ Parents get purchase confirmation in portal messages (and email when Gmail send 
 Do not send parents to the old Wix Events dashboard for day-to-day work. Stay in Staff.`,
     },
     {
-      slug: 'cove-register',
-      title: 'Cove register (window + events)',
+      slug: 'cove-in-person-manual',
+      title: 'Cove in-person transactions manual',
       categoryId: 'cove',
-      summary: 'Stand = cash+card · Staff = Cove charge (members may skip Cove).',
+      summary: 'Full Staff manual: Stand, Cove charge, pickups, External, double-charge rule.',
       order: 1,
       need: 'retail',
-      body: `Staff → **The Cove** → In-person sales. Guests do **not** need a login or Cove card.
+      body: `# Cove in-person transactions
 
-**How paying?**
-1. **Cash or card / wallet** → Square Stand (guests and members — members may skip Cove)
-2. **Cove Digital Card** → Staff lookup → Charge Cove
-3. **Zelle / PayPal / phone Square** (no Stand) → External pay logger
+**Sell first. One payment lane per sale. Never charge the same items twice.**
+Guests do **not** need a login or Cove card. Printable card: **/staff/in-person**
 
-**Cove Digital Card**
-1. Scan family QR or type passcode / 6-digit → Look up
-2. Confirm student names and balance
-3. Tap products → **Charge Cove**
-4. Prefer cash/card instead → Square Stand
+## How are they paying?
 
-Parents can also buy online (portal / site). Already paid online → Pickup queue.`,
+| Paying with… | Do this |
+|--------------|---------|
+| **Cash** or **card / Apple Pay / Google Pay** | **Square Stand** → ring → take payment → stop |
+| **Cove Digital Card** | Staff → lookup → **Charge Cove** |
+| Member has Cove but prefers cash/card | **Stand** — fine anytime |
+| **Portal / site checkout** (already paid) | **Today's store pickups** (candy/spirit) or shirts/magnets → **Handed out** |
+| **Zelle / PayPal / phone Square** (no Stand) | Staff → **External (AM)** → log amount |
+| Paid-member free food (code ends in **9**) | Hand ticket · **no charge** |
+| Membership (Reef / Lagoon / Tide) | **Portal only** — not Stand |
+
+## Devices
+
+### Square Stand (iPad)
+Cash + card/wallet. Ring → pay → **stop**. Do not also charge in Staff. Optional: add customer email on Stand.
+
+### Staff → The Cove (laptop or iPad browser)
+1. **Cove Digital Card** — scan/type code → Charge Cove
+2. **External (AM)** — Zelle / PayPal / phone when Stand is down
+3. **Today's store pickups** — morning-window portal snack/spirit · Handed out
+4. **Magnet & shirt pickup** — membership perks (not candy)
+
+## Event vs Window
+- **Event:** Stand dominates; Cove when they want balance; Join QR optional after sale
+- **Window (~8:25–8:50 AM ET M–Fri):** Stand default; Cove when they show a code; portal window orders → Today's store pickups
+
+## Walkthroughs
+
+**Cash/card:** Stand only → optional Join QR after
+**Cove:** Staff → Cove Digital Card → lookup → tap products → Charge Cove
+**Already paid online:** Handed out only — never re-ring
+**External:** Staff → External → amount → Log
+
+## Double-charge rule
+
+| Lane | Also ring elsewhere? |
+|------|----------------------|
+| Stand | **No** Staff charge |
+| Charge Cove | **No** Stand |
+| Portal pickup | **No** Stand / Cove |
+| External | No second tender |
+
+## Troubleshooting
+Stuck / double charge → **treasurer@** · Membership → **vp-membershipexperience@** · Cove ops → **cove@** / **cove-staff@**
+
+Full doc in repo: docs/STAFF-COVE-IN-PERSON-MANUAL.md`,
+    },
+    {
+      slug: 'cove-register',
+      title: 'Cove register quick reference',
+      categoryId: 'cove',
+      summary: 'Short How paying? card — see full manual for walkthroughs.',
+      order: 2,
+      need: 'retail',
+      body: `Staff → **The Cove** → In-person sales.
+
+1. **Cash or card** → Square Stand
+2. **Cove balance** → Staff Charge Cove
+3. **Portal already paid** → Today's store pickups · Handed out
+4. **External (AM)** → log Zelle / PayPal / phone
+
+Members may skip Cove and use Stand anytime.
+
+**Full manual:** Help → *Cove in-person transactions manual* · Printable **/staff/in-person**`,
     },
     {
       slug: 'cove-in-person-square-stand',
-      title: 'In-person sales + Square Stand (window & events)',
+      title: 'Square Stand (cash + card)',
       categoryId: 'cove',
-      summary: 'Sell first · Stand = cash+card · Staff = Cove · join optional.',
-      order: 2,
+      summary: 'Stand lane only — cash and wallet/card; never double with Staff.',
+      order: 3,
       need: 'retail',
-      body: `### Quick decision — how are they paying?
+      body: `### Square Stand steps
+1. Library / Favorites → ring snacks or spirit
+2. Take **cash** or **card / Apple Pay / Google Pay**
+3. Stop — do **not** also Charge Cove or External for the same items
+4. Optional: add customer email so Staff Payments attaches to them
 
-| Situation | Do this |
-|-----------|---------|
-| Cash or card / Apple Pay / Google Pay | **Square Stand** — do not also charge in Staff |
-| Cove balance | Staff → lookup → Charge Cove |
-| Member skips Cove | Stand (cash or card) — fine anytime |
-| Zelle / PayPal / phone Square | Staff → External pay |
-| Member portal / site checkout | Pickup only — no Stand / no Cove charge |
-| Free join | Soft ask **after** sale — QR optional |
-| Membership | Portal only |
-| Paid-member free food perk | Code ends in **9** → ticket · no charge |
+Stand syncs to Staff Payments (inventory when SKU matches).
 
-### What to expect
-- **Events / window:** Stand is default for cash + card; Cove on Staff when they want balance  
-
-### Online
-Anyone can shop on the site. Memberships pay in the **portal**. Members can load Cove later.
-
-Never charge the same item on Stand and Staff.
-
-Longer guide: docs/COVE-IN-PERSON.md · Printable: /staff/in-person`,
+See **Cove in-person transactions manual** for the full decision table. Printable: /staff/in-person`,
     },
     {
       slug: 'cove-products-inventory',
       title: 'Cove products & inventory',
       categoryId: 'cove',
       summary: 'Add/restock products; advanced inventory when needed.',
-      order: 3,
+      order: 4,
       body: `In **The Cove**, use **Cove products** to add items, prices, barcodes, and restock quantities.
 
 Multiple staff can work products at once. **Spirit wear** stock is separate (Wix Stores / Cove shop merch + Square Stand items) — not the snack register catalog. In person, sell spirit on **Square Stand**; browse online under **/cove → Stingrays Pride**.
@@ -284,7 +327,7 @@ Use advanced inventory only when you need deeper stock tools. Day-to-day is prod
       title: 'Discount codes & spirit coupons',
       categoryId: 'cove',
       summary: 'Create and manage promo codes in Staff.',
-      order: 4,
+      order: 5,
       need: 'discounts',
       body: `Open the discounts / coupons workspace your role can access.
 

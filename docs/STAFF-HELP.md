@@ -67,7 +67,8 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **48 - Where form emails go** | Everyone | Public + portal forms, Help, sale alerts — who gets each email |
 | **Ship week video updates (Aug 11)** | Marketing / video | `docs/SHIP-WEEK-2026-08-11-VIDEO-UPDATES.md` — backlog; UI callouts ship first |
 | **Canva setup** (`docs/CANVA-SETUP.md`) | Marketing / admin | Connect app redirect URIs, env vars, Staff → Canva |
-| **Cove in-person** (`docs/COVE-IN-PERSON.md`) | Retail / Cove / event volunteers | Staff register + Square Stand — snack window **and** PTO events |
+| **49 — Cove in-person transactions** (`docs/STAFF-COVE-IN-PERSON-MANUAL.md`) | Retail / Cove / event volunteers | Full manual: Stand, Cove charge, pickups, External |
+| **Cove in-person quick card** (`docs/COVE-IN-PERSON.md`) | Same | One-page pointer + printable `/staff/in-person` |
 | **40 - Visitor Site Content from Staff** | Role-scoped | Site settings, board, nav, FAQs, volunteers… |
 | **27 - Member Portal Parent Support Guide** | Everyone helping parents | Walk a parent through portal screens |
 

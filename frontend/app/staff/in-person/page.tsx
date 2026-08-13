@@ -25,9 +25,16 @@ export default function StaffInPersonCardPage() {
         <p className="text-sm text-[#5A6070]">
           Printable cheat sheet — no login required to buy · never charge twice.
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Link href="/staff" className="text-xs font-bold underline" style={{ color: '#085508' }}>
             ← Staff
+          </Link>
+          <Link
+            href="/staff?view=help&article=cove-in-person-manual"
+            className="text-xs font-bold underline"
+            style={{ color: '#085508' }}
+          >
+            Full manual
           </Link>
           <button
             type="button"

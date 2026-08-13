@@ -58,6 +58,14 @@ export function StaffRetailPanel() {
         >
           Print table card
         </a>
+        {' · '}
+        <a
+          href="/staff?view=help&article=cove-in-person-manual"
+          className="font-bold underline"
+          style={{ color: '#085508' }}
+        >
+          Full in-person manual
+        </a>
       </p>
 
       <StaffCoveRegister />
