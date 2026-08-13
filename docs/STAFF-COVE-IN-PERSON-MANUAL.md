@@ -136,7 +136,17 @@ If unsure whether Stand already synced: check Staff **Payments** before logging 
 
 ---
 
-## 8. What Staff does **not** handle at the table
+## 8. Stand inventory (SKU match)
+
+Stand sales **decrement Wix inventory only when the Square item SKU matches** a Cove/spirit product.
+
+- Ring items from the synced catalog (**Stingrays Spirit T-Shirt**, snacks with SKUs, etc.).
+- Do **not** recreate loose “T Shirt / Hats / Vintage” items without SKUs — those used to log as Paid · review inventory with no stock change.
+- Tee / hoodie sizes on Stand often share one SKU → one stock pool (not per size).
+- After catalog changes: on the iPad, refresh Library / Favorites.
+- Audit anytime: `node --env-file=frontend/.env.local scripts/audit-square-wix-skus.mjs`
+
+## 9. What Staff does **not** handle at the table
 
 - Selling **memberships** on Stand or Staff cart (portal only)  
 - Rebuilding Cove catalog inside Square Dashboard as source of truth (site/Staff owns catalog; Square is payment + Stand POS)  
@@ -145,7 +155,7 @@ If unsure whether Stand already synced: check Staff **Payments** before logging 
 
 ---
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
@@ -161,7 +171,7 @@ If unsure whether Stand already synced: check Staff **Payments** before logging 
 
 ---
 
-## 10. Contacts
+## 11. Contacts
 
 | Topic | Email |
 |-------|--------|
@@ -173,7 +183,7 @@ Sale alerts (when configured) also notify president@, secretary@, vp-sales@.
 
 ---
 
-## 11. Quick checklist (tape next to the iPad)
+## 12. Quick checklist (tape next to the iPad)
 
 - [ ] Stand up for cash + card  
 - [ ] Staff open on laptop/iPad for Cove + pickups  
