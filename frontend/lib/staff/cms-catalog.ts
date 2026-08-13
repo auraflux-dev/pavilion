@@ -342,8 +342,16 @@ export const SITE_SETTING_GROUPS: {
         label: 'Cove / store coordinator email (sale alerts)',
       },
       {
+        key: 'contactEmailCoveStaff',
+        label: 'Cove staff email (sale alerts)',
+      },
+      {
         key: 'contactEmailVpSales',
         label: 'VP Digital & Retail Sales email (sale alerts)',
+      },
+      {
+        key: 'contactEmailSecretary',
+        label: 'Secretary email (sale alerts)',
       },
       {
         key: 'contactEmailPrograms',

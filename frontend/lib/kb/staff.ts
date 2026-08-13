@@ -426,7 +426,7 @@ Same for free and paid. The request is also logged for follow-up.
 ## Paid checkout sale alert
 Parent gets confirmation email + portal Messages.
 
-Staff alert goes to **all of**: vp-membershipexperience@, president@, treasurer@, cove@, vp-sales@.
+Staff alert goes to **all of**: vp-membershipexperience@, president@, treasurer@, cove@, cove-staff@, vp-sales@, secretary@.
 
 Drive doc **48 - Where form emails go** is the shareable copy for WhatsApp / onboarding.`,
     },
@@ -457,7 +457,7 @@ Change one list at a time, save, then **View site** to confirm. Leave deep Wix E
       categoryId: 'admin',
       summary: 'What parents get after checkout.',
       order: 3,
-      body: `Successful membership, Cove load, ticket, donation, and shop purchases create a parent portal message (and email when Gmail send is connected). The same checkout also emails **vp-membershipexperience@shmspto.org**, **president@shmspto.org**, **treasurer@shmspto.org**, **cove@shmspto.org** (Cove Coordinator), and **vp-sales@shmspto.org** (VP Digital & Retail Sales) a staff sale alert (includes shirt size / magnet / refreshments notes when membership).
+      body: `Successful membership, Cove load, ticket, donation, and shop purchases create a parent portal message (and email when Gmail send is connected). The same checkout also emails **vp-membershipexperience@shmspto.org**, **president@shmspto.org**, **treasurer@shmspto.org**, **cove@shmspto.org** (Cove Coordinator), **cove-staff@shmspto.org**, **vp-sales@shmspto.org** (VP Digital & Retail Sales), and **secretary@shmspto.org** a staff sale alert (includes shirt size / magnet / refreshments notes when membership).
 
 If a parent paid but sees nothing:
 1. Confirm payment cleared in Square/PayPal

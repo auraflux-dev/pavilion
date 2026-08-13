@@ -59,7 +59,7 @@ Most submissions are also logged so staff can follow up in Staff.
 | Who | What |
 |-----|------|
 | **Parent** | Order confirmation email + message in Member Portal → Messages |
-| **Staff sale alert** | **All of:** vp-membershipexperience@, president@, treasurer@, cove@, vp-sales@ |
+| **Staff sale alert** | **All of:** vp-membershipexperience@, president@, treasurer@, cove@, cove-staff@, vp-sales@, secretary@ |
 
 Membership alerts include shirt / magnet / refreshments fulfillment notes when relevant.
 
@@ -91,7 +91,9 @@ Routing is the **same**. Paid parents also get purchase confirmations; staff get
 | vp-events@ | Event idea form |
 | treasurer@ | Sale alerts (finance awareness) |
 | cove@ | Sale alerts (retail / Cove) |
+| cove-staff@ | Sale alerts (Cove staff) |
 | vp-sales@ | Sale alerts (digital & retail sales) |
+| secretary@ | Sale alerts (secretary) |
 
 ---
 
