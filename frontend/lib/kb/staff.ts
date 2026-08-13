@@ -219,24 +219,21 @@ Do not send parents to the old Wix Events dashboard for day-to-day work. Stay in
       slug: 'cove-register',
       title: 'Cove register (window + events)',
       categoryId: 'cove',
-      summary: 'Lookup family → confirm kids + balance → tap products → Charge.',
+      summary: 'Stand = cash+card · Staff = Cove charge (members may skip Cove).',
       order: 1,
       need: 'retail',
       body: `Staff → **The Cove** → In-person sales. Guests do **not** need a login or Cove card.
 
 **How paying?**
-1. **Card / wallet** → Square Stand only (do not also ring Staff)
-2. **Cash** → Staff Cash lane → tap products → record
-3. **Cove balance** → lookup code/QR → Charge Cove
-4. **Zelle / PayPal / phone Square** → External pay logger
+1. **Cash or card / wallet** → Square Stand (guests and members — members may skip Cove)
+2. **Cove Digital Card** → Staff lookup → Charge Cove
+3. **Zelle / PayPal / phone Square** (no Stand) → External pay logger
 
-**Cove Digital Card (when they have balance)**
+**Cove Digital Card**
 1. Scan family QR or type passcode / 6-digit → Look up
 2. Confirm student names and balance
 3. Tap products → **Charge Cove**
-4. Low balance → Stand (card) or Cash instead
-
-**Window expectation:** until Cove cards are common → Stand or cash.
+4. Prefer cash/card instead → Square Stand
 
 Parents can also buy online (portal / site). Already paid online → Pickup queue.`,
     },
@@ -244,16 +241,16 @@ Parents can also buy online (portal / site). Already paid online → Pickup queu
       slug: 'cove-in-person-square-stand',
       title: 'In-person sales + Square Stand (window & events)',
       categoryId: 'cove',
-      summary: 'Sell first · Stand for card · Cash/Cove/External on Staff · join optional.',
+      summary: 'Sell first · Stand = cash+card · Staff = Cove · join optional.',
       order: 2,
       need: 'retail',
       body: `### Quick decision — how are they paying?
 
 | Situation | Do this |
 |-----------|---------|
-| Card / Apple Pay / Google Pay | **Square Stand only** — do not also Mark paid in Staff |
-| Cash | Staff → Cash |
+| Cash or card / Apple Pay / Google Pay | **Square Stand** — do not also charge in Staff |
 | Cove balance | Staff → lookup → Charge Cove |
+| Member skips Cove | Stand (cash or card) — fine anytime |
 | Zelle / PayPal / phone Square | Staff → External pay |
 | Already paid online | Pickup only |
 | Free join | Soft ask **after** sale — QR optional |
@@ -261,8 +258,7 @@ Parents can also buy online (portal / site). Already paid online → Pickup queu
 | Paid-member free food perk | Code ends in **9** → ticket · no charge |
 
 ### What to expect
-- **Events:** Stand dominates; cash minority; joins lag purchases  
-- **Snack window:** Stand or cash until Cove cards are common  
+- **Events / window:** Stand is default for cash + card; Cove on Staff when they want balance  
 
 ### Online
 Anyone can shop on the site. Memberships pay in the **portal**. Members can load Cove later.

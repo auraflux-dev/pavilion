@@ -1,7 +1,7 @@
 # In-person + online sales — what we use now
 
 **Audience:** Table staff, Cove window, Open House / event volunteers  
-**Devices:** Laptop/tablet (Staff) + iPad in **Square Stand**  
+**Devices:** Staff (browser on laptop or iPad) + iPad in **Square Stand**  
 **Staff:** https://www.shmspto.org/staff → **The Cove** (Retail)  
 **Printable table card:** https://www.shmspto.org/staff/in-person  
 
@@ -14,9 +14,9 @@
 
 | Situation | What to do |
 |-----------|------------|
-| **Card / Apple Pay / Google Pay** (anyone) | **Square Stand only** → ring → take payment → stop |
-| **Cash** | Staff → **Cash** → tap items → record |
+| **Cash** or **card / Apple Pay / Google Pay** | **Square Stand** → ring → take payment → stop |
 | **Cove Digital Card balance** | Staff → lookup → **Charge Cove** |
+| Member has Cove but prefers cash/card | **Stand** — fine anytime |
 | **Zelle / PayPal / phone Square** (no Stand) | Staff → **External pay** → log amount |
 | Already paid online | Staff → Retail → **Pickup** · no new charge |
 | Free join | Soft ask **after** sale — QR optional |
@@ -28,14 +28,14 @@
 ## What to expect
 
 ### Events (Open House)
-- Stand (wallet/card) dominates once the iPad is up  
-- Cash is a minority (~single digits %)  
+- Stand (cash + wallet/card) is the default lane  
+- Cove on Staff when they want to spend balance  
 - Joins lag purchases — normal  
 - Morning / before Stand: Zelle, phone Square, PayPal → External pay logger  
 
 ### Snack window (school days)
-- Until Cove cards are common → expect **Stand or cash**  
-- Cove lookup when they show a code/QR  
+- Default: **cash or card on Stand**  
+- Staff Cove only when they show a code and want Cove balance  
 
 ---
 
@@ -53,37 +53,32 @@ At the table: if they already paid online → **pickup only**.
 
 ## Devices
 
-### iPad — Square Stand (primary card lane)
+### Square Stand (cash + card)
 1. Library → ring spirit / snacks  
-2. Wallet or physical card → done  
+2. Cash tender **or** wallet / physical card → done  
 3. Syncs to Staff Payments (+ inventory when SKU matches)  
 4. Optional: add customer email on Stand so the sale attaches to a person  
 
-### Laptop — Staff
-1. **How paying?** chooser → Cash / Cove / External  
-2. Cove Charge · Cash cart · External logger · Pickup  
-3. Backup only: “Mark paid on Stand” if sync failed  
+### Staff (browser — laptop or iPad)
+1. **Cove Digital Card** → lookup → Charge Cove  
+2. **External** only when AM / no Stand (Zelle etc.)  
+3. Pickup for already-paid online  
 
 ---
 
 ## Walkthroughs
 
-### A — Card on Stand (guest or member)
+### A — Cash or card on Stand (guest or member)
 1. Confirm item  
-2. Stand: ring → take payment  
+2. Stand: ring → cash or card  
 3. Optional Join QR  
 4. Do **not** also charge in Staff  
 
-### B — Cash
-1. Staff → Cash  
-2. Tap products → Record cash  
-3. Optional email for join invite  
+### B — Cove balance
+1. Staff → Cove Digital Card  
+2. Scan/type code → confirm kids + balance → Charge Cove  
 
-### C — Cove balance
-1. Staff → lookup QR / code  
-2. Confirm kids + balance → Charge Cove  
-
-### D — External (AM / overflow)
+### C — External (AM / overflow)
 1. Staff → External pay  
 2. Pick Zelle / PayPal / phone Square / Other  
 3. Amount + optional note / email  
@@ -92,11 +87,10 @@ At the table: if they already paid online → **pickup only**.
 
 ## Double-charge rule
 
-| Lane | Also ring in Staff cart? |
-|------|---------------------------|
-| Stand card | **No** |
-| Cash on Staff | No second Stand charge |
-| Cove Charge | No Stand charge for same items |
+| Lane | Also ring elsewhere? |
+|------|----------------------|
+| Stand (cash or card) | **No** Staff charge |
+| Cove Charge | **No** Stand charge for same items |
 | External log | No second tender for same sale |
 
 ---

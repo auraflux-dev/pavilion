@@ -19,11 +19,12 @@ export function StaffRetailPanel() {
         >
           <p className="text-xs font-bold uppercase tracking-wider text-[#0B3D0B] flex items-center gap-1.5">
             <Smartphone className="w-3.5 h-3.5" aria-hidden />
-            Card / wallet
+            Cash or card / wallet
           </p>
-          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Square Stand first</p>
+          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Square Stand</p>
           <p className="mt-1 text-xs text-[#5A6070] leading-relaxed">
-            Ring on the <strong>iPad Stand</strong> only — syncs to Staff. Do not also charge below.
+            Guests and members — ring on Stand. Members can skip Cove anytime. Do not also charge
+            below.
           </p>
         </div>
         <a
@@ -33,11 +34,11 @@ export function StaffRetailPanel() {
         >
           <p className="text-xs font-bold uppercase tracking-wider text-[#085508] flex items-center gap-1.5">
             <CreditCard className="w-3.5 h-3.5" aria-hidden />
-            Cash · Cove · External
+            Cove Digital Card
           </p>
-          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Staff · How paying?</p>
+          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Staff · Charge Cove</p>
           <p className="mt-1 text-xs text-[#5A6070] leading-relaxed">
-            Cash cart, Cove lookup, or Zelle/PayPal/phone logger. Guests OK — no login required.
+            Lookup code/QR → Charge Cove. External logger only if AM / no Stand (Zelle etc).
           </p>
         </a>
       </div>

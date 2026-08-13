@@ -65,22 +65,16 @@ export default function StaffInPersonCardPage() {
             </thead>
             <tbody className="text-[#1A1A1A]">
               <tr className="border-t border-[#E8E4DC]">
-                <td className="p-3 align-top font-semibold">Card / Apple Pay / Google Pay</td>
+                <td className="p-3 align-top font-semibold">Cash · card · Apple Pay · Google Pay</td>
                 <td className="p-3 align-top">
-                  <strong>Square Stand (iPad)</strong> — ring → take payment → stop. Do not also ring
-                  in Staff.
-                </td>
-              </tr>
-              <tr className="border-t border-[#E8E4DC]">
-                <td className="p-3 align-top font-semibold">Cash</td>
-                <td className="p-3 align-top">
-                  Staff → <strong>Cash</strong> → tap items → record
+                  <strong>Square Stand</strong> — ring → take payment → stop. Guests and members
+                  (even if they have a Cove card). Do not also charge in Staff.
                 </td>
               </tr>
               <tr className="border-t border-[#E8E4DC]">
                 <td className="p-3 align-top font-semibold">Cove Digital Card balance</td>
                 <td className="p-3 align-top">
-                  Staff → lookup code/QR → <strong>Charge Cove</strong> (only if they have balance)
+                  Staff → lookup code/QR → <strong>Charge Cove</strong>
                 </td>
               </tr>
               <tr className="border-t border-[#E8E4DC]">
@@ -112,8 +106,8 @@ export default function StaffInPersonCardPage() {
           >
             <h2 className="text-base font-bold text-[#0B3D0B]">Snack window (school days)</h2>
             <p className="mt-2 text-sm text-[#5A6070] leading-relaxed">
-              Until most families use Cove cards, expect <strong>Stand or cash</strong>. Cove lookup
-              when they show a code.
+              Default: <strong>cash or card on Stand</strong>. Staff Cove only when they want to
+              spend Cove balance.
             </p>
           </div>
           <div

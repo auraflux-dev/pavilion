@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Loader2, Minus, Plus, ShoppingCart, UserRound, X } from 'lucide-react'
+import { Loader2, Minus, Plus, ShoppingCart, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CoveCameraScanner, parseCoveScan } from '@/components/staff/cove-camera-scanner'
 
@@ -69,11 +69,11 @@ function normalizeLookupInput(raw: string): string {
 
 /**
  * In-person sales (window + event tables).
- * How paying? → Stand hint / Cash cart / Cove charge / External logger.
+ * How paying? → Stand (cash+card) / Cove charge / External logger.
  */
 export function StaffCoveRegister() {
   type VenueMode = 'event' | 'window'
-  type PayLane = 'stand' | 'cash' | 'cove' | 'external' | 'pickup'
+  type PayLane = 'stand' | 'cove' | 'external' | 'pickup'
   type ExternalTender = 'zelle' | 'paypal' | 'phone_square' | 'other'
 
   const [venueMode, setVenueMode] = useState<VenueMode>(() => {
@@ -93,7 +93,6 @@ export function StaffCoveRegister() {
   const [guestEmail, setGuestEmail] = useState('')
   const [guestPhone, setGuestPhone] = useState('')
   const [sendJoinInvite, setSendJoinInvite] = useState(true)
-  const [showStandBackup, setShowStandBackup] = useState(false)
   const [externalTender, setExternalTender] = useState<ExternalTender>('zelle')
   const [externalAmount, setExternalAmount] = useState('')
   const [externalNote, setExternalNote] = useState('')
@@ -173,7 +172,7 @@ export function StaffCoveRegister() {
   }, [deals, productQuery])
 
   const selling = mode === 'guest' || mode === 'member'
-  const needsCart = payLane === 'cash' || payLane === 'cove'
+  const needsCart = payLane === 'cove'
   const canUseCove =
     payLane === 'cove' &&
     mode === 'member' &&
@@ -185,28 +184,16 @@ export function StaffCoveRegister() {
     setError('')
     setStatus('')
     setCart([])
-    setShowStandBackup(false)
     if (lane === 'stand') {
       setMode('idle')
       setFamily(null)
-      setStatus(
-        venueMode === 'event'
-          ? 'Ring on Square Stand · do not also charge here.'
-          : 'Card/wallet → Square Stand. Cash or Cove below if needed.',
-      )
+      setStatus('Cash or card/wallet → Square Stand. Members may skip Cove and use Stand anytime.')
       return
     }
     if (lane === 'pickup') {
       setMode('idle')
       setFamily(null)
       setStatus('Already paid online — use Pickup queue (no new charge).')
-      return
-    }
-    if (lane === 'cash') {
-      setMode('guest')
-      setFamily(null)
-      setCode('')
-      setStatus('Cash — tap products, then Record cash. Guest OK.')
       return
     }
     if (lane === 'cove') {
@@ -245,7 +232,7 @@ export function StaffCoveRegister() {
         setFamily({ ...d.family, hasCard: false, balance: 0 })
         setMode('member')
         setCode(trimmed)
-        setStatus('Member found — no Cove card. Use Cash or Stand instead.')
+        setStatus('Member found — no Cove card. Use Square Stand (cash or card).')
         setError('')
         return
       }
@@ -259,7 +246,7 @@ export function StaffCoveRegister() {
           ? 'Paid-member perk (code ends in 9) — refreshments free · no charge'
           : d.hasCard
             ? `Cove balance $${Number(d.balance).toFixed(2)}`
-            : 'Member found — no Cove balance (use Cash / Stand)',
+            : 'Member found — no Cove balance (use Square Stand)',
       )
     } catch (err) {
       setFamily(null)
@@ -268,15 +255,6 @@ export function StaffCoveRegister() {
     } finally {
       setBusy(false)
     }
-  }
-
-  function startGuestCash() {
-    setMode('guest')
-    setFamily(null)
-    setCode('')
-    setCart([])
-    setError('')
-    setStatus('Guest cash — inventory tracked. Optional email for join.')
   }
 
   function onCameraScan(value: string) {
@@ -292,7 +270,7 @@ export function StaffCoveRegister() {
 
   function setLineQty(product: Product, qty: number) {
     if (!selling) {
-      setError(payLane === 'cove' ? 'Look up a family first.' : 'Choose Cash or Guest first.')
+      setError('Look up a family first.')
       return
     }
     const variantId = product.variantId || ''
@@ -326,7 +304,7 @@ export function StaffCoveRegister() {
 
   function requestAdd(product: Product) {
     if (!selling) {
-      setError(payLane === 'cove' ? 'Look up a family first.' : 'Choose Cash lane first.')
+      setError('Look up a family first.')
       return
     }
     if (product.variants && product.variants.length > 1) {
@@ -411,7 +389,7 @@ export function StaffCoveRegister() {
     if (!family?.hasCard || !cart.length) return
     if (remainingAfter < 0) {
       setError(
-        `Not enough Cove balance ($${balance.toFixed(2)}). Use Cash or Stand, or remove items.`,
+        `Not enough Cove balance ($${balance.toFixed(2)}). Use Square Stand, or remove items.`,
       )
       return
     }
@@ -436,45 +414,6 @@ export function StaffCoveRegister() {
       await loadProducts()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Checkout failed')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  async function chargeTender(tender: 'cash' | 'stand') {
-    if (!cart.length) return
-    setBusy(true)
-    setError('')
-    setStatus('')
-    try {
-      const r = await fetch('/api/staff/cove/sale', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tender,
-          code: mode === 'member' ? family?.coveFamilyCode || code : undefined,
-          lines: cartPayload(),
-          guestEmail: guestEmail || undefined,
-          guestPhone: guestPhone || undefined,
-          guestName: guestName || undefined,
-          sendJoinInvite: mode === 'guest' && sendJoinInvite && Boolean(guestEmail.trim()),
-        }),
-      })
-      const d = await r.json()
-      if (!r.ok) throw new Error(d.error ?? 'Sale failed')
-      const inviteNote = d.invite?.emailed
-        ? ' Join invite emailed.'
-        : d.invite?.smsText
-          ? ` Text join: ${d.invite.smsText}`
-          : d.invite?.error
-            ? ` Invite: ${d.invite.error}`
-            : ''
-      const label = tender === 'stand' ? 'Marked Stand' : 'Cash'
-      setStatus(`${label} $${Number(d.total).toFixed(2)} — inventory updated.${inviteNote}`)
-      resetSale()
-      await loadProducts()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sale failed')
     } finally {
       setBusy(false)
     }
@@ -527,7 +466,7 @@ export function StaffCoveRegister() {
 
   function resetSale() {
     setFamily(null)
-    setMode(payLane === 'cash' || payLane === 'external' ? 'guest' : 'idle')
+    setMode(payLane === 'external' ? 'guest' : 'idle')
     setCart([])
     setCode('')
     setGuestEmail('')
@@ -536,7 +475,6 @@ export function StaffCoveRegister() {
     setProductQuery('')
     setLetterFilter('All')
     setCategoryFilter('All')
-    setShowStandBackup(false)
     if (payLane === 'cove') codeRef.current?.focus()
   }
 
@@ -554,7 +492,6 @@ export function StaffCoveRegister() {
     setProductQuery('')
     setLetterFilter('All')
     setCategoryFilter('All')
-    setShowStandBackup(false)
     setStatus('')
     setError('')
   }
@@ -691,8 +628,8 @@ export function StaffCoveRegister() {
 
       <p className="text-xs text-[#5A6070] leading-relaxed rounded-lg bg-[#FAFCF9] border border-[#E8E4DC] px-3 py-2">
         {venueMode === 'event'
-          ? 'Event mode: card/wallet on Square Stand first. Cash · Cove · External only when needed. Join QR optional after sale.'
-          : 'Window mode: until Cove cards are common → Stand or cash. Lookup when they show a code.'}
+          ? 'Event mode: cash + card/wallet on Square Stand. Cove balance → Staff. Members can skip Cove and use Stand. Join QR optional after sale.'
+          : 'Window mode: cash + card on Stand. Cove lookup only when they want to spend Cove balance.'}
         {' · '}
         <span className="font-semibold text-[#0B3D0B]">
           Optional — buy first, join anytime
@@ -703,15 +640,14 @@ export function StaffCoveRegister() {
         <p className="text-xs font-bold uppercase tracking-wider text-[#5A6070] mb-2">
           How paying?
         </p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {laneBtn(
             'stand',
-            'Card / wallet',
-            venueMode === 'event' ? '→ Square Stand only' : '→ iPad Stand',
+            'Cash or card / wallet',
+            '→ Square Stand (anyone, incl. members skipping Cove)',
           )}
-          {laneBtn('cash', 'Cash', 'Staff cart · record')}
-          {laneBtn('cove', 'Cove code', 'Lookup → Charge Cove')}
-          {laneBtn('external', 'External', 'Zelle · PayPal · phone')}
+          {laneBtn('cove', 'Cove Digital Card', 'Staff · lookup → Charge Cove')}
+          {laneBtn('external', 'External (AM)', 'Zelle · PayPal · phone · no Stand')}
         </div>
         <button
           type="button"
@@ -731,13 +667,14 @@ export function StaffCoveRegister() {
 
       {payLane === 'stand' ? (
         <div className="rounded-xl border-2 border-[#0B3D0B] bg-[#F5F7F4] p-4 space-y-2">
-          <p className="text-sm font-bold text-[#1A1A1A]">Use the iPad Square Stand</p>
+          <p className="text-sm font-bold text-[#1A1A1A]">Use Square Stand (cash or card)</p>
           <ol className="text-sm text-[#5A6070] list-decimal pl-5 space-y-1">
             <li>Ring snacks / spirit on Stand</li>
-            <li>Take wallet or card</li>
-            <li>Stop — do not also ring this sale in Staff</li>
+            <li>Take cash, wallet, or card</li>
+            <li>Stop — do not also charge in Staff</li>
           </ol>
           <p className="text-xs text-[#5A6070]">
+            Guests and members (even with a Cove card) can pay here if they prefer cash/card.
             Optional: add customer email on Stand so the Payment attaches to them.
           </p>
         </div>
@@ -853,7 +790,7 @@ export function StaffCoveRegister() {
         </div>
       ) : null}
 
-      {(payLane === 'cash' || payLane === 'cove') && mode !== 'guest' ? (
+      {payLane === 'cove' ? (
         <>
           <CoveCameraScanner onScan={onCameraScan} label="Scan family QR" />
           <form
@@ -889,11 +826,6 @@ export function StaffCoveRegister() {
             >
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Look up'}
             </Button>
-            {payLane === 'cash' ? (
-              <Button type="button" variant="outline" className="py-3" onClick={startGuestCash}>
-                <UserRound className="w-4 h-4 mr-1" /> Guest instead
-              </Button>
-            ) : null}
             {selling ? (
               <Button type="button" variant="outline" className="py-3" onClick={clearSession}>
                 <X className="w-4 h-4 mr-1" /> Next
@@ -901,29 +833,6 @@ export function StaffCoveRegister() {
             ) : null}
           </form>
         </>
-      ) : null}
-
-      {payLane === 'cash' && mode === 'guest' ? (
-        <div className="flex flex-wrap gap-2 items-center">
-          <p className="text-sm font-bold text-[#0B3D0B]">Guest cash</p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setMode('idle')
-              setFamily(null)
-              setCart([])
-              setStatus('Look up member for cash, or stay Guest.')
-              setTimeout(() => codeRef.current?.focus(), 50)
-            }}
-          >
-            Look up member instead
-          </Button>
-          <Button type="button" variant="outline" size="sm" onClick={clearSession}>
-            <X className="w-4 h-4 mr-1" /> Cancel
-          </Button>
-        </div>
       ) : null}
 
       {mode === 'member' && family ? (
@@ -946,52 +855,13 @@ export function StaffCoveRegister() {
             </p>
           ) : (
             <p className="text-sm font-bold text-amber-900">
-              No Cove card — switch to Cash or Stand.
+              No Cove card — use Square Stand (cash or card).
             </p>
           )}
         </div>
       ) : null}
 
-      {(payLane === 'cash' || payLane === 'external') && mode === 'guest' && payLane !== 'external' ? (
-        <div className="grid gap-2 sm:grid-cols-3 rounded-xl border border-[#E8E4DC] p-3 bg-[#FAFCF9]">
-          <label className="text-xs font-bold text-[#5A6070]">
-            Name (optional)
-            <input
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-2 py-2 text-sm"
-            />
-          </label>
-          <label className="text-xs font-bold text-[#5A6070]">
-            Email (for free join)
-            <input
-              type="email"
-              value={guestEmail}
-              onChange={(e) => setGuestEmail(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-2 py-2 text-sm"
-              placeholder="parent@email.com"
-            />
-          </label>
-          <label className="text-xs font-bold text-[#5A6070]">
-            Phone (SMS copy)
-            <input
-              type="tel"
-              value={guestPhone}
-              onChange={(e) => setGuestPhone(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-2 py-2 text-sm"
-              placeholder="optional"
-            />
-          </label>
-          <label className="sm:col-span-3 flex items-center gap-2 text-xs text-[#5A6070]">
-            <input
-              type="checkbox"
-              checked={sendJoinInvite}
-              onChange={(e) => setSendJoinInvite(e.target.checked)}
-            />
-            Email free join link after this sale
-          </label>
-        </div>
-      ) : null}
+
 
       {needsCart && selling ? (
         <>
@@ -1164,55 +1034,8 @@ export function StaffCoveRegister() {
 
                 {payLane === 'cove' && !canUseCove ? (
                   <p className="text-xs text-amber-900 font-semibold">
-                    Need Cove balance to charge here — switch lane to Cash or Stand.
+                    Need Cove balance to charge here — switch to Square Stand (cash or card).
                   </p>
-                ) : null}
-
-                {payLane === 'cash' ? (
-                  <Button
-                    disabled={busy}
-                    onClick={() => void chargeTender('cash')}
-                    className="text-white text-base px-8 py-6 font-bold w-full sm:w-auto"
-                    style={{ backgroundColor: '#0B3D0B' }}
-                  >
-                    {busy ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      `Record cash $${cartTotal.toFixed(2)}`
-                    )}
-                  </Button>
-                ) : null}
-
-                {payLane === 'cash' ? (
-                  <div className="pt-1">
-                    <button
-                      type="button"
-                      className="text-[11px] font-bold underline text-[#5A6070]"
-                      onClick={() => setShowStandBackup((v) => !v)}
-                    >
-                      {showStandBackup ? 'Hide' : 'Backup'}: already took card on Stand?
-                    </button>
-                    {showStandBackup ? (
-                      <div className="mt-2 space-y-2 rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-3">
-                        <p className="text-xs text-[#5A6070] leading-relaxed">
-                          Only if Stand sync failed and you need this cart recorded here. Prefer
-                          ringing on Stand alone.
-                        </p>
-                        <Button
-                          disabled={busy || !cart.length}
-                          onClick={() => void chargeTender('stand')}
-                          className="text-white text-sm px-6 py-4 font-bold"
-                          style={{ backgroundColor: '#085508' }}
-                        >
-                          {busy ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            `Mark paid on Stand · $${cartTotal.toFixed(2)}`
-                          )}
-                        </Button>
-                      </div>
-                    ) : null}
-                  </div>
                 ) : null}
 
                 <ul className="flex flex-wrap gap-2 text-xs text-[#5A6070]">
