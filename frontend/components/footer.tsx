@@ -17,7 +17,6 @@ export async function Footer() {
 
   return (
     <FooterClient
-      storeHours={settings.get('storeHours', 'Mon. Fri · 8:15 to 9:00 AM (when school is in session)')}
       presidentEmail={settings.get('presidentEmail', 'president@shmspto.org')}
       link6={member ? settings.get('announcement6thLink', '') : ''}
       link7={member ? settings.get('announcement7thLink', '') : ''}

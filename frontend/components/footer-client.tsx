@@ -10,7 +10,6 @@ import type { NavLink } from '@/lib/api/nav'
 import { useAuth } from '@/lib/hooks/use-auth'
 
 interface Props {
-  storeHours: string
   presidentEmail: string
   link6: string
   link7: string
@@ -22,7 +21,7 @@ interface Props {
   footerLinks: NavLink[]
 }
 
-export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, socialFacebook, socialInstagram, socialTwitter, socialYoutube, footerLinks }: Props) {
+export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebook, socialInstagram, socialTwitter, socialYoutube, footerLinks }: Props) {
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
   const { status } = useAuth()
@@ -288,21 +287,6 @@ export function FooterClient({ storeHours, presidentEmail, link6, link7, link8, 
               </form>
             )}
 
-            {/* In-person snack window only. online checkout is 24/7 for free or paid parents */}
-            <div
-              className="mt-4 rounded-lg p-3 border"
-              style={{ backgroundColor: '#2F2F2F', borderColor: '#4A4A4A' }}
-            >
-              <p className="text-xs font-semibold" style={{ color: '#FFD700' }}>
-                The Cove (in person)
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: '#C5CCD6' }}>
-                Snack window: {storeHours}
-              </p>
-              <p className="text-xs mt-1.5 leading-relaxed" style={{ color: '#C5CCD6' }}>
-                Online (membership, shop, store-card reload): anytime with a free or paid parent login.
-              </p>
-            </div>
           </div>
 
         </div>

@@ -94,7 +94,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
 
   if (disabled) {
     return (
-      <span className="text-xs font-bold px-3 py-1.5 rounded-full text-[#5A6070] bg-[#F0EDE8]">
+      <span className="inline-flex w-full sm:w-auto justify-center text-xs font-bold px-3 py-2 rounded-full text-[#5A6070] bg-[#F0EDE8]">
         Unavailable
       </span>
     )
@@ -103,7 +103,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
   if (status === 'loading') {
     return (
       <span
-        className="text-xs font-bold px-3 py-1.5 rounded-full text-white/70"
+        className="inline-flex w-full sm:w-auto justify-center text-xs font-bold px-3 py-2 rounded-full text-white/70"
         style={{ backgroundColor: '#085508' }}
       >
         …
@@ -116,11 +116,11 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
     return (
       <a
         href={`/auth/join?returnTo=${returnTo}`}
-        className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full border-2 transition-colors"
+        className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 rounded-full border-2 transition-colors whitespace-nowrap"
         style={{ borderColor: '#085508', color: '#085508' }}
         title="Create a free parent account or log in to buy"
       >
-        <Lock className="w-3 h-3" />
+        <Lock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
         Log in
       </a>
     )
@@ -132,10 +132,10 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
         type="button"
         onClick={() => void startBuy()}
         disabled={loadingVariants}
-        className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full transition-colors text-white disabled:opacity-70"
+        className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 rounded-full transition-colors text-white disabled:opacity-70 whitespace-nowrap"
         style={{ backgroundColor: '#085508' }}
       >
-        {loadingVariants ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+        {loadingVariants ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : null}
         Buy
       </button>
       {error && !pickerOpen ? (

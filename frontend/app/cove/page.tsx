@@ -147,20 +147,22 @@ export default async function CovePage() {
                         </div>
                       )}
                     </div>
-                    <div className="p-4 flex flex-col flex-1">
-                      <p className="text-sm font-bold text-[#1A1A1A] leading-snug flex-1 mb-3">
+                    <div className="p-3 sm:p-4 flex flex-col flex-1 gap-3">
+                      <p className="text-sm font-bold text-[#1A1A1A] leading-snug flex-1">
                         {item.name}
                       </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold" style={{ color: '#085508' }}>
+                      <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <span className="text-base sm:text-lg font-bold tabular-nums" style={{ color: '#085508' }}>
                           ${item.price.toFixed(2)}
                         </span>
-                        <SpiritWearBuyButton
-                          productId={item._id}
-                          price={item.price}
-                          productName={item.name}
-                          disabled={!item.inStock}
-                        />
+                        <div className="w-full sm:w-auto shrink-0">
+                          <SpiritWearBuyButton
+                            productId={item._id}
+                            price={item.price}
+                            productName={item.name}
+                            disabled={!item.inStock}
+                          />
+                        </div>
                       </div>
                     </div>
                   </article>
