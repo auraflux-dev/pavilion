@@ -684,8 +684,8 @@ export function StaffCoveRegister() {
         <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-4">
           <p className="text-sm text-[#5A6070]">
             No new charge.{' '}
-            <a href="#cove-fulfillment" className="font-bold underline" style={{ color: '#085508' }}>
-              Open pickup queue
+            <a href="#cove-store-pickups" className="font-bold underline" style={{ color: '#085508' }}>
+              Open today&apos;s store pickups
             </a>
           </p>
         </div>

@@ -48,9 +48,15 @@ export function StaffRetailSectionNav() {
       items={[
         { href: '#cove-register', label: 'In-person', hint: 'Any table sale', icon: ShoppingCart },
         {
+          href: '#cove-store-pickups',
+          label: 'Store pickups',
+          hint: 'Window · handed out',
+          icon: Package,
+        },
+        {
           href: '#cove-fulfillment',
-          label: 'Pickup',
-          hint: 'Online orders',
+          label: 'Shirts/magnets',
+          hint: 'Membership perks',
           icon: Package,
         },
         { href: '#cove-stock-admin', label: 'Stock setup', hint: 'Admin · not sales', icon: Store },
