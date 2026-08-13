@@ -152,13 +152,9 @@ export async function applyPaidMembership(opts: {
   let targets = items
   if (opts.studentId) {
     targets = items.filter((s) => s._id === opts.studentId)
-  } else {
-    const free = items.filter((s) => {
-      const t = String((s as { membershipTier?: string }).membershipTier ?? 'free')
-      return t === 'free' || !t
-    })
-    targets = free.length > 0 ? [free[0]] : items.slice(0, 1)
   }
+  // Default: stamp every active student in the household so roster/Students stay in sync.
+  // Gift-card credit still loads once (first target only) below.
 
   const updatedStudentIds: string[] = []
   let giftCardResult:

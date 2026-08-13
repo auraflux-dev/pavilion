@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
 import {
+  applyMembershipsToRoster,
   buildParentRoster,
   filterParentRoster,
   rosterEmails,
@@ -30,19 +31,27 @@ async function gate(req: NextRequest) {
   return { status: 200 as const, session }
 }
 
-async function loadRoster() {
+async function loadAll(collectionId: string) {
   const client = getWixClient()
   const items: Record<string, unknown>[] = []
   let skip = 0
-  for (let i = 0; i < 20; i += 1) {
-    const result = await client.items.query('Students').limit(100).skip(skip).find()
+  for (let i = 0; i < 50; i += 1) {
+    const result = await client.items.query(collectionId).limit(100).skip(skip).find()
     const batch = (result.items ?? []) as Record<string, unknown>[]
     items.push(...batch)
     if (batch.length < 100) break
     skip += 100
   }
-  return buildParentRoster(
-    items.map((item) => ({
+  return items
+}
+
+async function loadRoster() {
+  const [students, memberships] = await Promise.all([
+    loadAll('Students'),
+    loadAll('Memberships'),
+  ])
+  const fromStudents = buildParentRoster(
+    students.map((item) => ({
       _id: String(item._id ?? ''),
       parentEmail: String(item.parentEmail ?? ''),
       parentFirstName: String(item.parentFirstName ?? ''),
@@ -54,6 +63,17 @@ async function loadRoster() {
       membershipTier: String(item.membershipTier ?? 'free'),
       membershipStatus: String(item.membershipStatus ?? 'active'),
       archived: item.archived === true,
+    })),
+  )
+  return applyMembershipsToRoster(
+    fromStudents,
+    memberships.map((item) => ({
+      email: String(item.email ?? item.parentEmail ?? ''),
+      tier: String(item.tier ?? item.membershipTier ?? 'free'),
+      status: String(item.status ?? 'active'),
+      parentFirstName: String(item.parentFirstName ?? item.firstName ?? ''),
+      parentLastName: String(item.parentLastName ?? item.lastName ?? ''),
+      parentPhone: String(item.parentPhone ?? item.phone ?? ''),
     })),
   )
 }

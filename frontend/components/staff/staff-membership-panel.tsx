@@ -437,7 +437,8 @@ export function StaffMembershipPanel() {
           <div>
             <h1 className="text-xl font-bold">Membership roster</h1>
             <p className="text-xs text-[#5A6070] mt-1">
-              Parents from Students CMS. Email, phone, and paid tier (Reef / Lagoon / Tide).
+              Parents from Students + Memberships. Email, phone, and paid tier (Reef / Lagoon /
+              Tide). Paid count follows Memberships after checkout.
             </p>
           </div>
           <Button

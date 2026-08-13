@@ -1,6 +1,7 @@
 /**
  * Aggregate Students CMS rows into parent membership roster records.
  * Pure helpers. unit-tested without Wix.
+ * Paid tier also merges Memberships.tier (checkout source of truth — Students can lag).
  */
 
 export type StudentRosterRow = {
@@ -159,6 +160,71 @@ export function buildParentRoster(items: RawStudent[]): ParentRosterRow[] {
   return parents.sort((a, b) => a.parentEmail.localeCompare(b.parentEmail))
 }
 
+/** Memberships CMS row used to override / fill paid status on the roster. */
+export type MembershipRosterRow = {
+  email: string
+  tier: string
+  status?: string
+  parentFirstName?: string
+  parentLastName?: string
+  parentPhone?: string
+}
+
+/**
+ * Apply Memberships CMS tiers onto a Students-built roster.
+ * Memberships.tier is the checkout source of truth; Students.membershipTier can lag.
+ */
+export function applyMembershipsToRoster(
+  roster: ParentRosterRow[],
+  memberships: MembershipRosterRow[],
+): ParentRosterRow[] {
+  const byEmail = new Map(
+    roster.map((r) => [r.parentEmail, { ...r, students: [...r.students] }]),
+  )
+
+  for (const m of memberships) {
+    const email = String(m.email ?? '').trim().toLowerCase()
+    if (!email) continue
+    const status = String(m.status ?? 'active').trim().toLowerCase()
+    if (status === 'expired' || status === 'cancelled' || status === 'canceled') continue
+
+    const tier = normalizeMembershipTier(m.tier)
+    // Do not let a free Memberships row wipe a paid Students tier
+    if (!isPaidTier(tier)) continue
+
+    const existing = byEmail.get(email)
+    if (!existing) {
+      byEmail.set(email, {
+        parentEmail: email,
+        parentFirstName: String(m.parentFirstName ?? '').trim(),
+        parentLastName: String(m.parentLastName ?? '').trim(),
+        parentPhone: String(m.parentPhone ?? '').trim(),
+        membershipTier: tier,
+        accountType: 'paid',
+        students: [],
+      })
+      continue
+    }
+
+    const merged = pickHighestTier([existing.membershipTier, tier])
+    existing.membershipTier = merged
+    existing.accountType = isPaidTier(merged) ? 'paid' : 'free'
+    if (!existing.parentFirstName && m.parentFirstName) {
+      existing.parentFirstName = String(m.parentFirstName).trim()
+    }
+    if (!existing.parentLastName && m.parentLastName) {
+      existing.parentLastName = String(m.parentLastName).trim()
+    }
+    if (!existing.parentPhone && m.parentPhone) {
+      existing.parentPhone = String(m.parentPhone).trim()
+    }
+  }
+
+  return Array.from(byEmail.values()).sort((a, b) =>
+    a.parentEmail.localeCompare(b.parentEmail),
+  )
+}
+
 export function filterParentRoster(
   rows: ParentRosterRow[],
   filters: RosterFilters = {},
@@ -176,7 +242,10 @@ export function filterParentRoster(
       return { ...row, students }
     })
     .filter((row) => {
-      if (!includeArchived && row.students.length === 0) return false
+      // Keep Memberships-only paid parents (no student rows yet)
+      if (!includeArchived && row.students.length === 0 && row.accountType !== 'paid') {
+        return false
+      }
 
       if (tier === 'free' && row.accountType !== 'free') return false
       if (tier === 'paid' && row.accountType !== 'paid') return false

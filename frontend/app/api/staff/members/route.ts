@@ -2,18 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
 import {
+  applyMembershipsToRoster,
   buildParentRoster,
   filterParentRoster,
   type ParentRosterRow,
 } from '@/lib/staff/members-roster'
 
-async function loadAllStudents() {
+async function loadAllCollection(collectionId: string) {
   const client = getWixClient()
   const items: Record<string, unknown>[] = []
   let skip = 0
   const pageSize = 100
-  for (let i = 0; i < 20; i += 1) {
-    const result = await client.items.query('Students').limit(pageSize).skip(skip).find()
+  for (let i = 0; i < 50; i += 1) {
+    const result = await client.items.query(collectionId).limit(pageSize).skip(skip).find()
     const batch = (result.items ?? []) as Record<string, unknown>[]
     items.push(...batch)
     if (batch.length < pageSize) break
@@ -40,9 +41,12 @@ export async function GET(req: NextRequest) {
   const tier = String(req.nextUrl.searchParams.get('tier') ?? 'all').trim().toLowerCase() || 'all'
 
   try {
-    const raw = await loadAllStudents()
-    const roster = buildParentRoster(
-      raw.map((item) => ({
+    const [rawStudents, rawMemberships] = await Promise.all([
+      loadAllCollection('Students'),
+      loadAllCollection('Memberships'),
+    ])
+    const fromStudents = buildParentRoster(
+      rawStudents.map((item) => ({
         _id: String(item._id ?? ''),
         parentEmail: String(item.parentEmail ?? ''),
         parentFirstName: String(item.parentFirstName ?? ''),
@@ -54,6 +58,17 @@ export async function GET(req: NextRequest) {
         membershipTier: String(item.membershipTier ?? 'free'),
         membershipStatus: String(item.membershipStatus ?? 'active'),
         archived: item.archived === true,
+      })),
+    )
+    const roster = applyMembershipsToRoster(
+      fromStudents,
+      rawMemberships.map((item) => ({
+        email: String(item.email ?? item.parentEmail ?? ''),
+        tier: String(item.tier ?? item.membershipTier ?? 'free'),
+        status: String(item.status ?? 'active'),
+        parentFirstName: String(item.parentFirstName ?? item.firstName ?? ''),
+        parentLastName: String(item.parentLastName ?? item.lastName ?? ''),
+        parentPhone: String(item.parentPhone ?? item.phone ?? ''),
       })),
     )
 
@@ -90,7 +105,7 @@ export async function GET(req: NextRequest) {
         }),
       )
       const paid = filtered.filter((r) => r.accountType === 'paid').length
-      const free = filtered.filter((r) => r.accountType === 'free').length
+      const free = filtered.filter((r) => r.accountType !== 'paid').length
       return NextResponse.json({
         members: filtered,
         summary: {
