@@ -531,7 +531,15 @@ export const SITE_SETTING_GROUPS: {
     keys: [
       { key: 'storeProductIds', label: 'Store product IDs (comma or newline)', multiline: true },
       { key: 'spiritWearProductIds', label: 'Spirit wear product IDs (comma or newline)', multiline: true },
-      { key: 'membershipShirtProductId', label: 'Membership perk tee product ID (Design · Size variants)' },
+      {
+        key: 'membershipShirtProductId',
+        label: 'Membership perk tee product ID (Design · Size variants)',
+      },
+      {
+        key: 'membershipShirtDesignsEnabled',
+        label: 'Membership checkout: require design + size (and hold inventory). Leave off until all styles are ready.',
+        type: 'boolean',
+      },
       {
         key: 'storeCardBonusPercent',
         label:

@@ -154,9 +154,10 @@ export function StaffMembershipShirtDesignsPanel() {
             Shirt designs (held at checkout)
           </h2>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
-            Add a design name and sizes with quantities. Parents pick design + size when they
-            join Lagoon/Tide (or faculty shirt). That unit is decremented immediately so the
-            register cannot sell it.
+            Add a design name and sizes with quantities. Checkout stays size-only until Site
+            Settings → <span className="font-semibold">membershipShirtDesignsEnabled</span> is
+            turned on. Then parents pick design + size and that unit is held so the register
+            cannot sell it.
           </p>
         </div>
       </div>

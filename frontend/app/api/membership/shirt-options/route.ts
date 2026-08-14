@@ -11,24 +11,30 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   try {
     const data = await listMembershipShirtOptions()
+    const { isMembershipShirtDesignsEnabled } = await import('@/lib/membership-shirt')
+    const designsEnabled = await isMembershipShirtDesignsEnabled()
     return NextResponse.json({
       productId: data.productId,
       productName: data.productName,
-      designs: data.designs.map((d) => ({
-        design: d.design,
-        sizes: d.sizes.map((s) => ({
-          size: s.size,
-          variantId: s.variantId,
-          sku: s.sku,
-          quantity: s.quantity,
-          available: s.available,
-          label: s.label,
-        })),
-      })),
-      // Convenience: designs that still have at least one size in stock
-      availableDesigns: data.designs
-        .filter((d) => d.sizes.some((s) => s.available))
-        .map((d) => d.design),
+      designsEnabled,
+      designs: designsEnabled
+        ? data.designs.map((d) => ({
+            design: d.design,
+            sizes: d.sizes.map((s) => ({
+              size: s.size,
+              variantId: s.variantId,
+              sku: s.sku,
+              quantity: s.quantity,
+              available: s.available,
+              label: s.label,
+            })),
+          }))
+        : [],
+      availableDesigns: designsEnabled
+        ? data.designs
+            .filter((d) => d.sizes.some((s) => s.available))
+            .map((d) => d.design)
+        : [],
     })
   } catch (err) {
     console.error('membership/shirt-options', err)

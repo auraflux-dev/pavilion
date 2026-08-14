@@ -266,11 +266,10 @@ export async function POST(req: NextRequest) {
       }
 
       if (needsShirt) {
-        const { listMembershipShirtOptions, assertMembershipShirtAvailable } = await import(
-          '@/lib/membership-shirt'
-        )
-        const { options } = await listMembershipShirtOptions()
-        if (options.length > 0) {
+        const { isMembershipShirtDesignsEnabled, assertMembershipShirtAvailable } =
+          await import('@/lib/membership-shirt')
+        const designsEnabled = await isMembershipShirtDesignsEnabled()
+        if (designsEnabled) {
           if (!shirtVariantId || !shirtProductId) {
             return NextResponse.json(
               { error: 'Select a Spirit Wear design and size for this membership.' },

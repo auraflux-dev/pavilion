@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { SHIRT_SIZES } from '@/lib/membership-entitlements'
 
 type SizeOpt = {
   size: string
@@ -32,12 +33,14 @@ type Props = {
 }
 
 /**
- * Design + size picker for paid membership Spirit Wear perk.
- * Only shows in-stock sizes. Staff add designs as "Design · Size" variants.
+ * Spirit Wear perk picker.
+ * Default: size-only (legacy) until SiteSettings membershipShirtDesignsEnabled is on.
+ * When enabled: design + size with inventory hold.
  */
 export function MembershipShirtPicker({ required, value, onChange }: Props) {
   const [productId, setProductId] = useState('')
   const [productName, setProductName] = useState('Spirit Wear T-shirt')
+  const [designsEnabled, setDesignsEnabled] = useState(false)
   const [designs, setDesigns] = useState<DesignGroup[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -56,13 +59,17 @@ export function MembershipShirtPicker({ required, value, onChange }: Props) {
         if (cancelled) return
         setProductId(String(d.productId ?? ''))
         setProductName(String(d.productName ?? 'Spirit Wear T-shirt'))
-        const groups = (d.designs ?? []) as DesignGroup[]
+        const enabled = Boolean(d.designsEnabled)
+        setDesignsEnabled(enabled)
+        const groups = enabled ? ((d.designs ?? []) as DesignGroup[]) : []
         setDesigns(groups)
         const firstAvailable = groups.find((g) => g.sizes.some((s) => s.available))
         if (firstAvailable && !design) setDesign(firstAvailable.design)
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Could not load shirt options')
+          // Fall back to size-only if options API fails
+          setDesignsEnabled(false)
+          setError('')
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -86,6 +93,39 @@ export function MembershipShirtPicker({ required, value, onChange }: Props) {
 
   if (!required) return null
 
+  if (!designsEnabled) {
+    return (
+      <label className="block text-xs text-[#5A6070]">
+        Spirit Wear T-shirt size <span className="text-red-500">*</span>
+        <select
+          value={value?.size ?? ''}
+          onChange={(e) => {
+            const size = e.target.value
+            if (!size) {
+              onChange(null)
+              return
+            }
+            onChange({
+              productId: '',
+              variantId: '',
+              design: '',
+              size,
+              label: size,
+            })
+          }}
+          className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2.5 text-sm text-[#1A1A1A] bg-white"
+        >
+          <option value="">Select size</option>
+          {SHIRT_SIZES.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </label>
+    )
+  }
+
   return (
     <div className="space-y-3 rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-3">
       <div>
@@ -105,7 +145,7 @@ export function MembershipShirtPicker({ required, value, onChange }: Props) {
       ) : !availableDesigns.length ? (
         <p className="text-xs text-amber-800">
           No shirt designs in stock right now. Email vp-membershipexperience@shmspto.org and we
-          will follow up, or continue without selecting if staff enabled size-only checkout.
+          will follow up.
         </p>
       ) : (
         <>

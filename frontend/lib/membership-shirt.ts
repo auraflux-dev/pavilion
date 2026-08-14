@@ -109,6 +109,16 @@ export async function resolveMembershipShirtProductId(): Promise<string> {
   )
 }
 
+/**
+ * Design × size checkout + inventory hold. Off by default until staff finishes
+ * adding styles (SiteSettings membershipShirtDesignsEnabled = true / 1 / yes).
+ */
+export async function isMembershipShirtDesignsEnabled(): Promise<boolean> {
+  const { getSiteSettings } = await import('@/lib/api/site-settings')
+  const settings = await getSiteSettings()
+  return settings.getBool('membershipShirtDesignsEnabled', false)
+}
+
 async function getProductRaw(productId: string): Promise<Record<string, unknown>> {
   const res = await fetch(`${WIX_PRODUCTS}/${productId}`, {
     headers: wixHeaders(),
