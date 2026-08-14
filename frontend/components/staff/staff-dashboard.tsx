@@ -18,6 +18,7 @@ import { StaffDiscountsPanel } from '@/components/staff/staff-discounts-panel'
 import { StaffMembershipPanel } from '@/components/staff/staff-membership-panel'
 import { StaffFulfillmentsPanel } from '@/components/staff/staff-fulfillments-panel'
 import { StaffStorePickupsPanel } from '@/components/staff/staff-store-pickups-panel'
+import { StaffSpiritWearDemandPanel } from '@/components/staff/staff-spirit-wear-demand-panel'
 import {
   StaffDiscountsSectionNav,
   StaffEventsSectionNav,
@@ -833,6 +834,7 @@ export function StaffDashboard() {
           <div className="space-y-4">
             <StaffRetailSectionNav />
             <StaffRetailPanel />
+            <StaffSpiritWearDemandPanel />
             <StaffStorePickupsPanel />
             <StaffFulfillmentsPanel variant="cove" />
           </div>

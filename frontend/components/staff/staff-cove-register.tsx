@@ -97,6 +97,16 @@ export function StaffCoveRegister() {
   const [externalAmount, setExternalAmount] = useState('')
   const [externalNote, setExternalNote] = useState('')
   const [variantPicker, setVariantPicker] = useState<Product | null>(null)
+  const [demandDraft, setDemandDraft] = useState<{
+    product: Product
+    variant: NonNullable<Product['variants']>[number]
+  } | null>(null)
+  const [demandParentName, setDemandParentName] = useState('')
+  const [demandParentEmail, setDemandParentEmail] = useState('')
+  const [demandParentPhone, setDemandParentPhone] = useState('')
+  const [demandQty, setDemandQty] = useState('1')
+  const [demandEventNote, setDemandEventNote] = useState('')
+  const [demandNotes, setDemandNotes] = useState('')
   const codeRef = useRef<HTMLInputElement>(null)
 
   const [productQuery, setProductQuery] = useState('')
@@ -316,8 +326,12 @@ export function StaffCoveRegister() {
 
   function addVariant(product: Product, variantId: string) {
     const v = product.variants?.find((x) => x.id === variantId)
-    if (!v?.available && v?.quantity === 0) {
-      setError('That option is out of stock.')
+    if (!v) {
+      setError('That option was not found.')
+      return
+    }
+    if (!v.available) {
+      openDemandForVariant(product, v)
       return
     }
     setLineQty(
@@ -459,6 +473,68 @@ export function StaffCoveRegister() {
       await loadProducts()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not log payment')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function openDemandForVariant(
+    product: Product,
+    variant: NonNullable<Product['variants']>[number],
+  ) {
+    const familyName =
+      family?.students
+        ?.map((s) => [s.firstName, s.lastName].filter(Boolean).join(' '))
+        .filter(Boolean)
+        .join(', ') || ''
+    setDemandParentName(guestName || familyName || '')
+    setDemandParentEmail(guestEmail || family?.parentEmail || '')
+    setDemandParentPhone(guestPhone || '')
+    setDemandQty('1')
+    setDemandNotes('')
+    setDemandDraft({ product, variant })
+    setVariantPicker(null)
+    setError('')
+  }
+
+  async function submitDemand() {
+    if (!demandDraft) return
+    const parentName = demandParentName.trim()
+    if (!parentName) {
+      setError('Parent name is required to log size demand.')
+      return
+    }
+    setBusy(true)
+    setError('')
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/cove/demand', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          parentName,
+          parentEmail: demandParentEmail.trim(),
+          parentPhone: demandParentPhone.trim(),
+          coveFamilyCode: family?.coveFamilyCode || '',
+          productId: demandDraft.product.id,
+          productName: demandDraft.product.name,
+          variantId: demandDraft.variant.id,
+          sizeLabel: demandDraft.variant.label,
+          sku: demandDraft.variant.sku || '',
+          qty: Number(demandQty) || 1,
+          eventNote: demandEventNote.trim(),
+          notes: demandNotes.trim(),
+          source: 'register',
+        }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not log demand')
+      setStatus(
+        `Logged demand: ${demandDraft.product.name} · ${demandDraft.variant.label}`,
+      )
+      setDemandDraft(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not log demand')
     } finally {
       setBusy(false)
     }
@@ -1084,21 +1160,133 @@ export function StaffCoveRegister() {
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2 max-h-[50vh] overflow-y-auto">
-              {(variantPicker.variants ?? []).map((v) => (
-                <button
-                  key={v.id}
-                  type="button"
-                  disabled={!v.available}
-                  onClick={() => addVariant(variantPicker, v.id)}
-                  className="rounded-xl border border-[#E8E4DC] px-3 py-3 text-left disabled:opacity-40 hover:border-[#085508]"
-                >
-                  <p className="text-sm font-bold text-[#1A1A1A]">{v.label}</p>
-                  <p className="text-xs font-bold mt-0.5" style={{ color: '#085508' }}>
-                    ${v.price.toFixed(2)}
-                  </p>
-                </button>
-              ))}
+              {(variantPicker.variants ?? []).map((v) => {
+                const oos = !v.available
+                return (
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() =>
+                      oos
+                        ? openDemandForVariant(variantPicker, v)
+                        : addVariant(variantPicker, v.id)
+                    }
+                    className={`rounded-xl border px-3 py-3 text-left hover:border-[#085508] ${
+                      oos
+                        ? 'border-amber-300 bg-amber-50'
+                        : 'border-[#E8E4DC]'
+                    }`}
+                  >
+                    <p className="text-sm font-bold text-[#1A1A1A]">{v.label}</p>
+                    {oos ? (
+                      <p className="text-xs font-bold mt-0.5 text-amber-800">
+                        Out of stock · tap to log demand
+                      </p>
+                    ) : (
+                      <p className="text-xs font-bold mt-0.5" style={{ color: '#085508' }}>
+                        ${v.price.toFixed(2)}
+                      </p>
+                    )}
+                  </button>
+                )
+              })}
             </div>
+          </div>
+        </div>
+      ) : null}
+
+      {demandDraft ? (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Log size demand"
+        >
+          <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl space-y-3">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-sm font-bold text-[#1A1A1A]">
+                  Log demand · {demandDraft.product.name}
+                </p>
+                <p className="text-xs text-[#5A6070]">
+                  Size {demandDraft.variant.label} is out of stock. Capture who wants it for the
+                  next order.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="text-xs font-bold underline text-[#5A6070]"
+                onClick={() => setDemandDraft(null)}
+              >
+                Cancel
+              </button>
+            </div>
+            <label className="block text-xs font-bold text-[#5A6070] space-y-1">
+              Parent name *
+              <input
+                value={demandParentName}
+                onChange={(e) => setDemandParentName(e.target.value)}
+                className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+              />
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="block text-xs font-bold text-[#5A6070] space-y-1">
+                Email
+                <input
+                  type="email"
+                  value={demandParentEmail}
+                  onChange={(e) => setDemandParentEmail(e.target.value)}
+                  className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                />
+              </label>
+              <label className="block text-xs font-bold text-[#5A6070] space-y-1">
+                Phone
+                <input
+                  value={demandParentPhone}
+                  onChange={(e) => setDemandParentPhone(e.target.value)}
+                  className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                />
+              </label>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="block text-xs font-bold text-[#5A6070] space-y-1">
+                Qty
+                <input
+                  type="number"
+                  min={1}
+                  value={demandQty}
+                  onChange={(e) => setDemandQty(e.target.value)}
+                  className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                />
+              </label>
+              <label className="block text-xs font-bold text-[#5A6070] space-y-1">
+                Event / table
+                <input
+                  value={demandEventNote}
+                  onChange={(e) => setDemandEventNote(e.target.value)}
+                  placeholder="Open House"
+                  className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                />
+              </label>
+            </div>
+            <label className="block text-xs font-bold text-[#5A6070] space-y-1">
+              Notes
+              <input
+                value={demandNotes}
+                onChange={(e) => setDemandNotes(e.target.value)}
+                className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+              />
+            </label>
+            <Button
+              type="button"
+              disabled={busy}
+              className="w-full text-white"
+              style={{ backgroundColor: '#085508' }}
+              onClick={() => void submitDemand()}
+            >
+              {busy ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Save size demand
+            </Button>
           </div>
         </div>
       ) : null}

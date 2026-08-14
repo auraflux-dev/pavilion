@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  ClipboardList,
   FileText,
   Goal,
   HandCoins,
@@ -52,6 +53,12 @@ export function StaffRetailSectionNav() {
           label: 'Store pickups',
           hint: 'Window · handed out',
           icon: Package,
+        },
+        {
+          href: '#cove-demand',
+          label: 'Size demand',
+          hint: 'OOS shirts/hoodies',
+          icon: ClipboardList,
         },
         {
           href: '#cove-fulfillment',
