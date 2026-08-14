@@ -824,6 +824,7 @@ export function StaffDashboard() {
           <div className="space-y-4">
             <StaffEventsSectionNav />
             <StaffEventsPanel />
+            <StaffSpiritWearDemandPanel context="events" />
             <StaffCmsCollectionPanel
               collection="PortalCalendarEvents"
               title="Portal calendar events (member portal)"
@@ -851,6 +852,7 @@ export function StaffDashboard() {
           <div className="space-y-4">
             <StaffMembershipSectionNav />
             <StaffMembershipPanel />
+            <StaffSpiritWearDemandPanel context="membership" />
             <StaffFulfillmentsPanel />
           </div>
         ) : null}

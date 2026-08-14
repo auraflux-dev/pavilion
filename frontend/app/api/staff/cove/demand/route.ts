@@ -1,7 +1,7 @@
 /**
  * GET   /api/staff/cove/demand — list demand + size rollup
- * POST  /api/staff/cove/demand — log OOS size interest (retail/admin)
- * PATCH /api/staff/cove/demand — mark ordered / fulfilled / cancelled
+ * POST  /api/staff/cove/demand — log OOS size interest (events/membership/retail/admin)
+ * PATCH /api/staff/cove/demand — mark ordered / fulfilled / cancelled (retail/admin)
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
@@ -16,13 +16,20 @@ import { reportError } from '@/lib/observability/error-reporting'
 
 export const dynamic = 'force-dynamic'
 
-function canRetail(session: Awaited<ReturnType<typeof getStaffSession>>) {
+function canLogDemand(session: Awaited<ReturnType<typeof getStaffSession>>) {
+  return Boolean(
+    session?.staff &&
+      requireStaffRole(session.staff, ['retail', 'events', 'membership', 'admin']),
+  )
+}
+
+function canManageDemand(session: Awaited<ReturnType<typeof getStaffSession>>) {
   return Boolean(session?.staff && requireStaffRole(session.staff, ['retail', 'admin']))
 }
 
 export async function GET(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!canRetail(session)) {
+  if (!canLogDemand(session)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -43,6 +50,7 @@ export async function GET(req: NextRequest) {
       items,
       rollup: rollupOpenDemand(openItems),
       openCount: openItems.length,
+      canManage: canManageDemand(session),
     })
   } catch (err) {
     console.error('cove/demand GET', err)
@@ -62,7 +70,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!canRetail(session) || !session?.email) {
+  if (!canLogDemand(session) || !session?.email) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -96,7 +104,7 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!canRetail(session)) {
+  if (!canManageDemand(session)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

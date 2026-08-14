@@ -30,6 +30,12 @@ export function StaffMembershipSectionNav() {
         { href: '#membership-roster', label: 'Roster', hint: 'Parents & tiers', icon: Users },
         { href: '#membership-outreach', label: 'Outreach', hint: 'Email & WhatsApp', icon: Mail },
         {
+          href: '#cove-demand',
+          label: 'Size demand',
+          hint: 'OOS shirts/hoodies',
+          icon: ClipboardList,
+        },
+        {
           href: '#membership-fulfillment',
           label: 'Fulfillment',
           hint: 'Shirts & magnets',
@@ -88,6 +94,12 @@ export function StaffEventsSectionNav() {
       ariaLabel="Events sections"
       items={[
         { href: '#staff-events', label: 'Public events', hint: 'Site calendar', icon: CalendarDays },
+        {
+          href: '#cove-demand',
+          label: 'Size demand',
+          hint: 'OOS shirts/hoodies',
+          icon: ClipboardList,
+        },
         {
           href: '#portal-calendar-events',
           label: 'Portal calendar',

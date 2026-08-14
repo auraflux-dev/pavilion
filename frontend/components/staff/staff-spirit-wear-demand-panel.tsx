@@ -8,11 +8,18 @@ import type { SpiritDemandRollup, SpiritWearDemand } from '@/lib/staff/spirit-we
 /**
  * In-person size demand log: when shirts/hoodies are out of a parent's size,
  * staff capture interest so retail can reorder with real counts.
+ * Available to events / membership / retail (not only Cove register staff).
  */
-export function StaffSpiritWearDemandPanel() {
+export function StaffSpiritWearDemandPanel({
+  context = 'retail',
+}: {
+  /** Copy tweak when shown outside The Cove tab */
+  context?: 'retail' | 'events' | 'membership'
+}) {
   const [items, setItems] = useState<SpiritWearDemand[]>([])
   const [rollup, setRollup] = useState<SpiritDemandRollup[]>([])
   const [openCount, setOpenCount] = useState(0)
+  const [canManage, setCanManage] = useState(false)
   const [filter, setFilter] = useState<'open' | 'all'>('open')
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
@@ -37,6 +44,7 @@ export function StaffSpiritWearDemandPanel() {
       setItems(d.items ?? [])
       setRollup(d.rollup ?? [])
       setOpenCount(Number(d.openCount) || 0)
+      setCanManage(Boolean(d.canManage))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Load failed')
     } finally {
@@ -126,13 +134,14 @@ export function StaffSpiritWearDemandPanel() {
             <p className="text-[10px] font-bold uppercase tracking-widest text-[#5A6070]">
               In-person events
             </p>
-            <h2 className="mt-0.5 text-lg font-bold text-[#1A1A1A]">
-              Size demand (shirts / hoodies)
-            </h2>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
-              When a parent wants spirit wear but their size is out, log it here (or from the
-              register size picker). Use the rollup below to place a restock order.
-            </p>
+          <h2 className="mt-0.5 text-lg font-bold text-[#1A1A1A]">
+            Size demand (shirts / hoodies)
+          </h2>
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
+            {context === 'retail'
+              ? 'When a parent wants spirit wear but their size is out, log it here (or from the register size picker). Use the rollup below to place a restock order.'
+              : 'No Cove register needed. If a parent wants a shirt or hoodie and the size is out (or you are not on the register), log name + size here so retail can reorder.'}
+          </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -324,7 +333,7 @@ export function StaffSpiritWearDemandPanel() {
                   {item.sku ? ` · ${item.sku}` : ''}
                 </p>
               </div>
-              {item.status === 'open' ? (
+              {item.status === 'open' && canManage ? (
                 <div className="flex flex-wrap gap-2 shrink-0">
                   <Button
                     type="button"
