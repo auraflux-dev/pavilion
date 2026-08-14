@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowRight, Check, Copy, ExternalLink } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import {
   BEST_RUNNERS_SIGNUP_URL,
   RUN_FOR_CHARITY_REGISTER_PATH,
@@ -38,6 +38,7 @@ function isEarlyBird(now = new Date()): boolean {
 /**
  * Home promo for Best Runners Run for Charity (Sun 9/13).
  * One job: get families to register with school code SHMS.
+ * One CTA: copy SHMS + open Best Runners (flyer + primary button).
  */
 export function RunForCharityPromo() {
   const [copied, setCopied] = useState(false)
@@ -45,20 +46,11 @@ export function RunForCharityPromo() {
 
   if (!stillShowingPromo()) return null
 
-  async function copyCode() {
-    try {
-      await navigator.clipboard.writeText(RUN_FOR_CHARITY_SCHOOL_CODE)
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 2500)
-    } catch {
-      setCopied(false)
-    }
-  }
-
   async function copyAndContinue() {
     try {
       await navigator.clipboard.writeText(RUN_FOR_CHARITY_SCHOOL_CODE)
       setCopied(true)
+      window.setTimeout(() => setCopied(false), 2500)
     } catch {
       /* still open Best Runners */
     }
@@ -97,7 +89,7 @@ export function RunForCharityPromo() {
           Run for Charity 1K &amp; 5K
         </h2>
         <p className="mt-4 text-base sm:text-lg text-white/85 leading-relaxed max-w-2xl text-pretty">
-          Best Runners hosts the race. Register with school code{' '}
+          Best Runners hosts the race. Use school code{' '}
           <span className="font-bold text-white">SHMS</span> so Stone Hill receives
           100% of your registration fee.
         </p>
@@ -146,66 +138,54 @@ export function RunForCharityPromo() {
               )}
             </div>
 
-            <div>
-              <h3 className="text-sm font-bold tracking-wide uppercase text-[#98C818] mb-3">
-                School code · SHMS
-              </h3>
-              <p className="text-sm sm:text-base text-white/90 leading-relaxed">
-                Copy <span className="font-bold text-white">SHMS</span>, register on
-                Best Runners, then paste it under{' '}
-                <span className="font-bold text-white">School / Referral Code</span>{' '}
-                before you pay.
+            <div
+              className="rounded-2xl border-2 border-[#98C818]/60 bg-black/15 p-6 text-center space-y-3"
+            >
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#98C818]">
+                Stone Hill school code
               </p>
               <p
-                className="mt-4 text-4xl sm:text-5xl font-bold tracking-[0.2em] text-white"
+                className="text-5xl font-bold tracking-[0.2em] text-white"
                 aria-label={`School code ${RUN_FOR_CHARITY_SCHOOL_CODE}`}
               >
                 {RUN_FOR_CHARITY_SCHOOL_CODE}
               </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3 pt-1">
+              <p className="text-sm text-white/80 leading-relaxed">
+                Paste under <strong className="text-white">School / Referral Code</strong> on
+                Best Runners so Stone Hill receives your registration fee.
+              </p>
               <button
                 type="button"
                 onClick={() => void copyAndContinue()}
-                className="inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-bold text-[#085508] bg-[#FFD700] hover:bg-[#ffe44d] transition-colors"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3.5 text-base font-bold text-[#085508] bg-[#FFD700] hover:bg-[#ffe44d] transition-colors"
               >
-                Copy SHMS &amp; register
                 <ExternalLink className="w-4 h-4" aria-hidden />
+                {copied
+                  ? 'SHMS copied · opening Best Runners…'
+                  : 'Copy SHMS & register on Best Runners'}
               </button>
-              <button
-                type="button"
-                onClick={() => void copyCode()}
-                className="inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-bold text-white border border-white/35 hover:bg-white/10 transition-colors"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4" aria-hidden />
-                    Code copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" aria-hidden />
-                    Copy code only
-                  </>
-                )}
-              </button>
+            </div>
+
+            <p className="text-sm text-white/65">
               <Link
                 href={RUN_FOR_CHARITY_REGISTER_PATH}
-                className="inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-bold text-white/90 hover:text-white transition-colors"
+                className="underline underline-offset-2 hover:text-white transition-colors"
               >
                 Full event details
-                <ArrowRight className="w-4 h-4" aria-hidden />
               </Link>
-            </div>
+            </p>
           </div>
 
           <figure className="lg:sticky lg:top-28 space-y-4">
             <button
               type="button"
               onClick={() => void copyAndContinue()}
-              className="relative block w-full rounded-xl overflow-hidden bg-white shadow-[0_24px_48px_-24px_rgba(0,0,0,0.55)] text-left hover:opacity-[0.98] transition-opacity cursor-pointer"
+              className="relative block w-full overflow-hidden rounded-2xl bg-white shadow-[0_24px_48px_-28px_rgba(0,0,0,0.55)] ring-2 ring-[#98C818] text-left hover:opacity-[0.98] transition-opacity cursor-pointer"
             >
+              <p className="px-4 py-4 text-center text-base sm:text-lg font-bold tracking-wide text-[#0B3D0B] bg-[#FFD700] flex items-center justify-center gap-2">
+                <ExternalLink className="w-5 h-5 shrink-0" aria-hidden />
+                Official flyer · tap to register on Best Runners
+              </p>
               <Image
                 src="/events/run-for-charity-2026.jpg"
                 alt="Run for Charity 1K and 5K flyer: Sunday September 13 2026 at Rock Ridge High School, early bird through August 15"
@@ -215,9 +195,6 @@ export function RunForCharityPromo() {
                 priority
               />
             </button>
-            <figcaption className="text-xs sm:text-sm text-white/65 text-center">
-              Official flyer · tap to copy SHMS and open Best Runners registration
-            </figcaption>
           </figure>
         </div>
       </div>
