@@ -15,6 +15,10 @@ import {
 export type FulfillmentQueueItem = {
   membershipId: string
   parentEmail: string
+  parentFirstName: string
+  parentLastName: string
+  /** Comma-separated student names for staff lookup */
+  studentNames: string
   tier: string
   shirtSize: string
   kind: MembershipEntitlementKind
@@ -31,9 +35,65 @@ function isFulfillable(kind: string) {
   return kind === 'spirit_shirt' || kind === 'magnet'
 }
 
+type FamilyLookup = {
+  parentFirstName: string
+  parentLastName: string
+  studentNames: string[]
+}
+
+async function loadFamilyLookupByEmail(): Promise<Map<string, FamilyLookup>> {
+  const client = getWixClient()
+  const map = new Map<string, FamilyLookup>()
+  try {
+    const rows: Record<string, unknown>[] = []
+    let skip = 0
+    for (let i = 0; i < 50; i += 1) {
+      const res = await client.items.query('Students').limit(100).skip(skip).find()
+      const batch = (res.items ?? []) as Record<string, unknown>[]
+      rows.push(...batch)
+      if (batch.length < 100) break
+      skip += 100
+    }
+    for (const row of rows) {
+      if (row.archived === true) continue
+      const email = String(row.parentEmail ?? '')
+        .trim()
+        .toLowerCase()
+      if (!email) continue
+      const parentFirst = String(row.parentFirstName ?? '').trim()
+      const parentLast = String(row.parentLastName ?? '').trim()
+      const student =
+        `${String(row.firstName ?? '').trim()} ${String(row.lastName ?? '').trim()}`.trim()
+      const existing = map.get(email)
+      if (!existing) {
+        map.set(email, {
+          parentFirstName: parentFirst,
+          parentLastName: parentLast,
+          studentNames: student ? [student] : [],
+        })
+        continue
+      }
+      if (!existing.parentFirstName && parentFirst) existing.parentFirstName = parentFirst
+      if (!existing.parentLastName && parentLast) existing.parentLastName = parentLast
+      if (student && !existing.studentNames.includes(student)) {
+        existing.studentNames.push(student)
+      }
+    }
+  } catch {
+    // Students query optional for enrichment
+  }
+  for (const entry of map.values()) {
+    entry.studentNames.sort((a, b) => a.localeCompare(b))
+  }
+  return map
+}
+
 export async function listOpenFulfillments(): Promise<FulfillmentQueueItem[]> {
   const client = getWixClient()
-  const res = await client.items.query('Memberships').limit(200).find()
+  const [res, familyByEmail] = await Promise.all([
+    client.items.query('Memberships').limit(200).find(),
+    loadFamilyLookupByEmail(),
+  ])
   const out: FulfillmentQueueItem[] = []
 
   for (const row of res.items ?? []) {
@@ -43,6 +103,14 @@ export async function listOpenFulfillments(): Promise<FulfillmentQueueItem[]> {
     const email = String(rec.email ?? '').trim().toLowerCase()
     const tier = String(rec.tier ?? '').trim().toLowerCase()
     const shirtSize = String(rec.shirtSize ?? '').trim()
+    const family = familyByEmail.get(email)
+    const parentFirstName =
+      String(rec.parentFirstName ?? rec.firstName ?? '').trim() ||
+      family?.parentFirstName ||
+      ''
+    const parentLastName =
+      String(rec.parentLastName ?? rec.lastName ?? '').trim() || family?.parentLastName || ''
+    const studentNames = (family?.studentNames ?? []).join(', ')
     const entitlements = parseEntitlementsJson(rec.entitlementsJson)
     for (const e of entitlements) {
       if (!isFulfillable(e.kind)) continue
@@ -50,6 +118,9 @@ export async function listOpenFulfillments(): Promise<FulfillmentQueueItem[]> {
       out.push({
         membershipId: id,
         parentEmail: email,
+        parentFirstName,
+        parentLastName,
+        studentNames,
         tier,
         shirtSize: e.kind === 'spirit_shirt' ? e.detail || shirtSize : shirtSize,
         kind: e.kind,
@@ -68,6 +139,9 @@ export async function listOpenFulfillments(): Promise<FulfillmentQueueItem[]> {
       if (a.status === 'ordered') return -1
       if (b.status === 'ordered') return 1
     }
+    const an = `${a.parentLastName} ${a.parentFirstName}`.trim().toLowerCase()
+    const bn = `${b.parentLastName} ${b.parentFirstName}`.trim().toLowerCase()
+    if (an && bn && an !== bn) return an.localeCompare(bn)
     return a.parentEmail.localeCompare(b.parentEmail) || a.kind.localeCompare(b.kind)
   })
   return out

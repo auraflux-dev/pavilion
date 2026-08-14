@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button'
 type Item = {
   membershipId: string
   parentEmail: string
+  parentFirstName?: string
+  parentLastName?: string
+  studentNames?: string
   tier: string
   shirtSize: string
   kind: 'spirit_shirt' | 'magnet'
@@ -16,6 +19,29 @@ type Item = {
   status: 'pending' | 'ordered' | string
 }
 
+function parentDisplayName(item: Item) {
+  return `${item.parentFirstName ?? ''} ${item.parentLastName ?? ''}`.trim()
+}
+
+function matchesLookup(item: Item, q: string) {
+  if (!q) return true
+  const hay = [
+    item.parentEmail,
+    item.parentFirstName,
+    item.parentLastName,
+    parentDisplayName(item),
+    item.studentNames,
+    item.tier,
+    item.detail,
+    item.shirtSize,
+    item.label,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+  return hay.includes(q)
+}
+
 type Props = {
   /** Compact copy for The Cove on-site handoff */
   variant?: 'membership' | 'cove'
@@ -23,6 +49,7 @@ type Props = {
 
 export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
   const [items, setItems] = useState<Item[]>([])
+  const [lookup, setLookup] = useState('')
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
   const [error, setError] = useState('')
@@ -62,10 +89,11 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Update failed')
+      const who = parentDisplayName(item) || item.parentEmail
       setStatus(
         action === 'ordered'
-          ? `Set aside ${item.label} for ${item.parentEmail}`
-          : `Marked ${item.label} handed out to ${item.parentEmail}`,
+          ? `Set aside ${item.label} for ${who}`
+          : `Marked ${item.label} handed out to ${who}`,
       )
       await load()
     } catch (err) {
@@ -75,17 +103,34 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
     }
   }
 
-  const shirts = items.filter((i) => i.kind === 'spirit_shirt')
-  const magnets = items.filter((i) => i.kind === 'magnet')
+  const q = lookup.trim().toLowerCase()
+  const filtered = items.filter((i) => matchesLookup(i, q))
+  const shirts = filtered.filter((i) => i.kind === 'spirit_shirt')
+  const magnets = filtered.filter((i) => i.kind === 'magnet')
   const cove = variant === 'cove'
 
   function Row({ item }: { item: Item }) {
     const ordered = item.status === 'ordered'
+    const name = parentDisplayName(item)
     return (
       <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#E8E4DC] px-3 py-2.5">
         <div className="min-w-0">
-          <p className="text-sm font-bold text-[#1A1A1A]">{item.parentEmail}</p>
+          <p className="text-sm font-bold text-[#1A1A1A]">
+            {name || item.parentEmail}
+          </p>
           <p className="text-xs text-[#5A6070]">
+            {name ? (
+              <>
+                {item.parentEmail}
+                {' · '}
+              </>
+            ) : null}
+            {item.studentNames ? (
+              <>
+                Student{item.studentNames.includes(',') ? 's' : ''}: {item.studentNames}
+                {' · '}
+              </>
+            ) : null}
             {item.tier}
             {item.kind === 'spirit_shirt'
               ? ` · ${item.detail || item.shirtSize || 'Design/size —'}`
@@ -144,10 +189,25 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
         </p>
       </div>
 
+      {items.length > 0 ? (
+        <label className="block">
+          <span className="sr-only">Search by parent or student name</span>
+          <input
+            type="search"
+            value={lookup}
+            onChange={(e) => setLookup(e.target.value)}
+            placeholder="Lookup: parent name, student, email…"
+            className="w-full max-w-md rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm"
+          />
+        </label>
+      ) : null}
+
       {busy && items.length === 0 ? (
         <Loader2 className="w-5 h-5 animate-spin text-[#085508]" />
       ) : items.length === 0 ? (
         <p className="text-sm text-[#5A6070]">Queue clear — nothing waiting.</p>
+      ) : filtered.length === 0 ? (
+        <p className="text-sm text-[#5A6070]">No matches for “{lookup.trim()}”.</p>
       ) : (
         <div className="space-y-5">
           {shirts.length > 0 ? (
