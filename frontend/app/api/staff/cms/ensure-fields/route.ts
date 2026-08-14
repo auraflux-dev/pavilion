@@ -81,6 +81,11 @@ export async function POST(req: NextRequest) {
         { key: 'image', displayName: 'Flyer / Image URL', type: 'TEXT' },
         { key: 'schedule', displayName: 'Schedule Summary', type: 'TEXT' },
         { key: 'detail', displayName: 'Detail', type: 'TEXT' },
+        {
+          key: 'memberPriorityUntil',
+          displayName: 'Paid members only until (then open to all)',
+          type: 'DATETIME',
+        },
       ]),
     )
     results.push(

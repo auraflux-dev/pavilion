@@ -1,6 +1,7 @@
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { getWixClient } from "@/lib/wix-client";
 import { formatProgramSchedule } from "@/lib/programs/schedule";
+import { memberPriorityUntilIso } from '@/lib/programs/registration-access'
 
 export interface Program {
   _id: string;
@@ -9,6 +10,11 @@ export interface Program {
   fee: number;
   capacity: number;
   registrationOpen: boolean;
+  /**
+   * When set and still in the future (with registrationOpen), only paid members
+   * may enroll. After this instant (or when empty), all signed-in parents may enroll.
+   */
+  memberPriorityUntil?: string;
   cheddarupUrl?: string;
   requiresWaiver: boolean;
   grades: string;
@@ -71,6 +77,7 @@ function mapProgramItem(item: Record<string, unknown>): Program {
     fee: Number(item.fee ?? 0) || 0,
     capacity: Number(item.capacity ?? 0) || 0,
     registrationOpen: item.registrationOpen === true,
+    memberPriorityUntil: memberPriorityUntilIso(item.memberPriorityUntil) ?? undefined,
     cheddarupUrl: String(item.cheddarupUrl ?? '') || undefined,
     requiresWaiver: item.requiresWaiver === true,
     grades: String(item.grades ?? ''),

@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
+import {
+  formatMemberPriorityUntil,
+  toDatetimeLocalValue,
+} from '@/lib/programs/registration-access'
 
 type Program = {
   id: string
@@ -11,6 +15,8 @@ type Program = {
   fee: number
   capacity: number
   registrationOpen: boolean
+  /** ISO datetime; paid members only until this time when registration is open */
+  memberPriorityUntil: string
   grades: string
   featured: boolean
   schedule: string
@@ -538,6 +544,31 @@ export function StaffProgramsPanel() {
                       />
                       Featured
                     </label>
+                  ) : null}
+                  {canManageAll ? (
+                    <label className="inline-flex flex-col gap-0.5 text-[11px] text-[#5A6070] w-full sm:w-auto">
+                      <span>Paid members only until</span>
+                      <input
+                        type="datetime-local"
+                        className="border border-[#E8E4DC] rounded px-1.5 py-1 text-xs text-[#1A1A1A]"
+                        value={toDatetimeLocalValue(p.memberPriorityUntil)}
+                        disabled={busy}
+                        onChange={(e) =>
+                          void patchProgram(p.id, {
+                            memberPriorityUntil: e.target.value || null,
+                          })
+                        }
+                      />
+                      <span className="text-[10px] leading-snug max-w-xs">
+                        {p.memberPriorityUntil
+                          ? `Opens to all after ${formatMemberPriorityUntil(p.memberPriorityUntil)}`
+                          : 'Leave blank = open to all signed-in parents when registration is on'}
+                      </span>
+                    </label>
+                  ) : p.memberPriorityUntil ? (
+                    <span className="text-[11px] text-[#5A6070]">
+                      Paid members until {formatMemberPriorityUntil(p.memberPriorityUntil)}
+                    </span>
                   ) : null}
                   <button
                     type="button"

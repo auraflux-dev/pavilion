@@ -35,6 +35,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Registration is closed' }, { status: 400 })
     }
 
+    const { assertCanRegisterForProgram } = await import('@/lib/programs/registration-access')
+    const access = await assertCanRegisterForProgram(program, session.email)
+    if (!access.ok) {
+      return NextResponse.json(
+        {
+          error: access.error || 'Registration not available',
+          phase: access.phase,
+          memberPriorityUntil: access.memberPriorityUntil,
+        },
+        { status: access.phase === 'member_priority' ? 403 : 400 },
+      )
+    }
+
     const student = await getOwnedStudent(session.email, studentId)
     if (!student) return NextResponse.json({ error: 'Student not found' }, { status: 404 })
 

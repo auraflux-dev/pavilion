@@ -5,6 +5,10 @@ import { Button } from '@/components/ui/button'
 import { ArrowRight, Users, DollarSign, GraduationCap, CalendarClock } from 'lucide-react'
 import type { Program } from '@/lib/api/programs'
 import { formatProgramSchedule } from '@/lib/programs/schedule'
+import {
+  formatMemberPriorityUntil,
+  getRegistrationPhase,
+} from '@/lib/programs/registration-access'
 import { MemberGate } from '@/components/member-gate'
 import { ProgramRegisterModal } from '@/components/programs/program-register-modal'
 
@@ -52,7 +56,17 @@ export function ProgramCard({ program }: ProgramCardProps) {
   const scheduleLine = formatProgramSchedule(program)
   const comingSoon = !program.registrationOpen && (program.featured || hasTag(program, 'coming-soon'))
   const feeTbd = hasTag(program, 'fee-tbd')
-  const statusLabel = program.registrationOpen ? 'Open' : comingSoon ? 'Coming Soon' : 'Closed'
+  const phase = getRegistrationPhase(program)
+  const statusLabel =
+    phase === 'member_priority'
+      ? 'Paid members first'
+      : phase === 'open'
+        ? 'Open'
+        : comingSoon
+          ? 'Coming Soon'
+          : 'Closed'
+  const priorityUntilLabel =
+    phase === 'member_priority' ? formatMemberPriorityUntil(program.memberPriorityUntil) : ''
   const summary = plainText(program.description || '')
   const springNote = String(program.detail ?? '').trim()
   const feeLabel = feeTbd ? 'Tuition TBD' : program.fee === 0 ? 'Free' : program.fee != null ? `$${program.fee}` : null
@@ -83,11 +97,13 @@ export function ProgramCard({ program }: ProgramCardProps) {
 
           <span
             className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${
-              program.registrationOpen
-                ? 'bg-green-50 text-green-700'
-                : comingSoon
-                  ? 'bg-amber-50 text-amber-800'
-                  : 'bg-gray-100 text-gray-500'
+              phase === 'member_priority'
+                ? 'bg-amber-50 text-amber-800'
+                : phase === 'open'
+                  ? 'bg-green-50 text-green-700'
+                  : comingSoon
+                    ? 'bg-amber-50 text-amber-800'
+                    : 'bg-gray-100 text-gray-500'
             }`}
           >
             {statusLabel}
@@ -143,6 +159,13 @@ export function ProgramCard({ program }: ProgramCardProps) {
 
         {springNote ? (
           <p className="text-xs text-[#5A6070] mb-4">{springNote}</p>
+        ) : null}
+
+        {priorityUntilLabel ? (
+          <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-4">
+            Open to paid PTO members only until {priorityUntilLabel}. Then registration opens to all
+            signed-in parents.
+          </p>
         ) : null}
 
         {program.registrationOpen ? (

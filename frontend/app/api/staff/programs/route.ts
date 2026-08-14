@@ -8,6 +8,10 @@ import {
 } from '@/lib/staff/roles'
 import { countSeatsTaken } from '@/lib/programs/enrollments'
 import { composeScheduleField } from '@/lib/programs/schedule'
+import {
+  memberPriorityUntilIso,
+  normalizeMemberPriorityUntilInput,
+} from '@/lib/programs/registration-access'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -42,6 +46,7 @@ function mapProgram(item: Record<string, unknown>) {
     fee: Number(item.fee ?? 0) || 0,
     capacity: Number(item.capacity ?? 0) || 0,
     registrationOpen: item.registrationOpen === true,
+    memberPriorityUntil: memberPriorityUntilIso(item.memberPriorityUntil) ?? '',
     cheddarupUrl: String(item.cheddarupUrl ?? ''),
     requiresWaiver: item.requiresWaiver === true,
     grades: String(item.grades ?? ''),
@@ -189,6 +194,7 @@ export async function POST(req: NextRequest) {
         fee: Number(body.fee ?? 0) || 0,
         capacity: Number(body.capacity ?? 0) || 0,
         registrationOpen: body.registrationOpen === true,
+        memberPriorityUntil: normalizeMemberPriorityUntilInput(body.memberPriorityUntil),
         cheddarupUrl: String(body.cheddarupUrl ?? '').trim(),
         requiresWaiver: body.requiresWaiver === true,
         grades: String(body.grades ?? '').trim(),
@@ -308,6 +314,11 @@ export async function PATCH(req: NextRequest) {
           ? body.registrationOpen === true
           : existing.registrationOpen === true
         : existing.registrationOpen === true,
+      memberPriorityUntil: all
+        ? body.memberPriorityUntil !== undefined
+          ? normalizeMemberPriorityUntilInput(body.memberPriorityUntil)
+          : existing.memberPriorityUntil ?? null
+        : existing.memberPriorityUntil ?? null,
       cheddarupUrl: all && body.cheddarupUrl != null ? String(body.cheddarupUrl).trim() : existing.cheddarupUrl,
       requiresWaiver: all
         ? body.requiresWaiver != null

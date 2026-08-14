@@ -167,7 +167,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     bullets: [
       'Welcome to the SHMS PTO',
       'Your free parent account is ready. Add a student to track programs, Cove Digital Card balance, and paid membership status.',
-      'Paid members get Cove Digital Card credit, enrichment discounts, and free refreshments at school events.',
+      'Paid members get Cove Digital Card credit, enrichment discounts, priority enrichment registration when offered, and free refreshments at school events.',
     ],
   }),
   /** key|text lines. See lib/defaults/portal-copy.ts */

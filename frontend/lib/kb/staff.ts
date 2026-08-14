@@ -163,7 +163,7 @@ If paid perks are missing after checkout, have them refresh, then check Square/P
       categoryId: 'programs',
       summary: 'Run enrichment from Staff Programs.',
       order: 1,
-      body: `Open **Programs** to edit schedule fields, seats, and rosters.
+      body: `Open **Programs** to edit schedule fields, seats, rosters, and **Paid members only until** (priority registration window before general open).
 
 ## Attendance
 Use check-in / check-out for session dates. Medical notes appear for staff who need them on the roster view.
@@ -194,12 +194,14 @@ Do this before or with your first paid work. Keep a copy for your records. Times
       categoryId: 'programs',
       summary: 'What parents see when claiming seats.',
       order: 3,
-      body: `Parents enroll from **Programs** while signed in. Free vs paid rules follow the program settings (member-only seats, waitlist, capacity).
+      body: `Parents enroll from **Programs** while signed in. Free vs paid rules follow the program settings (paid-member priority window, waitlist, capacity).
+
+**Paid-member priority:** On each program, Staff can set **Paid members only until** (datetime). While registration is open and that time is still in the future, only paid PTO members (Reef / Lagoon / Tide / faculty) can enroll. After that time (or if the field is blank), any signed-in parent can enroll.
 
 If a parent cannot enroll:
 - Confirm sign-in and student grade
 - Confirm the program is open and has seats
-- Confirm membership requirement if the program is paid-only
+- If they see “paid members only,” check the priority-until time or ask them to upgrade
 
 Staff can adjust roster/waitlist from Programs when needed.`,
     },

@@ -11,6 +11,11 @@ import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import type { ConsentAck } from '@/lib/checkout-consent'
 import type { Program } from '@/lib/api/programs'
 import { formatProgramSchedule } from '@/lib/programs/schedule'
+import {
+  formatMemberPriorityUntil,
+  getRegistrationPhase,
+} from '@/lib/programs/registration-access'
+import { useAuth } from '@/lib/hooks/use-auth'
 
 type Student = {
   id: string
@@ -31,6 +36,7 @@ interface Props {
 }
 
 export function ProgramRegisterModal({ program, open, onClose, onRegistered }: Props) {
+  const { hasPaidMembership } = useAuth()
   const [students, setStudents] = useState<Student[]>([])
   const [studentId, setStudentId] = useState('')
   const [loading, setLoading] = useState(true)
@@ -41,6 +47,10 @@ export function ProgramRegisterModal({ program, open, onClose, onRegistered }: P
   const [consentComplete, setConsentComplete] = useState(false)
   const [payOpen, setPayOpen] = useState(false)
   const [payAmount, setPayAmount] = useState(0)
+  const phase = getRegistrationPhase(program)
+  const priorityUntilLabel =
+    phase === 'member_priority' ? formatMemberPriorityUntil(program.memberPriorityUntil) : ''
+  const blockedByPriority = phase === 'member_priority' && !hasPaidMembership
 
   const onConsentChange = useCallback((acks: ConsentAck[] | null, complete: boolean) => {
     setConsents(acks)
@@ -159,10 +169,29 @@ export function ProgramRegisterModal({ program, open, onClose, onRegistered }: P
             </button>
           </div>
 
+          {priorityUntilLabel ? (
+            <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+              {blockedByPriority
+                ? `Paid members only until ${priorityUntilLabel}. Upgrade on Membership, or come back when general registration opens.`
+                : `Paid-member priority window through ${priorityUntilLabel}.`}
+            </p>
+          ) : null}
+
           {loading ? (
             <div className="flex items-center gap-2 text-xs text-[#5A6070]">
               <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading…
             </div>
+          ) : blockedByPriority ? (
+            <Button
+              type="button"
+              className="w-full text-white font-bold"
+              style={{ backgroundColor: '#085508' }}
+              onClick={() => {
+                window.location.href = '/membership'
+              }}
+            >
+              View paid memberships
+            </Button>
           ) : students.length === 0 ? (
             <p className="text-sm text-[#5A6070]">
               Add a student in the Member Portal first, including emergency contact and pick-up
