@@ -33,7 +33,7 @@ function BandNav({
   )
 }
 
-function stillShowingOpenHouse(now = new Date()): boolean {
+function stillShowingRunForCharity(now = new Date()): boolean {
   try {
     const todayEt = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'America/New_York',
@@ -41,9 +41,9 @@ function stillShowingOpenHouse(now = new Date()): boolean {
       month: '2-digit',
       day: '2-digit',
     }).format(now)
-    return todayEt <= '2026-08-13'
+    return todayEt <= '2026-09-13'
   } catch {
-    return now.toISOString().slice(0, 10) <= '2026-08-13'
+    return now.toISOString().slice(0, 10) <= '2026-09-13'
   }
 }
 
@@ -55,12 +55,12 @@ export function HomeSectionNav({
   showEvents: boolean
 }) {
   const items: SectionJumpItem[] = [
-    ...(stillShowingOpenHouse()
+    ...(stillShowingRunForCharity()
       ? [
           {
-            href: '#open-house',
-            label: 'Open House',
-            hint: 'Thu 8/13',
+            href: '#run-for-charity',
+            label: 'Run for Charity',
+            hint: 'Sun 9/13',
             icon: Megaphone,
           } satisfies SectionJumpItem,
         ]

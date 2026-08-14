@@ -1,7 +1,7 @@
 import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Hero } from '@/components/hero'
-import { OpenHousePromo } from '@/components/open-house-promo'
+import { RunForCharityPromo } from '@/components/run-for-charity-promo'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
 import { ProgramsPreview } from '@/components/programs-preview'
 import { VolunteerSection } from '@/components/volunteer-section'
@@ -21,7 +21,7 @@ export default async function HomePage() {
       <Navbar />
       <main id="main-content">
         <Hero />
-        <OpenHousePromo />
+        <RunForCharityPromo />
         <ParentVideoSection
           videoId="parent-tour"
           id="parent-tour"
