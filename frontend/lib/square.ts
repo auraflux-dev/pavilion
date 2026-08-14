@@ -267,7 +267,7 @@ export async function upsertSquareCustomerForCoveStand(opts: {
     const client = getSquareClient()
     const searchResult = await client.customers.search({
       query: { filter: { emailAddress: { exact: email } } },
-      limit: 5n,
+      limit: BigInt(5),
     })
     let customer = ((searchResult as any).customers as Array<Record<string, any>> | undefined)?.[0]
 
