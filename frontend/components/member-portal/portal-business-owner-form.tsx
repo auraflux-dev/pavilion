@@ -35,30 +35,32 @@ export function PortalBusinessOwnerForm({
       setError('Please choose Yes or No.')
       return
     }
+    // "No" stays on-device — staff only get Yes + business details.
+    if (isOwner === 'no') {
+      setStatus('success')
+      return
+    }
+    if (!businessName.trim()) {
+      setError('Please share your business name so we can follow up.')
+      return
+    }
     setStatus('loading')
     setError('')
     try {
       if (isPublic) {
         const messageParts = [
-          `Business owner / family owns a business: ${isOwner === 'yes' ? 'Yes' : 'No'}`,
+          'Business owner / family owns a business: Yes',
+          `Business name: ${businessName.trim()}`,
         ]
-        if (isOwner === 'yes') {
-          messageParts.push(`Business name: ${businessName.trim()}`)
-          if (website.trim()) messageParts.push(`Website: ${website.trim()}`)
-          if (details.trim()) messageParts.push('', 'More about the business:', details.trim())
-        } else if (details.trim()) {
-          messageParts.push('', details.trim())
-        }
+        if (website.trim()) messageParts.push(`Website: ${website.trim()}`)
+        if (details.trim()) messageParts.push('', 'More about the business:', details.trim())
         const res = await fetch('/api/contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: name.trim(),
             email: email.trim(),
-            topic:
-              isOwner === 'yes'
-                ? 'Business owner · membership experience'
-                : 'Not a business owner · membership experience',
+            topic: 'Business owner · membership experience',
             message: messageParts.join('\n'),
             department: 'membership-experience',
             assignedTo: 'vp-membershipexperience@shmspto.org',
@@ -73,7 +75,7 @@ export function PortalBusinessOwnerForm({
           body: JSON.stringify({
             name: memberName || name,
             email: memberEmail || email,
-            isBusinessOwner: isOwner === 'yes',
+            isBusinessOwner: true,
             businessName,
             website,
             details,
@@ -216,9 +218,9 @@ export function PortalBusinessOwnerForm({
             simple ways to help: shout-outs, event tables, or member-friendly offers.
           </p>
           <p className="mt-2 text-sm leading-relaxed text-[#5A6070]">
-            Share a yes/no below (and business details if yes). Our VP of Membership Experience
-            replies within one business day. Formal sponsorship packages still go through
-            the sponsor form above.
+            Share a yes/no below. If yes, add your business details and we will email our
+            VP of Membership Experience (reply within one business day). Formal sponsorship
+            packages still go through the sponsor form above.
           </p>
         </div>
 
@@ -254,7 +256,10 @@ export function PortalBusinessOwnerForm({
         {yesNo}
         {ownerFields}
         {isOwner === 'no' ? (
-          <p className="text-sm text-[#5A6070]">Thanks. You can still submit so we have your response on file.</p>
+          <p className="text-sm text-[#5A6070]">
+            Thanks. Confirm below to close this out. We only email staff when you choose Yes
+            and share business details.
+          </p>
         ) : null}
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
@@ -264,10 +269,12 @@ export function PortalBusinessOwnerForm({
           className="gap-2 text-white"
           style={{ backgroundColor: '#085508' }}
         >
-          {status === 'loading' ? (
+              {status === 'loading' ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" /> Sending…
             </>
+          ) : isOwner === 'no' ? (
+            <>Done</>
           ) : (
             <>
               Send introduction <ArrowRight className="w-4 h-4" />
@@ -302,8 +309,9 @@ export function PortalBusinessOwnerForm({
           </p>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
             What happens next: answer yes or no below. If yes, add your business name and
-            anything you want us to know. Free and paid members welcome. Our VP of Membership
-            Experience follows up within one business day.
+            anything you want us to know. Free and paid members welcome. We only email our
+            VP of Membership Experience when you share business details (usually within one
+            business day).
           </p>
         </div>
       </div>
@@ -313,7 +321,8 @@ export function PortalBusinessOwnerForm({
         {ownerFields}
         {isOwner === 'no' ? (
           <p className="text-sm leading-relaxed text-[#5A6070]">
-            Thanks for letting us know. You can still submit so we have your response on file.
+            Thanks for letting us know. Confirm below to close this out. We only email staff
+            when you choose Yes and share business details.
           </p>
         ) : null}
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
@@ -327,6 +336,8 @@ export function PortalBusinessOwnerForm({
             <>
               <Loader2 className="w-4 h-4 animate-spin" /> Sending…
             </>
+          ) : isOwner === 'no' ? (
+            <>Done</>
           ) : (
             <>
               Submit <ArrowRight className="w-4 h-4" />
@@ -334,7 +345,8 @@ export function PortalBusinessOwnerForm({
           )}
         </Button>
         <p className="text-[11px] text-[#5A6070]">
-          Goes to our VP of Membership Experience · usually within one business day
+          Business details go to our VP of Membership Experience · usually within one
+          business day
         </p>
       </form>
     </section>

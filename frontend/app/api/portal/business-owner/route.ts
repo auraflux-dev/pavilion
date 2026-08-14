@@ -1,7 +1,7 @@
 /**
  * POST /api/portal/business-owner
- * Member-only: business-owner interest form → ContactSubmissions + email
- * VP Membership Experience (vp-membershipexperience@shmspto.org).
+ * Member-only: Yes + business details → ContactSubmissions + email to
+ * VP Membership Experience. "No" is acknowledged in the UI only (no email).
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
@@ -44,7 +44,11 @@ export async function POST(req: NextRequest) {
     if (!EMAIL_RE.test(email)) {
       return NextResponse.json({ error: 'Valid email required' }, { status: 400 })
     }
-    if (isBusinessOwner && !businessName) {
+    if (!isBusinessOwner) {
+      // "No" is acknowledged in the portal UI only — do not email staff or create a ticket.
+      return NextResponse.json({ ok: true, emailed: false, skipped: 'not_business_owner' })
+    }
+    if (!businessName) {
       return NextResponse.json(
         { error: 'Please share your business name so we can follow up.' },
         { status: 400 },
@@ -56,21 +60,15 @@ export async function POST(req: NextRequest) {
       settings.get('contactEmailMembershipExperience', DEFAULT_INBOX),
     )
 
-    const topic = isBusinessOwner
-      ? 'Business owner · membership experience'
-      : 'Not a business owner · membership experience'
+    const topic = 'Business owner · membership experience'
     const messageLines = [
       `[Route: VP Membership Experience · ${assignedTo}]`,
       '',
-      `Business owner / family owns a business: ${isBusinessOwner ? 'Yes' : 'No'}`,
+      'Business owner / family owns a business: Yes',
+      `Business name: ${businessName}`,
     ]
-    if (isBusinessOwner) {
-      messageLines.push(`Business name: ${businessName}`)
-      if (website) messageLines.push(`Website: ${website}`)
-      if (details) messageLines.push('', 'More about the business:', details)
-    } else if (details) {
-      messageLines.push('', details)
-    }
+    if (website) messageLines.push(`Website: ${website}`)
+    if (details) messageLines.push('', 'More about the business:', details)
 
     const routedMessage = messageLines.join('\n')
     const base = {
@@ -96,9 +94,7 @@ export async function POST(req: NextRequest) {
     const notify = await notifyStaffSubmission({
       kind: 'membership-experience',
       to: assignedTo,
-      subject: isBusinessOwner
-        ? `Business owner: ${businessName}`
-        : 'Member: not a business owner',
+      subject: `Business owner: ${businessName}`,
       replyTo: email,
       body: [
         'New business-owner form from the Member Portal.',
