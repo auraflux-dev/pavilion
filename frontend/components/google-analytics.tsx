@@ -1,11 +1,10 @@
-'use client'
-
 import Script from 'next/script'
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim()
 
 /**
- * Google Analytics 4. loads only when NEXT_PUBLIC_GA_MEASUREMENT_ID is set (e.g. G-XXXXXXXX).
+ * Google Analytics 4 — server-rendered so gtag init is in the HTML
+ * (client-only next/script was preloading gtag.js but never emitting config).
  */
 export function GoogleAnalytics() {
   if (!GA_ID) return null
@@ -21,7 +20,7 @@ export function GoogleAnalytics() {
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', '${GA_ID}', { anonymize_ip: true });
+gtag('config', '${GA_ID}');
         `}
       </Script>
     </>
