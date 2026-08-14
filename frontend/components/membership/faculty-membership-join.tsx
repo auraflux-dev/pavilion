@@ -1,16 +1,17 @@
 'use client'
 
 /**
- * Faculty / staff $20 membership — choose magnet OR Spirit Wear T-shirt, then pay.
+ * Faculty / staff $20 membership — choose magnet OR Spirit Wear design/size, then pay.
  */
 import { useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import {
-  SHIRT_SIZES,
-  type PhysicalPerkChoice,
-} from '@/lib/membership-entitlements'
+  MembershipShirtPicker,
+  type MembershipShirtSelection,
+} from '@/components/membership/membership-shirt-picker'
+import type { PhysicalPerkChoice } from '@/lib/membership-entitlements'
 
 type Props = {
   price: number
@@ -18,11 +19,11 @@ type Props = {
 
 export function FacultyMembershipJoin({ price }: Props) {
   const [open, setOpen] = useState(false)
-  const [shirtSize, setShirtSize] = useState('')
+  const [shirt, setShirt] = useState<MembershipShirtSelection | null>(null)
   const [physicalPerk, setPhysicalPerk] = useState<PhysicalPerkChoice | ''>('')
   const needsShirt = physicalPerk === 'spirit_shirt'
   const ready =
-    physicalPerk === 'magnet' || (physicalPerk === 'spirit_shirt' && !!shirtSize)
+    physicalPerk === 'magnet' || (physicalPerk === 'spirit_shirt' && !!shirt)
 
   return (
     <MemberGate
@@ -42,7 +43,7 @@ export function FacultyMembershipJoin({ price }: Props) {
               checked={physicalPerk === 'magnet'}
               onChange={() => {
                 setPhysicalPerk('magnet')
-                setShirtSize('')
+                setShirt(null)
               }}
             />
             <span>
@@ -64,23 +65,7 @@ export function FacultyMembershipJoin({ price }: Props) {
             </span>
           </label>
         </fieldset>
-        {needsShirt ? (
-          <label className="block text-xs text-[#5A6070]">
-            Spirit Wear T-shirt size
-            <select
-              value={shirtSize}
-              onChange={(e) => setShirtSize(e.target.value)}
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2.5 text-sm text-[#1A1A1A] bg-white"
-            >
-              <option value="">Select size</option>
-              {SHIRT_SIZES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : null}
+        <MembershipShirtPicker required={needsShirt} value={shirt} onChange={setShirt} />
         <button
           type="button"
           disabled={!ready}
@@ -100,8 +85,8 @@ export function FacultyMembershipJoin({ price }: Props) {
           amount={price}
           title="Join Faculty"
           subtitle={
-            physicalPerk === 'spirit_shirt' && shirtSize
-              ? `Faculty membership · Spirit Wear T-shirt (${shirtSize}).`
+            physicalPerk === 'spirit_shirt' && shirt
+              ? `Faculty membership · ${shirt.label}.`
               : physicalPerk === 'magnet'
                 ? 'Faculty membership · Stone Hill car magnet.'
                 : 'Faculty membership for the school year.'
@@ -109,7 +94,10 @@ export function FacultyMembershipJoin({ price }: Props) {
           payBody={{
             kind: 'membership',
             tier: 'faculty',
-            shirtSize: needsShirt ? shirtSize : undefined,
+            shirtSize: needsShirt ? shirt?.size : undefined,
+            shirtDesign: needsShirt ? shirt?.design : undefined,
+            shirtProductId: needsShirt ? shirt?.productId : undefined,
+            shirtVariantId: needsShirt ? shirt?.variantId : undefined,
             physicalPerk: physicalPerk || null,
           }}
           containerId="membership-pay-faculty"

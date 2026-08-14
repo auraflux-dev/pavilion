@@ -125,6 +125,9 @@ export async function applyPaidMembership(opts: {
   parentName?: string | null
   /** Spirit Wear size when the parent chose the included T-shirt */
   shirtSize?: string | null
+  shirtDesign?: string | null
+  shirtProductId?: string | null
+  shirtVariantId?: string | null
   /** Lagoon/Tide: magnet OR spirit_shirt */
   physicalPerk?: 'spirit_shirt' | 'magnet' | null
 }): Promise<{
@@ -139,6 +142,7 @@ export async function applyPaidMembership(opts: {
   }
   entitlements?: import('@/lib/membership-entitlements').MembershipEntitlement[]
   enrichmentCode?: string | null
+  shirtHeld?: boolean
 }> {
   const email = opts.parentEmail.trim().toLowerCase()
   const tier = opts.tier.trim().toLowerCase()
@@ -372,15 +376,43 @@ export async function applyPaidMembership(opts: {
     console.warn('assignEnrichmentCodeToFamily', err)
   }
 
-  const entitlements = buildMembershipEntitlements({
+  // Hold shirt inventory immediately so retail cannot sell the same unit.
+  let shirtHeld = false
+  let shirtSku: string | undefined
+  if (String(opts.shirtVariantId ?? '').trim()) {
+    const { holdMembershipShirtInventory, assertMembershipShirtAvailable } = await import(
+      '@/lib/membership-shirt'
+    )
+    const available = await assertMembershipShirtAvailable({
+      productId: String(opts.shirtProductId ?? '').trim(),
+      variantId: String(opts.shirtVariantId ?? '').trim(),
+    })
+    await holdMembershipShirtInventory({
+      productId: available.productId,
+      variantId: available.variantId,
+      qty: 1,
+    })
+    shirtHeld = true
+    shirtSku = available.sku
+    opts.shirtDesign = opts.shirtDesign || available.design
+    opts.shirtSize = opts.shirtSize || available.size
+    opts.shirtProductId = available.productId
+  }
+
+  const entitlementsWithHold = buildMembershipEntitlements({
     tier,
     shirtSize: opts.shirtSize,
+    shirtDesign: opts.shirtDesign,
+    shirtProductId: opts.shirtProductId,
+    shirtVariantId: opts.shirtVariantId,
+    shirtSku,
+    shirtHeld,
     physicalPerk: opts.physicalPerk,
     coveCreditDollars: giftCardResult?.creditDollars || fullCredit,
     enrichmentCode,
   })
   // Mark cove credit fulfilled when Square load succeeded (or skipped because already applied)
-  const entitlementsStored = entitlements.map((e) =>
+  const entitlementsStored = entitlementsWithHold.map((e) =>
     e.kind === 'cove_credit' && giftCardResult?.status === 'failed'
       ? { ...e, status: 'pending' as const, notes: giftCardResult.error || e.notes }
       : e
@@ -395,6 +427,9 @@ export async function applyPaidMembership(opts: {
       expiresAt,
       status: 'active',
       shirtSize: String(opts.shirtSize ?? '').trim() || undefined,
+      shirtDesign: String(opts.shirtDesign ?? '').trim() || undefined,
+      shirtProductId: String(opts.shirtProductId ?? '').trim() || undefined,
+      shirtVariantId: String(opts.shirtVariantId ?? '').trim() || undefined,
       entitlementsJson: JSON.stringify(entitlementsStored),
       enrichmentCode: enrichmentCode || undefined,
     }
@@ -425,5 +460,6 @@ export async function applyPaidMembership(opts: {
     giftCard: giftCardResult,
     entitlements: entitlementsStored,
     enrichmentCode,
+    shirtHeld,
   }
 }

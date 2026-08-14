@@ -238,6 +238,11 @@ export async function POST(req: NextRequest) {
       const tier = String(body.tier ?? '').trim().toLowerCase()
       const studentId = typeof body.studentId === 'string' ? body.studentId : null
       const shirtSize = typeof body.shirtSize === 'string' ? body.shirtSize.trim() : ''
+      const shirtDesign = typeof body.shirtDesign === 'string' ? body.shirtDesign.trim() : ''
+      const shirtProductId =
+        typeof body.shirtProductId === 'string' ? body.shirtProductId.trim() : ''
+      const shirtVariantId =
+        typeof body.shirtVariantId === 'string' ? body.shirtVariantId.trim() : ''
       const {
         tierOffersPhysicalPerkChoice,
         tierNeedsShirtSize,
@@ -246,7 +251,11 @@ export async function POST(req: NextRequest) {
       const physicalPerk = parsePhysicalPerk(
         typeof body.physicalPerk === 'string' ? body.physicalPerk : null,
       )
-      // Faculty: magnet OR shirt. Parents Lagoon/Tide: shirt size (they get shirt + magnet).
+      const needsShirt =
+        (tierOffersPhysicalPerkChoice(tier) && physicalPerk === 'spirit_shirt') ||
+        (!tierOffersPhysicalPerkChoice(tier) && tierNeedsShirtSize(tier))
+
+      // Faculty: magnet OR shirt. Parents Lagoon/Tide: shirt (they get shirt + magnet).
       if (tierOffersPhysicalPerkChoice(tier)) {
         if (!physicalPerk) {
           return NextResponse.json(
@@ -254,17 +263,42 @@ export async function POST(req: NextRequest) {
             { status: 400 },
           )
         }
-        if (physicalPerk === 'spirit_shirt' && !shirtSize) {
+      }
+
+      if (needsShirt) {
+        const { listMembershipShirtOptions, assertMembershipShirtAvailable } = await import(
+          '@/lib/membership-shirt'
+        )
+        const { options } = await listMembershipShirtOptions()
+        if (options.length > 0) {
+          if (!shirtVariantId || !shirtProductId) {
+            return NextResponse.json(
+              { error: 'Select a Spirit Wear design and size for this membership.' },
+              { status: 400 },
+            )
+          }
+          try {
+            await assertMembershipShirtAvailable({
+              productId: shirtProductId,
+              variantId: shirtVariantId,
+            })
+          } catch (err) {
+            return NextResponse.json(
+              {
+                error:
+                  err instanceof Error
+                    ? err.message
+                    : 'That shirt design/size is no longer available.',
+              },
+              { status: 409 },
+            )
+          }
+        } else if (!shirtSize) {
           return NextResponse.json(
             { error: 'Select a Spirit Wear T-shirt size for this membership.' },
             { status: 400 },
           )
         }
-      } else if (tierNeedsShirtSize(tier) && !shirtSize) {
-        return NextResponse.json(
-          { error: 'Select a Spirit Wear T-shirt size for this membership.' },
-          { status: 400 },
-        )
       }
       const tiers = await getPaidMembershipTiers()
       const match = tiers.find((t) => t.tierId === tier && t.active)
@@ -322,10 +356,10 @@ export async function POST(req: NextRequest) {
         studentId,
         orderId: payment.id ?? paymentKey,
         parentName: name || null,
-        shirtSize:
-          physicalPerk === 'spirit_shirt' || (!physicalPerk && shirtSize)
-            ? shirtSize || null
-            : null,
+        shirtSize: needsShirt ? shirtSize || null : null,
+        shirtDesign: needsShirt ? shirtDesign || null : null,
+        shirtProductId: needsShirt ? shirtProductId || null : null,
+        shirtVariantId: needsShirt ? shirtVariantId || null : null,
         physicalPerk: physicalPerk || null,
       })
 
@@ -377,6 +411,9 @@ export async function POST(req: NextRequest) {
             tierName: match.name,
             ...(charge.isUpgrade ? { isUpgrade: '1', currentTier } : {}),
             ...(shirtSize ? { shirtSize } : {}),
+            ...(shirtDesign ? { shirtDesign } : {}),
+            ...(shirtProductId ? { shirtProductId } : {}),
+            ...(shirtVariantId ? { shirtVariantId } : {}),
             ...(physicalPerk ? { physicalPerk } : {}),
           },
         })

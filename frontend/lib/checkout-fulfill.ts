@@ -40,6 +40,9 @@ export type CheckoutIntent = {
   studentId?: string | null
   /** Spirit Wear size when membership includes a free T-shirt */
   shirtSize?: string | null
+  shirtDesign?: string | null
+  shirtProductId?: string | null
+  shirtVariantId?: string | null
   physicalPerk?: string | null
   productId?: string
   /** Wix Catalog variant when the product has Color/Size options */
@@ -132,6 +135,9 @@ export async function resolveCheckoutIntent(
         tierName: match.name,
         studentId: intent.studentId ? String(intent.studentId) : '',
         shirtSize: intent.shirtSize ? String(intent.shirtSize) : '',
+        shirtDesign: intent.shirtDesign ? String(intent.shirtDesign) : '',
+        shirtProductId: intent.shirtProductId ? String(intent.shirtProductId) : '',
+        shirtVariantId: intent.shirtVariantId ? String(intent.shirtVariantId) : '',
         physicalPerk: intent.physicalPerk ? String(intent.physicalPerk) : '',
         isUpgrade: charge.isUpgrade ? '1' : '',
         currentTier,
@@ -381,6 +387,9 @@ export async function fulfillPaidCheckout(opts: {
       orderId: transactionId,
       parentName: parentName || null,
       shirtSize: resolved.meta.shirtSize || null,
+      shirtDesign: resolved.meta.shirtDesign || null,
+      shirtProductId: resolved.meta.shirtProductId || null,
+      shirtVariantId: resolved.meta.shirtVariantId || null,
       physicalPerk: (resolved.meta.physicalPerk as 'spirit_shirt' | 'magnet' | null) || null,
     })
     await client.items.insert('Payments', {

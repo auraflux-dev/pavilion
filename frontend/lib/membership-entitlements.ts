@@ -36,6 +36,10 @@ export type MembershipEntitlement = {
   /** e.g. shirt size, discount % */
   detail?: string
   notes?: string
+  /** Catalog hold for spirit_shirt perk */
+  productId?: string
+  variantId?: string
+  sku?: string
 }
 
 export const SHIRT_SIZES = [
@@ -118,6 +122,11 @@ export function enrichmentDiscountPercent(tier: string): number {
 export function buildMembershipEntitlements(opts: {
   tier: string
   shirtSize?: string | null
+  shirtDesign?: string | null
+  shirtProductId?: string | null
+  shirtVariantId?: string | null
+  shirtSku?: string | null
+  shirtHeld?: boolean
   /** Faculty only: magnet OR shirt. Parents Lagoon/Tide get both. */
   physicalPerk?: PhysicalPerkChoice | null
   coveCreditDollars?: number
@@ -162,20 +171,31 @@ export function buildMembershipEntitlements(opts: {
   }
 
   const choice = normalizePhysicalPerk(opts.physicalPerk)
+  const shirtSize = String(opts.shirtSize ?? '').trim()
+  const shirtDesign = String(opts.shirtDesign ?? '').trim()
+  const shirtDetail = [shirtDesign && shirtDesign !== 'Standard' ? shirtDesign : '', shirtSize]
+    .filter(Boolean)
+    .join(' · ')
+  const shirtHeld = Boolean(opts.shirtHeld && opts.shirtVariantId)
+  const shirtEntitlement = (): MembershipEntitlement => ({
+    kind: 'spirit_shirt',
+    label: '1 Spirit Wear T-shirt',
+    status: shirtHeld ? 'ordered' : 'pending',
+    detail: shirtDetail || 'Design & size needed',
+    notes: shirtHeld
+      ? `Held in inventory: ${shirtDetail}. ${PHYSICAL_PERK_PICKUP_NOTE}`
+      : shirtDetail
+        ? `${shirtDetail}. ${PHYSICAL_PERK_PICKUP_NOTE}`
+        : `Choose a design and size so we can hold inventory. ${PHYSICAL_PERK_PICKUP_NOTE}`,
+    productId: String(opts.shirtProductId ?? '').trim() || undefined,
+    variantId: String(opts.shirtVariantId ?? '').trim() || undefined,
+    sku: String(opts.shirtSku ?? '').trim() || undefined,
+  })
 
   if (tierOffersPhysicalPerkChoice(tier)) {
     // Faculty: exclusive magnet OR T-shirt
     if (choice === 'spirit_shirt') {
-      const size = String(opts.shirtSize ?? '').trim()
-      out.push({
-        kind: 'spirit_shirt',
-        label: '1 Spirit Wear T-shirt',
-        status: 'pending',
-        detail: size || 'Size needed',
-        notes: size
-          ? `Size ${size}. ${PHYSICAL_PERK_PICKUP_NOTE}`
-          : `Choose a size so we can fulfill your shirt. ${PHYSICAL_PERK_PICKUP_NOTE}`,
-      })
+      out.push(shirtEntitlement())
     } else {
       out.push({
         kind: 'magnet',
@@ -188,16 +208,7 @@ export function buildMembershipEntitlements(opts: {
   } else {
     // Parents: Lagoon/Tide get shirt + magnet; Reef gets magnet only
     if (tierIncludesShirt(tier)) {
-      const size = String(opts.shirtSize ?? '').trim()
-      out.push({
-        kind: 'spirit_shirt',
-        label: '1 Spirit Wear T-shirt',
-        status: 'pending',
-        detail: size || 'Size needed',
-        notes: size
-          ? `Size ${size}. ${PHYSICAL_PERK_PICKUP_NOTE}`
-          : `Choose a size so we can fulfill your shirt. ${PHYSICAL_PERK_PICKUP_NOTE}`,
-      })
+      out.push(shirtEntitlement())
     }
     if (tierAutoMagnet(tier) || tierIncludesMagnetWithShirt(tier)) {
       out.push({

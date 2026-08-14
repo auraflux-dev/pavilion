@@ -10,6 +10,7 @@ import {
   Newspaper,
   Package,
   Percent,
+  Shirt,
   ShoppingCart,
   Store,
   Tag,
@@ -53,6 +54,12 @@ export function StaffRetailSectionNav() {
           label: 'Store pickups',
           hint: 'Window · handed out',
           icon: Package,
+        },
+        {
+          href: '#cove-membership-shirts',
+          label: 'Shirt designs',
+          hint: 'Membership perk',
+          icon: Shirt,
         },
         {
           href: '#cove-demand',

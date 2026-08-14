@@ -88,7 +88,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
           <p className="text-xs text-[#5A6070]">
             {item.tier}
             {item.kind === 'spirit_shirt'
-              ? ` · Size ${item.detail || item.shirtSize || '—'}`
+              ? ` · ${item.detail || item.shirtSize || 'Design/size —'}`
               : item.detail
                 ? ` · ${item.detail}`
                 : ' · 1 magnet'}

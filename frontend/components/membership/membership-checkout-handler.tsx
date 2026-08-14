@@ -2,15 +2,18 @@
 
 /**
  * After login return to /membership?checkout=reef|lagoon|tide|faculty&…
- * Lagoon/Tide: shirt size (parents get shirt + magnet).
- * Faculty: choose magnet OR shirt, then pay $20.
+ * Lagoon/Tide: design + size (parents get shirt + magnet).
+ * Faculty: choose magnet OR shirt design/size, then pay $20.
  */
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import {
-  SHIRT_SIZES,
+  MembershipShirtPicker,
+  type MembershipShirtSelection,
+} from '@/components/membership/membership-shirt-picker'
+import {
   tierNeedsShirtSize,
   tierOffersPhysicalPerkChoice,
   type PhysicalPerkChoice,
@@ -37,7 +40,7 @@ function HandlerInner() {
   const studentId = searchParams.get('studentId')
   const [open, setOpen] = useState(false)
   const [price, setPrice] = useState(0)
-  const [shirtSize, setShirtSize] = useState('')
+  const [shirt, setShirt] = useState<MembershipShirtSelection | null>(null)
   const [physicalPerk, setPhysicalPerk] = useState<PhysicalPerkChoice | ''>('')
   const [ready, setReady] = useState(false)
 
@@ -46,8 +49,8 @@ function HandlerInner() {
   const needsShirtSize =
     needsParentShirt || (needsFacultyChoice && physicalPerk === 'spirit_shirt')
   const choiceReady = needsFacultyChoice
-    ? physicalPerk === 'magnet' || (physicalPerk === 'spirit_shirt' && !!shirtSize)
-    : !needsParentShirt || !!shirtSize
+    ? physicalPerk === 'magnet' || (physicalPerk === 'spirit_shirt' && !!shirt)
+    : !needsParentShirt || !!shirt
 
   useEffect(() => {
     if (status !== 'member') return
@@ -58,7 +61,11 @@ function HandlerInner() {
       try {
         sessionStorage.setItem(
           'pendingMembership',
-          JSON.stringify({ tier: checkout, studentId: studentId ?? null, startedAt: Date.now() })
+          JSON.stringify({
+            tier: checkout,
+            studentId: studentId ?? null,
+            startedAt: Date.now(),
+          }),
         )
       } catch {
         // ignore
@@ -99,64 +106,51 @@ function HandlerInner() {
       <div className="mb-6 rounded-xl border border-[#E8E4DC] bg-white p-4 space-y-3">
         <p className="text-sm font-bold text-[#1A1A1A]">Finish joining {tierName}</p>
         {needsFacultyChoice ? (
-          <>
-            <fieldset className="space-y-2">
-              <legend className="text-xs font-semibold text-[#5A6070]">
-                Included perk — choose one
-              </legend>
-              <label className="flex items-start gap-2 text-sm text-[#1A1A1A] cursor-pointer">
-                <input
-                  type="radio"
-                  name={`return-perk-${checkout}`}
-                  className="mt-1"
-                  checked={physicalPerk === 'magnet'}
-                  onChange={() => {
-                    setPhysicalPerk('magnet')
-                    setShirtSize('')
-                  }}
-                />
-                <span>
-                  <span className="font-semibold">Stone Hill car magnet</span>
-                  <span className="block text-xs text-[#5A6070]">About $10 value</span>
-                </span>
-              </label>
-              <label className="flex items-start gap-2 text-sm text-[#1A1A1A] cursor-pointer">
-                <input
-                  type="radio"
-                  name={`return-perk-${checkout}`}
-                  className="mt-1"
-                  checked={physicalPerk === 'spirit_shirt'}
-                  onChange={() => setPhysicalPerk('spirit_shirt')}
-                />
-                <span>
-                  <span className="font-semibold">Spirit Wear T-shirt</span>
-                  <span className="block text-xs text-[#5A6070]">About $18 value</span>
-                </span>
-              </label>
-            </fieldset>
-          </>
+          <fieldset className="space-y-2">
+            <legend className="text-xs font-semibold text-[#5A6070]">
+              Included perk — choose one
+            </legend>
+            <label className="flex items-start gap-2 text-sm text-[#1A1A1A] cursor-pointer">
+              <input
+                type="radio"
+                name={`return-perk-${checkout}`}
+                className="mt-1"
+                checked={physicalPerk === 'magnet'}
+                onChange={() => {
+                  setPhysicalPerk('magnet')
+                  setShirt(null)
+                }}
+              />
+              <span>
+                <span className="font-semibold">Stone Hill car magnet</span>
+                <span className="block text-xs text-[#5A6070]">About $10 value</span>
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-sm text-[#1A1A1A] cursor-pointer">
+              <input
+                type="radio"
+                name={`return-perk-${checkout}`}
+                className="mt-1"
+                checked={physicalPerk === 'spirit_shirt'}
+                onChange={() => setPhysicalPerk('spirit_shirt')}
+              />
+              <span>
+                <span className="font-semibold">Spirit Wear T-shirt</span>
+                <span className="block text-xs text-[#5A6070]">About $18 value</span>
+              </span>
+            </label>
+          </fieldset>
         ) : (
           <p className="text-xs text-[#5A6070]">
-            Choose your included Spirit Wear T-shirt size (Lagoon and Tide also include a car magnet), then continue to pay.
+            Choose your included Spirit Wear design and size (Lagoon and Tide also include a car
+            magnet), then continue to pay.
           </p>
         )}
-        {needsShirtSize ? (
-          <label className="block text-xs text-[#5A6070]">
-            Spirit Wear T-shirt size
-            <select
-              value={shirtSize}
-              onChange={(e) => setShirtSize(e.target.value)}
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2.5 text-sm text-[#1A1A1A] bg-white"
-            >
-              <option value="">Select size</option>
-              {SHIRT_SIZES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : null}
+        <MembershipShirtPicker
+          required={needsShirtSize}
+          value={shirt}
+          onChange={setShirt}
+        />
         <button
           type="button"
           disabled={!choiceReady}
@@ -171,13 +165,13 @@ function HandlerInner() {
   }
 
   const perkNote = needsFacultyChoice
-    ? physicalPerk === 'spirit_shirt' && shirtSize
-      ? `Pay with your own card. Faculty perk: Spirit Wear T-shirt (${shirtSize}).`
+    ? physicalPerk === 'spirit_shirt' && shirt
+      ? `Pay with your own card. Faculty perk: ${shirt.label}.`
       : physicalPerk === 'magnet'
         ? 'Pay with your own card. Faculty perk: Stone Hill car magnet.'
         : 'Pay with your own credit or debit card on this page'
-    : needsParentShirt && shirtSize
-      ? `Pay with your own card. Spirit shirt size: ${shirtSize}.`
+    : needsParentShirt && shirt
+      ? `Pay with your own card. Spirit shirt: ${shirt.label}.`
       : 'Pay with your own credit or debit card on this page'
 
   return (
@@ -191,8 +185,11 @@ function HandlerInner() {
         kind: 'membership',
         tier: checkout,
         studentId,
-        shirtSize: needsShirtSize ? shirtSize : undefined,
-        physicalPerk: needsFacultyChoice ? (physicalPerk || null) : undefined,
+        shirtSize: needsShirtSize ? shirt?.size : undefined,
+        shirtDesign: needsShirtSize ? shirt?.design : undefined,
+        shirtProductId: needsShirtSize ? shirt?.productId : undefined,
+        shirtVariantId: needsShirtSize ? shirt?.variantId : undefined,
+        physicalPerk: needsFacultyChoice ? physicalPerk || null : undefined,
       }}
       containerId={`membership-return-${checkout}`}
       onPaid={() => {
