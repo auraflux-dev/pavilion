@@ -219,79 +219,62 @@ Do not send parents to the old Wix Events dashboard for day-to-day work. Stay in
       slug: 'cove-in-person-manual',
       title: 'Cove in-person transactions manual',
       categoryId: 'cove',
-      summary: 'Stand owns cash/card/Cove gift card; Staff Charge Cove is backup; portal = pickup only.',
+      summary: 'Stand owns all in-person tenders including Cove PIN/passcode Card on File; portal pickup unchanged.',
       order: 1,
       need: 'retail',
       body: `# Cove in-person transactions
 
-**Sell first. One payment lane per sale. Never charge the same items twice.**
-Guests do **not** need a login or Cove card. Printable card: **/staff/in-person**
+**Sell first. One payment lane per sale. Never charge twice.**
+Printable: **/staff/in-person**
 
-**Out** = Square Stand (cash, card, Cove gift-card scan). **In** = portal/site already paid → pickup only.
-Cove balance **is** a Square gift card — Stand redeem updates the portal.
+**Out** = Square Stand. **In** = portal/site (parent pays; Staff pickup only). Preferring portal in person is fine.
 
 ## How are they paying?
 
 | Paying with… | Do this |
 |--------------|---------|
-| **Cash** or **card / Apple Pay / Google Pay** | **Square Stand** → ring → take payment → stop |
-| **Cove Digital Card** (Wallet / Photos QR / GAN) | **Square Stand** → tender **Gift card** → scan → stop |
-| Cove **passcode only** (no Wallet) | Staff → backup **Charge Cove** |
-| **Portal / site checkout** (already paid) | **Today's store pickups** or shirts/magnets → **Handed out** |
-| **Zelle / PayPal / phone Square** (no Stand) | Staff → **External (AM)** → log amount |
-| Paid-member free food (code ends in **9**) | Hand ticket · **no charge** |
-| Membership (Reef / Lagoon / Tide) | **Portal only** — not Stand |
+| Cash or card / wallet | **Stand** → Cash or Card → stop |
+| Cove **Photos QR** | **Stand** → Gift card → scan → stop |
+| Cove **6-digit or word passcode** | **Stand** → search Customer → **Card on File** → stop |
+| Unable to load cards | No Cove load yet — cash/card, or Staff Charge Cove backup |
+| Portal already paid | **Today's store pickups** → Handed out |
+| Zelle / PayPal / phone (no Stand) | Staff → **External** |
+| Code ends in **9** | Free food ticket · no charge |
+| Membership | **Portal only** |
 
-## Devices
+## Stand Cove (passcode / PIN)
+1. Ring items
+2. Search Customer by **6-digit** or **passcode**
+3. Charge → **Card on File** → gift card
+4. Stop — do not also Charge Cove in Staff
 
-### Square Stand (iPad) — default
-Cash + card/wallet + **Cove gift card**. Ring → pay → **stop**. Do not also Charge Cove in Staff. Optional: add customer email on Stand.
+They must have loaded Cove in the portal at least once.
 
-### Staff → The Cove (laptop or iPad browser)
-1. **Backup Cove charge** — passcode / PIN when Wallet is not open
-2. **External (AM)** — Zelle / PayPal / phone when Stand is down
-3. **Today's store pickups** — morning-window portal snack/spirit · Handed out
-4. **Magnet & shirt pickup** — membership perks (not candy)
+## Staff backup
+Charge Cove only if Stand Card on File fails. External if Stand is down. Pickups for portal-paid orders.
 
-## Event vs Window
-- **Event:** Stand owns cash + card + Cove scans; Staff Charge Cove only if no Wallet; Join QR optional after sale
-- **Window (~8:25–8:50 AM ET M–Fri):** Same Stand default; portal window orders → Today's store pickups
+## Double-charge
+Stand (any tender) → no Staff charge. Portal pickup → no Stand.
 
-## Walkthroughs
+Stuck → **treasurer@** · Membership → **vp-membershipexperience@**
 
-**Cash/card:** Stand only → optional Join QR after
-**Cove (preferred):** Stand → Gift card → scan Wallet / Photos QR
-**Cove (backup):** Staff → passcode lookup → Charge Cove
-**Already paid online:** Handed out only — never re-ring
-**External:** Staff → External → amount → Log
-
-## Double-charge rule
-
-| Lane | Also ring elsewhere? |
-|------|----------------------|
-| Stand (cash, card, or gift card) | **No** Staff charge |
-| Staff Charge Cove (backup) | **No** Stand |
-| Portal pickup | **No** Stand / Cove |
-| External | No second tender |
-
-## Troubleshooting
-Stuck / double charge → **treasurer@** · Membership → **vp-membershipexperience@** · Cove ops → **cove@** / **cove-staff@**
-
-Full doc in repo: docs/STAFF-COVE-IN-PERSON-MANUAL.md`,
+Full doc: docs/STAFF-COVE-IN-PERSON-MANUAL.md`,
     },
     {
       slug: 'cove-register',
       title: 'Cove register quick reference',
       categoryId: 'cove',
-      summary: 'Stand for cash/card/Cove gift card; Staff Charge Cove is backup only.',
+      summary: 'Stand for cash/card/Cove QR/PIN/passcode; Staff Charge Cove is backup only.',
       order: 2,
       need: 'retail',
-      body: `Staff → **The Cove** → In-person sales.
+      body: `Staff → **The Cove** → In-person sales (Stand is the register).
 
-1. **Cash, card, or Cove Wallet QR** → Square Stand (gift-card tender for Cove)
-2. **Passcode only / no Wallet** → Staff Charge Cove (backup)
-3. **Portal already paid** → Today's store pickups · Handed out
-4. **External (AM)** → log Zelle / PayPal / phone
+1. **Cash / card** → Stand
+2. **Cove Photos QR** → Stand → Gift card → scan
+3. **Cove 6-digit or passcode** → Stand → search Customer → **Card on File**
+4. **Portal already paid** → Today's store pickups · Handed out
+5. **External (AM)** → log Zelle / PayPal / phone
+6. **Unable to load cards** → cash/card or Staff Charge Cove backup
 
 Never Charge Cove after Stand already took the same items.
 
@@ -299,18 +282,22 @@ Never Charge Cove after Stand already took the same items.
     },
     {
       slug: 'cove-in-person-square-stand',
-      title: 'Square Stand (cash + card + Cove gift card)',
+      title: 'Square Stand (all in-person tenders)',
       categoryId: 'cove',
-      summary: 'Stand owns all in-person tenders including Cove Digital Card scan.',
+      summary: 'Cash, card, Gift card scan, and Card on File for Cove PIN/passcode.',
       order: 3,
       need: 'retail',
       body: `### Square Stand steps
 1. Library / Favorites → ring snacks or spirit
-2. Take **cash**, **card / Apple Pay / Google Pay**, or **Gift card** (scan Cove Wallet / Photos QR)
+2. Tender:
+   - **Cash** / **Card** for cash and tap
+   - **Gift card** → scan Photos QR
+   - Search **Customer** by 6-digit or passcode → **Card on File**
 3. Stop — do **not** also Charge Cove or External for the same items
-4. Optional: add customer email so Staff Payments attaches to them
 
-Cove Digital Card balance **is** that Square gift card — Stand redeem updates the portal.
+Cove balance is the Square gift card on file. Portal follows after redeem.
+
+If **Unable to load cards**, that family has not loaded Cove yet — take cash/card or Staff backup.
 
 Stand syncs to Staff Payments (inventory when SKU matches).
 

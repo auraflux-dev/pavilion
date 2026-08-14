@@ -187,7 +187,7 @@ export function StaffCoveRegister() {
     if (lane === 'stand') {
       setMode('idle')
       setFamily(null)
-      setStatus('Cash, card/wallet, or Cove Wallet QR → Square Stand (gift-card tender). Staff Charge Cove is backup only.')
+      setStatus('Stand: Cash/Card, Gift card (Photos QR), or search Customer → Card on File (PIN/passcode). Staff Charge Cove is backup only.')
       return
     }
     if (lane === 'pickup') {
@@ -199,7 +199,7 @@ export function StaffCoveRegister() {
     if (lane === 'cove') {
       setMode('idle')
       setFamily(null)
-      setStatus('Backup only — passcode / PIN when Wallet QR is not available. Prefer Stand gift-card scan.')
+      setStatus('Backup only — when Stand Card on File fails or customer has no Cove gift card loaded yet.')
       setTimeout(() => codeRef.current?.focus(), 50)
       return
     }
@@ -643,10 +643,10 @@ export function StaffCoveRegister() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {laneBtn(
             'stand',
-            'Cash · card · Cove Wallet',
-            '→ Square Stand (gift-card tender for Cove Digital Card)',
+            'Cash · card · Cove on Stand',
+            'Stand: Cash/Card · Gift card (Photos QR) · or Customer Card on File (PIN/passcode)',
           )}
-          {laneBtn('cove', 'Cove backup (passcode)', 'Staff only when Wallet QR is not open')}
+          {laneBtn('cove', 'Cove backup (Staff)', 'Only if Stand Card on File fails / no gift card')}
           {laneBtn('external', 'External (AM)', 'Zelle · PayPal · phone · no Stand')}
         </div>
         <button
@@ -667,15 +667,18 @@ export function StaffCoveRegister() {
 
       {payLane === 'stand' ? (
         <div className="rounded-xl border-2 border-[#0B3D0B] bg-[#F5F7F4] p-4 space-y-2">
-          <p className="text-sm font-bold text-[#1A1A1A]">Use Square Stand (cash, card, or Cove gift card)</p>
+          <p className="text-sm font-bold text-[#1A1A1A]">Use Square Stand (all in-person tenders)</p>
           <ol className="text-sm text-[#5A6070] list-decimal pl-5 space-y-1">
             <li>Ring snacks / spirit on Stand</li>
-            <li>Take cash, card/wallet, or Gift card (scan Cove Wallet / Photos QR)</li>
+            <li>
+              Cash or Card — or Gift card (Photos QR) — or search Customer by 6-digit/passcode →{' '}
+              <strong>Card on File</strong>
+            </li>
             <li>Stop — do not also Charge Cove in Staff</li>
           </ol>
           <p className="text-xs text-[#5A6070]">
-            Cove Digital Card balance is that Square gift card — Stand redeem updates the portal.
-            Passcode-only? Use Cove backup below. Optional: add customer email on Stand.
+            Card on File needs a Cove load in the portal. &quot;Unable to load cards&quot; → cash/card or
+            Staff backup below. Portal-paid orders → Pickup only.
           </p>
         </div>
       ) : null}

@@ -19,12 +19,12 @@ export function StaffRetailPanel() {
         >
           <p className="text-xs font-bold uppercase tracking-wider text-[#0B3D0B] flex items-center gap-1.5">
             <Smartphone className="w-3.5 h-3.5" aria-hidden />
-            Cash · card · Cove Wallet
+            Cash · card · Cove on Stand
           </p>
           <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Square Stand</p>
           <p className="mt-1 text-xs text-[#5A6070] leading-relaxed">
-            Default for all in-person tenders — including Cove Digital Card (Gift card scan).
-            Do not also Charge Cove below for the same sale.
+            All in-person tenders: Cash/Card, Gift card (Photos QR), or Customer Card on File
+            (6-digit / passcode). Do not also Charge Cove for the same sale.
           </p>
         </div>
         <a
@@ -34,11 +34,11 @@ export function StaffRetailPanel() {
         >
           <p className="text-xs font-bold uppercase tracking-wider text-[#085508] flex items-center gap-1.5">
             <CreditCard className="w-3.5 h-3.5" aria-hidden />
-            Cove backup (passcode)
+            Cove backup / External
           </p>
-          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Staff · Charge Cove</p>
+          <p className="mt-1.5 text-sm font-bold text-[#1A1A1A]">Staff · only if Stand fails</p>
           <p className="mt-1 text-xs text-[#5A6070] leading-relaxed">
-            Only when Wallet QR is not open. Prefer Stand gift-card scan. External if AM / no Stand.
+            Charge Cove if Card on File fails. External if AM / no Stand. Pickups for portal-paid.
           </p>
         </a>
       </div>
