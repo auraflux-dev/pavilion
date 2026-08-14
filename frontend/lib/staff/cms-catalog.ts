@@ -537,8 +537,8 @@ export const SITE_SETTING_GROUPS: {
       },
       {
         key: 'membershipShirtDesignsEnabled',
-        label: 'Membership checkout: require design + size (and hold inventory). Leave off until all styles are ready.',
-        type: 'boolean',
+        label:
+          'Membership checkout: require design + size (and hold inventory). Set true when all styles are ready; leave false/empty for size-only.',
       },
       {
         key: 'storeCardBonusPercent',
