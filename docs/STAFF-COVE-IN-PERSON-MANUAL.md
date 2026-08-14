@@ -32,7 +32,8 @@ Cove balance **is** a Square gift card. Stand redeem updates Square → portal b
 | **Cash** | Ring on **Square Stand** → Cash tender → stop | iPad Stand |
 | **Card / Apple Pay / Google Pay** | Ring on **Square Stand** → take tap/swipe → stop | iPad Stand |
 | **Cove Digital Card** (Wallet QR / Photos QR / GAN) | Ring on **Square Stand** → tender **Gift card** → scan → stop | iPad Stand |
-| **Cove code only** (word passcode / PIN, no Wallet open) | Staff → backup **Charge Cove** → lookup → charge | Staff browser |
+| **Cove 6-digit or word passcode** | Stand → search customer by code → **Card on File** (gift card) → stop | iPad Stand |
+| **Cove code only** (lookup fails / not synced yet) | Staff → backup **Charge Cove** → lookup → charge | Staff browser |
 | **Already paid in portal / site checkout** | Staff → **Today’s store pickups** (or shirts/magnets) → hand item → **Handed out** | Staff browser |
 | **Zelle / PayPal / phone Square** (Stand down) | Staff → **External (AM)** → log amount | Staff browser |
 | **Paid-member free food perk** | Code ends in **9** → hand ticket · **no charge** (Staff lookup) | Staff browser |

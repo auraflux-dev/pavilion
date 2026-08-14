@@ -14,7 +14,10 @@ Two worlds: **Out** = Square Stand · **In** = portal/site (pickup only).
 |--------------|---------|
 | Cash or card / wallet | **Square Stand** |
 | Cove Digital Card (Wallet / Photos QR) | **Square Stand** → Gift card tender → scan |
-| Cove passcode only (no Wallet) | Staff → **Charge Cove** (backup) |
+| Cove **6-digit or word passcode** | Stand → search customer → **Card on File** (gift card) |
+| Cove lookup fails / no Square customer yet | Staff → **Charge Cove** (backup) |
+
+Portal → Square Customer sync (instant on open/set code; backfill: `scripts/backfill-cove-square-customers.mjs`). Nickname = PIN; reference_id = `PIN passcode`. No reverse sync (portal is source of truth).
 | Portal / site (already paid) | **Today’s store pickups** → Handed out |
 | Zelle / PayPal / phone (no Stand) | Staff → **External** |
 | Membership | Portal only |

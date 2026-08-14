@@ -8,7 +8,7 @@ import {
   validateCovePasscode,
 } from '@/lib/cove-family-code'
 import { listFamilyStudents, resolveFamilyGiftCard } from '@/lib/family-store-card'
-import { getGiftCardBalance } from '@/lib/square'
+import { getGiftCardBalance, upsertSquareCustomerForCoveStand } from '@/lib/square'
 import { syncFamilyCoveRedeems } from '@/lib/cove-redeem-sync'
 import { resolvePrimaryParentEmail } from '@/lib/family-guardians'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
@@ -93,6 +93,16 @@ export async function GET(req: NextRequest) {
         ? await suggestUniqueCovePasscode(householdEmail, lastName, firstName)
         : ''
 
+    // Best-effort: keep Square Customer searchable on Stand (PIN + passcode)
+    void upsertSquareCustomerForCoveStand({
+      email: householdEmail,
+      name: [firstName, lastName].filter(Boolean).join(' ') || householdEmail,
+      coveFamilyCode: code,
+      coveFamilyPasscode: passcode,
+      giftCardId: card.giftCardId,
+      gan: card.gan,
+    }).catch(() => {})
+
     return NextResponse.json({
       coveFamilyCode: code,
       coveFamilyPasscode: passcode || null,
@@ -157,6 +167,15 @@ export async function POST(req: NextRequest) {
 
     if (action === 'reset') {
       const code = await resetCoveFamilyCode(householdEmail)
+      const passcode = await getCoveFamilyPasscode(householdEmail)
+      const card = resolveFamilyGiftCard(family)
+      await upsertSquareCustomerForCoveStand({
+        email: householdEmail,
+        coveFamilyCode: code,
+        coveFamilyPasscode: passcode,
+        giftCardId: card.giftCardId,
+        gan: card.gan,
+      })
       return NextResponse.json({ ok: true, coveFamilyCode: code })
     }
 
@@ -182,6 +201,15 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: validated.error }, { status: 400 })
       }
       const passcode = await setCoveFamilyPasscode(householdEmail, validated.passcode)
+      const code = await ensureCoveFamilyCode(householdEmail)
+      const card = resolveFamilyGiftCard(family)
+      await upsertSquareCustomerForCoveStand({
+        email: householdEmail,
+        coveFamilyCode: code,
+        coveFamilyPasscode: passcode,
+        giftCardId: card.giftCardId,
+        gan: card.gan,
+      })
       return NextResponse.json({ ok: true, coveFamilyPasscode: passcode })
     }
 

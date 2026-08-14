@@ -15,7 +15,11 @@ import {
   syncFamilyStoreCard,
 } from '@/lib/family-store-card'
 import { getWixClient } from '@/lib/wix-client'
-import { createOrLoadStudentGiftCard, loadGiftCard } from '@/lib/square'
+import {
+  createOrLoadStudentGiftCard,
+  loadGiftCard,
+  upsertSquareCustomerForCoveStand,
+} from '@/lib/square'
 import {
   getStoreCardBonusPercent,
   resolveParentLoadBonusPercent,
@@ -555,6 +559,21 @@ export async function fulfillPaidCheckout(opts: {
       giftCardId,
       balanceDollars: newBalance ?? loadCents / 100,
     })
+
+    try {
+      const { ensureCoveFamilyCode, getCoveFamilyPasscode } = await import(
+        '@/lib/cove-family-code'
+      )
+      await upsertSquareCustomerForCoveStand({
+        email: parentEmailForCard,
+        coveFamilyCode: await ensureCoveFamilyCode(parentEmailForCard),
+        coveFamilyPasscode: await getCoveFamilyPasscode(parentEmailForCard),
+        giftCardId,
+        gan,
+      })
+    } catch {
+      // Stand directory sync is best-effort
+    }
 
     await client.items.insert('Payments', {
       studentId,

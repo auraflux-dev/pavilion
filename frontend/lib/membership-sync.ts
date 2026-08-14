@@ -20,7 +20,10 @@ import {
   getStoreCardBonusPercent,
   storeCardLoadCents,
 } from '@/lib/store-card-bonus'
-import { createOrLoadStudentGiftCard, upsertSquareCustomer } from '@/lib/square'
+import {
+  createOrLoadStudentGiftCard,
+  upsertSquareCustomerForCoveStand,
+} from '@/lib/square'
 
 /** Any paid tier slug (ruby / supreme / pearl / future). */
 export type PaidTier = string
@@ -227,11 +230,18 @@ export async function applyPaidMembership(opts: {
 
           let customerId: string | undefined
           try {
-            const customer = await upsertSquareCustomer(
-              email,
-              opts.parentName || email.split('@')[0]
+            const { ensureCoveFamilyCode, getCoveFamilyPasscode } = await import(
+              '@/lib/cove-family-code'
             )
-            customerId = customer?.id
+            const pin = await ensureCoveFamilyCode(email)
+            const pass = await getCoveFamilyPasscode(email)
+            const synced = await upsertSquareCustomerForCoveStand({
+              email,
+              name: opts.parentName || email.split('@')[0],
+              coveFamilyCode: pin,
+              coveFamilyPasscode: pass,
+            })
+            customerId = synced.customerId || undefined
           } catch {
             // optional
           }
@@ -261,6 +271,22 @@ export async function applyPaidMembership(opts: {
             customerId,
             buyerPaymentInstrumentIds: [opts.orderId || 'membership-provision'],
           })
+
+          try {
+            const { ensureCoveFamilyCode, getCoveFamilyPasscode } = await import(
+              '@/lib/cove-family-code'
+            )
+            await upsertSquareCustomerForCoveStand({
+              email,
+              name: opts.parentName || email.split('@')[0],
+              coveFamilyCode: await ensureCoveFamilyCode(email),
+              coveFamilyPasscode: await getCoveFamilyPasscode(email),
+              giftCardId: card.giftCardId,
+              gan: card.gan,
+            })
+          } catch {
+            // Stand directory sync is best-effort
+          }
 
           const balanceDollars = existingGan
             ? familyCard.balance + loadedDollars

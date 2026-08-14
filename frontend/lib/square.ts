@@ -228,6 +228,128 @@ export async function upsertSquareCustomer(email: string, name: string) {
   return (createResult as any).customer ?? null
 }
 
+/**
+ * Keep Square Customer searchable on Stand for Cove Digital Card.
+ * Nickname = 6-digit PIN; reference_id = "PIN passcode" (both tokens searchable);
+ * companyName = passcode; custom attrs cove_pin / cove_passcode; gift card on file.
+ */
+export function buildCoveStandReferenceId(pin: string, passcode?: string | null): string {
+  const p = String(pin || '')
+    .trim()
+  const w = String(passcode || '')
+    .trim()
+    .toLowerCase()
+  const combined = [p, w].filter(Boolean).join(' ')
+  return combined.slice(0, 100)
+}
+
+export async function upsertSquareCustomerForCoveStand(opts: {
+  email: string
+  name?: string
+  coveFamilyCode?: string | null
+  coveFamilyPasscode?: string | null
+  giftCardId?: string | null
+  gan?: string | null
+}): Promise<{ customerId: string | null; linkedGiftCard: boolean }> {
+  const email = String(opts.email || '')
+    .trim()
+    .toLowerCase()
+  if (!email || !email.includes('@')) return { customerId: null, linkedGiftCard: false }
+
+  const pin = String(opts.coveFamilyCode || '')
+    .trim()
+  const passcode = String(opts.coveFamilyPasscode || '')
+    .trim()
+    .toLowerCase()
+  const name = String(opts.name || email.split('@')[0] || 'Cove Family').trim()
+
+  try {
+    const client = getSquareClient()
+    const searchResult = await client.customers.search({
+      query: { filter: { emailAddress: { exact: email } } },
+      limit: 5n,
+    })
+    let customer = ((searchResult as any).customers as Array<Record<string, any>> | undefined)?.[0]
+
+    if (!customer) {
+      const [givenName, ...rest] = name.split(/\s+/)
+      const createResult = await client.customers.create({
+        idempotencyKey: `cove-stand-${email}`.slice(0, 45),
+        emailAddress: email,
+        givenName: givenName || 'Cove',
+        familyName: rest.join(' ') || 'Family',
+        nickname: pin || undefined,
+        referenceId: buildCoveStandReferenceId(pin, passcode) || undefined,
+        companyName: passcode || undefined,
+        note: pin || passcode ? `Cove Digital Card · PIN ${pin || '—'} · passcode ${passcode || '—'}` : undefined,
+      })
+      customer = (createResult as any).customer
+    } else {
+      const version = customer.version
+      const updatePayload: Record<string, unknown> = {
+        customerId: customer.id,
+        givenName: customer.givenName,
+        familyName: customer.familyName,
+        emailAddress: customer.emailAddress || email,
+        version,
+      }
+      if (pin) updatePayload.nickname = pin
+      const ref = buildCoveStandReferenceId(pin, passcode)
+      if (ref) updatePayload.referenceId = ref
+      if (passcode) updatePayload.companyName = passcode
+      if (pin || passcode) {
+        updatePayload.note = `Cove Digital Card · PIN ${pin || '—'} · passcode ${passcode || '—'}`
+      }
+      const updated = await client.customers.update(updatePayload as any)
+      customer = (updated as any).customer || customer
+    }
+
+    const customerId = String(customer?.id || '')
+    if (!customerId) return { customerId: null, linkedGiftCard: false }
+
+    // Custom attributes (Dashboard visible after Configure profiles)
+    for (const [key, value] of [
+      ['cove_pin', pin],
+      ['cove_passcode', passcode],
+    ] as const) {
+      if (!value) continue
+      try {
+        await client.customers.customAttributes.upsert({
+          customerId,
+          key,
+          customAttribute: { value },
+        })
+      } catch {
+        // Definitions may be missing in some envs — nickname/reference_id still work
+      }
+    }
+
+    let linkedGiftCard = false
+    let giftCardId = String(opts.giftCardId || '').trim()
+    if (!giftCardId && opts.gan) {
+      try {
+        const card = await getGiftCardByGan(String(opts.gan).trim())
+        giftCardId = String(card?.id || '')
+      } catch {
+        giftCardId = ''
+      }
+    }
+    if (giftCardId) {
+      try {
+        await linkGiftCardToCustomer(giftCardId, customerId)
+        linkedGiftCard = true
+      } catch {
+        linkedGiftCard = false
+      }
+    }
+
+    return { customerId, linkedGiftCard }
+  } catch (err) {
+    console.warn('upsertSquareCustomerForCoveStand failed', err)
+    return { customerId: null, linkedGiftCard: false }
+  }
+}
+
 
 /** Store a Web Payments SDK token as a reusable Square card on file. */
 export async function createCardOnFile(input: {
