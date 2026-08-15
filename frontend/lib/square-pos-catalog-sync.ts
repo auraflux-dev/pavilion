@@ -151,8 +151,15 @@ export async function ensureSquarePosProductFromWix(
   }
 
   const cfg = await getCatalogConfig()
+  let onInventory = false
+  try {
+    const { listCoveInventory } = await import('@/lib/cove-inventory')
+    onInventory = (await listCoveInventory()).some((r) => r.productId === id)
+  } catch {
+    onInventory = false
+  }
   const onAllowlist =
-    cfg.storeProductIds.has(id) || cfg.spiritWearProductIds.has(id)
+    cfg.storeProductIds.has(id) || cfg.spiritWearProductIds.has(id) || onInventory
   if (!opts?.force && !onAllowlist) {
     return { ok: true, skipped: true, reason: 'not on Cove/spirit allowlist' }
   }

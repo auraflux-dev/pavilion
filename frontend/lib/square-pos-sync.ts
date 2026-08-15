@@ -50,11 +50,18 @@ function squareClient() {
 
 async function listPosVariantIndex(): Promise<Map<string, WixVariantHit>> {
   const cfg = await getCatalogConfig()
-  const ids = Array.from(
-    new Set([...cfg.spiritWearProductIds, ...cfg.storeProductIds]),
-  )
+  // Public allowlists + any CoveInventory product (POS-only / not on /cove or /spirit-wear).
+  const ids = new Set<string>([...cfg.spiritWearProductIds, ...cfg.storeProductIds])
+  try {
+    const { listCoveInventory } = await import('@/lib/cove-inventory')
+    for (const row of await listCoveInventory()) {
+      if (row.productId) ids.add(row.productId)
+    }
+  } catch {
+    // inventory optional for index bootstrap
+  }
   const bySku = new Map<string, WixVariantHit>()
-  if (!ids.length) return bySku
+  if (!ids.size) return bySku
 
   const siteId = process.env.WIX_SITE_ID
   const apiKey = process.env.WIX_API_KEY
