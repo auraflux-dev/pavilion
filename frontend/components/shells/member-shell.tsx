@@ -39,7 +39,9 @@ export function MemberShell({ children }: Props) {
   } = useAuth()
   const isPaid = accountType === 'paid'
   const audienceLabel = status === 'loading' ? '…' : isPaid ? 'Paid member' : 'Free member'
-  const displayName = isStaff
+  const signedInEmail = String(member?.email ?? '').trim().toLowerCase()
+  const staffChrome = isStaff || signedInEmail.endsWith('@shmspto.org')
+  const displayName = staffChrome
     ? boardTitle || staffName || member?.name || 'Board member'
     : member?.name || 'Member portal'
 
@@ -61,9 +63,12 @@ export function MemberShell({ children }: Props) {
             <Image src="/shms-logo.png" alt="" width={36} height={36} className="shrink-0" />
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#085508' }}>
-                {isStaff ? 'Member view' : audienceLabel}
+                {staffChrome ? 'Member view' : audienceLabel}
               </p>
               <p className="text-sm font-semibold text-[#1A1A1A] truncate">{displayName}</p>
+              {signedInEmail ? (
+                <p className="text-[10px] text-[#5A6070] truncate">{signedInEmail}</p>
+              ) : null}
             </div>
           </Link>
 
@@ -80,7 +85,7 @@ export function MemberShell({ children }: Props) {
           </nav>
 
           <div className="hidden md:flex items-center gap-2 shrink-0">
-            {isStaff ? (
+            {staffChrome ? (
               <>
                 <span className="inline-flex rounded-md border border-[#E8E4DC] p-0.5">
                   <span className="px-2.5 py-1 rounded text-xs font-semibold bg-[#085508] text-white">
@@ -139,7 +144,7 @@ export function MemberShell({ children }: Props) {
               </Link>
             ))}
             <div className="pt-2 mt-2 border-t border-[#E8E4DC] space-y-2">
-              {isStaff ? (
+              {staffChrome ? (
                 <div className="grid grid-cols-2 gap-2">
                   <Button size="sm" className="w-full text-white font-semibold" style={{ backgroundColor: '#085508' }}>
                     Member

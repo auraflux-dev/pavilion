@@ -266,6 +266,36 @@ export async function POST(req: NextRequest) {
         ],
       },
       {
+        id: 'PtoBudgetLines',
+        displayName: 'PTO Budget Lines',
+        fields: [
+          { key: 'fiscalYear', displayName: 'Fiscal Year', type: 'TEXT' },
+          { key: 'kind', displayName: 'Kind (income/expense)', type: 'TEXT' },
+          { key: 'category', displayName: 'Category', type: 'TEXT' },
+          { key: 'name', displayName: 'Line name', type: 'TEXT' },
+          { key: 'budgeted', displayName: 'Budgeted $', type: 'NUMBER' },
+          { key: 'actual', displayName: 'Actual $', type: 'NUMBER' },
+          { key: 'owner', displayName: 'Owner', type: 'TEXT' },
+          { key: 'notes', displayName: 'Notes', type: 'TEXT' },
+          { key: 'sortOrder', displayName: 'Sort order', type: 'NUMBER' },
+          { key: 'syncKey', displayName: 'Sync key', type: 'TEXT' },
+        ],
+      },
+      {
+        id: 'PtoBudgetEntries',
+        displayName: 'PTO Budget Activity',
+        fields: [
+          { key: 'fiscalYear', displayName: 'Fiscal Year', type: 'TEXT' },
+          { key: 'lineSyncKey', displayName: 'Budget line key', type: 'TEXT' },
+          { key: 'occurredAt', displayName: 'Occurred at', type: 'TEXT' },
+          { key: 'amount', displayName: 'Amount $', type: 'NUMBER' },
+          { key: 'memo', displayName: 'Memo', type: 'TEXT' },
+          { key: 'origin', displayName: 'Origin', type: 'TEXT' },
+          { key: 'refId', displayName: 'Ref ID', type: 'TEXT' },
+          { key: 'createdByEmail', displayName: 'Created by', type: 'TEXT' },
+        ],
+      },
+      {
         id: 'KbArticles',
         displayName: 'Help Knowledge Base',
         fields: [

@@ -20,6 +20,7 @@ export type StaffWorkspace =
  | 'minutes'
  | 'programs'
  | 'payments'
+ | 'budget'
  | 'events'
  | 'retail'
  | 'discounts'
@@ -55,6 +56,7 @@ export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
  minutes: 'Minutes',
  programs: 'Programs',
  payments: 'Payments',
+ budget: 'Budget',
  events: 'Events',
  retail: 'The Cove',
  discounts: 'Discounts',

@@ -10,7 +10,7 @@ import {
 export async function getStaffSession(req: NextRequest) {
   const session = await getMemberSession(req)
   if (!session) return null
-  const staff = await resolveStaffForSession(session.email)
+  const staff = await resolveStaffForSession(session.email, session.emails)
   if (!staff) return null
   return { ...session, staff }
 }
@@ -38,7 +38,7 @@ export async function getEffectiveParentEmail(req: NextRequest): Promise<{
 } | null> {
   const session = await getMemberSession(req)
   if (!session) return null
-  const staff = await resolveStaffForSession(session.email)
+  const staff = await resolveStaffForSession(session.email, session.emails)
   const actAs = getActAsEmail(req)
   if (actAs && hasStaffRole(staff, 'admin') && actAs !== session.email) {
     return {

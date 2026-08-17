@@ -137,7 +137,9 @@ export function NavbarClient({ links }: Props) {
   const [, startTransition] = useTransition()
   const pathname = usePathname()
   const router = useRouter()
-  const { status, isStaff } = useAuth()
+  const { status, isStaff, member } = useAuth()
+  const staffChrome =
+    isStaff || String(member?.email ?? '').toLowerCase().endsWith('@shmspto.org')
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 8)
@@ -255,7 +257,7 @@ export function NavbarClient({ links }: Props) {
               <div className="h-9 w-24 rounded-md bg-[#EEF6EE] animate-pulse" />
             ) : isMember ? (
               <>
-                {isStaff ? (
+                {staffChrome ? (
                   <Link href="/staff">
                     <Button size="sm" variant="outline" className="font-semibold">
                       Staff
@@ -349,7 +351,7 @@ export function NavbarClient({ links }: Props) {
             <li className="pt-2 border-t border-[#E8E4DC] mt-1">
               {isMember ? (
                 <div className="space-y-2">
-                  {isStaff ? (
+                  {staffChrome ? (
                     <Button
                       size="sm"
                       variant="outline"

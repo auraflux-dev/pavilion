@@ -12,6 +12,7 @@ import { StaffMinutesPanel } from '@/components/staff/staff-minutes-panel'
 import { StaffProgramsPanel } from '@/components/staff/staff-programs-panel'
 import { StaffReportsPanel } from '@/components/staff/staff-reports-panel'
 import { StaffPaymentsPanel } from '@/components/staff/staff-payments-panel'
+import { StaffBudgetPanel } from '@/components/staff/staff-budget-panel'
 import { StaffEventsPanel } from '@/components/staff/staff-events-panel'
 import { StaffRetailPanel } from '@/components/staff/staff-retail-panel'
 import { StaffDiscountsPanel } from '@/components/staff/staff-discounts-panel'
@@ -89,6 +90,7 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'minutes',
   'programs',
   'payments',
+  'budget',
   'events',
   'retail',
   'discounts',
@@ -290,6 +292,7 @@ export function StaffDashboard() {
     if (canPrograms) items.push({ id: 'programs', label: STAFF_WORKSPACE_LABEL.programs })
     if (canTimesheets) items.push({ id: 'timesheets', label: STAFF_WORKSPACE_LABEL.timesheets })
     if (canPayments) items.push({ id: 'payments', label: STAFF_WORKSPACE_LABEL.payments })
+    if (canPayments) items.push({ id: 'budget', label: STAFF_WORKSPACE_LABEL.budget })
     if (canEvents) items.push({ id: 'events', label: STAFF_WORKSPACE_LABEL.events })
     if (canRetail) items.push({ id: 'retail', label: STAFF_WORKSPACE_LABEL.retail })
     if (canDiscounts) items.push({ id: 'discounts', label: STAFF_WORKSPACE_LABEL.discounts })
@@ -563,6 +566,7 @@ export function StaffDashboard() {
                           minutes: 'Publish meeting minutes',
                           programs: 'Registration & sessions',
                           payments: 'Needs Reconciliation',
+                          budget: 'Record activity · refresh from Staff',
                           events: 'Create, edit, cancel events',
                           retail: 'The Cove product lists',
                           discounts: 'Named & member discount codes',
@@ -809,6 +813,7 @@ export function StaffDashboard() {
         {active === 'programs' && canPrograms ? <StaffProgramsPanel /> : null}
         {active === 'timesheets' && canTimesheets ? <StaffTimesheetsPanel /> : null}
         {active === 'payments' && canPayments ? <StaffPaymentsPanel /> : null}
+        {active === 'budget' && canPayments ? <StaffBudgetPanel /> : null}
         {active === 'reports' ? (
           <StaffReportsPanel
             allowedFocuses={[

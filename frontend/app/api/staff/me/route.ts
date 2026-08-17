@@ -17,8 +17,8 @@ import {
 async function ensureStaffRegistration(email: string, displayName: string) {
   try {
     const client = getWixClient()
-    const existing = await client.items.query('StaffRoles').eq('email', email).limit(1).find()
-    if (existing.items.length > 0) return
+    const existing = await client.items.query('StaffRoles').eq('email', email).limit(5).find()
+    if ((existing.items ?? []).some((row) => String(row.email ?? '').trim().toLowerCase() === email)) return
     await client.items.insert('StaffRoles', {
       email,
       name: displayName,
@@ -37,9 +37,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Sign in to continue.' }, { status: 401 })
   }
 
-  const staff = await resolveStaffForSession(session.email)
+  const staff = await resolveStaffForSession(session.email, session.emails)
   if (!staff) {
-    if (isStaffEmail(session.email)) {
+    if (isStaffEmail(session.email) || session.emails.some((e) => isStaffEmail(e))) {
       const displayName = `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim()
       await ensureStaffRegistration(session.email.trim().toLowerCase(), displayName)
       return NextResponse.json(

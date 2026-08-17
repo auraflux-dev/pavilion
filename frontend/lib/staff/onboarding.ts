@@ -183,9 +183,16 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
     role: 'treasurer',
     title: 'Treasurer onboarding',
     summary:
-      'Reconcile payments in Staff, clear expenses, and keep MoneyMinder / Square / bank as books of record.',
+      'Keep the 2026–27 planning budget, reconcile payments, clear expenses, and leave MoneyMinder / Square / bank as books of record.',
     steps: [
       ...sharedStart('tre'),
+      {
+        id: 'tre_budget',
+        title: 'Open the 2026–27 planning budget',
+        detail: 'Load the placeholder, Record activity when money moves off-system, and Refresh from Staff for Square sales. Not the ledger.',
+        workspace: 'budget',
+        actionLabel: 'Open Budget',
+      },
       {
         id: 'tre_payments',
         title: 'Open Payments · Needs Reconciliation',

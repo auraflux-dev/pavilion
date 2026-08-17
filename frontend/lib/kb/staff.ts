@@ -375,7 +375,7 @@ Progress is saved on your StaffRoles row so it follows you across devices.
 ## Tracks
 - **VP Marketing** — Google, Projects, Comms, Canva folder, Social, Newsletter, page copy, surveys
 - **Secretary** — Minutes, Comms, Board roster, Events, Newsletter
-- **Treasurer** — Payments, Expenses, Reports, MoneyMinder, Square
+- **Treasurer** — Budget (2026–27 placeholder), Payments, Expenses, Reports, MoneyMinder, Square
 - **Events / Programs / Retail / Membership / Wellness / Instructor / Coordinator** — role-specific workspaces
 
 See Drive doc **47 - Staff Role Onboarding** for the board-facing guide.`,
@@ -584,7 +584,17 @@ Square may keep a small processing fee on refunds. That is normal.
 - MoneyMinder
 - Bank of America
 
-Staff does not embed those consoles. Use them only for finance ops, then return to Staff for parent-facing and program work.`,
+Staff does not embed those consoles. Use them only for finance ops, then return to Staff for parent-facing and program work.
+
+## Planning budget (Staff → Budget)
+Treasurer/Admin load a **2026–27 planning placeholder** (Aug 1, 2026 – Jul 31, 2027).
+
+- **Refresh from Staff** pulls memberships, Cove loads, shop, POS, tickets, enrichment fees, donations, and reimbursements marked Paid
+- **Record activity** is for money that never hits those systems (beginning cash, insurance, spirit nights, sponsorship checks, 990, processing)
+- Actuals are the sum of those occurrences, not a number to type over
+- **Download Excel** saves Summary, Budget, and Activity sheets (`.xlsx`)
+
+Operational planning only — it does **not** replace MoneyMinder.`,
     },
   ],
 }

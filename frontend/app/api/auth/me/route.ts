@@ -7,22 +7,9 @@ import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { getWixClient } from '@/lib/wix-client'
 import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
+import { collectMemberEmails, pickSessionEmail } from '@/lib/member-emails'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
 import { resolveStaffForSession } from '@/lib/staff/roles'
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function extractEmail(member: any): string {
-  const emailEntry = member?.contact?.emails?.[0]
-  const fromContact =
-    typeof emailEntry === 'object' && emailEntry !== null && 'email' in emailEntry
-      ? String(emailEntry.email)
-      : typeof emailEntry === 'string'
-        ? emailEntry
-        : ''
-  return String(member?.loginEmail ?? fromContact ?? '')
-    .trim()
-    .toLowerCase()
-}
 
 export async function GET(req: NextRequest) {
   try {
@@ -46,12 +33,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Member not found' }, { status: 404 })
     }
 
-    const actorEmail = extractEmail(member)
+    const memberEmails = collectMemberEmails(member)
+    const actorEmail = pickSessionEmail(memberEmails)
     const effective = await getEffectiveParentEmail(req)
     const email = effective?.parentEmail ?? actorEmail
     const actingAs = Boolean(effective?.actingAs)
     const linkedHousehold = Boolean(effective?.linkedHousehold)
-    const staff = effective?.staff ?? (await resolveStaffForSession(actorEmail))
+    const staff =
+      effective?.staff ?? (await resolveStaffForSession(actorEmail, memberEmails))
     const adminClient = getWixClient()
 
     let storeCards: { balance: number; studentName: string }[] = []
