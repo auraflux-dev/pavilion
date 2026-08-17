@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Menu, X, Loader2 } from 'lucide-react'
+import { ChevronDown, Menu, X, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { NavLink } from '@/lib/api/nav'
 import { useAuth } from '@/lib/hooks/use-auth'
@@ -12,6 +12,122 @@ import { PortalReturnBar } from '@/components/portal-return-bar'
 
 interface Props {
   links: NavLink[]
+}
+
+type OverflowItem = { id: string; label: string; href: string }
+
+const DESKTOP_LINK_CLASS =
+  'px-2 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508]'
+
+function DesktopOverflowNav({ items }: { items: OverflowItem[] }) {
+  const pathname = usePathname()
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const measureRef = useRef<HTMLUListElement>(null)
+  const moreRef = useRef<HTMLDivElement>(null)
+  const [visibleCount, setVisibleCount] = useState(items.length)
+  const [moreOpen, setMoreOpen] = useState(false)
+  const itemKey = items.map((item) => `${item.id}:${item.label}`).join('|')
+
+  useEffect(() => {
+    setMoreOpen(false)
+  }, [pathname])
+
+  useLayoutEffect(() => {
+    const wrap = wrapRef.current
+    const measure = measureRef.current
+    if (!wrap || !measure) return
+
+    const fit = () => {
+      const budget = wrap.clientWidth
+      const kids = Array.from(measure.children) as HTMLElement[]
+      const moreW = 76
+      let used = 0
+      let count = 0
+      for (let i = 0; i < kids.length; i++) {
+        const width = kids[i].getBoundingClientRect().width
+        const last = i === kids.length - 1
+        if (used + width + (last ? 0 : moreW) > budget + 0.5) break
+        used += width
+        count += 1
+      }
+      setVisibleCount(count)
+    }
+
+    fit()
+    const observer = new ResizeObserver(fit)
+    observer.observe(wrap)
+    return () => observer.disconnect()
+  }, [itemKey])
+
+  useEffect(() => {
+    if (!moreOpen) return
+    function onDocClick(e: MouseEvent) {
+      if (!moreRef.current?.contains(e.target as Node)) setMoreOpen(false)
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [moreOpen])
+
+  const overflow = items.slice(visibleCount)
+
+  return (
+    <div ref={wrapRef} className="relative min-w-0 flex-1">
+      <ul
+        ref={measureRef}
+        className="absolute left-0 top-0 -z-10 flex items-center opacity-0 pointer-events-none"
+        aria-hidden="true"
+      >
+        {items.map((item) => (
+          <li key={item.id} className="shrink-0">
+            <span className={DESKTOP_LINK_CLASS}>{item.label}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="flex items-center justify-center">
+        <ul className="flex items-center flex-nowrap overflow-hidden" role="list">
+          {items.slice(0, visibleCount).map((item) => (
+            <li key={item.id} className="shrink-0">
+              <Link href={item.href} className={DESKTOP_LINK_CLASS}>
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        {overflow.length > 0 ? (
+          <div className="relative shrink-0" ref={moreRef}>
+            <button
+              type="button"
+              className={`${DESKTOP_LINK_CLASS} inline-flex items-center gap-0.5`}
+              onClick={() => setMoreOpen((open) => !open)}
+              aria-expanded={moreOpen}
+              aria-haspopup="menu"
+            >
+              More
+              <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
+            </button>
+            {moreOpen ? (
+              <div
+                role="menu"
+                className="absolute right-0 top-full mt-1 min-w-[11rem] rounded-lg border border-[#E8E4DC] bg-white py-1 shadow-lg z-50"
+              >
+                {overflow.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    role="menuitem"
+                    className="block px-3 py-2 text-sm font-medium text-[#1A1A1A] hover:bg-[#EEF6EE] hover:text-[#085508]"
+                    onClick={() => setMoreOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  )
 }
 
 export function NavbarClient({ links }: Props) {
@@ -48,6 +164,15 @@ export function NavbarClient({ links }: Props) {
 
   const isMember = status === 'member'
   const portalLabel = 'Member Portal'
+  const desktopItems = useMemo<OverflowItem[]>(
+    () => [
+      ...links.map((link) => ({ id: link.id, label: link.label, href: link.href })),
+      ...(isMember
+        ? [{ id: 'help', label: 'Help', href: '/member-portal/help' }]
+        : []),
+    ],
+    [links, isMember],
+  )
 
   function navigate(href: string) {
     if (href === pathname) {
@@ -63,7 +188,7 @@ export function NavbarClient({ links }: Props) {
 
   return (
     <header
-      className={`sticky top-0 z-50 bg-white transition-shadow duration-300 overflow-x-clip ${
+      className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${
         scrolled ? 'shadow-md' : 'shadow-sm'
       }`}
     >
@@ -81,12 +206,12 @@ export function NavbarClient({ links }: Props) {
       ) : null}
 
       <nav
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 overflow-hidden"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-3"
         aria-label="Main navigation"
       >
         <Link
           href="/"
-          className="flex items-center gap-2.5 shrink-0 group justify-self-start"
+          className="flex items-center gap-2.5 shrink-0 group"
           aria-label="Stone Hill Middle School PTO Home"
           onClick={() => setPendingHref('/')}
         >
@@ -98,7 +223,7 @@ export function NavbarClient({ links }: Props) {
             className="shrink-0"
             priority
           />
-          <div className="hidden sm:block">
+          <div className="hidden xl:block">
             <span
               className="font-bold text-sm leading-tight block"
               style={{ color: '#085508' }}
@@ -112,38 +237,19 @@ export function NavbarClient({ links }: Props) {
               PTO · Go Stingrays!
             </span>
           </div>
-          <div className="sm:hidden">
+          <div className="xl:hidden">
             <span className="font-bold text-sm" style={{ color: '#085508' }}>
               SHMS PTO
             </span>
           </div>
         </Link>
 
-        <ul className="hidden xl:flex items-center gap-0.5 justify-self-center" role="list">
-          {links.map((link) => (
-            <li key={link.id}>
-              <Link
-                href={link.href}
-                className="px-2.5 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508]"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-          {isMember ? (
-            <li>
-              <Link
-                href="/member-portal/help"
-                className="px-2.5 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508]"
-              >
-                Help
-              </Link>
-            </li>
-          ) : null}
-        </ul>
+        <div className="hidden lg:flex flex-1 min-w-0 items-center">
+          <DesktopOverflowNav items={desktopItems} />
+        </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 justify-self-end col-start-3">
-          {/* Auth always visible from sm so laptop widths under xl are not hamburger-only */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
+          {/* Auth stays visible from sm; page links show from lg instead of hamburger-only */}
           <div className="hidden sm:flex items-center gap-2">
             {status === 'loading' ? (
               <div className="h-9 w-24 rounded-md bg-[#EEF6EE] animate-pulse" />
@@ -187,7 +293,7 @@ export function NavbarClient({ links }: Props) {
           </div>
 
           <button
-            className="xl:hidden p-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#085508]"
+            className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#085508]"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
@@ -205,7 +311,7 @@ export function NavbarClient({ links }: Props) {
       {menuOpen && (
         <div
           id="mobile-menu"
-          className="xl:hidden border-t border-[#E8E4DC] bg-white"
+          className="lg:hidden border-t border-[#E8E4DC] bg-white"
         >
           <ul className="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-1" role="list">
             {links.map((link) => {

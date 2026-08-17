@@ -155,6 +155,13 @@ function isOpenBoardSeat(name: string | undefined | null): boolean {
   return !n || n === 'open' || n === 'open position'
 }
 
+function isSecretaryPhoto(member: BoardMember) {
+  return (
+    member.role.trim().toLowerCase() === 'secretary' ||
+    member.name.toLowerCase().includes('madhusudhan')
+  )
+}
+
 function BoardCard({
   member,
   featured = false,
@@ -165,6 +172,7 @@ function BoardCard({
   const isOpen = isOpenBoardSeat(member.name)
   const positionPdf = OPEN_ROLE_PDFS[member.role]
   const displayName = isOpen ? 'OPEN' : member.name
+  const secretaryPhoto = isSecretaryPhoto(member)
 
   return (
     <article className={`bg-white rounded-2xl overflow-hidden shadow-sm border flex flex-col ${featured ? 'border-[#085508]/20' : 'border-[#E8E4DC]'}`}>
@@ -177,8 +185,8 @@ function BoardCard({
 
       {/* Avatar */}
       <div
-        className="w-full aspect-square flex items-center justify-center"
-        style={{ backgroundColor: '#EEF6EE' }}
+        className="w-full aspect-square flex items-start justify-center overflow-hidden"
+        style={{ backgroundColor: secretaryPhoto ? '#E1DBC5' : '#EEF6EE' }}
       >
         {member.photo && !isOpen ? (
           <Image
@@ -186,7 +194,11 @@ function BoardCard({
             alt={member.name}
             width={200}
             height={200}
-            className="w-full h-full object-cover"
+            className={
+              secretaryPhoto
+                ? 'w-[80%] h-[80%] object-cover object-top mt-[16%]'
+                : 'w-full h-full object-cover'
+            }
           />
         ) : (
           <div className="relative flex flex-col items-center justify-center p-6 w-full h-full">
@@ -225,7 +237,7 @@ function BoardCard({
           {member.role}
         </p>
         <h3 className="font-bold text-[#1A1A1A] mb-2">{displayName}</h3>
-        <p className="text-xs text-[#5A6070] leading-relaxed flex-1 mb-4">
+        <p className="text-xs text-[#5A6070] leading-relaxed flex-1 mb-4 whitespace-pre-line">
           {member.bio}
         </p>
         <div className="mt-auto space-y-2">
