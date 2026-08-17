@@ -592,7 +592,7 @@ Treasurer/Admin load a **2026–27 planning placeholder** (Aug 1, 2026 – Jul 3
 - **Refresh from Staff** pulls memberships, Cove loads, shop, POS, tickets, enrichment fees, donations, and reimbursements marked Paid
 - **Record activity** is for money that never hits those systems (beginning cash, insurance, spirit nights, sponsorship checks, 990, processing)
 - Actuals are the sum of those occurrences, not a number to type over
-- **Download Excel** saves Summary, Budget, and Activity sheets (`.xlsx`)
+- **Download Excel** saves Summary, Budget, and Activity sheets (.xlsx)
 
 Operational planning only — it does **not** replace MoneyMinder.`,
     },
