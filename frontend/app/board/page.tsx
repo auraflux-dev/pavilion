@@ -172,7 +172,6 @@ function BoardCard({
   const isOpen = isOpenBoardSeat(member.name)
   const positionPdf = OPEN_ROLE_PDFS[member.role]
   const displayName = isOpen ? 'OPEN' : member.name
-  const secretaryPhoto = isSecretaryPhoto(member)
 
   return (
     <article className={`bg-white rounded-2xl overflow-hidden shadow-sm border flex flex-col ${featured ? 'border-[#085508]/20' : 'border-[#E8E4DC]'}`}>
@@ -185,8 +184,8 @@ function BoardCard({
 
       {/* Avatar */}
       <div
-        className="w-full aspect-square flex items-start justify-center overflow-hidden"
-        style={{ backgroundColor: secretaryPhoto ? '#E1DBC5' : '#EEF6EE' }}
+        className="w-full aspect-square flex items-center justify-center"
+        style={{ backgroundColor: '#EEF6EE' }}
       >
         {member.photo && !isOpen ? (
           <Image
@@ -195,8 +194,8 @@ function BoardCard({
             width={200}
             height={200}
             className={
-              secretaryPhoto
-                ? 'w-[80%] h-[80%] object-cover object-top mt-[16%]'
+              isSecretaryPhoto(member)
+                ? 'w-full h-full object-cover object-top'
                 : 'w-full h-full object-cover'
             }
           />
