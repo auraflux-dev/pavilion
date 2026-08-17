@@ -4,6 +4,9 @@ export const RUN_FOR_CHARITY_SCHOOL_CODE = 'SHMS'
 /** Our on-site bridge (copy code → continue to Best Runners). */
 export const RUN_FOR_CHARITY_BRIDGE_PATH = '/run-for-charity'
 
+/** Same destination as the bridge; homepage promo imports this name. */
+export const RUN_FOR_CHARITY_REGISTER_PATH = RUN_FOR_CHARITY_BRIDGE_PATH
+
 export const RUN_FOR_CHARITY_BRIDGE_URL = 'https://www.shmspto.org/run-for-charity'
 
 /**
