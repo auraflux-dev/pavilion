@@ -9,6 +9,7 @@ type Field = {
   type: 'text' | 'textarea' | 'number' | 'boolean' | 'select'
   options?: string[]
   required?: boolean
+  hint?: string
 }
 
 type Row = Record<string, unknown> & { id: string }
@@ -163,6 +164,7 @@ export function StaffCmsCollectionPanel({
                 className={f.type === 'textarea' || f.key === 'answer' || f.key === 'perks' ? 'sm:col-span-2' : ''}
               >
                 <label className="text-[11px] text-[#5A6070]">{f.label}</label>
+                {f.hint ? <p className="text-[10px] text-[#8A8F9C] mb-1">{f.hint}</p> : null}
                 {f.type === 'boolean' ? (
                   <label className="flex items-center gap-2 text-sm mt-1">
                     <input

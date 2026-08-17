@@ -3,6 +3,7 @@
  */
 import { getWixClient } from '@/lib/wix-client'
 import type { StaffRole } from '@/lib/staff/roles'
+import { BOARD_PHOTO_HINT } from '@/lib/board-photo'
 
 export type CmsFieldType = 'text' | 'textarea' | 'number' | 'boolean' | 'select'
 
@@ -12,6 +13,7 @@ export type CmsField = {
   type: CmsFieldType
   options?: string[]
   required?: boolean
+  hint?: string
 }
 
 export type CmsCollectionConfig = {
@@ -56,7 +58,12 @@ export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
       { key: 'role', label: 'Title / role', type: 'text', required: true },
       { key: 'email', label: 'Email', type: 'text' },
       { key: 'bio', label: 'Bio', type: 'textarea' },
-      { key: 'photo', label: 'Photo URL', type: 'text' },
+      {
+        key: 'photo',
+        label: 'Photo URL (800×800 square)',
+        type: 'text',
+        hint: BOARD_PHOTO_HINT,
+      },
       { key: 'isExec', label: 'Executive board', type: 'boolean' },
       { key: 'sortOrder', label: 'Sort order', type: 'number' },
     ],

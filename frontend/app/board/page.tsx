@@ -3,12 +3,12 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PageHero } from '@/components/page-hero'
 import { Mail, ArrowRight, Users } from 'lucide-react'
-import Image from 'next/image'
 import { getBoardMembers, type BoardMember } from '@/lib/api/board'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 import { BoardSectionNav } from '@/components/jump-nav/public-section-navs'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
+import { BoardMemberPhoto } from '@/components/board/board-member-photo'
 
 export const revalidate = 300 // refresh from Wix CMS every 5 minutes
 
@@ -155,13 +155,6 @@ function isOpenBoardSeat(name: string | undefined | null): boolean {
   return !n || n === 'open' || n === 'open position'
 }
 
-function isSecretaryPhoto(member: BoardMember) {
-  return (
-    member.role.trim().toLowerCase() === 'secretary' ||
-    member.name.toLowerCase().includes('madhusudhan')
-  )
-}
-
 function BoardCard({
   member,
   featured = false,
@@ -183,23 +176,13 @@ function BoardCard({
       />
 
       {/* Avatar */}
-      <div
-        className="w-full aspect-square flex items-center justify-center"
-        style={{ backgroundColor: '#EEF6EE' }}
-      >
-        {member.photo && !isOpen ? (
-          <Image
-            src={member.photo}
-            alt={member.name}
-            width={200}
-            height={200}
-            className={
-              isSecretaryPhoto(member)
-                ? 'w-full h-full object-cover object-top'
-                : 'w-full h-full object-cover'
-            }
-          />
-        ) : (
+      {member.photo && !isOpen ? (
+        <BoardMemberPhoto src={member.photo} alt={member.name} />
+      ) : (
+        <div
+          className="w-full aspect-square flex items-center justify-center"
+          style={{ backgroundColor: '#EEF6EE' }}
+        >
           <div className="relative flex flex-col items-center justify-center p-6 w-full h-full">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center"
@@ -224,8 +207,8 @@ function BoardCard({
               Position Open
             </span>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Info */}
       <div className="p-4 flex flex-col flex-1">
