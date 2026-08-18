@@ -13,7 +13,7 @@
     },
     {
       "path": "/api/cron/notify-invite-bounces",
-      "schedule": "12 * * * *"
+      "schedule": "15 12 * * *"
     },
     {
       "path": "/api/cron/sync-budget-plaid",
