@@ -6,14 +6,14 @@ import { GoogleAnalytics } from '@/components/google-analytics'
 import { TrafficBeacon } from '@/components/traffic-beacon'
 import { DemoBanner } from '@/components/demo/demo-banner'
 import { DEMO_BRAND } from '@/lib/demo/brand'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstance, publicSiteUrl } from '@/lib/demo/instance'
 import './globals.css'
 
 const _inter = Inter({ subsets: ['latin'] })
 const _merriweather = Merriweather({ subsets: ['latin'], weight: ['400', '700', '900'] })
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org').replace(/\/$/, '')
 const demo = isDemoInstance()
+const siteUrl = publicSiteUrl()
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

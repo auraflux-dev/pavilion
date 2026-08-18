@@ -181,7 +181,9 @@ function JoinInner() {
         if (data.errorCode === 'ownerApprovalRequired') {
           throw new Error(
             data.error ||
-              'Your parent account is pending approval. Keep using your personal email. Staff (@shmspto.org) is only for board tools, not family portal login. Email vp-membershipexperience@shmspto.org if this continues.',
+              vanillaizeIfDemo(
+                'Your parent account is pending approval. Keep using your personal email. Staff (@shmspto.org) is only for board tools, not family portal login. Email vp-membershipexperience@shmspto.org if this continues.',
+              ),
           )
         }
         if (data.errorCode === 'resetPassword') {
@@ -261,12 +263,14 @@ function JoinInner() {
             </button>
             {!googleParentEnabled ? (
               <p className="text-xs text-[#5A6070] text-center pt-1">
-                Google sign-in is temporarily off. Use email and password, or email vp-membershipexperience@shmspto.org for help.
+                {vanillaizeIfDemo(
+                  'Google sign-in is temporarily off. Use email and password, or email vp-membershipexperience@shmspto.org for help.',
+                )}
               </p>
             ) : null}
             {!isSignup && !isStaffReturn ? (
               <p className="text-xs text-[#5A6070] text-center pt-1">
-                Board / staff (@shmspto.org)? Use{' '}
+                {vanillaizeIfDemo('Board / staff (@shmspto.org)? Use')}{' '}
                 <a href="/staff" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
                   Staff tools
                 </a>

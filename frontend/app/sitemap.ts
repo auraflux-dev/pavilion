@@ -1,9 +1,7 @@
 import type { MetadataRoute } from 'next'
+import { publicSiteUrl } from '@/lib/demo/instance'
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org').replace(
-  /\/$/,
-  '',
-)
+const siteUrl = publicSiteUrl()
 
 /** Public marketing pages only. no /staff, /member-portal, or auth. */
 const PUBLIC_PATHS = [

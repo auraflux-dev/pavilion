@@ -1,10 +1,7 @@
 import type { MetadataRoute } from 'next'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstance, publicSiteUrl } from '@/lib/demo/instance'
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org').replace(
-  /\/$/,
-  '',
-)
+const siteUrl = publicSiteUrl()
 
 export default function robots(): MetadataRoute.Robots {
   if (isDemoInstance()) {
