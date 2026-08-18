@@ -102,7 +102,7 @@ This is for **any** second adult — married spouses, separated co-parents, or g
 4. Both logins see the same students
 5. Cove Digital Card stays with the **primary account holder** (whoever signed up first) unless they ask for a separate card
 
-If they never get the email, use **Copy link** from Household adults instead of waiting. You can remove an adult anytime.`,
+If they never get the email, use **Copy link** from Household adults instead of waiting. If the invite address bounces, you also get an email and a portal message so you can fix the spelling. You can remove an adult anytime.`,
     },
     {
       slug: 'edit-student',

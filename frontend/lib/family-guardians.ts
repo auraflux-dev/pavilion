@@ -23,6 +23,7 @@ export type FamilyGuardianRow = {
   acceptedAt?: string
   invitedByName?: string
   active?: boolean
+  bounceNotifiedAt?: string
 }
 
 function norm(email: string): string {
@@ -53,6 +54,30 @@ export async function listGuardianRowsForPrimary(
   } catch {
     return []
   }
+}
+
+export async function listPendingGuardianInvites(): Promise<FamilyGuardianRow[]> {
+  try {
+    const client = getWixClient()
+    const result = await client.items
+      .query(FAMILY_GUARDIANS_COLLECTION)
+      .eq('status', 'pending')
+      .limit(100)
+      .find()
+    return ((result.items ?? []) as FamilyGuardianRow[]).filter((r) => r.active !== false)
+  } catch {
+    return []
+  }
+}
+
+export async function markGuardianBounceNotified(row: FamilyGuardianRow): Promise<void> {
+  if (!row._id) return
+  const client = getWixClient()
+  await client.items.update(FAMILY_GUARDIANS_COLLECTION, {
+    ...row,
+    _id: row._id,
+    bounceNotifiedAt: new Date().toISOString(),
+  })
 }
 
 export async function listActiveGuardianLinksForEmail(

@@ -315,6 +315,22 @@ export async function POST(req: NextRequest) {
         ],
       },
       {
+        id: 'FamilyGuardians',
+        displayName: 'Family Guardians',
+        fields: [
+          { key: 'primaryParentEmail', displayName: 'Primary parent email', type: 'TEXT' },
+          { key: 'guardianEmail', displayName: 'Guardian email', type: 'TEXT' },
+          { key: 'status', displayName: 'Status', type: 'TEXT' },
+          { key: 'inviteTokenHash', displayName: 'Invite token hash', type: 'TEXT' },
+          { key: 'inviteExpiresAt', displayName: 'Invite expires at', type: 'TEXT' },
+          { key: 'invitedAt', displayName: 'Invited at', type: 'TEXT' },
+          { key: 'acceptedAt', displayName: 'Accepted at', type: 'TEXT' },
+          { key: 'invitedByName', displayName: 'Invited by name', type: 'TEXT' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+          { key: 'bounceNotifiedAt', displayName: 'Bounce notified at', type: 'TEXT' },
+        ],
+      },
+      {
         id: 'KbArticles',
         displayName: 'Help Knowledge Base',
         fields: [

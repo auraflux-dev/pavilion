@@ -12,6 +12,10 @@
       "schedule": "0 7 * * *"
     },
     {
+      "path": "/api/cron/notify-invite-bounces",
+      "schedule": "12 * * * *"
+    },
+    {
       "path": "/api/cron/sync-budget-plaid",
       "schedule": "0 15 * * *"
     }
