@@ -58,15 +58,17 @@ export async function ProgramsPreview() {
           {display.map((program) => {
             const Icon = iconForProgram(program)
             const summary = String(program.description ?? '')
+              .split(/<br\s*\/?>/i)[0]
               .replace(/<[^>]+>/g, ' ')
               .replace(/&amp;/g, '&')
               .replace(/\s+/g, ' ')
               .trim()
             const when = formatProgramSchedule(program) || program.schedule
+            const fee = Number(program.fee ?? 0)
             const detailPills = [
               program.grades ? `Grades ${program.grades}` : null,
               when,
-              program.detail,
+              fee > 0 ? `$${fee}` : null,
             ].filter(Boolean) as string[]
 
             return (
@@ -103,7 +105,7 @@ export async function ProgramsPreview() {
                   </h3>
 
                   {summary ? (
-                    <p className="text-sm text-[#5A6070] leading-relaxed mb-4 flex-1 line-clamp-5">
+                    <p className="text-sm text-[#5A6070] leading-snug mb-4 flex-1 line-clamp-2">
                       {summary}
                     </p>
                   ) : (

@@ -80,14 +80,7 @@ export default async function ProgramsPage() {
             )}
 
             {!error && programs.length > 0 && (
-              <>
-                <p className="mb-10 max-w-2xl text-sm sm:text-base text-[#5A6070] leading-relaxed">
-                  These evening programs give Stone Hill students a chance to stretch beyond the school
-                  day. Exact schedules, instructors, and tuition lock in this week. Spring
-                  continuation enrolls separately when details are ready.
-                </p>
-                <ProgramsFilter programs={programs} />
-              </>
+              <ProgramsFilter programs={programs} />
             )}
           </div>
         </section>

@@ -15,7 +15,8 @@ const FLYER_SRC = resolve(
   process.env.HOME,
   '.cursor/projects/Users-robertgregory-wix-shmspto/assets/R4C2026-1__1_-2522e732-e79a-47a5-bea5-f8a240f70532.png',
 )
-const REGISTER_URL = 'https://www.shmspto.org/run-for-charity'
+const REGISTER_URL =
+  'https://www.shmspto.org/events/run-for-charity-1k-5k-best-runners-code-shms#register'
 const BEST_RUNNERS_SIGNUP = 'https://www.bestrunners.org/run4charity'
 const SCHOOL_CODE = 'SHMS'
 const CATEGORY_PTO_SHMS = '1d7d7957-439e-4c6b-bafd-2a46d1716d34'
@@ -208,7 +209,7 @@ async function main() {
     title: 'Run for Charity (school code SHMS)',
     description: `Copy school code ${SCHOOL_CODE}, then register for Best Runners’ 1K/5K on Sep 13 at Rock Ridge. Stone Hill receives 100% of your registration fee. Early bird through Aug 15.`,
     ctaLabel: 'Register with code SHMS',
-    href: '/run-for-charity',
+    href: '/events/run-for-charity-1k-5k-best-runners-code-shms#register',
     icon: 'Ticket',
     sortOrder: 5,
     active: true,

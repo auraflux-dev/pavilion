@@ -90,7 +90,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   programs: empty('programs', {
     eyebrow: 'Fall 2026 Enrichment',
     title: 'Enrichment Programs',
-    body: 'Evening enrichment for grades 6-8: Robotics, MATHCOUNTS & math enrichment, and Young Entrepreneurs. Instructors, exact day/time, tuition, and syllabus confirm this week. Spring continuation sessions are offered separately.',
+    body: 'Robotics, MATHCOUNTS, Young Entrepreneurs, and essay writing. Grades 6–8. Nights confirming. Paid members save 10 / 15 / 30% and register first.',
   }),
   volunteer: empty('volunteer', {
     eyebrow: 'Get Involved',
@@ -167,7 +167,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     bullets: [
       'Welcome to the SHMS PTO',
       'Your free parent account is ready. Add a student to track programs, Cove Digital Card balance, and paid membership status.',
-      'Paid members get Cove Digital Card credit, enrichment discounts, priority enrichment registration when offered, and free refreshments at school events.',
+      'Paid members get Cove Digital Card credit, enrichment discounts, and priority enrichment registration when offered. Lagoon and Tide also include free refreshments at PTO events.',
     ],
   }),
   /** key|text lines. See lib/defaults/portal-copy.ts */

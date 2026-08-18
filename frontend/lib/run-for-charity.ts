@@ -1,13 +1,22 @@
-/** Best Runners partnership — school code bridge for parents. */
+/** Best Runners partnership — school code on the event page (no middle hop). */
 export const RUN_FOR_CHARITY_SCHOOL_CODE = 'SHMS'
 
-/** Our on-site bridge (copy code → continue to Best Runners). */
+export const RUN_FOR_CHARITY_EVENT_SLUG =
+  'run-for-charity-1k-5k-best-runners-code-shms'
+
+/** Canonical share / register page (school code + continue to Best Runners). */
+export const RUN_FOR_CHARITY_EVENT_PATH = `/events/${RUN_FOR_CHARITY_EVENT_SLUG}`
+
+export const RUN_FOR_CHARITY_REGISTER_HASH = '#register'
+
+export const RUN_FOR_CHARITY_REGISTER_PATH = `${RUN_FOR_CHARITY_EVENT_PATH}${RUN_FOR_CHARITY_REGISTER_HASH}`
+
+/** @deprecated Use RUN_FOR_CHARITY_EVENT_PATH — old bridge redirects there. */
 export const RUN_FOR_CHARITY_BRIDGE_PATH = '/run-for-charity'
 
-/** Same destination as the bridge; homepage promo imports this name. */
-export const RUN_FOR_CHARITY_REGISTER_PATH = RUN_FOR_CHARITY_BRIDGE_PATH
+export const RUN_FOR_CHARITY_BRIDGE_URL = `https://www.shmspto.org${RUN_FOR_CHARITY_EVENT_PATH}`
 
-export const RUN_FOR_CHARITY_BRIDGE_URL = 'https://www.shmspto.org/run-for-charity'
+export const RUN_FOR_CHARITY_REGISTER_URL = `https://www.shmspto.org${RUN_FOR_CHARITY_REGISTER_PATH}`
 
 /**
  * Best Runners race page (cold-load safe).
@@ -16,3 +25,20 @@ export const RUN_FOR_CHARITY_BRIDGE_URL = 'https://www.shmspto.org/run-for-chari
  * not accepted via URL — paste SHMS in School / Referral Code on the form.
  */
 export const BEST_RUNNERS_SIGNUP_URL = 'https://www.bestrunners.org/run4charity'
+
+export function isRunForCharitySlug(slug?: string | null): boolean {
+  return String(slug || '').trim() === RUN_FOR_CHARITY_EVENT_SLUG
+}
+
+export function isRunForCharityEvent(event: {
+  slug?: string | null
+  title?: string | null
+  externalRegistrationUrl?: string | null
+}): boolean {
+  if (isRunForCharitySlug(event.slug)) return true
+  const hay = `${event.title || ''} ${event.externalRegistrationUrl || ''}`.toLowerCase()
+  return (
+    hay.includes('run-for-charity') ||
+    (hay.includes('best runners') && hay.includes('shms'))
+  )
+}

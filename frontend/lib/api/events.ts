@@ -1,11 +1,17 @@
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { getWixClient } from '@/lib/wix-client'
 import { sortEventCategoryNames } from '@/lib/events/categories'
+import {
+  isRunForCharitySlug,
+  RUN_FOR_CHARITY_REGISTER_URL,
+} from '@/lib/run-for-charity'
 
 export interface WixEvent {
   id?: string
   title?: string
   description?: string
+  /** One-line promo (e.g. early bird pricing). */
+  shortDescription?: string
   location?: { name?: string }
   dateAndTimeSettings?: {
     startDate?: string
@@ -25,12 +31,54 @@ export interface WixEvent {
   }
 }
 
-/** First https URL in event copy (used for partner register CTAs). */
+/** Public path for messaging / deep links. */
+export function eventPublicPath(event: Pick<WixEvent, 'slug' | 'id'>): string | null {
+  const slug = String(event.slug || '').trim()
+  if (slug) return `/events/${encodeURIComponent(slug)}`
+  const id = String(event.id || '').trim()
+  return id ? `/events/${encodeURIComponent(id)}` : null
+}
+
+/** First https URL in event copy (used for partner register CTAs). Prefer our event register section. */
 export function extractExternalRegistrationUrl(text?: string): string | undefined {
   if (!text) return undefined
+  const eventRegister = text.match(
+    /https:\/\/(?:www\.)?shmspto\.org\/events\/run-for-charity[^\s<>"']*/i,
+  )
+  if (eventRegister?.[0]) {
+    const cleaned = eventRegister[0].replace(/[.,);]+$/, '')
+    return cleaned.includes('#') ? cleaned : `${cleaned}#register`
+  }
+  const bridge = text.match(/https:\/\/(?:www\.)?shmspto\.org\/run-for-charity[^\s<>"']*/i)
+  if (bridge?.[0]) {
+    // Legacy middle-page links → canonical event register section
+    return 'https://www.shmspto.org/events/run-for-charity-1k-5k-best-runners-code-shms#register'
+  }
   const m = text.match(/https:\/\/[^\s<>"']+/i)
   if (!m?.[0]) return undefined
   return m[0].replace(/[.,);]+$/, '')
+}
+
+/** Early-bird promo while the window is still open (Eastern). Two-line display. */
+export function earlyBirdCallout(text?: string, now = new Date()): string | null {
+  const raw = String(text || '').trim()
+  if (!raw) return null
+  if (!/early\s*bird/i.test(raw)) return null
+  // Early bird through Aug 15, 2026 (inclusive) Eastern
+  const end = new Date('2026-08-16T04:00:00.000Z') // Aug 16 00:00 ET
+  if (now >= end) return null
+
+  // Drop trailing "Use school code…" sentence; keep pricing.
+  const promo = raw
+    .replace(/\.\s*Use school code[^.]*\.?/i, '')
+    .split(/\n/)[0]
+    ?.trim()
+  if (!promo) return null
+
+  // "Early bird through Aug 15: Adults $25 · Kids $15" → break after the date.
+  const priced = promo.match(/^(Early bird through [^:]+):\s*(.+)$/i)
+  if (priced) return `${priced[1].trim()}\n${priced[2].trim()}`
+  return promo
 }
 
 /** Turn a Wix image URI or URL into a browser-safe static URL. */
@@ -109,13 +157,16 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
         const description = extractPlainText(ev.description)
         const shortDescription =
           typeof ev.shortDescription === 'string' ? ev.shortDescription : undefined
-        const externalRegistrationUrl =
-          extractExternalRegistrationUrl(description) ||
-          extractExternalRegistrationUrl(shortDescription)
+        const slug = ev.slug as string
+        const externalRegistrationUrl = isRunForCharitySlug(slug)
+          ? RUN_FOR_CHARITY_REGISTER_URL
+          : extractExternalRegistrationUrl(description) ||
+            extractExternalRegistrationUrl(shortDescription)
         return {
           id,
           title: ev.title as string,
           description,
+          shortDescription,
           location: ev.location as WixEvent['location'],
           dateAndTimeSettings: dts
             ? {
@@ -127,7 +178,7 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
             const url = resolveWixImageUrl(ev.mainImage)
             return url ? { url } : undefined
           })(),
-          slug: ev.slug as string,
+          slug,
           tags,
           externalRegistrationUrl,
         } satisfies WixEvent
@@ -168,4 +219,16 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
   } catch {
     return []
   }
+}
+
+/** Single upcoming event by Wix slug or id (for /events/[slug] share links). */
+export async function getEventBySlug(slugOrId: string): Promise<WixEvent | null> {
+  const key = String(slugOrId || '').trim()
+  if (!key) return null
+  const events = await getUpcomingEvents(50)
+  return (
+    events.find((e) => e.slug === key) ||
+    events.find((e) => e.id === key) ||
+    null
+  )
 }

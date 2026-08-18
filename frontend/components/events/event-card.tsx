@@ -1,14 +1,21 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Calendar, Clock, ExternalLink, MapPin, Ticket } from 'lucide-react'
+import { Calendar, Clock, ExternalLink, Link2, MapPin, Ticket } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
-import type { WixEvent } from '@/lib/api/events'
+import {
+  earlyBirdCallout,
+  eventPublicPath,
+  type WixEvent,
+} from '@/lib/api/events'
 
 interface EventCardProps {
   event: WixEvent
+  /** When true, title is plain text (detail page already is the share URL). */
+  detailPage?: boolean
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; accent: string }> = {
@@ -47,48 +54,114 @@ function formatDate(dateStr?: string) {
 function buildCalendarUrl(event: WixEvent) {
   const start = event.dateAndTimeSettings?.startDate ?? ''
   const end = event.dateAndTimeSettings?.endDate ?? start
-  const title = encodeURIComponent(event.title ?? '')
+  const title = encodeURIComponent((event.title ?? '').replace(/\n+/g, ' '))
   const location = encodeURIComponent(event.location?.name ?? '')
   const fmt = (d: string) => String(d).replace(/[-:]/g, '').replace(/\.\d{3}/, '')
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(start)}/${fmt(end)}&location=${location}`
 }
 
-export function EventCard({ event }: EventCardProps) {
+function sameOriginPath(url: string): string | null {
+  try {
+    const u = new URL(url, 'https://www.shmspto.org')
+    if (
+      u.hostname === 'www.shmspto.org' ||
+      u.hostname === 'shmspto.org' ||
+      u.hostname === 'localhost'
+    ) {
+      return `${u.pathname}${u.search}${u.hash}`
+    }
+  } catch {
+    /* ignore */
+  }
+  return null
+}
+
+export function EventCard({ event, detailPage = false }: EventCardProps) {
   const colors = getColors(event.tags)
   const { month, day, time } = formatDate(event.dateAndTimeSettings?.startDate)
   const endTime = formatDate(event.dateAndTimeSettings?.endDate).time
   const ticket = event.ticket
   const [qty, setQty] = useState(1)
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
   const remaining =
     ticket && ticket.capacity > 0 ? Math.max(0, ticket.capacity - ticket.soldCount) : null
   const canBuy =
     Boolean(ticket?.onSale && ticket.price > 0 && event.id) &&
     (remaining == null || remaining > 0)
   const total = ticket ? ticket.price * qty : 0
+  const path = eventPublicPath(event)
+  const earlyBird = earlyBirdCallout(event.shortDescription) || earlyBirdCallout(event.description)
+  const registerHref = event.externalRegistrationUrl
+  const registerLocal = registerHref ? sameOriginPath(registerHref) : null
+  const anchorId = String(event.slug || event.id || '').trim() || undefined
+
+  async function copyShareLink() {
+    if (!path || typeof window === 'undefined') return
+    const url = `${window.location.origin}${path}`
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const titleEl = (
+    <h3 className="text-lg font-bold text-[#1A1A1A] mb-3 whitespace-pre-line">
+      {event.title}
+    </h3>
+  )
+
+  const flyerImg = event.mainImage?.url ? (
+    <img
+      src={event.mainImage.url}
+      alt={event.title?.replace(/\n+/g, ' ') ?? 'Event flyer'}
+      className="w-full h-auto object-contain"
+    />
+  ) : null
+
+  const flyerCta =
+    flyerImg && registerLocal ? (
+      <Link
+        href={registerLocal}
+        className="block rounded-xl overflow-hidden border border-[#E8E4DC] hover:opacity-95 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        style={{ outlineColor: colors.accent }}
+        aria-label="Register — open flyer link"
+      >
+        {flyerImg}
+      </Link>
+    ) : flyerImg && registerHref ? (
+      <a
+        href={registerHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block rounded-xl overflow-hidden border border-[#E8E4DC] hover:opacity-95 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        style={{ outlineColor: colors.accent }}
+        aria-label="Register — open flyer link"
+      >
+        {flyerImg}
+      </a>
+    ) : flyerImg ? (
+      <div className="rounded-xl overflow-hidden border border-[#E8E4DC]">{flyerImg}</div>
+    ) : !event.mainImage?.url ? (
+      <div
+        className="h-24 w-full flex items-center justify-center rounded-xl"
+        style={{ backgroundColor: colors.bg }}
+        aria-hidden="true"
+      >
+        <span className="text-xs font-semibold" style={{ color: colors.text }}>
+          Flyer coming soon
+        </span>
+      </div>
+    ) : null
 
   return (
-    <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col">
-      {event.mainImage?.url ? (
-        <div className="h-48 w-full overflow-hidden">
-          <img
-            src={event.mainImage.url}
-            alt={event.title ?? 'Event'}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      ) : (
-        <div
-          className="h-28 w-full flex items-center justify-center"
-          style={{ backgroundColor: colors.bg }}
-          aria-hidden="true"
-        >
-          <span className="text-xs font-semibold" style={{ color: colors.text }}>
-            Flyer coming soon
-          </span>
-        </div>
-      )}
-
+    <article
+      id={anchorId}
+      className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col scroll-mt-24"
+    >
       <div className="p-6 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-5">
           <div
@@ -111,10 +184,29 @@ export function EventCard({ event }: EventCardProps) {
           )}
         </div>
 
-        <h3 className="text-lg font-bold text-[#1A1A1A] mb-3">{event.title}</h3>
+        {detailPage || !path ? (
+          titleEl
+        ) : (
+          <Link href={path} className="hover:opacity-80 transition-opacity">
+            {titleEl}
+          </Link>
+        )}
+
+        {earlyBird ? (
+          <p
+            className="text-sm font-semibold leading-relaxed mb-3 px-3 py-2.5 rounded-lg whitespace-pre-line"
+            style={{ backgroundColor: '#FFF4E5', color: '#9A5B00' }}
+          >
+            {earlyBird}
+          </p>
+        ) : null}
 
         {event.description && (
-          <p className="text-sm text-[#5A6070] leading-relaxed mb-5 flex-1 line-clamp-3">
+          <p
+            className={`text-sm text-[#5A6070] leading-relaxed mb-5 flex-1 ${
+              detailPage ? '' : 'line-clamp-3'
+            }`}
+          >
             {event.description}
           </p>
         )}
@@ -176,7 +268,7 @@ export function EventCard({ event }: EventCardProps) {
                 open={checkoutOpen}
                 onClose={() => setCheckoutOpen(false)}
                 amount={total}
-                title={event.title || 'Event tickets'}
+                title={(event.title || 'Event tickets').replace(/\n+/g, ' ')}
                 subtitle={`${qty} ticket${qty === 1 ? '' : 's'} · $${ticket!.price.toFixed(2)} each`}
                 payBody={{ kind: 'event', eventId: event.id!, quantity: qty }}
                 containerId={`event-pay-${event.id}`}
@@ -184,20 +276,20 @@ export function EventCard({ event }: EventCardProps) {
               />
             </>
           ) : null}
-          {!canBuy && event.externalRegistrationUrl ? (
+          {!canBuy && registerHref ? (
             <Button
               className="w-full text-white font-semibold"
               style={{ backgroundColor: colors.accent }}
               asChild
             >
-              <a
-                href={event.externalRegistrationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <ExternalLink className="w-4 h-4 mr-2" aria-hidden="true" />
-                Register
-              </a>
+              {registerLocal ? (
+                <Link href={registerLocal}>Register</Link>
+              ) : (
+                <a href={registerHref} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="w-4 h-4 mr-2" aria-hidden="true" />
+                  Register
+                </a>
+              )}
             </Button>
           ) : null}
           <Button
@@ -211,7 +303,21 @@ export function EventCard({ event }: EventCardProps) {
               Add to Calendar
             </a>
           </Button>
+          {path ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full font-semibold border-2"
+              style={{ borderColor: '#C4BAA8', color: '#3D4450' }}
+              onClick={copyShareLink}
+            >
+              <Link2 className="w-4 h-4 mr-2" aria-hidden="true" />
+              {copied ? 'Link copied' : 'Copy event link'}
+            </Button>
+          ) : null}
         </div>
+
+        {flyerCta ? <div className="mt-5">{flyerCta}</div> : null}
       </div>
     </article>
   )

@@ -155,7 +155,7 @@ export function ProgramRegisterModal({ program, open, onClose, onRegistered }: P
           <div className="flex items-start justify-between gap-3">
             <div>
               <p id="program-register-title" className="text-base font-bold text-[#1A1A1A]">
-                Register. {program.name}
+                Register for {program.name}
               </p>
               <p className="text-sm font-bold mt-1" style={{ color: '#085508' }}>
                 {fee <= 0 ? 'Free' : `$${fee.toFixed(2)}`}

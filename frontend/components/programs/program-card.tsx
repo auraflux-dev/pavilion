@@ -41,13 +41,35 @@ function hasTag(program: Program, tag: string) {
 
 function plainText(html: string) {
   return html
-    .replace(/<br\s*\/?>/gi, ' ')
-    .replace(/<\/p>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '\n• ')
     .replace(/<[^>]+>/g, '')
     .replace(/&amp;/g, '&')
     .replace(/&nbsp;/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]{2,}/g, ' ')
     .trim()
+}
+
+function programCopy(html: string): { lead: string; bullets: string[] } {
+  const lines = plainText(html)
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+  const lead: string[] = []
+  const bullets: string[] = []
+  for (const line of lines) {
+    if (line.startsWith('•') || line.startsWith('- ')) {
+      bullets.push(line.replace(/^[•-]\s*/, ''))
+    } else if (bullets.length) {
+      bullets.push(line)
+    } else {
+      lead.push(line)
+    }
+  }
+  return { lead: lead.join(' '), bullets }
 }
 
 export function ProgramCard({ program }: ProgramCardProps) {
@@ -67,7 +89,7 @@ export function ProgramCard({ program }: ProgramCardProps) {
           : 'Closed'
   const priorityUntilLabel =
     phase === 'member_priority' ? formatMemberPriorityUntil(program.memberPriorityUntil) : ''
-  const summary = plainText(program.description || '')
+  const { lead, bullets } = programCopy(program.description || '')
   const springNote = String(program.detail ?? '').trim()
   const feeLabel = feeTbd ? 'Tuition TBD' : program.fee === 0 ? 'Free' : program.fee != null ? `$${program.fee}` : null
 
@@ -112,53 +134,70 @@ export function ProgramCard({ program }: ProgramCardProps) {
 
         <h3 className="text-lg font-bold text-[#1A1A1A] leading-snug mb-2">{program.name}</h3>
 
-        {summary ? (
-          <p className="text-sm text-[#5A6070] leading-relaxed mb-4 flex-1">{summary}</p>
-        ) : (
-          <div className="flex-1" />
-        )}
+        {lead ? (
+          <p className={`text-sm text-[#5A6070] leading-snug ${bullets.length ? 'mb-2' : 'mb-4'}`}>
+            {lead}
+          </p>
+        ) : null}
+        {bullets.length > 0 ? (
+          <ul className="mb-4 space-y-1.5 text-sm text-[#5A6070] leading-snug list-disc pl-4 marker:text-[#085508]">
+            {bullets.map((item) => (
+              <li key={item} className="pl-0.5">
+                {item}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <div className="flex-1" />
 
-        <dl className="space-y-2 mb-4 text-sm border-t border-[#E8E4DC] pt-4">
+        <dl className="space-y-2 mb-3 text-sm border-t border-[#E8E4DC] pt-4">
           {program.grades ? (
-            <div className="flex gap-2">
-              <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5">
+            <div className="flex items-start gap-2">
+              <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5 pt-0.5">
                 <GraduationCap className="w-3.5 h-3.5" aria-hidden="true" />
                 Grades
               </dt>
-              <dd className="font-medium text-[#1A1A1A]">{program.grades}</dd>
+              <dd className="font-medium text-[#1A1A1A] min-w-0">{program.grades}</dd>
             </div>
           ) : null}
           {scheduleLine ? (
-            <div className="flex gap-2">
-              <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5">
+            <div className="flex items-start gap-2">
+              <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5 pt-0.5">
                 <CalendarClock className="w-3.5 h-3.5" aria-hidden="true" />
                 When
               </dt>
-              <dd className="font-medium text-[#1A1A1A]">{scheduleLine}</dd>
+              <dd className="font-medium text-[#1A1A1A] min-w-0">{scheduleLine}</dd>
             </div>
           ) : null}
           {feeLabel ? (
-            <div className="flex gap-2">
-              <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5">
+            <div className="flex items-start gap-2">
+              <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5 pt-0.5">
                 <DollarSign className="w-3.5 h-3.5" aria-hidden="true" />
                 Tuition
               </dt>
-              <dd className="font-medium text-[#1A1A1A]">{feeLabel}</dd>
+              <dd className="font-medium text-[#1A1A1A] min-w-0">
+                {feeLabel}
+                {!feeTbd && program.fee > 0 ? (
+                  <span className="block text-xs font-normal text-[#5A6070] mt-0.5">
+                    Members 10 / 15 / 30% off
+                  </span>
+                ) : null}
+              </dd>
             </div>
           ) : null}
           {program.capacity > 0 ? (
-            <div className="flex gap-2">
-              <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5">
+            <div className="flex items-start gap-2">
+              <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5 pt-0.5">
                 <Users className="w-3.5 h-3.5" aria-hidden="true" />
                 Spots
               </dt>
-              <dd className="font-medium text-[#1A1A1A]">{program.capacity}</dd>
+              <dd className="font-medium text-[#1A1A1A] min-w-0">{program.capacity}</dd>
             </div>
           ) : null}
         </dl>
 
         {springNote ? (
-          <p className="text-xs text-[#5A6070] mb-4">{springNote}</p>
+          <p className="text-xs text-[#5A6070] leading-snug mb-3 line-clamp-2">{springNote}</p>
         ) : null}
 
         {priorityUntilLabel ? (
