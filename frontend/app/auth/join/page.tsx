@@ -8,6 +8,7 @@
  */
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { clearPendingAuth, markPendingAuth, trackLogin, trackSignUp } from '@/lib/ga'
 
 type Mode = 'signup' | 'login'
 type Panel = 'chooser' | 'email'
@@ -80,6 +81,7 @@ function JoinInner() {
   }
 
   function startGoogle() {
+    markPendingAuth('google', mode === 'signup' ? 'sign_up' : 'login')
     window.location.href = `/api/auth/google?returnTo=${encodeURIComponent(returnTo)}`
   }
 
@@ -188,6 +190,9 @@ function JoinInner() {
         throw new Error(data.error || (mode === 'signup' ? 'Could not create account' : 'Could not log in'))
       }
 
+      if (mode === 'signup') trackSignUp('email', 'website')
+      else trackLogin('email', 'website')
+      clearPendingAuth()
       window.location.href = data.redirectTo
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')

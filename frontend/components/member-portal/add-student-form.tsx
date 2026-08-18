@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { UserPlus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { trackEvent } from '@/lib/ga'
 import type { PortalCopy } from '@/lib/defaults/portal-copy'
 
 type FormLabels = Pick<
@@ -53,6 +54,7 @@ export function AddStudentForm({ onAdded, grades = ['6', '7', '8'], labels }: Pr
       })
       if (!res.ok) throw new Error(await res.text())
       const { student } = await res.json()
+      trackEvent('add_student', { surface: 'member', grade: String(grade) })
       onAdded(student)
       setFirstName('')
       setLastName('')

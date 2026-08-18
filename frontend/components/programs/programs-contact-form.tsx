@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { CheckCircle2, Loader2, ArrowRight } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react'
+import { trackGenerateLead } from '@/lib/ga'
 
 type Variant = 'programs' | 'events' | 'sponsorship'
 
@@ -102,6 +103,7 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
         }),
       })
       if (!res.ok) throw new Error()
+      trackGenerateLead({ formId: `contact_${variant}`, leadType: copy.topic })
       setStatus('success')
     } catch {
       setStatus('error')

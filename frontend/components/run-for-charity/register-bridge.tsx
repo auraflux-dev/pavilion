@@ -7,6 +7,7 @@ import {
   BEST_RUNNERS_SIGNUP_URL,
   RUN_FOR_CHARITY_SCHOOL_CODE,
 } from '@/lib/run-for-charity'
+import { trackGenerateLead } from '@/lib/ga'
 
 type Props = {
   /** When true, omit early-bird footer (parent page already shows it). */
@@ -37,6 +38,7 @@ export function RunForCharityRegisterBridge({ compact = false }: Props) {
       /* still open Best Runners */
     }
     window.open(BEST_RUNNERS_SIGNUP_URL, '_blank', 'noopener,noreferrer')
+    trackGenerateLead({ formId: 'run_for_charity', leadType: 'run_for_charity' })
   }
 
   return (

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { PortalPayPalButtons } from '@/components/checkout/portal-paypal-buttons'
 import { CheckoutConsent } from '@/components/checkout/checkout-consent'
 import type { ConsentAck, CheckoutConsentKind } from '@/lib/checkout-consent'
+import { itemsFromPayBody, trackBeginCheckout, trackCheckoutPurchase } from '@/lib/ga'
 
 type StoredCard = {
   brand: string
@@ -105,6 +106,16 @@ export function PortalCardCheckout({
   const cardRef = useRef<SquareCard | null>(null)
 
   const nameReady = !needsName || (firstName.trim().length > 0 && lastName.trim().length > 0)
+
+  useEffect(() => {
+    if (!open) return
+    trackBeginCheckout({
+      value: amount,
+      items: itemsFromPayBody(payBody, title, amount),
+    })
+    // Intentionally keyed on kind + amount so parent re-renders do not re-fire.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, amount, title, payBody.kind])
 
   const consentKind: CheckoutConsentKind =
     payBody.kind === 'membership' || payBody.kind === 'program' || payBody.kind === 'event'
@@ -267,6 +278,13 @@ export function PortalCardCheckout({
       setPortalHref(typeof conf?.portalHref === 'string' ? conf.portalHref : '/member-portal')
       setEmailed(Boolean(conf?.emailed))
       setSuccess('Payment successful. Thank you!')
+      trackCheckoutPurchase({
+        data,
+        amount,
+        title,
+        payBody,
+        paymentType: useStored ? 'square_card_on_file' : 'square_card',
+      })
       onPaid?.(data)
       setTimeout(() => onClose(), conf?.nextSteps?.length ? 6000 : 1400)
     } catch (err) {
@@ -437,6 +455,13 @@ export function PortalCardCheckout({
             setPortalHref(typeof conf?.portalHref === 'string' ? conf.portalHref : '/member-portal')
             setEmailed(Boolean(conf?.emailed))
             setSuccess('PayPal payment successful. Thank you!')
+            trackCheckoutPurchase({
+              data,
+              amount,
+              title,
+              payBody,
+              paymentType: 'paypal',
+            })
             onPaid?.(data)
             setTimeout(() => onClose(), conf?.nextSteps?.length ? 6000 : 1400)
           }}

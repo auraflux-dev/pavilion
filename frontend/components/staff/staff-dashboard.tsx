@@ -45,6 +45,7 @@ import { StaffHelpPanel } from '@/components/staff/staff-help-panel'
 import { StaffPersonalEmailPanel } from '@/components/staff/staff-personal-email-panel'
 import { StaffShell } from '@/components/shells/staff-shell'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
+import { trackLogin } from '@/lib/ga'
 
 type StaffHome = {
   role: string
@@ -150,6 +151,7 @@ export function StaffDashboard() {
         const data = await r.json()
         if (!r.ok) throw new Error(data.error ?? 'Not authorized')
         setMe(data)
+        trackLogin('staff', 'staff')
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Not authorized'))
   }, [])

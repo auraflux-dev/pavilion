@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Loader2, Minus, Plus, ShoppingCart, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CoveCameraScanner, parseCoveScan } from '@/components/staff/cove-camera-scanner'
+import { trackPurchase } from '@/lib/ga'
 
 type Family = {
   parentEmail: string
@@ -421,6 +422,20 @@ export function StaffCoveRegister() {
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Checkout failed')
+      trackPurchase({
+        transactionId: `cove-balance-${Date.now()}`,
+        value: Number(d.total),
+        items: [
+          {
+            item_name: 'Cove snack window',
+            item_category: 'cove',
+            price: Number(d.total),
+            quantity: 1,
+          },
+        ],
+        surface: 'staff',
+        paymentType: 'cove_balance',
+      })
       setStatus(
         `Cove charged $${Number(d.total).toFixed(2)}. New balance $${Number(d.newBalance).toFixed(2)}.`,
       )
@@ -459,6 +474,20 @@ export function StaffCoveRegister() {
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Could not log payment')
+      trackPurchase({
+        transactionId: String(d.paymentId || `cove-ext-${Date.now()}`),
+        value: Number(d.total),
+        items: [
+          {
+            item_name: 'Cove in-person sale',
+            item_category: 'cove',
+            price: Number(d.total),
+            quantity: 1,
+          },
+        ],
+        surface: 'staff',
+        paymentType: String(d.tender || 'external'),
+      })
       const inviteNote = d.invite?.emailed
         ? ' Join invite emailed.'
         : d.invite?.error

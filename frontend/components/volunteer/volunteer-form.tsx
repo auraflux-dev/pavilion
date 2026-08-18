@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
+import { trackGenerateLead } from '@/lib/ga'
 
 /** Used only when VolunteerOpportunities CMS returns no active rows */
 const FALLBACK_OPPORTUNITIES = [
@@ -54,6 +55,7 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
         body: JSON.stringify(form),
       })
       if (!res.ok) throw new Error('Failed')
+      trackGenerateLead({ formId: 'volunteer', leadType: form.opportunity || 'volunteer' })
       setStatus('success')
     } catch {
       setStatus('error')

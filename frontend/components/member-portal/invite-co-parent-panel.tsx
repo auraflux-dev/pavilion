@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Users } from 'lucide-react'
+import { trackEvent } from '@/lib/ga'
 
 type Guardian = {
   email: string
@@ -65,6 +66,7 @@ export function InviteCoParentPanel() {
         throw new Error(d.error ?? 'Invite failed')
       }
       setMsg(d.message || 'Invite sent.')
+      trackEvent('invite_guardian', { surface: 'member' })
       if (d.acceptUrl) setAcceptUrl(String(d.acceptUrl))
       setEmail('')
       setConfirmEmail('')

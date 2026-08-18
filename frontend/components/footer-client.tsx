@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { SocialFooterLinks } from '@/components/social-footer-links'
 import type { NavLink } from '@/lib/api/nav'
 import { useAuth } from '@/lib/hooks/use-auth'
+import { trackGenerateLead } from '@/lib/ga'
 
 interface Props {
   presidentEmail: string
@@ -45,6 +46,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
         const data = await res.json().catch(() => ({}))
         throw new Error(data.error || 'Subscribe failed')
       }
+      trackGenerateLead({ formId: 'newsletter', leadType: 'newsletter' })
       setSubscribed(true)
       setEmail('')
     } catch (err) {

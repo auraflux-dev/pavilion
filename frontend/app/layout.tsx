@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import { Inter, Merriweather } from 'next/font/google'
+import { GaAuthBridge } from '@/components/ga-auth-bridge'
 import { GoogleAnalytics } from '@/components/google-analytics'
 import { TrafficBeacon } from '@/components/traffic-beacon'
 import './globals.css'
@@ -60,6 +61,7 @@ export default function RootLayout({
       <body className="font-sans antialiased text-foreground">
         {children}
         <TrafficBeacon />
+        <GaAuthBridge />
         <Analytics />
         <GoogleAnalytics />
       </body>

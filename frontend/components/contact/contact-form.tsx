@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { CheckCircle2, Loader2, ArrowRight } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react'
+import { trackGenerateLead } from '@/lib/ga'
 
 const TOPICS = [
   'General Question',
@@ -42,6 +43,7 @@ export function ContactForm() {
         body: JSON.stringify(form),
       })
       if (!res.ok) throw new Error()
+      trackGenerateLead({ formId: 'contact', leadType: form.topic || 'contact' })
       setStatus('success')
     } catch {
       setStatus('error')

@@ -16,6 +16,7 @@ import {
   getRegistrationPhase,
 } from '@/lib/programs/registration-access'
 import { useAuth } from '@/lib/hooks/use-auth'
+import { gaSurface, trackEvent } from '@/lib/ga'
 
 type Student = {
   id: string
@@ -126,8 +127,18 @@ export function ProgramRegisterModal({ program, open, onClose, onRegistered }: P
             ? `This program is full. You are #${position} on the waitlist. We will email you if a seat opens.`
             : 'This program is full. You are on the waitlist. We will email you if a seat opens.',
         )
+        trackEvent('program_enroll', {
+          surface: gaSurface(),
+          program_name: data.programName || program.name,
+          status: 'waitlist',
+        })
       } else {
         setSuccess(`Enrolled in ${data.programName || program.name}.`)
+        trackEvent('program_enroll', {
+          surface: gaSurface(),
+          program_name: data.programName || program.name,
+          status: 'enrolled',
+        })
       }
       onRegistered?.()
       setTimeout(() => onClose(), waitlisted ? 2800 : 1400)

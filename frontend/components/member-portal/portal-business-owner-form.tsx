@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Briefcase, CheckCircle2, Loader2, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { trackGenerateLead } from '@/lib/ga'
 
 type Props = {
   memberName?: string
@@ -84,6 +85,11 @@ export function PortalBusinessOwnerForm({
         const data = await res.json().catch(() => ({}))
         if (!res.ok) throw new Error(data.error || 'Could not send')
       }
+      trackGenerateLead({
+        formId: 'business_owner',
+        leadType: 'business_owner',
+        surface: isPublic ? 'website' : 'member',
+      })
       setStatus('success')
     } catch (err) {
       setStatus('error')
