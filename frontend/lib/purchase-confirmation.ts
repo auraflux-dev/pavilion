@@ -35,7 +35,9 @@ function money(n: number) {
   return `$${Number(n).toFixed(2)}`
 }
 
-function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation, 'emailed'> {
+export function buildPurchaseConfirmationCopy(
+  input: PurchaseConfirmationInput,
+): Omit<PurchaseConfirmation, 'emailed'> {
   const name = (input.parentName || 'SHMS PTO family').trim()
   const baseReceipt = [
     `Hi ${name.split(' ')[0] || 'there'},`,
@@ -195,7 +197,7 @@ async function insertPortalMessage(input: PurchaseConfirmationInput, copy: Omit<
 export async function sendPurchaseConfirmation(
   input: PurchaseConfirmationInput,
 ): Promise<PurchaseConfirmation> {
-  const copy = buildCopy(input)
+  const copy = buildPurchaseConfirmationCopy(input)
   await insertPortalMessage(input, copy)
 
   let emailed = false

@@ -266,28 +266,13 @@ export async function notifyStaffTransaction(opts: {
   if (opts.kind === 'membership') {
     const tier = String(opts.meta?.tier || opts.meta?.tierName || '').trim()
     if (tier) {
-      const { buildMembershipEntitlements } = await import('@/lib/membership-entitlements')
-      const ents = buildMembershipEntitlements({
+      const { staffMembershipPerkLines } = await import('@/lib/membership-entitlements')
+      const perkLines = staffMembershipPerkLines({
         tier,
         shirtSize: opts.meta?.shirtSize || null,
       })
-      const physical = ents.filter((e) => e.kind === 'spirit_shirt' || e.kind === 'magnet')
-      const refreshments = ents.find((e) => e.kind === 'event_refreshments')
-      if (physical.length || refreshments) {
-        lines.push('', 'Fulfillment / member perks:')
-        for (const e of physical) {
-          lines.push(
-            `• ${e.label}${e.detail ? ` (${e.detail})` : ''} — ${e.status}. ${e.notes || ''}`.trim(),
-          )
-        }
-        if (refreshments) {
-          lines.push(
-            `• ${refreshments.label} — parent shows Family Cove 6-digit code (Lagoon/Tide codes end in 9); record code and hand tickets.`,
-          )
-        }
-        lines.push(
-          'No mailing address yet (3PL later). Pick up at Back to School Night Aug 27, or parent emails vp-membershipexperience@shmspto.org to coordinate.',
-        )
+      if (perkLines.length) {
+        lines.push('', ...perkLines)
       }
     }
   }

@@ -232,6 +232,35 @@ export function buildMembershipEntitlements(opts: {
   return out
 }
 
+/** Staff sale-alert perk block (same source as parent entitlements). */
+export function staffMembershipPerkLines(opts: {
+  tier: string
+  shirtSize?: string | null
+}): string[] {
+  const ents = buildMembershipEntitlements({
+    tier: opts.tier,
+    shirtSize: opts.shirtSize || null,
+  })
+  const physical = ents.filter((e) => e.kind === 'spirit_shirt' || e.kind === 'magnet')
+  const refreshments = ents.find((e) => e.kind === 'event_refreshments')
+  if (!physical.length && !refreshments) return []
+  const lines = ['Fulfillment / member perks:']
+  for (const e of physical) {
+    lines.push(
+      `• ${e.label}${e.detail ? ` (${e.detail})` : ''} — ${e.status}. ${e.notes || ''}`.trim(),
+    )
+  }
+  if (refreshments) {
+    lines.push(
+      `• ${refreshments.label} — parent shows Family Cove 6-digit code (Lagoon/Tide codes end in 9); record code and hand tickets.`,
+    )
+  }
+  lines.push(
+    'No mailing address yet (3PL later). Pick up at Back to School Night Aug 27, or parent emails vp-membershipexperience@shmspto.org to coordinate.',
+  )
+  return lines
+}
+
 function normalizePhysicalPerk(
   raw: PhysicalPerkChoice | string | null | undefined,
 ): PhysicalPerkChoice | null {
@@ -260,4 +289,31 @@ export function parseEntitlementsJson(raw: unknown): MembershipEntitlement[] {
   } catch {
     return []
   }
+}
+
+/** Rebuild portal perks from the live tier, keeping shirt/magnet fulfillment progress. */
+export function mergePortalEntitlements(
+  stored: MembershipEntitlement[],
+  fresh: MembershipEntitlement[],
+): MembershipEntitlement[] {
+  const entitlements: MembershipEntitlement[] = []
+  const storedCove = stored.find((s) => s.kind === 'cove_credit')
+  if (storedCove) entitlements.push(storedCove)
+  for (const f of fresh) {
+    if (f.kind === 'cove_credit') continue
+    const prev = stored.find((s) => s.kind === f.kind)
+    if (prev && (f.kind === 'spirit_shirt' || f.kind === 'magnet')) {
+      if (isPhysicalPerkPickedUp(prev.status) || prev.status === 'ordered') {
+        entitlements.push({
+          ...f,
+          status: prev.status === 'fulfilled' ? 'picked_up' : prev.status,
+          detail: prev.detail || f.detail,
+          notes: prev.notes || f.notes,
+        })
+        continue
+      }
+    }
+    entitlements.push(f)
+  }
+  return entitlements
 }

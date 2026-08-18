@@ -6,6 +6,7 @@ import { getWixClient } from '@/lib/wix-client'
 import {
   isPhysicalPerkOpen,
   isPhysicalPerkPickedUp,
+  mergePortalEntitlements,
   parseEntitlementsJson,
   type MembershipEntitlement,
   type MembershipEntitlementKind,
@@ -241,26 +242,7 @@ export async function getMembershipEntitlements(
     shirtSize,
     enrichmentCode,
   })
-  // Keep cove credit + physical fulfillment progress from stored; refresh copy
-  const entitlements: MembershipEntitlement[] = []
-  const storedCove = stored.find((s) => s.kind === 'cove_credit')
-  if (storedCove) entitlements.push(storedCove)
-  for (const f of fresh) {
-    if (f.kind === 'cove_credit') continue
-    const prev = stored.find((s) => s.kind === f.kind)
-    if (prev && (f.kind === 'spirit_shirt' || f.kind === 'magnet')) {
-      if (isPhysicalPerkPickedUp(prev.status) || prev.status === 'ordered') {
-        entitlements.push({
-          ...f,
-          status: prev.status === 'fulfilled' ? 'picked_up' : prev.status,
-          detail: prev.detail || f.detail,
-          notes: prev.notes || f.notes,
-        })
-        continue
-      }
-    }
-    entitlements.push(f)
-  }
+  const entitlements = mergePortalEntitlements(stored, fresh)
 
   let coveFamilyCode = ''
   let paidMemberCode = false
