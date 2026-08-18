@@ -56,9 +56,9 @@ export const SHIRT_SIZES = [
 
 export type ShirtSize = (typeof SHIRT_SIZES)[number]
 
-/** Until 3PL ships, physical perks are Open House / coordinated pickup. */
+/** Until 3PL ships, physical perks are Back to School Night / coordinated pickup. */
 export const PHYSICAL_PERK_PICKUP_NOTE =
-  'Email vp-membershipexperience@shmspto.org to coordinate pickup at school.'
+  'Pick up at Back to School Night on August 27, or email vp-membershipexperience@shmspto.org to coordinate pickup.'
 
 export const EVENT_REFRESHMENTS_NOTE =
   'At PTO events, show your Family Cove 6-digit code (Lagoon and Tide codes end in 9). Volunteers record the code and hand refreshment tickets.'

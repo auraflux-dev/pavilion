@@ -502,7 +502,7 @@ If a parent paid but sees nothing:
 - **Reef:** includes a magnet (no shirt).
 - **Faculty ($20):** choose **magnet OR T-shirt** at checkout (not both).
 - Queued in Staff → Fulfillments. No mailing address yet (3PL later).
-- Tell members: email **vp-membershipexperience@shmspto.org** to coordinate pickup at school.
+- Tell members: pick up at **Back to School Night on August 27**, or email **vp-membershipexperience@shmspto.org** to coordinate.
 - Standalone **Stone Hill car magnet** is also sold in the spirit shop for $10.
 - Mark **Set aside** when inventory is pulled, then **Handed out** after handoff.
 

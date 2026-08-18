@@ -4,7 +4,10 @@
  */
 import { getWixClient } from '@/lib/wix-client'
 import { sendMassEmail } from '@/lib/staff/mass-email'
-import { buildMembershipEntitlements } from '@/lib/membership-entitlements'
+import {
+  buildMembershipEntitlements,
+  PHYSICAL_PERK_PICKUP_NOTE,
+} from '@/lib/membership-entitlements'
 
 export type PurchaseConfirmKind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation'
 
@@ -80,10 +83,12 @@ function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation,
     const perkLines = ents
       .filter((e) => e.kind !== 'cove_credit')
       .map((e) => e.label)
+    const hasPhysical = ents.some((e) => e.kind === 'spirit_shirt' || e.kind === 'magnet')
     const nextSteps = [
       `Your ${tier} membership is active.`,
       'Open Member Portal for your Cove Digital Card credit and member perks.',
       ...perkLines.map((label) => `Perk: ${label}.`),
+      ...(hasPhysical ? [PHYSICAL_PERK_PICKUP_NOTE] : []),
       'Add or update students so enrichment discounts apply correctly.',
     ]
     return {

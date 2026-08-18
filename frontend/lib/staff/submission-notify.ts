@@ -286,7 +286,7 @@ export async function notifyStaffTransaction(opts: {
           )
         }
         lines.push(
-          'No mailing address yet (3PL later). Parent emails vp-membershipexperience@shmspto.org to coordinate pickup at school.',
+          'No mailing address yet (3PL later). Pick up at Back to School Night Aug 27, or parent emails vp-membershipexperience@shmspto.org to coordinate.',
         )
       }
     }

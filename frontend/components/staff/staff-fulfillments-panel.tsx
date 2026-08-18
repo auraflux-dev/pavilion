@@ -185,7 +185,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
         <p className="text-xs text-[#5A6070] mt-1">
           {cove
             ? 'Membership perks only (not candy). Set aside shirt/magnet, then Handed out at handoff. Snack/spirit window orders → Today’s store pickups above.'
-            : 'These memberships are already paid. Shirt and/or magnet are included benefits. Mark Set aside when you pull inventory, then Handed out at The Cove or Open House.'}
+            : 'These memberships are already paid. Shirt and/or magnet are included benefits. Mark Set aside when you pull inventory, then Handed out at The Cove or Back to School Night (Aug 27).'}
         </p>
       </div>
 
