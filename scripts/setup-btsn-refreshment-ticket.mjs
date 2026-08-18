@@ -1,7 +1,7 @@
 /**
  * POS-only BTSN food-truck ticket (not on /cove or /spirit-wear).
- * Ring on Square Stand / phone POS; Cove QR or Card on File; then hand a ticket.
- * Lagoon/Tide (code ends in 9) stay free — do not ring this item.
+ * Reef only: lookup family → ring this SKU → deduct Cove → hand a ticket.
+ * Guests / non-members pay the truck (do not ring). Lagoon/Tide (code ends in 9) stay free.
  *
  *   node --env-file=frontend/.env.local scripts/setup-btsn-refreshment-ticket.mjs
  */
@@ -33,6 +33,8 @@ const ITEM = {
   variationName: 'Ticket',
   priceCents: 600,
   qty: 80,
+  description:
+    '$6 each for Reef after Cove lookup. Guests pay the truck. Lagoon/Tide (code ends in 9) free — do not ring.',
 }
 
 const siteId = process.env.WIX_SITE_ID
@@ -95,7 +97,23 @@ async function findWixProductBySku(sku) {
   return null
 }
 
+async function findCoveInventoryItem() {
+  const list = await wix('/wix-data/v2/items/query', {
+    dataCollectionId: 'CoveInventory',
+    query: { filter: { sku: { $eq: ITEM.sku } }, paging: { limit: 5 } },
+  })
+  return (list.dataItems || [])[0] || null
+}
+
 async function ensureWixProduct() {
+  const inv = await findCoveInventoryItem()
+  if (inv?.data?.productId && inv?.data?.variantId) {
+    return {
+      productId: String(inv.data.productId),
+      variantId: String(inv.data.variantId),
+      created: false,
+    }
+  }
   const existing = await findWixProductBySku(ITEM.sku)
   if (existing) {
     const productId = String(existing.product.id)
@@ -154,11 +172,7 @@ async function ensureWixProduct() {
 }
 
 async function upsertCoveInventory({ productId, variantId }) {
-  const list = await wix('/wix-data/v2/items/query', {
-    dataCollectionId: 'CoveInventory',
-    query: { filter: { sku: { $eq: ITEM.sku } }, paging: { limit: 5 } },
-  })
-  const existing = (list.dataItems || [])[0]
+  const existing = await findCoveInventoryItem()
   const fields = {
     productId,
     variantId,
@@ -214,7 +228,7 @@ async function ensureSquareItem() {
             itemData: {
               name: ITEM.name,
               description:
-                '$6 each. Reef/guests pay with Cove, cash, or card. Lagoon/Tide (code ends in 9) free — do not ring.',
+                ITEM.description,
               productType: 'REGULAR',
               variations: [
                 {
@@ -251,7 +265,7 @@ async function ensureSquareItem() {
       itemData: {
         name: ITEM.name,
         description:
-          '$6 each. Reef/guests pay with Cove, cash, or card. Lagoon/Tide (code ends in 9) free — do not ring.',
+          ITEM.description,
         productType: 'REGULAR',
         variations: [
           {

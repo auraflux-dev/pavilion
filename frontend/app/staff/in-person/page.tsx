@@ -117,10 +117,16 @@ export default function StaffInPersonCardPage() {
                 </td>
               </tr>
               <tr className="border-t border-[#E8E4DC]">
-                <td className="p-3 align-top font-semibold">Reef / guest · pay for food truck</td>
+                <td className="p-3 align-top font-semibold">Reef · pay with Cove</td>
                 <td className="p-3 align-top">
-                  Stand / phone POS → ring <strong>BTSN food truck ticket</strong> ($6 each) → Cove QR,
-                  Card on File, cash, or card → then hand ticket
+                  Lookup 6-digit / passcode → ring <strong>BTSN food truck ticket</strong> ($6 each) →
+                  deduct Cove (QR or Card on File) → then hand ticket
+                </td>
+              </tr>
+              <tr className="border-t border-[#E8E4DC]">
+                <td className="p-3 align-top font-semibold">Guest / non-member · food truck</td>
+                <td className="p-3 align-top">
+                  They pay the truck. Do not ring Stand. No PTO ticket.
                 </td>
               </tr>
             </tbody>
@@ -144,9 +150,8 @@ export default function StaffInPersonCardPage() {
           >
             <h2 className="text-base font-bold text-[#085508]">Events (BTSN Aug 27)</h2>
             <p className="mt-2 text-sm text-[#5A6070] leading-relaxed">
-              Stand owns all in-person tenders (including Cove Card on File). Soft-ask Join QR —
-              purchases will outnumber joins. Paid food: ring BTSN food truck ticket ($6 each),
-              then hand the ticket.
+              Stand owns Cove tenders. Guests pay the food truck. Reef: lookup → $6 Cove ticket
+              → hand ticket. Soft-ask Join QR — purchases will outnumber joins.
             </p>
           </div>
         </section>
