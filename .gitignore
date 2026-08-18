@@ -33,5 +33,8 @@ promo-videos/assets/portal-walkthrough/
 *.tsbuildinfo
 promo-videos/**/*.bak.mp4
 
+# local scratch — crops, audits, catalog dumps
+tmp/
+
 .DS_Store
 **/.DS_Store
