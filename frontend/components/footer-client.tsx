@@ -22,9 +22,13 @@ interface Props {
   socialTwitter: string
   socialYoutube: string
   footerLinks: NavLink[]
+  address: string
 }
 
-export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebook, socialInstagram, socialTwitter, socialYoutube, footerLinks }: Props) {
+export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebook, socialInstagram, socialTwitter, socialYoutube, footerLinks, address }: Props) {
+  const addressLines = address.split(',').map((part) => part.trim()).filter(Boolean)
+  const street = addressLines[0] || address
+  const cityLine = addressLines.slice(1).join(', ')
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
   const { status } = useAuth()
@@ -185,12 +189,16 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
                 />
                 <div>
                   <p className="text-sm leading-relaxed" style={{ color: '#C5CCD6' }}>
-                    23415 Evergreen Ridge Drive
-                    <br />
-                    Ashburn, VA 20148
+                    {street}
+                    {cityLine ? (
+                      <>
+                        <br />
+                        {cityLine}
+                      </>
+                    ) : null}
                   </p>
                   <a
-                    href="https://maps.google.com/?q=23415+Evergreen+Ridge+Drive+Ashburn+VA+20148"
+                    href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs mt-1 inline-block hover:underline"

@@ -43,6 +43,7 @@ export const DEMO_SETTINGS: Record<string, string> = {
   contactAddress: `100 Riverside Drive, ${b.town}`,
   contactStoreHours: 'Mon–Fri · lunch periods',
   storeHours: 'Mon–Fri · lunch periods',
+  homeVolunteerImageAlt: `${b.pto} volunteers at a school night`,
 }
 
 export const DEMO_NAV: NavLink[] = [
@@ -121,6 +122,11 @@ export const DEMO_PAGES: Record<string, PageContentFields> = {
     eyebrow: b.store,
     title: `${b.store} at ${b.school}`,
     body: `Snacks at the window, spirit wear online, and one ${b.card} for the family. Load it, then students tap or show a code.`,
+    bullets: [
+      'Free parent membership required',
+      `One family ${b.card} and balance`,
+      '10% on first load · up to $500',
+    ],
     ctaLabel: `Load a ${b.card}`,
     ctaHref: '/cove#card',
   }),

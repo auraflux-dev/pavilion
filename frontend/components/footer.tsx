@@ -7,6 +7,7 @@ import {
   resolveSocialLink,
 } from '@/lib/social/public-links'
 import { FooterClient } from './footer-client'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 export async function Footer() {
   const [settings, footerLinks, member] = await Promise.all([
@@ -21,11 +22,12 @@ export async function Footer() {
       link6={member ? settings.get('announcement6thLink', '') : ''}
       link7={member ? settings.get('announcement7thLink', '') : ''}
       link8={member ? settings.get('announcement8thLink', '') : ''}
-      socialFacebook={resolveSocialLink(settings.get('socialFacebook', ''), DEFAULT_SOCIAL_FACEBOOK)}
-      socialInstagram={resolveSocialLink(settings.get('socialInstagram', ''), DEFAULT_SOCIAL_INSTAGRAM)}
+      socialFacebook={isDemoInstance() ? '' : resolveSocialLink(settings.get('socialFacebook', ''), DEFAULT_SOCIAL_FACEBOOK)}
+      socialInstagram={isDemoInstance() ? '' : resolveSocialLink(settings.get('socialInstagram', ''), DEFAULT_SOCIAL_INSTAGRAM)}
       socialTwitter={settings.get('socialTwitter', '')}
       socialYoutube={settings.get('socialYoutube', '')}
       footerLinks={footerLinks}
+      address={settings.get('contactAddress', '23415 Evergreen Ridge Drive, Ashburn, VA 20148')}
     />
   )
 }

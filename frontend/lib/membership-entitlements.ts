@@ -1,3 +1,5 @@
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
+
 /**
  * Membership perk entitlements. what we still owe the family after they join.
  * Stored as JSON on Memberships.entitlementsJson and surfaced in the portal / Staff.
@@ -198,7 +200,7 @@ export function buildMembershipEntitlements(opts: {
     } else {
       out.push({
         kind: 'magnet',
-        label: '1 Stone Hill car magnet',
+        label: vanillaizeIfDemo('1 Stone Hill car magnet'),
         status: 'pending',
         detail: 'Circle 5-3/4″ · full color',
         notes: PHYSICAL_PERK_PICKUP_NOTE,
@@ -212,7 +214,7 @@ export function buildMembershipEntitlements(opts: {
     if (tierAutoMagnet(tier) || tierIncludesMagnetWithShirt(tier)) {
       out.push({
         kind: 'magnet',
-        label: '1 Stone Hill car magnet',
+        label: vanillaizeIfDemo('1 Stone Hill car magnet'),
         status: 'pending',
         detail: 'Circle 5-3/4″ · full color',
         notes: PHYSICAL_PERK_PICKUP_NOTE,

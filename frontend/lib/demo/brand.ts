@@ -54,6 +54,8 @@ export function vanillaizeCopy(input: string): string {
     .replace(/\bGo Stingrays!/gi, DEMO_BRAND.cheer)
     .replace(/\bStingrays\b/gi, DEMO_BRAND.mascotPlural)
     .replace(/\bStingray\b/gi, DEMO_BRAND.mascot)
+    .replace(/\bSHMS led\b/g, 'School led')
+    .replace(/\bPTO\/SHMS\b/g, 'PTO/School')
     .replace(/\bSHMS\b/g, DEMO_BRAND.short)
     .replace(/\bLagoon\b/g, DEMO_BRAND.tiers.lagoon)
     .replace(/\bReef\b/g, DEMO_BRAND.tiers.reef)

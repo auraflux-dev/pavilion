@@ -1,3 +1,5 @@
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
+
 export type ParentVideoId =
   | 'parent-tour'
   | 'portal-walkthrough'
@@ -56,12 +58,21 @@ export const PARENT_VIDEOS: ParentVideo[] = [
   },
 ]
 
+function vanillaizeVideo(video: ParentVideo): ParentVideo {
+  return {
+    ...video,
+    title: vanillaizeIfDemo(video.title),
+    summary: vanillaizeIfDemo(video.summary),
+  }
+}
+
 export function parentVideosFor(
   placement: ParentVideo['placements'][number],
 ): ParentVideo[] {
-  return PARENT_VIDEOS.filter((v) => v.placements.includes(placement))
+  return PARENT_VIDEOS.filter((v) => v.placements.includes(placement)).map(vanillaizeVideo)
 }
 
 export function getParentVideo(id: ParentVideoId): ParentVideo | undefined {
-  return PARENT_VIDEOS.find((v) => v.id === id)
+  const video = PARENT_VIDEOS.find((v) => v.id === id)
+  return video ? vanillaizeVideo(video) : undefined
 }

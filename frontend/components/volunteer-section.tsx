@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { CheckCircle2, ArrowRight } from 'lucide-react'
 import { getPageContent } from '@/lib/api/page-content'
 import { getSiteSettings } from '@/lib/api/site-settings'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 const DEFAULT_IMAGE = '/home/volunteer.jpg'
 
@@ -24,7 +25,9 @@ export async function VolunteerSection() {
   )
   const imageAlt = settings.get(
     'homeVolunteerImageAlt',
-    'SHMS PTO students and parent volunteers working together at a school event'
+    vanillaizeIfDemo(
+      'SHMS PTO students and parent volunteers working together at a school event',
+    ),
   )
   const primaryLabel = content.ctaLabel || 'Volunteer with us'
   const quote = content.sectionTitle

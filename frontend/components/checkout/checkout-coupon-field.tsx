@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { getStoredCouponCode, setStoredCouponCode } from '@/lib/start-checkout'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 /** Compact coupon field; persists to sessionStorage for checkout. */
 export function CheckoutCouponField({
@@ -33,7 +34,9 @@ export function CheckoutCouponField({
         className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-mono font-normal tracking-wide uppercase"
       />
       <span className="mt-1 block text-[11px] font-normal text-[#5A6070]">
-        For spirit wear and enrichment when available. Not for membership or Cove Digital Cards.
+        {vanillaizeIfDemo(
+          'For spirit wear and enrichment when available. Not for membership or Cove Digital Cards.',
+        )}
       </span>
     </label>
   )

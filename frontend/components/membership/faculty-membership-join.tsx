@@ -12,6 +12,7 @@ import {
   type MembershipShirtSelection,
 } from '@/components/membership/membership-shirt-picker'
 import type { PhysicalPerkChoice } from '@/lib/membership-entitlements'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type Props = {
   price: number
@@ -47,7 +48,7 @@ export function FacultyMembershipJoin({ price }: Props) {
               }}
             />
             <span>
-              <span className="font-semibold">Stone Hill car magnet</span>
+              <span className="font-semibold">{vanillaizeIfDemo('Stone Hill car magnet')}</span>
               <span className="block text-xs text-[#5A6070]">About $10 value</span>
             </span>
           </label>
@@ -88,7 +89,7 @@ export function FacultyMembershipJoin({ price }: Props) {
             physicalPerk === 'spirit_shirt' && shirt
               ? `Faculty membership · ${shirt.label}.`
               : physicalPerk === 'magnet'
-                ? 'Faculty membership · Stone Hill car magnet.'
+                ? vanillaizeIfDemo('Faculty membership · Stone Hill car magnet.')
                 : 'Faculty membership for the school year.'
           }
           payBody={{

@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react'
 import { EventCard } from '@/components/events/event-card'
 import type { WixEvent } from '@/lib/api/events'
 import { PRIMARY_EVENT_CATEGORIES, sortEventCategoryNames } from '@/lib/events/categories'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 interface EventsFilterProps {
   events: WixEvent[]
@@ -14,8 +16,11 @@ export function EventsFilter({ events }: EventsFilterProps) {
 
   const categoryOptions = useMemo(() => {
     const fromEvents = events.flatMap((e) => e.tags ?? []).filter(Boolean)
+    const primary = isPublicDemoInstance()
+      ? PRIMARY_EVENT_CATEGORIES.filter((c) => c === 'PTO led')
+      : PRIMARY_EVENT_CATEGORIES
     const ordered = sortEventCategoryNames([
-      ...PRIMARY_EVENT_CATEGORIES,
+      ...primary,
       ...fromEvents,
     ])
     return ['All', ...Array.from(new Set(ordered))]
@@ -40,7 +45,7 @@ export function EventsFilter({ events }: EventsFilterProps) {
             style={active === cat ? { backgroundColor: '#085508', borderColor: '#085508' } : {}}
             aria-pressed={active === cat}
           >
-            {cat}
+            {vanillaizeIfDemo(cat)}
           </button>
         ))}
       </div>
