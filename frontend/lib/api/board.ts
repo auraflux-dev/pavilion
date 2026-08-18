@@ -39,6 +39,11 @@ interface WixQueryResponse {
 }
 
 export async function getBoardMembers(): Promise<BoardMember[]> {
+  const { isDemoInstance } = await import('@/lib/demo/instance')
+  if (isDemoInstance()) {
+    const { DEMO_BOARD } = await import('@/lib/demo/content')
+    return DEMO_BOARD.map((m) => ({ ...m }))
+  }
   const apiKey = process.env.WIX_API_KEY
   const siteId = process.env.WIX_SITE_ID
 

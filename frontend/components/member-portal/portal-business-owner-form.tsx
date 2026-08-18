@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Briefcase, CheckCircle2, Loader2, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { trackGenerateLead } from '@/lib/ga'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type Props = {
   memberName?: string
@@ -158,8 +159,9 @@ export function PortalBusinessOwnerForm({
     isOwner === 'yes' ? (
       <>
         <p className="text-sm text-[#5A6070] leading-relaxed">
-          Tell us what you do and how you&apos;d like to show up for Stone Hill families. We&apos;ll
-          follow up with ideas that fit. No commitment required.
+          {vanillaizeIfDemo(
+            "Tell us what you do and how you'd like to show up for Stone Hill families. We'll follow up with ideas that fit. No commitment required.",
+          )}
         </p>
         <div>
           <label htmlFor="biz-name" className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
@@ -213,15 +215,15 @@ export function PortalBusinessOwnerForm({
       >
         <div className="text-left">
           <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#085508' }}>
-            For SHMS PTO families
+            {vanillaizeIfDemo('For SHMS PTO families')}
           </p>
           <h3 className="mt-1 text-xl font-bold text-[#1A1A1A]">
             Own a business? We want to know you.
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-[#5A6070]">
-            Many Stone Hill families run local businesses. Tell us yours so SHMS PTO can
-            celebrate you in the community, connect you with other parents, and explore
-            simple ways to help: shout-outs, event tables, or member-friendly offers.
+            {vanillaizeIfDemo(
+              'Many Stone Hill families run local businesses. Tell us yours so SHMS PTO can celebrate you in the community, connect you with other parents, and explore simple ways to help: shout-outs, event tables, or member-friendly offers.',
+            )}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-[#5A6070]">
             Share a yes/no below. If yes, add your business details and we will email our
@@ -309,9 +311,9 @@ export function PortalBusinessOwnerForm({
             Own a business? We want to know you.
           </h2>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
-            Why we ask: many SHMS PTO families run local businesses, and we want to celebrate
-            you in the school community: shout-outs, connections with other parents, and
-            simple ways to help each other.
+            {vanillaizeIfDemo(
+              'Why we ask: many SHMS PTO families run local businesses, and we want to celebrate you in the school community: shout-outs, connections with other parents, and simple ways to help each other.',
+            )}
           </p>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
             What happens next: answer yes or no below. If yes, add your business name and

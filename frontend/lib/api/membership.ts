@@ -230,6 +230,10 @@ async function fetchCmsTiers(): Promise<CmsTier[]> {
  * Faculty (and rows without productId) keep CMS copy.
  */
 export async function getMembershipTiers(): Promise<MembershipTier[]> {
+  if (isDemoInstance()) {
+    const { DEMO_TIERS } = await import('@/lib/demo/content')
+    return DEMO_TIERS.map((t) => ({ ...t, perks: [...t.perks] }))
+  }
   const cmsTiers = await fetchCmsTiers()
   if (!cmsTiers.length) return []
 

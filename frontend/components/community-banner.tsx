@@ -1,5 +1,7 @@
 import { getPageContent } from '@/lib/api/page-content'
 import { getSiteSettings } from '@/lib/api/site-settings'
+import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 const DEFAULT_IMAGE = '/home/community.jpg'
 
@@ -10,7 +12,7 @@ function splitCommunityHeadline(raw: string): string[] {
   if (text.includes('\n')) {
     return text.split('\n').map((l) => l.trim()).filter(Boolean)
   }
-  const match = text.match(/^(.*?)\.\s+(Go Stingrays!?)$/i)
+  const match = text.match(/^(.*?)\.\s+(Go (?:Stingrays|Hawks)!?)$/i)
   if (match?.[1] && match[2]) {
     return [`${match[1].trim()}.`, match[2]]
   }
@@ -36,7 +38,7 @@ export async function CommunityBanner() {
   )
   const imageAlt = settings.get(
     'homeCommunityImageAlt',
-    'Stone Hill Middle School PTO community'
+    isDemoInstance() ? `${DEMO_BRAND.pto} community` : 'Stone Hill Middle School PTO community'
   )
   const headline = content.title || content.body
 

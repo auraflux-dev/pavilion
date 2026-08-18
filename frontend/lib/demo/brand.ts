@@ -7,11 +7,11 @@ export const DEMO_BRAND = {
   mascot: 'Hawk',
   mascotPlural: 'Hawks',
   cheer: 'Go Hawks!',
-  store: 'Campus Store',
-  card: 'Campus Card',
-  cardPlural: 'Campus Cards',
-  town: 'your town',
-  district: 'your school district',
+  store: 'The Perch',
+  card: 'Perch Card',
+  cardPlural: 'Perch Cards',
+  town: 'Fairhaven',
+  district: 'Fairhaven Public Schools',
   host: 'riversidepto.org',
   tiers: {
     reef: 'Member',
@@ -43,6 +43,9 @@ export function vanillaizeCopy(input: string): string {
   s = s
     .replace(/\bCove Digital Cards\b/g, DEMO_BRAND.cardPlural)
     .replace(/\bCove Digital Card\b/g, DEMO_BRAND.card)
+    .replace(/\bShop The Cove\b/gi, `Shop ${DEMO_BRAND.store}`)
+    .replace(/\bThe Cove shop\b/gi, DEMO_BRAND.store)
+    .replace(/\bFamily Cove Digital Card\b/gi, DEMO_BRAND.card)
     .replace(/\bStone Hill Middle School PTO\b/gi, DEMO_BRAND.pto)
     .replace(/\bStone Hill Middle School\b/gi, DEMO_BRAND.school)
     .replace(/\bStone Hill\b/gi, 'Riverside')
@@ -56,9 +59,16 @@ export function vanillaizeCopy(input: string): string {
     .replace(/\bReef\b/g, DEMO_BRAND.tiers.reef)
     .replace(/\bTide\b/g, DEMO_BRAND.tiers.tide)
     .replace(/\bLoudoun County Public Schools\b/gi, DEMO_BRAND.district)
-    .replace(/\bAshburn, Virginia\b/gi, DEMO_BRAND.town)
+    .replace(/\bRock Ridge High School\b/gi, `${DEMO_BRAND.school}`)
+    .replace(/\bAshburn, Virginia\b/gi, `${DEMO_BRAND.town}`)
     .replace(/\bAshburn\b/gi, DEMO_BRAND.town)
     .replace(/\bLCPS\b/g, DEMO_BRAND.district)
+    .replace(/\bCampus Store\b/g, DEMO_BRAND.store)
+    .replace(/\bCampus Card\b/g, DEMO_BRAND.card)
+    .replace(/your town/gi, DEMO_BRAND.town)
+    .replace(/your school district/gi, DEMO_BRAND.district)
+    .replace(/\bNorthern Virginia\b/gi, DEMO_BRAND.town)
+    .replace(/\bNOVA Math Tournament\b/gi, 'Math meet')
     .replace(/shmspto\.org/gi, DEMO_BRAND.host)
     .replace(/@shmspto\b/gi, `@${DEMO_BRAND.host}`)
     .replace(/\s{2,}/g, ' ')

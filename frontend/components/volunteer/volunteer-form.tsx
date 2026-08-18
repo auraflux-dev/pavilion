@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 import { trackGenerateLead } from '@/lib/ga'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 /** Used only when VolunteerOpportunities CMS returns no active rows */
 const FALLBACK_OPPORTUNITIES = [
@@ -73,7 +74,9 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
         </div>
         <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Thank you for signing up!</h3>
         <p className="text-[#5A6070] text-sm">
-          We&apos;ll be in touch soon with next steps. We appreciate your support of SHMS PTO students.
+          {vanillaizeIfDemo(
+            "We'll be in touch soon with next steps. We appreciate your support of SHMS PTO students.",
+          )}
         </p>
       </div>
     )

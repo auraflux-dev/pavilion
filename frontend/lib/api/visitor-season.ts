@@ -6,6 +6,8 @@ import { getSiteSettings } from '@/lib/api/site-settings'
  * Default when unset: false (summer / off-session).
  */
 export async function isSchoolInSession(): Promise<boolean> {
+ const { isDemoInstance } = await import('@/lib/demo/instance')
+ if (isDemoInstance()) return true
  const settings = await getSiteSettings()
  return settings.getBool('schoolInSession', false)
 }

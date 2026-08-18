@@ -8,10 +8,13 @@ import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 import { CONTACT_DEFAULTS } from '@/lib/defaults/page-content'
 import { normalizeStaffInbox } from '@/lib/staff/inbox'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
-export const metadata = {
-  title: 'Contact | SHMS PTO',
-  description: 'Get in touch with the Stone Hill Middle School PTO board.',
+export async function generateMetadata() {
+  return {
+    title: vanillaizeIfDemo('Contact | SHMS PTO'),
+    description: vanillaizeIfDemo('Get in touch with the Stone Hill Middle School PTO board.'),
+  }
 }
 
 export const revalidate = 300
@@ -55,7 +58,7 @@ export default async function ContactPage() {
     },
     {
       icon: Clock,
-      label: 'The Cove (in-person snack window)',
+      label: vanillaizeIfDemo('The Cove (in-person snack window)'),
       value: `${storeHours} · Online shopping and store-card reloads available anytime with a free or paid parent login.`,
       href: null as string | null,
     },

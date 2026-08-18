@@ -8,6 +8,8 @@ function isPublicSurvey(s: SurveyDefinition | null): s is SurveyDefinition {
 }
 
 export async function getActiveSurveys(): Promise<SurveyDefinition[]> {
+  const { isDemoInstance } = await import('@/lib/demo/instance')
+  if (isDemoInstance()) return []
   try {
     const client = getWixClient()
     const result = await client.items.query('Surveys').eq('active', true).find()
@@ -20,6 +22,8 @@ export async function getActiveSurveys(): Promise<SurveyDefinition[]> {
 }
 
 export async function getSurveyBySlug(slug: string): Promise<SurveyDefinition | null> {
+  const { isDemoInstance } = await import('@/lib/demo/instance')
+  if (isDemoInstance()) return null
   try {
     const client = getWixClient()
     const result = await client.items.query('Surveys').eq('slug', slug).eq('active', true).find()

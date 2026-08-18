@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CreditCard, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PortalPayPalButtons } from '@/components/checkout/portal-paypal-buttons'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type Student = {
   id: string
@@ -51,7 +52,7 @@ export function StoreCardReload({
   amounts = [20, 40, 75],
   maxAmount = 500,
   onLoaded,
-  triggerLabel = 'Load Cove Digital Card',
+  triggerLabel = vanillaizeIfDemo('Load Cove Digital Card'),
   triggerClassName = '',
   bonusPercent = 10,
 }: Props) {
@@ -165,7 +166,7 @@ export function StoreCardReload({
   async function submit() {
     const loadStudentId = studentId || studentList[0]?.id || ''
     if (!loadStudentId) {
-      setError('Add a student in the portal before loading the Cove Digital Card.')
+      setError(vanillaizeIfDemo('Add a student in the portal before loading the Cove Digital Card.'))
       return
     }
     if (!Number.isInteger(amount) || amount < 1 || amount > maxAmount) {
@@ -257,7 +258,7 @@ export function StoreCardReload({
   return (
     <div className="w-full rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] p-4 space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-bold text-[#1A1A1A]">Load the family Cove Digital Card</p>
+        <p className="text-sm font-bold text-[#1A1A1A]">{vanillaizeIfDemo('Load the family Cove Digital Card')}</p>
         <button type="button" onClick={() => setOpen(false)} aria-label="Close reload form">
           <X className="w-4 h-4 text-[#5A6070]" />
         </button>
@@ -275,7 +276,7 @@ export function StoreCardReload({
 
       {/* Keep studentId for payment attribution; UI no longer asks parents to pick a card. */}
       {studentList.length === 0 ? (
-        <p className="text-xs text-amber-700">Add a student in the portal before loading the Cove Digital Card.</p>
+        <p className="text-xs text-amber-700">{vanillaizeIfDemo('Add a student in the portal before loading the Cove Digital Card.')}</p>
       ) : null}
 
       <div>
@@ -320,7 +321,8 @@ export function StoreCardReload({
         {appliedBonus > 0 ? (
           <p className="mt-2 text-[11px] text-[#085508] font-semibold">
             First-load bonus: pay ${amount} · get $
-            {(amount * (1 + appliedBonus / 100)).toFixed(2).replace(/\.00$/, '')} on the Cove Digital Card (
+            {(amount * (1 + appliedBonus / 100)).toFixed(2).replace(/\.00$/, '')}{' '}
+            {vanillaizeIfDemo('on the Cove Digital Card')} (
             {appliedBonus}%). Reloads after this are dollar-for-dollar.
           </p>
         ) : bonusPercent > 0 ? (
@@ -371,7 +373,7 @@ export function StoreCardReload({
               className="mt-0.5"
             />
             Save this card securely for future reloads and optional auto top-off.
-            SHMS PTO never stores the card number.
+            {vanillaizeIfDemo('SHMS PTO never stores the card number.')}
           </label>
         </>
       ) : null}
@@ -428,8 +430,9 @@ export function StoreCardReload({
       ) : null}
 
       <p className="text-[10px] text-[#5A6070] text-center">
-        Pay with credit/debit card or PayPal. One family Cove Digital Card and balance. {bonusPercent}% on
-        first load or membership credit only. Reloads are 1:1. Saving a payment card is optional.
+        {vanillaizeIfDemo(
+          `Pay with credit/debit card or PayPal. One family Cove Digital Card and balance. ${bonusPercent}% on first load or membership credit only. Reloads are 1:1. Saving a payment card is optional.`,
+        )}
       </p>
     </div>
   )

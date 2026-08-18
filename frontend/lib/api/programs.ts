@@ -1,5 +1,6 @@
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 import { getWixClient } from "@/lib/wix-client";
 import { formatProgramSchedule } from "@/lib/programs/schedule";
 import { memberPriorityUntilIso } from '@/lib/programs/registration-access'
@@ -99,6 +100,10 @@ function mapProgramItem(item: Record<string, unknown>): Program {
 }
 
 export async function getPrograms(): Promise<Program[]> {
+  if (isDemoInstance()) {
+    const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
+    return DEMO_PROGRAMS.filter((p) => p.registrationOpen)
+  }
   const client = getWixClient();
   const result = await client.items
     .query("Programs")
@@ -109,12 +114,20 @@ export async function getPrograms(): Promise<Program[]> {
 }
 
 export async function getAllPrograms(): Promise<Program[]> {
+  if (isDemoInstance()) {
+    const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
+    return [...DEMO_PROGRAMS]
+  }
   const client = getWixClient();
   const result = await client.items.query("Programs").find();
   return publicPrograms(result.items as Record<string, unknown>[]);
 }
 
 export async function getFeaturedPrograms(): Promise<Program[]> {
+  if (isDemoInstance()) {
+    const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
+    return DEMO_PROGRAMS.filter((p) => p.featured)
+  }
   const client = getWixClient();
   const result = await client.items
     .query("Programs")
@@ -133,6 +146,10 @@ function publicPrograms(items: Record<string, unknown>[]): Program[] {
 }
 
 export async function getProgramById(id: string): Promise<Program | null> {
+  if (isDemoInstance()) {
+    const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
+    return DEMO_PROGRAMS.find((p) => p._id === id) ?? null
+  }
   const client = getWixClient();
   try {
     const item = await client.items.get("Programs", id);

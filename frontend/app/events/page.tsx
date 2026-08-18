@@ -43,7 +43,9 @@ export default async function EventsPage() {
               : {
                   eyebrow: 'Off season',
                   title: 'Events resume with the school year',
-                  body: 'No public events are scheduled while school is out of session. Membership and The Cove stay open year-round.',
+                  body: vanillaizeIfDemo(
+                    'No public events are scheduled while school is out of session. Membership and The Cove stay open year-round.',
+                  ),
                   ctaLabel: vanillaizeIfDemo('Shop The Cove'),
                   ctaHref: '/cove',
                 }),

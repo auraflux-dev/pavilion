@@ -15,6 +15,7 @@ import { EmphasizedCopy } from '@/components/emphasized-copy'
 import { DonateBlock } from '@/components/donate/donate-block'
 import { MembershipSectionNav } from '@/components/jump-nav/public-section-navs'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export const revalidate = 60
 
@@ -36,7 +37,9 @@ export default async function MembershipPage() {
   const facultyPrice = facultyTier?.price ?? 20
   const facultyDescription =
     facultyTier?.description ??
-    'Faculty and staff memberships are $20 for the school year. We appreciate everything SHMS PTO educators do for our students.'
+    vanillaizeIfDemo(
+      'Faculty and staff memberships are $20 for the school year. We appreciate everything SHMS PTO educators do for our students.',
+    )
   return (
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
@@ -86,7 +89,7 @@ export default async function MembershipPage() {
                   className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
                   style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
                 >
-                  SHMS PTO Faculty & Staff
+                  {vanillaizeIfDemo('SHMS PTO Faculty & Staff')}
                 </div>
                 <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Faculty Membership</h3>
                 <p className="text-[#5A6070] text-sm leading-relaxed max-w-xl">
@@ -104,7 +107,9 @@ export default async function MembershipPage() {
 
         <DonateBlock
           title="Not joining a paid tier? You can still donate"
-          body="Reef, Lagoon, and Tide are optional. If paid membership isn’t for you right now, any gift still helps the PTO fund enrichment, The Cove, and events for Stone Hill students."
+          body={vanillaizeIfDemo(
+            'Reef, Lagoon, and Tide are optional. If paid membership isn’t for you right now, any gift still helps the PTO fund enrichment, The Cove, and events for Stone Hill students.',
+          )}
         />
 
         {/* FAQ */}

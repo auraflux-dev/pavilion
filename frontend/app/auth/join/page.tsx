@@ -9,6 +9,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { clearPendingAuth, markPendingAuth, trackLogin, trackSignUp } from '@/lib/ga'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type Mode = 'signup' | 'login'
 type Panel = 'chooser' | 'email'
@@ -63,7 +64,9 @@ function JoinInner() {
       google_failed:
         'Google sign-in failed. Try again or use email and password.',
       google_org_internal:
-        'Google still has this app set to Internal (org-only). PTO admin: set the OAuth client to External and rename it “SHMS PTO”. Meanwhile use email and password.',
+        vanillaizeIfDemo(
+          'Google still has this app set to Internal (org-only). PTO admin: set the OAuth client to External and rename it “SHMS PTO”. Meanwhile use email and password.',
+        ),
     }
     setError(messages[code] || 'Sign-in failed. Try again or use email.')
   }, [searchParams])
@@ -211,7 +214,7 @@ function JoinInner() {
     <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: '#F5F0E8' }}>
       <div className="w-full max-w-md bg-white rounded-2xl border border-[#E8E4DC] shadow-sm p-6 sm:p-8">
         <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#085508' }}>
-          SHMS PTO
+          {vanillaizeIfDemo('SHMS PTO')}
         </p>
         <h1 className="text-2xl font-bold text-[#1A1A1A] mb-1">
           {isStaffReturn
@@ -222,10 +225,14 @@ function JoinInner() {
         </h1>
         <p className="text-sm text-[#5A6070] mb-6">
           {isStaffReturn
-            ? 'Use your @shmspto.org Google account or email. Family Member Portal uses a personal email, not this staff path.'
+            ? vanillaizeIfDemo(
+                'Use your @shmspto.org Google account or email. Family Member Portal uses a personal email, not this staff path.',
+              )
             : isSignup
               ? 'Sign up free with your personal email, then finish joining your membership tier.'
-              : 'Parents: use your personal email (Gmail, etc.). @shmspto.org is for Staff tools only, not for Member Portal family login.'}
+              : vanillaizeIfDemo(
+                  'Parents: use your personal email (Gmail, etc.). @shmspto.org is for Staff tools only, not for Member Portal family login.',
+                )}
         </p>
 
         {panel === 'chooser' ? (

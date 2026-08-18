@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { SocialFooterLinks } from '@/components/social-footer-links'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
+import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 type NavItem = {
   id: StaffWorkspace
@@ -72,15 +74,24 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
           <Link
             href="/"
             className="flex items-center gap-2.5 min-w-0 rounded-md hover:bg-white/10 px-1 py-0.5 -ml-1"
-            aria-label="Return to SHMS PTO home"
+            aria-label={isPublicDemoInstance() ? `Return to ${DEMO_BRAND.short} home` : 'Return to SHMS PTO home'}
           >
-            <Image
-              src="/shms-logo.png"
-              alt=""
-              width={36}
-              height={36}
-              className="shrink-0 rounded-sm bg-white/10"
-            />
+            {isPublicDemoInstance() ? (
+              <span
+                className="w-9 h-9 rounded-sm shrink-0 flex items-center justify-center text-sm font-bold bg-white/10"
+                aria-hidden="true"
+              >
+                R
+              </span>
+            ) : (
+              <Image
+                src="/shms-logo.png"
+                alt=""
+                width={36}
+                height={36}
+                className="shrink-0 rounded-sm bg-white/10"
+              />
+            )}
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#FFD700]">Staff</p>
               <p className="text-sm font-semibold truncate">

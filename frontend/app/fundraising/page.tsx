@@ -20,9 +20,13 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 export const revalidate = 3600 // refresh totals every hour
 
-export const metadata = {
-  title: 'Fundraising | SHMS PTO',
-  description: 'Every purchase, membership, and Cove sale directly funds SHMS PTO student enrichment. Track live goals here.',
+export async function generateMetadata() {
+  return {
+    title: vanillaizeIfDemo('Fundraising | SHMS PTO'),
+    description: vanillaizeIfDemo(
+      'Every purchase, membership, and Cove sale directly funds SHMS PTO student enrichment. Track live goals here.',
+    ),
+  }
 }
 
 function pct(raised: number, goal: number) {
@@ -54,7 +58,7 @@ export default async function FundraisingPage() {
     { label: 'Student Enrichment Programs', pct: settings.getNumber('allocStudentEnrichment', 45), amount: '' },
     { label: 'School Events & Celebrations', pct: settings.getNumber('allocSchoolEvents', 25),    amount: '' },
     { label: 'Teacher & Classroom Support',  pct: settings.getNumber('allocTeacherSupport', 15),  amount: '' },
-    { label: 'The Cove Operations',          pct: settings.getNumber('allocStoreOps', 10),         amount: '' },
+    { label: vanillaizeIfDemo('The Cove Operations'),          pct: settings.getNumber('allocStoreOps', 10),         amount: '' },
     { label: 'PTO Admin & Communications',   pct: settings.getNumber('allocPTOAdmin', 5),          amount: '' },
   ].map(a => ({ ...a, amount: fmtDollars(ANNUAL_GOAL * a.pct / 100) }))
 
@@ -73,7 +77,7 @@ export default async function FundraisingPage() {
       id: 'membership',
       icon: Star,
       label: 'Memberships',
-      description: 'Annual PTO memberships (Reef, Lagoon, Tide) are our largest revenue source, funding enrichment programs directly.',
+      description: vanillaizeIfDemo('Annual PTO memberships (Reef, Lagoon, Tide) are our largest revenue source, funding enrichment programs directly.'),
       raised: totals.membership,
       goal:   goals.membership,
       href: '/membership',
@@ -82,12 +86,12 @@ export default async function FundraisingPage() {
     {
       id: 'store',
       icon: ShoppingBag,
-      label: 'The Cove Digital Card',
-      description: 'Student snack window sales via prepaid Cove Digital Cards at The Cove.',
+      label: vanillaizeIfDemo('The Cove Digital Card'),
+      description: vanillaizeIfDemo('Student snack window sales via prepaid Cove Digital Cards at The Cove.'),
       raised: totals.store,
       goal:   goals.store,
       href: '/cove',
-      cta: 'Load Cove Digital Card',
+      cta: vanillaizeIfDemo('Load Cove Digital Card'),
     },
     {
       id: 'spiritWear',
@@ -112,8 +116,10 @@ export default async function FundraisingPage() {
     {
       id: 'novaMath',
       icon: TrendingUp,
-      label: 'NOVA Math Tournament',
-      description: 'Registration fees and community support for our students competing in the Northern Virginia Math Tournament.',
+      label: vanillaizeIfDemo('NOVA Math Tournament'),
+      description: vanillaizeIfDemo(
+        'Registration fees and community support for our students competing in the Northern Virginia Math Tournament.',
+      ),
       raised: totals.novaMath,
       goal:   goals.novaMath,
       href: '/programs',
@@ -206,8 +212,10 @@ export default async function FundraisingPage() {
         <FundraisingSectionNav />
 
         <DonateBlock
-          title="Make a gift to SHMS PTO"
- body="Choose any amount. Your gift goes to the PTO: enrichment, The Cove, teacher support, and events for Stone Hill students. Not a donation to the school district."
+          title={vanillaizeIfDemo('Make a gift to SHMS PTO')}
+          body={vanillaizeIfDemo(
+            'Choose any amount. Your gift goes to the PTO: enrichment, The Cove, teacher support, and events for Stone Hill students. Not a donation to the school district.',
+          )}
         />
 
         {/* Initiative cards */}
@@ -224,7 +232,9 @@ export default async function FundraisingPage() {
                 Every Way You Can Help
               </h2>
               <p className="text-[#5A6070] mt-3 max-w-xl mx-auto">
-                Memberships, Cove Digital Cards, event tickets, and volunteering. It all adds up.
+                {vanillaizeIfDemo(
+                  'Memberships, Cove Digital Cards, event tickets, and volunteering. It all adds up.',
+                )}
               </p>
             </div>
 
@@ -298,7 +308,9 @@ export default async function FundraisingPage() {
                 Where the Funds Go
               </h2>
               <p className="text-[#5A6070] mt-3">
- 100% of gifts support SHMS PTO programs for Stone Hill students, not the school district.
+                {vanillaizeIfDemo(
+                  '100% of gifts support SHMS PTO programs for Stone Hill students, not the school district.',
+                )}
               </p>
             </div>
 
@@ -351,9 +363,9 @@ export default async function FundraisingPage() {
                 Sponsorships
               </h2>
               <p className="text-[#5A6070] mt-3 max-w-2xl mx-auto">
-                Highlighting businesses and organizations who support Stone Hill students. Suggest a
-                sponsor or apply on behalf of your business (VP of Initiatives). Family-owned
-                businesses can introduce themselves below so Membership Experience can connect with you.
+                {vanillaizeIfDemo(
+                  'Highlighting businesses and organizations who support Stone Hill students. Suggest a sponsor or apply on behalf of your business (VP of Initiatives). Family-owned businesses can introduce themselves below so Membership Experience can connect with you.',
+                )}
               </p>
             </div>
 
@@ -390,7 +402,9 @@ export default async function FundraisingPage() {
               </ul>
             ) : (
               <p className="text-center text-sm text-[#5A6070] mb-10">
-                Future sponsors will appear here. Be the first to partner with SHMS PTO.
+                {vanillaizeIfDemo(
+                  'Future sponsors will appear here. Be the first to partner with SHMS PTO.',
+                )}
               </p>
             )}
 

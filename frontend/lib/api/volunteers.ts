@@ -12,6 +12,11 @@ export interface VolunteerOpportunity {
 }
 
 export async function getVolunteerOpportunities(): Promise<VolunteerOpportunity[]> {
+  const { isDemoInstance } = await import('@/lib/demo/instance')
+  if (isDemoInstance()) {
+    const { DEMO_VOLUNTEER } = await import('@/lib/demo/content')
+    return [...DEMO_VOLUNTEER]
+  }
   const client = getWixClient();
   try {
     const result = await client.items

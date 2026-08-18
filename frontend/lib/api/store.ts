@@ -121,6 +121,11 @@ function mapProduct(raw: Record<string, unknown>): StoreItem {
 }
 
 export async function getStoreItems(): Promise<StoreItem[]> {
+ const { isDemoInstance } = await import('@/lib/demo/instance')
+ if (isDemoInstance()) {
+   const { DEMO_STORE_ITEMS } = await import('@/lib/demo/content')
+   return DEMO_STORE_ITEMS.map((i) => ({ ...i }))
+ }
  try {
  const apiKey = process.env.WIX_API_KEY;
  const siteId = process.env.WIX_SITE_ID;
@@ -165,6 +170,11 @@ export async function getFeaturedItems(): Promise<StoreItem[]> {
 }
 
 export async function getSpiritWearItems(): Promise<SpiritItem[]> {
+ const { isDemoInstance } = await import('@/lib/demo/instance')
+ if (isDemoInstance()) {
+   const { DEMO_SPIRIT_ITEMS } = await import('@/lib/demo/content')
+   return DEMO_SPIRIT_ITEMS.map((i) => ({ ...i }))
+ }
  try {
  const apiKey = process.env.WIX_API_KEY;
  const siteId = process.env.WIX_SITE_ID;

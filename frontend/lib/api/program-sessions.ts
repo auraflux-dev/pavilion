@@ -21,6 +21,8 @@ export type ProgramSession = {
 }
 
 export async function getUpcomingProgramSessions(limit = 40): Promise<ProgramSession[]> {
+  const { isDemoInstance } = await import('@/lib/demo/instance')
+  if (isDemoInstance()) return []
   try {
     const client = getWixClient()
     const now = new Date().toISOString()

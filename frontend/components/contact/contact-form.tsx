@@ -4,11 +4,12 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react'
 import { trackGenerateLead } from '@/lib/ga'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 const TOPICS = [
   'General Question',
   'Programs & Registration',
-  'The Cove / Cove Digital Card',
+  vanillaizeIfDemo('The Cove / Cove Digital Card'),
   'Volunteer Opportunities',
   'Membership',
   'Fundraising',

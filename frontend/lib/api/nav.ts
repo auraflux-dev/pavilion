@@ -135,6 +135,10 @@ function ensureHomeLink(links: NavLink[]): NavLink[] {
 }
 
 export async function getNavLinks(): Promise<NavLink[]> {
+ if (isDemoInstance()) {
+   const { DEMO_NAV } = await import('@/lib/demo/content')
+   return DEMO_NAV.map((l) => ({ ...l }))
+ }
  const raw = await fetchNavLinks()
  // Always use CMS active links; home sections still gate Programs/Events via schoolInSession.
  const links = ensureHomeLink(normalizeCommerceNav(raw.length > 0 ? raw : FALLBACK_NAV))

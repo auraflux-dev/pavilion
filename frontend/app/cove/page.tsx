@@ -14,13 +14,24 @@ import { getStoreCardBonusPercent } from '@/lib/store-card-bonus'
 import { SpiritWearBuyButton } from '@/components/spirit-wear/spirit-wear-buy-button'
 import { SpiritWearCouponBar } from '@/components/spirit-wear/spirit-wear-coupon-bar'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export const revalidate = 300
 
-export const metadata = {
-  title: 'The Cove | SHMS PTO',
-  description:
-    'The Cove: SHMS PTO Cove Digital Card, snack window menu, and spirit wear in one place.',
+export async function generateMetadata() {
+  const { isDemoInstance } = await import('@/lib/demo/instance')
+  const { DEMO_BRAND } = await import('@/lib/demo/brand')
+  if (isDemoInstance()) {
+    return {
+      title: `${DEMO_BRAND.store} | ${DEMO_BRAND.short}`,
+      description: `${DEMO_BRAND.store}: ${DEMO_BRAND.card}, snack window, and spirit wear for ${DEMO_BRAND.school}.`,
+    }
+  }
+  return {
+    title: 'The Cove | SHMS PTO',
+    description:
+      'The Cove: SHMS PTO Cove Digital Card, snack window menu, and spirit wear in one place.',
+  }
 }
 
 function parseHowSteps(bullets: string[]) {
@@ -79,8 +90,10 @@ export default async function CovePage() {
           videoId="parent-tour"
           id="cove-card-video"
           eyebrow="Watch"
-          title="See how the Cove Digital Card works"
-          body="The website tour covers loading your family card and using it at The Cove."
+          title={vanillaizeIfDemo('See how the Cove Digital Card works')}
+          body={vanillaizeIfDemo(
+            'The website tour covers loading your family card and using it at The Cove.',
+          )}
           background="#FFFFFF"
         />
 

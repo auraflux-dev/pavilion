@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/hooks/use-auth'
 import { usePathname } from 'next/navigation'
 import { Lock, Loader2, X } from 'lucide-react'
 import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type CatalogVariant = {
   id: string
@@ -46,8 +47,8 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
     null
   const chargeAmount = selected?.price ?? price
   const chargeTitle = selected
-    ? `${productName || detail?.name || 'The Cove'} — ${selected.label}`
-    : productName || 'The Cove'
+    ? `${productName || detail?.name || vanillaizeIfDemo('The Cove')} — ${selected.label}`
+    : productName || vanillaizeIfDemo('The Cove')
 
   async function startBuy() {
     setError('')

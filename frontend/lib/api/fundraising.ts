@@ -11,6 +11,7 @@
  */
 
 import { getCatalogConfig } from '@/lib/api/catalog-config'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 // ─── School-year window ───────────────────────────────────────────────────────
 const SCHOOL_YEAR_START = '2025-08-01T00:00:00.000Z'
@@ -168,6 +169,22 @@ async function fetchSiteSettingsGoals(): Promise<{
 }
 
 export async function getFundraisingTotals(): Promise<FundraisingData> {
+  if (isDemoInstance()) {
+    return {
+      totals: {
+        membership: 12480,
+        store: 4860,
+        spiritWear: 1920,
+        danceNight: 1640,
+        novaMath: 720,
+        other: 410,
+      },
+      goals: GOALS_DEFAULT,
+      volunteerHoursRaised: 210,
+      volunteerHoursGoal: VOLUNTEER_HOURS_GOAL_DEFAULT,
+      fetchedAt: new Date().toISOString(),
+    }
+  }
   const totals: InitiativeTotals = {
     membership: 0,
     store:      0,

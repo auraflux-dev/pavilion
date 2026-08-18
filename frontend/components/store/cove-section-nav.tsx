@@ -1,10 +1,13 @@
 import { CreditCard, Candy, Shirt } from 'lucide-react'
 import { SectionJumpNav } from '@/components/section-jump-nav'
 
+import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
+
 const SECTIONS = [
   {
     href: '#card',
-    label: 'Family Cove Digital Card',
+    label: isPublicDemoInstance() ? DEMO_BRAND.card : 'Family Cove Digital Card',
     hint: 'Load & reload',
     icon: CreditCard,
   },
@@ -27,7 +30,7 @@ export function CoveSectionNav() {
   return (
     <SectionJumpNav
       eyebrow="Jump to"
-      ariaLabel="The Cove sections"
+      ariaLabel={isPublicDemoInstance() ? `${DEMO_BRAND.store} sections` : 'The Cove sections'}
       items={SECTIONS}
       variant="band"
     />

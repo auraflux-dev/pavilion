@@ -7,6 +7,7 @@ import { getPageContent } from '@/lib/api/page-content'
 import { MeetingMonthFilter } from '@/components/meetings/meeting-month-filter'
 import { MeetingsSectionNav } from '@/components/jump-nav/public-section-navs'
 import { Users } from 'lucide-react'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export const revalidate = 300
 
@@ -72,7 +73,9 @@ export default async function MeetingsPage() {
               </div>
             </div>
             <p className="text-sm text-[#5A6070] mb-8 ml-[52px]">
-              Open to all SHMS PTO families. Upcoming meetings include a join link. All minutes are published after each meeting.
+              {vanillaizeIfDemo(
+                'Open to all SHMS PTO families. Upcoming meetings include a join link. All minutes are published after each meeting.',
+              )}
             </p>
             <MeetingMonthFilter meetings={pto} showJoinLink />
           </div>
@@ -118,8 +121,9 @@ export default async function MeetingsPage() {
               Get notified when minutes are published
             </h2>
             <p className="text-[#5A6070] mb-6 max-w-xl mx-auto text-sm">
-              SHMS PTO members receive an email when new meeting minutes are posted.
-              You can opt out anytime from your member profile.
+              {vanillaizeIfDemo(
+                'SHMS PTO members receive an email when new meeting minutes are posted. You can opt out anytime from your member profile.',
+              )}
             </p>
             <a
               href="/membership"

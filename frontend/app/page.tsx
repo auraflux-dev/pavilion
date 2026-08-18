@@ -11,9 +11,12 @@ import { Footer } from '@/components/footer'
 import { DonateBlock } from '@/components/donate/donate-block'
 import { HomeSectionNav } from '@/components/jump-nav/public-section-navs'
 import { isSchoolInSession } from '@/lib/api/visitor-season'
+import { isDemoInstance } from '@/lib/demo/instance'
+import { DEMO_BRAND } from '@/lib/demo/brand'
 
 export default async function HomePage() {
   const inSession = await isSchoolInSession()
+  const demo = isDemoInstance()
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -21,13 +24,17 @@ export default async function HomePage() {
       <Navbar />
       <main id="main-content">
         <Hero />
-        <RunForCharityPromo />
+        {demo ? null : <RunForCharityPromo />}
         <ParentVideoSection
           videoId="parent-tour"
           id="parent-tour"
           eyebrow="New this year"
           title="Take a 3-minute website tour"
-          body="See how families use shmspto.org for membership, The Cove Digital Card, and more."
+          body={
+            demo
+              ? `See how families use the ${DEMO_BRAND.short} site for membership, the ${DEMO_BRAND.card}, and ${DEMO_BRAND.store}.`
+              : 'See how families use shmspto.org for membership, The Cove Digital Card, and more.'
+          }
           background="#FFFFFF"
         />
         <HomeSectionNav showPrograms={inSession} showEvents={inSession} />
@@ -36,8 +43,12 @@ export default async function HomePage() {
         {inSession ? <UpcomingEvents /> : null}
         <DonateBlock
           compact
-          title="Donate to SHMS PTO"
-          body="Any amount helps the PTO fund enrichment, The Cove, and events for Stone Hill students."
+          title={demo ? `Donate to ${DEMO_BRAND.short}` : 'Donate to SHMS PTO'}
+          body={
+            demo
+              ? `Any amount helps ${DEMO_BRAND.short} fund enrichment, ${DEMO_BRAND.store}, and events for ${DEMO_BRAND.school} students.`
+              : 'Any amount helps the PTO fund enrichment, The Cove, and events for Stone Hill students.'
+          }
         />
         <CommunityBanner />
       </main>

@@ -7,6 +7,9 @@ import { StoreCardReload } from '@/components/member-portal/store-card-reload'
 import { CoveLogo } from '@/components/brand/cove-logo'
 import { formatStoreCardBonusExample } from '@/lib/store-card-bonus'
 import { useAuth } from '@/lib/hooks/use-auth'
+import { DEMO_BRAND } from '@/lib/demo/brand'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 export type StoreCardDenomination = { amount: number; label: string; note: string }
 
@@ -70,10 +73,12 @@ export function StoreCardHero({
   const { status } = useAuth()
   const isMember = status === 'member'
   const denominations = defaultDenominations(amounts)
+  const demo = isPublicDemoInstance()
 
-  const displayTitle = isMember
-    ? 'Load your family Cove Digital Card.'
-    : title
+  const displayTitle = vanillaizeIfDemo(
+    isMember ? 'Load your family Cove Digital Card.' : title,
+  )
+  const displayEyebrow = vanillaizeIfDemo(eyebrow)
   const displayPerks = isMember
     ? [
         'One family Cove Digital Card & balance',
@@ -94,7 +99,11 @@ export function StoreCardHero({
     '2|One family balance|Every student in your household shares the same Cove Digital Card balance.',
     '3|Spend at the window|Students use the portal QR or 6-digit code at The Cove snack window.',
   ])
-  const steps = isMember ? memberSteps : visitorSteps
+  const steps = (isMember ? memberSteps : visitorSteps).map((s) => ({
+    ...s,
+    title: vanillaizeIfDemo(s.title),
+    body: vanillaizeIfDemo(s.body),
+  }))
 
   return (
     <>
@@ -116,17 +125,27 @@ export function StoreCardHero({
             <div className="lg:col-span-7">
               <div className="flex items-center gap-3 mb-4">
                 <div className="rounded-2xl bg-[#F5F0E8] p-1.5 shadow-sm shrink-0">
-                  <CoveLogo size="md" priority className="w-20 h-20 sm:w-24 sm:h-24" />
+                  {demo ? (
+                    <span
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl flex items-center justify-center text-2xl font-bold text-white"
+                      style={{ backgroundColor: '#085508' }}
+                      aria-hidden="true"
+                    >
+                      {DEMO_BRAND.store.replace(/^The\s+/i, '').charAt(0)}
+                    </span>
+                  ) : (
+                    <CoveLogo size="md" priority className="w-20 h-20 sm:w-24 sm:h-24" />
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <CreditCard className="w-4 h-4 text-yellow-300 shrink-0" aria-hidden="true" />
                     <span className="text-xs font-bold tracking-widest uppercase text-white/70">
-                      {eyebrow}
+                      {displayEyebrow}
                     </span>
                   </div>
                   <p className="text-sm text-white/75 hidden sm:block max-w-xs leading-snug">
-                    Snacks · spirit wear · Cove Digital Card
+                    {vanillaizeIfDemo('Snacks · spirit wear · Cove Digital Card')}
                   </p>
                 </div>
               </div>
@@ -134,7 +153,7 @@ export function StoreCardHero({
                 {displayTitle}
               </h1>
               <ul className="mt-5 flex flex-col sm:flex-row sm:flex-wrap gap-x-5 gap-y-2">
-                {displayPerks.map((p) => (
+                {displayPerks.map((p) => vanillaizeIfDemo(p)).map((p) => (
                   <li key={p} className="flex items-center gap-1.5 text-sm text-white/85">
                     <CheckCircle2 className="w-4 h-4 text-green-300 shrink-0" aria-hidden="true" />
                     {p}
@@ -155,20 +174,22 @@ export function StoreCardHero({
                   className="text-xs font-bold tracking-widest uppercase mb-3"
                   style={{ color: '#085508' }}
                 >
-                  Cove Digital Card
+                  {vanillaizeIfDemo('Cove Digital Card')}
                 </p>
                 <p className="text-sm text-[#5A6070] mb-4 leading-snug">
-                  Free parent account required. Load online, spend at The Cove with code or QR.
+                  {vanillaizeIfDemo(
+                    'Free parent account required. Load online, spend at The Cove with code or QR.',
+                  )}
                 </p>
                 <MemberGate
-                  label="Load a Cove Digital Card"
+                  label={vanillaizeIfDemo('Load a Cove Digital Card')}
                   className="inline-flex items-center justify-center w-full font-bold text-sm px-5 py-3 rounded-lg bg-[#085508] text-white transition-opacity hover:opacity-90"
                 >
                   <StoreCardReload
                     amounts={denominations.map(({ amount }) => amount)}
                     bonusPercent={bonusPercent}
                     maxAmount={maxAmount}
-                    triggerLabel="Load Cove Digital Card"
+                    triggerLabel={vanillaizeIfDemo('Load Cove Digital Card')}
                     triggerClassName="w-full justify-center px-5 py-3 bg-[#085508] text-white"
                   />
                 </MemberGate>

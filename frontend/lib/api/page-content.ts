@@ -14,6 +14,7 @@ import { brandifyCoveDigitalCard } from '@/lib/copy/brandify-cove-digital-card'
 import { brandifyShmsPto } from '@/lib/copy/brandify-shms-pto'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 interface WixDataItem {
   id?: string
@@ -135,6 +136,12 @@ async function fetchPageRow(page: string): Promise<Partial<PageContentFields> | 
 }
 
 export async function getPageContent(page: string): Promise<PageContentFields> {
+  if (isDemoInstance()) {
+    const { DEMO_PAGES } = await import('@/lib/demo/content')
+    const row = DEMO_PAGES[page]
+    if (row) return { ...row }
+    return merge(page, null)
+  }
   const cms = await fetchPageRow(page)
   if (
     cms &&

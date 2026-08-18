@@ -326,7 +326,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
             className="text-xs font-bold tracking-wider uppercase"
             style={{ color: '#FFD700' }}
           >
-            Go Stingrays!
+            {isPublicDemoInstance() ? DEMO_BRAND.cheer : 'Go Stingrays!'}
           </p>
         </div>
       </div>

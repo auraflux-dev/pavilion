@@ -3,6 +3,7 @@
 import { CreditCard } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 import { StoreCardReload } from '@/components/member-portal/store-card-reload'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type Props = {
   amounts: number[]
@@ -21,6 +22,9 @@ export function StoreCardCta({
   bonusPercent = 10,
   maxAmount = 500,
 }: Props) {
+  eyebrow = vanillaizeIfDemo(eyebrow)
+  title = vanillaizeIfDemo(title)
+  body = vanillaizeIfDemo(body)
   return (
     <section className="py-14 md:py-20" style={{ backgroundColor: '#1A1A1A' }}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -36,7 +40,7 @@ export function StoreCardCta({
         <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">{body}</p>
 
         <MemberGate
-          label="Load a Cove Digital Card"
+          label={vanillaizeIfDemo('Load a Cove Digital Card')}
           className="inline-flex items-center justify-center w-full max-w-sm mx-auto font-bold text-sm px-5 py-3 rounded-lg bg-white text-[#085508] transition-opacity hover:opacity-90"
         >
           <div className="max-w-sm mx-auto">
@@ -44,7 +48,7 @@ export function StoreCardCta({
               amounts={amounts}
               bonusPercent={bonusPercent}
               maxAmount={maxAmount}
-              triggerLabel="Load Cove Digital Card"
+              triggerLabel={vanillaizeIfDemo('Load Cove Digital Card')}
               triggerClassName="w-full justify-center !bg-[#FFD700] !text-[#1A1A1A] px-8 py-3"
             />
           </div>

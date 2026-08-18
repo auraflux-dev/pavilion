@@ -9,12 +9,17 @@ import { getPageContent } from '@/lib/api/page-content'
 import { BoardSectionNav } from '@/components/jump-nav/public-section-navs'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
 import { BoardMemberPhoto } from '@/components/board/board-member-photo'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export const revalidate = 300 // refresh from Wix CMS every 5 minutes
 
-export const metadata = {
-  title: 'Board Members | SHMS PTO',
-  description: 'Meet the 2025-26 Stone Hill Middle School PTO Board, the parent volunteers who make it all happen.',
+export async function generateMetadata() {
+  return {
+    title: vanillaizeIfDemo('Board Members | SHMS PTO'),
+    description: vanillaizeIfDemo(
+      'Meet the 2025-26 Stone Hill Middle School PTO Board, the parent volunteers who make it all happen.',
+    ),
+  }
 }
 
 export default async function BoardPage() {
@@ -112,8 +117,9 @@ export default async function BoardPage() {
                 Interested in joining the board?
               </h2>
               <p className="text-[#5A6070] mb-8 max-w-xl mx-auto leading-relaxed">
-                Board positions are open to any SHMS PTO parent or guardian. Time commitments
-                vary by role. Most require 2 to 5 hours per month. No prior PTO experience needed.
+                {vanillaizeIfDemo(
+                  'Board positions are open to any SHMS PTO parent or guardian. Time commitments vary by role. Most require 2 to 5 hours per month. No prior PTO experience needed.',
+                )}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <a

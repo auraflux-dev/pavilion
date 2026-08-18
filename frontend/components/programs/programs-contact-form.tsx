@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react'
 import { trackGenerateLead } from '@/lib/ga'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type Variant = 'programs' | 'events' | 'sponsorship'
 
@@ -63,7 +64,9 @@ const COPY: Record<
     optionalLabel: 'Business or organization',
     optionalPlaceholder: 'e.g. Local restaurant, family business',
     messagePlaceholder:
-      'Tell us about your business, how you would like to support SHMS PTO, and the best way to reach you.',
+      vanillaizeIfDemo(
+        'Tell us about your business, how you would like to support SHMS PTO, and the best way to reach you.',
+      ),
     submitLabel: 'Send sponsorship request',
     successBody:
       'Thanks. Our VP of Initiatives will review your sponsorship interest and follow up soon.',

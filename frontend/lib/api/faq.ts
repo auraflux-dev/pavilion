@@ -8,6 +8,8 @@
 
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 export interface FAQItem {
   id: string
@@ -30,6 +32,10 @@ interface WixDataItem {
 }
 
 export async function getFAQItems(page?: string): Promise<FAQItem[]> {
+  if (isDemoInstance()) {
+    const { DEMO_FAQ } = await import('@/lib/demo/content')
+    return DEMO_FAQ.filter((item) => !page || item.page === page)
+  }
   const apiKey = process.env.WIX_API_KEY
   const siteId = process.env.WIX_SITE_ID
   if (!apiKey || !siteId) return []
@@ -61,8 +67,8 @@ export async function getFAQItems(page?: string): Promise<FAQItem[]> {
     return (data.dataItems ?? [])
       .map((item: WixDataItem) => ({
       id:        item.id ?? '',
-      question:  humanizePublicCopy(item.data?.question  ?? ''),
-      answer:    humanizePublicCopy(item.data?.answer    ?? ''),
+      question:  vanillaizeIfDemo(humanizePublicCopy(item.data?.question  ?? '')),
+      answer:    vanillaizeIfDemo(humanizePublicCopy(item.data?.answer    ?? '')),
       page:      item.data?.page      ?? 'general',
       sortOrder: item.data?.sortOrder ?? 99,
       active:    item.data?.active    ?? true,

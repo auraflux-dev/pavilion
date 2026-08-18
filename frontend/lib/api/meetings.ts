@@ -35,6 +35,11 @@ function mapMeeting(item: Record<string, unknown>): MeetingMinute | null {
 }
 
 export async function getMeetingsByCommittee(committee: Committee): Promise<MeetingMinute[]> {
+  const { isDemoInstance } = await import('@/lib/demo/instance')
+  if (isDemoInstance()) {
+    const { DEMO_MEETINGS } = await import('@/lib/demo/content')
+    return DEMO_MEETINGS.filter((m) => m.committee === committee)
+  }
   const client = getWixClient()
   const result = await client.items
     .query('MeetingMinutes')
@@ -48,6 +53,11 @@ export async function getMeetingsByCommittee(committee: Committee): Promise<Meet
 }
 
 export async function getAllPublishedMeetings(): Promise<MeetingMinute[]> {
+  const { isDemoInstance } = await import('@/lib/demo/instance')
+  if (isDemoInstance()) {
+    const { DEMO_MEETINGS } = await import('@/lib/demo/content')
+    return [...DEMO_MEETINGS]
+  }
   const client = getWixClient()
   const result = await client.items
     .query('MeetingMinutes')

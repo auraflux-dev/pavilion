@@ -15,6 +15,8 @@ export type Sponsor = {
 }
 
 export async function getActiveSponsors(): Promise<Sponsor[]> {
+  const { isDemoInstance } = await import('@/lib/demo/instance')
+  if (isDemoInstance()) return []
   try {
     const client = getWixClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

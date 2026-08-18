@@ -5,6 +5,8 @@
 
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
+import { vanillaizeCopy } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 export interface FundraisingCTA {
  id: string
@@ -37,7 +39,18 @@ const FALLBACK_CTAS: FundraisingCTA[] = [
   { id: 'f4', title: 'Spread the Word',    description: 'Tell other SHMS PTO families. More members means more programs.',                  ctaLabel: 'Share',     href: '/membership', icon: 'Heart',       sortOrder: 4, active: true },
 ]
 
+function vanillaizeCtas(items: FundraisingCTA[]): FundraisingCTA[] {
+  if (!isDemoInstance()) return items
+  return items.map((item) => ({
+    ...item,
+    title: vanillaizeCopy(item.title),
+    description: vanillaizeCopy(item.description),
+    ctaLabel: vanillaizeCopy(item.ctaLabel),
+  }))
+}
+
 export async function getFundraisingCTAs(): Promise<FundraisingCTA[]> {
+ if (isDemoInstance()) return vanillaizeCtas(FALLBACK_CTAS)
  const apiKey = process.env.WIX_API_KEY
  const siteId = process.env.WIX_SITE_ID
  if (!apiKey || !siteId) return FALLBACK_CTAS

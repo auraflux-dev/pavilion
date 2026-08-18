@@ -26,6 +26,10 @@ interface WixDataItem {
 }
 
 async function fetchAllSettings(): Promise<Record<string, string>> {
+ if (isDemoInstance()) {
+   const { DEMO_SETTINGS } = await import('@/lib/demo/content')
+   return { ...DEMO_SETTINGS }
+ }
  const apiKey = process.env.WIX_API_KEY
  const siteId = process.env.WIX_SITE_ID
  if (!apiKey || !siteId) return {}

@@ -18,6 +18,7 @@ import {
   tierOffersPhysicalPerkChoice,
   type PhysicalPerkChoice,
 } from '@/lib/membership-entitlements'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 const TIER_LABELS: Record<string, string> = {
   reef: 'Reef',
@@ -122,7 +123,7 @@ function HandlerInner() {
                 }}
               />
               <span>
-                <span className="font-semibold">Stone Hill car magnet</span>
+                <span className="font-semibold">{vanillaizeIfDemo('Stone Hill car magnet')}</span>
                 <span className="block text-xs text-[#5A6070]">About $10 value</span>
               </span>
             </label>
@@ -168,7 +169,7 @@ function HandlerInner() {
     ? physicalPerk === 'spirit_shirt' && shirt
       ? `Pay with your own card. Faculty perk: ${shirt.label}.`
       : physicalPerk === 'magnet'
-        ? 'Pay with your own card. Faculty perk: Stone Hill car magnet.'
+        ? vanillaizeIfDemo('Pay with your own card. Faculty perk: Stone Hill car magnet.')
         : 'Pay with your own credit or debit card on this page'
     : needsParentShirt && shirt
       ? `Pay with your own card. Spirit shirt: ${shirt.label}.`

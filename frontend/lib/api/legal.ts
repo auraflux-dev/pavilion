@@ -2,6 +2,8 @@
  * Legal page content from PageContent CMS with code defaults.
  */
 import { getPageContent } from '@/lib/api/page-content'
+import { vanillaizeCopy } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 export type LegalDocSlug =
   | 'privacy'
@@ -218,19 +220,31 @@ function parseSections(bullets: string[] | undefined) {
   return sections.length ? sections : null
 }
 
+function vanillaizeLegal(doc: LegalDoc): LegalDoc {
+  if (!isDemoInstance()) return doc
+  return {
+    ...doc,
+    title: vanillaizeCopy(doc.title),
+    sections: doc.sections.map((section) => ({
+      heading: vanillaizeCopy(section.heading),
+      body: vanillaizeCopy(section.body),
+    })),
+  }
+}
+
 export async function getLegalDoc(slug: LegalDoc['slug']): Promise<LegalDoc> {
   const fallback = DEFAULTS[slug]
   try {
     const page = await getPageContent(`legal-${slug}`)
-    if (!page) return fallback
+    if (!page) return vanillaizeLegal(fallback)
     const sections = parseSections(page.bullets) ?? fallback.sections
-    return {
+    return vanillaizeLegal({
       slug,
       title: page.title || fallback.title,
       updated: page.sectionTitle || fallback.updated,
       sections,
-    }
+    })
   } catch {
-    return fallback
+    return vanillaizeLegal(fallback)
   }
 }

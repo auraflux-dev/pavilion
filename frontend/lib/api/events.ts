@@ -1,5 +1,6 @@
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 import { getWixClient } from '@/lib/wix-client'
 import { sortEventCategoryNames } from '@/lib/events/categories'
 import {
@@ -140,6 +141,10 @@ async function categoryNamesForEvent(
 }
 
 export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
+  if (isDemoInstance()) {
+    const { DEMO_EVENTS } = await import('@/lib/demo/content')
+    return DEMO_EVENTS.slice(0, limit)
+  }
   try {
     const client = getWixClient()
     const result = await client.wixEventsV2

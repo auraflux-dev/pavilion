@@ -7,6 +7,7 @@
  * One card / one balance per family.
  */
 import { familyHasPriorStoreCardCredit } from '@/lib/family-store-card'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export function getStoreCardBonusPercent(
   raw: string | number | undefined | null,
@@ -26,7 +27,9 @@ export function storeCardLoadCents(payCents: number, bonusPercent: number): numb
 export function formatStoreCardBonusExample(payDollars: number, bonusPercent: number): string {
   const load = payDollars * (1 + bonusPercent / 100)
   const loadLabel = Number.isInteger(load) ? `$${load}` : `$${load.toFixed(2)}`
-  return `Pay $${payDollars} · get ${loadLabel} on the Cove Digital Card (${bonusPercent}% first-load bonus)`
+  return vanillaizeIfDemo(
+    `Pay $${payDollars} · get ${loadLabel} on the Cove Digital Card (${bonusPercent}% first-load bonus)`,
+  )
 }
 
 /**
