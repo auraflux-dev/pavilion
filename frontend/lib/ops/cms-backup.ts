@@ -24,6 +24,7 @@ export const BACKUP_COLLECTIONS = [
   'ExpenseReimbursements',
   'PtoBudgetLines',
   'PtoBudgetEntries',
+  'StaffPlaidItems',
   'ContactSubmissions',
   'Surveys',
   'SurveyResponses',

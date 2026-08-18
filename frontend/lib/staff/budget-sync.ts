@@ -5,6 +5,7 @@
 import { getWixClient } from '@/lib/wix-client'
 import {
   DEFAULT_FISCAL_YEAR,
+  ensureMissingPlaceholderLines,
   fiscalYearWindow,
   listBudgetLines,
   money,
@@ -28,6 +29,7 @@ export const AUTO_SYNC_KEYS = new Set([
   'instructor_pay',
   'enrichment_supplies',
   'events',
+  'beautification',
   'dance_costs',
   'wellness',
   'cove_restock',
@@ -36,7 +38,37 @@ export const AUTO_SYNC_KEYS = new Set([
   'comms',
 ])
 
-export type BudgetEntryOrigin = 'auto-payment' | 'auto-expense' | 'keyed' | 'opening'
+export type BudgetEntryOrigin =
+  | 'auto-payment'
+  | 'auto-expense'
+  | 'auto-plaid'
+  | 'auto-bofa'
+  | 'reclass'
+  | 'keyed'
+  | 'opening'
+
+const BANK_SYNC_KEYS = new Set([
+  'card_payouts',
+  'website_tools',
+  'processing',
+  'insurance',
+  'tax_bank',
+  'unclassified_income',
+  'unclassified_expense',
+])
+
+export type BudgetTracking = 'auto' | 'bank' | 'keyed' | 'skip'
+
+export function trackingFor(syncKey: string): BudgetTracking {
+  if (syncKey === 'card_payouts') return 'skip'
+  if (BANK_SYNC_KEYS.has(syncKey)) return 'bank'
+  if (AUTO_SYNC_KEYS.has(syncKey)) return 'auto'
+  return 'keyed'
+}
+
+export function needsReview(syncKey: string) {
+  return syncKey === 'unclassified_income' || syncKey === 'unclassified_expense'
+}
 
 export type BudgetEntry = {
   id: string
@@ -111,6 +143,9 @@ function mapEntry(row: Record<string, unknown>): BudgetEntry {
   const origin: BudgetEntryOrigin =
     originRaw === 'auto-payment' ||
     originRaw === 'auto-expense' ||
+    originRaw === 'auto-plaid' ||
+    originRaw === 'auto-bofa' ||
+    originRaw === 'reclass' ||
     originRaw === 'opening'
       ? originRaw
       : 'keyed'
@@ -175,7 +210,10 @@ export function classifyExpense(input: {
   descriptions: string
 }): string {
   const t = `${input.committeeEvent} ${input.notes} ${input.descriptions}`.toLowerCase()
-  if (/instructor|timesheet|contractor|w-?9/.test(t)) return 'instructor_pay'
+  if (/instructor|timesheet|contractor|w-?9|virtual loudoun|\bvlo\b/.test(t)) return 'instructor_pay'
+  if (/beautification|meadows farms|sherwin|community project|as we grow/.test(t)) {
+    return 'beautification'
+  }
   if (/dance/.test(t)) return 'dance_costs'
   if (/wellness|teacher|appreciation|classroom|morale/.test(t)) return 'wellness'
   if (/snack|costco|cove restock|cove snack/.test(t)) return 'cove_restock'
@@ -257,7 +295,7 @@ async function entryExists(refId: string): Promise<boolean> {
   return (found.items ?? []).length > 0
 }
 
-async function insertEntry(row: Omit<BudgetEntry, 'id'>, knownRefIds?: Set<string>): Promise<boolean> {
+export async function insertEntry(row: Omit<BudgetEntry, 'id'>, knownRefIds?: Set<string>): Promise<boolean> {
   if (row.refId && (knownRefIds?.has(row.refId) || (!knownRefIds && (await entryExists(row.refId))))) {
     return false
   }
@@ -273,6 +311,54 @@ async function insertEntry(row: Omit<BudgetEntry, 'id'>, knownRefIds?: Set<strin
     createdByEmail: row.createdByEmail,
   })
   if (row.refId) knownRefIds?.add(row.refId)
+  return true
+}
+
+export async function upsertBudgetEntryByRefId(
+  row: Omit<BudgetEntry, 'id'>,
+): Promise<'inserted' | 'updated' | 'skipped'> {
+  if (!row.refId) return 'skipped'
+  await ensureBudgetEntriesCollection()
+  const client = getWixClient()
+  const found = await client.items
+    .query(BUDGET_ENTRIES_COLLECTION)
+    .eq('refId', row.refId)
+    .limit(1)
+    .find()
+    .catch(() => ({ items: [] }))
+  const existing = found.items?.[0] as Record<string, unknown> | undefined
+  if (existing?._id) {
+    const existingOrigin = String(existing.origin ?? '')
+    if (existingOrigin === 'reclass' || existingOrigin === 'keyed') return 'skipped'
+    await client.items.update(BUDGET_ENTRIES_COLLECTION, {
+      ...existing,
+      _id: String(existing._id),
+      fiscalYear: row.fiscalYear,
+      lineSyncKey: row.lineSyncKey,
+      occurredAt: row.occurredAt,
+      amount: money(row.amount),
+      memo: row.memo,
+      origin: row.origin,
+      createdByEmail: row.createdByEmail || String(existing.createdByEmail ?? ''),
+    })
+    return 'updated'
+  }
+  await insertEntry(row)
+  return 'inserted'
+}
+
+export async function removeBudgetEntryByRefId(refId: string): Promise<boolean> {
+  if (!refId) return false
+  const client = getWixClient()
+  const found = await client.items
+    .query(BUDGET_ENTRIES_COLLECTION)
+    .eq('refId', refId)
+    .limit(1)
+    .find()
+    .catch(() => ({ items: [] }))
+  const existing = found.items?.[0] as Record<string, unknown> | undefined
+  if (!existing?._id) return false
+  await client.items.remove(BUDGET_ENTRIES_COLLECTION, String(existing._id))
   return true
 }
 
@@ -307,8 +393,8 @@ export async function deleteBudgetEntry(id: string, fiscalYear: string): Promise
   const client = getWixClient()
   const existing = (await client.items.get(BUDGET_ENTRIES_COLLECTION, id)) as Record<string, unknown>
   const origin = String(existing.origin ?? '')
-  if (origin.startsWith('auto')) {
-    throw new Error('Staff-filled rows refresh from payments — remove the source sale instead')
+  if (origin === 'auto-payment' || origin === 'auto-expense') {
+    throw new Error('Staff sales and reimbursements come back on Refresh from Staff — recategorize instead')
   }
   await client.items.remove(BUDGET_ENTRIES_COLLECTION, id)
   const entries = await listBudgetEntries(fiscalYear)
@@ -316,7 +402,30 @@ export async function deleteBudgetEntry(id: string, fiscalYear: string): Promise
   return entries
 }
 
-async function persistLineActuals(fiscalYear: string, entries: BudgetEntry[]) {
+export async function reclassifyBudgetEntry(opts: {
+  id: string
+  lineSyncKey: string
+  fiscalYear: string
+}): Promise<BudgetEntry[]> {
+  const lineSyncKey = opts.lineSyncKey.trim()
+  if (!opts.id || !lineSyncKey) throw new Error('Pick a budget line')
+  const client = getWixClient()
+  const existing = (await client.items.get(BUDGET_ENTRIES_COLLECTION, opts.id)) as Record<string, unknown>
+  const origin = String(existing.origin ?? '') as BudgetEntryOrigin
+  const nextOrigin: BudgetEntryOrigin =
+    origin.startsWith('auto') || origin === 'reclass' ? 'reclass' : origin
+  await client.items.update(BUDGET_ENTRIES_COLLECTION, {
+    ...existing,
+    _id: String(existing._id),
+    lineSyncKey,
+    origin: nextOrigin,
+  })
+  const entries = await listBudgetEntries(opts.fiscalYear)
+  await persistLineActuals(opts.fiscalYear, entries)
+  return entries
+}
+
+export async function persistLineActuals(fiscalYear: string, entries: BudgetEntry[]) {
   const lines = await listBudgetLines(fiscalYear)
   const sums = sumEntriesByKey(entries)
   for (const line of lines) {
@@ -336,6 +445,7 @@ export async function refreshBudgetActuals(opts: {
   const fromMs = from.getTime()
   const toMs = to.getTime()
   await ensureBudgetEntriesCollection()
+  await ensureMissingPlaceholderLines(fiscalYear)
 
   const knownRefIds = new Set((await listBudgetEntries(fiscalYear)).map((e) => e.refId).filter(Boolean))
   let added = 0

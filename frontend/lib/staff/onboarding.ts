@@ -189,7 +189,7 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
       {
         id: 'tre_budget',
         title: 'Open the 2026–27 planning budget',
-        detail: 'Load the placeholder, Record activity when money moves off-system, and Refresh from Staff for Square sales. Not the ledger.',
+        detail: '2026–27 is Jul 1–Jun 30. Expense budgets start from FY25 checking. Import a Bank of America CSV. Square/PayPal payouts already settle in checking. Not the ledger.',
         workspace: 'budget',
         actionLabel: 'Open Budget',
       },

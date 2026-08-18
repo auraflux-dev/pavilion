@@ -1,12 +1,15 @@
 'use client'
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { StaffPlaidConnect } from '@/components/staff/staff-plaid-connect'
 
 const DEFAULT_FISCAL_YEAR = '2026-27'
-const FISCAL_YEAR_LABEL = 'Aug 1, 2026 – Jul 31, 2027'
+const FISCAL_YEAR_LABEL = 'Jul 1, 2026 – Jun 30, 2027'
 
 type BudgetKind = 'income' | 'expense'
+type BudgetTracking = 'auto' | 'bank' | 'keyed' | 'skip'
 
 type BudgetLine = {
   id: string
@@ -20,7 +23,8 @@ type BudgetLine = {
   notes: string
   sortOrder: number
   syncKey: string
-  tracking: 'auto' | 'keyed'
+  tracking: BudgetTracking
+  entryCount?: number
 }
 
 type BudgetEntry = {
@@ -57,13 +61,30 @@ function summarizeBudget(lines: BudgetLine[]): Summary {
 }
 
 const money = (n: number) =>
-  `$${(Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+  (Number(n) || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 
 function originLabel(origin: string) {
+  if (origin === 'auto-plaid' || origin === 'auto-bofa') return 'Bank · BoA'
   if (origin === 'auto-payment') return 'Staff · sale'
   if (origin === 'auto-expense') return 'Staff · reimbursement'
+  if (origin === 'reclass') return 'Moved'
   if (origin === 'opening') return 'Opening'
   return 'Keyed'
+}
+
+function trackingLabel(tracking: BudgetTracking) {
+  if (tracking === 'bank') return 'Bank CSV'
+  if (tracking === 'auto') return 'Staff + bank'
+  if (tracking === 'skip') return 'Skipped · Staff sales'
+  return 'You key'
+}
+
+function canUndo(origin: string) {
+  return origin !== 'auto-payment' && origin !== 'auto-expense'
+}
+
+function canMove(origin: string) {
+  return origin !== 'opening'
 }
 
 /**
@@ -76,6 +97,7 @@ export function StaffBudgetPanel() {
   const [entries, setEntries] = useState<BudgetEntry[]>([])
   const [summary, setSummary] = useState<Summary | null>(null)
   const [status, setStatus] = useState('')
+  const [statusKind, setStatusKind] = useState<'ok' | 'err'>('ok')
   const [busy, setBusy] = useState(false)
   const [label, setLabel] = useState(FISCAL_YEAR_LABEL)
 
@@ -90,13 +112,28 @@ export function StaffBudgetPanel() {
   const [newBudgeted, setNewBudgeted] = useState('')
   const [newOwner, setNewOwner] = useState('Treasurer')
   const [newNotes, setNewNotes] = useState('')
+  const [plaidConnected, setPlaidConnected] = useState(false)
+  const [plaidConfigured, setPlaidConfigured] = useState(false)
+
+  const [filterKey, setFilterKey] = useState('')
+  const [search, setSearch] = useState('')
 
   const applyPayload = useCallback(
-    (d: { lines?: BudgetLine[]; summary?: Summary; label?: string; entries?: BudgetEntry[] }) => {
+    (d: {
+      lines?: BudgetLine[]
+      summary?: Summary
+      label?: string
+      entries?: BudgetEntry[]
+      plaid?: { connected?: boolean; configured?: boolean }
+    }) => {
       setLines(d.lines ?? [])
       setEntries(d.entries ?? [])
       setSummary(d.summary ?? summarizeBudget(d.lines ?? []))
       if (d.label) setLabel(d.label)
+      if (d.plaid) {
+        setPlaidConnected(Boolean(d.plaid.connected))
+        setPlaidConfigured(Boolean(d.plaid.configured))
+      }
     },
     [],
   )
@@ -108,6 +145,7 @@ export function StaffBudgetPanel() {
       if (!r.ok) throw new Error(d.error ?? 'Load failed')
       applyPayload(d)
     } catch (err) {
+      setStatusKind('err')
       setStatus(err instanceof Error ? err.message : 'Load failed')
     }
   }, [applyPayload, year])
@@ -134,9 +172,14 @@ export function StaffBudgetPanel() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Request failed')
       applyPayload(d)
-      const extra = typeof d.added === 'number' ? ` · ${d.added} new from Staff` : ''
-      setStatus(okMessage + extra)
+      const extra =
+        typeof d.added === 'number'
+          ? ` · ${d.added} new${typeof d.updated === 'number' && d.updated ? `, ${d.updated} updated` : ''}`
+          : ''
+      setStatusKind('ok')
+      setStatus((d.message ? String(d.message) : okMessage) + extra)
     } catch (err) {
+      setStatusKind('err')
       setStatus(err instanceof Error ? err.message : 'Request failed')
     } finally {
       setBusy(false)
@@ -156,6 +199,7 @@ export function StaffBudgetPanel() {
       if (!r.ok) throw new Error(d.error ?? 'Save failed')
       applyPayload(d)
     } catch (err) {
+      setStatusKind('err')
       setStatus(err instanceof Error ? err.message : 'Save failed')
     } finally {
       setBusy(false)
@@ -164,6 +208,7 @@ export function StaffBudgetPanel() {
 
   async function addLine() {
     if (!newName.trim()) {
+      setStatusKind('err')
       setStatus('Line name is required.')
       return
     }
@@ -186,7 +231,13 @@ export function StaffBudgetPanel() {
 
   async function recordActivity() {
     if (!entryKey) {
+      setStatusKind('err')
       setStatus('Pick a budget line.')
+      return
+    }
+    if (!Number(entryAmount)) {
+      setStatusKind('err')
+      setStatus('Enter an amount.')
       return
     }
     await post(
@@ -204,7 +255,7 @@ export function StaffBudgetPanel() {
   }
 
   async function remove(id: string, name: string) {
-    if (!window.confirm(`Delete “${name}”?`)) return
+    if (!window.confirm(`Delete “${name}”? Activity on this line stays until you move or undo those rows.`)) return
     setBusy(true)
     setStatus('')
     try {
@@ -215,6 +266,7 @@ export function StaffBudgetPanel() {
       if (!r.ok) throw new Error(d.error ?? 'Delete failed')
       applyPayload(d)
     } catch (err) {
+      setStatusKind('err')
       setStatus(err instanceof Error ? err.message : 'Delete failed')
     } finally {
       setBusy(false)
@@ -222,7 +274,7 @@ export function StaffBudgetPanel() {
   }
 
   async function removeEntry(id: string) {
-    if (!window.confirm('Remove this keyed activity?')) return
+    if (!window.confirm('Remove this activity? Re-importing the BoA CSV will bring bank rows back.')) return
     setBusy(true)
     setStatus('')
     try {
@@ -233,11 +285,19 @@ export function StaffBudgetPanel() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Delete failed')
       applyPayload(d)
+      setStatusKind('ok')
+      setStatus('Removed.')
     } catch (err) {
+      setStatusKind('err')
       setStatus(err instanceof Error ? err.message : 'Delete failed')
     } finally {
       setBusy(false)
     }
+  }
+
+  async function moveEntry(id: string, lineSyncKey: string) {
+    if (!lineSyncKey) return
+    await post({ action: 'reclassify', id, lineSyncKey }, 'Moved to another line.')
   }
 
   async function downloadExcel() {
@@ -256,18 +316,62 @@ export function StaffBudgetPanel() {
       a.download = `shms-pto-budget-${year}.xlsx`
       a.click()
       URL.revokeObjectURL(url)
+      setStatusKind('ok')
       setStatus('Excel downloaded.')
     } catch (err) {
+      setStatusKind('err')
       setStatus(err instanceof Error ? err.message : 'Excel export failed')
     } finally {
       setBusy(false)
     }
   }
 
+  async function importBofaFile(file: File) {
+    setBusy(true)
+    setStatus('')
+    try {
+      const csv = await file.text()
+      const r = await fetch('/api/staff/budget', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'import-bofa', fiscalYear: year, csv }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Import failed')
+      applyPayload(d)
+      setStatusKind('ok')
+      setStatus(d.message ? String(d.message) : 'Imported Bank of America.')
+    } catch (err) {
+      setStatusKind('err')
+      setStatus(err instanceof Error ? err.message : 'Import failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function focusLine(key: string) {
+    setEntryKey(key)
+    setFilterKey(key)
+    document.getElementById('budget-activity')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   const income = useMemo(() => lines.filter((l) => l.kind === 'income'), [lines])
   const expense = useMemo(() => lines.filter((l) => l.kind === 'expense'), [lines])
   const totals = summary ?? summarizeBudget(lines)
   const lineLabel = (key: string) => lines.find((l) => l.syncKey === key)?.name ?? key
+  const reviewLines = lines.filter((l) => l.syncKey.startsWith('unclassified') && l.actual)
+  const filteredEntries = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return entries.filter((e) => {
+      if (filterKey && e.lineSyncKey !== filterKey) return false
+      if (!q) return true
+      return (
+        e.memo.toLowerCase().includes(q) ||
+        lineLabel(e.lineSyncKey).toLowerCase().includes(q) ||
+        originLabel(e.origin).toLowerCase().includes(q)
+      )
+    })
+  }, [entries, filterKey, search, lines])
 
   return (
     <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-5">
@@ -275,6 +379,13 @@ export function StaffBudgetPanel() {
         <div>
           <h2 className="text-lg font-bold">Budget · {year}</h2>
           <p className="text-xs text-[#5A6070] mt-1">{label}</p>
+          <Link
+            href="/staff?view=help&article=staff-budget"
+            className="text-xs font-bold underline mt-1 inline-block"
+            style={{ color: '#085508' }}
+          >
+            How Budget works
+          </Link>
         </div>
         {lines.length > 0 ? (
           <div className="flex flex-wrap gap-2">
@@ -283,9 +394,16 @@ export function StaffBudgetPanel() {
               className="text-white"
               style={{ backgroundColor: '#085508' }}
               disabled={busy}
-              onClick={() => void post({ action: 'refresh' }, 'Pulled Staff sales and paid reimbursements.')}
+              onClick={() =>
+                void post(
+                  { action: 'refresh' },
+                  plaidConnected
+                    ? 'Pulled Bank of America transactions.'
+                    : 'Pulled Staff sales and paid reimbursements.',
+                )
+              }
             >
-              {busy ? 'Working…' : 'Refresh from Staff'}
+              {busy ? 'Working…' : plaidConnected ? 'Refresh from Bank' : 'Refresh from Staff'}
             </Button>
             <Button size="sm" variant="outline" disabled={busy} onClick={() => void downloadExcel()}>
               Download Excel
@@ -294,27 +412,78 @@ export function StaffBudgetPanel() {
         ) : null}
       </div>
 
+      {plaidConfigured ? (
+        <StaffPlaidConnect
+          busy={busy}
+          onMessage={setStatus}
+          onSynced={() => {
+            void load()
+          }}
+        />
+      ) : null}
+
+      <div className="rounded-lg border border-[#E8E4DC] bg-[#F7F4EE] px-3 py-3 space-y-2">
+        <p className="text-sm font-bold">Import Bank of America CSV</p>
+        <p className="text-xs text-[#5A6070]">
+          Checking → Activity → Download → CSV. Square and PayPal <strong>payouts are skipped</strong> so
+          memberships, Cove, and tickets stay on Staff Payments. Fees, checks, ACH, Sam’s, Amazon, and Zelle
+          still import. Re-importing the same file will not double-count; rows you moved to another line stay
+          put.
+        </p>
+        <label className="inline-flex">
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            className="text-sm"
+            disabled={busy || lines.length === 0}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              e.target.value = ''
+              if (file) void importBofaFile(file)
+            }}
+          />
+        </label>
+      </div>
+
       <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 space-y-1">
         <p>
-          Not the official books — MoneyMinder / Square / PayPal / Bank of America stay the ledger.
+          Planning worksheet — MoneyMinder stays the ledger. This is not a second set of books.
         </p>
         <p>
-          <strong>Staff fills:</strong> memberships, Cove card loads, shop, in-person POS, tickets,
-          enrichment fees, donations, and reimbursements you mark Paid.
+          <strong>Bank CSV:</strong> checking activity except processor payouts. Amazon lands on spirit-wear
+          restock; Sam’s / Costco on snack restock. Move a row if that guess is wrong.
         </p>
         <p>
-          <strong>You key when it happens:</strong> beginning cash, sponsorships received, spirit nights,
-          Run for Charity payout, insurance, tax/990, website tools, processing fees, vendor restock
-          not submitted as an expense, contingency.
+          <strong>Refresh from Staff:</strong> Square/PayPal <em>sales</em> (memberships, Cove, tickets).{' '}
+          <strong>You key:</strong> beginning cash, sponsorships, and anything still Unclassified.
         </p>
       </div>
 
-      {status ? <p className="text-xs text-[#5A6070]">{status}</p> : null}
+      {reviewLines.length ? (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-900">
+          {reviewLines.map((l) => (
+            <p key={l.id}>
+              {money(l.actual)} on <strong>{l.name}</strong> still needs a real line.{' '}
+              <button
+                type="button"
+                className="underline font-bold"
+                onClick={() => focusLine(l.syncKey)}
+              >
+                Show those rows
+              </button>
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      {status ? (
+        <p className={`text-xs ${statusKind === 'err' ? 'text-rose-700' : 'text-[#085508]'}`}>{status}</p>
+      ) : null}
 
       {lines.length === 0 ? (
         <div className="space-y-3">
           <p className="text-sm text-[#5A6070]">
-            No lines for {year} yet. Load the placeholder, then record activity as money moves.
+            No lines for {year} yet. Load the placeholder, then import the checking CSV and refresh Staff sales.
           </p>
           <Button
             disabled={busy}
@@ -327,11 +496,22 @@ export function StaffBudgetPanel() {
         </div>
       ) : (
         <>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <SummaryCard title="Income" budgeted={totals.incomeBudgeted} actual={totals.incomeActual} />
+            <SummaryCard
+              title="Expense"
+              budgeted={totals.expenseBudgeted}
+              actual={totals.expenseActual}
+              overIsBad
+            />
+            <SummaryCard title="Net" budgeted={totals.netBudgeted} actual={totals.netActual} highlight />
+          </div>
+
           <div id="budget-record" className="border border-[#E8E4DC] rounded-lg p-3 space-y-3">
             <h3 className="text-sm font-bold">Record activity</h3>
             <p className="text-xs text-[#5A6070]">
-              Date, line, amount, memo. Use this the day a check is written, a spirit night lands, or
-              beginning cash is known. Click a line below to prefill.
+              For beginning cash, a check, or a spirit night that never hit Square. Click a line below to
+              prefill and filter the log.
             </p>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               <input
@@ -349,7 +529,6 @@ export function StaffBudgetPanel() {
                 {lines.map((l) => (
                   <option key={l.id} value={l.syncKey}>
                     {l.kind === 'income' ? 'In' : 'Out'} · {l.name}
-                    {l.tracking === 'auto' ? ' (also auto)' : ''}
                   </option>
                 ))}
               </select>
@@ -378,40 +557,59 @@ export function StaffBudgetPanel() {
             </Button>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
-            <SummaryCard title="Income" budgeted={totals.incomeBudgeted} actual={totals.incomeActual} />
-            <SummaryCard
-              title="Expense"
-              budgeted={totals.expenseBudgeted}
-              actual={totals.expenseActual}
-            />
-            <SummaryCard title="Net" budgeted={totals.netBudgeted} actual={totals.netActual} highlight />
-          </div>
-
           <LineTable
             title="Income"
             rows={income}
             busy={busy}
+            activeKey={filterKey}
             onSave={save}
             onRemove={remove}
-            onRecord={(key) => setEntryKey(key)}
+            onFocus={focusLine}
           />
           <LineTable
             title="Expense"
             rows={expense}
             busy={busy}
+            activeKey={filterKey}
             onSave={save}
             onRemove={remove}
-            onRecord={(key) => setEntryKey(key)}
+            onFocus={focusLine}
           />
 
           <div id="budget-activity" className="space-y-2">
-            <h3 className="text-sm font-bold">Activity log</h3>
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <h3 className="text-sm font-bold">
+                Activity log
+                {filterKey ? ` · ${lineLabel(filterKey)}` : ''}
+                <span className="ml-2 font-normal text-[#5A6070]">
+                  {filteredEntries.length}
+                  {filteredEntries.length !== entries.length ? ` of ${entries.length}` : ''}
+                </span>
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                <input
+                  className="border border-[#E8E4DC] rounded-lg px-3 py-1.5 text-sm"
+                  placeholder="Search memo…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                {filterKey ? (
+                  <button
+                    type="button"
+                    className="text-xs text-[#085508] hover:underline"
+                    onClick={() => setFilterKey('')}
+                  >
+                    Show all lines
+                  </button>
+                ) : null}
+              </div>
+            </div>
             {entries.length === 0 ? (
               <p className="text-sm text-[#5A6070]">
-                Nothing recorded yet. Refresh from Staff after the year starts, or key the first
-                occurrence above.
+                Nothing recorded yet. Import a Bank of America CSV, then Refresh from Staff.
               </p>
+            ) : filteredEntries.length === 0 ? (
+              <p className="text-sm text-[#5A6070]">No rows match this filter.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -426,15 +624,34 @@ export function StaffBudgetPanel() {
                     </tr>
                   </thead>
                   <tbody>
-                    {entries.map((e) => (
-                      <tr key={e.id} className="border-t border-[#E8E4DC]">
+                    {filteredEntries.map((e) => (
+                      <tr key={e.id} className="border-t border-[#E8E4DC] align-top">
                         <td className="py-2 pr-2 whitespace-nowrap">{e.occurredAt.slice(0, 10)}</td>
-                        <td className="py-2 pr-2">{lineLabel(e.lineSyncKey)}</td>
-                        <td className="py-2 pr-2">{money(e.amount)}</td>
+                        <td className="py-2 pr-2">
+                          {canMove(e.origin) ? (
+                            <select
+                              className="max-w-[14rem] border border-[#E8E4DC] rounded-lg px-2 py-1 text-xs"
+                              value={e.lineSyncKey}
+                              disabled={busy}
+                              onChange={(ev) => {
+                                if (ev.target.value !== e.lineSyncKey) void moveEntry(e.id, ev.target.value)
+                              }}
+                            >
+                              {lines.map((l) => (
+                                <option key={l.id} value={l.syncKey}>
+                                  {l.kind === 'income' ? 'In' : 'Out'} · {l.name}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            lineLabel(e.lineSyncKey)
+                          )}
+                        </td>
+                        <td className="py-2 pr-2 tabular-nums whitespace-nowrap">{money(e.amount)}</td>
                         <td className="py-2 pr-2 text-xs text-[#5A6070]">{originLabel(e.origin)}</td>
                         <td className="py-2 pr-2 text-xs">{e.memo}</td>
                         <td className="py-2">
-                          {e.origin === 'keyed' || e.origin === 'opening' ? (
+                          {canUndo(e.origin) ? (
                             <button
                               type="button"
                               className="text-xs text-rose-700 hover:underline"
@@ -517,12 +734,17 @@ function SummaryCard({
   budgeted,
   actual,
   highlight,
+  overIsBad,
 }: {
   title: string
   budgeted: number
   actual: number
   highlight?: boolean
+  overIsBad?: boolean
 }) {
+  const remaining = Math.round((budgeted - actual) * 100) / 100
+  const pct = budgeted ? Math.round((actual / budgeted) * 100) : null
+  const over = remaining < 0
   return (
     <div
       className={`rounded-lg border px-3 py-3 ${
@@ -530,11 +752,20 @@ function SummaryCard({
       }`}
     >
       <p className="text-[11px] font-bold uppercase tracking-wider text-[#5A6070]">{title}</p>
-      <p className="text-xl font-bold mt-1">{money(budgeted)}</p>
+      <p className="text-xl font-bold mt-1 tabular-nums">{money(budgeted)}</p>
       <p className="text-xs text-[#5A6070]">budgeted</p>
-      <p className="text-sm mt-2">
+      <p className="text-sm mt-2 tabular-nums">
         Actual {money(actual)}
-        {budgeted ? ` · ${Math.round((actual / budgeted) * 100)}%` : ''}
+        {pct != null ? ` · ${pct}%` : ''}
+      </p>
+      <p
+        className={`text-xs mt-1 tabular-nums ${
+          over ? (overIsBad ? 'text-rose-700' : 'text-[#085508]') : 'text-[#5A6070]'
+        }`}
+      >
+        {over
+          ? `${overIsBad ? 'Over by' : 'Ahead by'} ${money(Math.abs(remaining))}`
+          : `${money(remaining)} remaining`}
       </p>
     </div>
   )
@@ -544,16 +775,18 @@ function LineTable({
   title,
   rows,
   busy,
+  activeKey,
   onSave,
   onRemove,
-  onRecord,
+  onFocus,
 }: {
   title: string
   rows: BudgetLine[]
   busy: boolean
+  activeKey: string
   onSave: (id: string, patch: Partial<BudgetLine>) => Promise<void>
   onRemove: (id: string, name: string) => Promise<void>
-  onRecord: (syncKey: string) => void
+  onFocus: (syncKey: string) => void
 }) {
   const grouped = useMemo(() => {
     const map = new Map<string, BudgetLine[]>()
@@ -575,8 +808,9 @@ function LineTable({
             <tr className="text-left text-[11px] uppercase tracking-wider text-[#5A6070]">
               <th className="pb-2 pr-2 font-bold">Line</th>
               <th className="pb-2 pr-2 font-bold w-28">Budgeted</th>
-              <th className="pb-2 pr-2 font-bold w-24">Actual</th>
-              <th className="pb-2 pr-2 font-bold w-28">How it fills</th>
+              <th className="pb-2 pr-2 font-bold w-28">Actual</th>
+              <th className="pb-2 pr-2 font-bold w-28">Remaining</th>
+              <th className="pb-2 pr-2 font-bold w-36">How it fills</th>
               <th className="pb-2 pr-2 font-bold">Notes</th>
               <th className="pb-2 w-24" />
             </tr>
@@ -586,7 +820,7 @@ function LineTable({
               <Fragment key={`${title}-${category}`}>
                 <tr className="bg-[#F7F5F0]">
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="py-1.5 px-1 text-[11px] font-bold uppercase tracking-wider text-[#085508]"
                   >
                     {category}
@@ -597,9 +831,10 @@ function LineTable({
                     key={row.id}
                     row={row}
                     busy={busy}
+                    active={activeKey === row.syncKey}
                     onSave={onSave}
                     onRemove={onRemove}
-                    onRecord={onRecord}
+                    onFocus={onFocus}
                   />
                 ))}
               </Fragment>
@@ -614,18 +849,24 @@ function LineTable({
 function BudgetRow({
   row,
   busy,
+  active,
   onSave,
   onRemove,
-  onRecord,
+  onFocus,
 }: {
   row: BudgetLine
   busy: boolean
+  active: boolean
   onSave: (id: string, patch: Partial<BudgetLine>) => Promise<void>
   onRemove: (id: string, name: string) => Promise<void>
-  onRecord: (syncKey: string) => void
+  onFocus: (syncKey: string) => void
 }) {
   const [budgeted, setBudgeted] = useState(String(row.budgeted))
   const [notes, setNotes] = useState(row.notes)
+  const remaining = Math.round((row.budgeted - row.actual) * 100) / 100
+  const review = row.syncKey.startsWith('unclassified') && row.actual > 0
+  const overSpend = remaining < 0 && row.kind === 'expense'
+  const ahead = remaining < 0 && row.kind === 'income'
 
   useEffect(() => {
     setBudgeted(String(row.budgeted))
@@ -633,14 +874,23 @@ function BudgetRow({
   }, [row.budgeted, row.notes])
 
   return (
-    <tr className="border-t border-[#E8E4DC] align-top">
+    <tr
+      className={`border-t border-[#E8E4DC] align-top ${
+        review ? 'bg-rose-50' : active ? 'bg-[#085508]/5' : ''
+      }`}
+    >
       <td className="py-2 pr-2">
-        <p className="font-medium">{row.name}</p>
-        <p className="text-[11px] text-[#5A6070]">{row.owner}</p>
+        <button type="button" className="text-left" onClick={() => onFocus(row.syncKey)}>
+          <p className="font-medium hover:underline">{row.name}</p>
+        </button>
+        <p className="text-[11px] text-[#5A6070]">
+          {row.owner}
+          {row.entryCount ? ` · ${row.entryCount} ${row.entryCount === 1 ? 'row' : 'rows'}` : ''}
+        </p>
       </td>
       <td className="py-2 pr-2">
         <input
-          className="w-24 border border-[#E8E4DC] rounded-lg px-2 py-1 text-sm"
+          className="w-24 border border-[#E8E4DC] rounded-lg px-2 py-1 text-sm tabular-nums"
           inputMode="decimal"
           value={budgeted}
           disabled={busy}
@@ -651,15 +901,28 @@ function BudgetRow({
         />
       </td>
       <td className="py-2 pr-2 font-medium tabular-nums">{money(row.actual)}</td>
+      <td
+        className={`py-2 pr-2 tabular-nums ${
+          overSpend ? 'text-rose-700 font-medium' : ahead ? 'text-[#085508] font-medium' : ''
+        }`}
+      >
+        {money(remaining)}
+      </td>
       <td className="py-2 pr-2">
         <span
           className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold ${
-            row.tracking === 'auto'
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-              : 'border-amber-200 bg-amber-50 text-amber-900'
+            review
+              ? 'border-rose-200 bg-rose-50 text-rose-800'
+              : row.tracking === 'bank'
+                ? 'border-sky-200 bg-sky-50 text-sky-800'
+                : row.tracking === 'auto'
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                  : row.tracking === 'skip'
+                    ? 'border-[#E8E4DC] bg-[#F7F5F0] text-[#5A6070]'
+                    : 'border-amber-200 bg-amber-50 text-amber-900'
           }`}
         >
-          {row.tracking === 'auto' ? 'Staff + keyed' : 'You key'}
+          {review ? 'Needs a line' : trackingLabel(row.tracking)}
         </span>
       </td>
       <td className="py-2 pr-2">
@@ -678,12 +941,9 @@ function BudgetRow({
           <button
             type="button"
             className="text-xs text-[#085508] hover:underline"
-            onClick={() => {
-              onRecord(row.syncKey)
-              document.getElementById('budget-record')?.scrollIntoView({ behavior: 'smooth' })
-            }}
+            onClick={() => onFocus(row.syncKey)}
           >
-            Record
+            Activity
           </button>
           <button
             type="button"

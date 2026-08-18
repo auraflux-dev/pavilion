@@ -296,6 +296,25 @@ export async function POST(req: NextRequest) {
         ],
       },
       {
+        id: 'StaffPlaidItems',
+        displayName: 'Staff Plaid Items',
+        fields: [
+          { key: 'itemId', displayName: 'Plaid item ID', type: 'TEXT' },
+          { key: 'accessToken', displayName: 'Access token', type: 'TEXT' },
+          { key: 'institutionId', displayName: 'Institution ID', type: 'TEXT' },
+          { key: 'institutionName', displayName: 'Institution', type: 'TEXT' },
+          { key: 'cursor', displayName: 'Transactions cursor', type: 'TEXT' },
+          { key: 'connectedByEmail', displayName: 'Connected by', type: 'TEXT' },
+          { key: 'accountMask', displayName: 'Account mask', type: 'TEXT' },
+          { key: 'accountName', displayName: 'Account name', type: 'TEXT' },
+          { key: 'lastSyncedAt', displayName: 'Last synced', type: 'TEXT' },
+          { key: 'lastBalance', displayName: 'Last balance $', type: 'NUMBER' },
+          { key: 'error', displayName: 'Item error', type: 'TEXT' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+          { key: 'updatedAt', displayName: 'Updated at', type: 'TEXT' },
+        ],
+      },
+      {
         id: 'KbArticles',
         displayName: 'Help Knowledge Base',
         fields: [

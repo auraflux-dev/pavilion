@@ -348,6 +348,7 @@ export function StaffDashboard() {
   ])
 
   const active: StaffWorkspace = useMemo(() => {
+    if (searchParams.get('oauth_state_id')) return 'budget'
     const fromUrl = parseWorkspace(searchParams.get('view'))
     if (fromUrl && navItems.some((i) => i.id === fromUrl)) return fromUrl
     return 'home'
@@ -566,7 +567,7 @@ export function StaffDashboard() {
                           minutes: 'Publish meeting minutes',
                           programs: 'Registration & sessions',
                           payments: 'Needs Reconciliation',
-                          budget: 'Record activity · refresh from Staff',
+                          budget: 'BoA CSV · Staff sales · Excel',
                           events: 'Create, edit, cancel events',
                           retail: 'The Cove product lists',
                           discounts: 'Named & member discount codes',

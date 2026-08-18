@@ -10,6 +10,10 @@
     {
       "path": "/api/cron/backup-cms",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/sync-budget-plaid",
+      "schedule": "0 15 * * *"
     }
   ],
   "redirects": [

@@ -6,7 +6,7 @@ import { getWixClient } from '@/lib/wix-client'
 
 export const BUDGET_COLLECTION = 'PtoBudgetLines'
 export const DEFAULT_FISCAL_YEAR = '2026-27'
-export const FISCAL_YEAR_LABEL = 'Aug 1, 2026 – Jul 31, 2027'
+export const FISCAL_YEAR_LABEL = 'Jul 1, 2026 – Jun 30, 2027'
 
 export type BudgetKind = 'income' | 'expense'
 
@@ -30,12 +30,12 @@ export function money(n: unknown) {
   return Math.round((Number(n) || 0) * 100) / 100
 }
 
-/** Aug 1 startYear → Jul 31 next year. `2026-27` → Aug 1 2026 – Jul 31 2027. */
+/** Jul 1 startYear → Jun 30 next year. `2026-27` → Jul 1 2026 – Jun 30 2027. */
 export function fiscalYearWindow(year = DEFAULT_FISCAL_YEAR) {
   const startYear = Number(String(year).split('-')[0]) || 2026
   return {
-    from: new Date(Date.UTC(startYear, 7, 1, 0, 0, 0, 0)),
-    to: new Date(Date.UTC(startYear + 1, 6, 31, 23, 59, 59, 999)),
+    from: new Date(Date.UTC(startYear, 6, 1, 0, 0, 0, 0)),
+    to: new Date(Date.UTC(startYear + 1, 5, 30, 23, 59, 59, 999)),
   }
 }
 
@@ -45,6 +45,7 @@ const SYNC_KEY_BY_SORT: Record<number, string> = {
   30: 'cove_loads',
   40: 'cove_shop',
   50: 'cove_pos',
+  55: 'card_payouts',
   60: 'dance_night',
   70: 'events_other',
   80: 'enrichment_fees',
@@ -52,9 +53,11 @@ const SYNC_KEY_BY_SORT: Record<number, string> = {
   100: 'sponsorships',
   110: 'gifts',
   120: 'run_for_charity',
+  130: 'unclassified_income',
   200: 'instructor_pay',
   210: 'enrichment_supplies',
   220: 'events',
+  225: 'beautification',
   230: 'dance_costs',
   240: 'wellness',
   250: 'cove_restock',
@@ -66,6 +69,7 @@ const SYNC_KEY_BY_SORT: Record<number, string> = {
   310: 'website_tools',
   320: 'comms',
   330: 'contingency',
+  340: 'unclassified_expense',
 }
 
 export function defaultSyncKey(sortOrder: number, name: string) {
@@ -110,7 +114,7 @@ export function summarizeBudget(lines: BudgetLine[]) {
   }
 }
 
-/** Placeholder FY 2026–27 lines from current site goals and how the PTO actually runs. */
+/** FY 2026–27 lines. Expense budgeted amounts are FY25 checking (Jul 1 2025 – Jun 30 2026), rounded. */
 export function placeholderBudgetLines(_fiscalYear = DEFAULT_FISCAL_YEAR): SeedLine[] {
   const income: SeedLine[] = [
     {
@@ -120,7 +124,7 @@ export function placeholderBudgetLines(_fiscalYear = DEFAULT_FISCAL_YEAR): SeedL
       budgeted: 5000,
       actual: 0,
       owner: 'Treasurer',
-      notes: 'Replace with closing cash from MoneyMinder at 7/31/2026.',
+      notes: 'Replace with closing cash from MoneyMinder at 6/30/2026.',
       sortOrder: 10,
     },
     {
@@ -162,6 +166,16 @@ export function placeholderBudgetLines(_fiscalYear = DEFAULT_FISCAL_YEAR): SeedL
       owner: 'Retail',
       notes: 'Square Stand cash/card at events when not already counted in shop totals.',
       sortOrder: 50,
+    },
+    {
+      kind: 'income',
+      category: 'Bank',
+      name: 'Card processor deposits (Square / PayPal → BoA)',
+      budgeted: 0,
+      actual: 0,
+      owner: 'Treasurer',
+      notes: 'Not filled from the bank CSV. Square/PayPal payout deposits are skipped so memberships/Cove/tickets stay on Staff Payments.',
+      sortOrder: 55,
     },
     {
       kind: 'income',
@@ -233,6 +247,16 @@ export function placeholderBudgetLines(_fiscalYear = DEFAULT_FISCAL_YEAR): SeedL
       notes: 'Best Runners partnership. Enter whatever the school actually receives.',
       sortOrder: 120,
     },
+    {
+      kind: 'income',
+      category: 'Bank',
+      name: 'Unclassified BoA deposits',
+      budgeted: 0,
+      actual: 0,
+      owner: 'Treasurer',
+      notes: 'BoA CSV could not map these inflows. Move each row in the activity log.',
+      sortOrder: 130,
+    },
   ]
 
   const expense: SeedLine[] = [
@@ -240,130 +264,140 @@ export function placeholderBudgetLines(_fiscalYear = DEFAULT_FISCAL_YEAR): SeedL
       kind: 'expense',
       category: 'Programs',
       name: 'Enrichment instructor / contractor pay',
-      budgeted: 10000,
+      budgeted: 4700,
       actual: 0,
       owner: 'Programs',
-      notes: 'From timesheets + W-9 contractors. Offsets enrichment fee income.',
+      notes: 'FY25 checking $4,678. Coaches, coordinators, VLO.',
       sortOrder: 200,
     },
     {
       kind: 'expense',
       category: 'Programs',
       name: 'Enrichment supplies, flyers, scholarships',
-      budgeted: 2500,
+      budgeted: 3150,
       actual: 0,
       owner: 'Programs',
-      notes: 'PTO-funded piece of the 45% student-enrichment allocation.',
+      notes: 'FY25 checking $3,172 (LEGO, Math Olympiads, Nova Math).',
       sortOrder: 210,
     },
     {
       kind: 'expense',
       category: 'Events',
       name: 'School events & celebrations',
-      budgeted: 5500,
+      budgeted: 8350,
       actual: 0,
       owner: 'Events',
-      notes: '~25% of the public fundraising allocation for events.',
+      notes: 'FY25 checking $8,334 (STEAM, Fall Annual Night, Sweet Treat, year-end).',
       sortOrder: 220,
+    },
+    {
+      kind: 'expense',
+      category: 'Campus',
+      name: 'Beautification / community project',
+      budgeted: 0,
+      actual: 0,
+      owner: 'Treasurer',
+      notes: 'One-off campus project in 2025–26. Not in the 2026–27 operating plan.',
+      sortOrder: 225,
     },
     {
       kind: 'expense',
       category: 'Events',
       name: 'Dance Night production costs',
-      budgeted: 1500,
+      budgeted: 1400,
       actual: 0,
       owner: 'Events',
-      notes: 'DJ, extras, concessions buy-in against dance-night sales.',
+      notes: 'FY25 checking $1,418 (DJ).',
       sortOrder: 230,
     },
     {
       kind: 'expense',
       category: 'Wellness',
       name: 'Teacher & staff wellness / classroom support',
-      budgeted: 3250,
+      budgeted: 3300,
       actual: 0,
       owner: 'Wellness',
-      notes: '~15% teacher-support allocation. Confirm with Wellness lead.',
+      notes: 'FY25 checking $3,314 (teacher breakfast and similar).',
       sortOrder: 240,
     },
     {
       kind: 'expense',
       category: 'The Cove',
       name: 'Cove snack restock',
-      budgeted: 4000,
+      budgeted: 4250,
       actual: 0,
       owner: 'Retail',
-      notes: 'COGS against Digital Card snack sales.',
+      notes: 'FY25 checking $4,250 (Sam’s / snack cart COGS).',
       sortOrder: 250,
     },
     {
       kind: 'expense',
       category: 'The Cove',
       name: 'Spirit wear / merch restock',
-      budgeted: 2200,
+      budgeted: 6850,
       actual: 0,
       owner: 'Retail',
-      notes: 'Vendor orders for shop and POS-only items.',
+      notes: 'FY25 checking $6,835 (includes Reston Shirt).',
       sortOrder: 260,
     },
     {
       kind: 'expense',
       category: 'Membership',
       name: 'Membership perk shirts & magnets',
-      budgeted: 2500,
+      budgeted: 0,
       actual: 0,
       owner: 'Membership',
-      notes: 'Lagoon/Tide shirts + magnets, Reef magnets. Fulfillment queue.',
+      notes: 'No separate FY25 checking line (shirts sat on merch). Key here if perk shirts are bought separately this year.',
       sortOrder: 270,
     },
     {
       kind: 'expense',
       category: 'Operations',
       name: 'Card processing (Square / PayPal)',
-      budgeted: 1500,
+      budgeted: 800,
       actual: 0,
       owner: 'Treasurer',
-      notes: '~2.5–3% of card volume. Actuals from Square + PayPal statements.',
+      notes: 'Not on the BoA CSV. ~3% of FY25 Square deposits ($29,140). Confirm on Square/PayPal.',
       sortOrder: 280,
     },
     {
       kind: 'expense',
       category: 'Operations',
       name: 'Insurance',
-      budgeted: 1500,
+      budgeted: 425,
       actual: 0,
       owner: 'Treasurer',
-      notes: 'Treasurer owns insurance. Replace with actual premium.',
+      notes: 'FY25 checking $423 (Association Insurance). Replace if the premium changed.',
       sortOrder: 290,
     },
     {
       kind: 'expense',
       category: 'Operations',
       name: 'Tax filing, 990, bank',
-      budgeted: 400,
+      budgeted: 475,
       actual: 0,
       owner: 'Treasurer',
-      notes: 'Annual filing and account fees.',
+      notes: 'FY25 checking $471 (IRS + Tax1099).',
       sortOrder: 300,
     },
     {
       kind: 'expense',
       category: 'Operations',
       name: 'Website & tools (Wix, Vercel, MoneyMinder)',
-      budgeted: 800,
+      budgeted: 2700,
       actual: 0,
       owner: 'Treasurer',
-      notes: 'Digital infrastructure. Confirm invoices.',
+      notes: 'FY25 checking $2,692 (Jumbula, Apple, hardware, tools).',
       sortOrder: 310,
     },
     {
       kind: 'expense',
       category: 'Communications',
       name: 'Print, Canva, newsletters',
-      budgeted: 400,
+      budgeted: 3050,
       actual: 0,
       owner: 'Marketing',
-      notes: '~5% PTO admin/comms allocation remainder.',
+      notes: 'FY25 checking $3,070 (4imprint + FastSigns).',
       sortOrder: 320,
     },
     {
@@ -373,8 +407,18 @@ export function placeholderBudgetLines(_fiscalYear = DEFAULT_FISCAL_YEAR): SeedL
       budgeted: 2000,
       actual: 0,
       owner: 'Treasurer',
-      notes: 'Board-approved cushion. Not a spend unless needed.',
+      notes: 'Board cushion, not FY25 spend. Not a spend unless needed.',
       sortOrder: 330,
+    },
+    {
+      kind: 'expense',
+      category: 'Bank',
+      name: 'Unclassified BoA withdrawals',
+      budgeted: 0,
+      actual: 0,
+      owner: 'Treasurer',
+      notes: 'BoA CSV could not map these outflows. Move each row in the activity log.',
+      sortOrder: 340,
     },
   ]
 
@@ -494,6 +538,27 @@ export async function seedPlaceholderBudget(fiscalYear = DEFAULT_FISCAL_YEAR): P
     )
   }
   return listBudgetLines(fiscalYear)
+}
+
+/** Insert any placeholder lines that are missing so new categories (e.g. campus) appear without reseeding. */
+export async function ensureMissingPlaceholderLines(fiscalYear = DEFAULT_FISCAL_YEAR): Promise<void> {
+  const existing = await listBudgetLines(fiscalYear)
+  const have = new Set(existing.map((l) => l.syncKey))
+  for (const spec of placeholderBudgetLines(fiscalYear)) {
+    if (!spec.syncKey || have.has(spec.syncKey)) continue
+    await createBudgetLine({
+      fiscalYear,
+      kind: spec.kind,
+      category: spec.category,
+      name: spec.name,
+      budgeted: spec.budgeted,
+      actual: 0,
+      owner: spec.owner,
+      notes: spec.notes,
+      sortOrder: spec.sortOrder,
+      syncKey: spec.syncKey,
+    })
+  }
 }
 
 export async function createBudgetLine(

@@ -40,7 +40,7 @@ export const STAFF_KB: KbIndex = {
     {
       id: 'admin',
       title: 'Site & admin',
-      summary: 'Reports, site lists, money systems note.',
+      summary: 'Reports, Budget, site lists, money systems note.',
       order: 6,
     },
   ],
@@ -241,7 +241,7 @@ Printable: **/staff/in-person**
 | Unable to load cards | No Cove load yet — cash/card, or Staff Charge Cove backup |
 | Portal already paid | **Today's store pickups** → Handed out |
 | Zelle / PayPal / phone (no Stand) | Staff → **External** |
-| Code ends in **9** | Free food ticket · no charge |
+| Code ends in **9** | Lagoon/Tide free food ticket · no charge |
 | Membership | **Portal only** |
 
 ## Stand Cove (passcode / PIN)
@@ -375,7 +375,7 @@ Progress is saved on your StaffRoles row so it follows you across devices.
 ## Tracks
 - **VP Marketing** — Google, Projects, Comms, Canva folder, Social, Newsletter, page copy, surveys
 - **Secretary** — Minutes, Comms, Board roster, Events, Newsletter
-- **Treasurer** — Budget (2026–27 placeholder), Payments, Expenses, Reports, MoneyMinder, Square
+- **Treasurer** — Budget (2026–27 planning worksheet), Payments, Expenses, Reports, MoneyMinder, Square
 - **Events / Programs / Retail / Membership / Wellness / Instructor / Coordinator** — role-specific workspaces
 
 See Drive doc **47 - Staff Role Onboarding** for the board-facing guide.`,
@@ -502,15 +502,15 @@ If a parent paid but sees nothing:
 - **Reef:** includes a magnet (no shirt).
 - **Faculty ($20):** choose **magnet OR T-shirt** at checkout (not both).
 - Queued in Staff → Fulfillments. No mailing address yet (3PL later).
-- Tell members: pick up at **Open House on August 13**, or email **vp-membershipexperience@shmspto.org** to coordinate pickup.
+- Tell members: email **vp-membershipexperience@shmspto.org** to coordinate pickup at school.
 - Standalone **Stone Hill car magnet** is also sold in the spirit shop for $10.
 - Mark **Set aside** when inventory is pulled, then **Handed out** after handoff.
 
 ## Free food & refreshments at PTO events
-- Paid parent tiers (Reef / Lagoon / Tide) get this perk.
-- Family Cove **6-digit codes for paid members always end in 9** (free accounts never do).
-- At food trucks / tables: parent shows the 6-digit code → volunteer checks it ends in 9 (or looks up on Cove register) → record the code → hand refreshment tickets.
-- Portal Membership benefits also shows the code for paid members.`,
+- **Lagoon and Tide only** (not Reef).
+- Family Cove **6-digit codes for Lagoon/Tide always end in 9** (Reef and free accounts never do).
+- At food trucks / tables: parent shows the 6-digit code → volunteer checks it ends in 9 **or** looks up on Cove register (Lagoon/Tide) → record the code → hand refreshment tickets.
+- Portal Membership benefits also shows the code for Lagoon/Tide members.`,
     },
     {
       slug: 'refunds-cancellations',
@@ -586,15 +586,68 @@ Square may keep a small processing fee on refunds. That is normal.
 
 Staff does not embed those consoles. Use them only for finance ops, then return to Staff for parent-facing and program work.
 
-## Planning budget (Staff → Budget)
-Treasurer/Admin load a **2026–27 planning placeholder** (Aug 1, 2026 – Jul 31, 2027).
+Planning vs actual for the year lives in Staff → **Budget**. Full walkthrough: Help → **Staff planning budget (2026–27)**.`,
+    },
+    {
+      slug: 'staff-budget',
+      title: 'Staff planning budget (2026–27)',
+      categoryId: 'admin',
+      summary: 'Plan vs actual for Treasurer. Not the ledger. Jul 1–Jun 30.',
+      order: 6,
+      body: `Open **Staff → Budget** (Treasurer and Admin). This is a **planning worksheet** so the board can see plan vs actual during the year.
 
-- **Refresh from Staff** pulls memberships, Cove loads, shop, POS, tickets, enrichment fees, donations, and reimbursements marked Paid
-- **Record activity** is for money that never hits those systems (beginning cash, insurance, spirit nights, sponsorship checks, 990, processing)
-- Actuals are the sum of those occurrences, not a number to type over
-- **Download Excel** saves Summary, Budget, and Activity sheets (.xlsx)
+It is **not** the official books. MoneyMinder, Square, PayPal, and Bank of America stay the ledger. Staff Budget does not need to match them to the penny.
 
-Operational planning only — it does **not** replace MoneyMinder.`,
+## Fiscal year
+**July 1, 2026 – June 30, 2027.**
+
+## Budgeted vs Actual
+- **Budgeted** is the plan. Edit the box on a line and tab away to save.
+- **Actual** is the sum of activity rows. Do not type over Actual. Add or move rows instead.
+
+Expense **budgeted** amounts for 2026–27 start from **FY 2025–26 checking spend** (July 1, 2025 – June 30, 2026), rounded.
+
+- **Beautification / community project** is **$0**. Last year’s campus work was a one-off, not this year’s operating plan.
+- **Contingency $2,000** is a board cushion, not last year’s spend.
+- **Card processing $800** is about 3% of last year’s Square deposits. Those fees are taken by Square/PayPal and usually never appear as a checking withdrawal.
+- **Membership perk shirts** are **$0** on their own line because last year those shirts hit spirit-wear restock. Type a budget here if perk shirts are bought separately this year.
+- **Income** lines are still fundraising **goals**, not last year’s deposits.
+- **Beginning cash** is a placeholder until Treasurer replaces it with MoneyMinder closing cash at **6/30/2026**.
+
+## How actuals get onto the worksheet
+Two feeds. Using both on purpose avoids counting the same dollars twice.
+
+### 1. Bank of America CSV (checking cash)
+In BoA: checking → Activity → Download → **CSV** (not PDF). Upload it on the Budget page.
+
+- Checks, ACH, Zelle, Sam’s, Amazon, Jumbula, insurance, and tools **do** import
+- Square and PayPal **payouts into checking are skipped** (same dollars as memberships / Cove / tickets)
+- Processor **fees** and card purchases (Apple, Square hardware, Adobe) still import
+- Debit charges on our own Square terminal (SQ *SHMSPTO) are skipped — those sales already live in Staff Payments
+- Internal transfers are skipped
+- Re-importing the same file will not double-count
+- If you move a row to another line, a later re-import leaves that move alone
+- Amazon lands on spirit-wear restock; Sam’s / Costco on snack restock. Change the line if that guess is wrong
+
+### 2. Refresh from Staff (sale-level)
+Pulls Square/PayPal **sales** already in Staff: memberships, Cove Digital loads, shop, in-person POS, tickets, and **paid** reimbursements. That is the split by what was sold, not the lump Square deposit.
+
+Typical month: download a fresh BoA CSV → import → **Refresh from Staff**.
+
+## Using the page
+- Totals at the top: income, expense, net — budgeted vs actual, and remaining
+- Click a line name to filter the activity log
+- Wrong category: change the line on the row in the activity log
+- **Record activity** is for beginning cash, a check, or a spirit night that never hit Square or the CSV
+- **Undo** removes a bank or keyed row. Staff sales come back on Refresh — recategorize those instead of deleting
+- **Download Excel** exports Summary, Budget, and Activity sheets
+
+Unclassified deposits/withdrawals are catch-alls. Move those rows to a real line.
+
+## Related
+- Staff Help → **PayPal, Square, MoneyMinder, Bank of America**
+- Questions: treasurer@shmspto.org
+`,
     },
   ],
 }

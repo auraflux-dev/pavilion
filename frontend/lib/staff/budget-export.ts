@@ -5,11 +5,13 @@ import {
   summarizeBudget,
   type BudgetLine,
 } from '@/lib/staff/budget'
-import { applyEntryTotals, isAutoTracked, type BudgetEntry } from '@/lib/staff/budget-sync'
+import { applyEntryTotals, trackingFor, type BudgetEntry } from '@/lib/staff/budget-sync'
 
 function originLabel(origin: string) {
+  if (origin === 'auto-plaid' || origin === 'auto-bofa') return 'Bank · BoA'
   if (origin === 'auto-payment') return 'Staff · sale'
   if (origin === 'auto-expense') return 'Staff · reimbursement'
+  if (origin === 'reclass') return 'Moved'
   if (origin === 'opening') return 'Opening'
   return 'Keyed'
 }
@@ -54,7 +56,7 @@ export async function buildBudgetWorkbook(input: {
   summarySheet.mergeCells('A1:C1')
   summarySheet.getCell('A2').value = label
   summarySheet.getCell('A3').value =
-    'Planning worksheet — not the official books. MoneyMinder / Square / PayPal / Bank of America remain the ledger.'
+    'Planning worksheet — MoneyMinder remains the ledger. Checking actuals from the BoA CSV; sales from Refresh from Staff.'
   summarySheet.mergeCells('A3:C3')
   summarySheet.getCell('A3').alignment = { wrapText: true }
   summarySheet.getRow(3).height = 32
@@ -126,7 +128,15 @@ export async function buildBudgetWorkbook(input: {
     row.getCell(7).value = line.budgeted ? line.actual / line.budgeted : null
     row.getCell(7).numFmt = '0%'
     row.getCell(8).value = line.owner
-    row.getCell(9).value = isAutoTracked(line.syncKey) ? 'Staff + keyed' : 'You key'
+    const track = trackingFor(line.syncKey)
+    row.getCell(9).value =
+      track === 'bank'
+        ? 'Bank CSV'
+        : track === 'auto'
+          ? 'Staff + bank'
+          : track === 'skip'
+            ? 'Skipped · Staff sales'
+            : 'You key'
     row.getCell(10).value = line.notes
     row.getCell(10).alignment = { wrapText: true }
   })

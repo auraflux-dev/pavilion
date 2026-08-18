@@ -1,6 +1,6 @@
 /**
- * GET    /api/staff/budget?year=2026-27  list lines, actuals, recent activity
- * POST   seed | refresh | entry | create
+ * GET    /api/staff/budget?year=2026-27  list lines, actuals, activity
+ * POST   seed | refresh | entry | create | import-bofa | reclassify
  * PATCH  update a line (budgeted / notes)
  * DELETE line (?id=) or keyed activity (?entryId=)
  */
@@ -22,11 +22,17 @@ import {
   addKeyedBudgetEntry,
   applyEntryTotals,
   deleteBudgetEntry,
-  isAutoTracked,
   listBudgetEntries,
+  reclassifyBudgetEntry,
   refreshBudgetActuals,
+  trackingFor,
   type BudgetEntry,
 } from '@/lib/staff/budget-sync'
+import { hasActivePlaidItem, listActivePlaidItems, publicPlaidStatus } from '@/lib/staff/plaid-items'
+import { plaidConfigured } from '@/lib/staff/plaid'
+import { refreshPlaidIntoBudget } from '@/lib/staff/plaid-sync'
+import { isBankOrigin } from '@/lib/staff/budget-bank'
+import { importBofaCsv } from '@/lib/staff/bofa-csv'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -37,24 +43,38 @@ async function gate(req: NextRequest) {
   return session
 }
 
-function decorate(line: BudgetLine) {
+function decorate(line: BudgetLine, entries: BudgetEntry[]) {
   return {
     ...line,
-    tracking: isAutoTracked(line.syncKey) ? ('auto' as const) : ('keyed' as const),
+    tracking: trackingFor(line.syncKey),
+    entryCount: entries.filter((e) => e.lineSyncKey === line.syncKey).length,
   }
 }
 
-async function payload(year: string, extra?: { entries?: BudgetEntry[]; added?: number }) {
+async function payload(
+  year: string,
+  extra?: { entries?: BudgetEntry[]; added?: number; updated?: number; source?: string; message?: string },
+) {
   const listed = await listBudgetLines(year)
   const entries = extra?.entries ?? (await listBudgetEntries(year))
-  const lines = applyEntryTotals(listed, entries).map(decorate)
+  const plaidItems = plaidConfigured() ? await listActivePlaidItems() : []
+  const bankConnected = plaidItems.length > 0 || entries.some((e) => isBankOrigin(e.origin))
+  const lines = applyEntryTotals(listed, entries).map((line) => decorate(line, entries))
   return {
     year,
     label: year === DEFAULT_FISCAL_YEAR ? FISCAL_YEAR_LABEL : year,
     lines,
     summary: summarizeBudget(lines),
-    entries: entries.slice(0, 50),
+    entries,
     added: extra?.added,
+    updated: extra?.updated,
+    source: extra?.source,
+    message: extra?.message,
+    plaid: {
+      configured: plaidConfigured(),
+      ...publicPlaidStatus(plaidItems),
+    },
+    bankConnected,
   }
 }
 
@@ -90,15 +110,62 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, ...(await payload(year)) })
     }
 
+    if (action === 'import-bofa') {
+      const csv = String(body.csv ?? '')
+      if (!csv.trim()) return NextResponse.json({ error: 'Paste or upload a BoA CSV' }, { status: 400 })
+      const result = await importBofaCsv({
+        csv,
+        fiscalYear: year,
+        actorEmail: session.email,
+      })
+      const entries = await listBudgetEntries(year)
+      return NextResponse.json({
+        ok: true,
+        ...(await payload(year, {
+          entries,
+          added: result.added,
+          updated: result.updated,
+          source: 'bofa',
+          message: `Imported BoA CSV · ${result.added} new, ${result.updated} already in, ${result.skippedPayouts} Square/PayPal payouts skipped (those sales stay in Staff Payments), ${result.skipped} other skipped.`,
+        })),
+      })
+    }
+
     if (action === 'refresh') {
+      if (plaidConfigured() && (await hasActivePlaidItem())) {
+        const result = await refreshPlaidIntoBudget({
+          fiscalYear: year,
+          actorEmail: session.email,
+        })
+        const entries = await listBudgetEntries(year)
+        return NextResponse.json({
+          ok: true,
+          ...(await payload(year, {
+            entries,
+            added: result.added,
+            updated: result.updated,
+            source: 'plaid',
+            message: result.message,
+          })),
+        })
+      }
       const { added, entries } = await refreshBudgetActuals({
         fiscalYear: year,
         actorEmail: session.email,
       })
       return NextResponse.json({
         ok: true,
-        ...(await payload(year, { entries, added })),
+        ...(await payload(year, { entries, added, source: 'staff' })),
       })
+    }
+
+    if (action === 'reclassify') {
+      const entries = await reclassifyBudgetEntry({
+        id: String(body.id ?? body.entryId ?? ''),
+        lineSyncKey: String(body.lineSyncKey ?? ''),
+        fiscalYear: year,
+      })
+      return NextResponse.json({ ok: true, ...(await payload(year, { entries })) })
     }
 
     if (action === 'entry') {
