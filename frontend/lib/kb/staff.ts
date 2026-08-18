@@ -516,7 +516,7 @@ If a parent paid but sees nothing:
 - **Lagoon and Tide only** (not Reef).
 - Family Cove **6-digit codes for Lagoon/Tide always end in 9** (Reef and free accounts never do).
 - At food trucks / tables: parent shows the 6-digit code → volunteer checks it ends in 9 **or** looks up on Cove register (Lagoon/Tide) → record the code → hand refreshment tickets.
-- **Reef / guests** are not free. Ring **BTSN food truck ticket** ($30, SKU `POS-REFRESH`) on Square Stand or the phone POS, take Cove / cash / card, **then** hand a ticket. Item is POS-only (not on /cove).
+- **Reef / guests** are not free. Ring **BTSN food truck ticket** ($30, SKU POS-REFRESH) on Square Stand or the phone POS, take Cove / cash / card, **then** hand a ticket. Item is POS-only (not on /cove).
 - Portal Membership benefits also shows the code for Lagoon/Tide members.`,
     },
     {
