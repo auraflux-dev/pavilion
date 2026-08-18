@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import { Inter, Merriweather } from 'next/font/google'
 import { GoogleAnalytics } from '@/components/google-analytics'
+import { TrafficBeacon } from '@/components/traffic-beacon'
 import './globals.css'
 
 const _inter = Inter({ subsets: ['latin'] })
@@ -58,6 +59,7 @@ export default function RootLayout({
     <html lang="en" className="bg-background">
       <body className="font-sans antialiased text-foreground">
         {children}
+        <TrafficBeacon />
         <Analytics />
         <GoogleAnalytics />
       </body>

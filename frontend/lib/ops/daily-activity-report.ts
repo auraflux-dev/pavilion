@@ -1,12 +1,13 @@
 /**
  * Yesterday’s recorded site / member / staff actions, emailed at 6am Eastern.
- * This is CMS + Gmail actions, not page-view analytics.
+ * CMS + Gmail actions daily; Mondays also include first-party weekly pageviews.
  */
 import { getWixClient } from '@/lib/wix-client'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { listMessages } from '@/lib/google/gmail'
 import { sendMassEmail } from '@/lib/staff/mass-email'
 import { preferredGmailSender } from '@/lib/staff/gmail-send-auth'
+import { formatWeeklyTraffic, summarizeTrafficWeek } from '@/lib/ops/site-traffic'
 
 const TZ = 'America/New_York'
 const LIST_CAP = 12
@@ -64,6 +65,14 @@ function zonedLocalToUtc(year: number, month: number, day: number, hour = 0, min
     instant = new Date(instant.getTime() + delta)
   }
   return instant
+}
+
+export function isMondayEastern(now = new Date()): boolean {
+  const weekday = new Intl.DateTimeFormat('en-US', {
+    timeZone: TZ,
+    weekday: 'short',
+  }).format(now)
+  return weekday === 'Mon'
 }
 
 export function easternYesterdayWindow(now = new Date()): DailyActivityWindow {
@@ -260,14 +269,25 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
   const newsletterRows = filterRows(newsletters, ['publishedAt', '_createdDate'], win)
   const errorRows = filterRows(errors, ['createdAt', '_createdDate'], win)
 
+  let trafficLines: string[] = []
+  if (isMondayEastern(now)) {
+    try {
+      trafficLines = formatWeeklyTraffic(await summarizeTrafficWeek(win.label))
+    } catch (err) {
+      console.warn('[daily-activity] weekly traffic skipped', err)
+      trafficLines = ['WEEKLY TRAFFIC', '  Could not load pageview counters.', '']
+    }
+  }
+
   const paidTotal = payRows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
   const ticketTotal = ticketRows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
 
   const lines: string[] = [
     `SHMS PTO daily activity — ${win.label} (US Eastern, midnight–midnight)`,
     `Window: ${win.startIso} → ${win.endIso}`,
-    'This is recorded actions (forms, checkouts, enrollments, staff work). It is not page-view counts.',
+    'This is recorded actions (forms, checkouts, enrollments, staff work). Weekly pageviews are included on Mondays.',
     '',
+    ...trafficLines,
     'WEBSITE',
     ...section(
       'Public / website forms',
@@ -387,7 +407,9 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
 
   return {
     window: win,
-    subject: `SHMS PTO daily activity — ${win.label}`,
+    subject: isMondayEastern(now)
+      ? `SHMS PTO daily activity — ${win.label} + weekly traffic`
+      : `SHMS PTO daily activity — ${win.label}`,
     body: lines.join('\n').replace(/\n{3,}/g, '\n\n'),
     counts,
   }

@@ -315,6 +315,21 @@ export async function POST(req: NextRequest) {
         ],
       },
       {
+        id: 'SiteTrafficDaily',
+        displayName: 'Site Traffic Daily',
+        fields: [
+          { key: 'day', displayName: 'Day (YYYY-MM-DD Eastern)', type: 'TEXT' },
+          { key: 'websitePageviews', displayName: 'Website pageviews', type: 'NUMBER' },
+          { key: 'memberPageviews', displayName: 'Member portal pageviews', type: 'NUMBER' },
+          { key: 'staffPageviews', displayName: 'Staff pageviews', type: 'NUMBER' },
+          { key: 'websiteVisitors', displayName: 'Website unique-browser days', type: 'NUMBER' },
+          { key: 'memberVisitors', displayName: 'Member unique-browser days', type: 'NUMBER' },
+          { key: 'staffVisitors', displayName: 'Staff unique-browser days', type: 'NUMBER' },
+          { key: 'pathsJson', displayName: 'Path counts JSON', type: 'TEXT' },
+          { key: 'updatedAt', displayName: 'Updated at', type: 'TEXT' },
+        ],
+      },
+      {
         id: 'FamilyGuardians',
         displayName: 'Family Guardians',
         fields: [

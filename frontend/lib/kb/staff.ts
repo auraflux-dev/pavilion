@@ -242,6 +242,7 @@ Printable: **/staff/in-person**
 | Portal already paid | **Today's store pickups** → Handed out |
 | Zelle / PayPal / phone (no Stand) | Staff → **External** |
 | Code ends in **9** | Lagoon/Tide free food ticket · no charge |
+| Reef / guest wants food | Stand → ring **BTSN food truck ticket** ($30, SKU POS-REFRESH) → Cove QR / Card on File / cash / card → hand ticket |
 | Membership | **Portal only** |
 
 ## Stand Cove (passcode / PIN)
@@ -433,7 +434,7 @@ All website and portal form mail sends from the shared SHMS PTO Gmail mailbox. *
 Household adult invites also send from that mailbox, so a mistyped invitee address can bounce to **president@**. The portal asks the owner to type the email twice, blocks common misspellings (gmial, etc.), skips domains with no mail server, emails **the owner** a copy with a share link, and posts the same note in portal messages. A cron also scans bounce notices and emails the owner plus a portal message (so president@ is not the only alert). If a bounce still arrives, reply to the owner (Reply-To) rather than chasing the bad address.
 
 ## Daily activity report
-Every morning at **6:00am Eastern during daylight time** (5:00am during standard time) president@ gets an email of **yesterday** (Eastern midnight–midnight): website forms and surveys, payments and event tickets, member portal students / memberships / enrollments / household invites / help / portal messages, staff tasks / minutes / outreach / audit, president inbox mail, and logged errors. Extra recipients: **Staff → Site settings → Contact → Daily activity report extra emails**. This is recorded actions, not page-view analytics.
+Every morning at **6:00am Eastern during daylight time** (5:00am during standard time) president@ gets an email of **yesterday** (Eastern midnight–midnight): website forms and surveys, payments and event tickets, member portal students / memberships / enrollments / household invites / help / portal messages, staff tasks / minutes / outreach / audit, president inbox mail, and logged errors. **Mondays** also include **weekly traffic** (last 7 Eastern days): website vs member portal vs staff pageviews, unique-browser days, and top paths. Extra recipients: **Staff → Site settings → Contact → Daily activity report extra emails**.
 
 ## Member Portal → Help (Ask the PTO)
 Goes to **all three**:
@@ -515,6 +516,7 @@ If a parent paid but sees nothing:
 - **Lagoon and Tide only** (not Reef).
 - Family Cove **6-digit codes for Lagoon/Tide always end in 9** (Reef and free accounts never do).
 - At food trucks / tables: parent shows the 6-digit code → volunteer checks it ends in 9 **or** looks up on Cove register (Lagoon/Tide) → record the code → hand refreshment tickets.
+- **Reef / guests** are not free. Ring **BTSN food truck ticket** ($30, SKU `POS-REFRESH`) on Square Stand or the phone POS, take Cove / cash / card, **then** hand a ticket. Item is POS-only (not on /cove).
 - Portal Membership benefits also shows the code for Lagoon/Tide members.`,
     },
     {
