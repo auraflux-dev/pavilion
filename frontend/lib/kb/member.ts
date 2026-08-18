@@ -96,12 +96,13 @@ Add every student in your household so programs, The Cove balance, and messages 
 
 This is for **any** second adult — married spouses, separated co-parents, or guardians with no parents on the account.
 
-1. Enter their email → **Send invite**
-2. They open the link, sign in (or create an account) with **that email**, then **Accept invite**
-3. Both logins see the same students
-4. Cove Digital Card stays with the **primary account holder** (whoever signed up first) unless they ask for a separate card
+1. Type their email, then type it **again** to confirm (this catches most misspellings)
+2. **Send invite** — they get an email, and **you** get a copy in email and portal messages with a share link
+3. They open the link, sign in (or create an account) with **that exact email**, then **Accept invite**
+4. Both logins see the same students
+5. Cove Digital Card stays with the **primary account holder** (whoever signed up first) unless they ask for a separate card
 
-You can remove an adult anytime from Household adults.`,
+If they never get the email, use **Copy link** from Household adults instead of waiting. You can remove an adult anytime.`,
     },
     {
       slug: 'edit-student',

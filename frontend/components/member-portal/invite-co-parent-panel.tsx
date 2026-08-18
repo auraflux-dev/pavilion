@@ -15,8 +15,11 @@ export function InviteCoParentPanel() {
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [email, setEmail] = useState('')
+  const [confirmEmail, setConfirmEmail] = useState('')
   const [msg, setMsg] = useState('')
   const [acceptUrl, setAcceptUrl] = useState('')
+  const [copied, setCopied] = useState(false)
+  const [suggestion, setSuggestion] = useState('')
   const [isPrimary, setIsPrimary] = useState(true)
   const [primaryParentEmail, setPrimaryParentEmail] = useState('')
   const [guardians, setGuardians] = useState<Guardian[]>([])
@@ -43,27 +46,52 @@ export function InviteCoParentPanel() {
     void load()
   }, [load])
 
-  async function invite(e: React.FormEvent) {
+  async function invite(e: React.FormEvent, acceptSuggestion = false) {
     e.preventDefault()
     setBusy(true)
     setMsg('')
     setAcceptUrl('')
+    setSuggestion('')
+    setCopied(false)
     try {
       const r = await fetch('/api/portal/guardians', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, confirmEmail, acceptSuggestion }),
       })
       const d = await r.json()
-      if (!r.ok) throw new Error(d.error ?? 'Invite failed')
+      if (!r.ok) {
+        if (typeof d.suggestion === 'string' && d.suggestion) setSuggestion(d.suggestion)
+        throw new Error(d.error ?? 'Invite failed')
+      }
       setMsg(d.message || 'Invite sent.')
       if (d.acceptUrl) setAcceptUrl(String(d.acceptUrl))
       setEmail('')
+      setConfirmEmail('')
       await load()
     } catch (err) {
       setMsg(err instanceof Error ? err.message : 'Invite failed')
     } finally {
       setBusy(false)
+    }
+  }
+
+  function applySuggestion() {
+    if (!suggestion) return
+    setEmail(suggestion)
+    setConfirmEmail(suggestion)
+    setSuggestion('')
+    setMsg(`Updated to ${suggestion}. Send invite to confirm.`)
+  }
+
+  async function copyLink() {
+    if (!acceptUrl) return
+    try {
+      await navigator.clipboard.writeText(acceptUrl)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch {
+      window.prompt('Copy this invite link:', acceptUrl)
     }
   }
 
@@ -104,15 +132,29 @@ export function InviteCoParentPanel() {
           Linked to household of <strong>{primaryParentEmail}</strong>.
         </p>
       ) : (
-        <form onSubmit={invite} className="flex flex-wrap gap-2">
+        <form onSubmit={(ev) => void invite(ev)} className="space-y-2">
           <input
             type="email"
             required
+            autoComplete="off"
             value={email}
             onChange={(ev) => setEmail(ev.target.value)}
             placeholder="Spouse, co-parent, or guardian email"
-            className="min-w-[14rem] flex-1 rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm"
           />
+          <input
+            type="email"
+            required
+            autoComplete="off"
+            value={confirmEmail}
+            onChange={(ev) => setConfirmEmail(ev.target.value)}
+            placeholder="Type that email again to confirm"
+            className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm"
+          />
+          <p className="text-[11px] text-[#5A6070]">
+            We email them this exact address. A mistype bounces. You also get a copy with a share
+            link.
+          </p>
           <Button
             type="submit"
             disabled={busy}
@@ -123,6 +165,14 @@ export function InviteCoParentPanel() {
           </Button>
         </form>
       )}
+
+      {suggestion ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" size="sm" variant="outline" disabled={busy} onClick={applySuggestion}>
+            Use {suggestion}
+          </Button>
+        </div>
+      ) : null}
 
       {guardians.length > 0 ? (
         <ul className="space-y-2">
@@ -158,9 +208,17 @@ export function InviteCoParentPanel() {
 
       {msg ? <p className="text-xs text-[#1B2A4A]">{msg}</p> : null}
       {acceptUrl ? (
-        <p className="text-[11px] break-all text-[#5A6070]">
-          Share link: <a href={acceptUrl} className="underline">{acceptUrl}</a>
-        </p>
+        <div className="space-y-1">
+          <p className="text-[11px] break-all text-[#5A6070]">
+            Share link:{' '}
+            <a href={acceptUrl} className="underline">
+              {acceptUrl}
+            </a>
+          </p>
+          <Button type="button" size="sm" variant="outline" onClick={() => void copyLink()}>
+            {copied ? 'Copied' : 'Copy link'}
+          </Button>
+        </div>
       ) : null}
     </div>
   )

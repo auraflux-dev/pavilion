@@ -430,6 +430,8 @@ Do not post payment or private parent data. Link parents back to shmspto.org pag
 
 All website and portal form mail sends from the shared SHMS PTO Gmail mailbox. **Reply-To** is usually the parent. Change destinations in **Staff → Site settings → Contact**. Dead aliases (info@, membership@, etc.) route to **president@**.
 
+Household adult invites also send from that mailbox, so a mistyped invitee address can bounce to **president@**. The portal now asks the account owner to type the email twice, blocks common misspellings (gmial, etc.), skips domains with no mail server, emails **the owner** a copy with a share link, and posts the same note in their portal messages. If a bounce still arrives, reply to the owner (Reply-To) rather than chasing the bad address.
+
 ## Member Portal → Help (Ask the PTO)
 Goes to **all three**:
 1. **president@shmspto.org**
