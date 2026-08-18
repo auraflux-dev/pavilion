@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
 import {
   BEST_RUNNERS_SIGNUP_URL,
+  RUN_FOR_CHARITY_FLYER_PDF_URL,
   RUN_FOR_CHARITY_REGISTER_PATH,
 } from '@/lib/run-for-charity'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
@@ -145,7 +146,9 @@ export function RunForCharityPromo() {
                 Register on Best Runners
               </button>
               <a
-                href="/flyers/run-for-charity-lp-flyer.pdf"
+                href={RUN_FOR_CHARITY_FLYER_PDF_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block text-sm font-semibold text-white/80 hover:text-white underline underline-offset-2"
               >
                 Download printable flyer (PDF)

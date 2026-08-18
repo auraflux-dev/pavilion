@@ -34,9 +34,6 @@ const securityHeaders = [
 ]
 
 const nextConfig = {
-  outputFileTracingIncludes: {
-    '/flyers/[file]': ['./public/flyers/**/*'],
-  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'static.wixstatic.com' },

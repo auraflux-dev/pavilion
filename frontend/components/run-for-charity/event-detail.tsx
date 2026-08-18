@@ -9,7 +9,10 @@ import {
   eventPublicPath,
   type WixEvent,
 } from '@/lib/api/events'
-import { BEST_RUNNERS_SIGNUP_URL } from '@/lib/run-for-charity'
+import {
+  BEST_RUNNERS_SIGNUP_URL,
+  RUN_FOR_CHARITY_FLYER_PDF_URL,
+} from '@/lib/run-for-charity'
 
 function formatDate(dateStr?: string) {
   if (!dateStr) return { month: 'n/a', day: 'n/a', time: '', weekday: '' }
@@ -201,7 +204,9 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
               </Button>
               <p className="text-center">
                 <a
-                  href="/flyers/run-for-charity-lp-flyer.pdf"
+                  href={RUN_FOR_CHARITY_FLYER_PDF_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-sm font-semibold text-[#085508] hover:underline underline-offset-2"
                 >
                   Download printable flyer (PDF)
