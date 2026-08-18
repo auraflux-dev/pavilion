@@ -8,6 +8,7 @@ import { ProgramsContactForm } from '@/components/programs/programs-contact-form
 import { getAllPrograms, type Program } from '@/lib/api/programs'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { normalizeStaffInbox, STAFF_INBOX_FALLBACK } from '@/lib/staff/inbox'
 import { ProgramsSectionNav } from '@/components/jump-nav/public-section-navs'
 
@@ -42,9 +43,9 @@ export default async function ProgramsPage() {
               ? {}
               : {
                   eyebrow: 'Off season',
-                  title: 'Programs resume with the school year',
-                  body: 'Enrichment programs are paused while school is out of session. Check back in the fall, or visit The Cove and Membership anytime.',
-                  ctaLabel: 'Shop The Cove',
+                  title: vanillaizeIfDemo('Programs resume with the school year'),
+                  body: vanillaizeIfDemo('Enrichment programs are paused while school is out of session. Check back in the fall, or visit The Cove and Membership anytime.'),
+                  ctaLabel: vanillaizeIfDemo('Shop The Cove'),
                   ctaHref: '/cove',
                 }),
           }}

@@ -12,6 +12,7 @@ import { normalizeStaffInbox } from '@/lib/staff/inbox'
 import { ArrowRight, Heart, TrendingUp, Users, ShoppingBag, Ticket, Star, RefreshCw, Handshake, type LucideIcon } from 'lucide-react'
 import { DonateBlock } from '@/components/donate/donate-block'
 import { FundraisingSectionNav } from '@/components/jump-nav/public-section-navs'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Star, ShoppingBag, Users, Heart, TrendingUp, Ticket, ArrowRight, RefreshCw,
@@ -91,12 +92,12 @@ export default async function FundraisingPage() {
     {
       id: 'spiritWear',
       icon: Heart,
-      label: 'The Cove shop',
-      description: 'Year-round Stingrays apparel and merchandise from The Cove.',
+      label: vanillaizeIfDemo('The Cove shop'),
+      description: vanillaizeIfDemo('Year-round Stingrays apparel and merchandise from The Cove.'),
       raised: totals.spiritWear,
       goal:   goals.spiritWear,
       href: '/cove#shop',
-      cta: 'Shop The Cove',
+      cta: vanillaizeIfDemo('Shop The Cove'),
     },
     {
       id: 'danceNight',

@@ -8,6 +8,7 @@ import { useMemo, useState } from 'react'
 import { Heart } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import {
   DONATION_MAX_DOLLARS,
   DONATION_MIN_DOLLARS,
@@ -32,6 +33,9 @@ export function DonateBlock({
   body = 'Give any amount to SHMS PTO. Every dollar funds enrichment, The Cove, and events for Stone Hill students.',
   compact = false,
 }: Props) {
+  eyebrow = vanillaizeIfDemo(eyebrow)
+  title = vanillaizeIfDemo(title)
+  body = vanillaizeIfDemo(body)
   const [amount, setAmount] = useState<number>(DONATION_PRESETS[0] ?? 5)
   const [other, setOther] = useState(false)
   const [custom, setCustom] = useState('')
@@ -191,7 +195,9 @@ export function DonateBlock({
           </MemberGate>
 
           <p className="text-xs text-[#5A6070] mt-3">
-            Gifts go to SHMS PTO (501(c)(3)), not Loudoun County Public Schools. You will receive a receipt. Consult your tax advisor about deductibility.
+            {vanillaizeIfDemo(
+              'Gifts go to SHMS PTO (501(c)(3)), not Loudoun County Public Schools. You will receive a receipt. Consult your tax advisor about deductibility.',
+            )}
           </p>
         </div>
       </div>
@@ -201,7 +207,7 @@ export function DonateBlock({
         onClose={() => setOpen(false)}
         amount={effectiveAmount}
         title="PTO Donation"
-        subtitle={note ? `Note: ${note}` : 'Thank you for supporting SHMS PTO.'}
+        subtitle={note ? `Note: ${note}` : vanillaizeIfDemo('Thank you for supporting SHMS PTO.')}
         containerId={`donate-pay-${id}`}
         payBody={{
           kind: 'donation',

@@ -314,7 +314,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-xs text-center sm:text-left space-y-1" style={{ color: '#C5CCD6' }}>
-            <p>&copy; 2026 Stone Hill Middle School PTO. All rights reserved.</p>
+            <p>&copy; 2026 {isPublicDemoInstance() ? DEMO_BRAND.pto : 'Stone Hill Middle School PTO'}. All rights reserved.</p>
             <p className="flex flex-wrap gap-x-3 gap-y-1 justify-center sm:justify-start">
               <a href="/privacy" className="hover:text-white transition-colors underline-offset-2 hover:underline">Privacy</a>
               <a href="/terms" className="hover:text-white transition-colors underline-offset-2 hover:underline">Terms</a>

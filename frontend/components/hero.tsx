@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Users, BookOpen, Heart } from 'lucide-react'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 function resolveHomeImage(raw: string, fallback: string): string {
   const url = (raw || '').trim()
@@ -16,7 +17,7 @@ export async function Hero() {
     { value: settings.get('heroStatFamilies', '500+'), label: 'Student Families' },
     ...(inSession
       ? [{ value: settings.get('heroStatPrograms', '12+'), label: 'Active Programs' }]
-      : [{ value: 'Year-round', label: 'The Cove shop' }]),
+      : [{ value: 'Year-round', label: vanillaizeIfDemo('The Cove shop') }]),
     { value: settings.get('heroStatVolunteers', '200+'), label: 'Volunteers' },
   ]
 
@@ -100,7 +101,7 @@ export async function Hero() {
               >
                 <a href="/cove">
                   <BookOpen className="w-4 h-4 mr-2" aria-hidden="true" />
-                  Shop The Cove
+                  {vanillaizeIfDemo('Shop The Cove')}
                 </a>
               </Button>
 

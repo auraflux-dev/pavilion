@@ -9,6 +9,7 @@ import {
   RUN_FOR_CHARITY_REGISTER_PATH,
   RUN_FOR_CHARITY_SCHOOL_CODE,
 } from '@/lib/run-for-charity'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 /** Hide after race day (America/New_York calendar date). */
 const RACE_DATE = '2026-09-13'
@@ -89,9 +90,9 @@ export function RunForCharityPromo() {
           Run for Charity 1K &amp; 5K
         </h2>
         <p className="mt-4 text-base sm:text-lg text-white/85 leading-relaxed max-w-2xl text-pretty">
-          Best Runners hosts the race. Use school code{' '}
-          <span className="font-bold text-white">SHMS</span> so Stone Hill receives
-          100% of your registration fee.
+          {vanillaizeIfDemo(
+            'Best Runners hosts the race. Use school code SHMS so Stone Hill receives 100% of your registration fee.',
+          )}
         </p>
 
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start">
@@ -105,7 +106,7 @@ export function RunForCharityPromo() {
                   <span className="font-bold">Sunday, Sep 13, 2026</span>
                 </li>
                 <li className="text-white/80 text-sm sm:text-base">
-                  Rock Ridge High School · Ashburn
+                  {vanillaizeIfDemo('Rock Ridge High School · Ashburn')}
                 </li>
                 <li className="text-white/80 text-sm sm:text-base">
                   1K &amp; 5K · medal, race shirt, post-race snacks
@@ -142,7 +143,7 @@ export function RunForCharityPromo() {
               className="rounded-2xl border-2 border-[#98C818]/60 bg-black/15 p-6 text-center space-y-3"
             >
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#98C818]">
-                Stone Hill school code
+                {vanillaizeIfDemo('Stone Hill school code')}
               </p>
               <p
                 className="text-5xl font-bold tracking-[0.2em] text-white"
@@ -151,8 +152,9 @@ export function RunForCharityPromo() {
                 {RUN_FOR_CHARITY_SCHOOL_CODE}
               </p>
               <p className="text-sm text-white/80 leading-relaxed">
-                Paste under <strong className="text-white">School / Referral Code</strong> on
-                Best Runners so Stone Hill receives your registration fee.
+                {vanillaizeIfDemo(
+                  'Paste under School / Referral Code on Best Runners so Stone Hill receives your registration fee.',
+                )}
               </p>
               <button
                 type="button"

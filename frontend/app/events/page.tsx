@@ -8,6 +8,7 @@ import { getUpcomingEvents, type WixEvent } from '@/lib/api/events'
 import { getPageContent } from '@/lib/api/page-content'
 import { Calendar, ArrowRight } from 'lucide-react'
 import { EventsSectionNav } from '@/components/jump-nav/public-section-navs'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export const revalidate = 300
 
@@ -43,7 +44,7 @@ export default async function EventsPage() {
                   eyebrow: 'Off season',
                   title: 'Events resume with the school year',
                   body: 'No public events are scheduled while school is out of session. Membership and The Cove stay open year-round.',
-                  ctaLabel: 'Shop The Cove',
+                  ctaLabel: vanillaizeIfDemo('Shop The Cove'),
                   ctaHref: '/cove',
                 }),
           }}
