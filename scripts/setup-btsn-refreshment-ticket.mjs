@@ -30,7 +30,8 @@ loadEnv()
 const ITEM = {
   name: 'BTSN food truck ticket',
   sku: 'POS-REFRESH',
-  priceCents: 3000,
+  variationName: 'Ticket',
+  priceCents: 600,
   qty: 80,
 }
 
@@ -108,12 +109,21 @@ async function ensureWixProduct() {
             revision: existing.product.revision,
             visible: false,
             name: ITEM.name,
+            variantsInfo: {
+              variants: [
+                {
+                  id: variantId,
+                  sku: ITEM.sku,
+                  price: { actualPrice: { amount: (ITEM.priceCents / 100).toFixed(2) } },
+                },
+              ],
+            },
           },
         },
         'PATCH',
       )
     } catch (err) {
-      console.warn('Wix hide patch', ITEM.sku, err.message)
+      console.warn('Wix price/hide patch', ITEM.sku, err.message)
     }
     return { productId, variantId, created: false }
   }
@@ -194,7 +204,38 @@ async function ensureSquareItem() {
     for (const v of variations) {
       const sku = String(v.itemVariationData?.sku || '').toUpperCase()
       if (sku === ITEM.sku || name.toLowerCase() === ITEM.name.toLowerCase()) {
-        return { itemId: obj.id, variationId: v.id, created: false }
+        await square.catalog.object.upsert({
+          idempotencyKey: randomUUID(),
+          object: {
+            type: 'ITEM',
+            id: obj.id,
+            version: obj.version,
+            presentAtAllLocations: true,
+            itemData: {
+              name: ITEM.name,
+              description:
+                '$6 each. Reef/guests pay with Cove, cash, or card. Lagoon/Tide (code ends in 9) free — do not ring.',
+              productType: 'REGULAR',
+              variations: [
+                {
+                  type: 'ITEM_VARIATION',
+                  id: v.id,
+                  version: v.version,
+                  presentAtAllLocations: true,
+                  itemVariationData: {
+                    itemId: obj.id,
+                    name: ITEM.variationName,
+                    sku: ITEM.sku,
+                    pricingType: 'FIXED_PRICING',
+                    priceMoney: { amount: BigInt(ITEM.priceCents), currency: 'USD' },
+                    trackInventory: true,
+                  },
+                },
+              ],
+            },
+          },
+        })
+        return { itemId: obj.id, variationId: v.id, created: false, updated: true }
       }
     }
   }
@@ -210,7 +251,7 @@ async function ensureSquareItem() {
       itemData: {
         name: ITEM.name,
         description:
-          '1 family food-truck ticket. Reef/guests pay with Cove, cash, or card. Lagoon/Tide (code ends in 9) free — do not ring.',
+          '$6 each. Reef/guests pay with Cove, cash, or card. Lagoon/Tide (code ends in 9) free — do not ring.',
         productType: 'REGULAR',
         variations: [
           {
@@ -219,7 +260,7 @@ async function ensureSquareItem() {
             presentAtAllLocations: true,
             itemVariationData: {
               itemId,
-              name: 'Family ticket',
+              name: ITEM.variationName,
               sku: ITEM.sku,
               pricingType: 'FIXED_PRICING',
               priceMoney: { amount: BigInt(ITEM.priceCents), currency: 'USD' },
