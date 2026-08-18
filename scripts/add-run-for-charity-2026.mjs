@@ -17,7 +17,8 @@ const FLYER_SRC = resolve(
 )
 const REGISTER_URL =
   'https://www.shmspto.org/events/run-for-charity-1k-5k-best-runners-code-shms#register'
-const BEST_RUNNERS_SIGNUP = 'https://www.bestrunners.org/run4charity'
+const BEST_RUNNERS_SIGNUP =
+  'https://bestrunners.org/register/signup?ref=SHMS'
 const SCHOOL_CODE = 'SHMS'
 const CATEGORY_PTO_SHMS = '1d7d7957-439e-4c6b-bafd-2a46d1716d34'
 
@@ -100,7 +101,7 @@ function descriptionText() {
     'Early bird through Aug 15: Adults $25 · Kids $15. After Aug 15: Adults $30 · Kids $20.',
     'Includes race shirt, finisher medal, and post-race snacks.',
     `Register (copies school code ${SCHOOL_CODE} first): ${REGISTER_URL}`,
-    `Best Runners signup (paste ${SCHOOL_CODE} in School / Referral Code): ${BEST_RUNNERS_SIGNUP}`,
+    `Best Runners signup (school code ${SCHOOL_CODE} is in the link): ${BEST_RUNNERS_SIGNUP}`,
   ].join('\n\n')
 }
 

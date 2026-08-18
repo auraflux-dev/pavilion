@@ -18,13 +18,9 @@ export const RUN_FOR_CHARITY_BRIDGE_URL = `https://www.shmspto.org${RUN_FOR_CHAR
 
 export const RUN_FOR_CHARITY_REGISTER_URL = `https://www.shmspto.org${RUN_FOR_CHARITY_REGISTER_PATH}`
 
-/**
- * Best Runners race page (cold-load safe).
- * Direct /register/signup hard-loads blank on their SPA; /run4charity works, and
- * parents tap Register Now there (client nav) to reach the form. School code is
- * not accepted via URL — paste SHMS in School / Referral Code on the form.
- */
-export const BEST_RUNNERS_SIGNUP_URL = 'https://www.bestrunners.org/run4charity'
+/** Best Runners signup with SHMS referral already on the URL. */
+export const BEST_RUNNERS_SIGNUP_URL =
+  'https://bestrunners.org/register/signup?ref=SHMS'
 
 export function isRunForCharitySlug(slug?: string | null): boolean {
   return String(slug || '').trim() === RUN_FOR_CHARITY_EVENT_SLUG
