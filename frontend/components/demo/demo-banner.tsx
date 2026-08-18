@@ -1,13 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { DEMO_BRAND } from '@/lib/demo/brand'
 
 export function DemoBanner() {
   const pathname = usePathname()
-  const router = useRouter()
   if (!isPublicDemoInstance()) return null
   if (pathname === '/review') return null
 
@@ -19,8 +18,7 @@ export function DemoBanner() {
     })
     const data = (await res.json()) as { next?: string }
     if (res.ok && data.next) {
-      router.push(data.next)
-      router.refresh()
+      window.location.assign(data.next)
     }
   }
 

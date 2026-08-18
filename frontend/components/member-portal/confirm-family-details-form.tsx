@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { Loader2, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type StudentSeed = {
   parentFirstName?: string
@@ -105,8 +106,12 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed }: Prop
           <p className="text-sm font-bold text-[#1A1A1A]">Confirm your family details</p>
           <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed">
             {students.length > 0
-              ? `We found ${students.length} student${students.length === 1 ? '' : 's'} on your account. Confirm or update the details below once. This unlocks the Cove Digital Card for your family.`
-              : 'Add a student first, then confirm these details to unlock Cove.'}
+              ? vanillaizeIfDemo(
+                  `We found ${students.length} student${students.length === 1 ? '' : 's'} on your account. Confirm or update the details below once. This unlocks the Cove Digital Card for your family.`,
+                )
+              : vanillaizeIfDemo(
+                  'Add a student first, then confirm these details to unlock Cove.',
+                )}
           </p>
         </div>
       </div>
@@ -182,7 +187,7 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed }: Prop
               <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving…
             </>
           ) : (
-            'Confirm and unlock Cove'
+            vanillaizeIfDemo('Confirm and unlock Cove')
           )}
         </Button>
       </form>

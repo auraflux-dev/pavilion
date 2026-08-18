@@ -65,6 +65,28 @@ export const DEMO_SEED_MEMBERS = [
   },
 ]
 
+/** Sample CRM households a reviewer can join as (signed cookie, not Clerk). */
+export const DEMO_JOIN_PROFILES = {
+  staff: {
+    firstName: 'Jordan',
+    lastName: 'Lee',
+    email: 'jordan.lee@example.com',
+    school: DEMO_BRAND.pto,
+  },
+  paid: {
+    firstName: DEMO_SEED_MEMBERS[0].parentFirstName,
+    lastName: DEMO_SEED_MEMBERS[0].parentLastName,
+    email: DEMO_SEED_MEMBERS[0].parentEmail,
+    school: DEMO_BRAND.pto,
+  },
+  free: {
+    firstName: DEMO_SEED_MEMBERS[2].parentFirstName,
+    lastName: DEMO_SEED_MEMBERS[2].parentLastName,
+    email: DEMO_SEED_MEMBERS[2].parentEmail,
+    school: DEMO_BRAND.pto,
+  },
+} as const
+
 export const DEMO_SEED_ACTIVITY = [
   {
     id: 'demo-inbox',

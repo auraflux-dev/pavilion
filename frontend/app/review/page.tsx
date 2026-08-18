@@ -1,21 +1,21 @@
 'use client'
 
 import { useMemo, useState, type FormEvent } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DEMO_BRAND } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
+import { DEMO_JOIN_PROFILES } from '@/lib/demo/seed'
 
 function ReviewJoinInner() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const presetCode = useMemo(() => searchParams.get('code') ?? '', [searchParams])
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
-  const [school, setSchool] = useState('')
+  const [school, setSchool] = useState<string>(DEMO_BRAND.pto)
   const [code, setCode] = useState(presetCode)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -32,6 +32,15 @@ function ReviewJoinInner() {
         </p>
       </main>
     )
+  }
+
+  function fillProfile(kind: keyof typeof DEMO_JOIN_PROFILES) {
+    const profile = DEMO_JOIN_PROFILES[kind]
+    setFirstName(profile.firstName)
+    setLastName(profile.lastName)
+    setEmail(profile.email)
+    setSchool(profile.school)
+    setError(null)
   }
 
   async function onSubmit(
@@ -58,8 +67,7 @@ function ReviewJoinInner() {
       })
       const data = (await res.json()) as { error?: string; next?: string }
       if (!res.ok) throw new Error(data.error || 'Could not join')
-      router.push(data.next || '/staff')
-      router.refresh()
+      window.location.assign(data.next || '/staff')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not join')
     } finally {
@@ -81,6 +89,21 @@ function ReviewJoinInner() {
         you click is saved, charged, or emailed. Join with the review code from
         the person who sent you this link.
       </p>
+
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#5A6070] mb-2">
+        Use a sample family from the demo roster
+      </p>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Button type="button" variant="outline" size="sm" onClick={() => fillProfile('staff')}>
+          {DEMO_JOIN_PROFILES.staff.firstName} {DEMO_JOIN_PROFILES.staff.lastName} · staff
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={() => fillProfile('paid')}>
+          {DEMO_JOIN_PROFILES.paid.firstName} {DEMO_JOIN_PROFILES.paid.lastName} · paid parent
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={() => fillProfile('free')}>
+          {DEMO_JOIN_PROFILES.free.firstName} {DEMO_JOIN_PROFILES.free.lastName} · free parent
+        </Button>
+      </div>
 
       <form className="space-y-4" onSubmit={(e) => void onSubmit(e, 'both')}>
         <div className="grid grid-cols-2 gap-3">
