@@ -413,6 +413,10 @@ export const SITE_SETTING_GROUPS: {
         key: 'presidentEmail',
         label: 'President email (portal help + general)',
       },
+      {
+        key: 'dailyActivityReportEmails',
+        label: 'Daily activity report extra emails (comma-separated, 6am Eastern)',
+      },
       { key: 'contactAddress', label: 'Address', multiline: true },
       { key: 'contactStoreHours', label: 'The Cove in-person snack window hours' },
       { key: 'storeHours', label: 'The Cove in-person hours (footer / alt)' },

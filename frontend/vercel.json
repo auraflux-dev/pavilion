@@ -12,6 +12,10 @@
       "schedule": "0 7 * * *"
     },
     {
+      "path": "/api/cron/daily-activity-report",
+      "schedule": "0 10 * * *"
+    },
+    {
       "path": "/api/cron/notify-invite-bounces",
       "schedule": "15 12 * * *"
     },
