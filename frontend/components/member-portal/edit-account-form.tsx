@@ -49,7 +49,7 @@ export function EditAccountForm({ initialName, email, phone = '', onUpdated }: P
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1 text-xs font-bold text-[#085508] hover:underline"
+        className="inline-flex items-center gap-1 text-xs font-bold text-[var(--brand-green)] hover:underline"
       >
         <Pencil className="w-3 h-3" />
         Edit profile
@@ -59,7 +59,7 @@ export function EditAccountForm({ initialName, email, phone = '', onUpdated }: P
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-[#E8E4DC] p-4 mb-4 bg-[#FAFCF9] space-y-3">
+    <form onSubmit={handleSubmit} className="rounded-xl border border-[var(--border)] p-4 mb-4 bg-[#FAFCF9] space-y-3">
       <p className="text-sm font-bold text-[#1A1A1A]">Edit your profile</p>
       <div className="grid grid-cols-2 gap-2">
         <input
@@ -67,14 +67,14 @@ export function EditAccountForm({ initialName, email, phone = '', onUpdated }: P
           onChange={(e) => setFirstName(e.target.value)}
           placeholder="First name"
           required
-          className="px-3 py-2 text-sm border border-[#E8E4DC] rounded-lg"
+          className="px-3 py-2 text-sm border border-[var(--border)] rounded-lg"
         />
         <input
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
           placeholder="Last name"
           required
-          className="px-3 py-2 text-sm border border-[#E8E4DC] rounded-lg"
+          className="px-3 py-2 text-sm border border-[var(--border)] rounded-lg"
         />
       </div>
       <input
@@ -82,12 +82,12 @@ export function EditAccountForm({ initialName, email, phone = '', onUpdated }: P
         value={phoneVal}
         onChange={(e) => setPhoneVal(e.target.value)}
         placeholder="Mobile phone (optional)"
-        className="w-full px-3 py-2 text-sm border border-[#E8E4DC] rounded-lg"
+        className="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg"
       />
       <p className="text-[11px] text-[#5A6070]">Sign-in email: {email} (contact the PTO to change)</p>
       {error && <p className="text-xs text-red-600">{error}</p>}
       <div className="flex gap-2">
-        <Button type="submit" disabled={saving} className="text-white text-xs" style={{ backgroundColor: '#085508' }}>
+        <Button type="submit" disabled={saving} className="text-white text-xs" style={{ backgroundColor: 'var(--brand-green)' }}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
         </Button>
         <Button type="button" variant="outline" className="text-xs" onClick={() => setOpen(false)}>

@@ -102,7 +102,7 @@ export function StaffPageContentPanel() {
   }
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-lg font-bold">Page copy</h2>
@@ -126,7 +126,7 @@ export function StaffPageContentPanel() {
       <select
         value={selected}
         onChange={(e) => pick(e.target.value)}
-        className="w-full sm:max-w-md border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+        className="w-full sm:max-w-md border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
       >
         {pages.map((p) => (
           <option key={p.page} value={p.page}>
@@ -142,52 +142,52 @@ export function StaffPageContentPanel() {
             value={form.eyebrow}
             onChange={(e) => setForm({ ...form, eyebrow: e.target.value })}
             placeholder="Eyebrow"
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <input
             value={form.ctaLabel}
             onChange={(e) => setForm({ ...form, ctaLabel: e.target.value })}
             placeholder="CTA label"
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder="Title"
-            className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <textarea
             value={form.body}
             onChange={(e) => setForm({ ...form, body: e.target.value })}
             rows={3}
             placeholder="Body"
-            className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <input
             value={form.sectionTitle}
             onChange={(e) => setForm({ ...form, sectionTitle: e.target.value })}
             placeholder="Section title"
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <input
             value={form.ctaHref}
             onChange={(e) => setForm({ ...form, ctaHref: e.target.value })}
             placeholder="CTA href"
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <textarea
             value={form.sectionBody}
             onChange={(e) => setForm({ ...form, sectionBody: e.target.value })}
             rows={2}
             placeholder="Section body"
-            className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <textarea
             value={form.bullets}
             onChange={(e) => setForm({ ...form, bullets: e.target.value })}
             rows={4}
             placeholder="Bullets (one per line)"
-            className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <div className="sm:col-span-2">
             <StaffFlyerUpload
@@ -212,7 +212,7 @@ export function StaffPageContentPanel() {
             disabled={busy}
             onClick={() => void save()}
             className="text-white sm:col-span-2"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             {busy ? 'Saving…' : 'Save page copy'}
           </Button>

@@ -150,7 +150,7 @@ export function StaffPlaidConnect({
   const connected = Boolean(status?.connected)
 
   return (
-    <div className="rounded-lg border border-[#E8E4DC] bg-[#F7F4EE] px-3 py-3 space-y-2">
+    <div className="rounded-lg border border-[var(--border)] bg-[#F7F4EE] px-3 py-3 space-y-2">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <p className="text-sm font-bold">Bank of America via Plaid</p>
@@ -182,7 +182,7 @@ export function StaffPlaidConnect({
             <Button
               size="sm"
               className="text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
               disabled={disabled}
               onClick={() => void startLink(false)}
             >

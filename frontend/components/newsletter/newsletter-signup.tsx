@@ -29,9 +29,9 @@ export function NewsletterSignup() {
       <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
         <div
           className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-          style={{ backgroundColor: '#EEF6EE' }}
+          style={{ backgroundColor: 'var(--brand-soft)' }}
         >
-          <CheckCircle2 className="w-8 h-8" style={{ color: '#085508' }} />
+          <CheckCircle2 className="w-8 h-8" style={{ color: 'var(--brand-green)' }} />
         </div>
         <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">You&apos;re subscribed!</h3>
         <p className="text-[#5A6070] text-sm">
@@ -60,7 +60,7 @@ export function NewsletterSignup() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="yourname@email.com"
-            className="w-full px-3.5 py-2.5 rounded-lg border border-[#E8E4DC] text-sm focus:outline-none focus:ring-2 focus:ring-[#085508]/20 focus:border-[#085508] transition-colors"
+            className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20 focus:border-[var(--brand-green)] transition-colors"
           />
         </div>
 
@@ -73,7 +73,7 @@ export function NewsletterSignup() {
           size="lg"
           disabled={status === 'loading'}
           className="w-full font-bold text-white group"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           {status === 'loading' ? (
             <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Subscribing…</>

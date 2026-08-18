@@ -95,7 +95,7 @@ export function SocialFooterLinks({
           target="_blank"
           rel="noopener noreferrer"
           aria-label={label}
-          className={`${size} rounded-lg overflow-hidden shrink-0 shadow-sm transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]`}
+          className={`${size} rounded-lg overflow-hidden shrink-0 shadow-sm transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold)]`}
         >
           {node}
         </a>

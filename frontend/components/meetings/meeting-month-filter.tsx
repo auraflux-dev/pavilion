@@ -69,9 +69,9 @@ export function MeetingMonthFilter({ meetings, showJoinLink }: Props) {
               className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
                 activeYear === y
                   ? 'text-white border-transparent'
-                  : 'bg-white text-[#5A6070] border-[#E8E4DC] hover:border-[#085508]'
+                  : 'bg-white text-[#5A6070] border-[var(--border)] hover:border-[var(--brand-green)]'
               }`}
-              style={activeYear === y ? { backgroundColor: '#085508', borderColor: '#085508' } : {}}
+              style={activeYear === y ? { backgroundColor: 'var(--brand-green)', borderColor: 'var(--brand-green)' } : {}}
             >
               {y} to {String(Number(y) + 1).slice(2)}
             </button>
@@ -88,7 +88,7 @@ export function MeetingMonthFilter({ meetings, showJoinLink }: Props) {
             className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
               selectedMonth === m
                 ? 'text-white border-transparent'
-                : 'bg-white text-[#5A6070] border-[#E8E4DC] hover:border-[#085508]'
+                : 'bg-white text-[#5A6070] border-[var(--border)] hover:border-[var(--brand-green)]'
             }`}
             style={selectedMonth === m ? { backgroundColor: '#3a7d44', borderColor: '#3a7d44' } : {}}
           >
@@ -100,7 +100,7 @@ export function MeetingMonthFilter({ meetings, showJoinLink }: Props) {
           className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
             selectedMonth === null
               ? 'text-white border-transparent'
-              : 'bg-white text-[#5A6070] border-[#E8E4DC] hover:border-[#085508]'
+              : 'bg-white text-[#5A6070] border-[var(--border)] hover:border-[var(--brand-green)]'
           }`}
           style={selectedMonth === null ? { backgroundColor: '#3a7d44', borderColor: '#3a7d44' } : {}}
         >

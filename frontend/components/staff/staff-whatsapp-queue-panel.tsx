@@ -104,7 +104,7 @@ function AttachmentList({
       {attachments.map((att, i) => (
         <li
           key={`${att.url}-${i}`}
-          className="flex items-center justify-between gap-2 rounded-lg border border-[#E8E4DC] bg-[#FAFAF8] px-3 py-2 text-xs"
+          className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[#FAFAF8] px-3 py-2 text-xs"
         >
           <div className="min-w-0">
             <p className="font-semibold text-[#1A1A1A] truncate">{att.fileName}</p>
@@ -122,7 +122,7 @@ function AttachmentList({
               Remove
             </button>
           ) : (
-            <span className="shrink-0 text-[#085508] font-semibold">Attached</span>
+            <span className="shrink-0 text-[var(--brand-green)] font-semibold">Attached</span>
           )}
         </li>
       ))}
@@ -281,7 +281,7 @@ export function StaffWhatsAppQueuePanel() {
   return (
     <section
       id="whatsapp-queue"
-      className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-4 sm:p-5 space-y-5"
+      className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-4 sm:p-5 space-y-5"
     >
       <div>
         <h2 className="text-lg font-bold">WhatsApp grade queue</h2>
@@ -296,13 +296,13 @@ export function StaffWhatsAppQueuePanel() {
 
       {due.length > 0 ? (
         <div className="space-y-3">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#085508]">
+          <p className="text-xs font-bold uppercase tracking-widest text-[var(--brand-green)]">
             Ready to confirm ({due.length})
           </p>
           {due.map((item) => (
             <article
               key={item.id}
-              className="rounded-xl border-2 border-[#085508] bg-[#FAFCF9] p-4 space-y-3"
+              className="rounded-xl border-2 border-[var(--brand-green)] bg-[#FAFCF9] p-4 space-y-3"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="text-sm font-bold text-[#1A1A1A]">{gradeLabel(item.grade)}</p>
@@ -319,7 +319,7 @@ export function StaffWhatsAppQueuePanel() {
                 disabled={Boolean(busyId)}
                 onClick={() => void confirm(item.id)}
                 className="w-full min-h-12 text-base font-bold text-white"
-                style={{ backgroundColor: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-green)' }}
               >
                 {busyId === item.id
                   ? 'Opening…'
@@ -339,12 +339,12 @@ export function StaffWhatsAppQueuePanel() {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-[#5A6070] rounded-lg bg-[#F5F0E8] px-3 py-2">
+        <p className="text-sm text-[#5A6070] rounded-lg bg-[var(--brand-warm)] px-3 py-2">
           Nothing due right now. Scheduled messages appear here when their time arrives.
         </p>
       )}
 
-      <div className="space-y-3 border-t border-[#E8E4DC] pt-4">
+      <div className="space-y-3 border-t border-[var(--border)] pt-4">
         <p className="text-xs font-bold uppercase tracking-widest text-[#5A6070]">
           Schedule a message
         </p>
@@ -353,7 +353,7 @@ export function StaffWhatsAppQueuePanel() {
           onChange={(e) => setMessage(e.target.value)}
           rows={5}
           placeholder="Message for the grade WhatsApp group…"
-          className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-sm"
+          className="w-full rounded-lg border border-[var(--border)] px-3 py-2.5 text-sm"
         />
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -395,7 +395,7 @@ export function StaffWhatsAppQueuePanel() {
           <select
             value={grade}
             onChange={(e) => setGrade(e.target.value)}
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2.5 text-sm min-h-11"
+            className="border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm min-h-11"
           >
             <option value="all">All grade groups</option>
             <option value="6">6th grade</option>
@@ -406,7 +406,7 @@ export function StaffWhatsAppQueuePanel() {
             type="datetime-local"
             value={sendAt}
             onChange={(e) => setSendAt(e.target.value)}
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2.5 text-sm min-h-11"
+            className="border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm min-h-11"
           />
         </div>
         <Button
@@ -414,14 +414,14 @@ export function StaffWhatsAppQueuePanel() {
           disabled={scheduling || uploading || !message.trim() || !sendAt}
           onClick={() => void schedule()}
           className="w-full sm:w-auto text-white"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           {scheduling ? 'Saving…' : 'Add to queue'}
         </Button>
       </div>
 
       {upcoming.length > 0 ? (
-        <div className="space-y-2 border-t border-[#E8E4DC] pt-4">
+        <div className="space-y-2 border-t border-[var(--border)] pt-4">
           <p className="text-xs font-bold uppercase tracking-widest text-[#5A6070]">
             Upcoming ({upcoming.length})
           </p>
@@ -429,7 +429,7 @@ export function StaffWhatsAppQueuePanel() {
             {upcoming.map((item) => (
               <li
                 key={item.id}
-                className="rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-sm flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+                className="rounded-lg border border-[var(--border)] px-3 py-2.5 text-sm flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
               >
                 <div className="min-w-0 space-y-1.5">
                   <p className="font-semibold text-[#1A1A1A]">
@@ -437,7 +437,7 @@ export function StaffWhatsAppQueuePanel() {
                   </p>
                   <p className="text-[#5A6070] line-clamp-2">{item.message}</p>
                   {(item.attachments?.length ?? 0) > 0 ? (
-                    <p className="text-[11px] text-[#085508] font-semibold">
+                    <p className="text-[11px] text-[var(--brand-green)] font-semibold">
                       {item.attachments!.length} attachment
                       {item.attachments!.length === 1 ? '' : 's'}
                     </p>
@@ -469,7 +469,7 @@ export function StaffWhatsAppQueuePanel() {
       ) : null}
 
       {recent.length > 0 ? (
-        <div className="space-y-2 border-t border-[#E8E4DC] pt-4">
+        <div className="space-y-2 border-t border-[var(--border)] pt-4">
           <p className="text-xs font-bold uppercase tracking-widest text-[#5A6070]">Recent</p>
           <ul className="space-y-1.5 text-xs text-[#5A6070]">
             {recent.map((item) => (
@@ -486,7 +486,7 @@ export function StaffWhatsAppQueuePanel() {
         </div>
       ) : null}
 
-      {status ? <p className="text-sm text-[#085508]">{status}</p> : null}
+      {status ? <p className="text-sm text-[var(--brand-green)]">{status}</p> : null}
     </section>
   )
 }

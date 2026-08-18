@@ -223,11 +223,11 @@ export function SocialComposePanel({ enabled }: Props) {
 
   const chip = (active: boolean) =>
     `px-3 py-1.5 rounded-lg text-xs font-bold border-2 ${
-      active ? 'border-[#085508] bg-[#EEF6EE]' : 'border-[#E8E4DC]'
+      active ? 'border-[var(--brand-green)] bg-[var(--brand-soft)]' : 'border-[var(--border)]'
     }`
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
       <h2 className="text-lg font-bold">Marketing · Facebook & Instagram</h2>
       <p className="text-xs text-[#5A6070]">
         Publish via Wix Social Publisher. Facebook supports post / reel / story. Instagram supports
@@ -293,7 +293,7 @@ export function SocialComposePanel({ enabled }: Props) {
         onChange={(e) => setText(e.target.value)}
         rows={4}
         placeholder={format === 'REEL' ? 'Reel description' : format === 'STORY' ? 'Optional note (stories are media-first)' : 'Caption / post text'}
-        className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+        className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
       />
 
       {(format === 'POST' && (kind === 'image' || kind === 'gallery')) || format === 'STORY' ? (
@@ -303,10 +303,10 @@ export function SocialComposePanel({ enabled }: Props) {
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
             placeholder="Image URL (will import to Media Manager if needed)"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <div className="flex flex-wrap gap-2">
-            <label className="text-xs font-bold border border-[#E8E4DC] rounded-lg px-3 py-2 cursor-pointer">
+            <label className="text-xs font-bold border border-[var(--border)] rounded-lg px-3 py-2 cursor-pointer">
               {uploadBusy ? 'Uploading…' : 'Upload image'}
               <input
                 type="file"
@@ -339,10 +339,10 @@ export function SocialComposePanel({ enabled }: Props) {
             value={videoUrl}
             onChange={(e) => setVideoUrl(e.target.value)}
             placeholder="Video URL (Wix Media Manager preferred)"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <div className="flex flex-wrap gap-2">
-            <label className="text-xs font-bold border border-[#E8E4DC] rounded-lg px-3 py-2 cursor-pointer">
+            <label className="text-xs font-bold border border-[var(--border)] rounded-lg px-3 py-2 cursor-pointer">
               {uploadBusy ? 'Uploading…' : 'Upload video'}
               <input
                 type="file"
@@ -375,27 +375,27 @@ export function SocialComposePanel({ enabled }: Props) {
             value={linkUrl}
             onChange={(e) => setLinkUrl(e.target.value)}
             placeholder="Link URL"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <input
             value={linkTitle}
             onChange={(e) => setLinkTitle(e.target.value)}
             placeholder="Preview title (optional)"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <input
             value={linkDescription}
             onChange={(e) => setLinkDescription(e.target.value)}
             placeholder="Preview description (optional)"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <input
             value={linkThumb}
             onChange={(e) => setLinkThumb(e.target.value)}
             placeholder="Preview thumbnail URL (optional)"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
-          <label className="inline-block text-xs font-bold border border-[#E8E4DC] rounded-lg px-3 py-2 cursor-pointer">
+          <label className="inline-block text-xs font-bold border border-[var(--border)] rounded-lg px-3 py-2 cursor-pointer">
             Upload thumbnail
             <input
               type="file"
@@ -415,7 +415,7 @@ export function SocialComposePanel({ enabled }: Props) {
       {(kind === 'gallery' || format === 'STORY') && gallery.length > 0 ? (
         <ul className="text-xs space-y-1 text-[#5A6070]">
           {gallery.map((m, i) => (
-            <li key={`${m.url}-${i}`} className="flex items-center justify-between gap-2 border border-[#E8E4DC] rounded-lg px-2 py-1">
+            <li key={`${m.url}-${i}`} className="flex items-center justify-between gap-2 border border-[var(--border)] rounded-lg px-2 py-1">
               <span className="truncate">
                 {m.type}: {m.url}
               </span>
@@ -446,7 +446,7 @@ export function SocialComposePanel({ enabled }: Props) {
             type="datetime-local"
             value={scheduledLocal}
             onChange={(e) => setScheduledLocal(e.target.value)}
-            className="w-full sm:max-w-xs border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="w-full sm:max-w-xs border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
         ) : null}
       </div>
@@ -456,7 +456,7 @@ export function SocialComposePanel({ enabled }: Props) {
         <select
           value={assetType}
           onChange={(e) => setAssetType(e.target.value as SiteAssetType | '')}
-          className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         >
           <option value="">None</option>
           {ASSET_TYPES.map((a) => (
@@ -471,13 +471,13 @@ export function SocialComposePanel({ enabled }: Props) {
               value={assetId}
               onChange={(e) => setAssetId(e.target.value)}
               placeholder="Asset ID (CMS / catalog GUID)"
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             />
             <input
               value={assetName}
               onChange={(e) => setAssetName(e.target.value)}
               placeholder="Display name (optional)"
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             />
           </>
         ) : null}
@@ -495,7 +495,7 @@ export function SocialComposePanel({ enabled }: Props) {
           disabled={publishDisabled}
           onClick={() => void submit(false)}
           className="text-white"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           {busy ? '…' : scheduleMode === 'later' ? 'Schedule' : 'Publish'}
         </Button>

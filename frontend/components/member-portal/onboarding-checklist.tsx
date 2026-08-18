@@ -26,9 +26,9 @@ export function OnboardingChecklist({
     return (
       <div
         id="portal-onboarding"
-        className="rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] px-4 py-3 mb-6 flex items-start gap-3"
+        className="rounded-xl border border-[var(--brand-line)] bg-[#FAFCF9] px-4 py-3 mb-6 flex items-start gap-3"
       >
-        <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#085508' }} />
+        <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'var(--brand-green)' }} />
         <div>
           <p className="text-sm font-bold text-[#1A1A1A]">You&apos;re set up</p>
           <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed">
@@ -45,13 +45,13 @@ export function OnboardingChecklist({
       className={`rounded-xl border px-4 py-4 mb-6 ${
         highlight
           ? 'border-[#F0D9A0] bg-[#FFF7E6]'
-          : 'border-[#E8E4DC] bg-white'
+          : 'border-[var(--border)] bg-white'
       }`}
     >
       <div className="flex items-start gap-3 mb-3">
         <ListChecks
           className="w-5 h-5 shrink-0 mt-0.5"
-          style={{ color: highlight ? '#8A6400' : '#085508' }}
+          style={{ color: highlight ? '#8A6400' : 'var(--brand-green)' }}
         />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-bold text-[#1A1A1A]">
@@ -84,7 +84,7 @@ export function OnboardingChecklist({
             >
               <Icon
                 className="w-4 h-4 shrink-0 mt-0.5"
-                style={{ color: item.done ? '#085508' : '#8A8F9C' }}
+                style={{ color: item.done ? 'var(--brand-green)' : '#8A8F9C' }}
                 aria-hidden
               />
               <div className="min-w-0 flex-1">
@@ -107,7 +107,7 @@ export function OnboardingChecklist({
                         el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                       }}
                       className="text-xs font-bold mt-1.5"
-                      style={{ color: '#085508' }}
+                      style={{ color: 'var(--brand-green)' }}
                     >
                       {item.actionLabel} →
                     </button>
@@ -115,7 +115,7 @@ export function OnboardingChecklist({
                     <a
                       href={item.href}
                       className="inline-block text-xs font-bold mt-1.5"
-                      style={{ color: '#085508' }}
+                      style={{ color: 'var(--brand-green)' }}
                     >
                       {item.actionLabel} →
                     </a>
@@ -142,7 +142,7 @@ export function CoveFeatureLockBanner({ reason }: { reason: string }) {
       <a
         href="#portal-onboarding"
         className="inline-block text-xs font-bold mt-2"
-        style={{ color: '#085508' }}
+        style={{ color: 'var(--brand-green)' }}
       >
         Open setup checklist →
       </a>

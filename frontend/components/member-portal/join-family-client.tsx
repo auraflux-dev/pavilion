@@ -64,7 +64,7 @@ export function JoinFamilyClient() {
       {preview?.error ? (
         <p className="text-sm text-red-700">{preview.error}</p>
       ) : preview ? (
-        <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] p-4 space-y-2 text-sm">
+        <div className="rounded-xl border border-[var(--border)] bg-[#FAFAF8] p-4 space-y-2 text-sm">
           <p>
             {preview.invitedByName ? (
               <>
@@ -100,7 +100,7 @@ export function JoinFamilyClient() {
           type="button"
           disabled={busy || Boolean(preview?.error) || !token}
           className="text-white"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
           onClick={() => void accept()}
         >
           Accept invite

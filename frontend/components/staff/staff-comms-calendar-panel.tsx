@@ -391,12 +391,12 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <div className="inline-flex overflow-hidden rounded-lg border border-[#E8E4DC] text-sm">
+        <div className="inline-flex overflow-hidden rounded-lg border border-[var(--border)] text-sm">
           {(['comms', 'content'] as const).map((id) => (
             <button
               key={id}
               type="button"
-              className={`px-3 py-1.5 ${plannerTab === id ? 'bg-[#085508] text-white' : 'bg-white text-[#1A1A2E]'}`}
+              className={`px-3 py-1.5 ${plannerTab === id ? 'bg-[var(--brand-green)] text-white' : 'bg-white text-[#1A1A2E]'}`}
               onClick={() => {
                 setPlannerTab(id)
                 setSelectedDate(null)
@@ -407,7 +407,7 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
             </button>
           ))}
         </div>
-        <div className="inline-flex overflow-hidden rounded-lg border border-[#E8E4DC] text-sm">
+        <div className="inline-flex overflow-hidden rounded-lg border border-[var(--border)] text-sm">
           {(
             [
               ['month', 'Month'],
@@ -486,7 +486,7 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
             }}
           />
           <div className="space-y-3">
-            <div className="rounded-xl border border-[#E8E4DC] bg-white p-3">
+            <div className="rounded-xl border border-[var(--border)] bg-white p-3">
               <h3 className="text-sm font-semibold text-[#1B2A4A]">
                 {selectedDate
                   ? new Date(`${selectedDate}T12:00:00`).toLocaleDateString(undefined, {
@@ -504,7 +504,7 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
               ) : null}
             </div>
             {undated.length > 0 ? (
-              <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] p-3">
+              <div className="rounded-xl border border-[var(--border)] bg-[#FAFAF8] p-3">
                 <h3 className="text-sm font-semibold text-[#1B2A4A]">No date yet</h3>
                 <ul className="mt-2 space-y-1 text-sm">
                   {undated.map((i) => (

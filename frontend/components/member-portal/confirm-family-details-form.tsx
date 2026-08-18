@@ -30,7 +30,7 @@ type Props = {
 }
 
 const inputCls =
-  'w-full px-3 py-2 text-sm border border-[#E8E4DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#085508]/30'
+  'w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/30'
 
 function splitName(name: string | undefined): { first: string; last: string } {
   const parts = String(name ?? '')
@@ -175,7 +175,7 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed }: Prop
           type="submit"
           disabled={saving || students.length === 0}
           className="w-full text-white"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           {saving ? (
             <>

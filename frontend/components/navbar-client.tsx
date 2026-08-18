@@ -11,6 +11,7 @@ import { useAuth } from '@/lib/hooks/use-auth'
 import { PortalReturnBar } from '@/components/portal-return-bar'
 import { DEMO_BRAND } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
+import { DemoMark } from '@/components/demo/demo-mark'
 
 interface Props {
   links: NavLink[]
@@ -19,7 +20,7 @@ interface Props {
 type OverflowItem = { id: string; label: string; href: string }
 
 const DESKTOP_LINK_CLASS =
-  'px-2 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508]'
+  'px-2 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap hover:bg-[var(--brand-soft)] text-[#1A1A1A] hover:text-[var(--brand-green)]'
 
 function DesktopOverflowNav({ items }: { items: OverflowItem[] }) {
   const pathname = usePathname()
@@ -110,14 +111,14 @@ function DesktopOverflowNav({ items }: { items: OverflowItem[] }) {
             {moreOpen ? (
               <div
                 role="menu"
-                className="absolute right-0 top-full mt-1 min-w-[11rem] rounded-lg border border-[#E8E4DC] bg-white py-1 shadow-lg z-50"
+                className="absolute right-0 top-full mt-1 min-w-[11rem] rounded-lg border border-[var(--border)] bg-white py-1 shadow-lg z-50"
               >
                 {overflow.map((item) => (
                   <Link
                     key={item.id}
                     href={item.href}
                     role="menuitem"
-                    className="block px-3 py-2 text-sm font-medium text-[#1A1A1A] hover:bg-[#EEF6EE] hover:text-[#085508]"
+                    className="block px-3 py-2 text-sm font-medium text-[#1A1A1A] hover:bg-[var(--brand-soft)] hover:text-[var(--brand-green)]"
                     onClick={() => setMoreOpen(false)}
                   >
                     {item.label}
@@ -199,12 +200,12 @@ export function NavbarClient({ links }: Props) {
       {pendingHref ? (
         <div
           className="h-0.5 w-full overflow-hidden"
-          style={{ backgroundColor: '#EEF6EE' }}
+          style={{ backgroundColor: 'var(--brand-soft)' }}
           aria-hidden="true"
         >
           <div
             className="h-full w-1/3 animate-pulse"
-            style={{ backgroundColor: '#085508', animation: 'nav-progress 0.9s ease-in-out infinite' }}
+            style={{ backgroundColor: 'var(--brand-green)', animation: 'nav-progress 0.9s ease-in-out infinite' }}
           />
         </div>
       ) : null}
@@ -220,13 +221,7 @@ export function NavbarClient({ links }: Props) {
           onClick={() => setPendingHref('/')}
         >
           {isPublicDemoInstance() ? (
-            <span
-              className="w-11 h-11 rounded-full shrink-0 flex items-center justify-center text-white font-bold"
-              style={{ backgroundColor: '#085508' }}
-              aria-hidden="true"
-            >
-              R
-            </span>
+            <DemoMark size={44} />
           ) : (
             <Image
               src="/shms-logo.png"
@@ -240,19 +235,19 @@ export function NavbarClient({ links }: Props) {
           <div className="hidden xl:block">
             <span
               className="font-bold text-sm leading-tight block"
-              style={{ color: '#085508' }}
+              style={{ color: 'var(--brand-green)' }}
             >
               {isPublicDemoInstance() ? DEMO_BRAND.school : 'Stone Hill Middle School'}
             </span>
             <span
               className="text-xs font-semibold tracking-wide uppercase whitespace-nowrap"
-              style={{ color: '#FFD700' }}
+              style={{ color: 'var(--brand-gold)' }}
             >
               {isPublicDemoInstance() ? `PTO · ${DEMO_BRAND.cheer}` : 'PTO · Go Stingrays!'}
             </span>
           </div>
           <div className="xl:hidden">
-            <span className="font-bold text-sm" style={{ color: '#085508' }}>
+            <span className="font-bold text-sm" style={{ color: 'var(--brand-green)' }}>
               {isPublicDemoInstance() ? DEMO_BRAND.short : 'SHMS PTO'}
             </span>
           </div>
@@ -266,7 +261,7 @@ export function NavbarClient({ links }: Props) {
           {/* Auth stays visible from sm; page links show from lg instead of hamburger-only */}
           <div className="hidden sm:flex items-center gap-2">
             {status === 'loading' ? (
-              <div className="h-9 w-24 rounded-md bg-[#EEF6EE] animate-pulse" />
+              <div className="h-9 w-24 rounded-md bg-[var(--brand-soft)] animate-pulse" />
             ) : isMember ? (
               <>
                 {staffChrome ? (
@@ -280,7 +275,7 @@ export function NavbarClient({ links }: Props) {
                   <Button
                     size="sm"
                     className="text-white font-semibold"
-                    style={{ backgroundColor: '#085508' }}
+                    style={{ backgroundColor: 'var(--brand-green)' }}
                   >
                     {portalLabel}
                   </Button>
@@ -297,7 +292,7 @@ export function NavbarClient({ links }: Props) {
                   <Button
                     size="sm"
                     className="text-white font-semibold"
-                    style={{ backgroundColor: '#085508' }}
+                    style={{ backgroundColor: 'var(--brand-green)' }}
                   >
                     Join
                   </Button>
@@ -307,7 +302,7 @@ export function NavbarClient({ links }: Props) {
           </div>
 
           <button
-            className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#085508]"
+            className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
@@ -325,7 +320,7 @@ export function NavbarClient({ links }: Props) {
       {menuOpen && (
         <div
           id="mobile-menu"
-          className="lg:hidden border-t border-[#E8E4DC] bg-white"
+          className="lg:hidden border-t border-[var(--border)] bg-white"
         >
           <ul className="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-1" role="list">
             {links.map((link) => {
@@ -334,8 +329,8 @@ export function NavbarClient({ links }: Props) {
                 <li key={link.id}>
                   <button
                     type="button"
-                    className={`w-full text-left px-3 py-2.5 text-sm font-medium rounded-md hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508] transition-colors flex items-center justify-between gap-2 ${
-                      isPending ? 'bg-[#EEF6EE] text-[#085508]' : ''
+                    className={`w-full text-left px-3 py-2.5 text-sm font-medium rounded-md hover:bg-[var(--brand-soft)] text-[#1A1A1A] hover:text-[var(--brand-green)] transition-colors flex items-center justify-between gap-2 ${
+                      isPending ? 'bg-[var(--brand-soft)] text-[var(--brand-green)]' : ''
                     }`}
                     onClick={() => navigate(link.href)}
                     disabled={Boolean(pendingHref)}
@@ -352,7 +347,7 @@ export function NavbarClient({ links }: Props) {
               <li>
                 <button
                   type="button"
-                  className="w-full text-left block px-3 py-2.5 text-sm font-medium rounded-md hover:bg-[#EEF6EE] text-[#1A1A1A] hover:text-[#085508] transition-colors"
+                  className="w-full text-left block px-3 py-2.5 text-sm font-medium rounded-md hover:bg-[var(--brand-soft)] text-[#1A1A1A] hover:text-[var(--brand-green)] transition-colors"
                   onClick={() => navigate('/member-portal/help')}
                   disabled={Boolean(pendingHref)}
                 >
@@ -360,7 +355,7 @@ export function NavbarClient({ links }: Props) {
                 </button>
               </li>
             ) : null}
-            <li className="pt-2 border-t border-[#E8E4DC] mt-1">
+            <li className="pt-2 border-t border-[var(--border)] mt-1">
               {isMember ? (
                 <div className="space-y-2">
                   {staffChrome ? (
@@ -376,7 +371,7 @@ export function NavbarClient({ links }: Props) {
                   ) : null}
                   <Button
                     className="w-full text-white font-semibold"
-                    style={{ backgroundColor: '#085508' }}
+                    style={{ backgroundColor: 'var(--brand-green)' }}
                     onClick={() => navigate('/member-portal')}
                     disabled={Boolean(pendingHref)}
                   >
@@ -393,7 +388,7 @@ export function NavbarClient({ links }: Props) {
                 <div className="space-y-2">
                   <Button
                     className="w-full text-white font-semibold"
-                    style={{ backgroundColor: '#085508' }}
+                    style={{ backgroundColor: 'var(--brand-green)' }}
                     onClick={() => navigate('/auth/join?returnTo=%2Fmembership')}
                     disabled={Boolean(pendingHref)}
                   >

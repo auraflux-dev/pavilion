@@ -139,13 +139,13 @@ export function StaffMembershipShirtDesignsPanel() {
   return (
     <section
       id="cove-membership-shirts"
-      className="scroll-mt-28 rounded-2xl border border-[#E8E4DC] bg-white shadow-sm overflow-hidden"
+      className="scroll-mt-28 rounded-2xl border border-[var(--border)] bg-white shadow-sm overflow-hidden"
     >
       <div
         className="flex items-start gap-3 border-b border-[#F0EDE8] px-5 py-4"
         style={{ backgroundColor: '#FAFCF9' }}
       >
-        <Shirt className="mt-0.5 h-5 w-5 shrink-0" style={{ color: '#085508' }} aria-hidden />
+        <Shirt className="mt-0.5 h-5 w-5 shrink-0" style={{ color: 'var(--brand-green)' }} aria-hidden />
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#5A6070]">
             Paid membership perk
@@ -177,7 +177,7 @@ export function StaffMembershipShirtDesignsPanel() {
               .map((v) => (
                 <li key={v.id} className="flex justify-between gap-3 border-b border-[#F0EDE8] py-1.5">
                   <span className="font-medium text-[#1A1A1A]">{v.label}</span>
-                  <span className="tabular-nums text-[#085508] font-bold">
+                  <span className="tabular-nums text-[var(--brand-green)] font-bold">
                     {v.quantity ?? 0} left
                   </span>
                 </li>
@@ -187,7 +187,7 @@ export function StaffMembershipShirtDesignsPanel() {
           <p className="text-sm text-[#5A6070]">No design variants yet.</p>
         )}
 
-        <form onSubmit={(e) => void addDesign(e)} className="space-y-3 rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-4">
+        <form onSubmit={(e) => void addDesign(e)} className="space-y-3 rounded-xl border border-[var(--border)] bg-[#FAFCF9] p-4">
           <h3 className="text-sm font-bold text-[#1A1A1A]">Add / replace a design</h3>
           <label className="block text-xs font-bold text-[#5A6070] space-y-1">
             Design name *
@@ -195,7 +195,7 @@ export function StaffMembershipShirtDesignsPanel() {
               value={designName}
               onChange={(e) => setDesignName(e.target.value)}
               placeholder="e.g. Classic Green · Stingray Crest"
-              className="w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+              className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
             />
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -210,7 +210,7 @@ export function StaffMembershipShirtDesignsPanel() {
                     setSizeQtys((prev) => ({ ...prev, [size]: e.target.value }))
                   }
                   placeholder="0"
-                  className="w-full rounded-lg border border-[#E8E4DC] bg-white px-2 py-1.5 text-sm font-normal text-[#1A1A1A]"
+                  className="w-full rounded-lg border border-[var(--border)] bg-white px-2 py-1.5 text-sm font-normal text-[#1A1A1A]"
                 />
               </label>
             ))}
@@ -219,7 +219,7 @@ export function StaffMembershipShirtDesignsPanel() {
             type="submit"
             disabled={busy || !product}
             className="gap-2 text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
             Save design sizes

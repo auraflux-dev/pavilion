@@ -58,12 +58,12 @@ export default async function MeetingsPage() {
         <MeetingsSectionNav />
 
         {/* PTO Section */}
-        <section id="pto" className="scroll-mt-28 py-16 md:py-20" style={{ backgroundColor: '#F5F0E8' }}>
+        <section id="pto" className="scroll-mt-28 py-16 md:py-20" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3 mb-2">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-green)' }}
               >
                 <Users className="w-5 h-5 text-white" />
               </div>
@@ -82,7 +82,7 @@ export default async function MeetingsPage() {
         </section>
 
         {/* Committee sections */}
-        <section id="committees" className="scroll-mt-28 py-16 md:py-20 bg-white border-t border-[#E8E4DC]">
+        <section id="committees" className="scroll-mt-28 py-16 md:py-20 bg-white border-t border-[var(--border)]">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
             <div className="text-center mb-4">
               <h2 className="text-3xl font-bold text-[#1A1A1A] mb-3">Advisory Committees</h2>
@@ -96,15 +96,15 @@ export default async function MeetingsPage() {
                 <div className="flex items-start gap-3 mb-2">
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ backgroundColor: '#EEF6EE' }}
+                    style={{ backgroundColor: 'var(--brand-soft)' }}
                   >
-                    <span className="text-xs font-bold" style={{ color: '#085508' }}>
+                    <span className="text-xs font-bold" style={{ color: 'var(--brand-green)' }}>
                       {c.key.slice(0, 2)}
                     </span>
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-[#1A1A1A]">{c.label}</h3>
-                    <p className="text-sm font-medium text-[#085508]">{c.full}</p>
+                    <p className="text-sm font-medium text-[var(--brand-green)]">{c.full}</p>
                   </div>
                 </div>
                 <p className="text-sm text-[#5A6070] mb-6 ml-[52px]">{c.description}</p>
@@ -115,7 +115,7 @@ export default async function MeetingsPage() {
         </section>
 
         {/* Stay updated CTA */}
-        <section id="join" className="scroll-mt-28 py-14 border-t border-[#E8E4DC]" style={{ backgroundColor: '#F5F0E8' }}>
+        <section id="join" className="scroll-mt-28 py-14 border-t border-[var(--border)]" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">
               Get notified when minutes are published
@@ -128,7 +128,7 @@ export default async function MeetingsPage() {
             <a
               href="/membership"
               className="inline-flex items-center gap-2 font-semibold text-white px-6 py-3 rounded-lg transition-opacity hover:opacity-90"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               Join the PTO
             </a>

@@ -112,7 +112,7 @@ export function CheckoutConsent({ kind, onChange }: Props) {
   if (!items.length) return null
 
   return (
-    <div className="space-y-3 rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-3">
+    <div className="space-y-3 rounded-xl border border-[var(--border)] bg-[#FAFCF9] p-3">
       <p className="text-[11px] font-semibold uppercase tracking-wide text-[#5A6070]">
         Required terms
       </p>
@@ -133,7 +133,7 @@ export function CheckoutConsent({ kind, onChange }: Props) {
                 <button
                   type="button"
                   onClick={() => setReading(item)}
-                  className="inline-flex items-center gap-0.5 font-semibold text-[#085508] hover:underline"
+                  className="inline-flex items-center gap-0.5 font-semibold text-[var(--brand-green)] hover:underline"
                 >
                   Read
                   <ExternalLink className="w-3 h-3" />
@@ -147,7 +147,7 @@ export function CheckoutConsent({ kind, onChange }: Props) {
                 <button
                   type="button"
                   onClick={() => setReading(item)}
-                  className="inline-flex items-center gap-0.5 font-semibold text-[#085508] hover:underline"
+                  className="inline-flex items-center gap-0.5 font-semibold text-[var(--brand-green)] hover:underline"
                 >
                   Read
                   <ExternalLink className="w-3 h-3" />
@@ -185,7 +185,7 @@ export function CheckoutConsent({ kind, onChange }: Props) {
           aria-modal="true"
           aria-labelledby="consent-read-title"
         >
-          <div className="w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl bg-white shadow-xl border border-[#E8E4DC] p-5 space-y-4">
+          <div className="w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl bg-white shadow-xl border border-[var(--border)] p-5 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p
@@ -227,7 +227,7 @@ export function CheckoutConsent({ kind, onChange }: Props) {
                 setReading(null)
               }}
               className="w-full rounded-lg py-2.5 text-sm font-semibold text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               {reading.mode === 'agree' ? 'I understand. close' : 'Close'}
             </button>

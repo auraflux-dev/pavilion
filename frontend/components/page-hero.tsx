@@ -13,7 +13,7 @@ export function PageHero({ content, compact }: Props) {
   return (
     <section
       className={compact ? 'py-12 md:py-16' : 'py-16 md:py-24'}
-      style={{ backgroundColor: '#085508' }}
+      style={{ backgroundColor: 'var(--brand-green)' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {content.eyebrow ? (

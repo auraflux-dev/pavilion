@@ -278,7 +278,7 @@ export function MemberDashboard({
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#085508' }} />
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand-green)' }} />
       </div>
     )
   }
@@ -319,9 +319,9 @@ export function MemberDashboard({
       <PortalSectionNav />
 
       {membershipSuccessNudge ? (
-        <div className="rounded-xl border border-[#D4E8D4] bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-start justify-between gap-3">
+        <div className="rounded-xl border border-[var(--brand-line)] bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-start justify-between gap-3">
           <div>
- <p className="text-sm font-bold text-[#085508]">Membership confirmed. Thank you!</p>
+ <p className="text-sm font-bold text-[var(--brand-green)]">Membership confirmed. Thank you!</p>
             <p className="text-xs text-[#1A1A1A]/80 mt-0.5 leading-relaxed">
               {onboarding.complete
                 ? 'Your Cove Digital Card and perks are ready below.'
@@ -368,11 +368,11 @@ export function MemberDashboard({
         />
       ) : null}
       {!dismissedActivity && newMessageCount > 0 ? (
-        <div className="rounded-xl border border-[#085508]/30 bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="rounded-xl border border-[var(--brand-green)]/30 bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-start gap-2 min-w-0">
-            <Mail className="w-4 h-4 mt-0.5 shrink-0 text-[#085508]" aria-hidden />
+            <Mail className="w-4 h-4 mt-0.5 shrink-0 text-[var(--brand-green)]" aria-hidden />
             <div>
-              <p className="text-sm font-bold text-[#085508]">
+              <p className="text-sm font-bold text-[var(--brand-green)]">
                 {newMessageCount === 1
                   ? 'You have a new message'
                   : `You have ${newMessageCount} new messages`}
@@ -387,7 +387,7 @@ export function MemberDashboard({
               type="button"
               size="sm"
               className="text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
               onClick={openMessages}
             >
               View messages
@@ -412,7 +412,7 @@ export function MemberDashboard({
           icon={CalendarDays}
           className="order-1 lg:order-4 lg:col-start-2 lg:row-start-2"
           action={
-            <div className="flex rounded-lg border border-[#E8E4DC] overflow-hidden text-xs font-bold">
+            <div className="flex rounded-lg border border-[var(--border)] overflow-hidden text-xs font-bold">
               <button
                 type="button"
                 onClick={() => setFamilyTab('calendar')}
@@ -420,7 +420,7 @@ export function MemberDashboard({
                   familyTab === 'calendar' ? 'text-white' : 'text-[#5A6070] bg-white'
                 }`}
                 style={
-                  familyTab === 'calendar' ? { backgroundColor: '#085508' } : undefined
+                  familyTab === 'calendar' ? { backgroundColor: 'var(--brand-green)' } : undefined
                 }
               >
                 {copy.tabCalendar}
@@ -428,11 +428,11 @@ export function MemberDashboard({
               <button
                 type="button"
                 onClick={() => setFamilyTab('messages')}
-                className={`px-2.5 py-1.5 border-l border-[#E8E4DC] ${
+                className={`px-2.5 py-1.5 border-l border-[var(--border)] ${
                   familyTab === 'messages' ? 'text-white' : 'text-[#5A6070] bg-white'
                 }`}
                 style={
-                  familyTab === 'messages' ? { backgroundColor: '#085508' } : undefined
+                  familyTab === 'messages' ? { backgroundColor: 'var(--brand-green)' } : undefined
                 }
               >
                 {copy.tabMessages}
@@ -460,7 +460,7 @@ export function MemberDashboard({
                 <a
                   href="/programs"
                   className="inline-flex items-center gap-1.5 text-sm font-bold"
-                  style={{ color: '#085508' }}
+                  style={{ color: 'var(--brand-green)' }}
                 >
                   {copy.calendarEmptyCta} <ArrowRight className="w-3.5 h-3.5" />
                 </a>
@@ -471,7 +471,7 @@ export function MemberDashboard({
                   <li key={item.id}>
                     <a
                       href={item.href}
-                      className="block rounded-xl border border-[#E8E4DC] px-3.5 py-3 hover:border-[#085508]/40 hover:bg-[#FAFCF9] transition-colors"
+                      className="block rounded-xl border border-[var(--border)] px-3.5 py-3 hover:border-[var(--brand-green)]/40 hover:bg-[#FAFCF9] transition-colors"
                     >
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <p className="text-sm font-bold text-[#1A1A1A] leading-snug">
@@ -480,14 +480,14 @@ export function MemberDashboard({
                         <span
                           className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0"
                           style={{
-                            backgroundColor: item.kind === 'program' ? '#EEF6EE' : '#FFF8E1',
-                            color: item.kind === 'program' ? '#085508' : '#8A6D00',
+                            backgroundColor: item.kind === 'program' ? 'var(--brand-soft)' : '#FFF8E1',
+                            color: item.kind === 'program' ? 'var(--brand-green)' : '#8A6D00',
                           }}
                         >
                           {item.kind === 'program' ? 'Program' : 'Event'}
                         </span>
                       </div>
-                      <p className="text-xs font-semibold text-[#085508] mb-0.5">
+                      <p className="text-xs font-semibold text-[var(--brand-green)] mb-0.5">
                         {item.whenLabel}
                       </p>
                       <p className="text-xs text-[#5A6070]">{item.subtitle}</p>
@@ -521,15 +521,15 @@ export function MemberDashboard({
                   key={m.id}
                   className={`rounded-xl border px-3.5 py-3 ${
                     isNew
-                      ? 'border-[#085508]/40 bg-[#E8F3E8]/50'
-                      : 'border-[#E8E4DC]'
+                      ? 'border-[var(--brand-green)]/40 bg-[#E8F3E8]/50'
+                      : 'border-[var(--border)]'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <p className="text-xs font-bold text-[#085508]">
+                    <p className="text-xs font-bold text-[var(--brand-green)]">
                       {m.fromName}
                       {isNew ? (
-                        <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wider text-[#085508]">
+                        <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--brand-green)]">
                           New
                         </span>
                       ) : null}
@@ -578,7 +578,7 @@ export function MemberDashboard({
             ) : (
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
-                style={{ backgroundColor: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-green)' }}
               >
                 {member.name.charAt(0).toUpperCase()}
               </div>
@@ -598,12 +598,12 @@ export function MemberDashboard({
           <div
             className="rounded-xl px-4 py-3 border mb-4"
             style={{
-              backgroundColor: accountType === 'paid' ? '#EEF6EE' : '#FAFAF8',
-              borderColor: '#E8E4DC',
+              backgroundColor: accountType === 'paid' ? 'var(--brand-soft)' : '#FAFAF8',
+              borderColor: 'var(--border)',
             }}
           >
             <p className="text-sm font-bold text-[#1A1A1A] flex items-center gap-1.5">
-              {accountType === 'paid' && <Star className="w-3.5 h-3.5" style={{ color: '#085508' }} />}
+              {accountType === 'paid' && <Star className="w-3.5 h-3.5" style={{ color: 'var(--brand-green)' }} />}
               {accountType === 'paid' ? copy.paidTitle : copy.freeTitle}
             </p>
             <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
@@ -613,7 +613,7 @@ export function MemberDashboard({
               <a
                 href="/membership"
                 className="inline-flex items-center gap-1 text-xs font-bold mt-2"
-                style={{ color: '#085508' }}
+                style={{ color: 'var(--brand-green)' }}
               >
                 {copy.viewMemberships} <ArrowRight className="w-3 h-3" />
               </a>
@@ -646,7 +646,7 @@ export function MemberDashboard({
             </div>
           </dl>
 
-          <div className="rounded-xl px-4 py-3 border border-[#E8E4DC] mb-4 bg-[#FAFCF9]">
+          <div className="rounded-xl px-4 py-3 border border-[var(--border)] mb-4 bg-[#FAFCF9]">
             <p className="text-xs font-bold text-[#1A1A1A] mb-1">{copy.paymentMethodsTitle}</p>
             <p className="text-[11px] text-[#5A6070] leading-relaxed">{copy.paymentMethodsBody}</p>
           </div>
@@ -667,7 +667,7 @@ export function MemberDashboard({
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-[#E8E4DC] hover:border-[#25D366] hover:bg-green-50"
+                    className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-[var(--border)] hover:border-[#25D366] hover:bg-green-50"
                   >
                     Join {grade}
                   </a>
@@ -687,7 +687,7 @@ export function MemberDashboard({
             <button
               type="button"
               onClick={load}
-              className="text-xs font-semibold text-[#5A6070] hover:text-[#085508] inline-flex items-center gap-1"
+              className="text-xs font-semibold text-[#5A6070] hover:text-[var(--brand-green)] inline-flex items-center gap-1"
             >
               <RefreshCw className="w-3.5 h-3.5" /> {copy.refresh}
             </button>
@@ -735,7 +735,7 @@ export function MemberDashboard({
           className="order-4 lg:order-3 lg:col-start-1 lg:row-start-2"
         >
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="rounded-xl px-3 py-3" style={{ backgroundColor: '#EEF6EE' }}>
+            <div className="rounded-xl px-3 py-3" style={{ backgroundColor: 'var(--brand-soft)' }}>
               <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
                 {copy.storeCardsLabel}
               </p>
@@ -744,7 +744,7 @@ export function MemberDashboard({
               </p>
               <p className="text-[11px] text-[#5A6070]">{copy.storeCardsHint}</p>
             </div>
-            <div className="rounded-xl px-3 py-3 border border-[#E8E4DC]">
+            <div className="rounded-xl px-3 py-3 border border-[var(--border)]">
               <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
                 {copy.recentBuysLabel}
               </p>
@@ -770,7 +770,7 @@ export function MemberDashboard({
               <button
                 type="button"
                 disabled
-                className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#8A8F9C] cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#8A8F9C] cursor-not-allowed"
                 title={coveGate.error}
               >
                 Load Cove Digital Card (locked)
@@ -778,13 +778,13 @@ export function MemberDashboard({
             )}
             <a
               href="/cove#shop"
-              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#1A1A1A]"
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#1A1A1A]"
             >
               <ShoppingBag className="w-3.5 h-3.5" /> {copy.ctaSpiritWear}
             </a>
             <a
               href={onboarding.complete ? '/programs' : '#portal-onboarding'}
-              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[#E8E4DC] text-[#1A1A1A]"
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#1A1A1A]"
               title={
                 onboarding.complete
                   ? undefined
@@ -841,14 +841,14 @@ export function MemberDashboard({
 
       <section
         id="help"
-        className="mt-8 scroll-mt-28 rounded-2xl border border-[#E8E4DC] bg-white overflow-hidden shadow-sm"
+        className="mt-8 scroll-mt-28 rounded-2xl border border-[var(--border)] bg-white overflow-hidden shadow-sm"
       >
         <div className="px-5 py-5 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
           <div className="flex items-start gap-3 min-w-0">
-            <HelpCircle className="w-5 h-5 mt-0.5 shrink-0" style={{ color: '#085508' }} />
+            <HelpCircle className="w-5 h-5 mt-0.5 shrink-0" style={{ color: 'var(--brand-green)' }} />
             <div>
               <h2 className="font-bold text-[#1A1A1A] text-base flex items-center gap-2">
-                <BookOpen className="w-4 h-4" style={{ color: '#085508' }} aria-hidden />
+                <BookOpen className="w-4 h-4" style={{ color: 'var(--brand-green)' }} aria-hidden />
                 Member Help
               </h2>
               <p className="text-sm text-[#5A6070] mt-1 leading-relaxed">
@@ -859,12 +859,12 @@ export function MemberDashboard({
           <Link
             href="/member-portal/help"
             className="shrink-0 inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             Open knowledge base
           </Link>
         </div>
-        <div className="border-t border-[#E8E4DC] px-5 py-5">
+        <div className="border-t border-[var(--border)] px-5 py-5">
           <PortalHelpForm memberName={member.name} compact />
         </div>
       </section>

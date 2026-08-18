@@ -25,15 +25,15 @@ export function MeetingCard({ meeting, showJoinLink, defaultOpen = false }: Prop
   const hasContent = meeting.minutesContent || meeting.summary || meeting.takeaways || meeting.callToAction
 
   return (
-    <div className="bg-white rounded-xl border border-[#E8E4DC] overflow-hidden">
+    <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
       {/* Header row */}
       <div className="flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-            style={{ backgroundColor: '#EEF6EE' }}
+            style={{ backgroundColor: 'var(--brand-soft)' }}
           >
-            <Calendar className="w-4 h-4" style={{ color: '#085508' }} />
+            <Calendar className="w-4 h-4" style={{ color: 'var(--brand-green)' }} />
           </div>
           <div>
             <p className="font-semibold text-[#1A1A1A] text-sm">{formatDate(meeting.meetingDate)}</p>
@@ -51,7 +51,7 @@ export function MeetingCard({ meeting, showJoinLink, defaultOpen = false }: Prop
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-white transition-opacity hover:opacity-90"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               Join Meeting
               <ExternalLink className="w-3 h-3" />
@@ -60,7 +60,7 @@ export function MeetingCard({ meeting, showJoinLink, defaultOpen = false }: Prop
           {hasContent && (
             <button
               onClick={() => setOpen(o => !o)}
-              className="text-[#5A6070] hover:text-[#085508] transition-colors p-1"
+              className="text-[#5A6070] hover:text-[var(--brand-green)] transition-colors p-1"
               aria-label={open ? 'Collapse' : 'Expand'}
             >
               {open ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
@@ -71,10 +71,10 @@ export function MeetingCard({ meeting, showJoinLink, defaultOpen = false }: Prop
 
       {/* Expanded content */}
       {open && hasContent && (
-        <div className="border-t border-[#E8E4DC] px-5 py-5 space-y-5">
+        <div className="border-t border-[var(--border)] px-5 py-5 space-y-5">
           {meeting.minutesContent && (
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#085508] mb-2">Minutes</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--brand-green)] mb-2">Minutes</h4>
               <div
                 className="prose prose-sm max-w-none text-[#3A3A3A]"
                 dangerouslySetInnerHTML={{ __html: meeting.minutesContent }}
@@ -83,7 +83,7 @@ export function MeetingCard({ meeting, showJoinLink, defaultOpen = false }: Prop
           )}
           {meeting.summary && (
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#085508] mb-2">Summary</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--brand-green)] mb-2">Summary</h4>
               <div
                 className="prose prose-sm max-w-none text-[#3A3A3A]"
                 dangerouslySetInnerHTML={{ __html: meeting.summary }}
@@ -92,7 +92,7 @@ export function MeetingCard({ meeting, showJoinLink, defaultOpen = false }: Prop
           )}
           {meeting.takeaways && (
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#085508] mb-2">Key Takeaways</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--brand-green)] mb-2">Key Takeaways</h4>
               <div
                 className="prose prose-sm max-w-none text-[#3A3A3A]"
                 dangerouslySetInnerHTML={{ __html: meeting.takeaways }}
@@ -100,8 +100,8 @@ export function MeetingCard({ meeting, showJoinLink, defaultOpen = false }: Prop
             </div>
           )}
           {meeting.callToAction && (
-            <div className="rounded-lg px-4 py-3" style={{ backgroundColor: '#EEF6EE' }}>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#085508] mb-1">Action for Parents</h4>
+            <div className="rounded-lg px-4 py-3" style={{ backgroundColor: 'var(--brand-soft)' }}>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--brand-green)] mb-1">Action for Parents</h4>
               <p className="text-sm text-[#1A1A1A]">{meeting.callToAction}</p>
             </div>
           )}

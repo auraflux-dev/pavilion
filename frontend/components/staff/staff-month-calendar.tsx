@@ -30,7 +30,7 @@ type Props = {
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const TONE_CLASS: Record<MonthCalendarTone, string> = {
-  green: 'bg-[#E8F3E8] text-[#085508] border-[#C5DCC5]',
+  green: 'bg-[#E8F3E8] text-[var(--brand-green)] border-[#C5DCC5]',
   blue: 'bg-[#E8EEF8] text-[#1B2A4A] border-[#C5D0E8]',
   amber: 'bg-[#FBF3E0] text-[#8A5A00] border-[#E8D4A8]',
   slate: 'bg-[#F0F1F4] text-[#3D4454] border-[#D8DEE8]',
@@ -130,8 +130,8 @@ export function StaffMonthCalendar({
         <h3 className="text-base font-semibold text-[#1B2A4A]">{label}</h3>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-[#E8E4DC] bg-white">
-        <div className="grid min-w-[40rem] grid-cols-7 border-b border-[#E8E4DC] bg-[#FAFAF8]">
+      <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-white">
+        <div className="grid min-w-[40rem] grid-cols-7 border-b border-[var(--border)] bg-[#FAFAF8]">
           {WEEKDAYS.map((d) => (
             <div
               key={d}
@@ -157,16 +157,16 @@ export function StaffMonthCalendar({
                 type="button"
                 onClick={() => onSelectDate?.(key)}
                 className={[
-                  'min-h-[5.5rem] border-b border-r border-[#E8E4DC] p-1.5 text-left align-top transition-colors',
+                  'min-h-[5.5rem] border-b border-r border-[var(--border)] p-1.5 text-left align-top transition-colors',
                   inMonth ? 'bg-white' : 'bg-[#F7F8FA]',
-                  isSelected ? 'ring-2 ring-inset ring-[#085508]' : 'hover:bg-[#F3F7F3]',
+                  isSelected ? 'ring-2 ring-inset ring-[var(--brand-green)]' : 'hover:bg-[#F3F7F3]',
                 ].join(' ')}
               >
                 <div className="mb-1 flex items-center justify-between">
                   <span
                     className={[
                       'inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full px-1 text-xs font-semibold',
-                      isToday ? 'bg-[#085508] text-white' : inMonth ? 'text-[#1B2A4A]' : 'text-[#9AA3B2]',
+                      isToday ? 'bg-[var(--brand-green)] text-white' : inMonth ? 'text-[#1B2A4A]' : 'text-[#9AA3B2]',
                     ].join(' ')}
                   >
                     {cell.getDate()}

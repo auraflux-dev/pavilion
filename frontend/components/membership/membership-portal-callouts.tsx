@@ -38,12 +38,12 @@ export function MembershipPortalCallouts({ lines }: { lines: string[] }) {
   if (!items.length) return null
 
   return (
-    <section id="portal" className="scroll-mt-28 border-t border-[#E8E4DC] bg-white py-14 md:py-16">
+    <section id="portal" className="scroll-mt-28 border-t border-[var(--border)] bg-white py-14 md:py-16">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
           <p
             className="text-xs font-bold uppercase tracking-[0.18em]"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
           >
             Included with every account
           </p>
@@ -58,12 +58,12 @@ export function MembershipPortalCallouts({ lines }: { lines: string[] }) {
             return (
               <li
                 key={`${item.title}-${i}`}
-                className="rounded-2xl border border-[#E8E4DC] bg-[#FAFCF9] p-4 transition-colors hover:border-[#085508]/35 hover:bg-[#EEF6EE]"
+                className="rounded-2xl border border-[var(--border)] bg-[#FAFCF9] p-4 transition-colors hover:border-[var(--brand-green)]/35 hover:bg-[var(--brand-soft)]"
               >
                 <div className="flex flex-col items-center text-center">
                   <span
                     className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-white"
-                    style={{ backgroundColor: '#085508' }}
+                    style={{ backgroundColor: 'var(--brand-green)' }}
                     aria-hidden="true"
                   >
                     <Icon className="h-5 w-5" />

@@ -27,7 +27,7 @@ export function DemoBanner() {
   return (
     <div
       className="text-sm px-4 py-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-2"
-      style={{ backgroundColor: '#085508', color: '#FFFFFF' }}
+      style={{ backgroundColor: 'var(--brand-green)', color: '#FFFFFF' }}
     >
       <span>
         Demo: {DEMO_BRAND.pto}. Sample school. Clicks are preview-only.

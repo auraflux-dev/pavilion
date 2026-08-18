@@ -85,7 +85,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 function statusClass(s: string) {
   const key = s?.toLowerCase()
-  if (key === 'loaded') return 'bg-[#EEF6EE] text-[#085508]'
+  if (key === 'loaded') return 'bg-[var(--brand-soft)] text-[var(--brand-green)]'
   if (key === 'spent') return 'bg-amber-50 text-amber-800'
   return STATUS_COLORS[key] ?? 'bg-gray-100 text-gray-500'
 }
@@ -254,13 +254,13 @@ export function StudentCard({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#E8E4DC] overflow-hidden shadow-sm">
+    <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-3">
           <div
             className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-base shrink-0"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             {student.firstName.charAt(0)}{student.lastName.charAt(0)}
           </div>
@@ -273,14 +273,14 @@ export function StudentCard({
         <div className="flex items-center gap-2">
           {/* Tier badge */}
           <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 ${
-            isPaid ? 'bg-[#EEF6EE] text-[#085508]' : 'bg-gray-100 text-gray-500'
+            isPaid ? 'bg-[var(--brand-soft)] text-[var(--brand-green)]' : 'bg-gray-100 text-gray-500'
           }`}>
             {isPaid && <Star className="w-3 h-3" />}
             {tierLabel}
           </span>
           <button
             onClick={() => setOpen(o => !o)}
-            className="p-1 text-[#5A6070] hover:text-[#085508] transition-colors"
+            className="p-1 text-[#5A6070] hover:text-[var(--brand-green)] transition-colors"
           >
             {open ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
           </button>
@@ -290,11 +290,11 @@ export function StudentCard({
       {/* Quick stats bar */}
       <div className="grid grid-cols-2 divide-x divide-[#F0EDE8] border-t border-[#F0EDE8]">
         <div className="flex items-center gap-2 px-5 py-3">
-          <CreditCard className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
+          <CreditCard className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
           <div>
             <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Cove Digital Card</p>
             {giftCardLoading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin mt-0.5" style={{ color: '#085508' }} />
+              <Loader2 className="w-3.5 h-3.5 animate-spin mt-0.5" style={{ color: 'var(--brand-green)' }} />
             ) : (
               <p className="text-sm font-bold text-[#1A1A1A]">
                 {giftCard?.hasCard ? formatMoney(giftCard.balance) : 'n/a'}
@@ -304,10 +304,10 @@ export function StudentCard({
         </div>
         {isPaid && student.discountCode ? (
           <div className="flex items-center gap-2 px-5 py-3">
-            <Tag className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
+            <Tag className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
             <div>
               <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Discount Code</p>
-              <p className="text-sm font-bold font-mono text-[#085508]">{student.discountCode}</p>
+              <p className="text-sm font-bold font-mono text-[var(--brand-green)]">{student.discountCode}</p>
             </div>
           </div>
         ) : (
@@ -318,7 +318,7 @@ export function StudentCard({
               <a
                 href={`/membership?studentId=${student.id}`}
                 className="text-sm font-bold flex items-center gap-1 transition-opacity hover:opacity-70"
-                style={{ color: '#085508' }}
+                style={{ color: 'var(--brand-green)' }}
               >
                 Upgrade <ArrowRight className="w-3 h-3" />
               </a>
@@ -339,7 +339,7 @@ export function StudentCard({
           ) : null}
           {loading && (
             <div className="flex items-center justify-center py-6">
-              <Loader2 className="w-5 h-5 animate-spin" style={{ color: '#085508' }} />
+              <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'var(--brand-green)' }} />
             </div>
           )}
 
@@ -349,7 +349,7 @@ export function StudentCard({
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
+                    <CreditCard className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
                     <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Cove Digital Card</h4>
                   </div>
                   {giftCard?.hasCard && (
@@ -358,14 +358,14 @@ export function StudentCard({
                 </div>
 
                 {!giftCard?.hasCard ? (
-                  <div className="rounded-xl border-2 border-dashed border-[#E8E4DC] p-4 text-center">
+                  <div className="rounded-xl border-2 border-dashed border-[var(--border)] p-4 text-center">
                     <p className="text-sm text-[#5A6070] mb-3">
                       Load money to begin using your Cove Digital Card (free accounts welcome).
                     </p>
                     <a
                       href="/cove"
                       className="inline-flex items-center gap-1.5 text-sm font-bold"
-                      style={{ color: '#085508' }}
+                      style={{ color: 'var(--brand-green)' }}
                     >
                       <Plus className="w-3.5 h-3.5" /> Load money
                     </a>
@@ -376,7 +376,7 @@ export function StudentCard({
                     {(giftCard.activities?.length ?? 0) > 0 && (
                       <div className="space-y-1.5">
                         {(giftCard.activities ?? []).slice(0, 5).map(a => (
-                          <div key={a.id} className="flex items-center justify-between text-sm py-1.5 border-b border-[#F5F0E8] last:border-0">
+                          <div key={a.id} className="flex items-center justify-between text-sm py-1.5 border-b border-[var(--brand-warm)] last:border-0">
                             <div>
                               <span className={`text-xs font-bold px-2 py-0.5 rounded-full mr-2 ${
                                 a.type === 'LOAD' ? 'bg-green-50 text-green-700' :
@@ -400,7 +400,7 @@ export function StudentCard({
                     {/* Load more / top-off button */}
                     <a
                       href="/cove"
-                      className="flex items-center justify-center gap-2 w-full py-2 rounded-lg text-sm font-bold border-2 border-[#085508] text-[#085508] hover:bg-[#EEF6EE] transition-colors"
+                      className="flex items-center justify-center gap-2 w-full py-2 rounded-lg text-sm font-bold border-2 border-[var(--brand-green)] text-[var(--brand-green)] hover:bg-[var(--brand-soft)] transition-colors"
                     >
                       <Plus className="w-3.5 h-3.5" /> Load funds
                     </a>
@@ -419,7 +419,7 @@ export function StudentCard({
                 return (
                   <p className="text-xs text-[#5A6070] -mt-2">
                     {safety.complete ? (
-                      <span className="font-semibold text-[#085508]">Safety profile complete</span>
+                      <span className="font-semibold text-[var(--brand-green)]">Safety profile complete</span>
                     ) : (
                       <span className="font-semibold text-amber-800">Safety profile incomplete. Edit student details above</span>
                     )}
@@ -431,7 +431,7 @@ export function StudentCard({
               {/* Enrollments */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <BookOpen className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
+                  <BookOpen className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Programs & Enrollments</h4>
                 </div>
                 {(history.enrollments?.length ?? 0) === 0 ? (
@@ -442,7 +442,7 @@ export function StudentCard({
                       const canRequest =
                         ['Enrolled', 'Paid', 'Waitlisted'].includes(e.status) && Boolean(e.id)
                       return (
-                      <div key={e.id} className="flex items-start justify-between gap-3 py-2.5 border-b border-[#F5F0E8] last:border-0">
+                      <div key={e.id} className="flex items-start justify-between gap-3 py-2.5 border-b border-[var(--brand-warm)] last:border-0">
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-[#1A1A1A] truncate">{e.programName}</p>
                           <p className="text-xs text-[#5A6070]">
@@ -455,7 +455,7 @@ export function StudentCard({
                                 type="button"
                                 disabled={requestBusy}
                                 className="text-[11px] font-semibold underline"
-                                style={{ color: '#085508' }}
+                                style={{ color: 'var(--brand-green)' }}
                                 onClick={() => void requestEnrollmentChange(e.id, 'refund')}
                               >
                                 Request refund
@@ -464,7 +464,7 @@ export function StudentCard({
                                 type="button"
                                 disabled={requestBusy}
                                 className="text-[11px] font-semibold underline"
-                                style={{ color: '#085508' }}
+                                style={{ color: 'var(--brand-green)' }}
                                 onClick={() => void requestEnrollmentChange(e.id, 'transfer', e.programId)}
                               >
                                 Request transfer
@@ -496,7 +496,7 @@ export function StudentCard({
                       {history.pastEnrollments!.length})
                     </button>
                     {showPast ? (
-                      <div className="mt-2 space-y-2 rounded-lg border border-[#E8E4DC] bg-[#FAFAF8] px-3 py-2">
+                      <div className="mt-2 space-y-2 rounded-lg border border-[var(--border)] bg-[#FAFAF8] px-3 py-2">
                         <p className="text-[11px] text-[#5A6070]">
                           Past Jumbula / prior-season records — not current programs.
                         </p>
@@ -524,7 +524,7 @@ export function StudentCard({
               {/* Attendance */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <BookOpen className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
+                  <BookOpen className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Attendance</h4>
                 </div>
                 {(attendance?.length ?? 0) === 0 ? (
@@ -534,7 +534,7 @@ export function StudentCard({
                     {attendance.slice(0, 12).map((m) => (
                       <div
                         key={m.id || `${m.sessionDate}-${m.programName}`}
-                        className="flex items-start justify-between gap-3 py-2.5 border-b border-[#F5F0E8] last:border-0"
+                        className="flex items-start justify-between gap-3 py-2.5 border-b border-[var(--brand-warm)] last:border-0"
                       >
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-[#1A1A1A] truncate">{m.programName}</p>
@@ -556,7 +556,7 @@ export function StudentCard({
               {/* Payments */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <Receipt className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
+                  <Receipt className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Payment History</h4>
                 </div>
                 {(history.payments?.length ?? 0) === 0 ? (
@@ -564,7 +564,7 @@ export function StudentCard({
                 ) : (
                   <div className="space-y-2">
                     {history.payments.map(p => (
-                      <div key={p.id} className="flex items-start justify-between gap-3 py-2.5 border-b border-[#F5F0E8] last:border-0">
+                      <div key={p.id} className="flex items-start justify-between gap-3 py-2.5 border-b border-[var(--brand-warm)] last:border-0">
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-[#1A1A1A] truncate">{p.programName}</p>
                           <p className="text-xs text-[#5A6070]">
@@ -595,9 +595,9 @@ export function StudentCard({
               {!isPaid && (
                 <div
                   className="rounded-xl p-4 flex items-start gap-3"
-                  style={{ backgroundColor: '#EEF6EE' }}
+                  style={{ backgroundColor: 'var(--brand-soft)' }}
                 >
-                  <Star className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#085508' }} />
+                  <Star className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'var(--brand-green)' }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-[#1A1A1A] mb-1">Upgrade to a paid membership</p>
                     <p className="text-xs text-[#5A6070] leading-relaxed mb-3">
@@ -606,7 +606,7 @@ export function StudentCard({
                     <a
                       href={`/membership?studentId=${student.id}`}
                       className="inline-flex items-center gap-1.5 text-xs font-bold transition-opacity hover:opacity-80"
-                      style={{ color: '#085508' }}
+                      style={{ color: 'var(--brand-green)' }}
                     >
                       See membership options <ArrowRight className="w-3 h-3" />
                     </a>

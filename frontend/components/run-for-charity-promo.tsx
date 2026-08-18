@@ -55,7 +55,7 @@ export function RunForCharityPromo() {
       aria-labelledby="run-for-charity-heading"
       style={{
         background:
-          'linear-gradient(165deg, #0a3d0a 0%, #085508 42%, #0d4a0d 100%)',
+          'linear-gradient(165deg, #0a3d0a 0%, var(--brand-green) 42%, #0d4a0d 100%)',
       }}
     >
       <div
@@ -140,7 +140,7 @@ export function RunForCharityPromo() {
               <button
                 type="button"
                 onClick={openBestRunners}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3.5 text-base font-bold text-[#085508] bg-[#FFD700] hover:bg-[#ffe44d] transition-colors"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3.5 text-base font-bold text-[var(--brand-green)] bg-[var(--brand-gold)] hover:bg-[#ffe44d] transition-colors"
               >
                 <ExternalLink className="w-4 h-4" aria-hidden />
                 Register on Best Runners
@@ -171,7 +171,7 @@ export function RunForCharityPromo() {
               onClick={openBestRunners}
               className="relative block w-full overflow-hidden rounded-2xl bg-white shadow-[0_24px_48px_-28px_rgba(0,0,0,0.55)] ring-2 ring-[#98C818] text-left hover:opacity-[0.98] transition-opacity cursor-pointer"
             >
-              <p className="px-4 py-4 text-center text-base sm:text-lg font-bold tracking-wide text-[#0B3D0B] bg-[#FFD700] flex items-center justify-center gap-2">
+              <p className="px-4 py-4 text-center text-base sm:text-lg font-bold tracking-wide text-[var(--brand-dark)] bg-[var(--brand-gold)] flex items-center justify-center gap-2">
                 <ExternalLink className="w-5 h-5 shrink-0" aria-hidden />
                 Official flyer · tap to register on Best Runners
               </p>

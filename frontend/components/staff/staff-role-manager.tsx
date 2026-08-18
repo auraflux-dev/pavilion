@@ -86,7 +86,7 @@ export function StaffRoleManager() {
   }
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
       <div>
         <h2 className="text-lg font-bold">Admin · Staff access</h2>
         <p className="text-xs text-[#5A6070]">
@@ -103,19 +103,19 @@ export function StaffRoleManager() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="person@shmspto.org"
-          className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <input
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Name"
-          className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <input
           value={boardTitle}
           onChange={(event) => setBoardTitle(event.target.value)}
           placeholder="Board title"
-          className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
       </div>
 
@@ -123,7 +123,7 @@ export function StaffRoleManager() {
         {availableRoles.map((role) => {
           const adminLocked = role === 'admin' && email.trim().toLowerCase() !== 'president@shmspto.org'
           return (
-          <label key={role} className="inline-flex items-center gap-1.5 rounded-lg border border-[#E8E4DC] px-2.5 py-1.5 text-xs">
+          <label key={role} className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-xs">
             <input
               type="checkbox"
               checked={roles.includes(role)}
@@ -140,7 +140,7 @@ export function StaffRoleManager() {
           </label>
           )
         })}
-        <label className="inline-flex items-center gap-1.5 rounded-lg border border-[#E8E4DC] px-2.5 py-1.5 text-xs">
+        <label className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-xs">
           <input type="checkbox" checked={active} onChange={(event) => setActive(event.target.checked)} />
           Active
         </label>
@@ -151,7 +151,7 @@ export function StaffRoleManager() {
         value={personalEmail}
         onChange={(event) => setPersonalEmail(event.target.value)}
         placeholder="Personal / parent portal email (e.g. you@gmail.com)"
-        className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+        className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
       />
       <p className="text-[11px] text-[#5A6070]">
         Optional. Their family login for Member Portal. Must not be @shmspto.org.
@@ -161,7 +161,7 @@ export function StaffRoleManager() {
         value={assignedProgramIds}
         onChange={(event) => setAssignedProgramIds(event.target.value)}
         placeholder="Assigned program IDs (comma-separated). Required for instructor/coordinator"
-        className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+        className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
       />
       <p className="text-[11px] text-[#5A6070]">
         Copy program IDs from Staff → Programs (open a program in Wix CMS, or ask admin). Instructors and
@@ -172,7 +172,7 @@ export function StaffRoleManager() {
         disabled={busy || !email || roles.length === 0}
         onClick={save}
         className="text-white"
-        style={{ backgroundColor: '#085508' }}
+        style={{ backgroundColor: 'var(--brand-green)' }}
       >
         {busy ? 'Saving…' : 'Save staff access'}
       </Button>
@@ -196,7 +196,7 @@ export function StaffRoleManager() {
                   : ''}
               </span>
             </span>
-            <span className={`text-xs font-bold ${row.active ? 'text-[#085508]' : 'text-[#8A4B00]'}`}>
+            <span className={`text-xs font-bold ${row.active ? 'text-[var(--brand-green)]' : 'text-[#8A4B00]'}`}>
               {row.active ? 'Active' : 'Inactive'}
             </span>
           </button>

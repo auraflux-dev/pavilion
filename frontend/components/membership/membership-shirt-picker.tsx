@@ -113,7 +113,7 @@ export function MembershipShirtPicker({ required, value, onChange }: Props) {
               label: size,
             })
           }}
-          className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2.5 text-sm text-[#1A1A1A] bg-white"
+          className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm text-[#1A1A1A] bg-white"
         >
           <option value="">Select size</option>
           {SHIRT_SIZES.map((s) => (
@@ -127,9 +127,9 @@ export function MembershipShirtPicker({ required, value, onChange }: Props) {
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-3">
+    <div className="space-y-3 rounded-xl border border-[var(--border)] bg-[#FAFCF9] p-3">
       <div>
-        <p className="text-xs font-bold uppercase tracking-wide text-[#085508]">
+        <p className="text-xs font-bold uppercase tracking-wide text-[var(--brand-green)]">
           Spirit Wear perk
         </p>
         <p className="mt-0.5 text-sm font-bold text-[#1A1A1A]">{productName}</p>
@@ -158,7 +158,7 @@ export function MembershipShirtPicker({ required, value, onChange }: Props) {
                 setDesign(nextDesign)
                 onChange(null)
               }}
-              className="w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+              className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
             >
               <option value="">Select design</option>
               {availableDesigns.map((d) => (
@@ -189,7 +189,7 @@ export function MembershipShirtPicker({ required, value, onChange }: Props) {
                   label: sizeRow.label,
                 })
               }}
-              className="w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A] disabled:opacity-50"
+              className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A] disabled:opacity-50"
             >
               <option value="">Select size</option>
               {sizesForDesign.map((s) => (

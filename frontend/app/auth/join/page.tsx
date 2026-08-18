@@ -211,9 +211,9 @@ function JoinInner() {
     'w-full inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60'
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: '#F5F0E8' }}>
-      <div className="w-full max-w-md bg-white rounded-2xl border border-[#E8E4DC] shadow-sm p-6 sm:p-8">
-        <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#085508' }}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: 'var(--brand-warm)' }}>
+      <div className="w-full max-w-md bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6 sm:p-8">
+        <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: 'var(--brand-green)' }}>
           {vanillaizeIfDemo('SHMS PTO')}
         </p>
         <h1 className="text-2xl font-bold text-[#1A1A1A] mb-1">
@@ -242,7 +242,7 @@ function JoinInner() {
               <button
                 type="button"
                 onClick={startGoogle}
-                className="w-full inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-bold border border-[#E8E4DC] text-[#1A1A1A] transition-opacity hover:opacity-90"
+                className="w-full inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-bold border border-[var(--border)] text-[#1A1A1A] transition-opacity hover:opacity-90"
               >
                 {isSignup ? 'Sign up with Google' : 'Log in with Google'}
               </button>
@@ -255,7 +255,7 @@ function JoinInner() {
                 setResetSent(null)
               }}
               className={primaryBtn}
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               {isSignup ? 'Sign up with Email' : 'Log in with Email'}
             </button>
@@ -267,7 +267,7 @@ function JoinInner() {
             {!isSignup && !isStaffReturn ? (
               <p className="text-xs text-[#5A6070] text-center pt-1">
                 Board / staff (@shmspto.org)? Use{' '}
-                <a href="/staff" className="font-semibold underline" style={{ color: '#085508' }}>
+                <a href="/staff" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
                   Staff tools
                 </a>
                 , not Member Portal.
@@ -279,7 +279,7 @@ function JoinInner() {
                 <a
                   href="/auth/join?mode=login&returnTo=%2Fmember-portal"
                   className="font-semibold underline"
-                  style={{ color: '#085508' }}
+                  style={{ color: 'var(--brand-green)' }}
                 >
                   Member Portal login
                 </a>
@@ -291,7 +291,7 @@ function JoinInner() {
             <button
               type="button"
               className="text-xs font-semibold underline mb-1"
-              style={{ color: '#085508' }}
+              style={{ color: 'var(--brand-green)' }}
               onClick={() => {
                 setPanel('chooser')
                 setNeedsVerify(false)
@@ -313,7 +313,7 @@ function JoinInner() {
                         autoComplete="given-name"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-sm"
+                        className="mt-1 w-full rounded-lg border border-[var(--border)] px-3 py-2.5 text-sm"
                       />
                     </label>
                     <label className="block text-sm">
@@ -324,7 +324,7 @@ function JoinInner() {
                         autoComplete="family-name"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-sm"
+                        className="mt-1 w-full rounded-lg border border-[var(--border)] px-3 py-2.5 text-sm"
                       />
                     </label>
                   </div>
@@ -337,7 +337,7 @@ function JoinInner() {
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-sm"
+                    className="mt-1 w-full rounded-lg border border-[var(--border)] px-3 py-2.5 text-sm"
                   />
                 </label>
                 <label className="block text-sm">
@@ -349,7 +349,7 @@ function JoinInner() {
                     autoComplete={isSignup ? 'new-password' : 'current-password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-sm"
+                    className="mt-1 w-full rounded-lg border border-[var(--border)] px-3 py-2.5 text-sm"
                   />
                 </label>
                 {!isSignup ? (
@@ -359,7 +359,7 @@ function JoinInner() {
                       disabled={busy}
                       onClick={onForgotPassword}
                       className="text-xs font-semibold underline disabled:opacity-60"
-                      style={{ color: '#085508' }}
+                      style={{ color: 'var(--brand-green)' }}
                     >
                       Forgot password?
                     </button>
@@ -374,19 +374,19 @@ function JoinInner() {
                   required
                   value={verifyCode}
                   onChange={(e) => setVerifyCode(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-sm"
+                  className="mt-1 w-full rounded-lg border border-[var(--border)] px-3 py-2.5 text-sm"
                 />
               </label>
             )}
 
             {error ? <p className="text-sm text-red-700">{error}</p> : null}
-            {resetSent ? <p className="text-sm text-[#085508]">{resetSent}</p> : null}
+            {resetSent ? <p className="text-sm text-[var(--brand-green)]">{resetSent}</p> : null}
 
             <button
               type="submit"
               disabled={busy}
               className={primaryBtn}
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               {busy
                 ? 'Please wait…'
@@ -406,7 +406,7 @@ function JoinInner() {
               <button
                 type="button"
                 className="font-semibold underline"
-                style={{ color: '#085508' }}
+                style={{ color: 'var(--brand-green)' }}
                 onClick={() => switchMode('login', { keepEmailPanel: panel === 'email' })}
               >
                 Log In
@@ -418,7 +418,7 @@ function JoinInner() {
               <button
                 type="button"
                 className="font-semibold underline"
-                style={{ color: '#085508' }}
+                style={{ color: 'var(--brand-green)' }}
                 onClick={() => switchMode('signup', { keepEmailPanel: panel === 'email' })}
               >
                 Sign Up
@@ -435,7 +435,7 @@ export default function JoinPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F5F0E8' }}>
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <p className="text-sm text-[#5A6070]">Loading…</p>
         </div>
       }

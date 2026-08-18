@@ -151,7 +151,7 @@ export function StaffDiscountsPanel() {
     <section className="space-y-6">
       <div
         id="discount-create"
-        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3"
+        className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-3"
       >
         <div>
           <h2 className="text-lg font-bold">Discount codes</h2>
@@ -172,7 +172,7 @@ export function StaffDiscountsPanel() {
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="SPRING25"
               maxLength={20}
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-mono font-normal"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-mono font-normal"
             />
           </label>
           <label className="block text-xs font-bold text-[#5A6070]">
@@ -181,7 +181,7 @@ export function StaffDiscountsPanel() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Spring fundraiser"
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal"
             />
           </label>
           <label className="block text-xs font-bold text-[#5A6070]">
@@ -192,7 +192,7 @@ export function StaffDiscountsPanel() {
               max={75}
               value={percent}
               onChange={(e) => setPercent(Number(e.target.value))}
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal"
             />
           </label>
           <label className="block text-xs font-bold text-[#5A6070]">
@@ -202,7 +202,7 @@ export function StaffDiscountsPanel() {
               min={0}
               value={usageLimit}
               onChange={(e) => setUsageLimit(Number(e.target.value))}
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal"
             />
           </label>
         </div>
@@ -211,14 +211,14 @@ export function StaffDiscountsPanel() {
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal"
+            className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal"
           />
         </label>
         <Button
           disabled={busy || !code || percent < 5 || percent > 75}
           onClick={() => void createNamed()}
           className="text-white"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           Create named code
         </Button>
@@ -226,7 +226,7 @@ export function StaffDiscountsPanel() {
 
       <div
         id="discount-issue"
-        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3"
+        className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-3"
       >
         <div>
           <h3 className="text-base font-bold">Issue to member</h3>
@@ -253,7 +253,7 @@ export function StaffDiscountsPanel() {
               value={issueEmail}
               onChange={(e) => setIssueEmail(e.target.value)}
               placeholder="parent@example.com"
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal"
             />
           </label>
           <label className="block text-xs font-bold text-[#5A6070]">
@@ -263,7 +263,7 @@ export function StaffDiscountsPanel() {
               onChange={(e) => setIssueBase(e.target.value.toUpperCase())}
               placeholder="PTO"
               maxLength={12}
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-mono font-normal"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-mono font-normal"
             />
           </label>
           <label className="block text-xs font-bold text-[#5A6070]">
@@ -275,7 +275,7 @@ export function StaffDiscountsPanel() {
               value={issuePercent}
               onChange={(e) => setIssuePercent(e.target.value)}
               placeholder="Tier default"
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal"
             />
           </label>
           <label className="block text-xs font-bold text-[#5A6070]">
@@ -283,7 +283,7 @@ export function StaffDiscountsPanel() {
             <input
               value={issueNote}
               onChange={(e) => setIssueNote(e.target.value)}
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal"
             />
           </label>
         </div>
@@ -291,7 +291,7 @@ export function StaffDiscountsPanel() {
           disabled={busy || !issueEmail.includes('@')}
           onClick={() => void issueToMember()}
           className="text-white"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           Issue code
         </Button>
@@ -299,13 +299,13 @@ export function StaffDiscountsPanel() {
 
       <div
         id="discount-active"
-        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3"
+        className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-3"
       >
         <h3 className="text-base font-bold">Active codes</h3>
         {codes.length === 0 ? (
           <p className="text-xs text-[#5A6070]">No codes yet.</p>
         ) : (
-          <ul className="divide-y divide-[#E8E4DC]">
+          <ul className="divide-y divide-[var(--border)]">
             {codes.map((row) => (
               <li key={row.id} className="py-3 flex flex-wrap items-start justify-between gap-2">
                 <div>

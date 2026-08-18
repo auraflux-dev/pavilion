@@ -17,13 +17,13 @@ interface ProgramCardProps {
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; accent: string }> = {
-  Competition: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Strategy: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  'Creative Arts': { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  STEM: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Music: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Sports: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  default: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Competition: { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
+  Strategy: { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
+  'Creative Arts': { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
+  STEM: { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
+  Music: { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
+  Sports: { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
+  default: { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
 }
 
 function getColors(category?: string) {
@@ -94,9 +94,9 @@ export function ProgramCard({ program }: ProgramCardProps) {
   const feeLabel = feeTbd ? 'Tuition TBD' : program.fee === 0 ? 'Free' : program.fee != null ? `$${program.fee}` : null
 
   return (
-    <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col border border-[#E8E4DC]">
+    <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col border border-[var(--border)]">
       {program.image ? (
-        <div className="h-40 w-full overflow-hidden bg-[#F5F0E8]">
+        <div className="h-40 w-full overflow-hidden bg-[var(--brand-warm)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={program.image}
@@ -140,7 +140,7 @@ export function ProgramCard({ program }: ProgramCardProps) {
           </p>
         ) : null}
         {bullets.length > 0 ? (
-          <ul className="mb-4 space-y-1.5 text-sm text-[#5A6070] leading-snug list-disc pl-4 marker:text-[#085508]">
+          <ul className="mb-4 space-y-1.5 text-sm text-[#5A6070] leading-snug list-disc pl-4 marker:text-[var(--brand-green)]">
             {bullets.map((item) => (
               <li key={item} className="pl-0.5">
                 {item}
@@ -150,7 +150,7 @@ export function ProgramCard({ program }: ProgramCardProps) {
         ) : null}
         <div className="flex-1" />
 
-        <dl className="space-y-2 mb-3 text-sm border-t border-[#E8E4DC] pt-4">
+        <dl className="space-y-2 mb-3 text-sm border-t border-[var(--border)] pt-4">
           {program.grades ? (
             <div className="flex items-start gap-2">
               <dt className="w-20 shrink-0 text-[#8A9099] flex items-center gap-1.5 pt-0.5">

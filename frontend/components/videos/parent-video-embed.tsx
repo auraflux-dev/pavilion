@@ -38,7 +38,7 @@ export function ParentVideoEmbed({ video, compact = false }: ParentVideoEmbedPro
   return (
     <figure
       id={video.id}
-      className="scroll-mt-28 overflow-hidden rounded-2xl border border-[#E8E4DC] bg-white shadow-sm"
+      className="scroll-mt-28 overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm"
     >
       <div className="relative aspect-video bg-[#1A1A1A]">
         <video
@@ -63,14 +63,14 @@ export function ParentVideoEmbed({ video, compact = false }: ParentVideoEmbedPro
           <a
             href={pageLink}
             className="min-w-0 break-all text-xs leading-relaxed hover:underline"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
           >
             {pageLink}
           </a>
           <button
             type="button"
             className="shrink-0 self-start text-xs font-bold hover:underline"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
             onClick={() => void copyLink()}
           >
             {copied ? 'Copied' : 'Copy link'}

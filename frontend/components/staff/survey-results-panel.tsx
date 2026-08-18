@@ -87,7 +87,7 @@ export function SurveyResultsPanel() {
   const [requireLogin, setRequireLogin] = useState(false)
   const [active, setActive] = useState(true)
   const [thankYou, setThankYou] = useState('Thank you. Your response was recorded.')
-  const [accentColor, setAccentColor] = useState('#085508')
+  const [accentColor, setAccentColor] = useState('var(--brand-green)')
   const [powrEmbedHtml, setPowrEmbedHtml] = useState('')
   const [fields, setFields] = useState<SurveyField[]>([emptyField()])
 
@@ -134,7 +134,7 @@ export function SurveyResultsPanel() {
     setRequireLogin(false)
     setActive(true)
     setThankYou('Thank you. Your response was recorded.')
-    setAccentColor('#085508')
+    setAccentColor('var(--brand-green)')
     setPowrEmbedHtml('')
     setFields([emptyField()])
   }
@@ -161,7 +161,7 @@ export function SurveyResultsPanel() {
     setRequireLogin(def.requireLogin)
     setActive(def.active !== false)
     setThankYou(def.branding?.thankYouMessage || 'Thank you. Your response was recorded.')
-    setAccentColor(def.branding?.accentColor || '#085508')
+    setAccentColor(def.branding?.accentColor || 'var(--brand-green)')
     setPowrEmbedHtml(def.powrEmbedHtml || '')
     setFields(def.fields.length ? def.fields.map((f) => ({ ...f, options: f.options ?? [] })) : [emptyField()])
     setSelectedSlug(def.slug)
@@ -263,7 +263,7 @@ export function SurveyResultsPanel() {
 
   if (mode === 'create' || mode === 'edit') {
     return (
-      <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+      <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-lg font-bold">
@@ -287,7 +287,7 @@ export function SurveyResultsPanel() {
                 setTitle(e.target.value)
                 if (!slugTouched) setSlug(slugify(e.target.value))
               }}
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
               placeholder="Spring PTO Feedback"
             />
           </label>
@@ -299,7 +299,7 @@ export function SurveyResultsPanel() {
                 setSlugTouched(true)
                 setSlug(slugify(e.target.value))
               }}
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
               placeholder="spring-feedback"
             />
             <span className="font-normal text-[11px]">
@@ -312,7 +312,7 @@ export function SurveyResultsPanel() {
               type="color"
               value={accentColor}
               onChange={(e) => setAccentColor(e.target.value)}
-              className="mt-1 block h-10 w-full border border-[#E8E4DC] rounded-lg"
+              className="mt-1 block h-10 w-full border border-[var(--border)] rounded-lg"
             />
           </label>
           <label className="block text-xs font-bold text-[#5A6070] sm:col-span-2">
@@ -321,7 +321,7 @@ export function SurveyResultsPanel() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
             />
           </label>
           <label className="block text-xs font-bold text-[#5A6070] sm:col-span-2">
@@ -331,7 +331,7 @@ export function SurveyResultsPanel() {
               onChange={(e) => setIntro(e.target.value)}
               rows={2}
               placeholder="Shown above the questions"
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
             />
           </label>
           <label className="block text-xs font-bold text-[#5A6070] sm:col-span-2">
@@ -339,7 +339,7 @@ export function SurveyResultsPanel() {
             <input
               value={thankYou}
               onChange={(e) => setThankYou(e.target.value)}
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
             />
           </label>
           <label className="block text-xs font-bold text-[#5A6070] sm:col-span-2">
@@ -349,7 +349,7 @@ export function SurveyResultsPanel() {
               onChange={(e) => setPowrEmbedHtml(e.target.value)}
               rows={3}
               placeholder="Paste POWR iframe/embed HTML or a powr.io URL. When set, parents see POWR instead of built-in questions."
-              className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A] font-mono"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A] font-mono"
             />
             <span className="mt-1 block font-normal text-[11px] text-[#5A6070]">
               From Wix Apps → POWR: copy the embed code. Built-in questions are ignored when this is filled.
@@ -393,20 +393,20 @@ export function SurveyResultsPanel() {
             </Button>
           </div>
           {fields.map((field, index) => (
-            <div key={index} className="rounded-lg border border-[#E8E4DC] p-3 space-y-2 bg-[#FAFAF8]">
+            <div key={index} className="rounded-lg border border-[var(--border)] p-3 space-y-2 bg-[#FAFAF8]">
               <div className="grid sm:grid-cols-2 gap-2">
                 <input
                   value={field.label}
                   onChange={(e) => updateField(index, { label: e.target.value })}
                   placeholder="Question label"
-                  className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                  className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 />
                 <select
                   value={field.type}
                   onChange={(e) =>
                     updateField(index, { type: e.target.value as SurveyFieldType })
                   }
-                  className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                  className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 >
                   {FIELD_TYPES.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -424,7 +424,7 @@ export function SurveyResultsPanel() {
                       ? 'Options (default 6, 7, 8)'
                       : 'Choices separated by commas'
                   }
-                  className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 />
               )}
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -454,7 +454,7 @@ export function SurveyResultsPanel() {
           disabled={busy || !title.trim() || !fields.some((f) => f.label.trim())}
           onClick={() => void saveSurvey()}
           className="text-white"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           {busy ? 'Saving…' : mode === 'edit' ? 'Save changes' : 'Create survey'}
         </Button>
@@ -463,7 +463,7 @@ export function SurveyResultsPanel() {
   }
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold">Surveys</h2>
@@ -472,7 +472,7 @@ export function SurveyResultsPanel() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button type="button" onClick={startCreate} className="text-white" style={{ backgroundColor: '#085508' }}>
+          <Button type="button" onClick={startCreate} className="text-white" style={{ backgroundColor: 'var(--brand-green)' }}>
             Create survey
           </Button>
           <Button asChild variant="outline" disabled={loading || responses.length === 0}>
@@ -481,7 +481,7 @@ export function SurveyResultsPanel() {
         </div>
       </div>
 
-      {status ? <p className="text-xs text-[#085508]">{status}</p> : null}
+      {status ? <p className="text-xs text-[var(--brand-green)]">{status}</p> : null}
 
       <label className="block text-xs font-bold text-[#5A6070]">
         Survey
@@ -491,7 +491,7 @@ export function SurveyResultsPanel() {
             setSelectedSlug(event.target.value)
             setShareStatus('')
           }}
-          className="mt-1 block w-full sm:max-w-md border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+          className="mt-1 block w-full sm:max-w-md border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
         >
           <option value="">
             All surveys ({surveys.reduce((sum, item) => sum + item.responseCount, 0)})
@@ -516,7 +516,7 @@ export function SurveyResultsPanel() {
               </p>
               <Link
                 href={`/survey/${selectedSurvey.slug}`}
-                className="text-xs font-bold underline text-[#085508]"
+                className="text-xs font-bold underline text-[var(--brand-green)]"
                 target="_blank"
               >
                 Open live survey
@@ -532,7 +532,7 @@ export function SurveyResultsPanel() {
             {(['email', 'sms', 'whatsapp'] as const).map((channel) => (
               <div
                 key={channel}
-                className="inline-flex rounded-lg border border-[#E8E4DC] overflow-hidden bg-white"
+                className="inline-flex rounded-lg border border-[var(--border)] overflow-hidden bg-white"
               >
                 <button
                   type="button"
@@ -544,7 +544,7 @@ export function SurveyResultsPanel() {
                 <button
                   type="button"
                   onClick={() => void copyShare(channel)}
-                  className="border-l border-[#E8E4DC] px-2 py-2 text-xs hover:bg-[#F5F2EC]"
+                  className="border-l border-[var(--border)] px-2 py-2 text-xs hover:bg-[#F5F2EC]"
                   aria-label={`Copy ${channel} message`}
                 >
                   Copy
@@ -552,7 +552,7 @@ export function SurveyResultsPanel() {
               </div>
             ))}
           </div>
-          {shareStatus ? <p className="text-xs text-[#085508]">{shareStatus}</p> : null}
+          {shareStatus ? <p className="text-xs text-[var(--brand-green)]">{shareStatus}</p> : null}
         </div>
       ) : (
         <p className="text-xs text-[#5A6070]">

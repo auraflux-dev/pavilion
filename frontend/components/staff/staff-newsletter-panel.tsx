@@ -153,7 +153,7 @@ export function StaffNewsletterPanel() {
   return (
     <section
       id="member-newsletter"
-      className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+      className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
     >
       <div>
         <h2 className="text-lg font-bold">Member newsletter</h2>
@@ -169,7 +169,7 @@ export function StaffNewsletterPanel() {
         <select
           value={tier}
           onChange={(e) => setTier(e.target.value)}
-          className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         >
           <option value="all">All members (free + paid)</option>
           <option value="free">Free only</option>
@@ -181,7 +181,7 @@ export function StaffNewsletterPanel() {
         <select
           value={grade}
           onChange={(e) => setGrade(e.target.value)}
-          className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         >
           <option value="">Any grade (email)</option>
           <option value="6">6th</option>
@@ -191,7 +191,7 @@ export function StaffNewsletterPanel() {
         <select
           value={waGrade}
           onChange={(e) => setWaGrade(e.target.value)}
-          className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         >
           <option value="all">WhatsApp: all grade groups</option>
           <option value="6">WhatsApp: 6th</option>
@@ -215,14 +215,14 @@ export function StaffNewsletterPanel() {
         value={subject}
         onChange={(e) => setSubject(e.target.value)}
         placeholder="Subject / headline"
-        className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+        className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
       />
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
         rows={8}
         placeholder="Newsletter body"
-        className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+        className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
       />
       <label className="flex items-center gap-2 text-xs text-[#5A6070]">
         <input
@@ -246,7 +246,7 @@ export function StaffNewsletterPanel() {
           type="button"
           disabled={busy || !subject || !body}
           className="text-white"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
           onClick={() => void sendEmail()}
         >
           Send email

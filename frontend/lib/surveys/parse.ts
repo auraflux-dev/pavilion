@@ -23,7 +23,7 @@ export function mapSurveyItem(item: any): SurveyDefinition | null {
     intro: String(data.intro ?? data.description ?? ''),
     fields: safeJson<SurveyField[]>(data.fieldsJson, []),
     branding: safeJson<SurveyBranding>(data.brandingJson, {
-      accentColor: '#085508',
+      accentColor: 'var(--brand-green)',
  thankYouMessage: 'Thank you. your response was recorded.',
     }),
     audience: data.audience === 'members' ? 'members' : 'all',

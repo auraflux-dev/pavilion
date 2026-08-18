@@ -298,7 +298,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
   function renderTaskCard(task: StaffTask, projectTitle?: string) {
     const overdue = Boolean(task.dueAt && Date.parse(task.dueAt) < Date.now() && task.status !== 'done')
     return (
-      <div key={task.id} className="border border-[#E8E4DC] rounded-lg p-3 space-y-2 bg-white">
+      <div key={task.id} className="border border-[var(--border)] rounded-lg p-3 space-y-2 bg-white">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-sm font-semibold">{task.title}</p>
@@ -341,7 +341,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
         ) : null}
         {task.status !== 'done' ? (
           <select
-            className="w-full border border-[#E8E4DC] rounded-lg px-2 py-1.5 text-xs"
+            className="w-full border border-[var(--border)] rounded-lg px-2 py-1.5 text-xs"
             value={task.assigneeEmail}
             disabled={busy}
             onChange={(e) => {
@@ -377,7 +377,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
   }, [])
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
       <div>
         <h2 className="text-lg font-bold">Staff · Year project board</h2>
         <p className="text-xs text-[#5A6070]">
@@ -388,7 +388,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
-        <div className="inline-flex rounded-lg border border-[#E8E4DC] overflow-hidden text-sm">
+        <div className="inline-flex rounded-lg border border-[var(--border)] overflow-hidden text-sm">
           {(
             [
               ['year', 'Year board'],
@@ -400,7 +400,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
             <button
               key={id}
               type="button"
-              className={`px-3 py-1.5 ${view === id ? 'bg-[#085508] text-white' : 'bg-white text-[#1A1A2E]'}`}
+              className={`px-3 py-1.5 ${view === id ? 'bg-[var(--brand-green)] text-white' : 'bg-white text-[#1A1A2E]'}`}
               onClick={() => {
                 setView(id)
                 if (id === 'project' && !selectedProjectId && projects[0]) {
@@ -415,7 +415,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
         <select
           value={schoolYear}
           onChange={(e) => setSchoolYear(e.target.value)}
-          className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         >
           {yearOptions.map((y) => (
             <option key={y} value={y}>
@@ -427,7 +427,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
           <select
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm min-w-[12rem]"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm min-w-[12rem]"
           >
             <option value="">Pick a project…</option>
             {projects.map((p) => (
@@ -448,7 +448,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
       </div>
 
       {/* Add project */}
-      <details className="rounded-lg border border-[#E8E4DC] p-3 bg-[#FAFAF8]">
+      <details className="rounded-lg border border-[var(--border)] p-3 bg-[#FAFAF8]">
         <summary className="text-xs font-bold text-[#5A6070] cursor-pointer">
           Add a project (your swimlane on the year board)
         </summary>
@@ -457,19 +457,19 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
             value={projTitle}
             onChange={(e) => setProjTitle(e.target.value)}
             placeholder="Project name (e.g. Fall Festival, Spirit Wear drop)"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <textarea
             value={projDesc}
             onChange={(e) => setProjDesc(e.target.value)}
             rows={2}
             placeholder="What this project covers (optional)"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
           <select
             value={projLeadRole}
             onChange={(e) => setProjLeadRole(e.target.value)}
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           >
             {(isAdmin ? ['admin', 'marketing', 'secretary', 'treasurer', 'events', 'programs', 'retail', 'membership', 'wellness'] : myRoles).map(
               (role) => (
@@ -483,7 +483,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
             <p className="text-xs text-[#5A6070] mb-1">Project members (who can add / get assigned work)</p>
             <div className="flex flex-wrap gap-2 max-h-28 overflow-y-auto">
               {directory.map((p) => (
-                <label key={p.email} className="inline-flex items-center gap-1 text-xs border border-[#E8E4DC] rounded-full px-2 py-1">
+                <label key={p.email} className="inline-flex items-center gap-1 text-xs border border-[var(--border)] rounded-full px-2 py-1">
                   <input
                     type="checkbox"
                     checked={projMembers.includes(p.email)}
@@ -498,7 +498,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
             disabled={busy || !projTitle.trim()}
             onClick={() => void createProject()}
             className="text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             {busy ? '…' : 'Add project'}
           </Button>
@@ -506,26 +506,26 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
       </details>
 
       {/* Add task */}
-      <div className="rounded-lg border border-[#E8E4DC] p-3 space-y-2 bg-[#FAFAF8]">
+      <div className="rounded-lg border border-[var(--border)] p-3 space-y-2 bg-[#FAFAF8]">
         <p className="text-xs font-bold text-[#5A6070]">Add a task under a project</p>
         <input
           value={taskTitle}
           onChange={(e) => setTaskTitle(e.target.value)}
           placeholder="What needs to happen?"
-          className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <textarea
           value={taskDesc}
           onChange={(e) => setTaskDesc(e.target.value)}
           rows={2}
           placeholder="Details (optional)"
-          className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <div className="grid sm:grid-cols-2 gap-2">
           <select
             value={taskProjectId || selectedProjectId}
             onChange={(e) => setTaskProjectId(e.target.value)}
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           >
             <option value="">Project…</option>
             {projects.map((p) => (
@@ -537,7 +537,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
           <select
             value={taskAssignee}
             onChange={(e) => setTaskAssignee(e.target.value)}
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           >
             <option value="">Assign later (after you talk)</option>
             {assigneeChoices.map((p) => (
@@ -549,7 +549,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
           <select
             value={taskOwnerRole}
             onChange={(e) => setTaskOwnerRole(e.target.value)}
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           >
             {Array.from(new Set([...myRoles, 'admin', 'marketing', 'events', 'programs', 'treasurer', 'secretary', 'retail', 'membership', 'wellness'])).map(
               (role) => (
@@ -563,14 +563,14 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
             type="datetime-local"
             value={taskDueLocal}
             onChange={(e) => setTaskDueLocal(e.target.value)}
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
         </div>
         <Button
           disabled={busy || !taskTitle.trim() || !(taskProjectId || selectedProjectId)}
           onClick={() => void createTask()}
           className="text-white"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           {busy ? '…' : 'Add task'}
         </Button>
@@ -592,7 +592,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
               return (
                 <div
                   key={project.id}
-                  className="min-w-[260px] max-w-[300px] flex-shrink-0 rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] p-3 space-y-2"
+                  className="min-w-[260px] max-w-[300px] flex-shrink-0 rounded-xl border border-[var(--border)] bg-[#FAFAF8] p-3 space-y-2"
                 >
                   <button
                     type="button"
@@ -629,7 +629,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
               )
             })}
             {(tasksByProject.get('__none__') ?? []).length > 0 ? (
-              <div className="min-w-[260px] max-w-[300px] flex-shrink-0 rounded-xl border border-dashed border-[#E8E4DC] bg-white p-3 space-y-2">
+              <div className="min-w-[260px] max-w-[300px] flex-shrink-0 rounded-xl border border-dashed border-[var(--border)] bg-white p-3 space-y-2">
                 <p className="text-sm font-bold">Unassigned / triage</p>
                 <div className="space-y-2">
                   {(tasksByProject.get('__none__') ?? []).map((t) => renderTaskCard(t))}
@@ -679,7 +679,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
             }}
           />
           <div className="space-y-3">
-            <div className="rounded-xl border border-[#E8E4DC] bg-white p-3">
+            <div className="rounded-xl border border-[var(--border)] bg-white p-3">
               <h3 className="text-sm font-semibold">
                 {calSelectedDate
                   ? new Date(`${calSelectedDate}T12:00:00`).toLocaleDateString(undefined, {
@@ -702,7 +702,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
               </div>
             </div>
             {undatedTasks.length > 0 ? (
-              <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] p-3">
+              <div className="rounded-xl border border-[var(--border)] bg-[#FAFAF8] p-3">
                 <h3 className="text-sm font-semibold">No due date</h3>
                 <div className="mt-2 space-y-2">
                   {undatedTasks.slice(0, 8).map((t) =>
@@ -722,7 +722,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
             <p className="text-xs text-[#5A6070]">Pick a project above, or add one.</p>
           ) : (
             <>
-              <div className="rounded-lg border border-[#E8E4DC] p-3 space-y-2">
+              <div className="rounded-lg border border-[var(--border)] p-3 space-y-2">
                 <div className="flex flex-wrap justify-between gap-2">
                   <div>
                     <p className="text-sm font-bold">{selectedProject.title}</p>
@@ -754,7 +754,7 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
                         return (
                           <label
                             key={p.email}
-                            className="inline-flex items-center gap-1 text-xs border border-[#E8E4DC] rounded-full px-2 py-1"
+                            className="inline-flex items-center gap-1 text-xs border border-[var(--border)] rounded-full px-2 py-1"
                           >
                             <input
                               type="checkbox"

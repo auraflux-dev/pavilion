@@ -104,14 +104,14 @@ export default async function CovePage() {
         <section
           id="shop"
           className="py-12 md:py-16 scroll-mt-28"
-          style={{ backgroundColor: '#F5F0E8' }}
+          style={{ backgroundColor: 'var(--brand-warm)' }}
           aria-labelledby="cove-shop-heading"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-8 max-w-2xl">
               <p
                 className="text-xs font-bold tracking-widest uppercase mb-2"
-                style={{ color: '#085508' }}
+                style={{ color: 'var(--brand-green)' }}
               >
                 {spiritCopy.eyebrow || 'Spirit & merchandise'}
               </p>
@@ -137,9 +137,9 @@ export default async function CovePage() {
                 {spiritItems.map((item) => (
                   <article
                     key={item._id}
-                    className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E8E4DC] flex flex-col group"
+                    className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[var(--border)] flex flex-col group"
                   >
-                    <div className="relative overflow-hidden" style={{ backgroundColor: '#EEF6EE' }}>
+                    <div className="relative overflow-hidden" style={{ backgroundColor: 'var(--brand-soft)' }}>
                       {item.image ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -154,7 +154,7 @@ export default async function CovePage() {
                       )}
                       {!item.inStock && (
                         <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                          <span className="text-xs font-bold text-[#5A6070] bg-white px-3 py-1 rounded-full border border-[#E8E4DC]">
+                          <span className="text-xs font-bold text-[#5A6070] bg-white px-3 py-1 rounded-full border border-[var(--border)]">
                             Out of Stock
                           </span>
                         </div>
@@ -165,7 +165,7 @@ export default async function CovePage() {
                         {item.name}
                       </p>
                       <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                        <span className="text-base sm:text-lg font-bold tabular-nums" style={{ color: '#085508' }}>
+                        <span className="text-base sm:text-lg font-bold tabular-nums" style={{ color: 'var(--brand-green)' }}>
                           ${item.price.toFixed(2)}
                         </span>
                         <div className="w-full sm:w-auto shrink-0">

@@ -41,7 +41,7 @@ export default async function NewsletterPage() {
         <PageHero content={page} />
 
         {/* Sign up + perks */}
-        <section className="py-16 md:py-24" style={{ backgroundColor: '#F5F0E8' }}>
+        <section className="py-16 md:py-24" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
@@ -55,9 +55,9 @@ export default async function NewsletterPage() {
                     <div key={title} className="flex gap-4">
                       <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: '#EEF6EE' }}
+                        style={{ backgroundColor: 'var(--brand-soft)' }}
                       >
-                        <Icon className="w-5 h-5" style={{ color: '#085508' }} aria-hidden="true" />
+                        <Icon className="w-5 h-5" style={{ color: 'var(--brand-green)' }} aria-hidden="true" />
                       </div>
                       <div>
                         <h3 className="font-bold text-[#1A1A1A] text-sm mb-1">{title}</h3>

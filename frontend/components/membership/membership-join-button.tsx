@@ -145,7 +145,7 @@ function JoinInner({ tierId, tierName, price }: Props) {
         <MembershipShirtPicker required={needsShirt} value={shirt} onChange={setShirt} />
         <Button
           className="w-full font-bold text-white group"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
           id={`join-${tierId}`}
           type="button"
           onClick={startCheckout}
@@ -192,7 +192,7 @@ export function MembershipJoinButton(props: Props) {
   return (
     <Suspense
       fallback={
-        <Button className="w-full font-bold text-white opacity-50" style={{ backgroundColor: '#085508' }} disabled>
+        <Button className="w-full font-bold text-white opacity-50" style={{ backgroundColor: 'var(--brand-green)' }} disabled>
           Join {props.tierName}
         </Button>
       }

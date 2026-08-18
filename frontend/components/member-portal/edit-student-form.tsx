@@ -32,7 +32,7 @@ interface Props {
 }
 
 const inputCls =
-  'w-full px-3 py-2 text-sm border border-[#E8E4DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#085508]/30'
+  'w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/30'
 
 export function EditStudentForm({ student, grades, onUpdated }: Props) {
   const [open, setOpen] = useState(false)
@@ -90,7 +90,7 @@ export function EditStudentForm({ student, grades, onUpdated }: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-xs font-semibold text-[#085508] hover:underline inline-flex items-center gap-1"
+        className="text-xs font-semibold text-[var(--brand-green)] hover:underline inline-flex items-center gap-1"
       >
         <Pencil className="w-3 h-3" /> Edit student
       </button>
@@ -100,7 +100,7 @@ export function EditStudentForm({ student, grades, onUpdated }: Props) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-3 p-4 rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] space-y-3"
+      className="mt-3 p-4 rounded-xl border border-[var(--border)] bg-[#FAFCF9] space-y-3"
     >
       <div className="grid grid-cols-2 gap-2">
         <input
@@ -125,9 +125,9 @@ export function EditStudentForm({ student, grades, onUpdated }: Props) {
             type="button"
             onClick={() => setGrade(g)}
             className={`flex-1 py-2 rounded-lg text-sm font-bold border-2 ${
-              grade === g ? 'text-white border-transparent' : 'border-[#E8E4DC] text-[#5A6070]'
+              grade === g ? 'text-white border-transparent' : 'border-[var(--border)] text-[#5A6070]'
             }`}
-            style={grade === g ? { backgroundColor: '#085508' } : undefined}
+            style={grade === g ? { backgroundColor: 'var(--brand-green)' } : undefined}
           >
             {g}th
           </button>
@@ -203,7 +203,7 @@ export function EditStudentForm({ student, grades, onUpdated }: Props) {
           type="submit"
           disabled={saving}
           className="text-white text-xs"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
         </Button>

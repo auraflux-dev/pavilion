@@ -120,9 +120,9 @@ export function PortalPayPalButtons({ payBody, onPaid, onError, onBeforePay, act
   return (
     <div className="space-y-2">
       <div className="relative flex items-center gap-3 py-1">
-        <div className="flex-1 h-px bg-[#E8E4DC]" />
+        <div className="flex-1 h-px bg-[var(--border)]" />
         <span className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">or PayPal</span>
-        <div className="flex-1 h-px bg-[#E8E4DC]" />
+        <div className="flex-1 h-px bg-[var(--border)]" />
       </div>
       {!ready ? <p className="text-[11px] text-[#5A6070] text-center">Loading PayPal…</p> : null}
       <div ref={hostRef} />

@@ -10,6 +10,7 @@ import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
 import { DEMO_BRAND } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
+import { DemoMark } from '@/components/demo/demo-mark'
 
 type NavItem = {
   id: StaffWorkspace
@@ -68,8 +69,8 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
   }, [moreOpen])
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F5F0E8' }}>
-      <header className="sticky top-0 z-50 bg-[#0B3D0B] text-white shadow-md">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--brand-warm)' }}>
+      <header className="sticky top-0 z-50 bg-[var(--brand-dark)] text-white shadow-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
           <Link
             href="/"
@@ -77,12 +78,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
             aria-label={isPublicDemoInstance() ? `Return to ${DEMO_BRAND.short} home` : 'Return to SHMS PTO home'}
           >
             {isPublicDemoInstance() ? (
-              <span
-                className="w-9 h-9 rounded-sm shrink-0 flex items-center justify-center text-sm font-bold bg-white/10"
-                aria-hidden="true"
-              >
-                R
-              </span>
+              <DemoMark size={36} className="rounded-sm" />
             ) : (
               <Image
                 src="/shms-logo.png"
@@ -93,7 +89,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
               />
             )}
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[#FFD700]">Staff</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--brand-gold)]">Staff</p>
               <p className="text-sm font-semibold truncate">
                 {name || 'Board member'}
                 {boardTitle ? (
@@ -111,7 +107,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                 onClick={() => onNavigate(item.id)}
                 className={`px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors shrink-0 ${
                   active === item.id
-                    ? 'bg-white text-[#0B3D0B]'
+                    ? 'bg-white text-[var(--brand-dark)]'
                     : 'text-white/85 hover:bg-white/10'
                 }`}
               >
@@ -125,7 +121,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                   onClick={() => setMoreOpen((o) => !o)}
                   className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors ${
                     activeInMore || moreOpen
-                      ? 'bg-white text-[#0B3D0B]'
+                      ? 'bg-white text-[var(--brand-dark)]'
                       : 'text-white/85 hover:bg-white/10'
                   }`}
                   aria-expanded={moreOpen}
@@ -137,7 +133,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                 {moreOpen ? (
                   <div
                     role="menu"
-                    className="absolute right-0 top-full mt-1 min-w-[11rem] rounded-lg border border-[#E8E4DC] bg-white py-1 shadow-lg text-[#1A1A1A]"
+                    className="absolute right-0 top-full mt-1 min-w-[11rem] rounded-lg border border-[var(--border)] bg-white py-1 shadow-lg text-[#1A1A1A]"
                   >
                     {overflow.map((item) => (
                       <button
@@ -148,8 +144,8 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                           onNavigate(item.id)
                           setMoreOpen(false)
                         }}
-                        className={`block w-full text-left px-3 py-2 text-xs font-semibold hover:bg-[#EEF6EE] ${
-                          active === item.id ? 'bg-[#EEF6EE] text-[#085508]' : ''
+                        className={`block w-full text-left px-3 py-2 text-xs font-semibold hover:bg-[var(--brand-soft)] ${
+                          active === item.id ? 'bg-[var(--brand-soft)] text-[var(--brand-green)]' : ''
                         }`}
                       >
                         {item.label}
@@ -169,7 +165,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
               >
                 Member
               </Link>
-              <span className="px-2.5 py-1 rounded text-xs font-semibold bg-white text-[#0B3D0B]">
+              <span className="px-2.5 py-1 rounded text-xs font-semibold bg-white text-[var(--brand-dark)]">
                 Staff
               </span>
             </span>
@@ -184,7 +180,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
             </Link>
             <Button
               size="sm"
-              className="h-8 text-xs bg-[#FFD700] text-[#0B3D0B] hover:bg-[#ffe44d] font-bold"
+              className="h-8 text-xs bg-[var(--brand-gold)] text-[var(--brand-dark)] hover:bg-[#ffe44d] font-bold"
               onClick={() => void signOut()}
             >
               Sign out
@@ -202,13 +198,13 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
         </div>
 
         {menuOpen ? (
-          <div className="lg:hidden border-t border-white/15 bg-[#0B3D0B] px-4 py-3 space-y-1 max-h-[70vh] overflow-y-auto">
+          <div className="lg:hidden border-t border-white/15 bg-[var(--brand-dark)] px-4 py-3 space-y-1 max-h-[70vh] overflow-y-auto">
             {items.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 className={`block w-full text-left px-3 py-2.5 rounded-md text-sm font-semibold ${
-                  active === item.id ? 'bg-white text-[#0B3D0B]' : 'text-white hover:bg-white/10'
+                  active === item.id ? 'bg-white text-[var(--brand-dark)]' : 'text-white hover:bg-white/10'
                 }`}
                 onClick={() => {
                   onNavigate(item.id)
@@ -230,7 +226,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                     Member
                   </Button>
                 </Link>
-                <Button size="sm" className="w-full bg-white text-[#0B3D0B] font-semibold">
+                <Button size="sm" className="w-full bg-white text-[var(--brand-dark)] font-semibold">
                   Staff
                 </Button>
               </div>
@@ -245,7 +241,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
               </Link>
               <Button
                 size="sm"
-                className="w-full bg-[#FFD700] text-[#0B3D0B] font-bold"
+                className="w-full bg-[var(--brand-gold)] text-[var(--brand-dark)] font-bold"
                 onClick={() => void signOut()}
               >
                 Sign out
@@ -257,7 +253,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
 
       {active !== 'home' ? (
         <div
-          className="border-b border-[#D4E8D4] bg-[#EEF6EE]"
+          className="border-b border-[var(--brand-line)] bg-[var(--brand-soft)]"
           role="navigation"
           aria-label="Staff navigation"
         >
@@ -266,14 +262,14 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
               type="button"
               onClick={() => onNavigate('home')}
               className="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
-              style={{ color: '#085508' }}
+              style={{ color: 'var(--brand-green)' }}
             >
               ← Staff home
             </button>
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
-              style={{ color: '#085508' }}
+              style={{ color: 'var(--brand-green)' }}
             >
               Site home
             </Link>
@@ -288,7 +284,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
         {children}
       </main>
 
-      <footer className="border-t border-[#E8E4DC] bg-white/70 py-4">
+      <footer className="border-t border-[var(--border)] bg-white/70 py-4">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#5A6070]">
           <span>Staff workspace · {STAFF_WORKSPACE_LABEL[active]}</span>
           <Link href="/privacy" className="underline">

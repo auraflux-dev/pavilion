@@ -175,7 +175,7 @@ export async function buildCoveGoogleWalletUrl(opts: {
             value: opts.payload,
             alternateText: opts.code,
           },
-          hexBackgroundColor: '#085508',
+          hexBackgroundColor: 'var(--brand-green)',
         },
       ],
     },

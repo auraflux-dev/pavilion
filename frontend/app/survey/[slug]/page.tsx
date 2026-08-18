@@ -44,10 +44,10 @@ export default async function SurveyPage({ params, searchParams }: Props) {
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
-      <main id="main-content" className="flex-1 py-12 md:py-16" style={{ backgroundColor: '#F5F0E8' }}>
+      <main id="main-content" className="flex-1 py-12 md:py-16" style={{ backgroundColor: 'var(--brand-warm)' }}>
         <div className="max-w-xl mx-auto px-4 sm:px-6">
           <div className="mb-6 text-center">
-            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#085508' }}>
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--brand-green)' }}>
               SHMS PTO
             </p>
             <h1 className="text-2xl md:text-3xl font-bold text-[#1A1A1A] text-balance">{survey.title}</h1>

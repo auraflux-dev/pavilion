@@ -37,7 +37,7 @@ export default async function MemberPortalPage() {
       <AnnouncementBar />
       <ActAsBanner />
 
-      <main id="main-content" className="flex-1" style={{ backgroundColor: '#F5F0E8' }}>
+      <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
         <PageHero content={hero} compact />
 
         <section className="py-10 md:py-14">

@@ -107,7 +107,7 @@ export function StoreCardHero({
 
   return (
     <>
-      <section id="card" className="py-12 md:py-16 scroll-mt-28" style={{ backgroundColor: '#085508' }}>
+      <section id="card" className="py-12 md:py-16 scroll-mt-28" style={{ backgroundColor: 'var(--brand-green)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {isMember ? (
             <div className="mb-6">
@@ -124,15 +124,9 @@ export function StoreCardHero({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <div className="lg:col-span-7">
               <div className="flex items-center gap-3 mb-4">
-                <div className="rounded-2xl bg-[#F5F0E8] p-1.5 shadow-sm shrink-0">
+                <div className="rounded-2xl bg-[var(--brand-warm)] p-1.5 shadow-sm shrink-0">
                   {demo ? (
-                    <span
-                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl flex items-center justify-center text-2xl font-bold text-white"
-                      style={{ backgroundColor: '#085508' }}
-                      aria-hidden="true"
-                    >
-                      {DEMO_BRAND.store.replace(/^The\s+/i, '').charAt(0)}
-                    </span>
+                    <img src="/demo/mark.png" alt="" className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover" />
                   ) : (
                     <CoveLogo size="md" priority className="w-20 h-20 sm:w-24 sm:h-24" />
                   )}
@@ -172,7 +166,7 @@ export function StoreCardHero({
               <div className="w-full max-w-md lg:ml-auto rounded-2xl bg-white p-5 sm:p-6 shadow-lg border border-white/40">
                 <p
                   className="text-xs font-bold tracking-widest uppercase mb-3"
-                  style={{ color: '#085508' }}
+                  style={{ color: 'var(--brand-green)' }}
                 >
                   {vanillaizeIfDemo('Cove Digital Card')}
                 </p>
@@ -183,14 +177,14 @@ export function StoreCardHero({
                 </p>
                 <MemberGate
                   label={vanillaizeIfDemo('Load a Cove Digital Card')}
-                  className="inline-flex items-center justify-center w-full font-bold text-sm px-5 py-3 rounded-lg bg-[#085508] text-white transition-opacity hover:opacity-90"
+                  className="inline-flex items-center justify-center w-full font-bold text-sm px-5 py-3 rounded-lg bg-[var(--brand-green)] text-white transition-opacity hover:opacity-90"
                 >
                   <StoreCardReload
                     amounts={denominations.map(({ amount }) => amount)}
                     bonusPercent={bonusPercent}
                     maxAmount={maxAmount}
                     triggerLabel={vanillaizeIfDemo('Load Cove Digital Card')}
-                    triggerClassName="w-full justify-center px-5 py-3 bg-[#085508] text-white"
+                    triggerClassName="w-full justify-center px-5 py-3 bg-[var(--brand-green)] text-white"
                   />
                 </MemberGate>
               </div>
@@ -199,14 +193,14 @@ export function StoreCardHero({
         </div>
       </section>
 
-      <section className="border-b border-[#E8E4DC]" style={{ backgroundColor: '#F0F7F0' }}>
+      <section className="border-b border-[var(--border)]" style={{ backgroundColor: 'var(--brand-mist)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[#D4E8D4]">
+          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[var(--brand-line)]">
             {steps.map(({ step, title: stepTitle, body }) => (
               <div key={step} className="flex items-start gap-3 py-5 px-2 sm:px-6">
                 <div
                   className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-xs mt-0.5"
-                  style={{ backgroundColor: '#085508', color: 'white' }}
+                  style={{ backgroundColor: 'var(--brand-green)', color: 'white' }}
                 >
                   {step}
                 </div>

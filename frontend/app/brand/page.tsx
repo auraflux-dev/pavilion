@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { COVE_LOGO } from '@/components/brand/cove-logo'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 export const metadata: Metadata = {
   title: 'Brand assets (internal)',
@@ -25,10 +27,11 @@ const ASSETS: { label: string; href: string; note: string }[] = [
 ]
 
 export default function BrandAssetsPage() {
+  if (isDemoInstance()) notFound()
   const site = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org').replace(/\/$/, '')
 
   return (
-    <main className="min-h-screen px-4 py-10" style={{ backgroundColor: '#F5F0E8' }}>
+    <main className="min-h-screen px-4 py-10" style={{ backgroundColor: 'var(--brand-warm)' }}>
       <div className="max-w-3xl mx-auto">
         <p className="text-[10px] font-bold uppercase tracking-widest text-[#5A6070] mb-2">
           Internal · not in nav · noindex
@@ -45,7 +48,7 @@ export default function BrandAssetsPage() {
             return (
               <li
                 key={a.href}
-                className="rounded-xl border border-[#E8E4DC] bg-white p-4 flex flex-col sm:flex-row gap-4 items-start"
+                className="rounded-xl border border-[var(--border)] bg-white p-4 flex flex-col sm:flex-row gap-4 items-start"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -59,7 +62,7 @@ export default function BrandAssetsPage() {
                   <a
                     href={a.href}
                     className="block text-xs font-mono mt-2 break-all"
-                    style={{ color: '#085508' }}
+                    style={{ color: 'var(--brand-green)' }}
                   >
                     {a.href}
                   </a>

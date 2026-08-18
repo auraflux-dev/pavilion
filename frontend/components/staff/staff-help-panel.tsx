@@ -148,7 +148,7 @@ export function StaffHelpPanel({
       />
 
       {canEditKb ? (
-        <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3">
+        <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-3">
           <div>
             <h2 className="text-base font-bold text-[#1A1A1A]">Edit help articles</h2>
             <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">

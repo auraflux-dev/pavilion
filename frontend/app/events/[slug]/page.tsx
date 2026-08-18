@@ -49,7 +49,7 @@ export default async function EventDetailPage({ params }: Props) {
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
-      <main id="main-content" className="flex-1" style={{ backgroundColor: '#F5F0E8' }}>
+      <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
         {isRfc ? (
           <RunForCharityEventDetail event={event} />
         ) : (
@@ -57,7 +57,7 @@ export default async function EventDetailPage({ params }: Props) {
             <div className="mx-auto max-w-lg px-4 sm:px-6 lg:px-8">
               <Link
                 href="/events"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-[#085508] mb-8 hover:opacity-80"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--brand-green)] mb-8 hover:opacity-80"
               >
                 <ArrowLeft className="w-4 h-4" aria-hidden="true" />
                 All events

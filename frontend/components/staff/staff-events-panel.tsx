@@ -168,7 +168,7 @@ export function StaffEventsPanel() {
   return (
     <section
       id="staff-events"
-      className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+      className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
     >
       <div className="flex flex-wrap justify-between gap-2">
         <div>
@@ -181,7 +181,7 @@ export function StaffEventsPanel() {
           <Button
             type="button"
             className="text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
             onClick={startCreate}
           >
             New event
@@ -190,29 +190,29 @@ export function StaffEventsPanel() {
       </div>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      {status ? <p className="text-sm text-[#085508]">{status}</p> : null}
+      {status ? <p className="text-sm text-[var(--brand-green)]">{status}</p> : null}
 
       {showForm ? (
-        <div className="rounded-lg border border-[#E8E4DC] bg-[#FAF8F4] p-4 space-y-3">
+        <div className="rounded-lg border border-[var(--border)] bg-[#FAF8F4] p-4 space-y-3">
           <p className="text-sm font-bold">{editingId ? 'Edit event' : 'Create event'}</p>
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder="Title"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
           />
           <textarea
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             placeholder="Description"
             rows={3}
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
           />
           <input
             value={form.location}
             onChange={(e) => setForm({ ...form, location: e.target.value })}
             placeholder="Location"
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
           />
           <div className="grid sm:grid-cols-2 gap-2">
             <label className="text-xs text-[#5A6070] space-y-1">
@@ -221,7 +221,7 @@ export function StaffEventsPanel() {
                 type="datetime-local"
                 value={form.startDate}
                 onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-                className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+                className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
               />
             </label>
             <label className="text-xs text-[#5A6070] space-y-1">
@@ -230,7 +230,7 @@ export function StaffEventsPanel() {
                 type="datetime-local"
                 value={form.endDate}
                 onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-                className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+                className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
               />
             </label>
           </div>
@@ -239,7 +239,7 @@ export function StaffEventsPanel() {
               <select
                 value={form.registrationType}
                 onChange={(e) => setForm({ ...form, registrationType: e.target.value })}
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
               >
                 <option value="RSVP">RSVP (free)</option>
                 <option value="TICKETING">Ticketed</option>
@@ -253,7 +253,7 @@ export function StaffEventsPanel() {
                     value={form.ticketPrice}
                     onChange={(e) => setForm({ ...form, ticketPrice: e.target.value })}
                     placeholder="Ticket price ($)"
-                    className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                    className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                   />
                   <input
                     type="number"
@@ -261,7 +261,7 @@ export function StaffEventsPanel() {
                     value={form.capacity}
                     onChange={(e) => setForm({ ...form, capacity: e.target.value })}
                     placeholder="Capacity (0 = unlimited)"
-                    className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                    className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               ) : null}
@@ -280,7 +280,7 @@ export function StaffEventsPanel() {
               type="button"
               disabled={busy || !form.title.trim() || !form.startDate}
               className="text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
               onClick={() => void save()}
             >
               {editingId ? 'Save changes' : form.draft ? 'Create draft' : 'Publish event'}

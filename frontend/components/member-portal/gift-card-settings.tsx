@@ -55,13 +55,13 @@ export function GiftCardSettings({ studentId, studentName }: Props) {
   }
 
   return (
-    <div className="rounded-xl border border-[#E8E4DC] overflow-hidden">
+    <div className="rounded-xl border border-[var(--border)] overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-[#FAFAF8] hover:bg-[#F5F0E8] transition-colors text-left"
+        className="w-full flex items-center justify-between px-4 py-3 bg-[#FAFAF8] hover:bg-[var(--brand-warm)] transition-colors text-left"
       >
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 shrink-0" style={{ color: '#085508' }} />
+          <Zap className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
           <span className="text-sm font-bold text-[#1A1A1A]">Auto Top-Off</span>
           {status === 'loading' ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin text-[#5A6070]" />
@@ -77,7 +77,7 @@ export function GiftCardSettings({ studentId, studentName }: Props) {
       </button>
 
       {open && (
-        <div className="px-4 py-4 space-y-4 border-t border-[#E8E4DC]">
+        <div className="px-4 py-4 space-y-4 border-t border-[var(--border)]">
           <p className="text-xs text-[#5A6070] leading-relaxed">
             When {studentName}&apos;s balance reaches the threshold, Square securely charges your saved card and loads the Cove Digital Card.
           </p>
@@ -98,7 +98,7 @@ export function GiftCardSettings({ studentId, studentName }: Props) {
               onClick={() => setEnabled(e => !e)}
               disabled={!hasPaymentMethod && !enabled}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors disabled:opacity-40 ${
-                enabled ? 'bg-[#085508]' : 'bg-gray-200'
+                enabled ? 'bg-[var(--brand-green)]' : 'bg-gray-200'
               }`}
             >
               <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
@@ -120,8 +120,8 @@ export function GiftCardSettings({ studentId, studentName }: Props) {
                       onClick={() => setThreshold(t)}
                       className={`px-3 py-1.5 rounded-lg text-sm font-bold border-2 ${
                         threshold === t
-                          ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
-                          : 'border-[#E8E4DC] text-[#5A6070]'
+                          ? 'border-[var(--brand-green)] bg-[var(--brand-soft)] text-[var(--brand-green)]'
+                          : 'border-[var(--border)] text-[#5A6070]'
                       }`}
                     >
                       ${t}
@@ -141,8 +141,8 @@ export function GiftCardSettings({ studentId, studentName }: Props) {
                       onClick={() => setReload(r)}
                       className={`px-3 py-1.5 rounded-lg text-sm font-bold border-2 ${
                         reload === r
-                          ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
-                          : 'border-[#E8E4DC] text-[#5A6070]'
+                          ? 'border-[var(--brand-green)] bg-[var(--brand-soft)] text-[var(--brand-green)]'
+                          : 'border-[var(--border)] text-[#5A6070]'
                       }`}
                     >
                       ${r}
@@ -151,7 +151,7 @@ export function GiftCardSettings({ studentId, studentName }: Props) {
                 </div>
               </div>
 
-              <p className="text-xs text-[#5A6070] bg-[#F5F0E8] rounded-lg px-3 py-2">
+              <p className="text-xs text-[#5A6070] bg-[var(--brand-warm)] rounded-lg px-3 py-2">
                 At or below <strong>${threshold}</strong>, charge <strong>${reload}</strong> to {paymentLabel} and load the student card.
               </p>
             </>
@@ -162,7 +162,7 @@ export function GiftCardSettings({ studentId, studentName }: Props) {
             onClick={save}
             disabled={status === 'saving' || status === 'loading' || (enabled && !hasPaymentMethod)}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-white disabled:opacity-50"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             {status === 'saving' ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>

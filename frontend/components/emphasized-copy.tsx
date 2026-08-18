@@ -7,7 +7,7 @@ export function EmphasizedCopy({ text, className }: { text: string; className?: 
     <span className={className}>
       {parts.map((part, i) =>
         /^(\$\d+(?:\.\d+)?|\d+(?:\.\d+)?%|\d+)$/.test(part) || /^free$/i.test(part) ? (
-          <strong key={i} className="font-bold text-[#085508]">
+          <strong key={i} className="font-bold text-[var(--brand-green)]">
             {part}
           </strong>
         ) : (

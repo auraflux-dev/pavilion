@@ -45,7 +45,7 @@ export async function VolunteerSection() {
             {content.eyebrow ? (
               <div
                 className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-5"
-                style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-soft)', color: 'var(--brand-green)' }}
               >
                 {content.eyebrow}
               </div>
@@ -69,7 +69,7 @@ export async function VolunteerSection() {
                   <li key={benefit} className="flex items-start gap-3">
                     <CheckCircle2
                       className="w-5 h-5 mt-0.5 shrink-0"
-                      style={{ color: '#085508' }}
+                      style={{ color: 'var(--brand-green)' }}
                       aria-hidden="true"
                     />
                     <span className="text-[#1A1A1A] text-sm sm:text-base">{benefit}</span>
@@ -82,7 +82,7 @@ export async function VolunteerSection() {
               <Button
                 size="lg"
                 className="text-white font-bold group"
-                style={{ backgroundColor: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-green)' }}
                 asChild
               >
                 <a href="/volunteer">
@@ -97,7 +97,7 @@ export async function VolunteerSection() {
           </div>
 
           <div className="relative lg:pl-4">
-            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#EEF6EE] shadow-[0_20px_40px_-20px_rgba(8,85,8,0.35)]">
+            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[var(--brand-soft)] shadow-[0_20px_40px_-20px_rgba(8,85,8,0.35)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageUrl}
@@ -124,12 +124,12 @@ export async function VolunteerSection() {
 
             <div
               className="absolute -bottom-4 -right-4 w-32 h-32 rounded-2xl -z-10"
-              style={{ backgroundColor: '#F5F0E8' }}
+              style={{ backgroundColor: 'var(--brand-warm)' }}
               aria-hidden="true"
             />
             <div
               className="absolute -top-4 -left-4 w-20 h-20 rounded-xl -z-10"
-              style={{ backgroundColor: '#EEF6EE' }}
+              style={{ backgroundColor: 'var(--brand-soft)' }}
               aria-hidden="true"
             />
           </div>

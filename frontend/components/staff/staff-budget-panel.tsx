@@ -374,7 +374,7 @@ export function StaffBudgetPanel() {
   }, [entries, filterKey, search, lines])
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-5">
+    <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-5">
       <div className="flex flex-wrap justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold">Budget · {year}</h2>
@@ -382,7 +382,7 @@ export function StaffBudgetPanel() {
           <Link
             href="/staff?view=help&article=staff-budget"
             className="text-xs font-bold underline mt-1 inline-block"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
           >
             How Budget works
           </Link>
@@ -392,7 +392,7 @@ export function StaffBudgetPanel() {
             <Button
               size="sm"
               className="text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
               disabled={busy}
               onClick={() =>
                 void post(
@@ -422,7 +422,7 @@ export function StaffBudgetPanel() {
         />
       ) : null}
 
-      <div className="rounded-lg border border-[#E8E4DC] bg-[#F7F4EE] px-3 py-3 space-y-2">
+      <div className="rounded-lg border border-[var(--border)] bg-[#F7F4EE] px-3 py-3 space-y-2">
         <p className="text-sm font-bold">Import Bank of America CSV</p>
         <p className="text-xs text-[#5A6070]">
           Checking → Activity → Download → CSV. Square and PayPal <strong>payouts are skipped</strong> so
@@ -477,7 +477,7 @@ export function StaffBudgetPanel() {
       ) : null}
 
       {status ? (
-        <p className={`text-xs ${statusKind === 'err' ? 'text-rose-700' : 'text-[#085508]'}`}>{status}</p>
+        <p className={`text-xs ${statusKind === 'err' ? 'text-rose-700' : 'text-[var(--brand-green)]'}`}>{status}</p>
       ) : null}
 
       {lines.length === 0 ? (
@@ -488,7 +488,7 @@ export function StaffBudgetPanel() {
           <Button
             disabled={busy}
             className="text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
             onClick={() => void post({ action: 'seed' }, 'Placeholder loaded.')}
           >
             {busy ? 'Loading…' : 'Load 2026–27 placeholder'}
@@ -507,7 +507,7 @@ export function StaffBudgetPanel() {
             <SummaryCard title="Net" budgeted={totals.netBudgeted} actual={totals.netActual} highlight />
           </div>
 
-          <div id="budget-record" className="border border-[#E8E4DC] rounded-lg p-3 space-y-3">
+          <div id="budget-record" className="border border-[var(--border)] rounded-lg p-3 space-y-3">
             <h3 className="text-sm font-bold">Record activity</h3>
             <p className="text-xs text-[#5A6070]">
               For beginning cash, a check, or a spirit night that never hit Square. Click a line below to
@@ -516,12 +516,12 @@ export function StaffBudgetPanel() {
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               <input
                 type="date"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 value={entryDate}
                 onChange={(e) => setEntryDate(e.target.value)}
               />
               <select
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm sm:col-span-2"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm sm:col-span-2"
                 value={entryKey}
                 onChange={(e) => setEntryKey(e.target.value)}
               >
@@ -533,14 +533,14 @@ export function StaffBudgetPanel() {
                 ))}
               </select>
               <input
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 placeholder="Amount $"
                 inputMode="decimal"
                 value={entryAmount}
                 onChange={(e) => setEntryAmount(e.target.value)}
               />
               <input
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm lg:col-span-3 sm:col-span-2"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm lg:col-span-3 sm:col-span-2"
                 placeholder="Memo (vendor, check #, spirit night restaurant…)"
                 value={entryMemo}
                 onChange={(e) => setEntryMemo(e.target.value)}
@@ -550,7 +550,7 @@ export function StaffBudgetPanel() {
               size="sm"
               disabled={busy}
               className="text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
               onClick={() => void recordActivity()}
             >
               Record
@@ -588,7 +588,7 @@ export function StaffBudgetPanel() {
               </h3>
               <div className="flex flex-wrap gap-2">
                 <input
-                  className="border border-[#E8E4DC] rounded-lg px-3 py-1.5 text-sm"
+                  className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm"
                   placeholder="Search memo…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -596,7 +596,7 @@ export function StaffBudgetPanel() {
                 {filterKey ? (
                   <button
                     type="button"
-                    className="text-xs text-[#085508] hover:underline"
+                    className="text-xs text-[var(--brand-green)] hover:underline"
                     onClick={() => setFilterKey('')}
                   >
                     Show all lines
@@ -625,12 +625,12 @@ export function StaffBudgetPanel() {
                   </thead>
                   <tbody>
                     {filteredEntries.map((e) => (
-                      <tr key={e.id} className="border-t border-[#E8E4DC] align-top">
+                      <tr key={e.id} className="border-t border-[var(--border)] align-top">
                         <td className="py-2 pr-2 whitespace-nowrap">{e.occurredAt.slice(0, 10)}</td>
                         <td className="py-2 pr-2">
                           {canMove(e.origin) ? (
                             <select
-                              className="max-w-[14rem] border border-[#E8E4DC] rounded-lg px-2 py-1 text-xs"
+                              className="max-w-[14rem] border border-[var(--border)] rounded-lg px-2 py-1 text-xs"
                               value={e.lineSyncKey}
                               disabled={busy}
                               onChange={(ev) => {
@@ -670,11 +670,11 @@ export function StaffBudgetPanel() {
             )}
           </div>
 
-          <div id="budget-add" className="border border-[#E8E4DC] rounded-lg p-3 space-y-3">
+          <div id="budget-add" className="border border-[var(--border)] rounded-lg p-3 space-y-3">
             <h3 className="text-sm font-bold">Add a line</h3>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               <select
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 value={newKind}
                 onChange={(e) => setNewKind(e.target.value === 'income' ? 'income' : 'expense')}
               >
@@ -682,32 +682,32 @@ export function StaffBudgetPanel() {
                 <option value="expense">Expense</option>
               </select>
               <input
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 placeholder="Category"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
               />
               <input
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm sm:col-span-2"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm sm:col-span-2"
                 placeholder="Line name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
               />
               <input
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 placeholder="Budgeted $"
                 inputMode="decimal"
                 value={newBudgeted}
                 onChange={(e) => setNewBudgeted(e.target.value)}
               />
               <input
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 placeholder="Owner"
                 value={newOwner}
                 onChange={(e) => setNewOwner(e.target.value)}
               />
               <input
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm sm:col-span-2"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm sm:col-span-2"
                 placeholder="Notes"
                 value={newNotes}
                 onChange={(e) => setNewNotes(e.target.value)}
@@ -717,7 +717,7 @@ export function StaffBudgetPanel() {
               size="sm"
               disabled={busy}
               className="text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
               onClick={() => void addLine()}
             >
               Add line
@@ -748,7 +748,7 @@ function SummaryCard({
   return (
     <div
       className={`rounded-lg border px-3 py-3 ${
-        highlight ? 'border-[#085508]/30 bg-[#085508]/5' : 'border-[#E8E4DC] bg-[#F7F5F0]'
+        highlight ? 'border-[var(--brand-green)]/30 bg-[var(--brand-green)]/5' : 'border-[var(--border)] bg-[#F7F5F0]'
       }`}
     >
       <p className="text-[11px] font-bold uppercase tracking-wider text-[#5A6070]">{title}</p>
@@ -760,7 +760,7 @@ function SummaryCard({
       </p>
       <p
         className={`text-xs mt-1 tabular-nums ${
-          over ? (overIsBad ? 'text-rose-700' : 'text-[#085508]') : 'text-[#5A6070]'
+          over ? (overIsBad ? 'text-rose-700' : 'text-[var(--brand-green)]') : 'text-[#5A6070]'
         }`}
       >
         {over
@@ -821,7 +821,7 @@ function LineTable({
                 <tr className="bg-[#F7F5F0]">
                   <td
                     colSpan={7}
-                    className="py-1.5 px-1 text-[11px] font-bold uppercase tracking-wider text-[#085508]"
+                    className="py-1.5 px-1 text-[11px] font-bold uppercase tracking-wider text-[var(--brand-green)]"
                   >
                     {category}
                   </td>
@@ -875,8 +875,8 @@ function BudgetRow({
 
   return (
     <tr
-      className={`border-t border-[#E8E4DC] align-top ${
-        review ? 'bg-rose-50' : active ? 'bg-[#085508]/5' : ''
+      className={`border-t border-[var(--border)] align-top ${
+        review ? 'bg-rose-50' : active ? 'bg-[var(--brand-green)]/5' : ''
       }`}
     >
       <td className="py-2 pr-2">
@@ -890,7 +890,7 @@ function BudgetRow({
       </td>
       <td className="py-2 pr-2">
         <input
-          className="w-24 border border-[#E8E4DC] rounded-lg px-2 py-1 text-sm tabular-nums"
+          className="w-24 border border-[var(--border)] rounded-lg px-2 py-1 text-sm tabular-nums"
           inputMode="decimal"
           value={budgeted}
           disabled={busy}
@@ -903,7 +903,7 @@ function BudgetRow({
       <td className="py-2 pr-2 font-medium tabular-nums">{money(row.actual)}</td>
       <td
         className={`py-2 pr-2 tabular-nums ${
-          overSpend ? 'text-rose-700 font-medium' : ahead ? 'text-[#085508] font-medium' : ''
+          overSpend ? 'text-rose-700 font-medium' : ahead ? 'text-[var(--brand-green)] font-medium' : ''
         }`}
       >
         {money(remaining)}
@@ -918,7 +918,7 @@ function BudgetRow({
                 : row.tracking === 'auto'
                   ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
                   : row.tracking === 'skip'
-                    ? 'border-[#E8E4DC] bg-[#F7F5F0] text-[#5A6070]'
+                    ? 'border-[var(--border)] bg-[#F7F5F0] text-[#5A6070]'
                     : 'border-amber-200 bg-amber-50 text-amber-900'
           }`}
         >
@@ -927,7 +927,7 @@ function BudgetRow({
       </td>
       <td className="py-2 pr-2">
         <input
-          className="w-full min-w-[10rem] border border-[#E8E4DC] rounded-lg px-2 py-1 text-xs"
+          className="w-full min-w-[10rem] border border-[var(--border)] rounded-lg px-2 py-1 text-xs"
           value={notes}
           disabled={busy}
           onChange={(e) => setNotes(e.target.value)}
@@ -940,7 +940,7 @@ function BudgetRow({
         <div className="flex flex-col items-start gap-1">
           <button
             type="button"
-            className="text-xs text-[#085508] hover:underline"
+            className="text-xs text-[var(--brand-green)] hover:underline"
             onClick={() => onFocus(row.syncKey)}
           >
             Activity

@@ -71,7 +71,7 @@ export function AddStudentForm({ onAdded, grades = ['6', '7', '8'], labels }: Pr
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 w-full px-4 py-3.5 rounded-xl border-2 border-dashed transition-colors hover:border-[#085508] hover:bg-[#EEF6EE] text-[#5A6070] hover:text-[#085508]"
+        className="flex items-center gap-2 w-full px-4 py-3.5 rounded-xl border-2 border-dashed transition-colors hover:border-[var(--brand-green)] hover:bg-[var(--brand-soft)] text-[#5A6070] hover:text-[var(--brand-green)]"
         style={{ borderColor: '#D4D4D4' }}
       >
         <UserPlus className="w-4 h-4 shrink-0" />
@@ -81,7 +81,7 @@ export function AddStudentForm({ onAdded, grades = ['6', '7', '8'], labels }: Pr
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#E8E4DC] p-5 shadow-sm">
+    <div className="bg-white rounded-2xl border border-[var(--border)] p-5 shadow-sm">
       <h3 className="font-bold text-[#1A1A1A] mb-4">{labels.addStudentTitle}</h3>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
@@ -95,7 +95,7 @@ export function AddStudentForm({ onAdded, grades = ['6', '7', '8'], labels }: Pr
               onChange={(e) => setFirstName(e.target.value)}
               placeholder={labels.firstNameLabel}
               required
-              className="w-full px-3 py-2 text-sm border border-[#E8E4DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#085508]/30 focus:border-[#085508]"
+              className="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/30 focus:border-[var(--brand-green)]"
             />
           </div>
           <div>
@@ -108,7 +108,7 @@ export function AddStudentForm({ onAdded, grades = ['6', '7', '8'], labels }: Pr
               onChange={(e) => setLastName(e.target.value)}
               placeholder={labels.lastNameLabel}
               required
-              className="w-full px-3 py-2 text-sm border border-[#E8E4DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#085508]/30 focus:border-[#085508]"
+              className="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/30 focus:border-[var(--brand-green)]"
             />
           </div>
         </div>
@@ -125,11 +125,11 @@ export function AddStudentForm({ onAdded, grades = ['6', '7', '8'], labels }: Pr
                 className={`flex-1 py-2 rounded-lg text-sm font-bold border-2 transition-colors ${
                   grade === g
                     ? 'text-white border-transparent'
-                    : 'bg-white text-[#5A6070] border-[#E8E4DC] hover:border-[#085508]'
+                    : 'bg-white text-[#5A6070] border-[var(--border)] hover:border-[var(--brand-green)]'
                 }`}
                 style={
                   grade === g
-                    ? { backgroundColor: '#085508', borderColor: '#085508' }
+                    ? { backgroundColor: 'var(--brand-green)', borderColor: 'var(--brand-green)' }
                     : {}
                 }
               >
@@ -144,7 +144,7 @@ export function AddStudentForm({ onAdded, grades = ['6', '7', '8'], labels }: Pr
             type="submit"
             disabled={saving || !firstName.trim() || !lastName.trim() || !grade}
             className="flex-1 font-semibold text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : labels.addStudentSubmit}
           </Button>

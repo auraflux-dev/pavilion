@@ -27,7 +27,7 @@ export async function ProgramsPreview() {
     <section
       id="programs"
       className="scroll-mt-28 relative overflow-hidden py-20 md:py-28"
-      style={{ backgroundColor: '#F5F0E8' }}
+      style={{ backgroundColor: 'var(--brand-warm)' }}
       aria-labelledby="programs-heading"
     >
       <BrandImageWash src="/home/hero-a.jpg" side="left" />
@@ -36,7 +36,7 @@ export async function ProgramsPreview() {
         <div className="text-center mb-14">
           <div
             className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
-            style={{ backgroundColor: '#085508', color: 'white' }}
+            style={{ backgroundColor: 'var(--brand-green)', color: 'white' }}
           >
             Student enrichment
           </div>
@@ -74,26 +74,26 @@ export async function ProgramsPreview() {
             return (
               <article
                 key={program._id}
-                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col border border-[#E8E4DC]"
+                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col border border-[var(--border)]"
               >
                 <div
                   className="h-1.5 w-full"
-                  style={{ backgroundColor: '#085508' }}
+                  style={{ backgroundColor: 'var(--brand-green)' }}
                   aria-hidden="true"
                 />
                 <div className="p-5 lg:p-6 flex flex-col flex-1">
                   <div className="flex items-start justify-between mb-3">
                     <div
                       className="w-11 h-11 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: '#EEF6EE' }}
+                      style={{ backgroundColor: 'var(--brand-soft)' }}
                       aria-hidden="true"
                     >
-                      <Icon className="w-5 h-5" style={{ color: '#085508' }} />
+                      <Icon className="w-5 h-5" style={{ color: 'var(--brand-green)' }} />
                     </div>
                     {program.category ? (
                       <span
                         className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                        style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
+                        style={{ backgroundColor: 'var(--brand-soft)', color: 'var(--brand-green)' }}
                       >
                         {program.category}
                       </span>
@@ -117,7 +117,7 @@ export async function ProgramsPreview() {
                       {detailPills.map((d) => (
                         <span
                           key={d}
-                          className="text-xs font-medium px-2.5 py-1 rounded-md bg-[#EEF6EE] text-[#5A6070]"
+                          className="text-xs font-medium px-2.5 py-1 rounded-md bg-[var(--brand-soft)] text-[#5A6070]"
                         >
                           {d}
                         </span>
@@ -127,7 +127,7 @@ export async function ProgramsPreview() {
 
                   <Button
                     className="w-full font-semibold text-white group"
-                    style={{ backgroundColor: '#085508' }}
+                    style={{ backgroundColor: 'var(--brand-green)' }}
                     asChild
                   >
                     <a href="/programs">
@@ -149,7 +149,7 @@ export async function ProgramsPreview() {
           <a
             href="/programs"
             className="inline-flex items-center gap-2 text-sm font-semibold hover:underline underline-offset-4 transition-colors"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
           >
             View all programs
             <ArrowRight className="w-4 h-4" aria-hidden="true" />

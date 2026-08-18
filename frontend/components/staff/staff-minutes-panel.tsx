@@ -112,7 +112,7 @@ export function StaffMinutesPanel() {
   }
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
       <div className="flex flex-wrap justify-between gap-2">
         <div>
           <h2 className="text-lg font-bold">Meeting minutes</h2>
@@ -127,7 +127,7 @@ export function StaffMinutesPanel() {
         <select
           value={form.committee}
           onChange={(e) => setForm((f) => ({ ...f, committee: e.target.value }))}
-          className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         >
           {committees.map((c) => (
             <option key={c} value={c}>
@@ -139,39 +139,39 @@ export function StaffMinutesPanel() {
           type="datetime-local"
           value={form.meetingDate}
           onChange={(e) => setForm((f) => ({ ...f, meetingDate: e.target.value }))}
-          className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <input
           value={form.joinUrl}
           onChange={(e) => setForm((f) => ({ ...f, joinUrl: e.target.value }))}
           placeholder="Join / Zoom URL (optional)"
-          className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <input
           value={form.summary}
           onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
           placeholder="Short summary"
-          className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <textarea
           value={form.minutesContent}
           onChange={(e) => setForm((f) => ({ ...f, minutesContent: e.target.value }))}
           rows={5}
           placeholder="Full minutes"
-          className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <textarea
           value={form.takeaways}
           onChange={(e) => setForm((f) => ({ ...f, takeaways: e.target.value }))}
           rows={2}
           placeholder="Takeaways"
-          className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <input
           value={form.callToAction}
           onChange={(e) => setForm((f) => ({ ...f, callToAction: e.target.value }))}
           placeholder="Call to action"
-          className="sm:col-span-2 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
       </div>
       <div className="flex flex-wrap gap-4 text-xs">
@@ -196,7 +196,7 @@ export function StaffMinutesPanel() {
         disabled={busy || !form.meetingDate}
         onClick={() => void save()}
         className="text-white"
-        style={{ backgroundColor: '#085508' }}
+        style={{ backgroundColor: 'var(--brand-green)' }}
       >
         {busy ? 'Saving…' : editing ? 'Save changes' : 'Publish minutes'}
       </Button>

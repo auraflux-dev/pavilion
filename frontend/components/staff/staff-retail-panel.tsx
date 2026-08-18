@@ -15,9 +15,9 @@ export function StaffRetailPanel() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div
           className="rounded-xl border-2 p-4"
-          style={{ borderColor: '#0B3D0B', backgroundColor: '#F5F7F4' }}
+          style={{ borderColor: 'var(--brand-dark)', backgroundColor: '#F5F7F4' }}
         >
-          <p className="text-xs font-bold uppercase tracking-wider text-[#0B3D0B] flex items-center gap-1.5">
+          <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)] flex items-center gap-1.5">
             <Smartphone className="w-3.5 h-3.5" aria-hidden />
             Cash · card · Cove on Stand
           </p>
@@ -30,9 +30,9 @@ export function StaffRetailPanel() {
         <a
           href="#cove-register"
           className="rounded-xl border-2 p-4 hover:opacity-95 transition-opacity"
-          style={{ borderColor: '#085508', backgroundColor: '#EEF6EE' }}
+          style={{ borderColor: 'var(--brand-green)', backgroundColor: 'var(--brand-soft)' }}
         >
-          <p className="text-xs font-bold uppercase tracking-wider text-[#085508] flex items-center gap-1.5">
+          <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-green)] flex items-center gap-1.5">
             <CreditCard className="w-3.5 h-3.5" aria-hidden />
             Cove backup / External
           </p>
@@ -45,7 +45,7 @@ export function StaffRetailPanel() {
 
       <p className="text-xs text-[#5A6070]">
         Paid in member portal / site checkout?{' '}
-        <a href="#cove-store-pickups" className="font-bold underline" style={{ color: '#085508' }}>
+        <a href="#cove-store-pickups" className="font-bold underline" style={{ color: 'var(--brand-green)' }}>
           Today&apos;s store pickups
         </a>
         {' · '}
@@ -54,7 +54,7 @@ export function StaffRetailPanel() {
           target="_blank"
           rel="noreferrer"
           className="font-bold underline"
-          style={{ color: '#085508' }}
+          style={{ color: 'var(--brand-green)' }}
         >
           Print table card
         </a>
@@ -62,7 +62,7 @@ export function StaffRetailPanel() {
         <a
           href="/staff?view=help&article=cove-in-person-manual"
           className="font-bold underline"
-          style={{ color: '#085508' }}
+          style={{ color: 'var(--brand-green)' }}
         >
           Full in-person manual
         </a>
@@ -85,7 +85,7 @@ export function StaffRetailPanel() {
             ringing sales.
           </p>
         </div>
-        <details className="rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] group">
+        <details className="rounded-xl border border-[var(--border)] bg-[#FAFCF9] group">
           <summary className="cursor-pointer list-none px-4 py-3 text-sm font-bold text-[#1A1A1A] flex items-center justify-between gap-2">
             <span>Edit products &amp; inventory</span>
             <span className="text-xs font-semibold text-[#5A6070] group-open:hidden">Show</span>
@@ -93,7 +93,7 @@ export function StaffRetailPanel() {
               Hide
             </span>
           </summary>
-          <div className="border-t border-[#E8E4DC] px-4 pb-4 pt-3 space-y-4 bg-white">
+          <div className="border-t border-[var(--border)] px-4 pb-4 pt-3 space-y-4 bg-white">
             <StaffCoveProductsPanel />
             <StaffCmsCollectionPanel
               collection="CoveInventory"

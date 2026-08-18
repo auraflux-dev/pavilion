@@ -30,7 +30,7 @@ export function StoreCardCta({
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div
           className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase px-3 py-1.5 rounded-full mb-6"
-          style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#FFD700' }}
+          style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'var(--brand-gold)' }}
         >
           <CreditCard className="w-3.5 h-3.5" aria-hidden="true" />
           {eyebrow}
@@ -41,7 +41,7 @@ export function StoreCardCta({
 
         <MemberGate
           label={vanillaizeIfDemo('Load a Cove Digital Card')}
-          className="inline-flex items-center justify-center w-full max-w-sm mx-auto font-bold text-sm px-5 py-3 rounded-lg bg-white text-[#085508] transition-opacity hover:opacity-90"
+          className="inline-flex items-center justify-center w-full max-w-sm mx-auto font-bold text-sm px-5 py-3 rounded-lg bg-white text-[var(--brand-green)] transition-opacity hover:opacity-90"
         >
           <div className="max-w-sm mx-auto">
             <StoreCardReload
@@ -49,7 +49,7 @@ export function StoreCardCta({
               bonusPercent={bonusPercent}
               maxAmount={maxAmount}
               triggerLabel={vanillaizeIfDemo('Load Cove Digital Card')}
-              triggerClassName="w-full justify-center !bg-[#FFD700] !text-[#1A1A1A] px-8 py-3"
+              triggerClassName="w-full justify-center !bg-[var(--brand-gold)] !text-[#1A1A1A] px-8 py-3"
             />
           </div>
         </MemberGate>

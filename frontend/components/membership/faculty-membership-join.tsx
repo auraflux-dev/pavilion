@@ -72,7 +72,7 @@ export function FacultyMembershipJoin({ price }: Props) {
           disabled={!ready}
           onClick={() => setOpen(true)}
           className="inline-flex w-full items-center justify-center gap-2 font-semibold text-white px-5 py-2.5 rounded-lg text-sm transition-opacity hover:opacity-90 disabled:opacity-50"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           Join Faculty · ${price.toFixed(0)}
           <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />

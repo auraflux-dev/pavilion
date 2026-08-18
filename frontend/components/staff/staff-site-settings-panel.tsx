@@ -62,7 +62,7 @@ export function StaffSiteSettingsPanel({
   return (
     <section
       id={sectionId}
-      className={`rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4${sectionId ? ' scroll-mt-28' : ''}`}
+      className={`rounded-xl border border-[var(--border)] bg-white p-5 space-y-4${sectionId ? ' scroll-mt-28' : ''}`}
     >
       <div>
         <h2 className="text-lg font-bold">{title}</h2>
@@ -79,8 +79,8 @@ export function StaffSiteSettingsPanel({
               onClick={() => setActiveGroup(g.id)}
               className={`text-xs font-semibold px-3 py-1.5 rounded-lg border ${
                 (group?.id ?? '') === g.id
-                  ? 'border-[#085508] bg-[#E8F3E8] text-[#085508]'
-                  : 'border-[#E8E4DC] text-[#5A6070]'
+                  ? 'border-[var(--brand-green)] bg-[#E8F3E8] text-[var(--brand-green)]'
+                  : 'border-[var(--border)] text-[#5A6070]'
               }`}
             >
               {g.label}
@@ -99,13 +99,13 @@ export function StaffSiteSettingsPanel({
                   value={settings[k.key] ?? ''}
                   onChange={(e) => setSettings((s) => ({ ...s, [k.key]: e.target.value }))}
                   rows={4}
-                  className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 />
               ) : (
                 <input
                   value={settings[k.key] ?? ''}
                   onChange={(e) => setSettings((s) => ({ ...s, [k.key]: e.target.value }))}
-                  className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 />
               )}
               <Button

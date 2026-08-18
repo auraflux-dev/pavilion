@@ -49,15 +49,15 @@ export function SectionJumpNav({
           <li key={href} className="w-full">
             <Link
               href={href}
-              className={`flex items-center gap-3 rounded-xl border border-[#E8E4DC] px-3 py-2.5 hover:border-[#085508] hover:bg-[#EEF6EE] transition-colors h-full ${
+              className={`flex items-center gap-3 rounded-xl border border-[var(--border)] px-3 py-2.5 hover:border-[var(--brand-green)] hover:bg-[var(--brand-soft)] transition-colors h-full ${
                 variant === 'band' ? 'bg-white' : 'bg-[#FAFCF9]'
               }`}
             >
               <span
                 className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: '#EEF6EE' }}
+                style={{ backgroundColor: 'var(--brand-soft)' }}
               >
-                <Icon className="w-4 h-4" style={{ color: '#085508' }} aria-hidden="true" />
+                <Icon className="w-4 h-4" style={{ color: 'var(--brand-green)' }} aria-hidden="true" />
               </span>
               <span className="min-w-0 text-left">
                 <span className="block text-sm font-bold text-[#1A1A1A] leading-snug">
@@ -75,7 +75,7 @@ export function SectionJumpNav({
   if (variant === 'band') {
     return (
       <nav
-        className={`border-b border-[#E8E4DC] ${className}`}
+        className={`border-b border-[var(--border)] ${className}`}
         style={{ backgroundColor: '#FAFCF9' }}
         aria-label={ariaLabel}
       >
@@ -86,7 +86,7 @@ export function SectionJumpNav({
 
   return (
     <nav
-      className={`rounded-2xl border border-[#E8E4DC] bg-white px-4 py-3 sm:px-5 shadow-sm ${className}`}
+      className={`rounded-2xl border border-[var(--border)] bg-white px-4 py-3 sm:px-5 shadow-sm ${className}`}
       aria-label={ariaLabel}
     >
       {list}

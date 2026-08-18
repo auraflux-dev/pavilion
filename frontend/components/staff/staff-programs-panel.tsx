@@ -433,7 +433,7 @@ export function StaffProgramsPanel() {
   ] as const
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
       <div>
         <h2 className="text-lg font-bold">Programs & sessions</h2>
         <p className="text-xs text-[#5A6070]">
@@ -445,7 +445,7 @@ export function StaffProgramsPanel() {
           <button
             type="button"
             className="text-[11px] underline font-semibold"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
             disabled={busy}
             onClick={() => {
               void (async () => {
@@ -468,12 +468,12 @@ export function StaffProgramsPanel() {
           </button>
         ) : null}
       </div>
-      <div className="inline-flex flex-wrap rounded-lg border border-[#E8E4DC] overflow-hidden text-sm">
+      <div className="inline-flex flex-wrap rounded-lg border border-[var(--border)] overflow-hidden text-sm">
         {tabs.map(([id, label]) => (
           <button
             key={id}
             type="button"
-            className={`px-3 py-1.5 ${tab === id ? 'bg-[#085508] text-white' : 'bg-white'}`}
+            className={`px-3 py-1.5 ${tab === id ? 'bg-[var(--brand-green)] text-white' : 'bg-white'}`}
             onClick={() => setTab(id)}
           >
             {label}
@@ -489,7 +489,7 @@ export function StaffProgramsPanel() {
             </p>
           ) : null}
           {programs.map((p) => (
-            <div key={p.id} className="border border-[#E8E4DC] rounded-lg p-3 space-y-2">
+            <div key={p.id} className="border border-[var(--border)] rounded-lg p-3 space-y-2">
               <div className="flex flex-wrap justify-between gap-2">
                 <div>
                   <p className="text-sm font-bold">{p.name}</p>
@@ -507,7 +507,7 @@ export function StaffProgramsPanel() {
                       <button
                         type="button"
                         className="underline"
-                        style={{ color: '#085508' }}
+                        style={{ color: 'var(--brand-green)' }}
                         onClick={() => {
                           void navigator.clipboard.writeText(p.id)
                           setStatus(`Copied program ID for ${p.name}`)
@@ -550,7 +550,7 @@ export function StaffProgramsPanel() {
                       <span>Paid members only until</span>
                       <input
                         type="datetime-local"
-                        className="border border-[#E8E4DC] rounded px-1.5 py-1 text-xs text-[#1A1A1A]"
+                        className="border border-[var(--border)] rounded px-1.5 py-1 text-xs text-[#1A1A1A]"
                         value={toDatetimeLocalValue(p.memberPriorityUntil)}
                         disabled={busy}
                         onChange={(e) =>
@@ -573,7 +573,7 @@ export function StaffProgramsPanel() {
                   <button
                     type="button"
                     className="underline font-semibold"
-                    style={{ color: '#085508' }}
+                    style={{ color: 'var(--brand-green)' }}
                     onClick={() => {
                       setRosterProgramId(p.id)
                       setTab('roster')
@@ -584,7 +584,7 @@ export function StaffProgramsPanel() {
                   <button
                     type="button"
                     className="underline font-semibold"
-                    style={{ color: '#085508' }}
+                    style={{ color: 'var(--brand-green)' }}
                     onClick={() => {
                       setAttProgramId(p.id)
                       setTab('attendance')
@@ -598,7 +598,7 @@ export function StaffProgramsPanel() {
                 <input
                   defaultValue={p.dayOfWeek}
                   placeholder="Day of week (e.g. Tuesdays)"
-                  className="border border-[#E8E4DC] rounded-lg px-3 py-1.5 text-xs"
+                  className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
                   onBlur={(e) => {
                     if (e.target.value !== p.dayOfWeek) {
                       void patchProgram(p.id, { dayOfWeek: e.target.value })
@@ -608,7 +608,7 @@ export function StaffProgramsPanel() {
                 <input
                   defaultValue={p.classTime}
                   placeholder="Class time (e.g. 3:30 to 4:30 PM)"
-                  className="border border-[#E8E4DC] rounded-lg px-3 py-1.5 text-xs"
+                  className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
                   onBlur={(e) => {
                     if (e.target.value !== p.classTime) {
                       void patchProgram(p.id, { classTime: e.target.value })
@@ -620,7 +620,7 @@ export function StaffProgramsPanel() {
                   min={0}
                   defaultValue={p.durationWeeks || ''}
                   placeholder="Weeks"
-                  className="border border-[#E8E4DC] rounded-lg px-3 py-1.5 text-xs"
+                  className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
                   onBlur={(e) => {
                     const next = Number(e.target.value) || 0
                     if (next !== (p.durationWeeks || 0)) {
@@ -631,7 +631,7 @@ export function StaffProgramsPanel() {
                 <input
                   type="date"
                   defaultValue={p.startDate || ''}
-                  className="border border-[#E8E4DC] rounded-lg px-3 py-1.5 text-xs"
+                  className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
                   onBlur={(e) => {
                     if (e.target.value !== (p.startDate || '')) {
                       void patchProgram(p.id, { startDate: e.target.value })
@@ -641,7 +641,7 @@ export function StaffProgramsPanel() {
                 <input
                   type="date"
                   defaultValue={p.endDate || ''}
-                  className="border border-[#E8E4DC] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
+                  className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
                   onBlur={(e) => {
                     if (e.target.value !== (p.endDate || '')) {
                       void patchProgram(p.id, { endDate: e.target.value })
@@ -665,7 +665,7 @@ export function StaffProgramsPanel() {
 
       {tab === 'sessions' ? (
         <div className="space-y-4">
-          <div className="rounded-lg border border-[#E8E4DC] p-3 space-y-2 bg-[#FAFAF8]">
+          <div className="rounded-lg border border-[var(--border)] p-3 space-y-2 bg-[#FAFAF8]">
             <p className="text-xs font-bold text-[#5A6070]">Add session</p>
             <select
               value={sessionForm.programId}
@@ -678,7 +678,7 @@ export function StaffProgramsPanel() {
                   title: f.title || p?.name || '',
                 }))
               }}
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             >
               <option value="">Program…</option>
               {programs.map((p) => (
@@ -691,39 +691,39 @@ export function StaffProgramsPanel() {
               value={sessionForm.title}
               onChange={(e) => setSessionForm((f) => ({ ...f, title: e.target.value }))}
               placeholder="Session title"
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             />
             <div className="grid sm:grid-cols-2 gap-2">
               <input
                 type="datetime-local"
                 value={sessionForm.startAt}
                 onChange={(e) => setSessionForm((f) => ({ ...f, startAt: e.target.value }))}
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
               <input
                 type="datetime-local"
                 value={sessionForm.endAt}
                 onChange={(e) => setSessionForm((f) => ({ ...f, endAt: e.target.value }))}
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
               <input
                 value={sessionForm.location}
                 onChange={(e) => setSessionForm((f) => ({ ...f, location: e.target.value }))}
                 placeholder="Location"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
               <input
                 value={sessionForm.instructorName}
                 onChange={(e) => setSessionForm((f) => ({ ...f, instructorName: e.target.value }))}
                 placeholder="Instructor"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
             </div>
             <Button
               disabled={busy || !sessionForm.programName || !sessionForm.title}
               onClick={() => void addSession()}
               className="text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               Add session
             </Button>
@@ -751,7 +751,7 @@ export function StaffProgramsPanel() {
           <select
             value={rosterProgramId}
             onChange={(e) => setRosterProgramId(e.target.value)}
-            className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           >
             <option value="">Select program…</option>
             {programs.map((p) => (
@@ -796,7 +796,7 @@ export function StaffProgramsPanel() {
                 e.status === 'RefundRequested' ||
                 e.status === 'TransferRequested'
               return (
-                <div key={e.id} className="border border-[#E8E4DC] rounded-lg p-2 text-sm space-y-1">
+                <div key={e.id} className="border border-[var(--border)] rounded-lg p-2 text-sm space-y-1">
                   <div className="flex flex-wrap justify-between gap-2">
                     <div>
                       <p className="font-semibold">{e.studentName || 'Student'}</p>
@@ -825,7 +825,7 @@ export function StaffProgramsPanel() {
                           type="button"
                           disabled={busy}
                           className="underline font-semibold"
-                          style={{ color: '#085508' }}
+                          style={{ color: 'var(--brand-green)' }}
                           onClick={() => void updateEnrollment(e.id, 'Enrolled')}
                         >
                           Promote
@@ -836,7 +836,7 @@ export function StaffProgramsPanel() {
                           type="button"
                           disabled={busy}
                           className="underline font-semibold"
-                          style={{ color: '#085508' }}
+                          style={{ color: 'var(--brand-green)' }}
                           onClick={() => void refundEnrollment(e.id)}
                         >
                           Approve refund
@@ -847,7 +847,7 @@ export function StaffProgramsPanel() {
                           type="button"
                           disabled={busy}
                           className="underline font-semibold"
-                          style={{ color: '#085508' }}
+                          style={{ color: 'var(--brand-green)' }}
                           onClick={() => {
                             void (async () => {
                               setBusy(true)
@@ -884,7 +884,7 @@ export function StaffProgramsPanel() {
                             type="button"
                             disabled={busy}
                             className="underline font-semibold"
-                            style={{ color: '#085508' }}
+                            style={{ color: 'var(--brand-green)' }}
                             onClick={() => void transferEnrollment(e.id)}
                           >
                             Transfer
@@ -893,7 +893,7 @@ export function StaffProgramsPanel() {
                             type="button"
                             disabled={busy}
                             className="underline font-semibold"
-                            style={{ color: '#085508' }}
+                            style={{ color: 'var(--brand-green)' }}
                             onClick={() => void refundEnrollment(e.id)}
                           >
                             Refund
@@ -924,7 +924,7 @@ export function StaffProgramsPanel() {
                     </button>
                   ) : null}
                   {open ? (
-                    <div className="text-[11px] text-[#5A6070] space-y-0.5 pl-1 border-l-2 border-[#E8E4DC]">
+                    <div className="text-[11px] text-[#5A6070] space-y-0.5 pl-1 border-l-2 border-[var(--border)]">
                       {e.parentPhone ? <p>Parent phone: {e.parentPhone}</p> : null}
                       {e.emergencyContact || e.emergencyPhone ? (
                         <p>
@@ -945,26 +945,26 @@ export function StaffProgramsPanel() {
             ) : null}
           </div>
 
-          <div className="rounded-lg border border-[#E8E4DC] p-3 space-y-2 bg-[#FAFAF8]">
+          <div className="rounded-lg border border-[var(--border)] p-3 space-y-2 bg-[#FAFAF8]">
             <p className="text-xs font-bold text-[#5A6070]">Message this class</p>
             <input
               value={msgSubject}
               onChange={(e) => setMsgSubject(e.target.value)}
               placeholder="Subject"
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             />
             <textarea
               value={msgBody}
               onChange={(e) => setMsgBody(e.target.value)}
               placeholder="Message to enrolled + waitlisted parents (portal inbox)"
               rows={4}
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             />
             <Button
               disabled={busy || !rosterProgramId || !msgSubject.trim() || !msgBody.trim()}
               onClick={() => void messageClass()}
               className="text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               Send to class
             </Button>
@@ -978,7 +978,7 @@ export function StaffProgramsPanel() {
             <select
               value={attProgramId}
               onChange={(e) => setAttProgramId(e.target.value)}
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             >
               <option value="">Select program…</option>
               {programs.map((p) => (
@@ -991,14 +991,14 @@ export function StaffProgramsPanel() {
               type="date"
               value={attDate}
               onChange={(e) => setAttDate(e.target.value)}
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             />
           </div>
           <div className="space-y-2 max-h-96 overflow-auto">
             {attStudents.map((s) => (
               <div
                 key={s.studentId}
-                className="border border-[#E8E4DC] rounded-lg p-2 text-sm flex flex-wrap gap-2 items-center justify-between"
+                className="border border-[var(--border)] rounded-lg p-2 text-sm flex flex-wrap gap-2 items-center justify-between"
               >
                 <div className="min-w-[140px]">
                   <p className="font-semibold">{s.studentName || 'Student'}</p>
@@ -1015,7 +1015,7 @@ export function StaffProgramsPanel() {
                       },
                     }))
                   }
-                  className="border border-[#E8E4DC] rounded-lg px-2 py-1.5 text-xs"
+                  className="border border-[var(--border)] rounded-lg px-2 py-1.5 text-xs"
                 >
                   <option value="">None</option>
                   {ATT_STATUSES.map((st) => (
@@ -1036,7 +1036,7 @@ export function StaffProgramsPanel() {
                     }))
                   }
                   placeholder="Notes"
-                  className="flex-1 min-w-[120px] border border-[#E8E4DC] rounded-lg px-2 py-1.5 text-xs"
+                  className="flex-1 min-w-[120px] border border-[var(--border)] rounded-lg px-2 py-1.5 text-xs"
                 />
               </div>
             ))}
@@ -1048,7 +1048,7 @@ export function StaffProgramsPanel() {
             disabled={busy || !attProgramId || !attStudents.length}
             onClick={() => void saveAttendance()}
             className="text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             Save attendance
           </Button>
@@ -1064,7 +1064,7 @@ export function StaffProgramsPanel() {
             <p className="text-sm text-[#5A6070]">No upcoming sessions yet. Add some under Sessions.</p>
           ) : (
             upcomingSessions.map((s) => (
-              <div key={s.id} className="border border-[#E8E4DC] rounded-lg p-3 text-sm">
+              <div key={s.id} className="border border-[var(--border)] rounded-lg p-3 text-sm">
                 <p className="font-semibold">
                   {s.title} · {s.programName}
                 </p>

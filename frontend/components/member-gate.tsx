@@ -47,7 +47,7 @@ function MemberGateInner({
           className ??
           'inline-flex items-center justify-center w-full font-bold text-sm px-4 py-2.5 rounded-lg text-white transition-opacity hover:opacity-90'
         }
-        style={className ? undefined : { backgroundColor: '#085508', color: '#FFFFFF' }}
+        style={className ? undefined : { backgroundColor: 'var(--brand-green)', color: '#FFFFFF' }}
       >
         {label}
       </a>

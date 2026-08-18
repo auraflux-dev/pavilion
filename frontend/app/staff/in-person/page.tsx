@@ -26,13 +26,13 @@ export default function StaffInPersonCardPage() {
           Printable cheat sheet — no login required to buy · never charge twice.
         </p>
         <div className="flex gap-2 flex-wrap">
-          <Link href="/staff" className="text-xs font-bold underline" style={{ color: '#085508' }}>
+          <Link href="/staff" className="text-xs font-bold underline" style={{ color: 'var(--brand-green)' }}>
             ← Staff
           </Link>
           <Link
             href="/staff?view=help&article=cove-in-person-manual"
             className="text-xs font-bold underline"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
           >
             Full manual
           </Link>
@@ -40,7 +40,7 @@ export default function StaffInPersonCardPage() {
             type="button"
             onClick={() => window.print()}
             className="rounded-lg px-3 py-2 text-xs font-bold text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             Print / PDF
           </button>
@@ -50,9 +50,9 @@ export default function StaffInPersonCardPage() {
       <article className="mx-auto max-w-3xl px-4 pb-10 print:max-w-none print:px-6 print:pb-0">
         <header
           className="rounded-2xl border-2 p-6 print:border-black print:rounded-none"
-          style={{ borderColor: '#085508', backgroundColor: '#EEF6EE' }}
+          style={{ borderColor: 'var(--brand-green)', backgroundColor: 'var(--brand-soft)' }}
         >
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#085508]">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--brand-green)]">
             SHMS PTO · Event / snack window
           </p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight">How to take payment</h1>
@@ -62,68 +62,68 @@ export default function StaffInPersonCardPage() {
           </p>
         </header>
 
-        <section className="mt-4 overflow-hidden rounded-2xl border-2 border-[#085508] bg-white print:border-black print:rounded-none">
+        <section className="mt-4 overflow-hidden rounded-2xl border-2 border-[var(--brand-green)] bg-white print:border-black print:rounded-none">
           <table className="w-full text-left text-sm">
-            <thead className="bg-[#EEF6EE] text-[#085508]">
+            <thead className="bg-[var(--brand-soft)] text-[var(--brand-green)]">
               <tr>
                 <th className="p-3 font-bold">How are they paying?</th>
                 <th className="p-3 font-bold">Do this</th>
               </tr>
             </thead>
             <tbody className="text-[#1A1A1A]">
-              <tr className="border-t border-[#E8E4DC]">
+              <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top font-semibold">Cash · card · Apple Pay · Google Pay</td>
                 <td className="p-3 align-top">
                   <strong>Square Stand</strong> — ring → take payment → stop. Do not also charge in
                   Staff.
                 </td>
               </tr>
-              <tr className="border-t border-[#E8E4DC]">
+              <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top font-semibold">Cove Photos QR</td>
                 <td className="p-3 align-top">
                   <strong>Square Stand</strong> — <strong>Gift card</strong> → scan → stop.
                 </td>
               </tr>
-              <tr className="border-t border-[#E8E4DC]">
+              <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top font-semibold">Cove 6-digit or word passcode</td>
                 <td className="p-3 align-top">
                   <strong>Square Stand</strong> — search Customer → <strong>Card on File</strong> →
                   stop. (Must have loaded Cove in portal.)
                 </td>
               </tr>
-              <tr className="border-t border-[#E8E4DC]">
+              <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top font-semibold">Unable to load cards / no Cove balance</td>
                 <td className="p-3 align-top">
                   Cash or card on Stand, or Staff → <strong>Charge Cove</strong> backup
                 </td>
               </tr>
-              <tr className="border-t border-[#E8E4DC]">
+              <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top font-semibold">Zelle / PayPal / phone Square</td>
                 <td className="p-3 align-top">
                   Staff → <strong>External pay</strong> → log amount (AM / no Stand)
                 </td>
               </tr>
-              <tr className="border-t border-[#E8E4DC]">
+              <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top font-semibold">Member portal / site checkout</td>
                 <td className="p-3 align-top">
                   They pay themselves online → Staff → <strong>Pickup</strong> only · no Stand / no
                   Cove charge
                 </td>
               </tr>
-              <tr className="border-t border-[#E8E4DC]">
+              <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top">Lagoon / Tide · free food ticket</td>
                 <td className="p-3 align-top">
                   Code ends in <strong>9</strong> → hand ticket · no charge (not Reef)
                 </td>
               </tr>
-              <tr className="border-t border-[#E8E4DC]">
+              <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top font-semibold">Reef · pay with Cove</td>
                 <td className="p-3 align-top">
                   Lookup 6-digit / passcode → ring <strong>BTSN food truck ticket</strong> ($6 each) →
                   deduct Cove (QR or Card on File) → then hand ticket
                 </td>
               </tr>
-              <tr className="border-t border-[#E8E4DC]">
+              <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top font-semibold">Guest / non-member · food truck</td>
                 <td className="p-3 align-top">
                   They pay the truck. Do not ring Stand. No PTO ticket.
@@ -136,9 +136,9 @@ export default function StaffInPersonCardPage() {
         <section className="mt-4 grid gap-4 sm:grid-cols-2">
           <div
             className="rounded-2xl border-2 bg-white p-5 print:border-black print:rounded-none"
-            style={{ borderColor: '#0B3D0B' }}
+            style={{ borderColor: 'var(--brand-dark)' }}
           >
-            <h2 className="text-base font-bold text-[#0B3D0B]">Snack window (school days)</h2>
+            <h2 className="text-base font-bold text-[var(--brand-dark)]">Snack window (school days)</h2>
             <p className="mt-2 text-sm text-[#5A6070] leading-relaxed">
               Default: <strong>Stand</strong> for cash, card, Photos QR, and PIN/passcode (Card on
               File). Staff Charge Cove only as backup.
@@ -146,9 +146,9 @@ export default function StaffInPersonCardPage() {
           </div>
           <div
             className="rounded-2xl border-2 bg-white p-5 print:border-black print:rounded-none"
-            style={{ borderColor: '#085508' }}
+            style={{ borderColor: 'var(--brand-green)' }}
           >
-            <h2 className="text-base font-bold text-[#085508]">Events (BTSN Aug 27)</h2>
+            <h2 className="text-base font-bold text-[var(--brand-green)]">Events (BTSN Aug 27)</h2>
             <p className="mt-2 text-sm text-[#5A6070] leading-relaxed">
               Stand owns Cove tenders. Guests pay the food truck. Reef: lookup → $6 Cove ticket
               → hand ticket. Soft-ask Join QR — purchases will outnumber joins.
@@ -173,7 +173,7 @@ export default function StaffInPersonCardPage() {
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-[#085508] bg-white p-4 text-center flex flex-col items-center justify-center gap-2 print:border-black print:rounded-none">
+          <div className="rounded-2xl border border-[var(--brand-green)] bg-white p-4 text-center flex flex-col items-center justify-center gap-2 print:border-black print:rounded-none">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={qrSrc(joinUrl, 240)}
@@ -182,7 +182,7 @@ export default function StaffInPersonCardPage() {
               height={240}
               className="w-[200px] h-[200px] print:w-[180px] print:h-[180px]"
             />
-            <p className="text-sm font-bold text-[#085508]">Optional · join free</p>
+            <p className="text-sm font-bold text-[var(--brand-green)]">Optional · join free</p>
             <p className="text-[11px] text-[#5A6070] px-1">After the sale · not a gate</p>
             <p className="text-[10px] text-[#5A6070] break-all px-1">{joinUrl}</p>
           </div>

@@ -34,9 +34,9 @@ export function ProgramsFilter({ programs }: ProgramsFilterProps) {
               className={`text-sm font-semibold px-4 py-2 rounded-full border transition-colors ${
                 activeCategory === cat
                   ? 'text-white border-transparent'
-                  : 'bg-white text-[#5A6070] border-[#E8E4DC] hover:border-[#085508] hover:text-[#085508]'
+                  : 'bg-white text-[#5A6070] border-[var(--border)] hover:border-[var(--brand-green)] hover:text-[var(--brand-green)]'
               }`}
-              style={activeCategory === cat ? { backgroundColor: '#085508', borderColor: '#085508' } : {}}
+              style={activeCategory === cat ? { backgroundColor: 'var(--brand-green)', borderColor: 'var(--brand-green)' } : {}}
               aria-pressed={activeCategory === cat}
             >
               {cat}

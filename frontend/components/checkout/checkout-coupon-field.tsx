@@ -31,7 +31,7 @@ export function CheckoutCouponField({
         }}
         placeholder="Optional"
         autoComplete="off"
-        className="mt-1 w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-mono font-normal tracking-wide uppercase"
+        className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-mono font-normal tracking-wide uppercase"
       />
       <span className="mt-1 block text-[11px] font-normal text-[#5A6070]">
         {vanillaizeIfDemo(

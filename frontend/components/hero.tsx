@@ -41,7 +41,7 @@ export async function Hero() {
   return (
     <section
       className="relative overflow-hidden pt-14 pb-20 md:pt-20 md:pb-24"
-      style={{ backgroundColor: '#085508' }}
+      style={{ backgroundColor: 'var(--brand-green)' }}
       aria-label="Welcome banner"
     >
       <div
@@ -66,7 +66,7 @@ export async function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
           <div className="lg:col-span-6 xl:col-span-7">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 mb-6">
-              <span className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse" aria-hidden="true" />
+              <span className="w-2 h-2 rounded-full bg-[var(--brand-gold)] animate-pulse" aria-hidden="true" />
               <span className="text-white/90 text-xs font-semibold tracking-wider uppercase">
                 {content.eyebrow}
               </span>
@@ -84,7 +84,7 @@ export async function Hero() {
               <Button
                 size="lg"
                 className="text-white font-bold px-6 sm:px-8 shadow-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#064206' }}
+                style={{ backgroundColor: 'var(--brand-dark)' }}
                 asChild
               >
                 <a href={content.ctaHref || '/membership'}>
@@ -96,7 +96,7 @@ export async function Hero() {
               <Button
                 size="lg"
                 variant="outline"
-                className="font-bold px-6 sm:px-8 border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#085508] transition-colors"
+                className="font-bold px-6 sm:px-8 border-2 border-white text-white bg-transparent hover:bg-white hover:text-[var(--brand-green)] transition-colors"
                 asChild
               >
                 <a href="/cove">
@@ -108,7 +108,7 @@ export async function Hero() {
               <Button
                 size="lg"
                 className="text-white font-bold px-6 sm:px-8 shadow-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#064206' }}
+                style={{ backgroundColor: 'var(--brand-dark)' }}
                 asChild
               >
                 <a href="/volunteer">
@@ -165,7 +165,7 @@ export async function Hero() {
           preserveAspectRatio="none"
           className="w-full h-8 sm:h-12"
         >
-          <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#F5F0E8" />
+          <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="var(--brand-warm)" />
         </svg>
       </div>
     </section>

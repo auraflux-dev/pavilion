@@ -156,11 +156,11 @@ export default async function FundraisingPage() {
       <main id="main-content" className="flex-1">
 
         {/* Hero. overall progress */}
-        <section className="py-16 md:py-24" style={{ backgroundColor: '#085508' }}>
+        <section className="py-16 md:py-24" style={{ backgroundColor: 'var(--brand-green)' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div
               className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase px-3 py-1.5 rounded-full mb-6"
-              style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: '#FFD700' }}
+              style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'var(--brand-gold)' }}
             >
               <TrendingUp className="w-3.5 h-3.5" aria-hidden="true" />
               {page.eyebrow}
@@ -185,13 +185,13 @@ export default async function FundraisingPage() {
                 <div className="pb-1 text-white/40 text-lg">of</div>
                 <div>
                   <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-0.5">Annual Goal</p>
-                  <p className="text-4xl font-bold" style={{ color: '#FFD700' }}>{fmtDollars(ANNUAL_GOAL)}</p>
+                  <p className="text-4xl font-bold" style={{ color: 'var(--brand-gold)' }}>{fmtDollars(ANNUAL_GOAL)}</p>
                 </div>
               </div>
               <div className="w-full bg-white/20 rounded-full h-3 mb-2">
                 <div
                   className="h-3 rounded-full transition-all duration-700"
-                  style={{ width: `${overallPct}%`, backgroundColor: '#FFD700' }}
+                  style={{ width: `${overallPct}%`, backgroundColor: 'var(--brand-gold)' }}
                   role="progressbar"
                   aria-valuenow={overallPct}
                   aria-valuemin={0}
@@ -219,12 +219,12 @@ export default async function FundraisingPage() {
         />
 
         {/* Initiative cards */}
-        <section id="initiatives" className="scroll-mt-28 py-14 md:py-20" style={{ backgroundColor: '#F5F0E8' }}>
+        <section id="initiatives" className="scroll-mt-28 py-14 md:py-20" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <div
                 className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
-                style={{ backgroundColor: '#085508', color: 'white' }}
+                style={{ backgroundColor: 'var(--brand-green)', color: 'white' }}
               >
                 By Initiative
               </div>
@@ -249,14 +249,14 @@ export default async function FundraisingPage() {
                 return (
                   <article
                     key={initiative.id}
-                    className="bg-white rounded-2xl p-6 shadow-sm border border-[#E8E4DC] flex flex-col hover:shadow-md transition-shadow duration-300"
+                    className="bg-white rounded-2xl p-6 shadow-sm border border-[var(--border)] flex flex-col hover:shadow-md transition-shadow duration-300"
                   >
                     <div className="mb-4">
                       <div
                         className="w-11 h-11 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: '#EEF6EE' }}
+                        style={{ backgroundColor: 'var(--brand-soft)' }}
                       >
-                        <Icon className="w-5 h-5" style={{ color: '#085508' }} aria-hidden="true" />
+                        <Icon className="w-5 h-5" style={{ color: 'var(--brand-green)' }} aria-hidden="true" />
                       </div>
                     </div>
 
@@ -267,7 +267,7 @@ export default async function FundraisingPage() {
 
                     {/* Raised only. per-area goals stay in Staff settings (not public) */}
                     <div className="mb-4">
-                      <p className="text-sm font-semibold" style={{ color: '#085508' }}>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--brand-green)' }}>
                         {raisedDisplay}
                         <span className="text-[#5A6070] font-normal"> raised</span>
                       </p>
@@ -282,7 +282,7 @@ export default async function FundraisingPage() {
                     <a
                       href={initiative.href}
                       className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-lg font-semibold text-sm text-white transition-opacity hover:opacity-90"
-                      style={{ backgroundColor: '#085508' }}
+                      style={{ backgroundColor: 'var(--brand-green)' }}
                     >
                       {initiative.cta}
                       <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -295,12 +295,12 @@ export default async function FundraisingPage() {
         </section>
 
         {/* Where funds go */}
-        <section id="allocations" className="scroll-mt-28 py-14 md:py-20 bg-white border-t border-[#E8E4DC]">
+        <section id="allocations" className="scroll-mt-28 py-14 md:py-20 bg-white border-t border-[var(--border)]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
               <div
                 className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
-                style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-soft)', color: 'var(--brand-green)' }}
               >
                 Transparency
               </div>
@@ -319,15 +319,15 @@ export default async function FundraisingPage() {
                 <div key={item.label}>
                   <div className="flex justify-between text-sm font-semibold mb-1.5">
                     <span style={{ color: '#1A1A1A' }}>{item.label}</span>
-                    <span style={{ color: '#085508' }}>
+                    <span style={{ color: 'var(--brand-green)' }}>
                       {item.amount}{' '}
                       <span className="text-[#5A6070] font-normal">({item.pct}%)</span>
                     </span>
                   </div>
-                  <div className="w-full bg-[#E8E4DC] rounded-full h-3">
+                  <div className="w-full bg-[var(--border)] rounded-full h-3">
                     <div
                       className="h-3 rounded-full"
-                      style={{ width: `${item.pct}%`, backgroundColor: '#085508' }}
+                      style={{ width: `${item.pct}%`, backgroundColor: 'var(--brand-green)' }}
                       role="progressbar"
                       aria-valuenow={item.pct}
                       aria-valuemin={0}
@@ -348,14 +348,14 @@ export default async function FundraisingPage() {
         {/* Sponsorships. deep link: /fundraising#sponsorship */}
         <section
           id="sponsorship"
-          className="scroll-mt-28 py-14 md:py-20 border-t border-[#E8E4DC] bg-white"
+          className="scroll-mt-28 py-14 md:py-20 border-t border-[var(--border)] bg-white"
           aria-labelledby="sponsorship-heading"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
               <div
                 className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
-                style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-soft)', color: 'var(--brand-green)' }}
               >
                 Community Partners
               </div>
@@ -374,9 +374,9 @@ export default async function FundraisingPage() {
                 {sponsors.map((s) => (
                   <li
                     key={s.id}
-                    className="rounded-2xl border border-[#E8E4DC] bg-[#FAFCF9] p-5 flex flex-col"
+                    className="rounded-2xl border border-[var(--border)] bg-[#FAFCF9] p-5 flex flex-col"
                   >
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#085508] mb-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)] mb-2">
                       {s.tier}
                     </p>
                     <h3 className="text-lg font-bold text-[#1A1A1A]">{s.name}</h3>
@@ -391,7 +391,7 @@ export default async function FundraisingPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="mt-4 text-sm font-semibold inline-flex items-center gap-1"
-                        style={{ color: '#085508' }}
+                        style={{ color: 'var(--brand-green)' }}
                       >
                         Visit site
                         <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -417,7 +417,7 @@ export default async function FundraisingPage() {
         </section>
 
         {/* How to contribute */}
-        <section id="contribute" className="scroll-mt-28 py-16" style={{ backgroundColor: '#F5F0E8' }}>
+        <section id="contribute" className="scroll-mt-28 py-16" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold" style={{ color: '#1A1A1A' }}>
@@ -435,19 +435,19 @@ export default async function FundraisingPage() {
                   <a
                     key={item.id}
                     href={item.href}
-                    className="bg-white rounded-2xl p-6 border border-[#E8E4DC] flex flex-col hover:shadow-md transition-shadow duration-300 group"
+                    className="bg-white rounded-2xl p-6 border border-[var(--border)] flex flex-col hover:shadow-md transition-shadow duration-300 group"
                   >
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                      style={{ backgroundColor: '#EEF6EE' }}
+                      style={{ backgroundColor: 'var(--brand-soft)' }}
                     >
-                      <Icon className="w-5 h-5" style={{ color: '#085508' }} aria-hidden="true" />
+                      <Icon className="w-5 h-5" style={{ color: 'var(--brand-green)' }} aria-hidden="true" />
                     </div>
                     <h3 className="font-bold text-[#1A1A1A] mb-2">{item.title}</h3>
                     <p className="text-sm text-[#5A6070] leading-relaxed flex-1 mb-4">{item.description}</p>
                     <span
                       className="inline-flex items-center gap-1 text-sm font-semibold group-hover:gap-2 transition-all"
-                      style={{ color: '#085508' }}
+                      style={{ color: 'var(--brand-green)' }}
                     >
                       {item.ctaLabel}
                       <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />

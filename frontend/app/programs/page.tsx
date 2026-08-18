@@ -56,7 +56,7 @@ export default async function ProgramsPage() {
         <section
           id="programs-list"
           className="scroll-mt-28 py-16 md:py-24"
-          style={{ backgroundColor: '#F5F0E8' }}
+          style={{ backgroundColor: 'var(--brand-warm)' }}
           aria-labelledby="programs-list-heading"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -89,7 +89,7 @@ export default async function ProgramsPage() {
         {/* Questions → VP of Programs */}
         <section
           id="programs-contact"
-          className="scroll-mt-28 border-t border-[#E8E4DC] bg-white py-14 md:py-20"
+          className="scroll-mt-28 border-t border-[var(--border)] bg-white py-14 md:py-20"
           aria-labelledby="programs-contact-heading"
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

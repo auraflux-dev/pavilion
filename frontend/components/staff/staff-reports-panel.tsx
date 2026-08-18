@@ -123,14 +123,14 @@ export function StaffReportsPanel({
 
   if (!focuses.length) {
     return (
-      <section className="rounded-xl border border-[#E8E4DC] bg-white p-5">
+      <section className="rounded-xl border border-[var(--border)] bg-white p-5">
         <p className="text-sm text-[#5A6070]">No report areas for your role.</p>
       </section>
     )
   }
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
       <div>
         <h2 className="text-lg font-bold">Reports</h2>
         <p className="text-xs text-[#5A6070]">
@@ -164,8 +164,8 @@ export function StaffReportsPanel({
             onClick={() => setFocus(f.id)}
             className={`px-3 py-1.5 text-sm rounded-lg border ${
               focus === f.id
-                ? 'bg-[#085508] text-white border-[#085508]'
-                : 'bg-white border-[#E8E4DC] text-[#5A6070]'
+                ? 'bg-[var(--brand-green)] text-white border-[var(--brand-green)]'
+                : 'bg-white border-[var(--border)] text-[#5A6070]'
             }`}
           >
             {f.label}
@@ -180,7 +180,7 @@ export function StaffReportsPanel({
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            className="block border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="block border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
         </label>
         <label className="text-xs text-[#5A6070] space-y-1">
@@ -189,7 +189,7 @@ export function StaffReportsPanel({
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className="block border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="block border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
         </label>
         <Button
@@ -206,13 +206,13 @@ export function StaffReportsPanel({
           disabled={!sorted.length}
           onClick={exportCsv}
           className="text-white text-sm"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           Export CSV
         </Button>
       </div>
 
-      <div className="border border-[#E8E4DC] rounded-lg overflow-auto max-h-[28rem]">
+      <div className="border border-[var(--border)] rounded-lg overflow-auto max-h-[28rem]">
         <table className="min-w-full text-sm">
           <thead className="sticky top-0 bg-[#FAFAF8]">
             <tr>

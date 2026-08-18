@@ -23,7 +23,7 @@ function ReviewJoinInner() {
   if (!isPublicDemoInstance()) {
     return (
       <main className="max-w-lg mx-auto px-4 py-16">
-        <h1 className="text-2xl font-bold mb-3" style={{ color: '#085508' }}>
+        <h1 className="text-2xl font-bold mb-3" style={{ color: 'var(--brand-green)' }}>
           Review join is on the demo site
         </h1>
         <p className="text-sm text-[#5A6070]">
@@ -64,7 +64,7 @@ function ReviewJoinInner() {
 
   return (
     <main className="max-w-lg mx-auto px-4 py-12 md:py-16">
-      <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#085508' }}>
+      <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--brand-green)' }}>
         PTO operating system demo
       </p>
       <h1 className="text-3xl font-bold mb-3" style={{ color: '#1A1A1A' }}>
@@ -148,7 +148,7 @@ function ReviewJoinInner() {
       </form>
       <p className="text-xs text-[#5A6070] mt-6">
         You can browse the public site without joining.{' '}
-        <a href="/" className="underline" style={{ color: '#085508' }}>
+        <a href="/" className="underline" style={{ color: 'var(--brand-green)' }}>
           View {DEMO_BRAND.school}
         </a>
       </p>

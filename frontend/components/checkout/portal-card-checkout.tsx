@@ -303,14 +303,14 @@ export function PortalCardCheckout({
       aria-modal="true"
       aria-labelledby={`${containerId}-title`}
     >
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl border border-[#E8E4DC] p-5 space-y-4">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl border border-[var(--border)] p-5 space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p id={`${containerId}-title`} className="text-base font-bold text-[#1A1A1A]">
               {title}
             </p>
             {subtitle ? <p className="text-xs text-[#5A6070] mt-1">{subtitle}</p> : null}
-            <p className="text-sm font-bold mt-2" style={{ color: '#085508' }}>
+            <p className="text-sm font-bold mt-2" style={{ color: 'var(--brand-green)' }}>
               ${amount.toFixed(2)}
             </p>
           </div>
@@ -334,7 +334,7 @@ export function PortalCardCheckout({
                 autoComplete="given-name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm text-[#1A1A1A]"
+                className="mt-1 w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[#1A1A1A]"
               />
             </label>
             <label className="block text-xs text-[#5A6070]">
@@ -345,7 +345,7 @@ export function PortalCardCheckout({
                 autoComplete="family-name"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm text-[#1A1A1A]"
+                className="mt-1 w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[#1A1A1A]"
               />
             </label>
             <p className="col-span-2 text-[11px] text-[#5A6070]">
@@ -369,7 +369,7 @@ export function PortalCardCheckout({
 
         {!useStored ? (
           <>
-            <div id={containerId} className="min-h-12 rounded-lg border border-[#E8E4DC] bg-white px-2 py-1" />
+            <div id={containerId} className="min-h-12 rounded-lg border border-[var(--border)] bg-white px-2 py-1" />
             <label className="flex items-start gap-2 text-xs text-[#5A6070]">
               <input
                 type="checkbox"
@@ -426,7 +426,7 @@ export function PortalCardCheckout({
             !nameReady
           }
           className="w-full text-white font-bold"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           {busy ? (
             <Loader2 className="w-4 h-4 animate-spin" />

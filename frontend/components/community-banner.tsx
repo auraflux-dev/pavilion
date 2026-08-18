@@ -56,7 +56,7 @@ export async function CommunityBanner() {
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(90deg, #F5F0E8 0%, rgba(245,240,232,0.55) 28%, rgba(245,240,232,0.2) 55%, transparent 100%), linear-gradient(0deg, rgba(8,85,8,0.25), rgba(8,85,8,0.15))',
+            'linear-gradient(90deg, var(--brand-warm) 0%, rgba(245,240,232,0.55) 28%, rgba(245,240,232,0.2) 55%, transparent 100%), linear-gradient(0deg, rgba(8,85,8,0.25), rgba(8,85,8,0.15))',
         }}
         aria-hidden="true"
       />

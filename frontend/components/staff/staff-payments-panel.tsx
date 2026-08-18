@@ -59,7 +59,7 @@ export function StaffPaymentsPanel() {
   }
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+    <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
       <div className="flex flex-wrap justify-between gap-2">
         <div>
           <h2 className="text-lg font-bold">Payments</h2>
@@ -85,7 +85,7 @@ export function StaffPaymentsPanel() {
 
       <div className="space-y-3">
         {payments.map((p) => (
-          <div key={p.id} className="border border-[#E8E4DC] rounded-lg p-3 space-y-2">
+          <div key={p.id} className="border border-[var(--border)] rounded-lg p-3 space-y-2">
             <div className="flex flex-wrap justify-between gap-2">
               <div>
                 <p className="text-sm font-bold">
@@ -111,7 +111,7 @@ export function StaffPaymentsPanel() {
                       size="sm"
                       disabled={busy}
                       className="text-white"
-                      style={{ backgroundColor: '#085508' }}
+                      style={{ backgroundColor: 'var(--brand-green)' }}
                       onClick={() => void act(p.id, 'retryLoad')}
                     >
                       Retry gift-card load

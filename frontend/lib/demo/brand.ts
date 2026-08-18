@@ -1,8 +1,8 @@
 import { isDemoInstance } from '@/lib/demo/instance'
 
 export const DEMO_BRAND = {
-  school: 'Riverside Middle School',
-  pto: 'Riverside Middle School PTO',
+  school: 'Riverside Elementary School',
+  pto: 'Riverside Elementary PTO',
   short: 'Riverside PTO',
   mascot: 'Hawk',
   mascotPlural: 'Hawks',

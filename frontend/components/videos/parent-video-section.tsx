@@ -5,6 +5,7 @@ import {
   getParentVideo,
   type ParentVideoId,
 } from '@/lib/videos/parent-videos'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 interface ParentVideoSectionProps {
   placement?: ParentVideo['placements'][number]
@@ -27,8 +28,9 @@ export function ParentVideoSection({
   body,
   id = 'videos',
   className = '',
-  background = '#F5F0E8',
+  background = 'var(--brand-warm)',
 }: ParentVideoSectionProps) {
+  if (isDemoInstance()) return null
   const videos = videoId
     ? ([getParentVideo(videoId)].filter(Boolean) as ParentVideo[])
     : placement
@@ -52,7 +54,7 @@ export function ParentVideoSection({
         <div className={`mb-8 ${single ? 'max-w-3xl' : 'max-w-2xl'}`}>
           <div
             className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             {eyebrow}
           </div>

@@ -272,7 +272,7 @@ export function StaffCoveProductsPanel() {
   return (
     <section
       id="cove-products"
-      className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-5"
+      className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -295,14 +295,14 @@ export function StaffCoveProductsPanel() {
         </Button>
       </div>
 
-      <div className="rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] p-4 space-y-3">
+      <div className="rounded-xl border border-[var(--brand-line)] bg-[#FAFCF9] p-4 space-y-3">
         <p className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Add product</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
           <input
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             placeholder="Name (e.g. Takis)"
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm sm:col-span-2"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm sm:col-span-2"
           />
           {!form.useVariants ? (
             <>
@@ -311,20 +311,20 @@ export function StaffCoveProductsPanel() {
                 onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
                 placeholder="Price $"
                 inputMode="decimal"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
               <input
                 value={form.quantity}
                 onChange={(e) => setForm((f) => ({ ...f, quantity: e.target.value }))}
                 placeholder="Qty on hand"
                 inputMode="numeric"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
               <input
                 value={form.sku}
                 onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
                 placeholder="SKU (auto from name)"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-mono"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-mono"
                 title="Leave blank — we generate from the product name"
               />
             </>
@@ -354,12 +354,12 @@ export function StaffCoveProductsPanel() {
         </label>
 
         {form.useVariants ? (
-          <div className="space-y-2 rounded-lg border border-[#E8E4DC] bg-white p-3">
+          <div className="space-y-2 rounded-lg border border-[var(--border)] bg-white p-3">
             <input
               value={form.optionName}
               onChange={(e) => setForm((f) => ({ ...f, optionName: e.target.value }))}
               placeholder="Option name (Flavor, Size…)"
-              className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm w-full max-w-xs"
+              className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm w-full max-w-xs"
             />
             {form.variants.map((v, idx) => (
               <div key={idx} className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -374,7 +374,7 @@ export function StaffCoveProductsPanel() {
                     }))
                   }
                   placeholder="Label (Fuego)"
-                  className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm"
+                  className="border border-[var(--border)] rounded px-2 py-1.5 text-sm"
                 />
                 <input
                   value={v.price}
@@ -388,7 +388,7 @@ export function StaffCoveProductsPanel() {
                   }
                   placeholder="Price"
                   inputMode="decimal"
-                  className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm"
+                  className="border border-[var(--border)] rounded px-2 py-1.5 text-sm"
                 />
                 <input
                   value={v.quantity}
@@ -402,7 +402,7 @@ export function StaffCoveProductsPanel() {
                   }
                   placeholder="Qty"
                   inputMode="numeric"
-                  className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm"
+                  className="border border-[var(--border)] rounded px-2 py-1.5 text-sm"
                 />
                 <input
                   value={v.sku}
@@ -415,7 +415,7 @@ export function StaffCoveProductsPanel() {
                     }))
                   }
                   placeholder="SKU (auto)"
-                  className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm font-mono"
+                  className="border border-[var(--border)] rounded px-2 py-1.5 text-sm font-mono"
                 />
                 <button
                   type="button"
@@ -465,7 +465,7 @@ export function StaffCoveProductsPanel() {
           }
           onClick={() => void createProduct()}
           className="text-white"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4 mr-1" />}
           Add product
@@ -482,7 +482,7 @@ export function StaffCoveProductsPanel() {
               className="rounded-xl border border-[#F0EDE8] p-4 space-y-3"
             >
               <div className="flex flex-wrap gap-3 items-start">
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-[#F5F3EF] border border-[#E8E4DC] shrink-0">
+                <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-[#F5F3EF] border border-[var(--border)] shrink-0">
                   {p.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={p.image} alt="" className="w-full h-full object-cover" />
@@ -493,7 +493,7 @@ export function StaffCoveProductsPanel() {
                   )}
                 </div>
                 <label className="text-xs cursor-pointer">
-                  <span className="inline-flex items-center gap-1 rounded-lg border border-[#E8E4DC] px-2 py-1.5 hover:bg-[#FAFCF9]">
+                  <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-2 py-1.5 hover:bg-[#FAFCF9]">
                     {uploadingId === p.id ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
@@ -521,7 +521,7 @@ export function StaffCoveProductsPanel() {
                       [p.id]: { ...e, name: ev.target.value },
                     }))
                   }
-                  className="flex-1 min-w-[10rem] border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm font-semibold"
+                  className="flex-1 min-w-[10rem] border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-semibold"
                 />
                 <label className="flex items-center gap-2 text-xs whitespace-nowrap">
                   <input
@@ -588,7 +588,7 @@ export function StaffCoveProductsPanel() {
                       }))
                     }
                     placeholder="Price"
-                    className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm"
+                    className="border border-[var(--border)] rounded px-2 py-1.5 text-sm"
                   />
                   <input
                     value={e.quantity}
@@ -599,7 +599,7 @@ export function StaffCoveProductsPanel() {
                       }))
                     }
                     placeholder="Qty"
-                    className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm"
+                    className="border border-[var(--border)] rounded px-2 py-1.5 text-sm"
                   />
                   <input
                     value={e.sku}
@@ -610,7 +610,7 @@ export function StaffCoveProductsPanel() {
                       }))
                     }
                     placeholder="SKU (auto)"
-                    className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm font-mono"
+                    className="border border-[var(--border)] rounded px-2 py-1.5 text-sm font-mono"
                   />
                 </div>
               ) : (
@@ -624,7 +624,7 @@ export function StaffCoveProductsPanel() {
                       }))
                     }
                     placeholder="Option name"
-                    className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm max-w-xs"
+                    className="border border-[var(--border)] rounded px-2 py-1.5 text-sm max-w-xs"
                   />
                   {e.variants.map((v, idx) => (
                     <div key={v.id || idx} className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -642,7 +642,7 @@ export function StaffCoveProductsPanel() {
                           }))
                         }
                         placeholder="Flavor / size"
-                        className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm"
+                        className="border border-[var(--border)] rounded px-2 py-1.5 text-sm"
                       />
                       <input
                         value={v.price}
@@ -658,7 +658,7 @@ export function StaffCoveProductsPanel() {
                           }))
                         }
                         placeholder="Price"
-                        className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm"
+                        className="border border-[var(--border)] rounded px-2 py-1.5 text-sm"
                       />
                       <input
                         value={v.quantity}
@@ -674,7 +674,7 @@ export function StaffCoveProductsPanel() {
                           }))
                         }
                         placeholder="Qty"
-                        className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm"
+                        className="border border-[var(--border)] rounded px-2 py-1.5 text-sm"
                       />
                       <input
                         value={v.sku}
@@ -690,7 +690,7 @@ export function StaffCoveProductsPanel() {
                           }))
                         }
                         placeholder="SKU (auto)"
-                        className="border border-[#E8E4DC] rounded px-2 py-1.5 text-sm font-mono"
+                        className="border border-[var(--border)] rounded px-2 py-1.5 text-sm font-mono"
                       />
                       <button
                         type="button"

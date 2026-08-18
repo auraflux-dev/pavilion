@@ -23,10 +23,10 @@ export function PortalSurveys() {
     return (
       <section
         id="surveys"
-        className="mt-6 scroll-mt-28 rounded-2xl border border-[#E8E4DC] bg-white p-5 shadow-sm"
+        className="mt-6 scroll-mt-28 rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm"
       >
         <div className="flex items-center gap-2 mb-2">
-          <ClipboardList className="w-5 h-5" style={{ color: '#085508' }} />
+          <ClipboardList className="w-5 h-5" style={{ color: 'var(--brand-green)' }} />
           <h2 className="font-bold text-[#1A1A1A]">Surveys for you</h2>
         </div>
         <p className="text-xs text-[#5A6070]">
@@ -39,10 +39,10 @@ export function PortalSurveys() {
   return (
     <section
       id="surveys"
-      className="mt-6 scroll-mt-28 rounded-2xl border border-[#E8E4DC] bg-white p-5 shadow-sm"
+      className="mt-6 scroll-mt-28 rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm"
     >
       <div className="flex items-center gap-2 mb-3">
-        <ClipboardList className="w-5 h-5" style={{ color: '#085508' }} />
+        <ClipboardList className="w-5 h-5" style={{ color: 'var(--brand-green)' }} />
         <h2 className="font-bold text-[#1A1A1A]">Surveys for you</h2>
       </div>
       <p className="text-xs text-[#5A6070] mb-4">
@@ -53,7 +53,7 @@ export function PortalSurveys() {
           <li key={s.slug}>
             <a
               href={`/survey/${s.slug}?from=portal`}
-              className="flex items-center justify-between gap-3 rounded-xl border border-[#E8E4DC] px-4 py-3 hover:border-[#085508]/40 hover:bg-[#FAFCF9] transition-colors"
+              className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] px-4 py-3 hover:border-[var(--brand-green)]/40 hover:bg-[#FAFCF9] transition-colors"
             >
               <div>
                 <p className="text-sm font-bold text-[#1A1A1A]">{s.title}</p>
@@ -61,7 +61,7 @@ export function PortalSurveys() {
                   <p className="text-xs text-[#5A6070] mt-0.5 line-clamp-2">{s.description}</p>
                 ) : null}
               </div>
-              <ArrowRight className="w-4 h-4 shrink-0 text-[#085508]" />
+              <ArrowRight className="w-4 h-4 shrink-0 text-[var(--brand-green)]" />
             </a>
           </li>
         ))}

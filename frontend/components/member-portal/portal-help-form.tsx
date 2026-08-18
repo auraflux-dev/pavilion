@@ -53,10 +53,10 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
   if (status === 'success') {
     return (
       <div
-        className={`rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] ${compact ? 'px-4 py-3' : 'p-6'} text-center sm:text-left`}
+        className={`rounded-xl border border-[var(--brand-line)] bg-[#FAFCF9] ${compact ? 'px-4 py-3' : 'p-6'} text-center sm:text-left`}
       >
         <div className="flex flex-col sm:flex-row sm:items-start gap-3">
-          <CheckCircle2 className="w-6 h-6 shrink-0 mx-auto sm:mx-0" style={{ color: '#085508' }} />
+          <CheckCircle2 className="w-6 h-6 shrink-0 mx-auto sm:mx-0" style={{ color: 'var(--brand-green)' }} />
           <div>
             <p className="text-sm font-bold text-[#1A1A1A]">Message sent</p>
             <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
@@ -81,7 +81,7 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
   return (
     <form
       onSubmit={(e) => void handleSubmit(e)}
-      className={`rounded-xl border border-[#E8E4DC] bg-white space-y-4 ${compact ? 'p-4' : 'p-5 sm:p-6'}`}
+      className={`rounded-xl border border-[var(--border)] bg-white space-y-4 ${compact ? 'p-4' : 'p-5 sm:p-6'}`}
     >
       <div>
         <h3 className="text-sm font-bold text-[#1A1A1A]">Ask the PTO</h3>
@@ -93,7 +93,7 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
       <label className="block text-sm">
         <span className="font-medium text-[#1A1A1A]">Topic</span>
         <select
-          className="mt-1.5 w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm"
+          className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm"
           value={topic}
           onChange={(e) => setTopic(e.target.value as (typeof TOPICS)[number])}
         >
@@ -108,7 +108,7 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
       <label className="block text-sm">
         <span className="font-medium text-[#1A1A1A]">Your question</span>
         <textarea
-          className="mt-1.5 w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm min-h-[7rem]"
+          className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm min-h-[7rem]"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           required
@@ -123,7 +123,7 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
         type="submit"
         disabled={status === 'loading' || message.trim().length < 10}
         className="text-white"
-        style={{ backgroundColor: '#085508' }}
+        style={{ backgroundColor: 'var(--brand-green)' }}
       >
         {status === 'loading' ? (
           <>

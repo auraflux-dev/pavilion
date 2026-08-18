@@ -66,7 +66,7 @@ export function DonateBlock({
     <section
       id={id}
       className={`scroll-mt-28 ${compact ? 'py-12 md:py-16' : 'py-14 md:py-20'}`}
-      style={{ backgroundColor: compact ? '#EEF6EE' : '#085508' }}
+      style={{ backgroundColor: compact ? 'var(--brand-soft)' : 'var(--brand-green)' }}
     >
       <div className={`max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 ${compact ? '' : 'text-center'}`}>
         <div
@@ -75,7 +75,7 @@ export function DonateBlock({
           }`}
           style={
             compact
-              ? { backgroundColor: '#085508', color: '#FFFFFF' }
+              ? { backgroundColor: 'var(--brand-green)', color: '#FFFFFF' }
               : { backgroundColor: 'rgba(255,255,255,0.15)', color: '#FFFFFF' }
           }
         >
@@ -94,11 +94,11 @@ export function DonateBlock({
 
         <div
           className={`rounded-2xl p-6 md:p-8 border text-left ${
-            compact ? 'bg-white border-[#E8E4DC]' : 'bg-white border-transparent shadow-lg'
+            compact ? 'bg-white border-[var(--border)]' : 'bg-white border-transparent shadow-lg'
           }`}
         >
           <div className="flex items-center gap-2 mb-4">
-            <Heart className="w-5 h-5" style={{ color: '#085508' }} aria-hidden />
+            <Heart className="w-5 h-5" style={{ color: 'var(--brand-green)' }} aria-hidden />
             <p className="text-sm font-bold text-[#1A1A1A]">Choose an amount</p>
           </div>
 
@@ -118,8 +118,8 @@ export function DonateBlock({
                   className="px-4 py-2 rounded-lg text-sm font-bold border transition-colors"
                   style={
                     selected
-                      ? { backgroundColor: '#085508', color: '#FFFFFF', borderColor: '#085508' }
-                      : { backgroundColor: '#F5F0E8', color: '#1A1A1A', borderColor: '#E8E4DC' }
+                      ? { backgroundColor: 'var(--brand-green)', color: '#FFFFFF', borderColor: 'var(--brand-green)' }
+                      : { backgroundColor: 'var(--brand-warm)', color: '#1A1A1A', borderColor: 'var(--border)' }
                   }
                 >
                   ${preset}
@@ -135,8 +135,8 @@ export function DonateBlock({
               className="px-4 py-2 rounded-lg text-sm font-bold border transition-colors"
               style={
                 other
-                  ? { backgroundColor: '#085508', color: '#FFFFFF', borderColor: '#085508' }
-                  : { backgroundColor: '#F5F0E8', color: '#1A1A1A', borderColor: '#E8E4DC' }
+                  ? { backgroundColor: 'var(--brand-green)', color: '#FFFFFF', borderColor: 'var(--brand-green)' }
+                  : { backgroundColor: 'var(--brand-warm)', color: '#1A1A1A', borderColor: 'var(--border)' }
               }
             >
               Other
@@ -162,7 +162,7 @@ export function DonateBlock({
                   setCustom(e.target.value)
                   setError('')
                 }}
-                className="w-full mb-4 rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-[#085508]/40"
+                className="w-full mb-4 rounded-lg border border-[var(--border)] px-3 py-2.5 text-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/40"
               />
             </>
           ) : null}
@@ -177,18 +177,18 @@ export function DonateBlock({
             placeholder="In honor of a teacher, class gift to the PTO…"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="w-full mb-5 rounded-lg border border-[#E8E4DC] px-3 py-2.5 text-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-[#085508]/40"
+            className="w-full mb-5 rounded-lg border border-[var(--border)] px-3 py-2.5 text-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/40"
           />
 
           {error ? <p className="text-sm text-red-700 mb-3">{error}</p> : null}
-          {thanks ? <p className="text-sm font-semibold mb-3" style={{ color: '#085508' }}>{thanks}</p> : null}
+          {thanks ? <p className="text-sm font-semibold mb-3" style={{ color: 'var(--brand-green)' }}>{thanks}</p> : null}
 
           <MemberGate label="Sign in to donate" returnToQuery={`${id}=1`}>
             <button
               type="button"
               onClick={startCheckout}
               className="w-full inline-flex items-center justify-center font-bold text-sm px-4 py-3 rounded-lg text-white transition-opacity hover:opacity-90"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
  Donate ${effectiveAmount > 0 ? effectiveAmount.toFixed(effectiveAmount % 1 ? 2 : 0) : '-'}
             </button>

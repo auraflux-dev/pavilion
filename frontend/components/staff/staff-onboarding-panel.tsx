@@ -82,9 +82,9 @@ export function StaffOnboardingPanel({ onOpenWorkspace }: Props) {
 
   if (incomplete.length === 0 && complete.length > 0 && collapsedComplete) {
     return (
-      <div className="rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div className="rounded-xl border border-[var(--brand-line)] bg-[#FAFCF9] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-start gap-3">
-          <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#085508' }} />
+          <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'var(--brand-green)' }} />
           <div>
             <p className="text-sm font-bold text-[#1A1A1A]">Role onboarding complete</p>
             <p className="text-xs text-[#5A6070] mt-0.5">
@@ -103,9 +103,9 @@ export function StaffOnboardingPanel({ onOpenWorkspace }: Props) {
     <section className="space-y-4">
       {error ? <p className="text-sm text-amber-900">{error}</p> : null}
       {show.map((track) => (
-        <div key={track.role} className="rounded-xl border border-[#E8E4DC] bg-white p-4 space-y-3">
+        <div key={track.role} className="rounded-xl border border-[var(--border)] bg-white p-4 space-y-3">
           <div className="flex items-start gap-3">
-            <ListChecks className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#085508' }} />
+            <ListChecks className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'var(--brand-green)' }} />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-[#1A1A1A]">
                 {track.title}
@@ -129,14 +129,14 @@ export function StaffOnboardingPanel({ onOpenWorkspace }: Props) {
                   <div className="flex items-start gap-2.5 min-w-0">
                     <Icon
                       className="w-4 h-4 shrink-0 mt-0.5"
-                      style={{ color: item.done ? '#085508' : '#8A8F9C' }}
+                      style={{ color: item.done ? 'var(--brand-green)' : '#8A8F9C' }}
                       aria-hidden
                     />
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-[#1A1A1A]">
                         {item.title}
                         {item.autoDone ? (
-                          <span className="ml-2 text-[10px] font-bold uppercase tracking-wide text-[#085508]">
+                          <span className="ml-2 text-[10px] font-bold uppercase tracking-wide text-[var(--brand-green)]">
                             Auto
                           </span>
                         ) : null}
@@ -169,7 +169,7 @@ export function StaffOnboardingPanel({ onOpenWorkspace }: Props) {
                         disabled={busy}
                         onClick={() => void toggleStep(track.role, item.id, item.done)}
                         className={item.done ? undefined : 'text-white'}
-                        style={item.done ? undefined : { backgroundColor: '#085508' }}
+                        style={item.done ? undefined : { backgroundColor: 'var(--brand-green)' }}
                         variant={item.done ? 'outline' : 'default'}
                       >
                         {item.done ? 'Undo' : 'Mark done'}

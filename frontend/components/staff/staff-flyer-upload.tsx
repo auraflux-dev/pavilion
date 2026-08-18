@@ -45,7 +45,7 @@ export function StaffFlyerUpload({
   return (
     <div className="space-y-1.5">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="w-16 h-16 rounded-lg border border-[#E8E4DC] bg-[#FAFAF8] overflow-hidden shrink-0">
+        <div className="w-16 h-16 rounded-lg border border-[var(--border)] bg-[#FAFAF8] overflow-hidden shrink-0">
           {currentUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={currentUrl} alt="" className="w-full h-full object-cover" />
@@ -61,7 +61,7 @@ export function StaffFlyerUpload({
             type="button"
             disabled={disabled || busy}
             className="text-xs font-bold underline disabled:opacity-50"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
             onClick={() => inputRef.current?.click()}
           >
             {busy ? 'Uploading…' : currentUrl ? 'Replace flyer' : 'Upload flyer'}

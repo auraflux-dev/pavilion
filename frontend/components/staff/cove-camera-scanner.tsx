@@ -117,7 +117,7 @@ export function CoveCameraScanner({
             onClick={() => void start()}
             disabled={starting}
             className="text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             {starting ? (
               <Loader2 className="w-4 h-4 animate-spin mr-1.5" />

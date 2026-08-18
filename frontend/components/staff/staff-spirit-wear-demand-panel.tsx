@@ -118,7 +118,7 @@ export function StaffSpiritWearDemandPanel({
   return (
     <section
       id="cove-demand"
-      className="scroll-mt-28 rounded-2xl border border-[#E8E4DC] bg-white shadow-sm overflow-hidden"
+      className="scroll-mt-28 rounded-2xl border border-[var(--border)] bg-white shadow-sm overflow-hidden"
     >
       <div
         className="flex flex-wrap items-start justify-between gap-3 border-b border-[#F0EDE8] px-5 py-4"
@@ -127,7 +127,7 @@ export function StaffSpiritWearDemandPanel({
         <div className="flex items-start gap-3 min-w-0">
           <ClipboardList
             className="mt-0.5 h-5 w-5 shrink-0"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
             aria-hidden
           />
           <div>
@@ -145,7 +145,7 @@ export function StaffSpiritWearDemandPanel({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-[#085508]">{openCount} open</span>
+          <span className="text-xs font-bold text-[var(--brand-green)]">{openCount} open</span>
           <Button
             type="button"
             variant="outline"
@@ -164,7 +164,7 @@ export function StaffSpiritWearDemandPanel({
         {rollup.length ? (
           <div>
             <h3 className="text-sm font-bold text-[#1A1A1A] mb-2">Open demand by size</h3>
-            <div className="overflow-x-auto rounded-xl border border-[#E8E4DC]">
+            <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
               <table className="w-full text-sm">
                 <thead className="bg-[#F5F7F4] text-left text-xs uppercase tracking-wide text-[#5A6070]">
                   <tr>
@@ -179,7 +179,7 @@ export function StaffSpiritWearDemandPanel({
                   {rollup.map((row) => (
                     <tr key={row.key} className="border-t border-[#F0EDE8]">
                       <td className="px-3 py-2 font-semibold text-[#1A1A1A]">{row.productName}</td>
-                      <td className="px-3 py-2 font-bold text-[#085508]">{row.sizeLabel}</td>
+                      <td className="px-3 py-2 font-bold text-[var(--brand-green)]">{row.sizeLabel}</td>
                       <td className="px-3 py-2 tabular-nums">{row.openQty}</td>
                       <td className="px-3 py-2 tabular-nums">{row.openCount}</td>
                       <td className="px-3 py-2 text-xs text-[#5A6070] font-mono">
@@ -197,7 +197,7 @@ export function StaffSpiritWearDemandPanel({
 
         <form
           onSubmit={(e) => void logManual(e)}
-          className="rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-4 space-y-3"
+          className="rounded-xl border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3"
         >
           <h3 className="text-sm font-bold text-[#1A1A1A]">Quick log (no register lookup)</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -207,7 +207,7 @@ export function StaffSpiritWearDemandPanel({
                 required
                 value={parentName}
                 onChange={(e) => setParentName(e.target.value)}
-                className="w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
               />
             </label>
             <label className="text-xs font-bold text-[#5A6070] space-y-1">
@@ -216,7 +216,7 @@ export function StaffSpiritWearDemandPanel({
                 type="email"
                 value={parentEmail}
                 onChange={(e) => setParentEmail(e.target.value)}
-                className="w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
               />
             </label>
             <label className="text-xs font-bold text-[#5A6070] space-y-1">
@@ -224,7 +224,7 @@ export function StaffSpiritWearDemandPanel({
               <input
                 value={parentPhone}
                 onChange={(e) => setParentPhone(e.target.value)}
-                className="w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
               />
             </label>
             <label className="text-xs font-bold text-[#5A6070] space-y-1">
@@ -233,7 +233,7 @@ export function StaffSpiritWearDemandPanel({
                 value={eventNote}
                 onChange={(e) => setEventNote(e.target.value)}
                 placeholder="e.g. Open House AM"
-                className="w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
               />
             </label>
             <label className="text-xs font-bold text-[#5A6070] space-y-1">
@@ -241,7 +241,7 @@ export function StaffSpiritWearDemandPanel({
               <select
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
-                className="w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
               >
                 <option>Hoodie</option>
                 <option>Spirit T-Shirt</option>
@@ -257,7 +257,7 @@ export function StaffSpiritWearDemandPanel({
                 value={sizeLabel}
                 onChange={(e) => setSizeLabel(e.target.value)}
                 placeholder="e.g. Adult L / Youth M"
-                className="w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
               />
             </label>
             <label className="text-xs font-bold text-[#5A6070] space-y-1">
@@ -267,7 +267,7 @@ export function StaffSpiritWearDemandPanel({
                 min={1}
                 value={qty}
                 onChange={(e) => setQty(e.target.value)}
-                className="w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
               />
             </label>
             <label className="text-xs font-bold text-[#5A6070] space-y-1 sm:col-span-2">
@@ -275,7 +275,7 @@ export function StaffSpiritWearDemandPanel({
               <input
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-normal text-[#1A1A1A]"
               />
             </label>
           </div>
@@ -283,7 +283,7 @@ export function StaffSpiritWearDemandPanel({
             type="submit"
             disabled={busy}
             className="text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             {busy ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             Log demand
@@ -295,7 +295,7 @@ export function StaffSpiritWearDemandPanel({
             type="button"
             onClick={() => setFilter('open')}
             className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
-              filter === 'open' ? 'bg-[#085508] text-white' : 'bg-[#F5F7F4] text-[#5A6070]'
+              filter === 'open' ? 'bg-[var(--brand-green)] text-white' : 'bg-[#F5F7F4] text-[#5A6070]'
             }`}
           >
             Open
@@ -304,7 +304,7 @@ export function StaffSpiritWearDemandPanel({
             type="button"
             onClick={() => setFilter('all')}
             className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
-              filter === 'all' ? 'bg-[#085508] text-white' : 'bg-[#F5F7F4] text-[#5A6070]'
+              filter === 'all' ? 'bg-[var(--brand-green)] text-white' : 'bg-[#F5F7F4] text-[#5A6070]'
             }`}
           >
             All
@@ -315,7 +315,7 @@ export function StaffSpiritWearDemandPanel({
           {items.map((item) => (
             <li
               key={item.id}
-              className="rounded-xl border border-[#E8E4DC] px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 justify-between"
+              className="rounded-xl border border-[var(--border)] px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 justify-between"
             >
               <div className="min-w-0">
                 <p className="text-sm font-bold text-[#1A1A1A]">
@@ -349,7 +349,7 @@ export function StaffSpiritWearDemandPanel({
                     size="sm"
                     disabled={busy}
                     className="text-white"
-                    style={{ backgroundColor: '#085508' }}
+                    style={{ backgroundColor: 'var(--brand-green)' }}
                     onClick={() => void setItemStatus(item.id, 'fulfilled')}
                   >
                     Fulfilled

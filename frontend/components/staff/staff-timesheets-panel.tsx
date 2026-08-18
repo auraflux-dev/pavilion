@@ -118,7 +118,7 @@ export function StaffTimesheetsPanel() {
     .reduce((sum, r) => sum + (Number(r.hours) || 0), 0)
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-5">
+    <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-5">
       <div>
         <h2 className="text-lg font-bold">Timesheets</h2>
         <p className="text-xs text-[#5A6070] mt-1">
@@ -126,7 +126,7 @@ export function StaffTimesheetsPanel() {
             ? 'Review contractor and instructor hours. Approved rows are ready for payment processing.'
             : 'Log hours for your assigned programs. Submissions go to VP Programs for approval.'}
         </p>
-        <p className="text-xs font-semibold mt-2" style={{ color: '#085508' }}>
+        <p className="text-xs font-semibold mt-2" style={{ color: 'var(--brand-green)' }}>
           {hoursSubmitted.toFixed(2)} hours logged (non-rejected)
           {canReview && pending.length ? ` · ${pending.length} awaiting review` : ''}
         </p>
@@ -145,7 +145,7 @@ export function StaffTimesheetsPanel() {
           <a
             href="mailto:treasurer@shmspto.org?subject=W-9%20for%20SHMS%20PTO%20contractor"
             className="font-semibold underline"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
           >
             treasurer@shmspto.org
           </a>
@@ -156,28 +156,28 @@ export function StaffTimesheetsPanel() {
             href="/forms/fw9.pdf"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-md border border-[#E8E4DC] bg-white px-3 py-1.5 text-xs font-semibold text-[#1A1A1A] hover:bg-[#EEF6EE]"
+            className="inline-flex items-center justify-center rounded-md border border-[var(--border)] bg-white px-3 py-1.5 text-xs font-semibold text-[#1A1A1A] hover:bg-[var(--brand-soft)]"
           >
             Download Form W-9 (PDF)
           </a>
           <a
             href="mailto:treasurer@shmspto.org?subject=W-9%20for%20SHMS%20PTO%20contractor&body=Hi%20Treasurer%2C%0A%0AAttached%20is%20my%20completed%20Form%20W-9%20for%20SHMS%20PTO%20contractor%20payments.%0A%0AThank%20you."
             className="inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             Email completed W-9 to Treasurer
           </a>
         </div>
       </div>
 
-      <div className="rounded-lg border border-[#E8E4DC] bg-[#FAFAF8] p-4 space-y-3">
+      <div className="rounded-lg border border-[var(--border)] bg-[#FAFAF8] p-4 space-y-3">
         <p className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">
           Submit hours
         </p>
         <select
           value={form.programId}
           onChange={(e) => setForm((f) => ({ ...f, programId: e.target.value }))}
-          className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
         >
           <option value="">Program…</option>
           {programs.map((p) => (
@@ -193,7 +193,7 @@ export function StaffTimesheetsPanel() {
               type="date"
               value={form.workDate}
               onChange={(e) => setForm((f) => ({ ...f, workDate: e.target.value }))}
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
             />
           </label>
           <label className="text-xs text-[#5A6070] space-y-1">
@@ -202,7 +202,7 @@ export function StaffTimesheetsPanel() {
               type="time"
               value={form.startTime}
               onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
             />
           </label>
           <label className="text-xs text-[#5A6070] space-y-1">
@@ -211,7 +211,7 @@ export function StaffTimesheetsPanel() {
               type="time"
               value={form.endTime}
               onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
             />
           </label>
         </div>
@@ -220,13 +220,13 @@ export function StaffTimesheetsPanel() {
           onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
           placeholder="Notes (optional). e.g. makeup class, prep time"
           rows={2}
-          className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
         />
         <Button
           disabled={busy || !form.programId || !form.workDate}
           onClick={() => void submit()}
           className="text-white"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           {busy ? 'Sending…' : 'Submit to VP Programs'}
         </Button>

@@ -82,14 +82,14 @@ export default function CallbackPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F5F0E8' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--brand-warm)' }}>
         <div className="bg-white rounded-2xl p-8 shadow-sm text-center max-w-sm">
-          <p className="text-[#085508] font-bold mb-2">Login failed</p>
+          <p className="text-[var(--brand-green)] font-bold mb-2">Login failed</p>
           <p className="text-sm text-[#5A6070] mb-6">{error}</p>
           <a
             href="/api/auth/wix-login?returnTo=/member-portal"
             className="text-sm font-semibold underline"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
           >
             Try again
           </a>
@@ -99,11 +99,11 @@ export default function CallbackPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F5F0E8' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--brand-warm)' }}>
       <div className="text-center">
         <div
           className="w-12 h-12 rounded-full border-4 animate-spin mx-auto mb-4"
-          style={{ borderColor: '#085508', borderTopColor: 'transparent' }}
+          style={{ borderColor: 'var(--brand-green)', borderTopColor: 'transparent' }}
         />
         <p className="text-sm text-[#5A6070]">Completing login…</p>
       </div>

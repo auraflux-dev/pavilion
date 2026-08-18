@@ -25,7 +25,7 @@ export function AnnouncementBarClient({ text, link6, link7, link8 }: Props) {
   return (
     <div
       className="relative flex items-center justify-center px-4 py-2.5 text-white text-sm font-medium"
-      style={{ backgroundColor: '#085508' }}
+      style={{ backgroundColor: 'var(--brand-green)' }}
       role="banner"
     >
       <p className="text-center pr-8 leading-relaxed">

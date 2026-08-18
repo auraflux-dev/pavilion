@@ -11,6 +11,7 @@ import { useAuth } from '@/lib/hooks/use-auth'
 import { trackGenerateLead } from '@/lib/ga'
 import { DEMO_BRAND } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
+import { DemoMark } from '@/components/demo/demo-mark'
 
 interface Props {
   presidentEmail: string
@@ -91,13 +92,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
               aria-label={isPublicDemoInstance() ? `${DEMO_BRAND.pto} Home` : 'Stone Hill Middle School PTO Home'}
             >
               {isPublicDemoInstance() ? (
-                <span
-                  className="w-11 h-11 rounded-full shrink-0 flex items-center justify-center text-white font-bold"
-                  style={{ backgroundColor: '#085508' }}
-                  aria-hidden="true"
-                >
-                  R
-                </span>
+                <DemoMark size={44} />
               ) : (
                 <Image
                   src="/shms-logo.png"
@@ -113,7 +108,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
                 </div>
                 <div
                   className="text-xs font-semibold tracking-wider uppercase"
-                  style={{ color: '#FFD700' }}
+                  style={{ color: 'var(--brand-gold)' }}
                 >
                   PTO
                 </div>
@@ -184,7 +179,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
               <div className="flex items-start gap-3">
                 <MapPin
                   className="w-4 h-4 mt-0.5 shrink-0"
-                  style={{ color: '#FFD700' }}
+                  style={{ color: 'var(--brand-gold)' }}
                   aria-hidden="true"
                 />
                 <div>
@@ -202,7 +197,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs mt-1 inline-block hover:underline"
-                    style={{ color: '#FFD700' }}
+                    style={{ color: 'var(--brand-gold)' }}
                   >
                     Get Directions
                   </a>
@@ -212,7 +207,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
               <div className="flex items-start gap-3">
                 <Mail
                   className="w-4 h-4 mt-0.5 shrink-0"
-                  style={{ color: '#FFD700' }}
+                  style={{ color: 'var(--brand-gold)' }}
                   aria-hidden="true"
                 />
                 <div>
@@ -271,9 +266,9 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
             {subscribed ? (
               <div
                 className="rounded-xl p-4 border"
-                style={{ backgroundColor: '#0d3b0d', borderColor: '#085508' }}
+                style={{ backgroundColor: '#0d3b0d', borderColor: 'var(--brand-green)' }}
               >
-                <p className="text-sm font-semibold" style={{ color: '#FFD700' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--brand-gold)' }}>
                   Thanks for subscribing!
                 </p>
                 <p className="text-xs mt-1" style={{ color: '#C5CCD6' }}>
@@ -293,7 +288,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="text-sm border-0 text-white placeholder:text-[#9AA3B0] focus-visible:ring-1 focus-visible:ring-[#FFD700]"
+                    className="text-sm border-0 text-white placeholder:text-[#9AA3B0] focus-visible:ring-1 focus-visible:ring-[var(--brand-gold)]"
                     style={{ backgroundColor: '#2F2F2F' }}
                   />
                 </div>
@@ -301,7 +296,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
                   type="submit"
                   disabled={subBusy}
                   className="w-full font-semibold text-white group"
-                  style={{ backgroundColor: '#085508' }}
+                  style={{ backgroundColor: 'var(--brand-green)' }}
                 >
                   <Send className="w-4 h-4 mr-2 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
                   {subBusy ? 'Subscribing…' : 'Subscribe to Newsletter'}
@@ -332,7 +327,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
           </div>
           <p
             className="text-xs font-bold tracking-wider uppercase"
-            style={{ color: '#FFD700' }}
+            style={{ color: 'var(--brand-gold)' }}
           >
             {isPublicDemoInstance() ? DEMO_BRAND.cheer : 'Go Stingrays!'}
           </p>

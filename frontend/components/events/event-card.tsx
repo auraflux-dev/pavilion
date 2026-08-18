@@ -19,15 +19,15 @@ interface EventCardProps {
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; accent: string }> = {
-  'PTO led': { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  'PTO led': { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
   'SHMS led': { bg: '#E8F0FE', text: '#1A56A8', accent: '#1A56A8' },
   'PTO/SHMS': { bg: '#FFF4E5', text: '#9A5B00', accent: '#9A5B00' },
-  Meeting: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Social: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Competition: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Fundraiser: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  Workshop: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
-  default: { bg: '#EEF6EE', text: '#085508', accent: '#085508' },
+  Meeting: { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
+  Social: { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
+  Competition: { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
+  Fundraiser: { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
+  Workshop: { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
+  default: { bg: 'var(--brand-soft)', text: 'var(--brand-green)', accent: 'var(--brand-green)' },
 }
 
 function getColors(tags?: string[]) {
@@ -126,7 +126,7 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
     flyerImg && registerLocal ? (
       <Link
         href={registerLocal}
-        className="block rounded-xl overflow-hidden border border-[#E8E4DC] hover:opacity-95 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="block rounded-xl overflow-hidden border border-[var(--border)] hover:opacity-95 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
         style={{ outlineColor: colors.accent }}
         aria-label="Register — open flyer link"
       >
@@ -137,14 +137,14 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
         href={registerHref}
         target="_blank"
         rel="noopener noreferrer"
-        className="block rounded-xl overflow-hidden border border-[#E8E4DC] hover:opacity-95 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="block rounded-xl overflow-hidden border border-[var(--border)] hover:opacity-95 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
         style={{ outlineColor: colors.accent }}
         aria-label="Register — open flyer link"
       >
         {flyerImg}
       </a>
     ) : flyerImg ? (
-      <div className="rounded-xl overflow-hidden border border-[#E8E4DC]">{flyerImg}</div>
+      <div className="rounded-xl overflow-hidden border border-[var(--border)]">{flyerImg}</div>
     ) : !event.mainImage?.url ? (
       <div
         className="h-24 w-full flex items-center justify-center rounded-xl"
@@ -246,7 +246,7 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
                 <select
                   value={qty}
                   onChange={(e) => setQty(Number(e.target.value))}
-                  className="border border-[#E8E4DC] rounded-lg px-2 py-1"
+                  className="border border-[var(--border)] rounded-lg px-2 py-1"
                 >
                   {Array.from({ length: Math.min(10, remaining ?? 10) }, (_, i) => i + 1).map((n) => (
                     <option key={n} value={n}>

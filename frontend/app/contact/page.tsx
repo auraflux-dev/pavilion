@@ -72,7 +72,7 @@ export default async function ContactPage() {
       <main id="main-content">
         <PageHero content={page} />
 
-        <section className="py-16 md:py-24" style={{ backgroundColor: '#F5F0E8' }}>
+        <section className="py-16 md:py-24" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16">
               <div className="lg:col-span-2">
@@ -82,9 +82,9 @@ export default async function ContactPage() {
                     <div key={label} className="flex gap-4">
                       <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: '#EEF6EE' }}
+                        style={{ backgroundColor: 'var(--brand-soft)' }}
                       >
-                        <Icon className="w-5 h-5" style={{ color: '#085508' }} aria-hidden="true" />
+                        <Icon className="w-5 h-5" style={{ color: 'var(--brand-green)' }} aria-hidden="true" />
                       </div>
                       <div>
                         <p className="text-xs font-bold text-[#5A6070] uppercase tracking-wider mb-0.5">
@@ -107,7 +107,7 @@ export default async function ContactPage() {
                   ))}
                 </div>
 
-                <div className="mt-10 p-5 rounded-2xl border border-[#E8E4DC] bg-white">
+                <div className="mt-10 p-5 rounded-2xl border border-[var(--border)] bg-white">
                   <p className="text-sm font-bold text-[#1A1A1A] mb-2">{page.sectionTitle}</p>
                   <p className="text-sm text-[#5A6070] leading-relaxed">{page.sectionBody}</p>
                 </div>

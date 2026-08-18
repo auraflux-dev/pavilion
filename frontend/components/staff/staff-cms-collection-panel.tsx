@@ -118,7 +118,7 @@ export function StaffCmsCollectionPanel({
   return (
     <section
       id={sectionId}
-      className={`rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4${sectionId ? ' scroll-mt-28' : ''}`}
+      className={`rounded-xl border border-[var(--border)] bg-white p-5 space-y-4${sectionId ? ' scroll-mt-28' : ''}`}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
@@ -127,12 +127,12 @@ export function StaffCmsCollectionPanel({
             Add, edit, and deactivate visitor-facing site content without opening Wix.
           </p>
         </div>
-        <Button type="button" className="text-white" style={{ backgroundColor: '#085508' }} onClick={startNew}>
+        <Button type="button" className="text-white" style={{ backgroundColor: 'var(--brand-green)' }} onClick={startNew}>
           Add new
         </Button>
       </div>
 
-      <div className="border border-[#E8E4DC] rounded-lg divide-y max-h-56 overflow-auto">
+      <div className="border border-[var(--border)] rounded-lg divide-y max-h-56 overflow-auto">
         {items.length === 0 ? (
           <p className="p-3 text-sm text-[#5A6070]">No rows yet.</p>
         ) : (
@@ -155,7 +155,7 @@ export function StaffCmsCollectionPanel({
       </div>
 
       {form ? (
-        <div className="space-y-2 border-t border-[#E8E4DC] pt-3">
+        <div className="space-y-2 border-t border-[var(--border)] pt-3">
           <p className="text-xs font-bold text-[#5A6070]">{form.id ? 'Edit row' : 'New row'}</p>
           <div className="grid sm:grid-cols-2 gap-2">
             {fields.map((f) => (
@@ -178,7 +178,7 @@ export function StaffCmsCollectionPanel({
                   <select
                     value={String(form[f.key] ?? '')}
                     onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                    className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                   >
                     {(f.options ?? []).map((o) => (
                       <option key={o} value={o}>
@@ -191,7 +191,7 @@ export function StaffCmsCollectionPanel({
                     value={String(form[f.key] ?? '')}
                     onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
                     rows={4}
-                    className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                   />
                 ) : (
                   <input
@@ -203,7 +203,7 @@ export function StaffCmsCollectionPanel({
                         [f.key]: f.type === 'number' ? Number(e.target.value) : e.target.value,
                       })
                     }
-                    className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                   />
                 )}
               </div>
@@ -215,7 +215,7 @@ export function StaffCmsCollectionPanel({
               disabled={busy}
               onClick={() => void save()}
               className="text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               {busy ? 'Saving…' : 'Save'}
             </Button>

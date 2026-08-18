@@ -37,7 +37,7 @@ export function RunForCharityRegisterBridge({ compact = false }: Props) {
       <Button
         type="button"
         className="w-full text-white font-bold text-base py-6"
-        style={{ backgroundColor: '#0B3D0B' }}
+        style={{ backgroundColor: 'var(--brand-dark)' }}
         onClick={openBestRunners}
       >
         <ExternalLink className="w-4 h-4 mr-2" aria-hidden="true" />

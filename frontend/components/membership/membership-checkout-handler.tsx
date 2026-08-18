@@ -104,7 +104,7 @@ function HandlerInner() {
 
   if ((needsParentShirt || needsFacultyChoice) && !open) {
     return (
-      <div className="mb-6 rounded-xl border border-[#E8E4DC] bg-white p-4 space-y-3">
+      <div className="mb-6 rounded-xl border border-[var(--border)] bg-white p-4 space-y-3">
         <p className="text-sm font-bold text-[#1A1A1A]">Finish joining {tierName}</p>
         {needsFacultyChoice ? (
           <fieldset className="space-y-2">
@@ -157,7 +157,7 @@ function HandlerInner() {
           disabled={!choiceReady}
           onClick={() => setOpen(true)}
           className="w-full rounded-lg px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           Continue to pay · ${price.toFixed(0)}
         </button>

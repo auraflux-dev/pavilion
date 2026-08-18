@@ -115,12 +115,12 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
 
   if (status === 'success') {
     return (
-      <div className="mx-auto max-w-xl rounded-2xl border border-[#E8E4DC] bg-white p-8 text-center shadow-sm">
+      <div className="mx-auto max-w-xl rounded-2xl border border-[var(--border)] bg-white p-8 text-center shadow-sm">
         <div
           className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
-          style={{ backgroundColor: '#EEF6EE' }}
+          style={{ backgroundColor: 'var(--brand-soft)' }}
         >
-          <CheckCircle2 className="h-7 w-7" style={{ color: '#085508' }} aria-hidden="true" />
+          <CheckCircle2 className="h-7 w-7" style={{ color: 'var(--brand-green)' }} aria-hidden="true" />
         </div>
         <h3 className="mb-2 text-xl font-bold text-[#1A1A1A]">Message sent</h3>
         <p className="text-sm text-[#5A6070]">{copy.successBody}</p>
@@ -133,10 +133,10 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mx-auto max-w-xl space-y-4 rounded-2xl border border-[#E8E4DC] bg-white p-6 shadow-sm sm:p-8"
+      className="mx-auto max-w-xl space-y-4 rounded-2xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-8"
     >
       <div className="text-left">
-        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#085508' }}>
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--brand-green)' }}>
           {copy.eyebrow}
         </p>
         <h3 className="mt-1 text-xl font-bold text-[#1A1A1A]">{copy.title}</h3>
@@ -156,7 +156,7 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-[#E8E4DC] px-3.5 py-2.5 text-sm focus:border-[#085508] focus:outline-none focus:ring-2 focus:ring-[#085508]/20"
+            className="w-full rounded-lg border border-[var(--border)] px-3.5 py-2.5 text-sm focus:border-[var(--brand-green)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20"
           />
         </div>
         <div>
@@ -169,7 +169,7 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-[#E8E4DC] px-3.5 py-2.5 text-sm focus:border-[#085508] focus:outline-none focus:ring-2 focus:ring-[#085508]/20"
+            className="w-full rounded-lg border border-[var(--border)] px-3.5 py-2.5 text-sm focus:border-[var(--brand-green)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20"
           />
         </div>
       </div>
@@ -184,7 +184,7 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
           value={optional}
           onChange={(e) => setOptional(e.target.value)}
           placeholder={copy.optionalPlaceholder}
-          className="w-full rounded-lg border border-[#E8E4DC] px-3.5 py-2.5 text-sm focus:border-[#085508] focus:outline-none focus:ring-2 focus:ring-[#085508]/20"
+          className="w-full rounded-lg border border-[var(--border)] px-3.5 py-2.5 text-sm focus:border-[var(--brand-green)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20"
         />
       </div>
 
@@ -199,7 +199,7 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder={copy.messagePlaceholder}
-          className="w-full resize-none rounded-lg border border-[#E8E4DC] px-3.5 py-2.5 text-sm focus:border-[#085508] focus:outline-none focus:ring-2 focus:ring-[#085508]/20"
+          className="w-full resize-none rounded-lg border border-[var(--border)] px-3.5 py-2.5 text-sm focus:border-[var(--brand-green)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20"
         />
       </div>
 
@@ -218,7 +218,7 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
         size="lg"
         disabled={status === 'loading'}
         className="w-full font-bold text-white"
-        style={{ backgroundColor: '#085508' }}
+        style={{ backgroundColor: 'var(--brand-green)' }}
       >
         {status === 'loading' ? (
           <>

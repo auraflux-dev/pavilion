@@ -153,7 +153,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
       {msg ? <p className="text-sm text-[#1B2A4A]">{msg}</p> : null}
       {loading ? <p className="text-sm text-[#5A6070]">Loading…</p> : null}
 
-      <div className="rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] p-4 space-y-3">
+      <div className="rounded-xl border border-[var(--brand-line)] bg-[#FAFCF9] p-4 space-y-3">
         <p className="text-sm font-semibold text-[#1A1A1A]">Marketing Canva folder</p>
         <p className="text-xs text-[#5A6070] leading-relaxed">
           Open this folder to create and edit PTO graphics. Ask Rob to share/invite if you can’t
@@ -164,7 +164,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
           <Button
             type="button"
             className="text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
             onClick={() => window.open(folderUrl, '_blank', 'noopener,noreferrer')}
           >
             Open Marketing folder
@@ -185,7 +185,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
 
       {status?.connected ? (
         <>
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] px-4 py-3">
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[var(--border)] bg-[#FAFAF8] px-4 py-3">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-[#1A1A1A]">
                 API connected{status.user?.displayName ? ` · ${status.user.displayName}` : ''}
@@ -219,7 +219,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
             }}
           >
             <input
-              className="min-w-[12rem] flex-1 rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm"
+              className="min-w-[12rem] flex-1 rounded-lg border border-[var(--border)] px-3 py-2 text-sm"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search designs…"
@@ -235,7 +235,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
 
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {designs.map((d) => (
-              <li key={d.id} className="rounded-xl border border-[#E8E4DC] bg-white overflow-hidden flex flex-col">
+              <li key={d.id} className="rounded-xl border border-[var(--border)] bg-white overflow-hidden flex flex-col">
                 <div className="aspect-video bg-[#F0EDE8] flex items-center justify-center overflow-hidden">
                   {d.thumbnailUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -282,7 +282,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
           ) : null}
         </>
       ) : (
-        <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] p-4 space-y-2">
+        <div className="rounded-xl border border-[var(--border)] bg-[#FAFAF8] p-4 space-y-2">
           <button
             type="button"
             className="text-sm font-semibold text-[#1A1A1A] underline-offset-2 hover:underline"

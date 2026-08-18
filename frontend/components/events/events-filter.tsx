@@ -40,9 +40,9 @@ export function EventsFilter({ events }: EventsFilterProps) {
             className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
               active === cat
                 ? 'border-transparent text-white'
-                : 'border-[#E8E4DC] bg-white text-[#5A6070] hover:border-[#085508] hover:text-[#085508]'
+                : 'border-[var(--border)] bg-white text-[#5A6070] hover:border-[var(--brand-green)] hover:text-[var(--brand-green)]'
             }`}
-            style={active === cat ? { backgroundColor: '#085508', borderColor: '#085508' } : {}}
+            style={active === cat ? { backgroundColor: 'var(--brand-green)', borderColor: 'var(--brand-green)' } : {}}
             aria-pressed={active === cat}
           >
             {vanillaizeIfDemo(cat)}

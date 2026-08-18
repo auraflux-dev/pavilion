@@ -616,7 +616,7 @@ export function StaffCoveRegister() {
     return (
       <div
         className={`rounded-xl border-2 overflow-hidden flex flex-col ${
-          inCart ? 'border-[#085508] bg-[#EEF6EE]' : 'border-[#E8E4DC] bg-white'
+          inCart ? 'border-[var(--brand-green)] bg-[var(--brand-soft)]' : 'border-[var(--border)] bg-white'
         } ${out ? 'opacity-50' : ''} ${compact ? 'min-w-[8.5rem] w-[8.5rem]' : ''}`}
       >
         <button
@@ -648,7 +648,7 @@ export function StaffCoveRegister() {
             <p className={`font-bold text-[#1A1A1A] leading-snug ${compact ? 'text-xs' : 'text-sm'}`}>
               {product.name}
             </p>
-            <p className="text-xs font-bold mt-0.5" style={{ color: '#085508' }}>
+            <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand-green)' }}>
               ${product.price.toFixed(2)}
               {qty > 0 ? (
                 <span className="ml-1 text-[#5A6070] font-semibold">· {qty}</span>
@@ -662,7 +662,7 @@ export function StaffCoveRegister() {
             aria-label={`Fewer ${product.name}`}
             disabled={!selling || qty <= 0}
             onClick={() => bump(product, -1)}
-            className="h-9 w-9 rounded-lg border border-[#E8E4DC] flex items-center justify-center disabled:opacity-30"
+            className="h-9 w-9 rounded-lg border border-[var(--border)] flex items-center justify-center disabled:opacity-30"
           >
             <Minus className="w-4 h-4" />
           </button>
@@ -672,8 +672,8 @@ export function StaffCoveRegister() {
             aria-label={`More ${product.name}`}
             disabled={!selling}
             onClick={() => requestAdd(product)}
-            className="h-9 w-9 rounded-lg border border-[#E8E4DC] flex items-center justify-center disabled:opacity-30"
-            style={{ backgroundColor: inCart ? '#EEF6EE' : undefined }}
+            className="h-9 w-9 rounded-lg border border-[var(--border)] flex items-center justify-center disabled:opacity-30"
+            style={{ backgroundColor: inCart ? 'var(--brand-soft)' : undefined }}
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -689,8 +689,8 @@ export function StaffCoveRegister() {
       onClick={() => chooseLane(lane)}
       className={`rounded-xl border-2 px-3 py-3 text-left transition-colors ${
         payLane === lane
-          ? 'border-[#085508] bg-[#EEF6EE]'
-          : 'border-[#E8E4DC] bg-white hover:border-[#085508]/50'
+          ? 'border-[var(--brand-green)] bg-[var(--brand-soft)]'
+          : 'border-[var(--border)] bg-white hover:border-[var(--brand-green)]/50'
       }`}
     >
       <p className="text-sm font-bold text-[#1A1A1A]">{label}</p>
@@ -701,14 +701,14 @@ export function StaffCoveRegister() {
   return (
     <section
       id="cove-register"
-      className="scroll-mt-28 rounded-xl border-2 border-[#085508] bg-white p-4 sm:p-5 space-y-4"
+      className="scroll-mt-28 rounded-xl border-2 border-[var(--brand-green)] bg-white p-4 sm:p-5 space-y-4"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h2 className="text-lg font-bold flex items-center gap-2">
-          <ShoppingCart className="w-5 h-5" style={{ color: '#085508' }} />
+          <ShoppingCart className="w-5 h-5" style={{ color: 'var(--brand-green)' }} />
           In-person sales
         </h2>
-        <div className="flex rounded-lg border border-[#E8E4DC] overflow-hidden">
+        <div className="flex rounded-lg border border-[var(--border)] overflow-hidden">
           {(
             [
               { id: 'event' as const, label: 'Event' },
@@ -721,7 +721,7 @@ export function StaffCoveRegister() {
               onClick={() => setVenueMode(v.id)}
               className={`px-3 py-1.5 text-xs font-bold ${
                 venueMode === v.id
-                  ? 'bg-[#085508] text-white'
+                  ? 'bg-[var(--brand-green)] text-white'
                   : 'bg-white text-[#5A6070]'
               }`}
             >
@@ -731,12 +731,12 @@ export function StaffCoveRegister() {
         </div>
       </div>
 
-      <p className="text-xs text-[#5A6070] leading-relaxed rounded-lg bg-[#FAFCF9] border border-[#E8E4DC] px-3 py-2">
+      <p className="text-xs text-[#5A6070] leading-relaxed rounded-lg bg-[#FAFCF9] border border-[var(--border)] px-3 py-2">
         {venueMode === 'event'
           ? 'Event mode: Stand owns cash + card + Cove gift-card scan · Staff Charge Cove is backup · portal paid → Pickup only. Join QR optional after sale.'
           : 'Window mode: Stand for cash/card/Cove Wallet · Staff Charge Cove only if no Wallet · portal checkout → Pickup only.'}
         {' · '}
-        <span className="font-semibold text-[#0B3D0B]">
+        <span className="font-semibold text-[var(--brand-dark)]">
           Optional — buy first, join anytime
         </span>
       </p>
@@ -758,7 +758,7 @@ export function StaffCoveRegister() {
           type="button"
           onClick={() => chooseLane('pickup')}
           className={`mt-2 text-xs font-bold underline ${
-            payLane === 'pickup' ? 'text-[#085508]' : 'text-[#5A6070]'
+            payLane === 'pickup' ? 'text-[var(--brand-green)]' : 'text-[#5A6070]'
           }`}
         >
           Paid in portal / site checkout → Pickup only
@@ -771,7 +771,7 @@ export function StaffCoveRegister() {
       </div>
 
       {payLane === 'stand' ? (
-        <div className="rounded-xl border-2 border-[#0B3D0B] bg-[#F5F7F4] p-4 space-y-2">
+        <div className="rounded-xl border-2 border-[var(--brand-dark)] bg-[#F5F7F4] p-4 space-y-2">
           <p className="text-sm font-bold text-[#1A1A1A]">Use Square Stand (all in-person tenders)</p>
           <ol className="text-sm text-[#5A6070] list-decimal pl-5 space-y-1">
             <li>Ring snacks / spirit on Stand</li>
@@ -789,10 +789,10 @@ export function StaffCoveRegister() {
       ) : null}
 
       {payLane === 'pickup' ? (
-        <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFCF9] p-4">
+        <div className="rounded-xl border border-[var(--border)] bg-[#FAFCF9] p-4">
           <p className="text-sm text-[#5A6070]">
             No new charge.{' '}
-            <a href="#cove-store-pickups" className="font-bold underline" style={{ color: '#085508' }}>
+            <a href="#cove-store-pickups" className="font-bold underline" style={{ color: 'var(--brand-green)' }}>
               Open today&apos;s store pickups
             </a>
           </p>
@@ -800,7 +800,7 @@ export function StaffCoveRegister() {
       ) : null}
 
       {payLane === 'external' ? (
-        <div className="rounded-xl border-2 border-[#085508] p-4 space-y-3 bg-[#FAFCF9]">
+        <div className="rounded-xl border-2 border-[var(--brand-green)] p-4 space-y-3 bg-[#FAFCF9]">
           <p className="text-sm font-bold text-[#1A1A1A]">External pay logger</p>
           <p className="text-xs text-[#5A6070]">
             Morning / no Stand — log money that landed outside cash drawer or Stand.
@@ -820,8 +820,8 @@ export function StaffCoveRegister() {
                 onClick={() => setExternalTender(t.id)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-bold border ${
                   externalTender === t.id
-                    ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
-                    : 'border-[#E8E4DC] text-[#5A6070]'
+                    ? 'border-[var(--brand-green)] bg-[var(--brand-soft)] text-[var(--brand-green)]'
+                    : 'border-[var(--border)] text-[#5A6070]'
                 }`}
               >
                 {t.label}
@@ -837,7 +837,7 @@ export function StaffCoveRegister() {
                 step="0.01"
                 value={externalAmount}
                 onChange={(e) => setExternalAmount(e.target.value)}
-                className="mt-1 w-full rounded-lg border-2 border-[#085508] px-3 py-3 text-xl font-bold tabular-nums"
+                className="mt-1 w-full rounded-lg border-2 border-[var(--brand-green)] px-3 py-3 text-xl font-bold tabular-nums"
                 placeholder="0.00"
               />
             </label>
@@ -846,7 +846,7 @@ export function StaffCoveRegister() {
               <input
                 value={externalNote}
                 onChange={(e) => setExternalNote(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-2 py-3 text-sm"
+                className="mt-1 w-full rounded-lg border border-[var(--border)] px-2 py-3 text-sm"
                 placeholder="Open House AM · spiritwear"
               />
             </label>
@@ -857,7 +857,7 @@ export function StaffCoveRegister() {
               <input
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-2 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-[var(--border)] px-2 py-2 text-sm"
               />
             </label>
             <label className="text-xs font-bold text-[#5A6070]">
@@ -866,7 +866,7 @@ export function StaffCoveRegister() {
                 type="email"
                 value={guestEmail}
                 onChange={(e) => setGuestEmail(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-2 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-[var(--border)] px-2 py-2 text-sm"
               />
             </label>
             <label className="text-xs font-bold text-[#5A6070]">
@@ -875,7 +875,7 @@ export function StaffCoveRegister() {
                 type="tel"
                 value={guestPhone}
                 onChange={(e) => setGuestPhone(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-[#E8E4DC] px-2 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-[var(--border)] px-2 py-2 text-sm"
               />
             </label>
           </div>
@@ -891,7 +891,7 @@ export function StaffCoveRegister() {
             disabled={busy || !externalAmount}
             onClick={() => void logExternal()}
             className="text-white text-base px-8 py-6 font-bold"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : `Log ${externalTender.replace('_', ' ')}`}
           </Button>
@@ -923,14 +923,14 @@ export function StaffCoveRegister() {
                 autoComplete="off"
                 spellCheck={false}
                 placeholder="Passcode or 6-digit"
-                className="mt-1 w-full border-2 border-[#085508] rounded-lg px-3 py-3 text-xl font-mono tracking-widest"
+                className="mt-1 w-full border-2 border-[var(--brand-green)] rounded-lg px-3 py-3 text-xl font-mono tracking-widest"
               />
             </label>
             <Button
               type="submit"
               disabled={busy || code.trim().length < 4}
               className="text-white py-3"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Look up'}
             </Button>
@@ -944,7 +944,7 @@ export function StaffCoveRegister() {
       ) : null}
 
       {mode === 'member' && family ? (
-        <div className="rounded-xl px-4 py-3 space-y-1" style={{ backgroundColor: '#EEF6EE' }}>
+        <div className="rounded-xl px-4 py-3 space-y-1" style={{ backgroundColor: 'var(--brand-soft)' }}>
           <p className="text-sm font-bold text-[#1A1A1A]">
             {family.students
               .map((s) => [s.firstName, s.lastName].filter(Boolean).join(' ').trim())
@@ -958,7 +958,7 @@ export function StaffCoveRegister() {
             ) : null}
           </p>
           {family.hasCard ? (
-            <p className="text-2xl font-bold tabular-nums" style={{ color: '#085508' }}>
+            <p className="text-2xl font-bold tabular-nums" style={{ color: 'var(--brand-green)' }}>
               Cove Digital Card: ${Number(family.balance).toFixed(2)}
             </p>
           ) : (
@@ -973,7 +973,7 @@ export function StaffCoveRegister() {
 
       {needsCart && selling ? (
         <>
-          <div className="sticky top-0 z-[5] -mx-1 px-1 py-2 bg-white/95 backdrop-blur-sm space-y-2 border-b border-[#E8E4DC]">
+          <div className="sticky top-0 z-[5] -mx-1 px-1 py-2 bg-white/95 backdrop-blur-sm space-y-2 border-b border-[var(--border)]">
             <label className="block text-xs font-bold text-[#5A6070]">
               Find product
               <input
@@ -984,7 +984,7 @@ export function StaffCoveRegister() {
                   if (e.target.value.trim()) setLetterFilter('All')
                 }}
                 placeholder="Snacks, spirit, Takis, hoodie…"
-                className="mt-1 w-full rounded-xl border-2 border-[#085508] px-3 py-3 text-base font-semibold text-[#1A1A1A]"
+                className="mt-1 w-full rounded-xl border-2 border-[var(--brand-green)] px-3 py-3 text-base font-semibold text-[#1A1A1A]"
                 autoComplete="off"
                 spellCheck={false}
               />
@@ -1009,8 +1009,8 @@ export function StaffCoveRegister() {
                   onClick={() => setCategoryFilter(c.id)}
                   className={`h-9 rounded-lg text-xs font-bold border px-3 ${
                     categoryFilter === c.id
-                      ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
-                      : 'border-[#E8E4DC] text-[#5A6070]'
+                      ? 'border-[var(--brand-green)] bg-[var(--brand-soft)] text-[var(--brand-green)]'
+                      : 'border-[var(--border)] text-[#5A6070]'
                   }`}
                 >
                   {c.label}
@@ -1023,8 +1023,8 @@ export function StaffCoveRegister() {
                 onClick={() => setLetterFilter('All')}
                 className={`min-w-9 h-9 rounded-lg text-xs font-bold border px-2 ${
                   letterFilter === 'All'
-                    ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
-                    : 'border-[#E8E4DC] text-[#5A6070]'
+                    ? 'border-[var(--brand-green)] bg-[var(--brand-soft)] text-[var(--brand-green)]'
+                    : 'border-[var(--border)] text-[#5A6070]'
                 }`}
               >
                 A–Z
@@ -1039,8 +1039,8 @@ export function StaffCoveRegister() {
                   }}
                   className={`min-w-9 h-9 rounded-lg text-xs font-bold border ${
                     letterFilter === letter
-                      ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
-                      : 'border-[#E8E4DC] text-[#5A6070]'
+                      ? 'border-[var(--brand-green)] bg-[var(--brand-soft)] text-[var(--brand-green)]'
+                      : 'border-[var(--border)] text-[#5A6070]'
                   }`}
                 >
                   {letter}
@@ -1094,7 +1094,7 @@ export function StaffCoveRegister() {
                 <a
                   href="#cove-stock-admin"
                   className="font-bold underline"
-                  style={{ color: '#085508' }}
+                  style={{ color: 'var(--brand-green)' }}
                 >
                   Stock setup
                 </a>
@@ -1102,7 +1102,7 @@ export function StaffCoveRegister() {
             ) : null}
           </div>
 
-          <div className="sticky bottom-2 z-10 rounded-2xl border-2 border-[#085508] bg-white shadow-lg p-3 space-y-3">
+          <div className="sticky bottom-2 z-10 rounded-2xl border-2 border-[var(--brand-green)] bg-white shadow-lg p-3 space-y-3">
             <div className="text-sm">
               <p>
                 Order <span className="font-bold tabular-nums">${cartTotal.toFixed(2)}</span>
@@ -1114,7 +1114,7 @@ export function StaffCoveRegister() {
                 ) : null}
               </p>
               {canUseCove ? (
-                <p className="text-xs" style={{ color: remainingAfter < 0 ? '#b91c1c' : '#085508' }}>
+                <p className="text-xs" style={{ color: remainingAfter < 0 ? '#b91c1c' : 'var(--brand-green)' }}>
                   Cove left after charge:{' '}
                   {remainingAfter < 0 ? 'Not enough' : `$${remainingAfter.toFixed(2)}`}
                 </p>
@@ -1130,7 +1130,7 @@ export function StaffCoveRegister() {
                     disabled={busy || remainingAfter < 0}
                     onClick={() => void chargeCove()}
                     className="text-white text-base px-8 py-6 font-bold w-full sm:w-auto"
-                    style={{ backgroundColor: '#085508' }}
+                    style={{ backgroundColor: 'var(--brand-green)' }}
                   >
                     {busy ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
@@ -1150,7 +1150,7 @@ export function StaffCoveRegister() {
                   {cart.map((l) => (
                     <li
                       key={lineKey(l.productId, l.variantId)}
-                      className="rounded-full bg-[#FAFCF9] border border-[#E8E4DC] px-2.5 py-1"
+                      className="rounded-full bg-[#FAFCF9] border border-[var(--border)] px-2.5 py-1"
                     >
                       {l.qty}× {l.name}
                     </li>
@@ -1200,10 +1200,10 @@ export function StaffCoveRegister() {
                         ? openDemandForVariant(variantPicker, v)
                         : addVariant(variantPicker, v.id)
                     }
-                    className={`rounded-xl border px-3 py-3 text-left hover:border-[#085508] ${
+                    className={`rounded-xl border px-3 py-3 text-left hover:border-[var(--brand-green)] ${
                       oos
                         ? 'border-amber-300 bg-amber-50'
-                        : 'border-[#E8E4DC]'
+                        : 'border-[var(--border)]'
                     }`}
                   >
                     <p className="text-sm font-bold text-[#1A1A1A]">{v.label}</p>
@@ -1212,7 +1212,7 @@ export function StaffCoveRegister() {
                         Out of stock · tap to log demand
                       </p>
                     ) : (
-                      <p className="text-xs font-bold mt-0.5" style={{ color: '#085508' }}>
+                      <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand-green)' }}>
                         ${v.price.toFixed(2)}
                       </p>
                     )}
@@ -1255,7 +1255,7 @@ export function StaffCoveRegister() {
               <input
                 value={demandParentName}
                 onChange={(e) => setDemandParentName(e.target.value)}
-                className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
               />
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -1265,7 +1265,7 @@ export function StaffCoveRegister() {
                   type="email"
                   value={demandParentEmail}
                   onChange={(e) => setDemandParentEmail(e.target.value)}
-                  className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                  className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
                 />
               </label>
               <label className="block text-xs font-bold text-[#5A6070] space-y-1">
@@ -1273,7 +1273,7 @@ export function StaffCoveRegister() {
                 <input
                   value={demandParentPhone}
                   onChange={(e) => setDemandParentPhone(e.target.value)}
-                  className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                  className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
                 />
               </label>
             </div>
@@ -1285,7 +1285,7 @@ export function StaffCoveRegister() {
                   min={1}
                   value={demandQty}
                   onChange={(e) => setDemandQty(e.target.value)}
-                  className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                  className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
                 />
               </label>
               <label className="block text-xs font-bold text-[#5A6070] space-y-1">
@@ -1294,7 +1294,7 @@ export function StaffCoveRegister() {
                   value={demandEventNote}
                   onChange={(e) => setDemandEventNote(e.target.value)}
                   placeholder="Open House"
-                  className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                  className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
                 />
               </label>
             </div>
@@ -1303,14 +1303,14 @@ export function StaffCoveRegister() {
               <input
                 value={demandNotes}
                 onChange={(e) => setDemandNotes(e.target.value)}
-                className="w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+                className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-normal text-[#1A1A1A]"
               />
             </label>
             <Button
               type="button"
               disabled={busy}
               className="w-full text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
               onClick={() => void submitDemand()}
             >
               {busy ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}

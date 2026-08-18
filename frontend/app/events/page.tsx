@@ -56,7 +56,7 @@ export default async function EventsPage() {
         <section
           id="events-list"
           className="scroll-mt-28 py-16 md:py-24"
-          style={{ backgroundColor: '#F5F0E8' }}
+          style={{ backgroundColor: 'var(--brand-warm)' }}
           aria-labelledby="events-list-heading"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,7 +84,7 @@ export default async function EventsPage() {
 
         <section
           id="event-ideas"
-          className="scroll-mt-28 border-t border-[#E8E4DC] bg-white py-14 md:py-20"
+          className="scroll-mt-28 border-t border-[var(--border)] bg-white py-14 md:py-20"
           aria-labelledby="event-ideas-heading"
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -104,7 +104,7 @@ export default async function EventsPage() {
           </div>
         </section>
 
-        <section id="newsletter" className="scroll-mt-28 py-14 bg-white border-t border-[#E8E4DC]">
+        <section id="newsletter" className="scroll-mt-28 py-14 bg-white border-t border-[var(--border)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">
               Never miss an event
@@ -115,7 +115,7 @@ export default async function EventsPage() {
             <a
               href="/newsletter"
               className="inline-flex items-center gap-2 font-semibold text-white px-6 py-3 rounded-lg transition-opacity hover:opacity-90"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               Subscribe to Newsletter
               <ArrowRight className="w-4 h-4" aria-hidden="true" />

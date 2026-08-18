@@ -249,7 +249,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
   }
 
   return (
-    <div className="rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] px-3 py-3 mb-4">
+    <div className="rounded-xl border border-[var(--brand-line)] bg-[#FAFCF9] px-3 py-3 mb-4">
       <div className="flex items-center gap-2.5">
         <CoveLogo size="xs" className="w-10 h-10 shrink-0" />
         <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
@@ -257,7 +257,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
         </p>
       </div>
       {busy && !code ? (
-        <Loader2 className="w-4 h-4 animate-spin mt-2 text-[#085508]" />
+        <Loader2 className="w-4 h-4 animate-spin mt-2 text-[var(--brand-green)]" />
       ) : code ? (
         <div className="mt-2 space-y-3">
           <div className="flex flex-wrap items-start gap-4">
@@ -268,7 +268,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
                 alt="Cove Digital Card QR for Square Stand and Cove"
                 width={140}
                 height={140}
-                className="rounded-lg border border-[#E8E4DC] bg-white"
+                className="rounded-lg border border-[var(--border)] bg-white"
               />
             ) : null}
             <div className="min-w-0 flex-1">
@@ -277,7 +277,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
               </p>
               <p className="text-2xl font-bold font-mono tracking-[0.2em] text-[#1A1A1A]">{code}</p>
               {paidMemberCode ? (
-                <p className="text-[11px] font-bold text-[#085508] mt-1">
+                <p className="text-[11px] font-bold text-[var(--brand-green)] mt-1">
                   Lagoon/Tide member code (ends in 9) — show at event food tables for refreshment tickets
                 </p>
               ) : codeHint ? (
@@ -339,7 +339,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
                     <strong className="text-[#1A1A1A]">Load money</strong> to activate your phone QR
                     for The Cove. Free accounts can use the card after a load — paid membership is
                     optional.{' '}
-                    <a href="/cove" className="font-bold underline" style={{ color: '#085508' }}>
+                    <a href="/cove" className="font-bold underline" style={{ color: 'var(--brand-green)' }}>
                       Load Cove Digital Card
                     </a>
                   </>
@@ -354,13 +354,13 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
               style={{
                 borderColor: '#C4A035',
                 background:
-                  'linear-gradient(135deg, #FFF9E8 0%, #EEF6EE 55%, #FAFCF9 100%)',
+                  'linear-gradient(135deg, #FFF9E8 0%, var(--brand-soft) 55%, #FAFCF9 100%)',
               }}
             >
               <div className="flex items-start gap-2.5">
                 <span
                   className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white shadow-sm animate-pulse"
-                  style={{ backgroundColor: '#085508' }}
+                  style={{ backgroundColor: 'var(--brand-green)' }}
                   aria-hidden
                 >
                   <Sparkles className="w-4 h-4" />
@@ -385,7 +385,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
                   <button
                     type="button"
                     className="mt-2 text-[11px] font-bold underline"
-                    style={{ color: '#085508' }}
+                    style={{ color: 'var(--brand-green)' }}
                     onClick={() => {
                       document.getElementById('cove-word-passcode')?.scrollIntoView({
                         behavior: 'smooth',
@@ -413,7 +413,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
             id="cove-word-passcode"
             className="rounded-lg border-2 px-3 py-2.5 scroll-mt-4"
             style={{
-              borderColor: passcode ? '#D4E8D4' : '#C4A035',
+              borderColor: passcode ? 'var(--brand-line)' : '#C4A035',
               backgroundColor: passcode ? '#fff' : '#FFFCF3',
             }}
           >
@@ -449,7 +449,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
                     onChange={(e) => setPasscodeDraft(e.target.value.replace(/[^a-zA-Z0-9]/g, ''))}
                     placeholder={suggestedPasscode || 'e.g. GregoryRo'}
                     maxLength={24}
-                    className="min-w-[10rem] flex-1 border border-[#E8E4DC] rounded-lg px-3 py-1.5 text-sm font-mono"
+                    className="min-w-[10rem] flex-1 border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm font-mono"
                   />
                   <Button
                     type="button"
@@ -466,7 +466,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
                     disabled={busy || passcodeDraft.length < 6}
                     onClick={() => void savePasscode()}
                     className="text-white"
-                    style={{ backgroundColor: '#085508' }}
+                    style={{ backgroundColor: 'var(--brand-green)' }}
                   >
                     Save
                   </Button>

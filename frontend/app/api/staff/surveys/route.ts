@@ -85,7 +85,7 @@ function normalizeFields(raw: unknown): SurveyField[] {
 function normalizeBranding(raw: unknown): SurveyBranding {
   const row = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}
   return {
-    accentColor: String(row.accentColor ?? '#085508').trim() || '#085508',
+    accentColor: String(row.accentColor ?? 'var(--brand-green)').trim() || 'var(--brand-green)',
     thankYouMessage:
       String(row.thankYouMessage ?? 'Thank you. Your response was recorded.').trim() ||
       'Thank you. Your response was recorded.',

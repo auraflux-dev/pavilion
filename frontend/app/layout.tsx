@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     description: demo
       ? `A vanilla PTO operating system demo for ${DEMO_BRAND.school}.`
       : 'Enriching the academic and social experience for all SHMS PTO students and families in Ashburn, Virginia.',
-    images: [{ url: '/shms-logo.png', width: 1200, height: 1200, alt: demo ? DEMO_BRAND.pto : 'SHMS PTO Stingrays' }],
+    images: [{ url: demo ? '/demo/mark.png' : '/shms-logo.png', width: 1200, height: 1200, alt: demo ? DEMO_BRAND.pto : 'SHMS PTO Stingrays' }],
   },
   twitter: {
     card: 'summary',
@@ -58,12 +58,13 @@ export const metadata: Metadata = {
     description: demo
       ? `A vanilla PTO operating system demo for ${DEMO_BRAND.school}.`
       : 'Enriching the academic and social experience for all SHMS PTO students and families in Ashburn, Virginia.',
-    images: ['/shms-logo.png'],
+    images: [demo ? '/demo/mark.png' : '/shms-logo.png'],
   },
   robots: {
     index: !demo,
     follow: !demo,
   },
+  icons: demo ? [{ url: '/demo/mark.png' }] : undefined,
 }
 
 export default function RootLayout({
@@ -72,7 +73,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="bg-background">
+    <html lang="en" data-pto={demo ? 'riverside' : 'shms'} className="bg-background">
+      <head>
+        {demo ? (
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+          />
+        ) : null}
+      </head>
       <body className="font-sans antialiased text-foreground">
         <DemoBanner />
         {children}

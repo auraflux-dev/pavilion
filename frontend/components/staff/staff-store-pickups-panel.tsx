@@ -95,15 +95,15 @@ export function StaffStorePickupsPanel() {
   return (
     <section
       id="cove-store-pickups"
-      className="scroll-mt-28 rounded-xl border-2 border-[#085508] bg-white p-4 sm:p-5 space-y-3"
+      className="scroll-mt-28 rounded-xl border-2 border-[var(--brand-green)] bg-white p-4 sm:p-5 space-y-3"
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#085508]">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--brand-green)]">
             Store window · today
           </p>
           <h2 className="text-lg font-bold flex items-center gap-2 mt-0.5">
-            <Package className="w-5 h-5" style={{ color: '#085508' }} />
+            <Package className="w-5 h-5" style={{ color: 'var(--brand-green)' }} />
             Today&apos;s store pickups
             {pendingCount > 0 ? (
               <span className="text-sm font-bold tabular-nums text-amber-800">
@@ -130,7 +130,7 @@ export function StaffStorePickupsPanel() {
       </div>
 
       {!weekday ? (
-        <p className="text-sm text-[#5A6070] rounded-lg bg-[#FAFCF9] border border-[#E8E4DC] px-3 py-2">
+        <p className="text-sm text-[#5A6070] rounded-lg bg-[#FAFCF9] border border-[var(--border)] px-3 py-2">
           No school store window on weekends. Come back Monday–Friday morning.
         </p>
       ) : null}
@@ -144,7 +144,7 @@ export function StaffStorePickupsPanel() {
       ) : null}
 
       {pending.length > 0 ? (
-        <ul className="divide-y divide-[#E8E4DC] rounded-xl border border-[#E8E4DC] overflow-hidden">
+        <ul className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] overflow-hidden">
           {pending.map((item) => (
             <li
               key={item.id}
@@ -162,7 +162,7 @@ export function StaffStorePickupsPanel() {
                 type="button"
                 disabled={busy}
                 className="text-white font-bold"
-                style={{ backgroundColor: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-green)' }}
                 onClick={() => void mark(item, 'handed_out')}
               >
                 <Check className="w-4 h-4 mr-1" />
@@ -174,11 +174,11 @@ export function StaffStorePickupsPanel() {
       ) : null}
 
       {done.length > 0 ? (
-        <details className="rounded-xl border border-[#E8E4DC] bg-[#FAFCF9]">
+        <details className="rounded-xl border border-[var(--border)] bg-[#FAFCF9]">
           <summary className="cursor-pointer px-3 py-2 text-xs font-bold text-[#5A6070]">
             Handed out today ({done.length})
           </summary>
-          <ul className="divide-y divide-[#E8E4DC] border-t border-[#E8E4DC] bg-white">
+          <ul className="divide-y divide-[var(--border)] border-t border-[var(--border)] bg-white">
             {done.map((item) => (
               <li
                 key={item.id}

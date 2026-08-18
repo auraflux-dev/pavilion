@@ -17,9 +17,9 @@ const CATEGORY_EMOJI: Record<string, string> = {
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-  Candy: { bg: '#EEF6EE', text: '#085508' },
-  Snacks: { bg: '#EEF6EE', text: '#085508' },
-  Drinks: { bg: '#EEF6EE', text: '#085508' },
+  Candy: { bg: 'var(--brand-soft)', text: 'var(--brand-green)' },
+  Snacks: { bg: 'var(--brand-soft)', text: 'var(--brand-green)' },
+  Drinks: { bg: 'var(--brand-soft)', text: 'var(--brand-green)' },
 }
 
 export function StoreGrid({ items }: StoreGridProps) {
@@ -34,7 +34,7 @@ export function StoreGrid({ items }: StoreGridProps) {
   const outOfStock = filtered.filter((i) => !i.inStock)
 
   return (
-    <section id="menu" className="py-8 md:py-12 scroll-mt-28" style={{ backgroundColor: '#F5F0E8' }}>
+    <section id="menu" className="py-8 md:py-12 scroll-mt-28" style={{ backgroundColor: 'var(--brand-warm)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section header */}
@@ -56,8 +56,8 @@ export function StoreGrid({ items }: StoreGridProps) {
               className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
               style={
                 activeCategory === cat
-                  ? { backgroundColor: '#085508', color: 'white' }
-                  : { backgroundColor: 'white', color: '#5A6070', border: '1px solid #E8E4DC' }
+                  ? { backgroundColor: 'var(--brand-green)', color: 'white' }
+                  : { backgroundColor: 'white', color: '#5A6070', border: '1px solid var(--border)' }
               }
               aria-pressed={activeCategory === cat}
             >
@@ -105,10 +105,10 @@ export function StoreGrid({ items }: StoreGridProps) {
 }
 
 function ItemCard({ item }: { item: StoreItem }) {
-  const colors = CATEGORY_COLORS[item.category] ?? { bg: '#F5F0E8', text: '#5A6070' }
+  const colors = CATEGORY_COLORS[item.category] ?? { bg: 'var(--brand-warm)', text: '#5A6070' }
 
   return (
-    <article className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E8E4DC] flex flex-col">
+    <article className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[var(--border)] flex flex-col">
       {/* Product image or emoji fallback */}
       {item.image ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -139,7 +139,7 @@ function ItemCard({ item }: { item: StoreItem }) {
           {item.name}
         </p>
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-base font-bold" style={{ color: '#085508' }}>
+          <span className="text-base font-bold" style={{ color: 'var(--brand-green)' }}>
             ${item.price.toFixed(2)}
           </span>
           {!item.inStock && (

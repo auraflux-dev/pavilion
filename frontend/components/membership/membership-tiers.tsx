@@ -4,16 +4,25 @@ import { getMembershipTiers, type MembershipTier } from '@/lib/api/membership'
 import { MembershipJoinButton } from '@/components/membership/membership-join-button'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getStoreCardBonusPercent } from '@/lib/store-card-bonus'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 const PLACE_ACCENT: Record<string, string> = {
-  reef: '#064206',
+  reef: 'var(--brand-dark)',
   lagoon: '#1B6B1B',
   tide: '#C9A800',
-  faculty: '#085508',
+  faculty: 'var(--brand-green)',
+}
+
+const RIVERSIDE_ACCENT: Record<string, string> = {
+  reef: 'var(--brand-green)',
+  lagoon: '#2c6e8a',
+  tide: 'var(--brand-gold)',
+  faculty: 'var(--brand-dark)',
 }
 
 function tierAccent(tierId: string): string {
-  return PLACE_ACCENT[tierId] ?? '#085508'
+  const map = isDemoInstance() ? RIVERSIDE_ACCENT : PLACE_ACCENT
+  return map[tierId] ?? 'var(--brand-green)'
 }
 
 const fmtDollars = (n: number): string => (Number.isInteger(n) ? String(n) : n.toFixed(2))
@@ -23,7 +32,7 @@ function emphasizePerkCopy(text: string): ReactNode {
   const parts = text.split(/(\$\d+(?:\.\d+)?|\d+(?:\.\d+)?%|\b\d+\b|\bfree\b)/gi)
   return parts.map((part, i) =>
     /^(\$\d+(?:\.\d+)?|\d+(?:\.\d+)?%|\d+)$/.test(part) || /^free$/i.test(part) ? (
-      <strong key={i} className="font-bold text-[#085508]">
+      <strong key={i} className="font-bold text-[var(--brand-green)]">
         {part}
       </strong>
     ) : (
@@ -95,13 +104,13 @@ export async function MembershipTiers() {
         <article
           key={tier.id}
           className={`bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col relative ${
-            tier.popular ? 'ring-2 ring-[#085508]' : 'border border-[#E8E4DC]'
+            tier.popular ? 'ring-2 ring-[var(--brand-green)]' : 'border border-[var(--border)]'
           }`}
         >
           {tier.popular && (
             <div
               className="absolute top-4 right-4 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               <Star className="w-3 h-3 fill-current" aria-hidden="true" />
               Most Popular
@@ -118,7 +127,7 @@ export async function MembershipTiers() {
             <div className="mb-6">
               <span
                 className="text-xs font-bold tracking-widest uppercase px-2.5 py-1 rounded-full"
-                style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-soft)', color: 'var(--brand-green)' }}
               >
                 {tier.name}
               </span>
@@ -136,13 +145,13 @@ export async function MembershipTiers() {
                 </p>
                 <p className="text-xs text-[#8A6400]">
                   Get an extra{' '}
-                  <strong className="font-bold text-[#085508]">{bonusPercent}%</strong> on
+                  <strong className="font-bold text-[var(--brand-green)]">{bonusPercent}%</strong> on
                   your PTO card.{' '}
-                  <strong className="font-bold text-[#085508]">
+                  <strong className="font-bold text-[var(--brand-green)]">
                     ${tier.giftCardCredit}
                   </strong>{' '}
                   becomes{' '}
-                  <strong className="font-bold text-[#085508]">
+                  <strong className="font-bold text-[var(--brand-green)]">
                     ${fmtDollars(tier.giftCardCredit * (1 + bonusPercent / 100))}
                   </strong>{' '}
                   loaded.
@@ -156,7 +165,7 @@ export async function MembershipTiers() {
                   <li key={perk} className="flex items-start gap-2.5">
                     <CheckCircle2
                       className="w-4 h-4 mt-0.5 shrink-0"
-                      style={{ color: '#085508' }}
+                      style={{ color: 'var(--brand-green)' }}
                       aria-hidden="true"
                     />
                     <span className="text-sm text-[#1A1A1A] text-left">

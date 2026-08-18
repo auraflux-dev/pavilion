@@ -38,7 +38,7 @@ export function PowrEmbed({ html, title = 'Survey' }: { html: string; title?: st
 
   if (!src) {
     return (
-      <div className="rounded-2xl border border-[#E8E4DC] bg-white p-6 text-center">
+      <div className="rounded-2xl border border-[var(--border)] bg-white p-6 text-center">
         <p className="text-sm font-semibold text-[#1A1A1A]">POWR embed could not be shown</p>
         <p className="text-xs text-[#5A6070] mt-1">
           Paste a powr.io iframe URL or embed that includes an https://powr.io src.
@@ -51,7 +51,7 @@ export function PowrEmbed({ html, title = 'Survey' }: { html: string; title?: st
     <iframe
       src={src}
       title={title}
-      className="w-full min-h-[640px] rounded-2xl border border-[#E8E4DC] bg-white"
+      className="w-full min-h-[640px] rounded-2xl border border-[var(--border)] bg-white"
       loading="lazy"
       referrerPolicy="no-referrer"
       // Scripts/forms needed for POWR; omit allow-same-origin to avoid sandbox escape.

@@ -41,11 +41,11 @@ export function KnowledgeBase({
 
   if (active) {
     return (
-      <section className="rounded-xl border border-[#E8E4DC] bg-white overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#E8E4DC] space-y-2">
+      <section className="rounded-xl border border-[var(--border)] bg-white overflow-hidden">
+        <div className="px-5 py-4 border-b border-[var(--border)] space-y-2">
           <Link
             href={indexHref}
-            className="text-xs font-semibold text-[#085508] hover:underline inline-flex items-center gap-1"
+            className="text-xs font-semibold text-[var(--brand-green)] hover:underline inline-flex items-center gap-1"
           >
             ← All help
           </Link>
@@ -65,8 +65,8 @@ export function KnowledgeBase({
   }
 
   return (
-    <section className="rounded-xl border border-[#E8E4DC] bg-white overflow-hidden">
-      <header className="px-5 py-4 border-b border-[#E8E4DC]">
+    <section className="rounded-xl border border-[var(--border)] bg-white overflow-hidden">
+      <header className="px-5 py-4 border-b border-[var(--border)]">
         <h1 className="text-xl font-bold text-[#1A1A1A]">{title}</h1>
         <p className="text-sm text-[#5A6070] mt-1 leading-relaxed">{subtitle}</p>
       </header>
@@ -74,14 +74,14 @@ export function KnowledgeBase({
       <div className="grid gap-0 lg:grid-cols-[minmax(0,14rem)_1fr]">
         <nav
           aria-label="Help categories"
-          className="border-b lg:border-b-0 lg:border-r border-[#E8E4DC] p-3 space-y-1"
+          className="border-b lg:border-b-0 lg:border-r border-[var(--border)] p-3 space-y-1"
         >
           <button
             type="button"
             onClick={() => setCategoryId('all')}
             className={`w-full text-left rounded-lg px-2.5 py-2 text-sm transition-colors ${
               categoryId === 'all'
-                ? 'bg-[#E8F3E8] text-[#085508] font-semibold'
+                ? 'bg-[#E8F3E8] text-[var(--brand-green)] font-semibold'
                 : 'hover:bg-[#F7F5F0] text-[#1A1A1A]'
             }`}
           >
@@ -94,7 +94,7 @@ export function KnowledgeBase({
               onClick={() => setCategoryId(category.id)}
               className={`w-full text-left rounded-lg px-2.5 py-2 text-sm transition-colors ${
                 categoryId === category.id
-                  ? 'bg-[#E8F3E8] text-[#085508] font-semibold'
+                  ? 'bg-[#E8F3E8] text-[var(--brand-green)] font-semibold'
                   : 'hover:bg-[#F7F5F0] text-[#1A1A1A]'
               }`}
             >
@@ -112,7 +112,7 @@ export function KnowledgeBase({
               <h2 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">
                 {category.title}
               </h2>
-              <ul className="divide-y border border-[#E8E4DC] rounded-lg overflow-hidden">
+              <ul className="divide-y border border-[var(--border)] rounded-lg overflow-hidden">
                 {articles.map((article) => (
                   <li key={article.slug}>
                     <Link
@@ -121,7 +121,7 @@ export function KnowledgeBase({
                     >
                       <BookOpen
                         className="w-4 h-4 mt-0.5 shrink-0"
-                        style={{ color: '#085508' }}
+                        style={{ color: 'var(--brand-green)' }}
                         aria-hidden
                       />
                       <span className="min-w-0 flex-1">

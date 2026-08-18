@@ -30,7 +30,7 @@ export async function UpcomingEvents() {
     <section
       id="events"
       className="scroll-mt-28 py-20 md:py-28"
-      style={{ backgroundColor: '#F5F0E8' }}
+      style={{ backgroundColor: 'var(--brand-warm)' }}
       aria-labelledby="events-heading"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -39,7 +39,7 @@ export async function UpcomingEvents() {
           <div>
             <div
               className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
-              style={{ backgroundColor: '#085508', color: 'white' }}
+              style={{ backgroundColor: 'var(--brand-green)', color: 'white' }}
             >
               Mark Your Calendar
             </div>
@@ -54,7 +54,7 @@ export async function UpcomingEvents() {
           <a
             href="/events"
             className="inline-flex items-center gap-2 text-sm font-semibold shrink-0 hover:underline underline-offset-4"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
           >
             View full calendar
             <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -76,7 +76,7 @@ export async function UpcomingEvents() {
                 {/* Colored top bar */}
                 <div
                   className="h-1.5"
-                  style={{ backgroundColor: '#085508' }}
+                  style={{ backgroundColor: 'var(--brand-green)' }}
                   aria-hidden="true"
                 />
 
@@ -85,7 +85,7 @@ export async function UpcomingEvents() {
                   <div className="flex items-start justify-between mb-5">
                     <div
                       className="w-14 h-14 rounded-xl flex flex-col items-center justify-center shadow-sm"
-                      style={{ backgroundColor: '#085508' }}
+                      style={{ backgroundColor: 'var(--brand-green)' }}
                       aria-label={`${month} ${day}`}
                     >
                       <span className="text-white/80 text-xs font-bold uppercase tracking-wider leading-none">
@@ -97,7 +97,7 @@ export async function UpcomingEvents() {
                     </div>
                     <span
                       className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
+                      style={{ backgroundColor: 'var(--brand-soft)', color: 'var(--brand-green)' }}
                     >
                       {category}
                     </span>
@@ -130,7 +130,7 @@ export async function UpcomingEvents() {
                   <Button
                     variant="outline"
                     className="w-full font-semibold border-2 hover:text-white transition-colors"
-                    style={{ borderColor: '#085508', color: '#085508' }}
+                    style={{ borderColor: 'var(--brand-green)', color: 'var(--brand-green)' }}
                     asChild
                   >
                     <a href="/events">

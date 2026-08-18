@@ -105,7 +105,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
     return (
       <span
         className="inline-flex w-full sm:w-auto justify-center text-xs font-bold px-3 py-2 rounded-full text-white/70"
-        style={{ backgroundColor: '#085508' }}
+        style={{ backgroundColor: 'var(--brand-green)' }}
       >
         …
       </span>
@@ -118,7 +118,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
       <a
         href={`/auth/join?returnTo=${returnTo}`}
         className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 rounded-full border-2 transition-colors whitespace-nowrap"
-        style={{ borderColor: '#085508', color: '#085508' }}
+        style={{ borderColor: 'var(--brand-green)', color: 'var(--brand-green)' }}
         title="Create a free parent account or log in to buy"
       >
         <Lock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
@@ -134,7 +134,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
         onClick={() => void startBuy()}
         disabled={loadingVariants}
         className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 rounded-full transition-colors text-white disabled:opacity-70 whitespace-nowrap"
-        style={{ backgroundColor: '#085508' }}
+        style={{ backgroundColor: 'var(--brand-green)' }}
       >
         {loadingVariants ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : null}
         Buy
@@ -153,7 +153,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
             if (e.target === e.currentTarget) closeAll()
           }}
         >
-          <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl border border-[#E8E4DC] p-5">
+          <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl border border-[var(--border)] p-5">
             <div className="flex items-start justify-between gap-3 mb-3">
               <div>
                 <h2
@@ -190,9 +190,9 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
                     className={`px-3 py-2 rounded-full text-sm font-semibold border-2 transition-colors ${
                       active
                         ? 'text-white border-transparent'
-                        : 'text-[#1A1C23] border-[#D8D2C8] bg-white hover:border-[#085508]'
+                        : 'text-[#1A1C23] border-[#D8D2C8] bg-white hover:border-[var(--brand-green)]'
                     }`}
-                    style={active ? { backgroundColor: '#085508' } : undefined}
+                    style={active ? { backgroundColor: 'var(--brand-green)' } : undefined}
                   >
                     {v.label}
                   </button>
@@ -206,7 +206,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
               type="button"
               onClick={continueToPay}
               className="w-full text-sm font-bold py-2.5 rounded-full text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               Continue · ${chargeAmount.toFixed(2)}
             </button>

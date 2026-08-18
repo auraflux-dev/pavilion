@@ -248,7 +248,7 @@ export function StoreCardReload({
         type="button"
         onClick={() => setOpen(true)}
         className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg text-white disabled:opacity-50 ${triggerClassName}`}
-        style={{ backgroundColor: '#085508' }}
+        style={{ backgroundColor: 'var(--brand-green)' }}
       >
         <CreditCard className="w-3.5 h-3.5" /> {triggerLabel}
       </button>
@@ -256,7 +256,7 @@ export function StoreCardReload({
   }
 
   return (
-    <div className="w-full rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] p-4 space-y-4">
+    <div className="w-full rounded-xl border border-[var(--brand-line)] bg-[#FAFCF9] p-4 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-bold text-[#1A1A1A]">{vanillaizeIfDemo('Load the family Cove Digital Card')}</p>
         <button type="button" onClick={() => setOpen(false)} aria-label="Close reload form">
@@ -292,8 +292,8 @@ export function StoreCardReload({
               }}
               className={`min-w-[3.5rem] rounded-lg border-2 px-2 py-2 text-sm font-bold ${
                 amount === value && !customAmount
-                  ? 'border-[#085508] bg-[#EEF6EE] text-[#085508]'
-                  : 'border-[#E8E4DC] bg-white text-[#5A6070]'
+                  ? 'border-[var(--brand-green)] bg-[var(--brand-soft)] text-[var(--brand-green)]'
+                  : 'border-[var(--border)] bg-white text-[#5A6070]'
               }`}
             >
               ${value}
@@ -315,11 +315,11 @@ export function StoreCardReload({
               if (Number.isInteger(n) && n >= 1 && n <= maxAmount) setAmount(n)
             }}
             placeholder={`e.g. 75`}
-            className="mt-1 w-full px-3 py-2 text-sm border border-[#E8E4DC] rounded-lg bg-white"
+            className="mt-1 w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg bg-white"
           />
         </label>
         {appliedBonus > 0 ? (
-          <p className="mt-2 text-[11px] text-[#085508] font-semibold">
+          <p className="mt-2 text-[11px] text-[var(--brand-green)] font-semibold">
             First-load bonus: pay ${amount} · get $
             {(amount * (1 + appliedBonus / 100)).toFixed(2).replace(/\.00$/, '')}{' '}
             {vanillaizeIfDemo('on the Cove Digital Card')} (
@@ -396,7 +396,7 @@ export function StoreCardReload({
           (!useStored && !ready)
         }
         className="w-full text-white font-bold"
-        style={{ backgroundColor: '#085508' }}
+        style={{ backgroundColor: 'var(--brand-green)' }}
       >
         {busy ? (
           <Loader2 className="w-4 h-4 animate-spin" />

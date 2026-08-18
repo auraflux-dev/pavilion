@@ -18,7 +18,7 @@ export default async function MemberHelpIndexPage() {
 
   return (
     <MemberShell>
-      <main id="main-content" className="flex-1" style={{ backgroundColor: '#F5F0E8' }}>
+      <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
           <div className="mb-8">
             <PortalHelpForm />

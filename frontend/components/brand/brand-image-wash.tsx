@@ -2,6 +2,8 @@
  * Soft photo wash for cream / white section dead space.
  * Real campus imagery, faded and masked. not pattern ribbons.
  */
+import { isDemoInstance } from '@/lib/demo/instance'
+
 export function BrandImageWash({
   src,
   side = 'right',
@@ -11,6 +13,7 @@ export function BrandImageWash({
   side?: 'left' | 'right'
   className?: string
 }) {
+  if (isDemoInstance()) return null
   return (
     <div
       className={`pointer-events-none absolute inset-y-0 ${

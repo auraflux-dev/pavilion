@@ -53,7 +53,7 @@ function MailBody({ text, html }: { text: string; html: string }) {
  <iframe
  title="Email body"
  sandbox="allow-popups allow-popups-to-escape-sandbox"
-        srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8" /><base target="_blank" rel="noopener" /><style>html,body{margin:0;padding:0;}body{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#1A1A1A;padding:4px 2px;word-break:break-word;}a{color:#085508;}img{max-width:100%;height:auto;}</style></head><body>${sanitizeEmailHtml(rich)}</body></html>`}
+        srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8" /><base target="_blank" rel="noopener" /><style>html,body{margin:0;padding:0;}body{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#1A1A1A;padding:4px 2px;word-break:break-word;}a{color:var(--brand-green);}img{max-width:100%;height:auto;}</style></head><body>${sanitizeEmailHtml(rich)}</body></html>`}
  className="w-full border-0 bg-transparent"
  style={{ minHeight: '8rem', height: 'auto' }}
  onLoad={(e) => {
@@ -655,14 +655,14 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  type="button"
  onClick={() => selectFolder(f.id)}
  className={`w-full flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors ${
- active ? 'bg-[#E8F3E8] text-[#085508] font-semibold' : 'hover:bg-[#F7F5F0] text-[#1A1A1A]'
+ active ? 'bg-[#E8F3E8] text-[var(--brand-green)] font-semibold' : 'hover:bg-[#F7F5F0] text-[#1A1A1A]'
  }`}
  >
         <span className="truncate">{folderLabel(f)}</span>
  {unread > 0 ? (
  <span
  className={`shrink-0 min-w-[1.25rem] rounded-full px-1.5 py-0.5 text-center text-[10px] font-bold tabular-nums ${
- active ? 'bg-[#085508] text-white' : 'bg-[#085508]/15 text-[#085508]'
+ active ? 'bg-[var(--brand-green)] text-white' : 'bg-[var(--brand-green)]/15 text-[var(--brand-green)]'
  }`}
  >
  {unread > 99 ? '99+' : unread}
@@ -673,7 +673,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  }
 
  return (
- <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+ <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
  <div className="flex flex-wrap items-start justify-between gap-3">
  <div>
           <h1 className="text-xl font-bold">{title}</h1>
@@ -686,7 +686,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  <Button
  type="button"
  className="text-white"
- style={{ backgroundColor: '#085508' }}
+ style={{ backgroundColor: 'var(--brand-green)' }}
  onClick={startCompose}
  >
  New email
@@ -698,7 +698,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  </Button>
  ) : null}
  {status && !status.connected && status.connectAvailable ? (
- <Button asChild className="text-white" style={{ backgroundColor: '#085508' }}>
+ <Button asChild className="text-white" style={{ backgroundColor: 'var(--brand-green)' }}>
               <a href="/api/staff/workspace/connect">Connect Google</a>
  </Button>
  ) : null}
@@ -706,7 +706,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
       </div>
 
  {signatureOpen ? (
- <div className="rounded-lg border border-[#E8E4DC] bg-[#F7F5F0] p-3 space-y-2">
+ <div className="rounded-lg border border-[var(--border)] bg-[#F7F5F0] p-3 space-y-2">
  <p className="text-xs text-[#5A6070]">
  Appended to new emails, replies, and forwards when “Include signature” is checked.
           </p>
@@ -715,14 +715,14 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  onChange={(e) => setSignatureDraft(e.target.value)}
  rows={5}
  placeholder={'Jane Doe\nVP Membership · SHMS PTO\nvp-membershipexperience@shmspto.org'}
- className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+ className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
  />
  <Button
  type="button"
  disabled={busy}
  onClick={() => void saveSignature()}
  className="text-white"
- style={{ backgroundColor: '#085508' }}
+ style={{ backgroundColor: 'var(--brand-green)' }}
  >
  Save signature
  </Button>
@@ -736,7 +736,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  ) : null}
 
  {googleJustConnected && status?.connected ? (
- <div className="rounded-lg border border-[#085508]/30 bg-[#E8F3E8] px-3 py-2 text-xs text-[#085508]">
+ <div className="rounded-lg border border-[var(--brand-green)]/30 bg-[#E8F3E8] px-3 py-2 text-xs text-[var(--brand-green)]">
           <p className="font-bold">Google connected as {status.email}</p>
  <p className="mt-1 text-[#1A1A1A]/80">
  This is your Workspace inbox (same mail as Gmail). Bold rows are unread. Purchase
@@ -752,12 +752,12 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  ) : null}
 
  {tab === 'inbox' && status?.connected && (mode === 'compose' || mode === 'forward') ? (
- <div className="rounded-lg border border-[#E8E4DC] p-4 space-y-3">
+ <div className="rounded-lg border border-[var(--border)] p-4 space-y-3">
  <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-bold">{mode === 'forward' ? 'Forward' : 'New email'}</p>
  <button
  type="button"
- className="text-xs font-bold underline text-[#085508]"
+ className="text-xs font-bold underline text-[var(--brand-green)]"
  onClick={() => setMode('read')}
  >
  Cancel
@@ -767,20 +767,20 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  value={composeTo}
  onChange={(e) => setComposeTo(e.target.value)}
  placeholder="To (email)"
- className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+ className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
  />
  <input
  value={composeCc}
  onChange={(e) => setComposeCc(e.target.value)}
  placeholder="Cc (optional)"
- className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+ className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
  />
  {mode === 'compose' ? (
  <input
  value={composeSubject}
  onChange={(e) => setComposeSubject(e.target.value)}
  placeholder="Subject"
- className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+ className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
  />
  ) : (
             <p className="text-xs text-[#5A6070]">Subject: {composeSubject}</p>
@@ -790,7 +790,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  onChange={(e) => setComposeBody(e.target.value)}
  rows={8}
  placeholder={mode === 'forward' ? 'Add a note above the forwarded message…' : 'Message'}
- className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+ className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
  />
  <div className="flex flex-wrap items-center gap-2">
  <Button
@@ -829,7 +829,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  }
  onClick={() => void sendComposeOrForward()}
  className="text-white"
- style={{ backgroundColor: '#085508' }}
+ style={{ backgroundColor: 'var(--brand-green)' }}
  >
  {mode === 'forward' ? 'Send forward' : 'Send email'}
  </Button>
@@ -840,15 +840,15 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  <div className="grid grid-cols-1 lg:grid-cols-[12rem_minmax(0,20rem)_minmax(0,1fr)] gap-0 lg:gap-3 lg:min-h-[min(70vh,40rem)] lg:h-[min(70vh,40rem)]">
  {/* Folders sidebar. compact on desktop; collapsible strip on mobile when reading */}
  <aside
- className={`border border-[#E8E4DC] rounded-lg flex flex-col min-h-0 bg-[#FBFBF9] lg:max-h-none ${
+ className={`border border-[var(--border)] rounded-lg flex flex-col min-h-0 bg-[#FBFBF9] lg:max-h-none ${
  selectedThread ? 'hidden lg:flex' : 'flex max-h-48 lg:max-h-none'
  }`}
  >
- <div className="px-2.5 py-2 border-b border-[#E8E4DC] flex items-center justify-between gap-2">
+ <div className="px-2.5 py-2 border-b border-[var(--border)] flex items-center justify-between gap-2">
               <p className="text-[11px] font-bold uppercase tracking-wide text-[#5A6070]">Folders</p>
  <button
  type="button"
- className="text-[11px] font-bold underline text-[#085508]"
+ className="text-[11px] font-bold underline text-[var(--brand-green)]"
  disabled={busy}
  onClick={() => void syncFolders()}
  >
@@ -878,12 +878,12 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  </>
  ) : null}
             </nav>
- <div className="border-t border-[#E8E4DC] p-2 space-y-1.5">
+ <div className="border-t border-[var(--border)] p-2 space-y-1.5">
  <input
  value={newFolderName}
  onChange={(e) => setNewFolderName(e.target.value)}
  placeholder="New folder"
- className="w-full border border-[#E8E4DC] rounded-md px-2 py-1.5 text-xs bg-white"
+ className="w-full border border-[var(--border)] rounded-md px-2 py-1.5 text-xs bg-white"
  />
  <Button
  type="button"
@@ -899,11 +899,11 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
 
  {/* Thread list. hide on mobile once a conversation is open */}
  <div
- className={`border border-[#E8E4DC] rounded-lg overflow-auto divide-y min-h-0 bg-white lg:max-h-none ${
+ className={`border border-[var(--border)] rounded-lg overflow-auto divide-y min-h-0 bg-white lg:max-h-none ${
  selectedThread ? 'hidden lg:block' : 'block max-h-[min(50vh,24rem)] lg:max-h-none'
  }`}
  >
- <div className="sticky top-0 bg-white px-3 py-2 border-b border-[#E8E4DC] z-10">
+ <div className="sticky top-0 bg-white px-3 py-2 border-b border-[var(--border)] z-10">
  <p className="text-xs font-bold text-[#1A1A1A]">
  {folderLabel(
  sidebarFolders.find((f) => f.id === activeLabelId) ?? {
@@ -924,7 +924,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  onClick={() => void openThread(t.id)}
  className={`w-full text-left px-3 py-2.5 hover:bg-[#F7F5F0] border-l-2 ${
  selectedThread?.id === t.id
- ? 'bg-[#F0F7F0] border-[#085508]'
+ ? 'bg-[var(--brand-mist)] border-[var(--brand-green)]'
  : 'border-transparent'
  }`}
  >
@@ -947,7 +947,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
 
  {/* Reading pane. one scroll; full width on mobile when open */}
  <div
- className={`border border-[#E8E4DC] rounded-lg bg-white min-h-0 flex flex-col ${
+ className={`border border-[var(--border)] rounded-lg bg-white min-h-0 flex flex-col ${
  selectedThread ? 'flex' : 'hidden lg:flex'
  }`}
  >
@@ -957,10 +957,10 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
               </p>
  ) : (
  <>
- <div className="shrink-0 px-4 pt-3 pb-2 border-b border-[#E8E4DC] space-y-2">
+ <div className="shrink-0 px-4 pt-3 pb-2 border-b border-[var(--border)] space-y-2">
  <button
  type="button"
- className="lg:hidden text-xs font-semibold text-[#085508] underline"
+ className="lg:hidden text-xs font-semibold text-[var(--brand-green)] underline"
  onClick={() => {
  setSelectedThread(null)
  setReplyToMessageId(null)
@@ -993,7 +993,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  if (e.target.value) void moveSelected(e.target.value)
  e.target.value = ''
  }}
- className="border border-[#E8E4DC] rounded-lg px-2 py-1.5 text-xs"
+ className="border border-[var(--border)] rounded-lg px-2 py-1.5 text-xs"
  >
                       <option value="">Move to folder…</option>
  {moveFolders.map((f) => (
@@ -1010,9 +1010,9 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  <article
  key={m.id}
  className={`${
- idx > 0 ? 'border-t border-[#E8E4DC] pt-5' : ''
+ idx > 0 ? 'border-t border-[var(--border)] pt-5' : ''
  } ${
- m.id === replyToMessageId ? 'rounded-lg bg-[#F0F7F0] -mx-2 px-2 py-2' : ''
+ m.id === replyToMessageId ? 'rounded-lg bg-[var(--brand-mist)] -mx-2 px-2 py-2' : ''
  }`}
  >
  <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
@@ -1022,7 +1022,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
                         </div>
  <button
  type="button"
- className="text-[11px] font-bold underline text-[#085508] shrink-0"
+ className="text-[11px] font-bold underline text-[var(--brand-green)] shrink-0"
  onClick={() => setReplyToMessageId(m.id)}
  >
  Reply to this
@@ -1035,7 +1035,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  <li key={`${m.id}-${a.attachmentId}`}>
  <a
                                 href={`/api/staff/workspace/mail/attachment?messageId=${encodeURIComponent(m.id)}&attachmentId=${encodeURIComponent(a.attachmentId)}&filename=${encodeURIComponent(a.filename)}&mimeType=${encodeURIComponent(a.mimeType)}`}
- className="inline-flex text-xs font-semibold text-[#085508] underline"
+ className="inline-flex text-xs font-semibold text-[var(--brand-green)] underline"
  target="_blank"
  rel="noreferrer"
  >
@@ -1050,13 +1050,13 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  ))}
                 </div>
 
- <div className="shrink-0 border-t border-[#E8E4DC] px-4 py-3 space-y-2 bg-[#FBFBF9]">
+ <div className="shrink-0 border-t border-[var(--border)] px-4 py-3 space-y-2 bg-[#FBFBF9]">
  <textarea
  value={reply}
  onChange={(e) => setReply(e.target.value)}
  rows={3}
  placeholder="Type your reply…"
- className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm bg-white"
+ className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
  />
  <div className="flex flex-wrap items-center gap-2">
  <Button
@@ -1089,7 +1089,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  disabled={busy || !reply.trim()}
  onClick={() => void sendReply()}
  className="text-white"
- style={{ backgroundColor: '#085508' }}
+ style={{ backgroundColor: 'var(--brand-green)' }}
  >
  Send reply
  </Button>
@@ -1102,7 +1102,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
 
  {tab === 'calendar' && status?.connected ? (
  <div className="space-y-3">
- <ul className="divide-y border border-[#E8E4DC] rounded-lg">
+ <ul className="divide-y border border-[var(--border)] rounded-lg">
  {events.length === 0 ? (
               <li className="p-3 text-sm text-[#5A6070]">No upcoming events on your primary calendar.</li>
  ) : (
@@ -1123,7 +1123,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  {e.location ? ` · ${e.location}` : ''}
                       </p>
                     </div>
-                    <span className="text-xs font-bold text-[#085508] self-center">Details</span>
+                    <span className="text-xs font-bold text-[var(--brand-green)] self-center">Details</span>
                   </button>
                 </li>
  ))
@@ -1131,12 +1131,12 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
           </ul>
 
  {selectedEvent ? (
- <div className="rounded-lg border border-[#E8E4DC] bg-white p-4 space-y-2">
+ <div className="rounded-lg border border-[var(--border)] bg-white p-4 space-y-2">
  <div className="flex items-start justify-between gap-2">
                 <h3 className="text-base font-bold text-[#1A1A1A]">{selectedEvent.summary}</h3>
  <button
  type="button"
- className="text-xs font-semibold underline text-[#085508] shrink-0"
+ className="text-xs font-semibold underline text-[var(--brand-green)] shrink-0"
  onClick={() => setSelectedEvent(null)}
  >
  Close
@@ -1161,7 +1161,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  target="_blank"
  rel="noreferrer"
  className="inline-flex items-center rounded-lg px-3 py-2 text-sm font-semibold text-white"
- style={{ backgroundColor: '#085508' }}
+ style={{ backgroundColor: 'var(--brand-green)' }}
  >
  Join meeting
                   </a>
@@ -1175,7 +1175,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  href={a.fileUrl}
  target="_blank"
  rel="noreferrer"
- className="font-semibold text-[#085508] underline"
+ className="font-semibold text-[var(--brand-green)] underline"
  >
  {a.title}
                       </a>
@@ -1184,7 +1184,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
                 </ul>
  ) : null}
  {selectedEvent.description ? (
- <div className="text-sm text-[#1A1A1A] whitespace-pre-wrap border-t border-[#E8E4DC] pt-2">
+ <div className="text-sm text-[#1A1A1A] whitespace-pre-wrap border-t border-[var(--border)] pt-2">
  {selectedEvent.description
                     .replace(/<br\s*\/?\s*>/gi, '\n')
                     .replace(/<\/p>/gi, '\n\n')
@@ -1204,7 +1204,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  ) : null}
 
  {tab === 'docs' && status?.connected ? (
- <ul className="divide-y border border-[#E8E4DC] rounded-lg">
+ <ul className="divide-y border border-[var(--border)] rounded-lg">
  {docs.length === 0 ? (
  <li className="p-3 text-sm text-[#5A6070]">
  No Docs/Sheets/Slides found. Share the PTO Shared drive with board emails, or set
@@ -1231,7 +1231,7 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  {f.modifiedTime ? formatWhen(f.modifiedTime) : f.mimeType}
                     </p>
                   </div>
-                  <span className="text-xs font-bold text-[#085508] self-center">Open here</span>
+                  <span className="text-xs font-bold text-[var(--brand-green)] self-center">Open here</span>
                 </button>
               </li>
  ))
@@ -1241,13 +1241,13 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
  {tab === 'docs' && embedUrl ? (
  <div
  ref={embedPanelRef}
- className="rounded-lg border border-[#E8E4DC] overflow-hidden bg-white"
+ className="rounded-lg border border-[var(--border)] overflow-hidden bg-white"
  >
- <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[#E8E4DC]">
+ <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--border)]">
             <p className="text-xs font-bold truncate">{embedTitle || 'Preview'}</p>
  <button
  type="button"
- className="text-xs font-semibold underline text-[#085508] shrink-0"
+ className="text-xs font-semibold underline text-[var(--brand-green)] shrink-0"
  onClick={() => setEmbedUrl(null)}
  >
  Close

@@ -15,13 +15,13 @@ export function DealsStrip({ items }: DealsStripProps) {
   if (items.length === 0) return null
 
   return (
-    <section className="py-7 md:py-9 border-b border-[#E8E4DC]" style={{ backgroundColor: '#FFF8E7' }}>
+    <section className="py-7 md:py-9 border-b border-[var(--border)]" style={{ backgroundColor: '#FFF8E7' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             <Zap className="w-5 h-5 text-white fill-current" aria-hidden="true" />
           </div>
@@ -36,7 +36,7 @@ export function DealsStrip({ items }: DealsStripProps) {
           {items.map((item) => (
             <article
               key={item._id}
-              className="snap-start shrink-0 w-44 bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E8E4DC] flex flex-col"
+              className="snap-start shrink-0 w-44 bg-white rounded-2xl overflow-hidden shadow-sm border border-[var(--border)] flex flex-col"
             >
               {/* Product image or emoji fallback */}
               {item.image ? (
@@ -49,7 +49,7 @@ export function DealsStrip({ items }: DealsStripProps) {
               ) : (
                 <div
                   className="h-28 flex items-center justify-center text-4xl"
-                  style={{ backgroundColor: '#F5F0E8' }}
+                  style={{ backgroundColor: 'var(--brand-warm)' }}
                   aria-hidden="true"
                 >
                   {CATEGORY_EMOJI[item.category] ?? '🍬'}
@@ -64,7 +64,7 @@ export function DealsStrip({ items }: DealsStripProps) {
                   {item.name}
                 </p>
                 <div className="mt-auto flex items-center justify-between">
-                  <span className="text-lg font-bold" style={{ color: '#085508' }}>
+                  <span className="text-lg font-bold" style={{ color: 'var(--brand-green)' }}>
                     ${item.price.toFixed(2)}
                   </span>
                   {!item.inStock && (

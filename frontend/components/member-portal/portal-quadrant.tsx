@@ -15,7 +15,7 @@ type Props = {
 export function PortalQuadrant({
   title,
   icon: Icon,
-  accent = '#085508',
+  accent = 'var(--brand-green)',
   action,
   children,
   className = '',
@@ -24,13 +24,13 @@ export function PortalQuadrant({
   return (
     <section
       id={id}
-      className={`bg-white rounded-2xl border border-[#E8E4DC] shadow-sm flex flex-col min-h-[280px] scroll-mt-28 ${className}`}
+      className={`bg-white rounded-2xl border border-[var(--border)] shadow-sm flex flex-col min-h-[280px] scroll-mt-28 ${className}`}
     >
       <header className="flex items-center justify-between gap-3 px-5 py-4 border-b border-[#F0EDE8]">
         <div className="flex items-center gap-2.5 min-w-0">
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{ backgroundColor: '#EEF6EE' }}
+            style={{ backgroundColor: 'var(--brand-soft)' }}
           >
             <Icon className="w-4.5 h-4.5" style={{ color: accent, width: 18, height: 18 }} />
           </div>

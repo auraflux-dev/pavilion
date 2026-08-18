@@ -314,7 +314,7 @@ export function StaffMembershipPanel() {
     <div className="space-y-5">
       <section
         id="membership-invite"
-        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+        className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -329,7 +329,7 @@ export function StaffMembershipPanel() {
             target="_blank"
             rel="noreferrer"
             className="text-xs font-bold underline shrink-0"
-            style={{ color: '#085508' }}
+            style={{ color: 'var(--brand-green)' }}
           >
             Print table card
           </a>
@@ -344,26 +344,26 @@ export function StaffMembershipPanel() {
                 placeholder="Parent email *"
                 type="email"
                 autoComplete="email"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm sm:col-span-2"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm sm:col-span-2"
               />
               <input
                 value={inviteFirst}
                 onChange={(e) => setInviteFirst(e.target.value)}
                 placeholder="First name"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
               <input
                 value={inviteLast}
                 onChange={(e) => setInviteLast(e.target.value)}
                 placeholder="Last name"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
               <input
                 value={invitePhone}
                 onChange={(e) => setInvitePhone(e.target.value)}
                 placeholder="Phone (for your notes / SMS)"
                 type="tel"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm sm:col-span-2"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm sm:col-span-2"
               />
             </div>
             <div className="flex flex-wrap gap-2">
@@ -372,7 +372,7 @@ export function StaffMembershipPanel() {
                 disabled={inviteBusy || !inviteEmail.trim()}
                 onClick={() => void inviteFreeParent(true)}
                 className="text-white"
-                style={{ backgroundColor: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-green)' }}
               >
                 Send join link
               </Button>
@@ -405,8 +405,8 @@ export function StaffMembershipPanel() {
               {invitePhone.replace(/\D/g, '').length >= 10 && inviteSmsText ? (
                 <a
                   href={`sms:${invitePhone.replace(/\D/g, '')}?&body=${encodeURIComponent(inviteSmsText)}`}
-                  className="inline-flex items-center rounded-lg border border-[#E8E4DC] px-3 py-2 text-xs font-bold"
-                  style={{ color: '#085508' }}
+                  className="inline-flex items-center rounded-lg border border-[var(--border)] px-3 py-2 text-xs font-bold"
+                  style={{ color: 'var(--brand-green)' }}
                 >
                   Open Messages
                 </a>
@@ -420,10 +420,10 @@ export function StaffMembershipPanel() {
             ) : null}
           </div>
 
-          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-[#E8E4DC] bg-[#F7F4EE] p-4 min-w-[160px]">
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[#F7F4EE] p-4 min-w-[160px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={joinQrSrc} alt="Scan to join free" width={140} height={140} />
-            <p className="text-xs font-bold text-[#085508]">Scan to join free</p>
+            <p className="text-xs font-bold text-[var(--brand-green)]">Scan to join free</p>
             <p className="text-[10px] text-[#5A6070] text-center break-all px-1">{publicJoinUrl}</p>
           </div>
         </div>
@@ -431,7 +431,7 @@ export function StaffMembershipPanel() {
 
       <section
         id="membership-roster"
-        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+        className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -457,12 +457,12 @@ export function StaffMembershipPanel() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search name, email, phone"
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm sm:col-span-2"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm sm:col-span-2"
           />
           <select
             value={tier}
             onChange={(e) => setTier(e.target.value)}
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           >
             <option value="all">All parents</option>
             <option value="free">Free only</option>
@@ -474,7 +474,7 @@ export function StaffMembershipPanel() {
           <select
             value={grade}
             onChange={(e) => setGrade(e.target.value)}
-            className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           >
             <option value="">Any grade</option>
             <option value="6">6th</option>
@@ -491,7 +491,7 @@ export function StaffMembershipPanel() {
           </p>
         ) : null}
 
-        <div className="max-h-[420px] overflow-auto divide-y divide-[#E8E4DC] border border-[#E8E4DC] rounded-lg">
+        <div className="max-h-[420px] overflow-auto divide-y divide-[var(--border)] border border-[var(--border)] rounded-lg">
           {members.length === 0 ? (
             <p className="p-4 text-sm text-[#5A6070]">No parents match these filters.</p>
           ) : (
@@ -506,7 +506,7 @@ export function StaffMembershipPanel() {
                     {m.parentEmail}
                     {m.parentPhone ? ` · ${m.parentPhone}` : ''}
                   </p>
-                  <p className="text-[11px] mt-1 text-[#085508] font-semibold uppercase tracking-wide">
+                  <p className="text-[11px] mt-1 text-[var(--brand-green)] font-semibold uppercase tracking-wide">
                     {m.accountType === 'paid' ? m.membershipTier : 'free'}
                   </p>
                   <ul className="mt-1 text-xs text-[#5A6070] space-y-0.5">
@@ -520,7 +520,7 @@ export function StaffMembershipPanel() {
                 <div className="flex flex-col gap-1 shrink-0">
                   <a
                     href={`mailto:${encodeURIComponent(m.parentEmail)}`}
-                    className="text-xs font-bold underline text-[#085508]"
+                    className="text-xs font-bold underline text-[var(--brand-green)]"
                   >
                     Email
                   </a>
@@ -529,7 +529,7 @@ export function StaffMembershipPanel() {
                       href={`https://wa.me/${m.parentPhone.replace(/\D/g, '')}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-xs font-bold underline text-[#085508]"
+                      className="text-xs font-bold underline text-[var(--brand-green)]"
                     >
                       WhatsApp
                     </a>
@@ -543,7 +543,7 @@ export function StaffMembershipPanel() {
 
       <section
         id="membership-outreach"
-        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+        className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
       >
         <div>
           <h2 className="text-lg font-bold">Outreach</h2>
@@ -558,14 +558,14 @@ export function StaffMembershipPanel() {
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           placeholder="Subject"
-          className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={5}
           placeholder="Message body"
-          className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <label className="flex items-center gap-2 text-xs text-[#5A6070]">
           <input
@@ -589,7 +589,7 @@ export function StaffMembershipPanel() {
             disabled={busy || !subject || !body}
             onClick={() => void sendPortal()}
             className="text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
           >
             Send to portal inbox
           </Button>
@@ -598,13 +598,13 @@ export function StaffMembershipPanel() {
             disabled={busy || !subject || !body}
             onClick={() => void sendEmail()}
             className="text-white"
-            style={{ backgroundColor: '#0B3D0B' }}
+            style={{ backgroundColor: 'var(--brand-dark)' }}
           >
             {emailConfigured ? 'Send via Gmail' : 'Email via mail app (BCC)'}
           </Button>
         </div>
 
-        <div className="border-t border-[#E8E4DC] pt-4 space-y-3">
+        <div className="border-t border-[var(--border)] pt-4 space-y-3">
           <p className="text-sm font-semibold">WhatsApp grade groups</p>
           <p className="text-xs text-[#5A6070]">
             Copies your message, then opens the invite link(s) so you can paste in the group.
@@ -615,7 +615,7 @@ export function StaffMembershipPanel() {
             <select
               value={waGrade}
               onChange={(e) => setWaGrade(e.target.value as '6' | '7' | '8' | 'all')}
-              className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             >
               <option value="all">All configured grades</option>
               <option value="6">6th grade group</option>

@@ -61,7 +61,7 @@ export default async function MembershipPage() {
         <section
           id="tiers"
           className="relative overflow-hidden scroll-mt-28 py-16 md:py-24"
-          style={{ backgroundColor: '#F5F0E8' }}
+          style={{ backgroundColor: 'var(--brand-warm)' }}
         >
           <BrandImageWash src="/home/community.jpg" side="right" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -81,13 +81,13 @@ export default async function MembershipPage() {
         <MembershipPortalCallouts lines={sharedBenefits} />
 
         {/* Faculty membership */}
-        <section id="faculty" className="scroll-mt-28 py-14" style={{ backgroundColor: '#F5F0E8' }}>
+        <section id="faculty" className="scroll-mt-28 py-14" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-2xl p-6 lg:p-8 border border-[#E8E4DC] flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-10">
+            <div className="bg-white rounded-2xl p-6 lg:p-8 border border-[var(--border)] flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-10">
               <div className="flex-1 min-w-0">
                 <div
                   className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
-                  style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
+                  style={{ backgroundColor: 'var(--brand-soft)', color: 'var(--brand-green)' }}
                 >
                   {vanillaizeIfDemo('SHMS PTO Faculty & Staff')}
                 </div>
@@ -96,8 +96,8 @@ export default async function MembershipPage() {
                   {facultyDescription}
                 </p>
               </div>
-              <div className="w-full sm:w-64 shrink-0 text-left sm:border-l sm:border-[#E8E4DC] sm:pl-8">
-                <div className="text-3xl font-bold text-[#085508] leading-none">${facultyPrice}</div>
+              <div className="w-full sm:w-64 shrink-0 text-left sm:border-l sm:border-[var(--border)] sm:pl-8">
+                <div className="text-3xl font-bold text-[var(--brand-green)] leading-none">${facultyPrice}</div>
                 <div className="text-xs text-[#5A6070] mt-1 mb-4">per school year</div>
                 <FacultyMembershipJoin price={facultyPrice} />
               </div>
@@ -113,14 +113,14 @@ export default async function MembershipPage() {
         />
 
         {/* FAQ */}
-        <section id="faq" className="scroll-mt-28 py-16 bg-white border-t border-[#E8E4DC]">
+        <section id="faq" className="scroll-mt-28 py-16 bg-white border-t border-[var(--border)]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-2xl font-bold text-[#1A1A1A] mb-8 text-center">
               Common Questions
             </h2>
             <div className="space-y-6">
               {faqItems.map((item) => (
-                <div key={item.id} className="border-b border-[#E8E4DC] pb-6 last:border-0">
+                <div key={item.id} className="border-b border-[var(--border)] pb-6 last:border-0">
                   <h3 className="font-bold text-[#1A1A1A] mb-2">{item.question}</h3>
                   <p className="text-[#5A6070] text-sm leading-relaxed">{item.answer}</p>
                 </div>

@@ -3,7 +3,7 @@ import { BOARD_PHOTO_SIZE_PX } from '@/lib/board-photo'
 
 export function BoardMemberPhoto({ src, alt }: { src: string; alt: string }) {
   return (
-    <div className="w-full aspect-square overflow-hidden bg-[#EEF6EE]">
+    <div className="w-full aspect-square overflow-hidden bg-[var(--brand-soft)]">
       <Image
         src={src}
         alt={alt}

@@ -52,12 +52,12 @@ export default async function BoardPage() {
 
         {/* Executive Board */}
         {execMembers.length > 0 && (
-          <section id="leadership" className="scroll-mt-28 py-14 md:py-20" style={{ backgroundColor: '#F5F0E8' }}>
+          <section id="leadership" className="scroll-mt-28 py-14 md:py-20" style={{ backgroundColor: 'var(--brand-warm)' }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
                 <div
                   className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
-                  style={{ backgroundColor: '#085508', color: 'white' }}
+                  style={{ backgroundColor: 'var(--brand-green)', color: 'white' }}
                 >
                   Executive Officers
                 </div>
@@ -82,7 +82,7 @@ export default async function BoardPage() {
               <div className="text-center mb-12">
                 <div
                   className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
-                  style={{ backgroundColor: '#EEF6EE', color: '#085508' }}
+                  style={{ backgroundColor: 'var(--brand-soft)', color: 'var(--brand-green)' }}
                 >
                   Committee Chairs
                 </div>
@@ -101,17 +101,17 @@ export default async function BoardPage() {
         )}
 
         {/* Join the board CTA */}
-        <section id="join" className="scroll-mt-28 py-16" style={{ backgroundColor: '#F5F0E8' }}>
+        <section id="join" className="scroll-mt-28 py-16" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div
-              className="rounded-2xl p-8 md:p-12 text-center border border-[#E8E4DC]"
+              className="rounded-2xl p-8 md:p-12 text-center border border-[var(--border)]"
               style={{ backgroundColor: 'white' }}
             >
               <div
                 className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
-                style={{ backgroundColor: '#EEF6EE' }}
+                style={{ backgroundColor: 'var(--brand-soft)' }}
               >
-                <Users className="w-7 h-7" style={{ color: '#085508' }} aria-hidden="true" />
+                <Users className="w-7 h-7" style={{ color: 'var(--brand-green)' }} aria-hidden="true" />
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold mb-3" style={{ color: '#1A1A1A' }}>
                 Interested in joining the board?
@@ -125,15 +125,15 @@ export default async function BoardPage() {
                 <a
                   href="/volunteer"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-white transition-opacity hover:opacity-90"
-                  style={{ backgroundColor: '#085508' }}
+                  style={{ backgroundColor: 'var(--brand-green)' }}
                 >
                   Volunteer with the PTO
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </a>
                 <a
                   href={`mailto:${presidentEmail}`}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold border-2 transition-colors hover:bg-[#EEF6EE]"
-                  style={{ borderColor: '#085508', color: '#085508' }}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold border-2 transition-colors hover:bg-[var(--brand-soft)]"
+                  style={{ borderColor: 'var(--brand-green)', color: 'var(--brand-green)' }}
                 >
                   <Mail className="w-4 h-4" aria-hidden="true" />
                   Email the President
@@ -173,11 +173,11 @@ function BoardCard({
   const displayName = isOpen ? 'OPEN' : member.name
 
   return (
-    <article className={`bg-white rounded-2xl overflow-hidden shadow-sm border flex flex-col ${featured ? 'border-[#085508]/20' : 'border-[#E8E4DC]'}`}>
+    <article className={`bg-white rounded-2xl overflow-hidden shadow-sm border flex flex-col ${featured ? 'border-[var(--brand-green)]/20' : 'border-[var(--border)]'}`}>
       {/* Top accent */}
       <div
         className="h-1.5 w-full"
-        style={{ backgroundColor: featured ? '#085508' : '#E8E4DC' }}
+        style={{ backgroundColor: featured ? 'var(--brand-green)' : 'var(--border)' }}
         aria-hidden="true"
       />
 
@@ -187,12 +187,12 @@ function BoardCard({
       ) : (
         <div
           className="w-full aspect-square flex items-center justify-center"
-          style={{ backgroundColor: '#EEF6EE' }}
+          style={{ backgroundColor: 'var(--brand-soft)' }}
         >
           <div className="relative flex flex-col items-center justify-center p-6 w-full h-full">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               {isOpen ? (
                 <span className="text-white text-xs font-bold tracking-wide uppercase px-1 text-center leading-tight">
@@ -207,7 +207,7 @@ function BoardCard({
             {/* Always reserve badge height so OPEN circles align with initials */}
             <span
               className={`mt-2 text-xs font-semibold px-2 py-0.5 rounded-full ${isOpen ? '' : 'invisible'}`}
-              style={{ backgroundColor: '#FFD700', color: '#1A1A1A' }}
+              style={{ backgroundColor: 'var(--brand-gold)', color: '#1A1A1A' }}
               aria-hidden={!isOpen}
             >
               Position Open
@@ -220,7 +220,7 @@ function BoardCard({
       <div className="p-4 flex flex-col flex-1">
         <p
           className="text-xs font-bold tracking-widest uppercase mb-1"
-          style={{ color: '#085508' }}
+          style={{ color: 'var(--brand-green)' }}
         >
           {member.role}
         </p>
@@ -235,7 +235,7 @@ function BoardCard({
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors hover:underline"
-              style={{ color: '#085508' }}
+              style={{ color: 'var(--brand-green)' }}
             >
               View position description (PDF)
               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -245,7 +245,7 @@ function BoardCard({
             <a
               href={`mailto:${member.email}`}
               className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors hover:underline"
-              style={{ color: '#085508' }}
+              style={{ color: 'var(--brand-green)' }}
               aria-label={`Email ${member.role}`}
             >
               <Mail className="w-3.5 h-3.5" aria-hidden="true" />
@@ -256,7 +256,7 @@ function BoardCard({
             <a
               href={`mailto:president@shmspto.org?subject=${encodeURIComponent(`Board interest: ${member.role}`)}`}
               className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors hover:underline"
-              style={{ color: '#085508' }}
+              style={{ color: 'var(--brand-green)' }}
             >
               <Mail className="w-3.5 h-3.5" aria-hidden="true" />
               Express interest

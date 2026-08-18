@@ -113,7 +113,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
     const ordered = item.status === 'ordered'
     const name = parentDisplayName(item)
     return (
-      <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#E8E4DC] px-3 py-2.5">
+      <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--border)] px-3 py-2.5">
         <div className="min-w-0">
           <p className="text-sm font-bold text-[#1A1A1A]">
             {name || item.parentEmail}
@@ -138,7 +138,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
                 ? ` · ${item.detail}`
                 : ' · 1 magnet'}
             {' · '}
-            <span className={ordered ? 'font-semibold text-[#085508]' : 'font-semibold text-[#8A6400]'}>
+            <span className={ordered ? 'font-semibold text-[var(--brand-green)]' : 'font-semibold text-[#8A6400]'}>
               {ordered ? 'Ready for pickup' : 'Needs set-aside'}
             </span>
           </p>
@@ -161,7 +161,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
             size="sm"
             disabled={busy}
             className="text-white"
-            style={{ backgroundColor: '#085508' }}
+            style={{ backgroundColor: 'var(--brand-green)' }}
             onClick={() => void setAction(item, 'picked_up')}
           >
             <Check className="w-3.5 h-3.5 mr-1" />
@@ -175,11 +175,11 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
   return (
     <section
       id={cove ? 'cove-fulfillment' : 'membership-fulfillment'}
-      className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+      className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
     >
       <div>
         <h2 className="text-lg font-bold flex items-center gap-2">
-          <Package className="w-5 h-5" style={{ color: '#085508' }} />
+          <Package className="w-5 h-5" style={{ color: 'var(--brand-green)' }} />
           {cove ? 'Magnet & shirt pickup' : 'Membership fulfillment queue'}
         </h2>
         <p className="text-xs text-[#5A6070] mt-1">
@@ -197,13 +197,13 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
             value={lookup}
             onChange={(e) => setLookup(e.target.value)}
             placeholder="Lookup: parent name, student, email…"
-            className="w-full max-w-md rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm"
+            className="w-full max-w-md rounded-lg border border-[var(--border)] px-3 py-2 text-sm"
           />
         </label>
       ) : null}
 
       {busy && items.length === 0 ? (
-        <Loader2 className="w-5 h-5 animate-spin text-[#085508]" />
+        <Loader2 className="w-5 h-5 animate-spin text-[var(--brand-green)]" />
       ) : items.length === 0 ? (
         <p className="text-sm text-[#5A6070]">Queue clear — nothing waiting.</p>
       ) : filtered.length === 0 ? (

@@ -47,7 +47,7 @@ export default async function VolunteerPage() {
                     <li key={b} className="flex items-start gap-3">
                       <CheckCircle2
                         className="w-5 h-5 mt-0.5 shrink-0"
-                        style={{ color: '#085508' }}
+                        style={{ color: 'var(--brand-green)' }}
                         aria-hidden="true"
                       />
                       <span className="text-[#1A1A1A] text-sm sm:text-base">{b}</span>
@@ -62,11 +62,11 @@ export default async function VolunteerPage() {
                   {opportunities.map((opp) => (
                     <div
                       key={opp._id}
-                      className="rounded-xl p-4 border border-[#E8E4DC] flex gap-4"
+                      className="rounded-xl p-4 border border-[var(--border)] flex gap-4"
                     >
                       <div
                         className="w-1 rounded-full shrink-0"
-                        style={{ backgroundColor: '#085508' }}
+                        style={{ backgroundColor: 'var(--brand-green)' }}
                         aria-hidden="true"
                       />
                       <div>
@@ -74,7 +74,7 @@ export default async function VolunteerPage() {
                           <h3 className="font-bold text-[#1A1A1A] text-sm">{opp.title}</h3>
                           <span
                             className="text-xs font-medium px-2 py-0.5 rounded-full"
-                            style={{ backgroundColor: '#EEF6EE', color: '#5A6070' }}
+                            style={{ backgroundColor: 'var(--brand-soft)', color: '#5A6070' }}
                           >
                             {opp.commitment}
                           </span>

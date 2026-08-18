@@ -7,6 +7,9 @@ import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SocialFooterLinks } from '@/components/social-footer-links'
 import { useAuth } from '@/lib/hooks/use-auth'
+import { DEMO_BRAND, vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
+import { DemoMark } from '@/components/demo/demo-mark'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
 
 type Props = {
@@ -40,7 +43,9 @@ export function MemberShell({ children }: Props) {
   const isPaid = accountType === 'paid'
   const audienceLabel = status === 'loading' ? '…' : isPaid ? 'Paid member' : 'Free member'
   const signedInEmail = String(member?.email ?? '').trim().toLowerCase()
-  const staffChrome = isStaff || signedInEmail.endsWith('@shmspto.org')
+  const staffChrome =
+    isStaff ||
+    (!isPublicDemoInstance() && signedInEmail.endsWith('@shmspto.org'))
   const displayName = staffChrome
     ? boardTitle || staffName || member?.name || 'Board member'
     : member?.name || 'Member portal'
@@ -49,20 +54,24 @@ export function MemberShell({ children }: Props) {
   const links = [
     { href: '/member-portal', label: 'My Portal' },
     { href: '/membership', label: isPaid ? 'Membership' : 'Upgrade' },
-    { href: '/cove', label: 'The Cove' },
+    { href: '/cove', label: vanillaizeIfDemo('The Cove') },
     { href: '/programs', label: 'Programs' },
-    { href: '/member-portal/videos', label: 'Videos' },
+    ...(isPublicDemoInstance() ? [] : [{ href: '/member-portal/videos', label: 'Videos' }]),
     { href: '/member-portal/help', label: 'Help' },
   ]
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-50 bg-white border-b border-[#E8E4DC] shadow-sm">
+      <header className="sticky top-0 z-50 bg-white border-b border-[var(--border)] shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
           <Link href="/member-portal" className="flex items-center gap-2.5 min-w-0">
-            <Image src="/shms-logo.png" alt="" width={36} height={36} className="shrink-0" />
+            {isPublicDemoInstance() ? (
+              <DemoMark size={36} />
+            ) : (
+              <Image src="/shms-logo.png" alt="" width={36} height={36} className="shrink-0" />
+            )}
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#085508' }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--brand-green)' }}>
                 {staffChrome ? 'Member view' : audienceLabel}
               </p>
               <p className="text-sm font-semibold text-[#1A1A1A] truncate">{displayName}</p>
@@ -77,7 +86,7 @@ export function MemberShell({ children }: Props) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="px-2.5 py-1.5 rounded-md text-xs font-semibold text-[#1A1A1A] hover:bg-[#EEF6EE]"
+                className="px-2.5 py-1.5 rounded-md text-xs font-semibold text-[#1A1A1A] hover:bg-[var(--brand-soft)]"
               >
                 {link.label}
               </Link>
@@ -87,13 +96,13 @@ export function MemberShell({ children }: Props) {
           <div className="hidden md:flex items-center gap-2 shrink-0">
             {staffChrome ? (
               <>
-                <span className="inline-flex rounded-md border border-[#E8E4DC] p-0.5">
-                  <span className="px-2.5 py-1 rounded text-xs font-semibold bg-[#085508] text-white">
+                <span className="inline-flex rounded-md border border-[var(--border)] p-0.5">
+                  <span className="px-2.5 py-1 rounded text-xs font-semibold bg-[var(--brand-green)] text-white">
                     Member
                   </span>
                   <Link
                     href="/staff"
-                    className="px-2.5 py-1 rounded text-xs font-semibold text-[#1A1A1A] hover:bg-[#EEF6EE]"
+                    className="px-2.5 py-1 rounded text-xs font-semibold text-[#1A1A1A] hover:bg-[var(--brand-soft)]"
                   >
                     Staff
                   </Link>
@@ -114,7 +123,7 @@ export function MemberShell({ children }: Props) {
             <Button
               size="sm"
               className="h-8 text-xs text-white font-semibold"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
               onClick={() => void signOut()}
             >
               Sign out
@@ -132,21 +141,21 @@ export function MemberShell({ children }: Props) {
         </div>
 
         {menuOpen ? (
-          <div className="md:hidden border-t border-[#E8E4DC] px-4 py-3 space-y-1 bg-white">
+          <div className="md:hidden border-t border-[var(--border)] px-4 py-3 space-y-1 bg-white">
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="block px-3 py-2.5 rounded-md text-sm font-semibold hover:bg-[#EEF6EE]"
+                className="block px-3 py-2.5 rounded-md text-sm font-semibold hover:bg-[var(--brand-soft)]"
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="pt-2 mt-2 border-t border-[#E8E4DC] space-y-2">
+            <div className="pt-2 mt-2 border-t border-[var(--border)] space-y-2">
               {staffChrome ? (
                 <div className="grid grid-cols-2 gap-2">
-                  <Button size="sm" className="w-full text-white font-semibold" style={{ backgroundColor: '#085508' }}>
+                  <Button size="sm" className="w-full text-white font-semibold" style={{ backgroundColor: 'var(--brand-green)' }}>
                     Member
                   </Button>
                   <Link href="/staff" onClick={() => setMenuOpen(false)}>
@@ -164,7 +173,7 @@ export function MemberShell({ children }: Props) {
               <Button
                 size="sm"
                 className="w-full text-white font-semibold"
-                style={{ backgroundColor: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-green)' }}
                 onClick={() => void signOut()}
               >
                 Sign out
@@ -189,7 +198,7 @@ export function MemberShell({ children }: Props) {
       ) : null}
 
       {isStaff && linkedHousehold && viewingEmail ? (
-        <div className="border-b border-[#D4E8D4] bg-[#FAFCF9] px-4 py-1.5 text-[11px] text-[#5A6070]">
+        <div className="border-b border-[var(--brand-line)] bg-[#FAFCF9] px-4 py-1.5 text-[11px] text-[#5A6070]">
           <div className="max-w-6xl mx-auto">
             Member household: <span className="font-semibold text-[#1A1A1A]">{viewingEmail}</span>
           </div>
@@ -198,7 +207,7 @@ export function MemberShell({ children }: Props) {
 
       {children}
 
-      <footer className="border-t border-[#E8E4DC] bg-[#FAFCF9] py-4 mt-auto">
+      <footer className="border-t border-[var(--border)] bg-[#FAFCF9] py-4 mt-auto">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#5A6070]">
           <span>{audienceLabel} · SHMS PTO</span>
           <Link href="/privacy" className="underline">Privacy</Link>

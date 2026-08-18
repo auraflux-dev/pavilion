@@ -180,14 +180,14 @@ export function StaffExpensesPanel() {
   }
 
   const inputCls =
-    'w-full rounded-lg border border-[#E8E4DC] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B6E6E]/30'
+    'w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B6E6E]/30'
 
   return (
     <div className="space-y-5">
       {/* Submit form */}
       <section
         id="expense-submit"
-        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4"
+        className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
       >
         <div>
           <h1 className="text-xl font-bold text-[#1A1A1A]">PTO Expense Reimbursement</h1>
@@ -366,7 +366,7 @@ export function StaffExpensesPanel() {
       {/* List */}
       <section
         id="expense-requests"
-        className="scroll-mt-28 rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-3"
+        className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-3"
       >
         <h2 className="text-sm font-semibold text-[#1A1A1A]">
           {canManage ? 'All reimbursement requests' : 'My reimbursement requests'}
@@ -376,7 +376,7 @@ export function StaffExpensesPanel() {
         ) : (
           <ul className="space-y-3">
             {expenses.map((ex) => (
-              <li key={ex.id} className="rounded-lg border border-[#E8E4DC] p-4 space-y-2">
+              <li key={ex.id} className="rounded-lg border border-[var(--border)] p-4 space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="text-sm font-semibold text-[#1A1A1A]">

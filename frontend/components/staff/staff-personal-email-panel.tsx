@@ -50,7 +50,7 @@ export function StaffPersonalEmailPanel({
   }
 
   return (
-    <section className="rounded-xl border border-[#085508]/30 bg-white p-4 space-y-3">
+    <section className="rounded-xl border border-[var(--brand-green)]/30 bg-white p-4 space-y-3">
       <div>
         <h2 className="text-base font-bold text-[#1A1A1A]">Your parent portal email</h2>
         <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
@@ -65,14 +65,14 @@ export function StaffPersonalEmailPanel({
           value={personalEmail}
           onChange={(e) => setPersonalEmail(e.target.value)}
           placeholder="you@gmail.com"
-          className="flex-1 border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+          className="flex-1 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           autoComplete="email"
         />
         <Button
           disabled={busy}
           onClick={() => void save()}
           className="text-white font-semibold shrink-0"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           {busy ? 'Saving…' : 'Save personal email'}
         </Button>
@@ -82,7 +82,7 @@ export function StaffPersonalEmailPanel({
           Linked:{' '}
           <span className="font-semibold text-[#1A1A1A]">{personalEmail.trim()}</span>
           {' · '}
-          <Link href="/auth/join?mode=login&returnTo=%2Fmember-portal" className="underline font-semibold" style={{ color: '#085508' }}>
+          <Link href="/auth/join?mode=login&returnTo=%2Fmember-portal" className="underline font-semibold" style={{ color: 'var(--brand-green)' }}>
             Open Member Portal login
           </Link>
         </p>

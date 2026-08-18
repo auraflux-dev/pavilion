@@ -14,8 +14,8 @@ export function PortalReturnBar() {
 
   return (
     <div
-      className="border-t border-[#D4E8D4]"
-      style={{ backgroundColor: '#EEF6EE' }}
+      className="border-t border-[var(--brand-line)]"
+      style={{ backgroundColor: 'var(--brand-soft)' }}
       role="navigation"
       aria-label="Return to Member Portal"
     >
@@ -23,7 +23,7 @@ export function PortalReturnBar() {
         <Link
           href="/member-portal"
           className="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
-          style={{ color: '#085508' }}
+          style={{ color: 'var(--brand-green)' }}
         >
           <ArrowLeft className="w-4 h-4 shrink-0" aria-hidden="true" />
           Return to Member Portal

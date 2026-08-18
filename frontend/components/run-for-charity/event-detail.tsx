@@ -80,7 +80,7 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
         className="relative overflow-hidden border-b border-[#D9D2C5]"
         style={{
           background:
-            'linear-gradient(165deg, #F5F0E8 0%, #E8F0E4 45%, #F5F0E8 100%)',
+            'linear-gradient(165deg, var(--brand-warm) 0%, #E8F0E4 45%, var(--brand-warm) 100%)',
         }}
       >
         <div
@@ -95,21 +95,21 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 md:py-14 space-y-10">
           <Link
             href="/events"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-[#085508] hover:opacity-80"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--brand-green)] hover:opacity-80"
           >
             <ArrowLeft className="w-4 h-4" aria-hidden="true" />
             All events
           </Link>
 
           <header className="max-w-3xl space-y-5 animate-in fade-in slide-in-from-bottom-3 duration-500">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#085508]">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--brand-green)]">
               SHMS PTO · Best Runners partnership
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
               <div
                 className="w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0"
-                style={{ backgroundColor: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-green)' }}
                 aria-label={`${month} ${day}`}
               >
                 <span className="text-white/80 text-xs font-bold uppercase tracking-wider leading-none">
@@ -131,7 +131,7 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
               </div>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-[#0B3D0B] tracking-tight whitespace-pre-line text-balance leading-[1.15]">
+            <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-[var(--brand-dark)] tracking-tight whitespace-pre-line text-balance leading-[1.15]">
               {event.title}
             </h1>
 
@@ -152,7 +152,7 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
               {brief}
             </p>
 
-            <p className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold text-[#085508]">
+            <p className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold text-[var(--brand-green)]">
               <a
                 href={buildCalendarUrl(event)}
                 target="_blank"
@@ -196,7 +196,7 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
               <Button
                 type="button"
                 className="w-full text-white font-bold text-base py-6"
-                style={{ backgroundColor: '#0B3D0B' }}
+                style={{ backgroundColor: 'var(--brand-dark)' }}
                 onClick={openBestRunners}
               >
                 <ExternalLink className="w-4 h-4 mr-2" aria-hidden="true" />
@@ -207,7 +207,7 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
                   href={RUN_FOR_CHARITY_FLYER_PDF_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-semibold text-[#085508] hover:underline underline-offset-2"
+                  className="text-sm font-semibold text-[var(--brand-green)] hover:underline underline-offset-2"
                 >
                   Download printable flyer (PDF)
                 </a>
@@ -219,11 +219,11 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
                 <button
                   type="button"
                   onClick={openBestRunners}
-                  className="block w-full text-left overflow-hidden rounded-2xl shadow-[0_24px_48px_-28px_rgba(11,61,11,0.45)] ring-2 ring-[#0B3D0B] bg-white hover:opacity-[0.98] transition-opacity cursor-pointer"
+                  className="block w-full text-left overflow-hidden rounded-2xl shadow-[0_24px_48px_-28px_rgba(11,61,11,0.45)] ring-2 ring-[var(--brand-dark)] bg-white hover:opacity-[0.98] transition-opacity cursor-pointer"
                 >
                   <p
                     className="px-4 py-4 text-center text-base sm:text-lg font-bold tracking-wide text-white flex items-center justify-center gap-2"
-                    style={{ backgroundColor: '#0B3D0B' }}
+                    style={{ backgroundColor: 'var(--brand-dark)' }}
                   >
                     <ExternalLink className="w-5 h-5 shrink-0" aria-hidden="true" />
                     Official flyer · tap to register on Best Runners

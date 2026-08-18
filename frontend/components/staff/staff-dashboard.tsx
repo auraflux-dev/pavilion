@@ -475,7 +475,7 @@ export function StaffDashboard() {
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold text-[#1A1A1A] mb-2">Staff access required</h1>
         <p className="text-sm text-[#5A6070] mb-6">{error}</p>
-        <Link href="/member-portal" className="text-sm font-bold" style={{ color: '#085508' }}>
+        <Link href="/member-portal" className="text-sm font-bold" style={{ color: 'var(--brand-green)' }}>
           Back to member portal
         </Link>
       </div>
@@ -511,8 +511,8 @@ export function StaffDashboard() {
             />
             <StaffOnboardingPanel onOpenWorkspace={go} />
             {activityItems.length > 0 ? (
-              <div className="rounded-xl border border-[#085508]/25 bg-[#E8F3E8] p-4 space-y-2">
-                <p className="text-sm font-bold text-[#085508]">Needs your attention</p>
+              <div className="rounded-xl border border-[var(--brand-green)]/25 bg-[#E8F3E8] p-4 space-y-2">
+                <p className="text-sm font-bold text-[var(--brand-green)]">Needs your attention</p>
                 <ul className="space-y-1.5">
                   {activityItems.map((item) => (
                     <li key={item.id}>
@@ -532,7 +532,7 @@ export function StaffDashboard() {
                           className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${
                             item.tone === 'warn'
                               ? 'bg-amber-100 text-amber-900'
-                              : 'bg-white text-[#085508]'
+                              : 'bg-white text-[var(--brand-green)]'
                           }`}
                         >
                           {item.count}
@@ -551,7 +551,7 @@ export function StaffDashboard() {
                     key={item.id}
                     type="button"
                     onClick={() => go(item.id)}
-                    className="text-left rounded-xl border border-[#E8E4DC] bg-white p-4 hover:border-[#085508] transition-colors"
+                    className="text-left rounded-xl border border-[var(--border)] bg-white p-4 hover:border-[var(--brand-green)] transition-colors"
                   >
                     <p className="text-sm font-bold text-[#1A1A1A]">{item.label}</p>
                     <p className="text-xs text-[#5A6070] mt-1">
@@ -596,10 +596,10 @@ export function StaffDashboard() {
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {me.homes.map((home) => (
-                <div key={home.role} className="rounded-xl border border-[#E8E4DC] bg-white p-4">
+                <div key={home.role} className="rounded-xl border border-[var(--border)] bg-white p-4">
                   <h2 className="text-base font-bold text-[#1A1A1A]">{home.title}</h2>
                   <p className="text-xs text-[#5A6070] mt-1 mb-2">{home.owns}</p>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#085508] mb-1.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--brand-green)] mb-1.5">
                     This week
                   </p>
                   <ul className="space-y-1">
@@ -620,7 +620,7 @@ export function StaffDashboard() {
         ) : null}
 
         {active === 'members' && me.isAdmin ? (
-          <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+          <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
             <div>
               <h1 className="text-xl font-bold">Members</h1>
               <p className="text-xs text-[#5A6070] mt-1">
@@ -636,7 +636,7 @@ export function StaffDashboard() {
                   if (e.key === 'Enter') void loadMembers()
                 }}
                 placeholder="Filter by email or student name"
-                className="flex-1 min-w-[12rem] border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="flex-1 min-w-[12rem] border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
               <select
                 value={memberTier}
@@ -644,7 +644,7 @@ export function StaffDashboard() {
                   const v = e.target.value
                   setMemberTier(v === 'paid' || v === 'free' ? v : 'all')
                 }}
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 aria-label="Filter paid or free"
               >
                 <option value="all">All accounts</option>
@@ -654,7 +654,7 @@ export function StaffDashboard() {
               <select
                 value={memberSort}
                 onChange={(e) => setMemberSort(e.target.value === 'name' ? 'name' : 'email')}
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                 aria-label="Sort members"
               >
                 <option value="email">Sort by email</option>
@@ -675,7 +675,7 @@ export function StaffDashboard() {
                 }}
                 disabled={lookupBusy}
                 className="text-white"
-                style={{ backgroundColor: '#085508' }}
+                style={{ backgroundColor: 'var(--brand-green)' }}
               >
                 Show all
               </Button>
@@ -726,7 +726,7 @@ export function StaffDashboard() {
                             <button
                               type="button"
                               onClick={() => void setStudentArchived(student.id, !student.archived)}
-                              className="font-bold underline text-[#085508]"
+                              className="font-bold underline text-[var(--brand-green)]"
                             >
                               {student.archived ? 'Restore' : 'Archive'}
                             </button>
@@ -738,7 +738,7 @@ export function StaffDashboard() {
                       type="button"
                       onClick={() => void actAs(m.parentEmail)}
                       className="text-xs font-bold px-3 py-1.5 rounded-lg text-white shrink-0"
-                      style={{ backgroundColor: '#085508' }}
+                      style={{ backgroundColor: 'var(--brand-green)' }}
                     >
                       Act as
                     </button>
@@ -759,7 +759,7 @@ export function StaffDashboard() {
         {active === 'surveys' && canSurveys ? <SurveyResultsPanel /> : null}
 
         {active === 'messages' && canMessage ? (
-          <section className="rounded-xl border border-[#E8E4DC] bg-white p-5 space-y-4">
+          <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
             <div>
               <h1 className="text-xl font-bold">Messages</h1>
               <p className="text-xs text-[#5A6070] mt-1">
@@ -771,40 +771,40 @@ export function StaffDashboard() {
               value={msgSubject}
               onChange={(e) => setMsgSubject(e.target.value)}
               placeholder="Subject"
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             />
             <textarea
               value={msgBody}
               onChange={(e) => setMsgBody(e.target.value)}
               rows={4}
               placeholder="Message body"
-              className="w-full border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             />
             <div className="grid sm:grid-cols-3 gap-2">
               <input
                 value={msgEmail}
                 onChange={(e) => setMsgEmail(e.target.value)}
                 placeholder="Parent email (optional)"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
               <input
                 value={msgGrade}
                 onChange={(e) => setMsgGrade(e.target.value)}
                 placeholder="Grade e.g. 6"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
               <input
                 value={msgProgram}
                 onChange={(e) => setMsgProgram(e.target.value)}
                 placeholder="Program name"
-                className="border border-[#E8E4DC] rounded-lg px-3 py-2 text-sm"
+                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
             </div>
             <Button
               disabled={msgBusy || !msgSubject || !msgBody}
               onClick={() => void sendMessage()}
               className="text-white"
-              style={{ backgroundColor: '#085508' }}
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
               {msgBusy ? 'Sending…' : 'Send to inbox'}
             </Button>

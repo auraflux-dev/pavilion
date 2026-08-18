@@ -51,8 +51,8 @@ export function MembershipBenefitsCard() {
 
   if (busy) {
     return (
-      <div className="rounded-xl border border-[#E8E4DC] bg-white px-3 py-3 mb-4">
-        <Loader2 className="w-4 h-4 animate-spin text-[#085508]" />
+      <div className="rounded-xl border border-[var(--border)] bg-white px-3 py-3 mb-4">
+        <Loader2 className="w-4 h-4 animate-spin text-[var(--brand-green)]" />
       </div>
     )
   }
@@ -60,7 +60,7 @@ export function MembershipBenefitsCard() {
   if (!data) return null
 
   return (
-    <div className="rounded-xl border border-[#D4E8D4] bg-[#FAFCF9] px-3 py-3 mb-4">
+    <div className="rounded-xl border border-[var(--brand-line)] bg-[#FAFCF9] px-3 py-3 mb-4">
       <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070] flex items-center gap-1">
         <Gift className="w-3 h-3" />
         Membership benefits
@@ -69,7 +69,7 @@ export function MembershipBenefitsCard() {
       {data.coveFamilyCode && data.paidMemberCode ? (
         <p className="mt-2 text-sm text-[#1A1A1A]">
           Event refreshments ID:{' '}
-          <span className="font-mono font-bold tracking-wider text-[#085508]">
+          <span className="font-mono font-bold tracking-wider text-[var(--brand-green)]">
             {data.coveFamilyCode}
           </span>
           <span className="block text-[11px] text-[#5A6070] mt-0.5">
@@ -83,7 +83,7 @@ export function MembershipBenefitsCard() {
           <li key={e.kind} className="text-sm">
             <span className="font-bold text-[#1A1A1A]">{e.label}</span>
             {e.detail ? (
-              <span className="text-[#085508] font-mono text-xs ml-2">{e.detail}</span>
+              <span className="text-[var(--brand-green)] font-mono text-xs ml-2">{e.detail}</span>
             ) : null}
             <span
               className={`ml-2 text-[10px] font-bold uppercase ${
@@ -103,7 +103,7 @@ export function MembershipBenefitsCard() {
       {data.discountCode ? (
         <p className="text-xs mt-2 text-[#5A6070]">
           Enrichment code:{' '}
-          <span className="font-mono font-bold text-[#085508]">{data.discountCode}</span>
+          <span className="font-mono font-bold text-[var(--brand-green)]">{data.discountCode}</span>
         </p>
       ) : null}
     </div>

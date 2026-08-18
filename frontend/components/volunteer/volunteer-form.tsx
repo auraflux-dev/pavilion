@@ -68,9 +68,9 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
       <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
         <div
           className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-          style={{ backgroundColor: '#EEF6EE' }}
+          style={{ backgroundColor: 'var(--brand-soft)' }}
         >
-          <CheckCircle2 className="w-8 h-8" style={{ color: '#085508' }} />
+          <CheckCircle2 className="w-8 h-8" style={{ color: 'var(--brand-green)' }} />
         </div>
         <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Thank you for signing up!</h3>
         <p className="text-[#5A6070] text-sm">
@@ -99,7 +99,7 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
             required
             value={form.firstName}
             onChange={handleChange}
-            className="w-full px-3.5 py-2.5 rounded-lg border border-[#E8E4DC] text-sm focus:outline-none focus:ring-2 focus:ring-[#085508]/20 focus:border-[#085508] transition-colors"
+            className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20 focus:border-[var(--brand-green)] transition-colors"
             placeholder="Jane"
           />
         </div>
@@ -114,7 +114,7 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
             required
             value={form.lastName}
             onChange={handleChange}
-            className="w-full px-3.5 py-2.5 rounded-lg border border-[#E8E4DC] text-sm focus:outline-none focus:ring-2 focus:ring-[#085508]/20 focus:border-[#085508] transition-colors"
+            className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20 focus:border-[var(--brand-green)] transition-colors"
             placeholder="Smith"
           />
         </div>
@@ -133,7 +133,7 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
             required
             value={form.email}
             onChange={handleChange}
-            className="w-full px-3.5 py-2.5 rounded-lg border border-[#E8E4DC] text-sm focus:outline-none focus:ring-2 focus:ring-[#085508]/20 focus:border-[#085508] transition-colors"
+            className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20 focus:border-[var(--brand-green)] transition-colors"
             placeholder="jane@email.com"
           />
         </div>
@@ -147,7 +147,7 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
             type="tel"
             value={form.phone}
             onChange={handleChange}
-            className="w-full px-3.5 py-2.5 rounded-lg border border-[#E8E4DC] text-sm focus:outline-none focus:ring-2 focus:ring-[#085508]/20 focus:border-[#085508] transition-colors"
+            className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20 focus:border-[var(--brand-green)] transition-colors"
             placeholder="(703) 555-0100"
           />
         </div>
@@ -164,7 +164,7 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
           required
           value={form.opportunity}
           onChange={handleChange}
-          className="w-full px-3.5 py-2.5 rounded-lg border border-[#E8E4DC] text-sm focus:outline-none focus:ring-2 focus:ring-[#085508]/20 focus:border-[#085508] transition-colors bg-white"
+          className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20 focus:border-[var(--brand-green)] transition-colors bg-white"
         >
           <option value="">Select an opportunity…</option>
           {options.map((o) => (
@@ -184,7 +184,7 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
           rows={3}
           value={form.notes}
           onChange={handleChange}
-          className="w-full px-3.5 py-2.5 rounded-lg border border-[#E8E4DC] text-sm focus:outline-none focus:ring-2 focus:ring-[#085508]/20 focus:border-[#085508] transition-colors resize-none"
+          className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20 focus:border-[var(--brand-green)] transition-colors resize-none"
           placeholder="Availability, questions, preferences…"
         />
       </div>
@@ -201,7 +201,7 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
           size="lg"
           disabled={status === 'loading'}
           className="w-full font-bold text-white group"
-          style={{ backgroundColor: '#085508' }}
+          style={{ backgroundColor: 'var(--brand-green)' }}
         >
           {status === 'loading' ? (
             <>
