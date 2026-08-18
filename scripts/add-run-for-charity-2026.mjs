@@ -96,11 +96,11 @@ async function uploadFlyer() {
 function descriptionText() {
   return [
     'Best Runners USA · 14th Annual Run for Charity — 1K & 5K run/walk for families.',
-    `Use school / referral code ${SCHOOL_CODE} when you register so 100% of registration fees come back to Stone Hill (bonus funding available based on participation).`,
+    `Our register link applies school / referral code ${SCHOOL_CODE} so 100% of registration fees come back to Stone Hill (bonus funding available based on participation).`,
     'Best Runners handles race day; SHMS PTO shares the invite with our community.',
     'Early bird through Aug 15: Adults $25 · Kids $15. After Aug 15: Adults $30 · Kids $20.',
     'Includes race shirt, finisher medal, and post-race snacks.',
-    `Register (copies school code ${SCHOOL_CODE} first): ${REGISTER_URL}`,
+    `Register: ${REGISTER_URL}`,
     `Best Runners signup (school code ${SCHOOL_CODE} is in the link): ${BEST_RUNNERS_SIGNUP}`,
   ].join('\n\n')
 }
@@ -140,7 +140,7 @@ async function main() {
       timeZoneId: 'America/New_York',
     },
     mainImage: { id: flyer.id },
-    shortDescription: `Register with school code ${SCHOOL_CODE}. Early bird ends Aug 15. 43460 Loudoun Reserve Dr, Ashburn.`,
+    shortDescription: `Our register link applies school code ${SCHOOL_CODE}. Early bird ends Aug 15. 43460 Loudoun Reserve Dr, Ashburn.`,
   }
   const descriptionPatch = {
     description: {

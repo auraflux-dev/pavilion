@@ -2,17 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Check, Copy, ExternalLink, Link2, MapPin } from 'lucide-react'
+import { ArrowLeft, Calendar, ExternalLink, Link2, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   earlyBirdCallout,
   eventPublicPath,
   type WixEvent,
 } from '@/lib/api/events'
-import {
-  BEST_RUNNERS_SIGNUP_URL,
-  RUN_FOR_CHARITY_SCHOOL_CODE,
-} from '@/lib/run-for-charity'
+import { BEST_RUNNERS_SIGNUP_URL } from '@/lib/run-for-charity'
 
 function formatDate(dateStr?: string) {
   if (!dateStr) return { month: 'n/a', day: 'n/a', time: '', weekday: '' }
@@ -40,11 +37,7 @@ function buildCalendarUrl(event: WixEvent) {
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(start)}/${fmt(end)}&location=${location}`
 }
 
-/**
- * Landing page with two strong actions only:
- * 1) Copy school code
- * 2) Official flyer → copy SHMS + open Best Runners
- */
+/** Landing: register on Best Runners (SHMS is already on the signup URL). */
 export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
   const { month, day, time, weekday } = formatDate(event.dateAndTimeSettings?.startDate)
   const endTime = formatDate(event.dateAndTimeSettings?.endDate).time
@@ -52,7 +45,6 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
     earlyBirdCallout(event.shortDescription) || earlyBirdCallout(event.description)
   const path = eventPublicPath(event)
   const [copiedLink, setCopiedLink] = useState(false)
-  const [copiedCode, setCopiedCode] = useState(false)
 
   const brief =
     (event.description || '')
@@ -62,7 +54,7 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
       .filter((l) => !/^register\b/i.test(l) && !/^https?:\/\//i.test(l))
       .slice(0, 2)
       .join(' ') ||
-    'Best Runners 1K & 5K for families — use school code SHMS so Stone Hill receives the registration fees.'
+    'Best Runners 1K & 5K for families — our register link applies school code SHMS so Stone Hill receives the registration fees.'
 
   async function copyShareLink() {
     if (!path || typeof window === 'undefined') return
@@ -75,23 +67,7 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
     }
   }
 
-  async function copyCode() {
-    try {
-      await navigator.clipboard.writeText(RUN_FOR_CHARITY_SCHOOL_CODE)
-      setCopiedCode(true)
-      window.setTimeout(() => setCopiedCode(false), 2500)
-    } catch {
-      setCopiedCode(false)
-    }
-  }
-
-  async function continueToBestRunners() {
-    try {
-      await navigator.clipboard.writeText(RUN_FOR_CHARITY_SCHOOL_CODE)
-      setCopiedCode(true)
-    } catch {
-      /* still open */
-    }
+  function openBestRunners() {
     window.open(BEST_RUNNERS_SIGNUP_URL, '_blank', 'noopener,noreferrer')
   }
 
@@ -209,87 +185,27 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
                   Run for Charity registration
                 </h2>
                 <p className="mt-2 text-sm sm:text-base text-[#5A6070] leading-relaxed">
-                  Best Runners runs the race. Use our school code so Stone Hill gets
-                  the registration fees.
+                  Best Runners runs the race. Tap register — the link fills in school
+                  code SHMS so Stone Hill gets the registration fees.
                 </p>
               </div>
 
-              <div
-                className="rounded-2xl border-2 bg-white p-6 text-center space-y-3"
-                style={{ borderColor: '#085508' }}
+              <Button
+                type="button"
+                className="w-full text-white font-bold text-base py-6"
+                style={{ backgroundColor: '#0B3D0B' }}
+                onClick={openBestRunners}
               >
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#085508]">
-                  Stone Hill school code
-                </p>
-                <p
-                  className="text-5xl font-bold tracking-[0.2em] text-[#0B3D0B]"
-                  aria-label={`School code ${RUN_FOR_CHARITY_SCHOOL_CODE}`}
-                >
-                  {RUN_FOR_CHARITY_SCHOOL_CODE}
-                </p>
-                <p className="text-sm font-medium text-[#3D4450]">
-                  Paste under <strong>School / Referral Code</strong> so Stone Hill
-                  receives 100% of your registration fee.
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full font-bold border-2"
-                  style={{ borderColor: '#085508', color: '#085508' }}
-                  onClick={() => void copyCode()}
-                >
-                  {copiedCode ? (
-                    <>
-                      <Check className="w-4 h-4 mr-2" aria-hidden="true" />
-                      Code copied
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4 mr-2" aria-hidden="true" />
-                      Copy code SHMS
-                    </>
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  className="w-full text-white font-bold text-base py-6"
-                  style={{ backgroundColor: '#0B3D0B' }}
-                  onClick={() => void continueToBestRunners()}
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" aria-hidden="true" />
-                  Register on Best Runners
-                </Button>
-              </div>
-
-              <ol className="space-y-3 text-sm text-[#3D4450] list-decimal pl-5 leading-relaxed">
-                <li>
-                  <strong className="text-[#1A1A1A]">Copy SHMS</strong>
-                  <span className="block text-[#5A6070]">
-                    Use the button above so our school code is on your clipboard.
-                  </span>
-                </li>
-                <li>
-                  <strong className="text-[#1A1A1A]">Register on Best Runners</strong>
-                  <span className="block text-[#5A6070]">
-                    Tap Register (or the flyer). On their site, choose{' '}
-                    <strong>Register Now</strong>.
-                  </span>
-                </li>
-                <li>
-                  <strong className="text-[#1A1A1A]">Paste SHMS before you pay</strong>
-                  <span className="block text-[#5A6070]">
-                    Enter it in <strong>School / Referral Code</strong> so fees come
-                    back to Stone Hill.
-                  </span>
-                </li>
-              </ol>
+                <ExternalLink className="w-4 h-4 mr-2" aria-hidden="true" />
+                Register on Best Runners
+              </Button>
             </div>
 
             {event.mainImage?.url ? (
               <div className="lg:col-span-7">
                 <button
                   type="button"
-                  onClick={() => void continueToBestRunners()}
+                  onClick={openBestRunners}
                   className="block w-full text-left overflow-hidden rounded-2xl shadow-[0_24px_48px_-28px_rgba(11,61,11,0.45)] ring-2 ring-[#0B3D0B] bg-white hover:opacity-[0.98] transition-opacity cursor-pointer"
                 >
                   <p

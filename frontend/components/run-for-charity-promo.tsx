@@ -2,12 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
 import { ExternalLink } from 'lucide-react'
 import {
   BEST_RUNNERS_SIGNUP_URL,
   RUN_FOR_CHARITY_REGISTER_PATH,
-  RUN_FOR_CHARITY_SCHOOL_CODE,
 } from '@/lib/run-for-charity'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
@@ -38,23 +36,14 @@ function isEarlyBird(now = new Date()): boolean {
 
 /**
  * Home promo for Best Runners Run for Charity (Sun 9/13).
- * One job: get families to register with school code SHMS.
- * One CTA: copy SHMS + open Best Runners (flyer + primary button).
+ * One job: get families to register. The Best Runners link already applies SHMS.
  */
 export function RunForCharityPromo() {
-  const [copied, setCopied] = useState(false)
   const earlyBird = isEarlyBird()
 
   if (!stillShowingPromo()) return null
 
-  async function copyAndContinue() {
-    try {
-      await navigator.clipboard.writeText(RUN_FOR_CHARITY_SCHOOL_CODE)
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 2500)
-    } catch {
-      /* still open Best Runners */
-    }
+  function openBestRunners() {
     window.open(BEST_RUNNERS_SIGNUP_URL, '_blank', 'noopener,noreferrer')
   }
 
@@ -91,7 +80,7 @@ export function RunForCharityPromo() {
         </h2>
         <p className="mt-4 text-base sm:text-lg text-white/85 leading-relaxed max-w-2xl text-pretty">
           {vanillaizeIfDemo(
-            'Best Runners hosts the race. Use school code SHMS so Stone Hill receives 100% of your registration fee.',
+            'Best Runners hosts the race. Our register link applies school code SHMS so Stone Hill receives 100% of your registration fee.',
           )}
         </p>
 
@@ -142,29 +131,18 @@ export function RunForCharityPromo() {
             <div
               className="rounded-2xl border-2 border-[#98C818]/60 bg-black/15 p-6 text-center space-y-3"
             >
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#98C818]">
-                {vanillaizeIfDemo('Stone Hill school code')}
-              </p>
-              <p
-                className="text-5xl font-bold tracking-[0.2em] text-white"
-                aria-label={`School code ${RUN_FOR_CHARITY_SCHOOL_CODE}`}
-              >
-                {RUN_FOR_CHARITY_SCHOOL_CODE}
-              </p>
               <p className="text-sm text-white/80 leading-relaxed">
                 {vanillaizeIfDemo(
-                  'Paste under School / Referral Code on Best Runners so Stone Hill receives your registration fee.',
+                  'Tap register — Best Runners fills in SHMS for you.',
                 )}
               </p>
               <button
                 type="button"
-                onClick={() => void copyAndContinue()}
+                onClick={openBestRunners}
                 className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3.5 text-base font-bold text-[#085508] bg-[#FFD700] hover:bg-[#ffe44d] transition-colors"
               >
                 <ExternalLink className="w-4 h-4" aria-hidden />
-                {copied
-                  ? 'SHMS copied · opening Best Runners…'
-                  : 'Copy SHMS & register on Best Runners'}
+                Register on Best Runners
               </button>
             </div>
 
@@ -181,7 +159,7 @@ export function RunForCharityPromo() {
           <figure className="lg:sticky lg:top-28 space-y-4">
             <button
               type="button"
-              onClick={() => void copyAndContinue()}
+              onClick={openBestRunners}
               className="relative block w-full overflow-hidden rounded-2xl bg-white shadow-[0_24px_48px_-28px_rgba(0,0,0,0.55)] ring-2 ring-[#98C818] text-left hover:opacity-[0.98] transition-opacity cursor-pointer"
             >
               <p className="px-4 py-4 text-center text-base sm:text-lg font-bold tracking-wide text-[#0B3D0B] bg-[#FFD700] flex items-center justify-center gap-2">
