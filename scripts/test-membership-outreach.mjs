@@ -13,6 +13,7 @@ import {
 import {
   buildMailtoBcc,
   buildRawMimeMessage,
+  sanitizeRecipients,
   sendMassEmail,
   validateMassEmailDraft,
 } from '../frontend/lib/staff/mass-email.ts'
@@ -114,6 +115,19 @@ check('gmail raw MIME is base64url', () => {
   const decoded = Buffer.from(raw.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')
   assert.ok(decoded.includes('To: parent@example.com'))
   assert.ok(decoded.includes('Body line'))
+})
+
+check('sanitize recipients drops junk and fixes typos', () => {
+  assert.deepEqual(
+    sanitizeRecipients([
+      'Parent@Gmail.com',
+      'myrna75@yahoo.comm',
+      'treasurer@shmspto.org',
+      'qa@example.com',
+      'bad',
+    ]),
+    ['myrna75@yahoo.com', 'parent@gmail.com'],
+  )
 })
 
 check('mass email validation + mailto BCC', () => {

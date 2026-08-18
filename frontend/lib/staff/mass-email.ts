@@ -26,15 +26,43 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const GMAIL_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const GMAIL_SEND_URL = 'https://gmail.googleapis.com/gmail/v1/users/me/messages/send'
 
+const EMAIL_DOMAIN_FIX: Record<string, string> = {
+  'yahoo.comm': 'yahoo.com',
+  'yhaoo.fr': 'yahoo.fr',
+  'hotmail.cm': 'hotmail.com',
+  'gmail.con': 'gmail.com',
+  'gmai.com': 'gmail.com',
+  'gmial.com': 'gmail.com',
+  'hmail.com': 'gmail.com',
+}
+
+const BLOCKED_EMAIL_DOMAINS = new Set(['example.com', 'example.org', 'example.net'])
+
 export function isValidEmail(email: string): boolean {
   return EMAIL_RE.test(email.trim().toLowerCase())
+}
+
+/** Lowercase, trim, and fix common domain typos. */
+export function sanitizeDirectoryEmail(raw: string): string {
+  const e = String(raw ?? '').trim().toLowerCase()
+  const at = e.lastIndexOf('@')
+  if (at < 1) return e
+  return `${e.slice(0, at)}@${EMAIL_DOMAIN_FIX[e.slice(at + 1)] || e.slice(at + 1)}`
+}
+
+function isOutreachEmail(email: string): boolean {
+  if (!isValidEmail(email)) return false
+  const domain = email.split('@')[1] || ''
+  if (BLOCKED_EMAIL_DOMAINS.has(domain)) return false
+  if (email.endsWith('@shmspto.org')) return false
+  return true
 }
 
 export function sanitizeRecipients(emails: string[]): string[] {
   const out = new Set<string>()
   for (const raw of emails) {
-    const e = String(raw ?? '').trim().toLowerCase()
-    if (isValidEmail(e)) out.add(e)
+    const e = sanitizeDirectoryEmail(raw)
+    if (isOutreachEmail(e)) out.add(e)
   }
   return Array.from(out).sort()
 }
