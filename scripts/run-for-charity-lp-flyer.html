@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Run for Charity 1K &amp; 5K · SHMS PTO</title>
+    <style>
+      @page {
+        size: letter;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 8.5in;
+        height: 11in;
+        font-family: Georgia, 'Times New Roman', serif;
+        color: #1a1a1a;
+        background: #f7f4ee;
+      }
+      .page {
+        width: 8.5in;
+        height: 11in;
+        padding: 0.55in 0.6in 0.5in;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(165deg, #0a3d0a 0%, #085508 42%, #0d4a0d 100%);
+        color: #fff;
+      }
+      .kicker {
+        font-family: system-ui, sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #98c818;
+        margin: 0 0 10px;
+      }
+      h1 {
+        font-size: 42px;
+        line-height: 1.05;
+        margin: 0 0 8px;
+        font-weight: 700;
+      }
+      .lede {
+        font-family: system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.45;
+        color: rgba(255, 255, 255, 0.88);
+        max-width: 6.6in;
+        margin: 0 0 22px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 2.55in;
+        gap: 0.28in;
+        flex: 1;
+        align-items: stretch;
+      }
+      .card {
+        background: rgba(0, 0, 0, 0.16);
+        border: 2px solid rgba(152, 200, 24, 0.55);
+        border-radius: 18px;
+        padding: 18px 20px;
+      }
+      .card h2 {
+        font-family: system-ui, sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #98c818;
+        margin: 0 0 10px;
+      }
+      .card p,
+      .card li {
+        font-family: system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.4;
+        margin: 0 0 8px;
+      }
+      .card ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .price strong {
+        font-size: 18px;
+      }
+      .qr-wrap {
+        background: #fff;
+        color: #0b3d0b;
+        border-radius: 18px;
+        padding: 16px 14px 14px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .qr-wrap img {
+        width: 2.15in;
+        height: 2.15in;
+      }
+      .qr-wrap p {
+        font-family: system-ui, sans-serif;
+        font-size: 13px;
+        line-height: 1.35;
+        margin: 10px 0 0;
+        font-weight: 600;
+      }
+      .qr-wrap .url {
+        font-size: 10px;
+        font-weight: 500;
+        color: #3d4450;
+        word-break: break-all;
+        margin-top: 6px;
+      }
+      footer {
+        font-family: system-ui, sans-serif;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.75);
+        margin-top: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <p class="kicker">SHMS PTO · Best Runners partnership · Early bird through Aug 15</p>
+      <h1>Run for Charity 1K &amp; 5K</h1>
+      <p class="lede">
+        Best Runners hosts the race. Scan to register — school code SHMS is filled in
+        automatically so Stone Hill receives 100% of your registration fee.
+      </p>
+      <div class="grid">
+        <div>
+          <div class="card" style="margin-bottom: 14px">
+            <h2>Race day</h2>
+            <ul>
+              <li><strong>Sunday, Sep 13, 2026</strong></li>
+              <li>Rock Ridge High School · Ashburn</li>
+              <li>43460 Loudoun Reserve Dr</li>
+              <li>1K &amp; 5K · medal, race shirt, post-race snacks</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h2>Early bird pricing</h2>
+            <p class="price"><strong>Adults $25</strong> · Kids $15 · through Aug 15</p>
+            <p>After Aug 15: Adults $30 · Kids $20</p>
+          </div>
+        </div>
+        <div class="qr-wrap">
+          <img src="../frontend/public/events/run-for-charity-signup-qr.png" alt="Register QR code" />
+          <p>Scan to register.<br />SHMS is already applied.</p>
+          <p class="url">bestrunners.org/register/signup?ref=SHMS</p>
+        </div>
+      </div>
+      <footer>www.shmspto.org · Stone Hill Middle School PTO</footer>
+    </div>
+  </body>
+</html>

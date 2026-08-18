@@ -144,6 +144,12 @@ export function RunForCharityPromo() {
                 <ExternalLink className="w-4 h-4" aria-hidden />
                 Register on Best Runners
               </button>
+              <a
+                href="/events/run-for-charity-lp-flyer.pdf"
+                className="block text-sm font-semibold text-white/80 hover:text-white underline underline-offset-2"
+              >
+                Download printable flyer (PDF)
+              </a>
             </div>
 
             <p className="text-sm text-white/65">

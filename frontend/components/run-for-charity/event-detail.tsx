@@ -199,6 +199,14 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
                 <ExternalLink className="w-4 h-4 mr-2" aria-hidden="true" />
                 Register on Best Runners
               </Button>
+              <p className="text-center">
+                <a
+                  href="/events/run-for-charity-lp-flyer.pdf"
+                  className="text-sm font-semibold text-[#085508] hover:underline underline-offset-2"
+                >
+                  Download printable flyer (PDF)
+                </a>
+              </p>
             </div>
 
             {event.mainImage?.url ? (
