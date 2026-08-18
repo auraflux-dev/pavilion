@@ -11,6 +11,9 @@
  * settings.getBool('announcementEnabled') // → true
  */
 
+import { vanillaizeRecord } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
+
 interface SiteSettingsMap {
  get(key: string, fallback?: string): string
  getNumber(key: string, fallback?: number): number
@@ -50,7 +53,7 @@ async function fetchAllSettings(): Promise<Record<string, string>> {
  for (const item of (data.dataItems ?? []) as WixDataItem[]) {
  if (item.data?.key) map[item.data.key] = item.data.value ?? ''
  }
- return map
+ return isDemoInstance() ? vanillaizeRecord(map) : map
  } catch {
  return {}
  }

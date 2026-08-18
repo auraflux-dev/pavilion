@@ -7,6 +7,8 @@ import {
   PAGE_CONTENT_DEFAULTS,
 } from '@/lib/defaults/page-content'
 import type { StaffProfile } from '@/lib/staff/roles'
+import { vanillaizeCopy } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -79,10 +81,23 @@ export async function GET(req: NextRequest) {
     if (!allPages) {
       merged = merged.filter((p) => isCovePageContentKey(p.page))
     }
+    if (isDemoInstance()) {
+      merged = merged.map((p) => ({
+        ...p,
+        eyebrow: vanillaizeCopy(p.eyebrow),
+        title: vanillaizeCopy(p.title),
+        body: vanillaizeCopy(p.body),
+        sectionTitle: vanillaizeCopy(p.sectionTitle),
+        sectionBody: vanillaizeCopy(p.sectionBody),
+        bullets: vanillaizeCopy(p.bullets),
+        ctaLabel: vanillaizeCopy(p.ctaLabel),
+      }))
+    }
     return NextResponse.json({
       pages: merged,
       scope: allPages ? 'all' : 'cove',
       canBrandFix: allPages,
+      demo: isDemoInstance(),
     })
   } catch (err) {
     console.error('/api/staff/page-content GET', err)

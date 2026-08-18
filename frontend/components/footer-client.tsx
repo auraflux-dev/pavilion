@@ -9,6 +9,8 @@ import { SocialFooterLinks } from '@/components/social-footer-links'
 import type { NavLink } from '@/lib/api/nav'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { trackGenerateLead } from '@/lib/ga'
+import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 interface Props {
   presidentEmail: string
@@ -82,18 +84,28 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
             <a
               href="/"
               className="inline-flex items-center gap-3 mb-5 group"
-              aria-label="Stone Hill Middle School PTO Home"
+              aria-label={isPublicDemoInstance() ? `${DEMO_BRAND.pto} Home` : 'Stone Hill Middle School PTO Home'}
             >
-              <Image
-                src="/shms-logo.png"
-                alt="Stone Hill Middle School Stingrays logo"
-                width={44}
-                height={44}
-                className="shrink-0"
-              />
+              {isPublicDemoInstance() ? (
+                <span
+                  className="w-11 h-11 rounded-full shrink-0 flex items-center justify-center text-white font-bold"
+                  style={{ backgroundColor: '#085508' }}
+                  aria-hidden="true"
+                >
+                  R
+                </span>
+              ) : (
+                <Image
+                  src="/shms-logo.png"
+                  alt="Stone Hill Middle School Stingrays logo"
+                  width={44}
+                  height={44}
+                  className="shrink-0"
+                />
+              )}
               <div>
                 <div className="font-bold text-sm text-white leading-tight">
-                  Stone Hill Middle School
+                  {isPublicDemoInstance() ? DEMO_BRAND.school : 'Stone Hill Middle School'}
                 </div>
                 <div
                   className="text-xs font-semibold tracking-wider uppercase"
@@ -105,8 +117,9 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
             </a>
 
             <p className="text-sm leading-relaxed mb-6" style={{ color: '#C5CCD6' }}>
-              Enriching the academic and social experience for all SHMS PTO
-              students and families in Ashburn, Virginia.
+              {isPublicDemoInstance()
+                ? `A working PTO operating system demo. Public site, family portal, and staff workspace for ${DEMO_BRAND.school}.`
+                : 'Enriching the academic and social experience for all SHMS PTO students and families in Ashburn, Virginia.'}
             </p>
 
             <div className="flex items-center gap-2.5 flex-wrap">

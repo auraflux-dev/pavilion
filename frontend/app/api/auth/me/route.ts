@@ -10,9 +10,60 @@ import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
 import { collectMemberEmails, pickSessionEmail } from '@/lib/member-emails'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
 import { resolveStaffForSession } from '@/lib/staff/roles'
+import { isDemoInstance } from '@/lib/demo/instance'
+import {
+  demoMemberId,
+  demoStaffProfile,
+  getDemoReviewSession,
+} from '@/lib/demo/session'
 
 export async function GET(req: NextRequest) {
   try {
+    if (isDemoInstance()) {
+      const demo = getDemoReviewSession(req)
+      if (demo) {
+        const staff = demo.lane === 'parent' ? null : demoStaffProfile(demo)
+        const name = `${demo.firstName} ${demo.lastName}`.trim()
+        return NextResponse.json({
+          member: {
+            id: demoMemberId(demo.email),
+            name,
+            firstName: demo.firstName,
+            lastName: demo.lastName,
+            needsName: false,
+            email: demo.email,
+            profileImage: null,
+            memberSince: new Date(demo.iat).toISOString(),
+          },
+          storeCards: [{ balance: 42.5, studentName: 'Maya Nguyen' }],
+          membership: { tier: 'lagoon', expiresAt: '', status: 'active' },
+          students: [
+            {
+              id: 'demo-stu-1',
+              firstName: 'Maya',
+              lastName: 'Nguyen',
+              grade: '6',
+              membershipTier: 'lagoon',
+              membershipStatus: 'active',
+            },
+          ],
+          studentCount: 1,
+          hasPaidMembership: true,
+          accountType: 'paid',
+          actingAs: false,
+          linkedHousehold: false,
+          viewingEmail: demo.email,
+          staffRoles: staff?.roles ?? [],
+          boardTitle: staff?.boardTitle ?? '',
+          staffName: staff?.name ?? '',
+          personalEmail: demo.email,
+          needsPersonalEmail: false,
+          isStaff: Boolean(staff),
+          demo: true,
+        })
+      }
+    }
+
     const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
     if (!tokens || !isMemberTokens(tokens)) {
       return NextResponse.json(

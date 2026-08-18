@@ -1,4 +1,5 @@
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { getWixClient } from '@/lib/wix-client'
 import { sortEventCategoryNames } from '@/lib/events/categories'
 import {
@@ -164,8 +165,8 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
             extractExternalRegistrationUrl(shortDescription)
         return {
           id,
-          title: ev.title as string,
-          description,
+          title: vanillaizeIfDemo(String(ev.title ?? '')),
+          description: description ? vanillaizeIfDemo(description) : description,
           shortDescription,
           location: ev.location as WixEvent['location'],
           dateAndTimeSettings: dts

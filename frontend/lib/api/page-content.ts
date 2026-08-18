@@ -13,6 +13,7 @@ import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { brandifyCoveDigitalCard } from '@/lib/copy/brandify-cove-digital-card'
 import { brandifyShmsPto } from '@/lib/copy/brandify-shms-pto'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 interface WixDataItem {
   id?: string
@@ -71,17 +72,17 @@ function merge(
       }
 
   const pub = (text: string) =>
-    humanizePublicCopy(brandifyCoveDigitalCard(brandifyShmsPto(text)))
+    vanillaizeIfDemo(humanizePublicCopy(brandifyCoveDigitalCard(brandifyShmsPto(text))))
 
   return {
     ...merged,
-    eyebrow: brandifyCoveDigitalCard(brandifyShmsPto(merged.eyebrow)),
+    eyebrow: vanillaizeIfDemo(brandifyCoveDigitalCard(brandifyShmsPto(merged.eyebrow))),
     title: pub(merged.title),
     body: pub(merged.body),
     sectionTitle: pub(merged.sectionTitle),
     sectionBody: pub(merged.sectionBody),
     bullets: merged.bullets.map((b) => pub(b)),
-    ctaLabel: brandifyCoveDigitalCard(brandifyShmsPto(merged.ctaLabel)),
+    ctaLabel: vanillaizeIfDemo(brandifyCoveDigitalCard(brandifyShmsPto(merged.ctaLabel))),
   }
 }
 

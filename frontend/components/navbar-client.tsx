@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import type { NavLink } from '@/lib/api/nav'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { PortalReturnBar } from '@/components/portal-return-bar'
+import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 interface Props {
   links: NavLink[]
@@ -214,34 +216,44 @@ export function NavbarClient({ links }: Props) {
         <Link
           href="/"
           className="flex items-center gap-2.5 shrink-0 group"
-          aria-label="Stone Hill Middle School PTO Home"
+          aria-label={isPublicDemoInstance() ? `${DEMO_BRAND.pto} Home` : 'Stone Hill Middle School PTO Home'}
           onClick={() => setPendingHref('/')}
         >
-          <Image
-            src="/shms-logo.png"
-            alt="Stone Hill Middle School Stingrays logo"
-            width={44}
-            height={44}
-            className="shrink-0"
-            priority
-          />
+          {isPublicDemoInstance() ? (
+            <span
+              className="w-11 h-11 rounded-full shrink-0 flex items-center justify-center text-white font-bold"
+              style={{ backgroundColor: '#085508' }}
+              aria-hidden="true"
+            >
+              R
+            </span>
+          ) : (
+            <Image
+              src="/shms-logo.png"
+              alt="Stone Hill Middle School Stingrays logo"
+              width={44}
+              height={44}
+              className="shrink-0"
+              priority
+            />
+          )}
           <div className="hidden xl:block">
             <span
               className="font-bold text-sm leading-tight block"
               style={{ color: '#085508' }}
             >
-              Stone Hill Middle School
+              {isPublicDemoInstance() ? DEMO_BRAND.school : 'Stone Hill Middle School'}
             </span>
             <span
               className="text-xs font-semibold tracking-wide uppercase whitespace-nowrap"
               style={{ color: '#FFD700' }}
             >
-              PTO · Go Stingrays!
+              {isPublicDemoInstance() ? `PTO · ${DEMO_BRAND.cheer}` : 'PTO · Go Stingrays!'}
             </span>
           </div>
           <div className="xl:hidden">
             <span className="font-bold text-sm" style={{ color: '#085508' }}>
-              SHMS PTO
+              {isPublicDemoInstance() ? DEMO_BRAND.short : 'SHMS PTO'}
             </span>
           </div>
         </Link>

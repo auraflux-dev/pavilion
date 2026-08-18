@@ -6,8 +6,18 @@ import {
   resolveStaffForSession,
   type StaffProfile,
 } from '@/lib/staff/roles'
+import { isDemoInstance } from '@/lib/demo/instance'
+import { demoStaffProfile, getDemoReviewSession } from '@/lib/demo/session'
 
 export async function getStaffSession(req: NextRequest) {
+  if (isDemoInstance()) {
+    const demo = getDemoReviewSession(req)
+    if (demo && (demo.lane === 'staff' || demo.lane === 'both')) {
+      const session = await getMemberSession(req)
+      if (!session) return null
+      return { ...session, staff: demoStaffProfile(demo) }
+    }
+  }
   const session = await getMemberSession(req)
   if (!session) return null
   const staff = await resolveStaffForSession(session.email, session.emails)

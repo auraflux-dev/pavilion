@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
 import { getWixClient } from '@/lib/wix-client'
-import { requireStaffRole } from '@/lib/staff/session'
+import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
 import {
   isStaffEmail,
   resolveStaffForSession,
@@ -9,6 +9,7 @@ import {
   STAFF_EMAIL_DOMAIN,
   type StaffRole,
 } from '@/lib/staff/roles'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 /**
  * Self-registration: first @shmspto.org login creates a StaffRoles row with no
@@ -32,6 +33,27 @@ async function ensureStaffRegistration(email: string, displayName: string) {
 }
 
 export async function GET(req: NextRequest) {
+  if (isDemoInstance()) {
+    const demoStaff = await getStaffSession(req)
+    if (demoStaff) {
+      const homes = demoStaff.staff.roles.map((role) => ({
+        role,
+        ...ROLE_HOME_COPY[role as StaffRole],
+      }))
+      return NextResponse.json({
+        email: demoStaff.staff.email,
+        sessionEmail: demoStaff.email,
+        name: demoStaff.staff.name,
+        boardTitle: demoStaff.staff.boardTitle,
+        roles: demoStaff.staff.roles,
+        personalEmail: demoStaff.staff.personalEmail,
+        isAdmin: true,
+        homes,
+        demo: true,
+      })
+    }
+  }
+
   const session = await getMemberSession(req)
   if (!session) {
     return NextResponse.json({ error: 'Sign in to continue.' }, { status: 401 })

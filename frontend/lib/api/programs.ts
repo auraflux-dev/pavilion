@@ -1,4 +1,5 @@
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { getWixClient } from "@/lib/wix-client";
 import { formatProgramSchedule } from "@/lib/programs/schedule";
 import { memberPriorityUntilIso } from '@/lib/programs/registration-access'
@@ -72,8 +73,8 @@ function mapProgramItem(item: Record<string, unknown>): Program {
 
   return {
     _id: String(item._id ?? ''),
-    name: String(item.name ?? ''),
-    description: String(item.description ?? ''),
+    name: vanillaizeIfDemo(String(item.name ?? '')),
+    description: vanillaizeIfDemo(String(item.description ?? '')),
     fee: Number(item.fee ?? 0) || 0,
     capacity: Number(item.capacity ?? 0) || 0,
     registrationOpen: item.registrationOpen === true,

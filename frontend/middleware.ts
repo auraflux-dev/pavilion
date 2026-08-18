@@ -12,11 +12,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
 import { isSameOriginRequest } from '@/lib/security/csrf'
+import { DEMO_REVIEW_COOKIE, hasDemoReviewCookie } from '@/lib/demo/cookie'
+import {
+  demoWriteResponse,
+  isDemoJoinAllowPath,
+  isDemoPiiPath,
+  isWriteMethod,
+} from '@/lib/demo/guard'
+import { isDemoInstance } from '@/lib/demo/instance'
+import { demoPiiStub } from '@/lib/demo/seed'
 
 const PROTECTED_ROUTES = ['/member-portal', '/staff']
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
+  const demo = isDemoInstance()
 
   // Short table QR URL → free signup (hard redirect for scanners / SMS links)
   if (pathname === '/join') {
@@ -45,6 +55,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden origin' }, { status: 403 })
   }
 
+  if (demo && pathname.startsWith('/api/')) {
+    if (isWriteMethod(req.method) && !isDemoJoinAllowPath(pathname)) {
+      return demoWriteResponse()
+    }
+    if (req.method === 'GET' && isDemoPiiPath(pathname)) {
+      return NextResponse.json(demoPiiStub(pathname))
+    }
+  }
+
   // Printable payment cheat sheet — no session (table QR / print without Staff login)
   const staffPublic =
     pathname === '/staff/in-person' || pathname.startsWith('/staff/in-person/')
@@ -54,10 +73,12 @@ export async function middleware(req: NextRequest) {
     PROTECTED_ROUTES.some((r) => pathname.startsWith(r))
   ) {
     const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
-    if (!isMemberTokens(tokens)) {
+    const demoOk =
+      demo && hasDemoReviewCookie(req.cookies.get(DEMO_REVIEW_COOKIE)?.value)
+    if (!isMemberTokens(tokens) && !demoOk) {
       const loginUrl = req.nextUrl.clone()
-      loginUrl.pathname = '/auth/join'
-      loginUrl.searchParams.set('mode', 'login')
+      loginUrl.pathname = demo ? '/review' : '/auth/join'
+      if (!demo) loginUrl.searchParams.set('mode', 'login')
       loginUrl.searchParams.set('returnTo', pathname + (req.nextUrl.search || ''))
       return NextResponse.redirect(loginUrl)
     }

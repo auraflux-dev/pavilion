@@ -7,6 +7,9 @@
  */
 
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 export interface NavLink {
  id: string
@@ -97,7 +100,7 @@ function normalizeCommerceNav(links: NavLink[]): NavLink[] {
 
  const cove: NavLink = {
  id: commerce[0].id || 'cove',
- label: 'The Cove',
+ label: isDemoInstance() ? DEMO_BRAND.store : 'The Cove',
     href: '/cove',
  sortOrder: Math.min(...commerce.map((l) => l.sortOrder)),
  showInNav: commerce.some((l) => l.showInNav),
@@ -134,7 +137,8 @@ function ensureHomeLink(links: NavLink[]): NavLink[] {
 export async function getNavLinks(): Promise<NavLink[]> {
  const raw = await fetchNavLinks()
  // Always use CMS active links; home sections still gate Programs/Events via schoolInSession.
- return ensureHomeLink(normalizeCommerceNav(raw.length > 0 ? raw : FALLBACK_NAV))
+ const links = ensureHomeLink(normalizeCommerceNav(raw.length > 0 ? raw : FALLBACK_NAV))
+ return links.map((l) => ({ ...l, label: vanillaizeIfDemo(l.label) }))
 }
 
 export async function getTopNavLinks(): Promise<NavLink[]> {

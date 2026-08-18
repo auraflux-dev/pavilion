@@ -10,6 +10,8 @@
  */
 
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
+import { vanillaizeCopy } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 export interface MembershipTier {
   id: string
@@ -253,6 +255,15 @@ export async function getMembershipTiers(): Promise<MembershipTier[]> {
         variantId: tier.variantId || product.variantId,
       }
     })
+  ).then((tiers) =>
+    isDemoInstance()
+      ? tiers.map((tier) => ({
+          ...tier,
+          name: vanillaizeCopy(tier.name),
+          description: vanillaizeCopy(tier.description),
+          perks: tier.perks.map((p) => vanillaizeCopy(p)),
+        }))
+      : tiers,
   )
 }
 
