@@ -1,6 +1,9 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { NextResponse } from 'next/server'
+
+const PDF_DIR = join(fileURLToPath(new URL('../_pdfs/', import.meta.url)))
 
 const FILES: Record<string, { disk: string; download: string }> = {
   'run-for-charity-lp-flyer.pdf': {
@@ -22,7 +25,7 @@ export async function GET(
   const { file } = await ctx.params
   const spec = FILES[file]
   if (!spec) return new NextResponse('Not found', { status: 404 })
-  const buf = await readFile(join(process.cwd(), 'public/flyers', spec.disk))
+  const buf = await readFile(join(PDF_DIR, spec.disk))
   return new NextResponse(buf, {
     headers: {
       'Content-Type': 'application/pdf',
