@@ -58,10 +58,10 @@ export type ShirtSize = (typeof SHIRT_SIZES)[number]
 
 /** Until 3PL ships, physical perks are Open House / coordinated pickup. */
 export const PHYSICAL_PERK_PICKUP_NOTE =
-  'Pick up at Open House on August 13, or email vp-membershipexperience@shmspto.org to coordinate pickup.'
+  'Email vp-membershipexperience@shmspto.org to coordinate pickup at school.'
 
 export const EVENT_REFRESHMENTS_NOTE =
-  'At PTO events, show your Family Cove 6-digit code (paid member codes end in 9). Volunteers record the code and hand refreshment tickets.'
+  'At PTO events, show your Family Cove 6-digit code (Lagoon and Tide codes end in 9). Volunteers record the code and hand refreshment tickets.'
 
 /** Faculty/teacher membership: choose magnet OR Spirit Wear T-shirt at purchase. */
 export type PhysicalPerkChoice = 'spirit_shirt' | 'magnet'
@@ -98,13 +98,12 @@ export function tierNeedsMagnet(tier: string): boolean {
   return tierAutoMagnet(tier) || tierIncludesMagnetWithShirt(tier)
 }
 
+/** Lagoon / Tide only — Reef does not include free event food. */
 export function tierNeedsEventRefreshments(tier: string): boolean {
   const t = tier.trim().toLowerCase()
   return (
-    t === 'reef' ||
     t === 'lagoon' ||
     t === 'tide' ||
-    t === 'ruby' ||
     t === 'supreme' ||
     t === 'pearl' ||
     t === 'trench'

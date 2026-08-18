@@ -75,7 +75,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   emptyBody:
     'Your free parent account is ready. Add a student to track programs, Cove Digital Card balance, and paid membership status.',
   upgradeBody:
-    'Paid members get Cove Digital Card credit, enrichment discounts, priority enrichment registration when offered, and free refreshments at school events.',
+    'Paid members get Cove Digital Card credit, enrichment discounts, and priority enrichment registration when offered. Lagoon and Tide also include free refreshments at PTO events.',
   viewMemberships: 'View paid memberships',
 
   calendarTitle: 'Calendar & Messages',

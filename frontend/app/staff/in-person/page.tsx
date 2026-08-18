@@ -111,9 +111,9 @@ export default function StaffInPersonCardPage() {
                 </td>
               </tr>
               <tr className="border-t border-[#E8E4DC]">
-                <td className="p-3 align-top">Paid member · free food ticket</td>
+                <td className="p-3 align-top">Lagoon / Tide · free food ticket</td>
                 <td className="p-3 align-top">
-                  Code ends in <strong>9</strong> → hand ticket · no charge
+                  Code ends in <strong>9</strong> → hand ticket · no charge (not Reef)
                 </td>
               </tr>
             </tbody>

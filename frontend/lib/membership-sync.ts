@@ -446,7 +446,7 @@ export async function applyPaidMembership(opts: {
     // Memberships collection may be missing or permissioned differently
   }
 
-  // Reclassify Family Cove code to paid marker (ends in 9) for event refreshments checks
+  // Reclassify Family Cove code: Lagoon/Tide end in 9 for refreshments; Reef does not.
   try {
     const { ensureCoveFamilyCode } = await import('@/lib/cove-family-code')
     await ensureCoveFamilyCode(email)

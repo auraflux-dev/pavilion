@@ -278,7 +278,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
               <p className="text-2xl font-bold font-mono tracking-[0.2em] text-[#1A1A1A]">{code}</p>
               {paidMemberCode ? (
                 <p className="text-[11px] font-bold text-[#085508] mt-1">
-                  Paid PTO member code (ends in 9) — show at event food tables for refreshment tickets
+                  Lagoon/Tide member code (ends in 9) — show at event food tables for refreshment tickets
                 </p>
               ) : codeHint ? (
                 <p className="text-[11px] text-[#5A6070] mt-1">{codeHint}</p>

@@ -4,6 +4,7 @@
  */
 import { getWixClient } from '@/lib/wix-client'
 import { sendMassEmail } from '@/lib/staff/mass-email'
+import { buildMembershipEntitlements } from '@/lib/membership-entitlements'
 
 export type PurchaseConfirmKind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation'
 
@@ -72,14 +73,22 @@ function buildCopy(input: PurchaseConfirmationInput): Omit<PurchaseConfirmation,
 
   if (input.kind === 'membership') {
     const tier = input.meta?.tierName || input.meta?.tier || 'paid'
+    const ents = buildMembershipEntitlements({
+      tier: String(input.meta?.tier || input.meta?.tierName || ''),
+      shirtSize: input.meta?.shirtSize || null,
+    })
+    const perkLines = ents
+      .filter((e) => e.kind !== 'cove_credit')
+      .map((e) => e.label)
     const nextSteps = [
       `Your ${tier} membership is active.`,
       'Open Member Portal for your Cove Digital Card credit and member perks.',
+      ...perkLines.map((label) => `Perk: ${label}.`),
       'Add or update students so enrichment discounts apply correctly.',
     ]
     return {
- subject: `Welcome: ${tier} membership confirmed`,
- body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', 'SHMS PTO Membership'].join(
+      subject: `Welcome: ${tier} membership confirmed`,
+      body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', 'SHMS PTO Membership'].join(
         '\n',
       ),
       nextSteps,

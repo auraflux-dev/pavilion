@@ -17,7 +17,7 @@ export type CoveFamilyLookup = {
   coveFamilyPasscode: string
   gan: string
   balance: number
-  /** Reef / Lagoon / Tide — refreshments + paid code marker (ends in 9). */
+  /** Lagoon / Tide — event refreshments + code marker (ends in 9). Reef is paid but not this perk. */
   paidMember: boolean
   membershipTier: string
   students: Array<{ id: string; firstName: string; lastName: string; grade?: string }>
@@ -76,7 +76,7 @@ export function suggestCovePasscode(lastName: string, firstName: string): string
   return base.slice(0, PASSCODE_MAX)
 }
 
-/** Paid PTO member family codes always end in 9 (Reef / Lagoon / Tide). Free never do. */
+/** Lagoon / Tide family codes end in 9 (event refreshments). Reef and free never do. */
 export const PAID_MEMBER_CODE_SUFFIX = '9'
 
 function normalizeCode(raw: string): string {
@@ -85,7 +85,7 @@ function normalizeCode(raw: string): string {
     .slice(0, 8)
 }
 
-/** Quick volunteer rule: spoken/backup code ending in 9 ⇒ paid PTO member. */
+/** Quick volunteer rule: backup code ending in 9 ⇒ Lagoon/Tide refreshments perk. */
 export function isPaidMemberFamilyCode(code: string): boolean {
   const digits = normalizeCode(code)
   return digits.length >= 4 && digits.endsWith(PAID_MEMBER_CODE_SUFFIX)

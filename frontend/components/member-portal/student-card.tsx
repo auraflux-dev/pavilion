@@ -126,7 +126,7 @@ interface GiftCardData {
 export function StudentCard({
   student,
   defaultOpen = false,
-  upgradeBody = 'Paid members get Cove Digital Card credit, enrichment discounts, and free refreshments at school events.',
+  upgradeBody = 'Paid members get Cove Digital Card credit and enrichment discounts. Lagoon and Tide also include free refreshments at PTO events.',
   grades = ['6', '7', '8'],
   onUpdated,
 }: Props) {
@@ -359,13 +359,15 @@ export function StudentCard({
 
                 {!giftCard?.hasCard ? (
                   <div className="rounded-xl border-2 border-dashed border-[#E8E4DC] p-4 text-center">
-                    <p className="text-sm text-[#5A6070] mb-3">No Cove Digital Card linked yet.</p>
+                    <p className="text-sm text-[#5A6070] mb-3">
+                      Load money to begin using your Cove Digital Card (free accounts welcome).
+                    </p>
                     <a
                       href="/cove"
                       className="inline-flex items-center gap-1.5 text-sm font-bold"
                       style={{ color: '#085508' }}
                     >
-                      <Plus className="w-3.5 h-3.5" /> Get a card
+                      <Plus className="w-3.5 h-3.5" /> Load money
                     </a>
                   </div>
                 ) : (

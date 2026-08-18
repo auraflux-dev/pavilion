@@ -755,7 +755,7 @@ export function MemberDashboard({
 
           <MembershipBenefitsCard />
           {coveGate.ok ? (
-            <CoveFamilyCodeCard />
+            <CoveFamilyCodeCard refreshKey={students.length} />
           ) : (
             <CoveFeatureLockBanner reason={coveGate.error ?? 'Complete family setup first.'} />
           )}

@@ -73,8 +73,8 @@ export function MembershipBenefitsCard() {
             {data.coveFamilyCode}
           </span>
           <span className="block text-[11px] text-[#5A6070] mt-0.5">
-            Show this 6-digit Family Cove code at food trucks / refreshment tables (paid codes end in
-            9).
+            Show this 6-digit Family Cove code at food trucks / refreshment tables (Lagoon and Tide
+            codes end in 9).
           </span>
         </p>
       ) : null}

@@ -124,8 +124,8 @@ export async function GET(req: NextRequest) {
         ? undefined
         : 'Load money to activate your phone QR for The Cove and Square Stand. Free accounts can use the card anytime after a load — paid membership is optional.',
       codeHint: paidMemberCode
-        ? 'Paid PTO member code (ends in 9). Show this 6-digit code at event food tables for refreshment tickets.'
-        : 'Free-account Cove code. Paid membership codes end in 9 for event refreshments.',
+        ? 'Lagoon/Tide member code (ends in 9). Show this 6-digit code at event food tables for refreshment tickets.'
+        : 'Family Cove backup code. Lagoon and Tide member codes end in 9 for event refreshments.',
     })
   } catch (err) {
     console.error('/api/gift-card/family-code GET', err)

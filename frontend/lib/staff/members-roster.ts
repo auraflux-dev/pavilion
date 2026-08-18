@@ -60,10 +60,10 @@ export function isPaidTier(tier: string): boolean {
   return n !== 'free' && n !== 'none' && n !== ''
 }
 
-/** Parent paid PTO tiers that get paid Cove code marker (ends in 9) + event refreshments. */
+/** Lagoon / Tide: Cove code ends in 9 for event refreshments. Reef is paid but does not get this perk. */
 export function isCovePaidMemberTier(tier: string): boolean {
   const n = normalizeMembershipTier(tier)
-  return n === 'reef' || n === 'lagoon' || n === 'tide'
+  return n === 'lagoon' || n === 'tide'
 }
 
 export function tierRank(tier: string | undefined | null): number {

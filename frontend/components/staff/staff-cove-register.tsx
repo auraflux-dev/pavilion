@@ -250,10 +250,10 @@ export function StaffCoveRegister() {
       setFamily(d)
       setMode('member')
       setCode(trimmed)
-      const ends9 = String(d.coveFamilyCode || '').endsWith('9')
+      const refreshmentsPerk = Boolean(d.paidMember)
       setStatus(
-        ends9
-          ? 'Paid-member perk (code ends in 9) — refreshments free · no charge'
+        refreshmentsPerk
+          ? 'Lagoon/Tide perk (code ends in 9) — refreshments free · no charge'
           : d.hasCard
             ? `Cove balance $${Number(d.balance).toFixed(2)}`
             : 'Member found — no Cove balance (use Square Stand)',
@@ -924,7 +924,7 @@ export function StaffCoveRegister() {
               family.parentEmail ||
               'Family'}
             <span className="font-normal text-[#5A6070]"> · code {family.coveFamilyCode}</span>
-            {String(family.coveFamilyCode || '').endsWith('9') ? (
+            {family.paidMember ? (
               <span className="ml-2 text-amber-900 font-bold">· perk · free food</span>
             ) : null}
           </p>
