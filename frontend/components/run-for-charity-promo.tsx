@@ -145,7 +145,7 @@ export function RunForCharityPromo() {
                 Register on Best Runners
               </button>
               <a
-                href="/events/run-for-charity-lp-flyer.pdf"
+                href="/flyers/run-for-charity-lp-flyer.pdf"
                 className="block text-sm font-semibold text-white/80 hover:text-white underline underline-offset-2"
               >
                 Download printable flyer (PDF)

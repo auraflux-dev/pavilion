@@ -201,7 +201,7 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
               </Button>
               <p className="text-center">
                 <a
-                  href="/events/run-for-charity-lp-flyer.pdf"
+                  href="/flyers/run-for-charity-lp-flyer.pdf"
                   className="text-sm font-semibold text-[#085508] hover:underline underline-offset-2"
                 >
                   Download printable flyer (PDF)
