@@ -8,6 +8,7 @@ import {
   studentSafetyComplete,
   type StudentSafety,
 } from '@/lib/program-enroll'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export type OnboardingStudent = Omit<StudentSafety, '_id'> & {
   id?: string
@@ -85,14 +86,18 @@ export function coveFeaturesUnlocked(students: OnboardingStudent[]): {
     return {
       ok: false,
       error:
-        'Add a student in the Member Portal, then confirm your family details to unlock the Cove Digital Card.',
+        vanillaizeIfDemo(
+          'Add a student in the Member Portal, then confirm your family details to unlock the Cove Digital Card.',
+        ),
     }
   }
   if (!isFamilyProfileConfirmed(students) || incompleteSafetyStudents(students).length > 0) {
     return {
       ok: false,
       error:
-        'Confirm your family details (parent name, phone, emergency contact, and pick-up list) to unlock the Cove Digital Card.',
+        vanillaizeIfDemo(
+          'Confirm your family details (parent name, phone, emergency contact, and pick-up list) to unlock the Cove Digital Card.',
+        ),
     }
   }
   return { ok: true }
@@ -124,7 +129,9 @@ export function buildOnboardingChecklist(opts: {
           ? `Update details for ${studentDisplayName(incomplete[0])} (name, phone, emergency, pick-up).`
           : `Update safety details for ${incomplete.length} students.`
         : hasStudent
-          ? 'We may already have your students from school lists. Confirm or update your details below to unlock Cove.'
+          ? vanillaizeIfDemo(
+              'We may already have your students from school lists. Confirm or update your details below to unlock Cove.',
+            )
           : 'Confirm parent name, phone, emergency contact, and pick-up.'
 
   const items: ChecklistItem[] = [
@@ -133,7 +140,7 @@ export function buildOnboardingChecklist(opts: {
       title: 'Add your student(s)',
       detail: hasStudent
         ? `${students.length} student${students.length === 1 ? '' : 's'} on your account.`
-        : 'Name and grade. needed for Cove credit, programs, and your family QR.',
+        : vanillaizeIfDemo('Name and grade. needed for Cove credit, programs, and your family QR.'),
       done: hasStudent,
       required: true,
       href: '#portal-students',
@@ -150,11 +157,17 @@ export function buildOnboardingChecklist(opts: {
     },
     {
       id: 'membership_optional',
-      title: accountType === 'paid' ? 'Paid membership active' : 'Join Reef, Lagoon, or Tide (optional)',
+      title: accountType === 'paid'
+        ? 'Paid membership active'
+        : vanillaizeIfDemo('Join Reef, Lagoon, or Tide (optional)'),
       detail:
         accountType === 'paid'
-          ? 'Thanks for supporting SHMS PTO. Finish the steps above so card credit and perks attach to your students.'
-          : 'Membership is optional. Free accounts can still use The Cove after student setup.',
+          ? vanillaizeIfDemo(
+              'Thanks for supporting SHMS PTO. Finish the steps above so card credit and perks attach to your students.',
+            )
+          : vanillaizeIfDemo(
+              'Membership is optional. Free accounts can still use The Cove after student setup.',
+            ),
       done: accountType === 'paid',
       required: false,
       href: accountType === 'paid' ? undefined : '/membership',

@@ -19,16 +19,20 @@ export async function POST(req: NextRequest) {
   }
 
   let lane: DemoLane = current.lane
+  let parentKind = current.parentKind || 'paid'
   try {
-    const body = (await req.json()) as { lane?: string }
+    const body = (await req.json()) as { lane?: string; parentKind?: string }
     if (body.lane === 'parent' || body.lane === 'staff' || body.lane === 'both') {
       lane = body.lane
+    }
+    if (body.parentKind === 'free' || body.parentKind === 'paid') {
+      parentKind = body.parentKind
     }
   } catch {
     return NextResponse.json({ error: 'Invalid JSON.' }, { status: 400 })
   }
 
-  const token = encodeDemoReviewCookie({ ...current, lane })
+  const token = encodeDemoReviewCookie({ ...current, lane, parentKind })
   const next = lane === 'parent' ? '/member-portal' : '/staff'
   const res = NextResponse.json({ ok: true, next, lane })
   res.cookies.set(DEMO_REVIEW_COOKIE, token, {

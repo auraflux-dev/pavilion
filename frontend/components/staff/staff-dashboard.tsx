@@ -38,6 +38,7 @@ import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
 import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
 import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
 import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
+import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { StaffWhatsAppQueuePanel } from '@/components/staff/staff-whatsapp-queue-panel'
 import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
 import { StaffTimesheetsPanel } from '@/components/staff/staff-timesheets-panel'
@@ -474,7 +475,7 @@ export function StaffDashboard() {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold text-[#1A1A1A] mb-2">Staff access required</h1>
-        <p className="text-sm text-[#5A6070] mb-6">{error}</p>
+        <p className="text-sm text-[#5A6070] mb-6">{vanillaizeIfDemo(error)}</p>
         <Link href="/member-portal" className="text-sm font-bold" style={{ color: 'var(--brand-green)' }}>
           Back to member portal
         </Link>
@@ -553,9 +554,9 @@ export function StaffDashboard() {
                     onClick={() => go(item.id)}
                     className="text-left rounded-xl border border-[var(--border)] bg-white p-4 hover:border-[var(--brand-green)] transition-colors"
                   >
-                    <p className="text-sm font-bold text-[#1A1A1A]">{item.label}</p>
+                    <p className="text-sm font-bold text-[#1A1A1A]">{vanillaizeIfDemo(item.label)}</p>
                     <p className="text-xs text-[#5A6070] mt-1">
-                      {(
+                      {vanillaizeIfDemo((
                         {
                           inbox: 'Workspace mail + reply',
                           calendar: 'Google Calendar',
@@ -589,7 +590,8 @@ export function StaffDashboard() {
                           expenses: 'Submit & track reimbursements',
                           help: 'Staff knowledge base',
                         } as Partial<Record<StaffWorkspace, string>>
-                      )[item.id] ?? 'Open workspace'}
+                      )[item.id] ?? 'Open workspace',
+                    )}
                     </p>
                   </button>
                 ))}
@@ -710,7 +712,7 @@ export function StaffDashboard() {
                       {m.accountType || m.membershipTier ? (
                         <p className="text-[11px] text-[#5A6070] mt-0.5">
                           {m.accountType === 'paid' ? 'Paid' : 'Free'}
-                          {m.membershipTier ? ` · ${m.membershipTier}` : ''}
+                          {m.membershipTier ? ` · ${displayMembershipTier(m.membershipTier)}` : ''}
                         </p>
                       ) : null}
                       <div className="mt-1 space-y-1">

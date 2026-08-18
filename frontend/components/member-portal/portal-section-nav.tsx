@@ -1,5 +1,6 @@
 import { Briefcase, CalendarDays, CreditCard, ClipboardList, HelpCircle, Users } from 'lucide-react'
 import { SectionJumpNav } from '@/components/section-jump-nav'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 const SECTIONS = [
   {
@@ -16,7 +17,7 @@ const SECTIONS = [
   },
   {
     href: '#store',
-    label: 'Store & Cove Digital Card',
+    label: vanillaizeIfDemo('Store & Cove Digital Card'),
     hint: 'Balance & purchases',
     icon: CreditCard,
   },

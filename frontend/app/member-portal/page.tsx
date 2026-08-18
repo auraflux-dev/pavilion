@@ -9,7 +9,7 @@ import { getPortalCopy } from '@/lib/api/portal-copy'
 import { CONTACT_DEFAULTS } from '@/lib/defaults/page-content'
 
 export const metadata = {
-  title: 'Member Portal | SHMS PTO',
+  title: 'Member Portal',
   description:
     'Parent hub: account, students, store purchases, program calendar, and instructor messages.',
 }

@@ -90,3 +90,26 @@ export function vanillaizeRecord(raw: Record<string, string>): Record<string, st
   }
   return out
 }
+
+export function vanillaizeDeep<T>(input: T): T {
+  if (!isDemoInstance()) return input
+  if (typeof input === 'string') return vanillaizeCopy(input) as T
+  if (Array.isArray(input)) return input.map((v) => vanillaizeDeep(v)) as T
+  if (input && typeof input === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(input as Record<string, unknown>)) {
+      out[key] = vanillaizeDeep(value)
+    }
+    return out as T
+  }
+  return input
+}
+
+/** Catalog ids stay reef/lagoon/tide; demo UI shows Member/Family/Patron. */
+export function displayMembershipTier(tier: string): string {
+  const key = String(tier || '').trim().toLowerCase()
+  if (!key || key === 'free') return key || 'free'
+  if (!isDemoInstance()) return tier
+  const mapped = DEMO_BRAND.tiers[key as keyof typeof DEMO_BRAND.tiers]
+  return mapped || vanillaizeCopy(tier)
+}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession } from '@/lib/staff/session'
 import { getStaffGoogleAccess, workspaceStatusPayload } from '@/lib/google/workspace-auth'
+import { vanillaizeDeep } from '@/lib/demo/brand'
 import {
   STAFF_ONBOARDING_TRACKS,
   buildTrackProgress,
@@ -64,13 +65,15 @@ export async function GET(req: NextRequest) {
       }
     })
 
-    return NextResponse.json({
-      tracks,
-      progress,
-      roles,
-      flags,
-      myEmail: session.email,
-    })
+    return NextResponse.json(
+      vanillaizeDeep({
+        tracks,
+        progress,
+        roles,
+        flags,
+        myEmail: session.email,
+      }),
+    )
   } catch (err) {
     console.error('/api/staff/onboarding GET error:', err)
     return NextResponse.json(

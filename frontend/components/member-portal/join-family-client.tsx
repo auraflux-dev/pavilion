@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export function JoinFamilyClient() {
   const params = useSearchParams()
@@ -73,7 +74,7 @@ export function JoinFamilyClient() {
             ) : (
               'You’ve been invited'
             )}{' '}
-            to share an SHMS PTO family account
+            {vanillaizeIfDemo('to share an SHMS PTO family account')}
             {preview.primaryParentEmail ? (
               <>
                 {' '}
@@ -84,8 +85,9 @@ export function JoinFamilyClient() {
           </p>
           <p className="text-xs text-[#5A6070]">
             Sign in as <strong>{preview.guardianEmail}</strong>. You’ll see the same students —
-            whether you’re a spouse, co-parent, or guardian. Cove Digital Card stays with the
-            primary household account unless you buy separately.
+            {vanillaizeIfDemo(
+              'whether you’re a spouse, co-parent, or guardian. Cove Digital Card stays with the primary household account unless you buy separately.',
+            )}
           </p>
           <p className="text-[11px] text-[#5A6070]">Status: {preview.status}</p>
         </div>

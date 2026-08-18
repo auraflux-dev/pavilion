@@ -16,6 +16,7 @@ import {
   demoStaffProfile,
   getDemoReviewSession,
 } from '@/lib/demo/session'
+import { demoReviewerStudents } from '@/lib/demo/seed'
 
 export async function GET(req: NextRequest) {
   try {
@@ -24,6 +25,8 @@ export async function GET(req: NextRequest) {
       if (demo) {
         const staff = demo.lane === 'parent' ? null : demoStaffProfile(demo)
         const name = `${demo.firstName} ${demo.lastName}`.trim()
+        const paid = demo.parentKind !== 'free'
+        const students = demoReviewerStudents(demo)
         return NextResponse.json({
           member: {
             id: demoMemberId(demo.email),
@@ -35,21 +38,16 @@ export async function GET(req: NextRequest) {
             profileImage: null,
             memberSince: new Date(demo.iat).toISOString(),
           },
-          storeCards: [{ balance: 42.5, studentName: 'Maya Nguyen' }],
-          membership: { tier: 'lagoon', expiresAt: '', status: 'active' },
-          students: [
-            {
-              id: 'demo-stu-1',
-              firstName: 'Maya',
-              lastName: 'Nguyen',
-              grade: '6',
-              membershipTier: 'lagoon',
-              membershipStatus: 'active',
-            },
-          ],
-          studentCount: 1,
-          hasPaidMembership: true,
-          accountType: 'paid',
+          storeCards: paid
+            ? [{ balance: 42.5, studentName: students[0]?.name }]
+            : [{ balance: 0, studentName: students[0]?.name }],
+          membership: paid
+            ? { tier: 'lagoon', expiresAt: '', status: 'active' }
+            : { tier: 'free', expiresAt: '', status: 'none' },
+          students,
+          studentCount: students.length,
+          hasPaidMembership: paid,
+          accountType: paid ? 'paid' : 'free',
           actingAs: false,
           linkedHousehold: false,
           viewingEmail: demo.email,

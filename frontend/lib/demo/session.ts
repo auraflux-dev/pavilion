@@ -7,6 +7,7 @@ export { DEMO_REVIEW_COOKIE }
 export const DEMO_REVIEW_MAX_AGE = 60 * 60 * 24 * 7
 
 export type DemoLane = 'staff' | 'parent' | 'both'
+export type DemoParentKind = 'paid' | 'free'
 
 export type DemoReviewSession = {
   email: string
@@ -14,6 +15,7 @@ export type DemoReviewSession = {
   lastName: string
   school: string
   lane: DemoLane
+  parentKind: DemoParentKind
   iat: number
 }
 
@@ -72,6 +74,7 @@ export function parseDemoReviewCookie(raw: string | undefined): DemoReviewSessio
     if (parsed.lane !== 'staff' && parsed.lane !== 'parent' && parsed.lane !== 'both') {
       return null
     }
+    if (parsed.parentKind !== 'free') parsed.parentKind = 'paid'
     return parsed
   } catch {
     return null

@@ -6,8 +6,8 @@ import { getMergedKbArticles } from '@/lib/api/kb-articles'
 import { articlesByCategoryWithExtras } from '@/lib/kb'
 
 export const metadata = {
-  title: 'Member Help | SHMS PTO',
-  description: 'Guides for your account, students, membership, The Cove, and programs.',
+  title: 'Member Help',
+  description: 'Guides for your account, students, membership, store card, and programs.',
 }
 
 export const dynamic = 'force-dynamic'

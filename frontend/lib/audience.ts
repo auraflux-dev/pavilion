@@ -6,6 +6,8 @@
  * paid member. same as free, portal CTA labeled Member Portal
  * staff. StaffShell on /staff (@shmspto.org + StaffRoles); separate from parent login
  */
+import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 export type Audience = 'visitor' | 'free' | 'paid' | 'staff'
 
@@ -58,7 +60,7 @@ export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
  payments: 'Payments',
  budget: 'Budget',
  events: 'Events',
- retail: 'The Cove',
+ retail: isDemoInstance() ? DEMO_BRAND.store : 'The Cove',
  discounts: 'Discounts',
  membership: 'Memberships',
  inbox: 'Inbox',

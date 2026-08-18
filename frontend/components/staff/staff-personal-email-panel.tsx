@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 /**
  * Board member self-service: link personal email for the parent portal.
@@ -54,9 +55,9 @@ export function StaffPersonalEmailPanel({
       <div>
         <h2 className="text-base font-bold text-[#1A1A1A]">Your parent portal email</h2>
         <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
-          Staff hierarchy uses your <span className="font-semibold">@shmspto.org</span> login.
-          Add your personal email so you can also be a parent: students, Cove Digital Card, and membership
-          live under that personal login.
+          {vanillaizeIfDemo(
+            'Staff hierarchy uses your @shmspto.org login. Add your personal email so you can also be a parent: students, Cove Digital Card, and membership live under that personal login.',
+          )}
         </p>
       </div>
       <div className="flex flex-col sm:flex-row gap-2">

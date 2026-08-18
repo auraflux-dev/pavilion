@@ -11,11 +11,11 @@ export function DemoBanner() {
   if (!isPublicDemoInstance()) return null
   if (pathname === '/review') return null
 
-  async function switchLane(lane: 'both' | 'parent') {
+  async function switchLane(lane: 'both' | 'parent', parentKind?: 'paid' | 'free') {
     const res = await fetch('/api/demo/switch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lane }),
+      body: JSON.stringify({ lane, parentKind }),
     })
     const data = (await res.json()) as { next?: string }
     if (res.ok && data.next) {
@@ -36,11 +36,14 @@ export function DemoBanner() {
         <Link href="/review" className="underline font-semibold">
           Board join
         </Link>
-        <button type="button" className="underline" onClick={() => void switchLane('both')}>
+        <button type="button" className="underline" onClick={() => void switchLane('both', 'paid')}>
           Staff
         </button>
-        <button type="button" className="underline" onClick={() => void switchLane('parent')}>
-          Parent portal
+        <button type="button" className="underline" onClick={() => void switchLane('parent', 'paid')}>
+          Paid parent
+        </button>
+        <button type="button" className="underline" onClick={() => void switchLane('parent', 'free')}>
+          Free parent
         </button>
       </span>
     </div>

@@ -23,7 +23,7 @@ export async function generateMetadata() {
   const { DEMO_BRAND } = await import('@/lib/demo/brand')
   if (isDemoInstance()) {
     return {
-      title: `${DEMO_BRAND.store} | ${DEMO_BRAND.short}`,
+      title: DEMO_BRAND.store,
       description: `${DEMO_BRAND.store}: ${DEMO_BRAND.card}, snack window, and spirit wear for ${DEMO_BRAND.school}.`,
     }
   }

@@ -10,6 +10,8 @@ import {
   type StaffRole,
 } from '@/lib/staff/roles'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { vanillaizeDeep, vanillaizeIfDemo } from '@/lib/demo/brand'
+import { getDemoReviewSession } from '@/lib/demo/session'
 
 /**
  * Self-registration: first @shmspto.org login creates a StaffRoles row with no
@@ -40,17 +42,29 @@ export async function GET(req: NextRequest) {
         role,
         ...ROLE_HOME_COPY[role as StaffRole],
       }))
-      return NextResponse.json({
-        email: demoStaff.staff.email,
-        sessionEmail: demoStaff.email,
-        name: demoStaff.staff.name,
-        boardTitle: demoStaff.staff.boardTitle,
-        roles: demoStaff.staff.roles,
-        personalEmail: demoStaff.staff.personalEmail,
-        isAdmin: true,
-        homes,
-        demo: true,
-      })
+      return NextResponse.json(
+        vanillaizeDeep({
+          email: demoStaff.staff.email,
+          sessionEmail: demoStaff.email,
+          name: demoStaff.staff.name,
+          boardTitle: demoStaff.staff.boardTitle,
+          roles: demoStaff.staff.roles,
+          personalEmail: demoStaff.staff.personalEmail,
+          isAdmin: true,
+          homes,
+          demo: true,
+        }),
+      )
+    }
+    if (getDemoReviewSession(req)) {
+      return NextResponse.json(
+        {
+          error: vanillaizeIfDemo(
+            'Use Staff in the demo banner to open the board workspace.',
+          ),
+        },
+        { status: 403 },
+      )
     }
   }
 

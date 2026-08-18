@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
   const school = String(body.school ?? '').trim()
   const code = String(body.code ?? '').trim()
   const lane: DemoLane = body.lane === 'parent' ? 'parent' : 'both'
+  const parentKind = body.parentKind === 'free' ? 'free' : 'paid'
 
   if (!firstName || !lastName) return bad('Enter your first and last name.')
   if (!email.includes('@') || !email.includes('.')) return bad('Enter a valid email.')
@@ -47,6 +48,7 @@ export async function POST(req: NextRequest) {
     lastName,
     school,
     lane,
+    parentKind,
     iat: Date.now(),
   })
   if (!token) {

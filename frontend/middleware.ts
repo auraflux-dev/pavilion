@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
 import { isSameOriginRequest } from '@/lib/security/csrf'
-import { DEMO_REVIEW_COOKIE, hasDemoReviewCookie } from '@/lib/demo/cookie'
+import { DEMO_REVIEW_COOKIE, hasDemoReviewCookie, peekDemoReviewSession } from '@/lib/demo/cookie'
 import {
   demoWriteResponse,
   isDemoJoinAllowPath,
@@ -60,7 +60,8 @@ export async function middleware(req: NextRequest) {
       return demoWriteResponse()
     }
     if (req.method === 'GET' && isDemoPiiPath(pathname)) {
-      return NextResponse.json(demoPiiStub(pathname))
+      const peek = peekDemoReviewSession(req.cookies.get(DEMO_REVIEW_COOKIE)?.value)
+      return NextResponse.json(demoPiiStub(pathname, peek))
     }
   }
 

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, Loader2 } from 'lucide-react'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 const TOPICS = [
   'Account & login',
@@ -99,7 +100,7 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
         >
           {TOPICS.map((t) => (
             <option key={t} value={t}>
-              {t}
+              {vanillaizeIfDemo(t)}
             </option>
           ))}
         </select>

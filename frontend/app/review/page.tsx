@@ -34,7 +34,11 @@ function ReviewJoinInner() {
     )
   }
 
-  async function onSubmit(event: FormEvent, lane: 'both' | 'parent') {
+  async function onSubmit(
+    event: FormEvent,
+    lane: 'both' | 'parent',
+    parentKind: 'paid' | 'free' = 'paid',
+  ) {
     event.preventDefault()
     setBusy(true)
     setError(null)
@@ -49,6 +53,7 @@ function ReviewJoinInner() {
           school,
           code,
           lane,
+          parentKind,
         }),
       })
       const data = (await res.json()) as { error?: string; next?: string }
@@ -140,9 +145,17 @@ function ReviewJoinInner() {
             type="button"
             variant="outline"
             disabled={busy}
-            onClick={(e) => void onSubmit(e, 'parent')}
+            onClick={(e) => void onSubmit(e, 'parent', 'paid')}
           >
-            Tour parent portal
+            Tour paid parent
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy}
+            onClick={(e) => void onSubmit(e, 'parent', 'free')}
+          >
+            Tour free parent
           </Button>
         </div>
       </form>

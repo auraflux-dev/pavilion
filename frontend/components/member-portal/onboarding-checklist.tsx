@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Circle, Lock, ListChecks } from 'lucide-react'
 import type { ChecklistItem } from '@/lib/onboarding-checklist'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type Props = {
   items: ChecklistItem[]
@@ -32,7 +33,9 @@ export function OnboardingChecklist({
         <div>
           <p className="text-sm font-bold text-[#1A1A1A]">You&apos;re set up</p>
           <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed">
-            Student profiles are complete. Cove Digital Card and programs are unlocked.
+            {vanillaizeIfDemo(
+              'Student profiles are complete. Cove Digital Card and programs are unlocked.',
+            )}
           </p>
         </div>
       </div>
@@ -62,13 +65,14 @@ export function OnboardingChecklist({
             </span>
           </p>
           <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed">
-            You can browse anytime. Cove QR, card loads, and enrichment stay locked until you confirm
-            family details (parent name, phone, emergency contact, pick-up).
+            {vanillaizeIfDemo(
+              'You can browse anytime. Cove QR, card loads, and enrichment stay locked until you confirm family details (parent name, phone, emergency contact, pick-up).',
+            )}
           </p>
           {!coveUnlocked ? (
             <p className="text-xs font-semibold mt-2 inline-flex items-center gap-1.5 text-[#8A6400]">
               <Lock className="w-3.5 h-3.5" />
-              The Cove Digital Card is locked until setup is complete
+              {vanillaizeIfDemo('The Cove Digital Card is locked until setup is complete')}
             </p>
           ) : null}
         </div>

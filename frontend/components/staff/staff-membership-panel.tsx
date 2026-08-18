@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { displayMembershipTier } from '@/lib/demo/brand'
 
 type StudentRow = {
   id: string
@@ -507,12 +508,12 @@ export function StaffMembershipPanel() {
                     {m.parentPhone ? ` · ${m.parentPhone}` : ''}
                   </p>
                   <p className="text-[11px] mt-1 text-[var(--brand-green)] font-semibold uppercase tracking-wide">
-                    {m.accountType === 'paid' ? m.membershipTier : 'free'}
+                    {m.accountType === 'paid' ? displayMembershipTier(m.membershipTier) : 'free'}
                   </p>
                   <ul className="mt-1 text-xs text-[#5A6070] space-y-0.5">
                     {m.students.map((s) => (
                       <li key={s.id}>
-                        {s.firstName} {s.lastName} · G{s.grade} · {s.membershipTier}
+                        {s.firstName} {s.lastName} · G{s.grade} · {displayMembershipTier(s.membershipTier)}
                       </li>
                     ))}
                   </ul>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession } from '@/lib/staff/session'
 import { getMergedKbArticles, getMergedKbCategories } from '@/lib/api/kb-articles'
 import { articlesByCategoryWithExtras, type KbAudience } from '@/lib/kb'
+import { vanillaizeDeep } from '@/lib/demo/brand'
 import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 
@@ -31,5 +32,7 @@ export async function GET(req: NextRequest) {
   const categories = await getMergedKbCategories(audience)
   const groups = articlesByCategoryWithExtras(audience, articles)
 
-  return NextResponse.json({ audience, categories, articles, groups })
+  return NextResponse.json(
+    vanillaizeDeep({ audience, categories, articles, groups }),
+  )
 }

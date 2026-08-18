@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 export const DEMO_WRITE_MESSAGE =
-  'Preview only. Demo does not save, charge, or email. Stone Hill data is not touched.'
+  'Preview only. Demo does not save, charge, or email. Nothing is written to a live school.'
 
 export function demoWriteResponse() {
   return NextResponse.json(

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp, CreditCard, BookOpen, Receipt, ArrowRight, Star, Tag, Loader2, Plus } from 'lucide-react'
 import { GiftCardSettings } from './gift-card-settings'
 import { EditStudentForm } from './edit-student-form'
+import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
 
 interface Enrollment {
   id: string
@@ -126,7 +127,9 @@ interface GiftCardData {
 export function StudentCard({
   student,
   defaultOpen = false,
-  upgradeBody = 'Paid members get Cove Digital Card credit and enrichment discounts. Lagoon and Tide also include free refreshments at PTO events.',
+  upgradeBody = vanillaizeIfDemo(
+    'Paid members get Cove Digital Card credit and enrichment discounts. Lagoon and Tide also include free refreshments at PTO events.',
+  ),
   grades = ['6', '7', '8'],
   onUpdated,
 }: Props) {
@@ -148,9 +151,7 @@ export function StudentCard({
     student.membershipStatus?.toLowerCase() !== 'historical' &&
     Boolean(student.membershipTier) &&
     student.membershipTier !== 'free'
-  const tierLabel = isPaid
-    ? student.membershipTier.charAt(0).toUpperCase() + student.membershipTier.slice(1)
-    : 'Free'
+  const tierLabel = isPaid ? displayMembershipTier(student.membershipTier) : 'Free'
 
   // Live gift card balance. Fetched on mount
   useEffect(() => {
@@ -292,7 +293,7 @@ export function StudentCard({
         <div className="flex items-center gap-2 px-5 py-3">
           <CreditCard className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
           <div>
-            <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Cove Digital Card</p>
+            <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">{vanillaizeIfDemo('Cove Digital Card')}</p>
             {giftCardLoading ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin mt-0.5" style={{ color: 'var(--brand-green)' }} />
             ) : (
@@ -350,7 +351,7 @@ export function StudentCard({
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <CreditCard className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Cove Digital Card</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">{vanillaizeIfDemo('Cove Digital Card')}</h4>
                   </div>
                   {giftCard?.hasCard && (
                     <span className="text-lg font-bold text-[#1A1A1A]">{formatMoney(giftCard.balance)}</span>
@@ -360,7 +361,7 @@ export function StudentCard({
                 {!giftCard?.hasCard ? (
                   <div className="rounded-xl border-2 border-dashed border-[var(--border)] p-4 text-center">
                     <p className="text-sm text-[#5A6070] mb-3">
-                      Load money to begin using your Cove Digital Card (free accounts welcome).
+                      {vanillaizeIfDemo('Load money to begin using your Cove Digital Card (free accounts welcome).')}
                     </p>
                     <a
                       href="/cove"

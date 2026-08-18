@@ -13,7 +13,7 @@ export const DEMO_SEED_MEMBERS = [
         id: 'demo-stu-1',
         firstName: 'Maya',
         lastName: 'Nguyen',
-        grade: '6',
+        grade: '3',
         membershipTier: 'lagoon',
         archived: false,
       },
@@ -21,7 +21,7 @@ export const DEMO_SEED_MEMBERS = [
         id: 'demo-stu-2',
         firstName: 'Leo',
         lastName: 'Nguyen',
-        grade: '8',
+        grade: '5',
         membershipTier: 'lagoon',
         archived: false,
       },
@@ -39,7 +39,7 @@ export const DEMO_SEED_MEMBERS = [
         id: 'demo-stu-3',
         firstName: 'Sam',
         lastName: 'Patel',
-        grade: '7',
+        grade: '2',
         membershipTier: 'reef',
         archived: false,
       },
@@ -57,7 +57,7 @@ export const DEMO_SEED_MEMBERS = [
         id: 'demo-stu-4',
         firstName: 'Casey',
         lastName: 'Brooks',
-        grade: '6',
+        grade: 'K',
         membershipTier: 'free',
         archived: false,
       },
@@ -82,7 +82,45 @@ export const DEMO_SEED_ACTIVITY = [
   },
 ]
 
-export function demoPiiStub(pathname: string): Record<string, unknown> {
+export function demoReviewerStudents(session: {
+  lastName?: string
+  parentKind?: string
+} | null): Array<{
+  id: string
+  firstName: string
+  lastName: string
+  grade: string
+  membershipTier: string
+  membershipStatus: string
+  archived: boolean
+  storeCardBalance: number
+  name: string
+}> {
+  const last = session?.lastName?.trim() || 'Brooks'
+  const paid = session?.parentKind !== 'free'
+  const rows = paid
+    ? [
+        { id: 'demo-stu-1', firstName: 'Maya', lastName: last, grade: '3', membershipTier: 'lagoon' as const, storeCardBalance: 42.5 },
+        { id: 'demo-stu-2', firstName: 'Leo', lastName: last, grade: '5', membershipTier: 'lagoon' as const, storeCardBalance: 42.5 },
+      ]
+    : [
+        { id: 'demo-stu-4', firstName: 'Casey', lastName: last, grade: 'K', membershipTier: 'free' as const, storeCardBalance: 0 },
+      ]
+  return rows.map((s) => ({
+    ...s,
+    membershipStatus: 'active',
+    archived: false,
+    name: `${s.firstName} ${s.lastName}`,
+  }))
+}
+
+export function demoPiiStub(
+  pathname: string,
+  session?: { lastName?: string; parentKind?: string } | null,
+): Record<string, unknown> {
+  const students = demoReviewerStudents(session ?? null)
+  const paid = session?.parentKind !== 'free'
+
   if (pathname.startsWith('/api/staff/members')) {
     return {
       members: DEMO_SEED_MEMBERS,
@@ -93,15 +131,9 @@ export function demoPiiStub(pathname: string): Record<string, unknown> {
   if (pathname.startsWith('/api/staff/activity')) {
     return { items: DEMO_SEED_ACTIVITY, demo: true }
   }
-  if (pathname.startsWith('/api/portal/family')) {
+  if (pathname.startsWith('/api/portal/family') || pathname.startsWith('/api/students')) {
     return {
-      students: DEMO_SEED_MEMBERS[0].students.map((s) => ({
-        id: s.id,
-        firstName: s.firstName,
-        lastName: s.lastName,
-        grade: s.grade,
-        name: `${s.firstName} ${s.lastName}`,
-      })),
+      students,
       calendar: [],
       messages: [],
       purchases: [],
@@ -110,15 +142,11 @@ export function demoPiiStub(pathname: string): Record<string, unknown> {
   }
   if (pathname.startsWith('/api/gift-card')) {
     return {
-      cards: [
-        {
-          studentName: 'Maya Nguyen',
-          balance: 42.5,
-          label: DEMO_BRAND.card,
-        },
-      ],
+      cards: paid
+        ? [{ studentName: students[0]?.name || 'Maya', balance: 42.5, label: DEMO_BRAND.card }]
+        : [{ studentName: students[0]?.name || 'Casey', balance: 0, label: DEMO_BRAND.card }],
       demo: true,
     }
   }
-  return { items: [], members: [], students: [], demo: true }
+  return { items: [], members: [], students, demo: true }
 }

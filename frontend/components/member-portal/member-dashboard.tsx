@@ -24,6 +24,7 @@ import {
   PORTAL_COPY_DEFAULTS,
   type PortalCopy,
 } from '@/lib/defaults/portal-copy'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { StudentCard } from './student-card'
 import { AddStudentForm } from './add-student-form'
 import { EditAccountForm } from './edit-account-form'
@@ -324,8 +325,10 @@ export function MemberDashboard({
  <p className="text-sm font-bold text-[var(--brand-green)]">Membership confirmed. Thank you!</p>
             <p className="text-xs text-[#1A1A1A]/80 mt-0.5 leading-relaxed">
               {onboarding.complete
-                ? 'Your Cove Digital Card and perks are ready below.'
-                : 'Finish confirming your family details so Cove Digital Card credit and your QR attach to your students.'}
+                ? vanillaizeIfDemo('Your Cove Digital Card and perks are ready below.')
+                : vanillaizeIfDemo(
+                    'Finish confirming your family details so Cove Digital Card credit and your QR attach to your students.',
+                  )}
             </p>
           </div>
           <button
@@ -773,7 +776,7 @@ export function MemberDashboard({
                 className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#8A8F9C] cursor-not-allowed"
                 title={coveGate.error}
               >
-                Load Cove Digital Card (locked)
+                {vanillaizeIfDemo('Load Cove Digital Card (locked)')}
               </button>
             )}
             <a

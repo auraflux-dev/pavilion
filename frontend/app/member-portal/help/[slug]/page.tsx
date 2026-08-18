@@ -11,7 +11,7 @@ type Props = { params: Promise<{ slug: string }> }
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params
   const article = await getMergedKbArticle('member', slug)
-  if (!article) return { title: 'Help | SHMS PTO' }
+  if (!article) return { title: 'Help' }
   return {
     title: `${article.title} | Member Help`,
     description: article.summary,
