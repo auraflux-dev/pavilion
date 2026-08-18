@@ -239,6 +239,8 @@ Instructor and PTO messages for your students land in the same area. Refresh if 
       order: 1,
       body: `Open **Videos** in the Member Portal menu for the full parent library (website tour, portal walkthrough, membership tiers, board).
 
+Under each video, the page prints a share URL and a **Copy link** button. Use that — you do not have to remember a hash.
+
 The same clips also appear on Help and on matching public pages (Home, Membership, The Cove, Board).
 
 Staff training videos are separate and stay in the Staff workspace.`,

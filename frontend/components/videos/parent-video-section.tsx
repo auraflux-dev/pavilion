@@ -38,13 +38,15 @@ export function ParentVideoSection({
   if (videos.length === 0) return null
 
   const single = videos.length === 1
+  // Player figures use video.id as the hash target. Don't duplicate that on the section.
+  const sectionId = videoId && id === videoId ? `${id}-section` : id
 
   return (
     <section
-      id={id}
+      id={sectionId}
       className={`scroll-mt-28 py-12 md:py-16 ${className}`}
       style={{ backgroundColor: background }}
-      aria-labelledby={`${id}-heading`}
+      aria-labelledby={`${sectionId}-heading`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className={`mb-8 ${single ? 'max-w-3xl' : 'max-w-2xl'}`}>
@@ -54,7 +56,7 @@ export function ParentVideoSection({
           >
             {eyebrow}
           </div>
-          <h2 id={`${id}-heading`} className="text-2xl font-bold text-[#1A1A1A] sm:text-3xl">
+          <h2 id={`${sectionId}-heading`} className="text-2xl font-bold text-[#1A1A1A] sm:text-3xl">
             {title}
           </h2>
           {body ? <p className="mt-3 text-[#5A6070] leading-relaxed">{body}</p> : null}
