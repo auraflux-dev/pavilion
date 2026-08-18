@@ -98,6 +98,7 @@ export async function POST(req: NextRequest) {
         { key: 'assignedProgramIds', displayName: 'Assigned Program IDs', type: 'TEXT' },
         { key: 'personalEmail', displayName: 'Personal / Parent Email', type: 'TEXT' },
         { key: 'emailSignature', displayName: 'Email Signature', type: 'TEXT' },
+        { key: 'extraWorkspaces', displayName: 'Extra Workspaces', type: 'TEXT' },
       ]),
     )
     results.push(

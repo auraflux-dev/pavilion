@@ -50,6 +50,7 @@ export async function GET(req: NextRequest) {
           boardTitle: demoStaff.staff.boardTitle,
           roles: demoStaff.staff.roles,
           personalEmail: demoStaff.staff.personalEmail,
+          extraWorkspaces: demoStaff.staff.extraWorkspaces ?? [],
           isAdmin: true,
           homes,
           demo: true,
@@ -106,6 +107,7 @@ export async function GET(req: NextRequest) {
     boardTitle: staff.boardTitle,
     roles: staff.roles,
     personalEmail: staff.personalEmail || '',
+    extraWorkspaces: staff.extraWorkspaces ?? [],
     isAdmin: requireStaffRole(staff, 'admin'),
     homes,
   })

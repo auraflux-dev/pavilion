@@ -9,6 +9,7 @@ import {
   STAFF_ROLES,
   type StaffRole,
 } from '@/lib/staff/roles'
+import { extrasBeyondRoles, parseExtraWorkspaces } from '@/lib/staff/permissions'
 
 type StaffRoleRow = {
   _id?: string
@@ -18,7 +19,36 @@ type StaffRoleRow = {
   roles?: string
   assignedProgramIds?: string
   personalEmail?: string
+  extraWorkspaces?: string
   active?: boolean
+}
+
+async function ensureExtraWorkspacesField() {
+  const apiKey = process.env.WIX_API_KEY
+  const siteId = process.env.WIX_SITE_ID
+  if (!apiKey || !siteId) return
+  const headers = {
+    Authorization: apiKey,
+    'wix-site-id': siteId,
+    'Content-Type': 'application/json',
+  }
+  const getRes = await fetch('https://www.wixapis.com/wix-data/v2/collections/StaffRoles', {
+    method: 'GET',
+    headers,
+  })
+  const getBody = (await getRes.json().catch(() => ({}))) as {
+    collection?: { fields?: { key?: string }[] }
+  }
+  const existing = new Set((getBody.collection?.fields ?? []).map((f) => String(f.key ?? '')))
+  if (existing.has('extraWorkspaces')) return
+  await fetch('https://www.wixapis.com/wix-data/v2/collections/create-field', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      dataCollectionId: 'StaffRoles',
+      field: { key: 'extraWorkspaces', displayName: 'Extra Workspaces', type: 'TEXT' },
+    }),
+  })
 }
 
 function normalizeRoles(value: unknown): StaffRole[] {
@@ -58,6 +88,7 @@ export async function GET(req: NextRequest) {
           .map((id) => id.trim())
           .filter(Boolean),
         personalEmail: String(row.personalEmail ?? '').trim().toLowerCase(),
+        extraWorkspaces: parseExtraWorkspaces(row.extraWorkspaces),
         active: row.active !== false,
       })),
     })
@@ -78,6 +109,12 @@ export async function POST(req: NextRequest) {
     const name = String(body.name ?? '').trim()
     const boardTitle = String(body.boardTitle ?? '').trim()
     const roles = normalizeRoles(body.roles)
+    const extraWorkspaces = extrasBeyondRoles(
+      roles,
+      parseExtraWorkspaces(
+        Array.isArray(body.extraWorkspaces) ? body.extraWorkspaces.join(',') : body.extraWorkspaces,
+      ),
+    )
     const assignedProgramIds = Array.isArray(body.assignedProgramIds)
       ? body.assignedProgramIds.map((id: unknown) => String(id).trim()).filter(Boolean)
       : String(body.assignedProgramIds ?? '')
@@ -93,8 +130,11 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       )
     }
-    if (!roles.length) {
-      return NextResponse.json({ error: 'Choose at least one role.' }, { status: 400 })
+    if (!roles.length && !extraWorkspaces.length) {
+      return NextResponse.json(
+        { error: 'Choose at least one role or permission.' },
+        { status: 400 },
+      )
     }
     if (roles.includes('admin') && !isPresidentAdminEmail(email)) {
       return NextResponse.json(
@@ -114,6 +154,7 @@ export async function POST(req: NextRequest) {
     }
 
     const client = getWixClient()
+    await ensureExtraWorkspacesField()
     if (personalEmail) {
       const clash = await client.items
         .query('StaffRoles')
@@ -141,6 +182,7 @@ export async function POST(req: NextRequest) {
       roles: roles.join(','),
       assignedProgramIds: assignedProgramIds.join(','),
       personalEmail,
+      extraWorkspaces: extraWorkspaces.join(','),
       active,
     }
 

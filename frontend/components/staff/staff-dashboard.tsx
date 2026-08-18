@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { staffCanWorkspace } from '@/lib/staff/permissions'
 import { SurveyResultsPanel } from '@/components/staff/survey-results-panel'
 import { StaffRoleManager } from '@/components/staff/staff-role-manager'
 import { SocialComposePanel } from '@/components/staff/social-compose-panel'
@@ -60,6 +61,7 @@ type StaffMe = {
   name: string
   boardTitle: string
   roles: string[]
+  extraWorkspaces?: string[]
   personalEmail?: string
   isAdmin: boolean
   homes: StaffHome[]
@@ -168,109 +170,28 @@ export function StaffDashboard() {
       .catch(() => null)
   }, [me])
 
-  const canMarketing = Boolean(me && (me.roles.includes('marketing') || me.isAdmin))
-  const canSurveys = Boolean(
-    me &&
-      (me.roles.includes('marketing') ||
-        me.roles.includes('secretary') ||
-        me.roles.includes('wellness') ||
-        me.isAdmin),
-  )
-  const canMessage = Boolean(
-    me &&
-      (me.roles.includes('programs') ||
-        me.roles.includes('instructor') ||
-        me.roles.includes('coordinator') ||
-        me.roles.includes('secretary') ||
-        me.roles.includes('membership') ||
-        me.isAdmin),
-  )
-  const canMembership = Boolean(
-    me && (me.roles.includes('membership') || me.roles.includes('secretary') || me.isAdmin),
-  )
-  const canMinutes = Boolean(me && (me.roles.includes('secretary') || me.isAdmin))
-  const canPrograms = Boolean(
-    me &&
-      (me.roles.includes('programs') ||
-        me.roles.includes('instructor') ||
-        me.roles.includes('coordinator') ||
-        me.isAdmin),
-  )
-  const canTimesheets = Boolean(
-    me &&
-      (me.roles.includes('instructor') ||
-        me.roles.includes('coordinator') ||
-        me.roles.includes('programs') ||
-        me.isAdmin),
-  )
-  const canPayments = Boolean(me && (me.roles.includes('treasurer') || me.isAdmin))
-  const canEvents = Boolean(
-    me &&
-      (me.roles.includes('events') ||
-        me.roles.includes('secretary') ||
-        me.roles.includes('marketing') ||
-        me.isAdmin),
-  )
-  const canRetail = Boolean(me && (me.roles.includes('retail') || me.isAdmin))
-  const canDiscounts = Boolean(
-    me && (me.roles.includes('retail') || me.roles.includes('membership') || me.isAdmin),
-  )
-  const canContent = Boolean(
-    me &&
-      (me.roles.includes('marketing') ||
-        me.roles.includes('secretary') ||
-        me.roles.includes('retail') ||
-        me.isAdmin),
-  )
-  const canSite = Boolean(
-    me &&
-      (me.isAdmin ||
-        me.roles.some((r) =>
-          ['marketing', 'secretary', 'membership', 'programs', 'treasurer', 'events', 'retail', 'wellness'].includes(
-            r,
-          ),
-        )),
-  )
-  const canBoard = Boolean(me && (me.roles.includes('secretary') || me.isAdmin))
-  const canNav = Boolean(
-    me && (me.roles.includes('marketing') || me.roles.includes('secretary') || me.isAdmin),
-  )
-  const canFaq = Boolean(
-    me &&
-      (me.roles.includes('marketing') ||
-        me.roles.includes('membership') ||
-        me.roles.includes('secretary') ||
-        me.isAdmin),
-  )
-  const canVolunteers = Boolean(
-    me && (me.roles.includes('events') || me.roles.includes('secretary') || me.isAdmin),
-  )
-  const canFundraising = Boolean(
-    me &&
-      (me.roles.includes('programs') ||
-        me.roles.includes('treasurer') ||
-        me.roles.includes('marketing') ||
-        me.isAdmin),
-  )
-  const canTiers = Boolean(
-    me && (me.roles.includes('membership') || me.roles.includes('secretary') || me.isAdmin),
-  )
-  const canWellness = Boolean(me && (me.roles.includes('wellness') || me.roles.includes('events') || me.isAdmin))
-  const canNewsletter = Boolean(
-    me &&
-      (me.roles.includes('marketing') ||
-        me.roles.includes('secretary') ||
-        me.roles.includes('membership') ||
-        me.isAdmin),
-  )
-  const canComms = Boolean(
-    me &&
-      (me.roles.includes('marketing') ||
-        me.roles.includes('secretary') ||
-        me.roles.includes('membership') ||
-        me.roles.includes('events') ||
-        me.isAdmin),
-  )
+  const canMarketing = staffCanWorkspace(me, 'social')
+  const canSurveys = staffCanWorkspace(me, 'surveys')
+  const canMessage = staffCanWorkspace(me, 'messages')
+  const canMembership = staffCanWorkspace(me, 'membership')
+  const canMinutes = staffCanWorkspace(me, 'minutes')
+  const canPrograms = staffCanWorkspace(me, 'programs')
+  const canTimesheets = staffCanWorkspace(me, 'timesheets')
+  const canPayments = staffCanWorkspace(me, 'payments')
+  const canEvents = staffCanWorkspace(me, 'events')
+  const canRetail = staffCanWorkspace(me, 'retail')
+  const canDiscounts = staffCanWorkspace(me, 'discounts')
+  const canContent = staffCanWorkspace(me, 'content')
+  const canSite = staffCanWorkspace(me, 'site')
+  const canBoard = staffCanWorkspace(me, 'board')
+  const canNav = staffCanWorkspace(me, 'nav')
+  const canFaq = staffCanWorkspace(me, 'faq')
+  const canVolunteers = staffCanWorkspace(me, 'volunteers')
+  const canFundraising = staffCanWorkspace(me, 'fundraising')
+  const canTiers = staffCanWorkspace(me, 'tiers')
+  const canWellness = staffCanWorkspace(me, 'wellness')
+  const canNewsletter = staffCanWorkspace(me, 'newsletter')
+  const canComms = staffCanWorkspace(me, 'comms')
 
   const navItems = useMemo(() => {
     if (!me) return []
@@ -312,14 +233,7 @@ export function StaffDashboard() {
     if (canComms) items.push({ id: 'comms', label: STAFF_WORKSPACE_LABEL.comms })
     if (canMarketing) items.push({ id: 'canva', label: STAFF_WORKSPACE_LABEL.canva })
     if (canNewsletter) items.push({ id: 'newsletter', label: STAFF_WORKSPACE_LABEL.newsletter })
-    if (
-      canPrograms ||
-      canRetail ||
-      canPayments ||
-      canMembership ||
-      canEvents ||
-      me.isAdmin
-    ) {
+    if (staffCanWorkspace(me, 'reports')) {
       items.push({ id: 'reports', label: STAFF_WORKSPACE_LABEL.reports })
     }
     items.push({ id: 'help', label: STAFF_WORKSPACE_LABEL.help })

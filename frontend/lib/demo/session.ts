@@ -95,6 +95,7 @@ export function demoStaffProfile(session: DemoReviewSession): StaffProfile {
     emailSignature: `${name}\n${session.school} PTO`,
     assignedProgramIds: [],
     personalEmail: session.email,
+    extraWorkspaces: [],
   }
 }
 
