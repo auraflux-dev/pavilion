@@ -60,7 +60,7 @@ export async function resolveSubmissionInbox(
   }
   if (kind === 'events') {
     return normalizeStaffInbox(
-      settings.get('contactEmailEvents', 'vp-events@shmspto.org'),
+      settings.get('contactEmailEvents', 'vp-community-events@shmspto.org'),
     )
   }
   if (kind === 'sponsorship') {

@@ -390,7 +390,7 @@ export const SITE_SETTING_GROUPS: {
       },
       {
         key: 'contactEmailEvents',
-        label: 'VP Events email (event idea form)',
+        label: 'VP Events email (event idea form · vp-community-events@)',
       },
       {
         key: 'contactEmailSponsorship',
@@ -403,7 +403,7 @@ export const SITE_SETTING_GROUPS: {
       },
       {
         key: 'contactEmailVolunteer',
-        label: 'Volunteer signup inbox (events / volunteer VP)',
+        label: 'Volunteer signup inbox (VP Events · vp-community-events@)',
       },
       {
         key: 'contactEmailMarketing',

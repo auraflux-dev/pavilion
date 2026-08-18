@@ -14,6 +14,7 @@ const DEAD_INBOXES = new Set([
 const INBOX_ALIASES: Record<string, string> = {
   'vp-programs@shmspto.org': 'vp-initiatives@shmspto.org',
   'wellness@shmspto.org': 'bayansouqi@shmspto.org',
+  'vp-events@shmspto.org': 'vp-community-events@shmspto.org',
 }
 
 export const STAFF_INBOX_FALLBACK = 'president@shmspto.org'

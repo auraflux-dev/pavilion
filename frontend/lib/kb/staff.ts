@@ -450,10 +450,10 @@ Same for free and paid. The request is also logged for follow-up.
 |------|--------|
 | Contact (/contact) | president@ (general) |
 | Programs (/programs) | vp-initiatives@ |
-| Event idea (/events) | vp-events@ |
+| Event idea (/events) | vp-community-events@ |
 | Sponsorship (/fundraising) | vp-initiatives@ |
 | Business owner (public) | vp-membershipexperience@ |
-| Volunteer (logged in) | volunteer inbox, else president@ |
+| Volunteer (logged in) | vp-community-events@ (volunteer inbox) |
 | Newsletter | vp-marketing@, else president@ |
 | Survey | vp-marketing@, else president@ |
 

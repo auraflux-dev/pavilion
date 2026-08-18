@@ -74,6 +74,7 @@ const KNOWN = [
   'treasurer@shmspto.org',
   'secretary@shmspto.org',
   'vp-marketing@shmspto.org',
+  'vp-community-events@shmspto.org',
   'vp-events@shmspto.org',
   'vp-initiatives@shmspto.org',
   'bayansouqi@shmspto.org',

@@ -27,7 +27,7 @@ node scripts/compare-staff-google-emails.mjs
 | Robert Gregory | President | president@shmspto.org |
 | Open Position | Secretary | secretary@shmspto.org |
 | Open Position | Treasurer | treasurer@shmspto.org |
-| Shruti Sagar | VP Events | vp-events@shmspto.org |
+| Shruti Sagar | VP Events | vp-community-events@shmspto.org |
 | Diane Worden | VP Marketing | vp-marketing@shmspto.org |
 | Shweta Walia | VP Membership Experience | vp-membershipexperience@shmspto.org |
 | Pallavi Muley | VP Fundraising & Programs | vp-programs@shmspto.org |
@@ -45,7 +45,7 @@ node scripts/compare-staff-google-emails.mjs
 - president@shmspto.org
 - programs@shmspto.org
 - secretary@shmspto.org
-- vp-events@shmspto.org
+- vp-community-events@shmspto.org
 - vp-initiatives@shmspto.org
 - vp-marketing@shmspto.org
 - vp-membershipexperience@shmspto.org

@@ -205,7 +205,7 @@ export const CONTACT_DEFAULTS = {
   contactEmailTreasurer: 'treasurer@shmspto.org',
  /** Programs inbox shares Initiatives alias until vp-programs@ exists */
   contactEmailPrograms: 'vp-initiatives@shmspto.org',
-  contactEmailEvents: 'vp-events@shmspto.org',
+  contactEmailEvents: 'vp-community-events@shmspto.org',
   contactEmailSponsorship: 'vp-initiatives@shmspto.org',
   contactAddress: '23415 Evergreen Ridge Drive, Ashburn, VA 20148',
   contactStoreHours: 'Mon. Fri · lunch periods (in person only)',

@@ -30,10 +30,10 @@ Same for free and paid members. The request is also logged for follow-up.
 |-------------|-------------------|
 | Contact (`/contact`) | president@ (general; topic does not auto-route) |
 | Programs contact (`/programs`) | vp-initiatives@ |
-| Event idea (`/events`) | vp-events@ |
+| Event idea (`/events`) | vp-community-events@ |
 | Sponsorship (`/fundraising`) | vp-initiatives@ |
 | Business owner (public fundraising section) | vp-membershipexperience@ |
-| Volunteer signup (must be logged in) | Volunteer inbox, else president@ |
+| Volunteer signup (must be logged in) | vp-community-events@ |
 | Newsletter signup | vp-marketing@, else president@ |
 | Survey submit | vp-marketing@, else president@ |
 | Board page email links | That officer’s email (opens mail app) |
@@ -88,7 +88,7 @@ Routing is the **same**. Paid parents also get purchase confirmations; staff get
 | vp-membershipexperience@ | Portal help, business owner, sale alerts, account support |
 | vp-marketing@ | Portal help (shared), newsletter/survey alerts |
 | vp-initiatives@ | Programs + sponsorship forms |
-| vp-events@ | Event idea form |
+| vp-community-events@ | Event idea form |
 | treasurer@ | Sale alerts (finance awareness) |
 | cove@ | Sale alerts (retail / Cove) |
 | cove-staff@ | Sale alerts (Cove staff) |

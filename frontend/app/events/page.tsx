@@ -21,7 +21,7 @@ export default async function EventsPage() {
   ])
   const settings = await getSiteSettings()
   const inSession = settings.getBool('schoolInSession', false)
-  const eventsEmail = settings.get('contactEmailEvents', 'vp-events@shmspto.org')
+  const eventsEmail = settings.get('contactEmailEvents', 'vp-community-events@shmspto.org')
 
   try {
     events = inSession ? await getUpcomingEvents(24) : []

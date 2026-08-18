@@ -24,7 +24,7 @@ function resolveAssignedTo(
   }
   if (dept === 'events') {
     return normalizeStaffInbox(
-      settings.get('contactEmailEvents', 'vp-events@shmspto.org'),
+      settings.get('contactEmailEvents', 'vp-community-events@shmspto.org'),
     )
   }
   if (dept === 'sponsorship' || dept === 'initiatives') {
