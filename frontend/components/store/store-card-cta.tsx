@@ -56,7 +56,9 @@ export function StoreCardCta({
 
         <p className="text-white/30 text-xs mt-6">
           {bonusPercent}% on first load / membership credit only. Reloads 1:1 up to ${maxAmount}.
-          Spending at the snack window is in person during Cove hours.
+          {vanillaizeIfDemo(
+            'Spending at the snack window is in person during Cove hours.',
+          )}
         </p>
       </div>
     </section>

@@ -71,7 +71,7 @@ function ReviewJoinInner() {
         Review {DEMO_BRAND.pto}
       </h1>
       <p className="text-sm text-[#5A6070] mb-8 leading-relaxed">
-        This is a vanilla school, not Stone Hill. Same product: public site,
+        Sample school for a board walkthrough. Same product: public site,
         family portal, staff workspace, membership, store, and books. Nothing
         you click is saved, charged, or emailed. Join with the review code from
         the person who sent you this link.
@@ -117,7 +117,7 @@ function ReviewJoinInner() {
             className="mt-1"
             value={school}
             onChange={(e) => setSchool(e.target.value)}
-            placeholder="Lincoln Middle School PTO"
+            placeholder="Oak Street Elementary PTO"
             required
           />
         </label>

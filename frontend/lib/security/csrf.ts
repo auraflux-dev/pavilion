@@ -1,10 +1,11 @@
 /**
  * Same-origin check for cookie-authenticated mutating API calls.
- * Browser fetch from shmspto.org sends Origin; block cross-site POSTs.
+ * Browser fetch from this host sends Origin; block cross-site POSTs.
  */
+import { isDemoInstance, publicSiteUrl } from '@/lib/demo/instance'
 
 function allowedOrigins(): string[] {
-  const site = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org').replace(/\/$/, '')
+  const site = publicSiteUrl()
   const extras = (process.env.ALLOWED_ORIGINS || '')
     .split(',')
     .map((s) => s.trim().replace(/\/$/, ''))
@@ -15,6 +16,9 @@ function allowedOrigins(): string[] {
     'https://shmspto.org',
     ...extras,
   ])
+  if (isDemoInstance()) {
+    set.add('https://commons-pto-demo.vercel.app')
+  }
   if (process.env.NODE_ENV !== 'production') {
     set.add('http://localhost:3000')
     set.add('http://127.0.0.1:3000')
@@ -44,14 +48,17 @@ export function isSameOriginRequest(req: Request): boolean {
   const origin = req.headers.get('origin')
   const referer = req.headers.get('referer')
   const allowed = allowedOrigins()
+  const requestOrigin = new URL(req.url).origin
 
   if (origin) {
+    if (origin === requestOrigin) return true
     if (allowed.some((a) => origin === a || origin.startsWith(`${a}/`))) return true
     return isLocalDevOrigin(origin)
   }
   if (referer) {
     try {
       const refOrigin = new URL(referer).origin
+      if (refOrigin === requestOrigin) return true
       if (allowed.includes(refOrigin)) return true
       return isLocalDevOrigin(refOrigin)
     } catch {

@@ -14,6 +14,7 @@ import {
   UserPlus,
 } from 'lucide-react'
 import { SectionJumpNav, type SectionJumpItem } from '@/components/section-jump-nav'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 function BandNav({
   ariaLabel,
@@ -121,7 +122,12 @@ export function MembershipSectionNav() {
     <BandNav
       ariaLabel="Membership page sections"
       items={[
-        { href: '#tiers', label: 'Tiers', hint: 'Reef · Lagoon · Tide', icon: Gift },
+        {
+          href: '#tiers',
+          label: 'Tiers',
+          hint: isPublicDemoInstance() ? 'Member · Family · Patron' : 'Reef · Lagoon · Tide',
+          icon: Gift,
+        },
         { href: '#portal', label: 'Portal', hint: 'What you get', icon: LayoutList },
         { href: '#faculty', label: 'Faculty', hint: 'Staff membership', icon: Users },
         { href: '#donate', label: 'Donate', hint: 'Skip paid tier', icon: Heart },
