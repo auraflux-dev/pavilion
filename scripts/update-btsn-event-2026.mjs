@@ -124,7 +124,7 @@ async function main() {
     },
     mainImage: { id: flyer.id },
     shortDescription:
-      'Cafeteria PTO table: spirit wear, memberships, Member Portal, Cove Digital Card, enrichment, and Sips & Sweets tickets.',
+      'Spirit wear, memberships, Member Portal, Cove Digital Card, and enrichment at the cafeteria table. Sips & Sweets food truck is on site. Stop by the PTO table for refreshment tickets.',
     description: {
       nodes: [
         {

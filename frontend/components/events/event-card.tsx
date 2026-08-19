@@ -95,6 +95,9 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
   const registerHref = event.externalRegistrationUrl
   const registerLocal = registerHref ? sameOriginPath(registerHref) : null
   const anchorId = String(event.slug || event.id || '').trim() || undefined
+  const bodyCopy = detailPage
+    ? event.description
+    : event.shortDescription || event.description
 
   async function copyShareLink() {
     if (!path || typeof window === 'undefined') return
@@ -201,15 +204,15 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
           </p>
         ) : null}
 
-        {event.description && (
+        {bodyCopy ? (
           <p
             className={`text-sm text-[#5A6070] leading-relaxed mb-5 ${
               detailPage ? '' : 'line-clamp-3'
             }`}
           >
-            {event.description}
+            {bodyCopy}
           </p>
-        )}
+        ) : null}
 
         <div className="space-y-2 mb-6">
           {time && (
