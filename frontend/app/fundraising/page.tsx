@@ -9,7 +9,7 @@ import { getPageContent } from '@/lib/api/page-content'
 import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
 import { PortalBusinessOwnerForm } from '@/components/member-portal/portal-business-owner-form'
 import { getActiveSponsors } from '@/lib/api/sponsors'
-import { normalizeStaffInbox } from '@/lib/staff/inbox'
+import { DEFAULT_SPONSORSHIP_INBOXES, parseStaffInboxes } from '@/lib/staff/inbox'
 import { ArrowRight, Heart, TrendingUp, Users, ShoppingBag, Ticket, Star, RefreshCw, Handshake, type LucideIcon } from 'lucide-react'
 import { DonateBlock } from '@/components/donate/donate-block'
 import { SponsorshipPackages } from '@/components/fundraising/sponsorship-packages'
@@ -54,9 +54,10 @@ export default async function FundraisingPage() {
   const sponsorshipRaised =
     settings.getNumber('sponsorshipRaised', 0) + (sponsorshipFromBank ?? 0)
   const sponsorshipGoal = settings.getNumber('goalSponsorship', 5000)
-  const sponsorshipEmail = normalizeStaffInbox(
-    settings.get('contactEmailSponsorship', 'vp-initiatives@shmspto.org'),
-  )
+  const sponsorshipEmail =
+    parseStaffInboxes(
+      settings.get('contactEmailSponsorship', DEFAULT_SPONSORSHIP_INBOXES),
+    ).join(', ') || DEFAULT_SPONSORSHIP_INBOXES
 
   const ANNUAL_GOAL = annualGoal.goal
 

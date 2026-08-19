@@ -19,6 +19,10 @@ const INBOX_ALIASES: Record<string, string> = {
 
 export const STAFF_INBOX_FALLBACK = 'president@shmspto.org'
 
+/** Default sponsorship form inboxes (comma-separated in SiteSettings). */
+export const DEFAULT_SPONSORSHIP_INBOXES =
+  'vp-sponsorships@shmspto.org, president@shmspto.org'
+
 /** Map missing board aliases to a live mailbox. */
 export function normalizeStaffInbox(email: string | null | undefined): string {
   const e = String(email ?? '')
@@ -28,4 +32,14 @@ export function normalizeStaffInbox(email: string | null | undefined): string {
   if (INBOX_ALIASES[e]) return INBOX_ALIASES[e]
   if (DEAD_INBOXES.has(e)) return STAFF_INBOX_FALLBACK
   return e
+}
+
+/** Split a CMS inbox field that may list several addresses. */
+export function parseStaffInboxes(raw: string | null | undefined): string[] {
+  const out = new Set<string>()
+  for (const part of String(raw ?? '').split(/[,;]+/)) {
+    const e = normalizeStaffInbox(part)
+    if (e.includes('@')) out.add(e)
+  }
+  return Array.from(out)
 }

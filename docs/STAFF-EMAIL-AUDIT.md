@@ -47,6 +47,7 @@ node scripts/compare-staff-google-emails.mjs
 - secretary@shmspto.org
 - vp-community-events@shmspto.org
 - vp-initiatives@shmspto.org
+- vp-sponsorships@shmspto.org
 - vp-marketing@shmspto.org
 - vp-membershipexperience@shmspto.org
 - vp-programs@shmspto.org

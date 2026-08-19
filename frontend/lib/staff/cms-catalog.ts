@@ -394,7 +394,7 @@ export const SITE_SETTING_GROUPS: {
       },
       {
         key: 'contactEmailSponsorship',
-        label: 'VP Initiatives email (sponsorship form)',
+        label: 'Sponsorship form inboxes (vp-sponsorships@ and president@, comma-separated)',
       },
       {
         key: 'contactEmailMembershipExperience',

@@ -14,6 +14,16 @@ type Props = {
   variant: Variant
 }
 
+function formatInboxList(raw: string): string {
+  const parts = String(raw ?? '')
+    .split(/[,;]+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (parts.length <= 1) return parts[0] || raw
+  if (parts.length === 2) return `${parts[0]} and ${parts[1]}`
+  return `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`
+}
+
 const COPY: Record<
   Variant,
   {
@@ -58,7 +68,7 @@ const COPY: Record<
   sponsorship: {
     department: 'sponsorship',
     topic: 'Sponsorship inquiry',
-    eyebrow: 'VP of Initiatives',
+    eyebrow: 'VP of Sponsorships',
     title: 'Become a sponsor',
     intro: 'Sponsorship requests go to',
     optionalLabel: 'Business or organization',
@@ -69,7 +79,7 @@ const COPY: Record<
       ),
     submitLabel: 'Send sponsorship request',
     successBody:
-      'Thanks. Our VP of Initiatives will review your sponsorship interest and follow up soon.',
+      'Thanks. Our VP of Sponsorships and the president will review your interest and follow up soon.',
   },
 }
 
@@ -146,7 +156,7 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
         </p>
         <h3 className="mt-1 text-xl font-bold text-[#1A1A1A]">{copy.title}</h3>
         <p className="mt-1 text-sm text-[#5A6070]">
-          {copy.intro} {toEmail}. We usually reply within one business day.
+          {copy.intro} {formatInboxList(toEmail)}. We usually reply within one business day.
         </p>
       </div>
 

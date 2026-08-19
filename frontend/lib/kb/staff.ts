@@ -451,7 +451,7 @@ Same for free and paid. The request is also logged for follow-up.
 | Contact (/contact) | president@ (general) |
 | Programs (/programs) | vp-initiatives@ |
 | Event idea (/events) | vp-community-events@ |
-| Sponsorship (/fundraising) | vp-initiatives@ |
+| Sponsorship (/fundraising) | vp-sponsorships@ and president@ |
 | Business owner (public) | vp-membershipexperience@ |
 | Volunteer (logged in) | vp-community-events@ (volunteer inbox) |
 | Newsletter | vp-marketing@, else president@ |

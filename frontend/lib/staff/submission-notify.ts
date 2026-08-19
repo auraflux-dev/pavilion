@@ -6,7 +6,12 @@
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { sendMassEmail, type SendMassEmailResult } from '@/lib/staff/mass-email'
 import { resolveGmailSendAuth } from '@/lib/staff/gmail-send-auth'
-import { normalizeStaffInbox, STAFF_INBOX_FALLBACK } from '@/lib/staff/inbox'
+import {
+  DEFAULT_SPONSORSHIP_INBOXES,
+  normalizeStaffInbox,
+  parseStaffInboxes,
+  STAFF_INBOX_FALLBACK,
+} from '@/lib/staff/inbox'
 
 export type SubmissionNotifyKind =
   | 'contact'
@@ -50,7 +55,10 @@ export async function resolveSubmissionInbox(
   const explicit = String(overrideTo ?? '')
     .trim()
     .toLowerCase()
-  if (explicit.includes('@')) return normalizeStaffInbox(explicit)
+  if (explicit.includes('@')) {
+    const list = parseStaffInboxes(explicit)
+    return list.join(', ') || STAFF_INBOX_FALLBACK
+  }
 
   const settings = await getSiteSettings()
   if (kind === 'programs') {
@@ -64,9 +72,10 @@ export async function resolveSubmissionInbox(
     )
   }
   if (kind === 'sponsorship') {
-    return normalizeStaffInbox(
-      settings.get('contactEmailSponsorship', 'vp-initiatives@shmspto.org'),
+    const list = parseStaffInboxes(
+      settings.get('contactEmailSponsorship', DEFAULT_SPONSORSHIP_INBOXES),
     )
+    return list.join(', ') || DEFAULT_SPONSORSHIP_INBOXES
   }
   if (kind === 'membership-experience') {
     return normalizeStaffInbox(
@@ -136,14 +145,8 @@ export async function notifyStaffSubmission(opts: {
 
   const recipients =
     opts.recipients && opts.recipients.length
-      ? Array.from(
-          new Set(
-            opts.recipients
-              .map((e) => normalizeStaffInbox(e).trim().toLowerCase())
-              .filter(Boolean),
-          ),
-        )
-      : [await resolveSubmissionInbox(opts.kind, opts.to)]
+      ? Array.from(new Set(opts.recipients.flatMap((e) => parseStaffInboxes(e))))
+      : parseStaffInboxes(await resolveSubmissionInbox(opts.kind, opts.to))
 
   if (!recipients.length || !recipients[0]) {
     return { ok: false, mode: 'skipped', reason: 'No staff inbox resolved' }

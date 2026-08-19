@@ -4,7 +4,12 @@ import { getSiteSettings } from '@/lib/api/site-settings'
 import { notifyStaffSubmission } from '@/lib/staff/submission-notify'
 import { clientIp, rateLimit } from '@/lib/security/rate-limit'
 import { reportError } from '@/lib/observability/error-reporting'
-import { normalizeStaffInbox, STAFF_INBOX_FALLBACK } from '@/lib/staff/inbox'
+import {
+  DEFAULT_SPONSORSHIP_INBOXES,
+  normalizeStaffInbox,
+  parseStaffInboxes,
+  STAFF_INBOX_FALLBACK,
+} from '@/lib/staff/inbox'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -13,8 +18,8 @@ function resolveAssignedTo(
   assignedTo: string | undefined,
   settings: Awaited<ReturnType<typeof getSiteSettings>>
 ): string {
-  const explicit = String(assignedTo ?? '').trim().toLowerCase()
-  if (explicit && EMAIL_RE.test(explicit)) return normalizeStaffInbox(explicit)
+  const explicit = parseStaffInboxes(assignedTo)
+  if (explicit.length) return explicit.join(', ')
 
   const dept = String(department ?? '').trim().toLowerCase()
   if (dept === 'programs') {
@@ -28,9 +33,10 @@ function resolveAssignedTo(
     )
   }
   if (dept === 'sponsorship' || dept === 'initiatives') {
-    return normalizeStaffInbox(
-      settings.get('contactEmailSponsorship', 'vp-initiatives@shmspto.org'),
+    const list = parseStaffInboxes(
+      settings.get('contactEmailSponsorship', DEFAULT_SPONSORSHIP_INBOXES),
     )
+    return list.join(', ') || DEFAULT_SPONSORSHIP_INBOXES
   }
   if (dept === 'membership-experience' || dept === 'membership') {
     return normalizeStaffInbox(
@@ -91,7 +97,7 @@ export async function POST(req: NextRequest) {
         : kind === 'events'
           ? 'VP Events'
           : kind === 'sponsorship'
-            ? 'VP Initiatives'
+            ? 'VP Sponsorships'
             : kind === 'membership-experience'
               ? 'VP Membership Experience'
               : null

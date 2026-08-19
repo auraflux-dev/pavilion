@@ -11,6 +11,10 @@ import {
   rosterEmails,
 } from '../frontend/lib/staff/members-roster.ts'
 import {
+  DEFAULT_SPONSORSHIP_INBOXES,
+  parseStaffInboxes,
+} from '../frontend/lib/staff/inbox.ts'
+import {
   buildMailtoBcc,
   buildRawMimeMessage,
   sanitizeRecipients,
@@ -115,6 +119,16 @@ check('gmail raw MIME is base64url', () => {
   const decoded = Buffer.from(raw.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')
   assert.ok(decoded.includes('To: parent@example.com'))
   assert.ok(decoded.includes('Body line'))
+})
+
+check('parseStaffInboxes splits sponsorship list', () => {
+  assert.deepEqual(parseStaffInboxes(DEFAULT_SPONSORSHIP_INBOXES), [
+    'vp-sponsorships@shmspto.org',
+    'president@shmspto.org',
+  ])
+  assert.deepEqual(parseStaffInboxes('vp-sponsorships@shmspto.org'), [
+    'vp-sponsorships@shmspto.org',
+  ])
 })
 
 check('sanitize recipients drops junk and fixes typos', () => {
