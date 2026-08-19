@@ -13,8 +13,18 @@
 
 import { getWixClient } from '@/lib/wix-client'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { listBudgetLines, money } from '@/lib/staff/budget'
 import { listBudgetEntries } from '@/lib/staff/budget-sync'
 import { DEFAULT_FISCAL_YEAR } from '@/lib/staff/budget'
+
+/** Year-end reserve on top of projected operating expenses (excludes contingency line). */
+export const FUNDRAISING_GOAL_LIFT = 0.1
+
+export interface FundraisingAnnualGoal {
+  goal: number
+  expenseBudgeted: number
+  liftPercent: number
+}
 
 export const VOLUNTEER_HOURS_RAISED_DEFAULT = 0
 export const VOLUNTEER_HOURS_GOAL_DEFAULT = 500
@@ -137,6 +147,40 @@ function classifyFundraisingPayment(
     return 'spiritWear'
   }
   return null
+}
+
+function schoolYearFiscalKey(now = new Date()) {
+  const year = now.getUTCFullYear()
+  const startYear = now.getUTCMonth() >= 7 ? year : year - 1
+  return `${startYear}-${String(startYear + 1).slice(-2)}`
+}
+
+/** Public hero goal: projected operating expenses + 10% year-end reserve (Staff → Budget). */
+export async function getFundraisingAnnualGoal(): Promise<FundraisingAnnualGoal> {
+  const liftPercent = Math.round(FUNDRAISING_GOAL_LIFT * 100)
+
+  if (isDemoInstance()) {
+    const expenseBudgeted = 18000
+    return {
+      expenseBudgeted,
+      liftPercent,
+      goal: money(expenseBudgeted * (1 + FUNDRAISING_GOAL_LIFT)),
+    }
+  }
+
+  const fiscalYear = schoolYearFiscalKey()
+  const lines = await listBudgetLines(fiscalYear).catch(() => [])
+  const expenseBudgeted = money(
+    lines
+      .filter((l) => l.kind === 'expense' && l.syncKey !== 'contingency')
+      .reduce((n, l) => n + l.budgeted, 0),
+  )
+
+  return {
+    expenseBudgeted,
+    liftPercent,
+    goal: money(expenseBudgeted * (1 + FUNDRAISING_GOAL_LIFT)),
+  }
 }
 
 const BANK_CSV_ORIGINS = new Set(['auto-bofa', 'auto-plaid', 'auto-paypal'])

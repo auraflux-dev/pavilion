@@ -43,7 +43,6 @@ export const DEMO_SETTINGS: Record<string, string> = {
   contactAddress: `100 Riverside Drive, ${b.town}`,
   contactStoreHours: 'Mon–Fri · lunch periods',
   storeHours: 'Mon–Fri · lunch periods',
-  fundraisingAnnualGoal: '18000',
   homeVolunteerImageAlt: `${b.pto} volunteers at a school night`,
   homeHeroImageTopUrl: '/demo/hero-a.jpg',
   homeHeroImageBottomUrl: '/demo/hero-b.jpg',

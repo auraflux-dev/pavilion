@@ -440,10 +440,6 @@ export const SITE_SETTING_GROUPS: {
     roles: ['programs', 'treasurer', 'admin'],
     keys: [
       {
-        key: 'fundraisingAnnualGoal',
- label: 'Public annual goal ($). shown on fundraising hero',
-      },
-      {
         key: 'goalMembership',
  label: 'Internal goal. Membership ($) (staff only, not public)',
       },

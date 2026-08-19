@@ -2,7 +2,7 @@ import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { getFundAllocationActuals } from '@/lib/api/fund-allocation'
-import { getFundraisingTotals } from '@/lib/api/fundraising'
+import { getFundraisingAnnualGoal, getFundraisingTotals } from '@/lib/api/fundraising'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getFundraisingCTAs } from '@/lib/api/fundraising-ctas'
 import { getPageContent } from '@/lib/api/page-content'
@@ -41,13 +41,14 @@ function fmtDollars(n: number) {
 }
 
 export default async function FundraisingPage() {
-  const [data, settings, ctas, page, sponsors, allocations] = await Promise.all([
+  const [data, settings, ctas, page, sponsors, allocations, annualGoal] = await Promise.all([
     getFundraisingTotals(),
     getSiteSettings(),
     getFundraisingCTAs(),
     getPageContent('fundraising'),
     getActiveSponsors(),
     getFundAllocationActuals(),
+    getFundraisingAnnualGoal(),
   ])
   const { totals, goals, volunteerHoursRaised, volunteerHoursGoal, sponsorshipFromBank } = data
   const sponsorshipRaised =
@@ -57,7 +58,7 @@ export default async function FundraisingPage() {
     settings.get('contactEmailSponsorship', 'vp-initiatives@shmspto.org'),
   )
 
-  const ANNUAL_GOAL = settings.getNumber('fundraisingAnnualGoal', 21667)
+  const ANNUAL_GOAL = annualGoal.goal
 
   const allocationRows = allocations.rows.map((row) => ({
     ...row,
@@ -209,6 +210,9 @@ export default async function FundraisingPage() {
                 </p>
                 ) : null}
               </div>
+              <p className="text-white/50 text-xs mt-3 leading-relaxed">
+                Annual goal = {fmtDollars(annualGoal.expenseBudgeted)} projected expenses + {annualGoal.liftPercent}% year-end reserve (Staff → Budget).
+              </p>
             </div>
           </div>
         </section>
