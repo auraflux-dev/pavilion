@@ -164,12 +164,12 @@ export function StaffRoleManager() {
         <h2 className="text-lg font-bold">
           {scope === 'instructors' ? 'Instructors & class coordinators' : 'Admin · Staff access'}
         </h2>
-        <p className="text-xs text-[#5A6070]">
+        <p className="text-xs text-[#5A6070] whitespace-pre-line">
           {scope === 'instructors'
-            ? 'Pick an EP mailbox from the Google list (math, robotics, business plan, etc.). Instructor + class tick. Essay has no EP mailbox yet — Lumi needs one added in Workspace first.'
-            : 'Pick a role for the usual toolkit, then tick any extra permissions below. Staff tools stay on official @' +
+            ? 'Pick an EP mailbox from the Google list (math, robotics, business plan).\nSet Instructor and tick their class.\nEssay has no EP mailbox yet. Add one in Workspace for Lumi first.'
+            : 'Pick a role for the usual toolkit, then tick any extra permissions below.\nStaff tools stay on official @' +
               (isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org') +
-              ' accounts. Link a personal email for the parent portal.'}
+              ' accounts.\nLink a personal email for the parent portal.'}
         </p>
       </div>
 

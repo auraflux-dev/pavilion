@@ -33,7 +33,7 @@ export function PageHero({ content, compact }: Props) {
         </h1>
         {content.body ? (
           <p
-            className={`text-white/80 max-w-2xl mx-auto leading-relaxed ${
+            className={`text-white/80 max-w-2xl mx-auto leading-relaxed whitespace-pre-line ${
               compact ? 'text-base text-white/70' : 'text-lg'
             }`}
           >

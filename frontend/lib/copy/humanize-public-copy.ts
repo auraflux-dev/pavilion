@@ -25,8 +25,9 @@ export function humanizePublicCopy(text: string): string {
     .replace(/–/g, ' to ')
     .replace(/\.\s+\./g, '.')
     .replace(/\.\s+([a-z])/g, (_, c: string) => `. ${c.toUpperCase()}`)
-    .replace(/\s{2,}/g, ' ')
-    .trim()
+    .replace(/[^\S\n]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/^\n+|\n+$/g, '')
 
   return brandifyCoveDigitalCard(s)
 }

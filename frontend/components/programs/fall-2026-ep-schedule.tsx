@@ -21,8 +21,8 @@ export function Fall2026EpSchedule({ variant = 'public' }: { variant?: 'public' 
             Fall 2026 · 12 sessions
           </p>
           <h2 className="text-2xl font-bold text-[#1A1A1A]">Enrichment schedule</h2>
-          <p className="mt-1 text-sm text-[#5A6070]">
-            Library only. Two classes each night with a 15-minute break. {printHint}
+          <p className="mt-1 text-sm text-[#5A6070] whitespace-pre-line">
+            {`Library only. Two classes each night with a 15-minute break.\n${printHint}`}
           </p>
         </div>
         {variant === 'public' ? (
@@ -75,9 +75,8 @@ export function Fall2026EpSchedule({ variant = 'public' }: { variant?: 'public' 
         </table>
       </div>
 
-      <p className="text-sm text-[#5A6070]">
-        Paid-member registration {FALL_2026_EP_SALES.paidMembers}. Public {FALL_2026_EP_SALES.public}. Principal
-        packet: library Tuesday and Wednesday 5:30–8:00 p.m. only.
+      <p className="text-sm text-[#5A6070] whitespace-pre-line">
+        {`Paid-member registration ${FALL_2026_EP_SALES.paidMembers}.\nPublic ${FALL_2026_EP_SALES.public}.\nPrincipal packet: library Tuesday and Wednesday 5:30 to 8:00 p.m. only.`}
       </p>
 
       {FALL_2026_EP_CLASSES.map((c) => (

@@ -1,0 +1,13 @@
+---
+description: Multi-line website and portal copy must use real line breaks
+alwaysApply: true
+---
+
+# Copy line breaks
+
+When adding or editing visitor, member-portal, or staff copy that is more than one sentence or beat:
+
+- Put each beat on its own line in the source (`\n` in strings, `<br />` in HTML, or separate `<p>` tags).
+- Render it so those breaks show (`whitespace-pre-line`, HTML breaks, or stacked paragraphs). Do not dump a long run-on into one cramped line and hope wrapping looks clean.
+- `humanizePublicCopy` must keep newlines. Never collapse `\n` to spaces.
+- Same rule for CMS fields (PageContent body, program descriptions, announcements).
