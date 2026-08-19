@@ -345,15 +345,6 @@ export default async function FundraisingPage() {
                 </div>
               ))}
             </div>
-
-            <p className="text-center text-xs text-[#5A6070] mt-8">
-              Actual spending this school year ({allocations.schoolYearLabel}, August–July) from the PTO budget: bank withdrawals, reimbursements, and other logged expenses. Updates when Staff → Budget is refreshed or new activity is imported.
-              {allocations.totalSpent > 0 ? (
-                <> Total spent so far: {fmtDollars(allocations.totalSpent)}.</>
-              ) : (
-                <> No budget expenses logged yet this school year.</>
-              )}
-            </p>
           </div>
         </section>
 
