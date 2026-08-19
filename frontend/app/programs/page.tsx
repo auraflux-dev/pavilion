@@ -81,7 +81,7 @@ export default async function ProgramsPage() {
 
             {!error && programs.length > 0 && (
               <>
-                <p className="mb-8 text-center text-sm text-[#5A6070]">
+                <p className="mb-8 text-center text-sm text-[#5A6070] whitespace-pre-line">
                   <a
                     href="/programs/fall-2026"
                     className="font-semibold underline"
@@ -89,7 +89,7 @@ export default async function ProgramsPage() {
                   >
                     Fall 2026 nights and session dates
                   </a>
-                  {' — '}library Tuesdays and Wednesdays, 12 meetings. Share with instructors.
+                  {`\nLibrary Tuesdays and Wednesdays, 12 meetings.\nShare with instructors.`}
                 </p>
                 <ProgramsFilter programs={programs} />
               </>
