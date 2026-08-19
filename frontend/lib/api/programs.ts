@@ -53,7 +53,8 @@ function normalizeImage(raw: unknown): string | undefined {
 
 function dateField(value: unknown): string | undefined {
   if (!value) return undefined
-  if (typeof value === 'string') return value.slice(0, 10)
+  const m = String(value).match(/(\d{4}-\d{2}-\d{2})/)
+  if (m) return m[1]
   try {
     return new Date(String(value)).toISOString().slice(0, 10)
   } catch {

@@ -48,6 +48,8 @@ export type Fall2026EpClass = {
   vendor: string
   dates: readonly string[]
   skips: string
+  /** Extra night note that is not in skips (e.g. end of quarter still meets). */
+  sessionNote?: string
   /** Google Workspace mailbox to pick in Staff → Access (empty = none in directory). */
   suggestedMailbox: string
 }
@@ -90,6 +92,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
     vendor: 'Mathnasium of Ashburn',
     dates: FALL_2026_WEDNESDAY_DATES,
     skips: 'Wed Nov 25 Thanksgiving',
+    sessionNote: 'Oct 28 meets (end of quarter).',
     suggestedMailbox: 'ep-math@shmspto.org',
   },
   {
@@ -103,6 +106,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
     vendor: 'Loudoun Robotics',
     dates: FALL_2026_WEDNESDAY_DATES,
     skips: 'Wed Nov 25 Thanksgiving',
+    sessionNote: 'Oct 28 meets (end of quarter).',
     suggestedMailbox: 'ep-robotics@shmspto.org',
   },
 ]

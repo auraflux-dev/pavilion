@@ -52,7 +52,7 @@ export function ProgramsFilter({ programs }: ProgramsFilterProps) {
             Open for Registration
             <span className="ml-2 text-sm font-normal text-[#5A6070]">({open.length})</span>
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-14">
+          <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:gap-8 mb-14">
             {open.map((program) => (
               <ProgramCard key={program._id} program={program} />
             ))}
@@ -67,7 +67,7 @@ export function ProgramsFilter({ programs }: ProgramsFilterProps) {
             {open.length > 0 ? 'Coming soon' : 'Fall 2026 lineup'}
             <span className="ml-2 text-sm font-normal text-[#5A6070]">({closed.length})</span>
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:gap-8">
             {closed.map((program) => (
               <ProgramCard key={program._id} program={program} />
             ))}

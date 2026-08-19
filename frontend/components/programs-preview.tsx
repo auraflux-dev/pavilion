@@ -1,20 +1,12 @@
 import { Button } from '@/components/ui/button'
-import { Trophy, Brain, Palette, Star, BookOpen, ArrowRight } from 'lucide-react'
-import { getFeaturedPrograms, type Program } from '@/lib/api/programs'
-import { formatProgramSchedule } from '@/lib/programs/schedule'
+import { ArrowRight } from 'lucide-react'
+import { getFeaturedPrograms } from '@/lib/api/programs'
+import { programDateBadge } from '@/lib/programs/schedule'
+import { matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
 
-// Map icon names stored in CMS category → Lucide icon
-const CATEGORY_ICONS: Record<string, React.ElementType> = {
-  'Academic':    Trophy,
-  'Arts':        Palette,
-  'Strategy':    Brain,
-  'STEM':        Star,
-  'default':     BookOpen,
-}
-
-function iconForProgram(program: Program) {
-  return CATEGORY_ICONS[program.category ?? ''] ?? CATEGORY_ICONS['default']
+function displayProgramName(name: string) {
+  return name.replace(/\s*\((Fall|Spring|Winter|Summer)\s+20\d{2}\)\s*$/i, '').trim()
 }
 
 export async function ProgramsPreview() {
@@ -57,20 +49,24 @@ export async function ProgramsPreview() {
         </div>
 
         {/* Program cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {display.map((program) => {
-            const Icon = iconForProgram(program)
             const summary = String(program.description ?? '')
               .split(/<br\s*\/?>/i)[0]
               .replace(/<[^>]+>/g, ' ')
               .replace(/&amp;/g, '&')
               .replace(/\s+/g, ' ')
               .trim()
-            const when = formatProgramSchedule(program) || program.schedule
+            const ep = matchFall2026EpClass(program.name)
+            const badge = programDateBadge(ep ? ep.dates[0] : program.startDate)
+            const whenShort = [ep?.dayOfWeek ?? program.dayOfWeek, ep?.classTime ?? program.classTime]
+              .map((s) => String(s ?? '').trim())
+              .filter(Boolean)
+              .join(' · ')
             const fee = Number(program.fee ?? 0)
             const detailPills = [
               program.grades ? `Grades ${program.grades}` : null,
-              when,
+              whenShort || null,
               fee > 0 ? `$${fee}` : null,
             ].filter(Boolean) as string[]
 
@@ -79,20 +75,20 @@ export async function ProgramsPreview() {
                 key={program._id}
                 className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col border border-[var(--border)]"
               >
-                <div
-                  className="h-1.5 w-full"
-                  style={{ backgroundColor: 'var(--brand-green)' }}
-                  aria-hidden="true"
-                />
                 <div className="p-5 lg:p-6 flex flex-col flex-1">
-                  <div className="flex items-start justify-between mb-3">
-                    <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: 'var(--brand-soft)' }}
-                      aria-hidden="true"
-                    >
-                      <Icon className="w-5 h-5" style={{ color: 'var(--brand-green)' }} />
-                    </div>
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    {badge ? (
+                      <div
+                        className="w-14 h-14 rounded-xl flex flex-col items-center justify-center shadow-sm shrink-0"
+                        style={{ backgroundColor: 'var(--brand-green)' }}
+                        aria-label={`${badge.month} ${badge.day}`}
+                      >
+                        <span className="text-white/80 text-xs font-bold uppercase tracking-wider leading-none">
+                          {badge.month}
+                        </span>
+                        <span className="text-white text-2xl font-bold leading-tight">{badge.day}</span>
+                      </div>
+                    ) : null}
                     {program.category ? (
                       <span
                         className="text-xs font-semibold px-2.5 py-1 rounded-full"
@@ -104,7 +100,7 @@ export async function ProgramsPreview() {
                   </div>
 
                   <h3 className="text-lg font-bold text-[#1A1A1A] leading-snug mb-2">
-                    {program.name}
+                    {displayProgramName(program.name)}
                   </h3>
 
                   {summary ? (

@@ -10,6 +10,7 @@ import { getPageContent } from '@/lib/api/page-content'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { normalizeStaffInbox, STAFF_INBOX_FALLBACK } from '@/lib/staff/inbox'
 import { ProgramsSectionNav } from '@/components/jump-nav/public-section-navs'
+import { BrandImageWash } from '@/components/brand/brand-image-wash'
 
 export const revalidate = 300 // revalidate every 5 minutes
 
@@ -54,11 +55,12 @@ export default async function ProgramsPage() {
         {/* Programs grid */}
         <section
           id="programs-list"
-          className="scroll-mt-28 py-16 md:py-24"
+          className="scroll-mt-28 relative overflow-hidden py-16 md:py-24"
           style={{ backgroundColor: 'var(--brand-warm)' }}
           aria-labelledby="programs-list-heading"
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <BrandImageWash src="/home/hero-a.jpg" side="left" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 id="programs-list-heading" className="sr-only">
               All Programs
             </h2>

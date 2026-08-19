@@ -12,21 +12,25 @@ export type ProgramScheduleFields = {
   detail?: string | null
 }
 
-function formatShortDate(iso: string | null | undefined): string {
+export function formatShortDate(iso: string | null | undefined): string {
   if (!iso) return ''
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) {
-    // Already a date-only string like 2026-09-09
-    const bare = String(iso).slice(0, 10)
+  const bare = String(iso).slice(0, 10)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(bare)) {
     const parsed = new Date(`${bare}T12:00:00`)
-    if (Number.isNaN(parsed.getTime())) return String(iso)
-    return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    }
   }
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return String(iso)
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-/** One-line summary for cards / calendar: "Tuesdays · 3:30 to 4:30 PM · 8 weeks · Sep 9 to Oct 28" */
-export function formatProgramSchedule(p: ProgramScheduleFields): string {
+export function programScheduleParts(p: ProgramScheduleFields): string[] {
   const parts: string[] = []
   const day = String(p.dayOfWeek ?? '').trim()
   const time = String(p.classTime ?? '').trim()
@@ -41,10 +45,26 @@ export function formatProgramSchedule(p: ProgramScheduleFields): string {
   else if (start) parts.push(`Starts ${start}`)
   else if (end) parts.push(`Through ${end}`)
 
-  if (parts.length) return parts.join(' · ')
+  return parts
+}
 
-  const legacy = String(p.schedule ?? '').trim() || String(p.detail ?? '').trim()
-  return legacy
+/** Month + day for the event-style date badge. */
+export function programDateBadge(iso: string | null | undefined): { month: string; day: string } | null {
+  const bare = String(iso ?? '').slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(bare)) return null
+  const parsed = new Date(`${bare}T12:00:00`)
+  if (Number.isNaN(parsed.getTime())) return null
+  return {
+    month: parsed.toLocaleString('en-US', { month: 'short' }).toUpperCase(),
+    day: parsed.toLocaleString('en-US', { day: 'numeric' }),
+  }
+}
+
+/** One-line summary for cards / calendar: "Tuesdays · 3:30 to 4:30 PM · 8 weeks · Sep 9 to Oct 28" */
+export function formatProgramSchedule(p: ProgramScheduleFields): string {
+  const parts = programScheduleParts(p)
+  if (parts.length) return parts.join(' · ')
+  return String(p.schedule ?? '').trim() || String(p.detail ?? '').trim()
 }
 
 /** Build CMS `schedule` text from structured fields (keeps older consumers working). */
