@@ -48,6 +48,8 @@ export type Fall2026EpClass = {
   vendor: string
   dates: readonly string[]
   skips: string
+  /** Google Workspace mailbox to pick in Staff → Access (empty = none in directory). */
+  suggestedMailbox: string
 }
 
 export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
@@ -62,6 +64,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
     vendor: '021 / Janet Bih',
     dates: FALL_2026_TUESDAY_DATES,
     skips: 'Tue Nov 3 student holiday',
+    suggestedMailbox: 'ep-businessplan@shmspto.org',
   },
   {
     id: 'essay',
@@ -74,6 +77,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
     vendor: 'Lumi (Andrew Martineau)',
     dates: FALL_2026_TUESDAY_DATES,
     skips: 'Tue Nov 3 student holiday',
+    suggestedMailbox: '',
   },
   {
     id: 'mathcounts',
@@ -86,6 +90,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
     vendor: 'Mathnasium of Ashburn',
     dates: FALL_2026_WEDNESDAY_DATES,
     skips: 'Wed Nov 25 Thanksgiving',
+    suggestedMailbox: 'ep-math@shmspto.org',
   },
   {
     id: 'robotics',
@@ -98,6 +103,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
     vendor: 'Loudoun Robotics',
     dates: FALL_2026_WEDNESDAY_DATES,
     skips: 'Wed Nov 25 Thanksgiving',
+    suggestedMailbox: 'ep-robotics@shmspto.org',
   },
 ]
 

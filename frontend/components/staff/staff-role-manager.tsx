@@ -15,6 +15,12 @@ import {
 import type { StaffRole } from '@/lib/staff/roles'
 import { DEMO_BRAND } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
+import { FALL_2026_EP_CLASSES } from '@/lib/programs/fall-2026-ep'
+import {
+  EP_INSTRUCTOR_MAILBOXES,
+  WORKSPACE_MAILBOXES,
+  findWorkspaceMailbox,
+} from '@/lib/staff/workspace-mailboxes'
 
 type StaffRow = {
   id: string
@@ -160,7 +166,7 @@ export function StaffRoleManager() {
         </h2>
         <p className="text-xs text-[#5A6070]">
           {scope === 'instructors'
-            ? 'Mailbox must be @shmspto.org. Assign Instructor (teaches) or Coordinator (parent liaison) and tick their class. They only see that roster, messages, attendance, and timesheets.'
+            ? 'Pick an EP mailbox from the Google list (math, robotics, business plan, etc.). Instructor + class tick. Essay has no EP mailbox yet — Lumi needs one added in Workspace first.'
             : 'Pick a role for the usual toolkit, then tick any extra permissions below. Staff tools stay on official @' +
               (isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org') +
               ' accounts. Link a personal email for the parent portal.'}
@@ -168,6 +174,50 @@ export function StaffRoleManager() {
       </div>
 
       <div className="grid sm:grid-cols-3 gap-2">
+        <div className="sm:col-span-3">
+          <label className="block text-[11px] font-bold uppercase tracking-wide text-[#5A6070] mb-1">
+            Workspace mailbox
+          </label>
+          <select
+            value={WORKSPACE_MAILBOXES.some((row) => row.email === email.trim().toLowerCase()) ? email.trim().toLowerCase() : ''}
+            onChange={(event) => {
+              const next = event.target.value
+              if (!next) return
+              setEmail(next)
+              const box = findWorkspaceMailbox(next)
+              if (box) {
+                setName(box.displayName)
+                setBoardTitle(box.displayName)
+              }
+              if (scope === 'instructors' && roles.length === 0) setRoles(['instructor'])
+              const klass = FALL_2026_EP_CLASSES.find((c) => c.suggestedMailbox === next)
+              if (klass) {
+                const match = programs.find((p) =>
+                  klass.cmsNameIncludes.some((part) => p.name.toLowerCase().includes(part)),
+                )
+                if (match) setAssignedProgramIds(match.id)
+              }
+            }}
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
+          >
+            <option value="">Pick from Google Workspace…</option>
+            <optgroup label="EP instructor mailboxes">
+              {EP_INSTRUCTOR_MAILBOXES.map((row) => (
+                <option key={row.email} value={row.email}>
+                  {row.displayName} ({row.email})
+                  {row.note ? ` — ${row.note}` : ''}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="All 30 workspace mailboxes">
+              {WORKSPACE_MAILBOXES.map((row) => (
+                <option key={`all-${row.email}`} value={row.email}>
+                  {row.displayName} ({row.email})
+                </option>
+              ))}
+            </optgroup>
+          </select>
+        </div>
         <input
           type="email"
           value={email}
