@@ -78,6 +78,7 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [optional, setOptional] = useState('')
+  const [packageChoice, setPackageChoice] = useState('')
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
@@ -98,9 +99,13 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
           name,
           email,
           topic: copy.topic,
-          message: optional.trim()
-            ? `${prefix}: ${optional.trim()}\n\n${message}`
-            : message,
+          message: [
+            optional.trim() ? `${prefix}: ${optional.trim()}` : '',
+            variant === 'sponsorship' && packageChoice ? `Package: ${packageChoice}` : '',
+            message,
+          ]
+            .filter(Boolean)
+            .join('\n\n'),
           department: copy.department,
           assignedTo: toEmail,
         }),
@@ -187,6 +192,26 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
           className="w-full rounded-lg border border-[var(--border)] px-3.5 py-2.5 text-sm focus:border-[var(--brand-green)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20"
         />
       </div>
+
+      {variant === 'sponsorship' ? (
+        <div>
+          <label htmlFor={`${idPrefix}-package`} className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
+            Package of interest <span className="text-[#5A6070]">(optional)</span>
+          </label>
+          <select
+            id={`${idPrefix}-package`}
+            value={packageChoice}
+            onChange={(e) => setPackageChoice(e.target.value)}
+            className="w-full rounded-lg border border-[var(--border)] px-3.5 py-2.5 text-sm bg-white focus:border-[var(--brand-green)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20"
+          >
+            <option value="">Not sure yet</option>
+            <option value="Platinum — $2,500 full year">Platinum — $2,500 full year</option>
+            <option value="Gold — $1,500 half year">Gold — $1,500 half year</option>
+            <option value="Silver — $500 one quarter">Silver — $500 one quarter</option>
+            <option value="One-time donation">One-time donation</option>
+          </select>
+        </div>
+      ) : null}
 
       <div>
         <label htmlFor={`${idPrefix}-message`} className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">

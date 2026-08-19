@@ -11,6 +11,7 @@ import { getActiveSponsors } from '@/lib/api/sponsors'
 import { normalizeStaffInbox } from '@/lib/staff/inbox'
 import { ArrowRight, Heart, TrendingUp, Users, ShoppingBag, Ticket, Star, RefreshCw, Handshake, type LucideIcon } from 'lucide-react'
 import { DonateBlock } from '@/components/donate/donate-block'
+import { SponsorshipPackages } from '@/components/fundraising/sponsorship-packages'
 import { FundraisingSectionNav } from '@/components/jump-nav/public-section-navs'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
@@ -364,10 +365,12 @@ export default async function FundraisingPage() {
               </h2>
               <p className="text-[#5A6070] mt-3 max-w-2xl mx-auto">
                 {vanillaizeIfDemo(
-                  'Highlighting businesses and organizations who support Stone Hill students. Suggest a sponsor or apply on behalf of your business (VP of Initiatives). Family-owned businesses can introduce themselves below so Membership Experience can connect with you.',
+                  'Partner with Stone Hill families for the 2026–27 school year. Platinum, Gold, and Silver packages put your brand at events, in parent inboxes, and in front of 1,000+ families. Apply below. Family-owned businesses can also introduce themselves so Membership Experience can connect with you.',
                 )}
               </p>
             </div>
+
+            <SponsorshipPackages />
 
             {sponsors.length > 0 ? (
               <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12" role="list">
@@ -408,7 +411,9 @@ export default async function FundraisingPage() {
               </p>
             )}
 
-            <DepartmentContactForm toEmail={sponsorshipEmail} variant="sponsorship" />
+            <div id="become-a-sponsor" className="scroll-mt-28">
+              <DepartmentContactForm toEmail={sponsorshipEmail} variant="sponsorship" />
+            </div>
 
             <div className="mt-12 max-w-xl mx-auto">
               <PortalBusinessOwnerForm mode="public" />

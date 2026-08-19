@@ -42,7 +42,7 @@ export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
         key: 'tier',
         label: 'Tier',
         type: 'select',
-        options: ['Title', 'Gold', 'Silver', 'Community'],
+        options: ['Platinum', 'Gold', 'Silver', 'Community'],
       },
       { key: 'sortOrder', label: 'Sort order', type: 'number' },
       { key: 'active', label: 'Active / show publicly', type: 'boolean' },
