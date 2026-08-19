@@ -1,4 +1,4 @@
-/** Public 2026–27 SHMS PTO sponsorship packages. */
+/** Public 2026–27 SHMS PTO sponsorship packages. Copy matches the 2026–27 table. */
 export type SponsorshipPackageId = 'platinum' | 'gold' | 'silver'
 
 export type SponsorshipPerkGroup = {
@@ -13,44 +13,43 @@ export type SponsorshipPackage = {
   duration: string
   featured: boolean
   accent: string
-  summary: string
   groups: SponsorshipPerkGroup[]
 }
+
+const WEBSITE_AND_FACEBOOK = [
+  'Logo and link on the PTO website Sponsorship page, Member Portal, and Facebook/Instagram during all events',
+  '1 post per month to WhatsApp groups of over 1,000 parents',
+  '1 post per month to Facebook and Instagram',
+] as const
 
 export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
   {
     id: 'platinum',
     name: 'Platinum',
     price: 2500,
-    duration: 'Full school year',
+    duration: 'Full Year',
     featured: true,
     accent: '#C9A800',
-    summary: 'Premier partner at every event and in every parent channel.',
     groups: [
       {
-        label: 'On site',
+        label: 'Sponsor recognition',
         items: [
-          'Logo on the banner at every PTO event',
-          'Announced at every event',
-          'Logo on all flyers and student-facing print',
+          'Logo on banner at all events',
+          'Announced at all events',
+          'Inclusion on all flyers',
           'Frameable participation certificate',
         ],
       },
       {
-        label: 'Digital',
-        items: [
-          'Logo and link on the Sponsorship page and Member Portal for the full year',
-          'Facebook and Instagram during every event',
-          'One post each month to WhatsApp groups of 1,000+ parents',
-          'One post each month on Facebook and Instagram',
-        ],
+        label: 'Website & Facebook',
+        items: [...WEBSITE_AND_FACEBOOK],
       },
       {
-        label: 'Print & newsletter',
+        label: 'Newsletter & event ads',
         items: [
-          'Mention in every PTO and school newsletter',
-          'QR on in-person event flyers',
-          'Inclusion on PTO marketing materials',
+          'Mention in all PTO and school newsletters',
+          'Flyers for in-person events with QR',
+          'Any marketing material',
         ],
       },
     ],
@@ -59,36 +58,30 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
     id: 'gold',
     name: 'Gold',
     price: 1500,
-    duration: 'Half year',
+    duration: 'Half Year',
     featured: false,
     accent: 'var(--brand-green)',
-    summary: 'High-visibility partner across our three flagship family events.',
     groups: [
       {
-        label: 'On site',
+        label: 'Sponsor recognition',
         items: [
-          'Logo on the banner at 3 events',
+          'Logo on banner at 3 events',
+          'Logo inclusion on take-home folders',
           'Announced at 3 events',
-          'Logo on take-home folders',
-          'Logo on student event tees',
-          'Flyer distribution at events',
+          'Logo printed on student event tees',
+          'Flier distribution at events',
           'Frameable participation certificate',
         ],
       },
       {
-        label: 'Digital',
-        items: [
-          'Logo and link on the Sponsorship page and Member Portal for half the year',
-          'Facebook and Instagram during every event',
-          'One post each month to WhatsApp groups of 1,000+ parents',
-          'One post each month on Facebook and Instagram',
-        ],
+        label: 'Website & Facebook',
+        items: [...WEBSITE_AND_FACEBOOK],
       },
       {
-        label: 'Print & newsletter',
+        label: 'Newsletter & event ads',
         items: [
           'Mention in 3 monthly newsletters',
-          'Three event flyers (Family Fun Fest, Fall Fest, Back to School Night)',
+          '3 event flyers (including Family Fun Fest, Fall Fest, Back to School Night)',
         ],
       },
     ],
@@ -97,36 +90,30 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
     id: 'silver',
     name: 'Silver',
     price: 500,
-    duration: 'One quarter',
+    duration: 'Quarter of Year',
     featured: false,
     accent: '#6B7280',
-    summary: 'A focused season of recognition at school and online.',
     groups: [
       {
-        label: 'On site',
+        label: 'Sponsor recognition',
         items: [
-          'Logo on the banner at 1 event',
+          'Logo on banner at 1 event',
+          'Logo inclusion on take-home folders',
           'Announced at 1 event',
-          'Logo on take-home folders',
-          'Logo on student event tees',
-          'Flyer distribution at events',
+          'Logo printed on student event tees',
+          'Flier distribution at events',
           'Frameable participation certificate',
         ],
       },
       {
-        label: 'Digital',
-        items: [
-          'Logo and link on the Sponsorship page and Member Portal for one quarter',
-          'Facebook and Instagram during every event',
-          'One post each month to WhatsApp groups of 1,000+ parents',
-          'One post each month on Facebook and Instagram',
-        ],
+        label: 'Website & Facebook',
+        items: [...WEBSITE_AND_FACEBOOK],
       },
       {
-        label: 'Print & newsletter',
+        label: 'Newsletter & event ads',
         items: [
           'Mention in 2 monthly newsletters',
-          'One event flyer (Family Fun Fest, Fall Fest, or Back to School Night)',
+          '1 event flyer (including Family Fun Fest, Fall Fest, Back to School Night)',
         ],
       },
     ],
@@ -134,9 +121,13 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
 ]
 
 export const SPONSORSHIP_COMPARE = [
-  { label: 'Digital presence', platinum: 'Full year', gold: 'Half year', silver: 'One quarter' },
-  { label: 'Event banner', platinum: 'Every event', gold: '3 events', silver: '1 event' },
-  { label: 'Announced on stage', platinum: 'Every event', gold: '3 events', silver: '1 event' },
-  { label: 'Newsletters', platinum: 'All year', gold: '3 issues', silver: '2 issues' },
-  { label: 'Event flyers', platinum: 'All flyers', gold: '3 flagship events', silver: '1 flagship event' },
+  { label: 'Website & Facebook', platinum: 'Full Year', gold: 'Half Year', silver: 'Quarter of Year' },
+  { label: 'Banner / announced', platinum: 'All events', gold: '3 events', silver: '1 event' },
+  { label: 'Newsletters', platinum: 'All PTO and school', gold: '3 monthly', silver: '2 monthly' },
+  {
+    label: 'Event flyers',
+    platinum: 'All in-person flyers with QR',
+    gold: '3 (Family Fun Fest, Fall Fest, Back to School Night)',
+    silver: '1 (Family Fun Fest, Fall Fest, Back to School Night)',
+  },
 ] as const

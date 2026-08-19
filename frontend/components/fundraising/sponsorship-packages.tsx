@@ -39,9 +39,8 @@ function PackageCard({ pkg }: { pkg: SponsorshipPackage }) {
           </span>
           <div className="mt-4 flex items-end gap-1">
             <span className="text-4xl font-bold text-[#1A1A1A]">{fmtDollars(pkg.price)}</span>
-            <span className="text-[#5A6070] text-sm mb-1">/ {pkg.duration.toLowerCase()}</span>
+            <span className="text-[#5A6070] text-sm mb-1">· {pkg.duration}</span>
           </div>
-          <p className="mt-2 text-sm text-[#5A6070]">{vanillaizeIfDemo(pkg.summary)}</p>
         </div>
 
         <div className="space-y-4 mb-8 flex-1">
@@ -117,7 +116,7 @@ export function SponsorshipPackages() {
 
       <p className="text-center text-xs text-[#5A6070] mt-4 max-w-2xl mx-auto">
         {vanillaizeIfDemo(
-          'Gifts support SHMS PTO (501(c)(3)), not Loudoun County Public Schools. A one-time donation is always welcome if a package is not the right fit.',
+          'Gifts support SHMS PTO (501(c)(3)), not Loudoun County Public Schools.',
         )}
       </p>
     </div>

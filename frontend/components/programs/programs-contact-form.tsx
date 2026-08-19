@@ -205,10 +205,9 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
             className="w-full rounded-lg border border-[var(--border)] px-3.5 py-2.5 text-sm bg-white focus:border-[var(--brand-green)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20"
           >
             <option value="">Not sure yet</option>
-            <option value="Platinum — $2,500 full year">Platinum — $2,500 full year</option>
-            <option value="Gold — $1,500 half year">Gold — $1,500 half year</option>
-            <option value="Silver — $500 one quarter">Silver — $500 one quarter</option>
-            <option value="One-time donation">One-time donation</option>
+            <option value="Platinum — $2,500 Full Year">Platinum — $2,500 Full Year</option>
+            <option value="Gold — $1,500 Half Year">Gold — $1,500 Half Year</option>
+            <option value="Silver — $500 Quarter of Year">Silver — $500 Quarter of Year</option>
           </select>
         </div>
       ) : null}
