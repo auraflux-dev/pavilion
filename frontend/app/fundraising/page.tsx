@@ -210,9 +210,6 @@ export default async function FundraisingPage() {
                 </p>
                 ) : null}
               </div>
-              <p className="text-white/50 text-xs mt-3 leading-relaxed">
-                Annual goal = {fmtDollars(annualGoal.expenseBudgeted)} projected expenses + {annualGoal.liftPercent}% year-end reserve (Staff → Budget).
-              </p>
             </div>
           </div>
         </section>
