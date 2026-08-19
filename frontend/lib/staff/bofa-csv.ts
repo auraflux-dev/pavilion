@@ -178,6 +178,10 @@ export async function importBofaCsv(opts: {
       isProcessorPayout({
         name: row.description,
         amount: plaidSigned,
+      }) ||
+      isProcessorPayout({
+        name: row.description,
+        amount: row.amount,
       })
     ) {
       skippedPayouts += 1

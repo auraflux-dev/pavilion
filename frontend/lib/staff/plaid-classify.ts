@@ -11,16 +11,17 @@ export type ClassifiedBankTxn = {
 const INTERNAL_TRANSFER =
   /online banking transfer|keep the change|transfer to (chk|checking|sav|savings)|xfer to |internal transfer|account transfer|transfer from (chk|checking|sav|savings)|funds transfer/i
 
-const PROCESSOR = /\b(square|paypal|stripe)\b|sq \*/i
+const PROCESSOR_PAYOUT =
+  /\b(square|paypal|stripe)\b|sq \*|paypal \*|pp\*|des:?\s*paypal|paypal transfer|paypal instant|instant transfer|instant deposit|sqc\*|square inc|block, inc|paypal, inc|paypal payout|paypal withdrawal|transfer from paypal|deposit from paypal|ach paypal|ach square|square deposit|square transfer/i
 
 function blob(input: { name: string; merchantName?: string; pfcPrimary?: string; pfcDetailed?: string }) {
   return `${input.name} ${input.merchantName ?? ''} ${input.pfcPrimary ?? ''} ${input.pfcDetailed ?? ''}`
 }
 
 /**
- * Square / PayPal / Stripe **settlements into checking**.
- * Those dollars already exist as Staff Payment sales (memberships, Cove, tickets…).
- * Skip the bank deposit so actuals are not counted twice. Processor **fees** (money out) still post.
+ * Square / PayPal / Stripe settlements into checking (deposits or instant transfers).
+ * Those dollars already exist as Staff Payment sales or the live PayPal feed.
+ * Skip so BoA CSV / Plaid actuals are not counted twice. Processor fees still post.
  */
 export function isProcessorPayout(input: {
   name: string
@@ -29,11 +30,11 @@ export function isProcessorPayout(input: {
   pfcPrimary?: string
   pfcDetailed?: string
 }): boolean {
-  const amount = Number(input.amount) || 0
-  if (!(amount < 0)) return false
   const t = blob(input)
-  if (!PROCESSOR.test(t)) return false
-  if (/fee|chargeback/i.test(t)) return false
+  if (!PROCESSOR_PAYOUT.test(t)) return false
+  if (/fee|chargeback|card processing/i.test(t) && !/instant (deposit|transfer)|paypal transfer|square (deposit|transfer|inc)/i.test(t)) {
+    return false
+  }
   return true
 }
 

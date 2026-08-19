@@ -115,6 +115,7 @@ export function StaffBudgetPanel() {
   const [newNotes, setNewNotes] = useState('')
   const [plaidConnected, setPlaidConnected] = useState(false)
   const [plaidConfigured, setPlaidConfigured] = useState(false)
+  const [paypalConfigured, setPaypalConfigured] = useState(false)
 
   const [filterKey, setFilterKey] = useState('')
   const [search, setSearch] = useState('')
@@ -126,6 +127,7 @@ export function StaffBudgetPanel() {
       label?: string
       entries?: BudgetEntry[]
       plaid?: { connected?: boolean; configured?: boolean }
+      paypal?: { configured?: boolean }
     }) => {
       setLines(d.lines ?? [])
       setEntries(d.entries ?? [])
@@ -135,6 +137,7 @@ export function StaffBudgetPanel() {
         setPlaidConnected(Boolean(d.plaid.connected))
         setPlaidConfigured(Boolean(d.plaid.configured))
       }
+      if (d.paypal) setPaypalConfigured(Boolean(d.paypal.configured))
     },
     [],
   )
@@ -327,29 +330,6 @@ export function StaffBudgetPanel() {
     }
   }
 
-  async function importPaypalFile(file: File) {
-    setBusy(true)
-    setStatus('')
-    try {
-      const csv = await file.text()
-      const r = await fetch('/api/staff/budget', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'import-paypal', fiscalYear: year, csv }),
-      })
-      const d = await r.json()
-      if (!r.ok) throw new Error(d.error ?? 'Import failed')
-      applyPayload(d)
-      setStatusKind('ok')
-      setStatus(d.message ? String(d.message) : 'Imported PayPal activity.')
-    } catch (err) {
-      setStatusKind('err')
-      setStatus(err instanceof Error ? err.message : 'Import failed')
-    } finally {
-      setBusy(false)
-    }
-  }
-
   async function importBofaFile(file: File) {
     setBusy(true)
     setStatus('')
@@ -421,8 +401,8 @@ export function StaffBudgetPanel() {
               onClick={() =>
                 void post(
                   { action: 'refresh' },
-                  plaidConnected
-                    ? 'Pulled Bank of America transactions.'
+                  paypalConfigured
+                    ? 'Pulled Staff sales, paid reimbursements, and live PayPal activity.'
                     : 'Pulled Staff sales and paid reimbursements.',
                 )
               }
@@ -449,11 +429,11 @@ export function StaffBudgetPanel() {
       <div className="rounded-lg border border-[var(--border)] bg-[#F7F4EE] px-3 py-3 space-y-2">
         <p className="text-sm font-bold">Import Bank of America CSV</p>
         <p className="text-xs text-[#5A6070]">
-          Live BoA is Plaid (Connect bank above). Live PayPal is Transaction Search on the Live app plus
-          non-empty Vercel secrets. CSV is backup. Only <strong>August 1 – July 31</strong> of this school year
-          is used (not the whole download). Square and PayPal <strong>payouts are skipped</strong> so
-          memberships, Cove, and tickets stay on Staff Payments. Zelle, checks, ACH, Sam’s, and Amazon still
-          import and show on Fundraising. Re-importing the same file will not double-count.
+          Only CSV this page accepts. Bank of America checking → Activity → Download CSV. Only{' '}
+          <strong>August 1 – July 31</strong> of this school year is used. Square and PayPal{' '}
+          <strong>payouts and transfers into checking are skipped</strong> so those sales are not counted
+          twice. Zelle, checks, ACH, Sam’s, and Amazon still import. Re-importing the same file will not
+          double-count.
         </p>
         <label className="inline-flex">
           <input
@@ -468,24 +448,11 @@ export function StaffBudgetPanel() {
             }}
           />
         </label>
-        <p className="text-sm font-bold pt-2">Import PayPal activity CSV</p>
-        <p className="text-xs text-[#5A6070]">
-          PayPal → Activity → Download CSV. Same Aug–Jul window. Bank withdrawals are skipped. Website PayPal
-          checkout is already in Staff Payments; this is for money that never hit the site.
+        <p className="text-xs text-[#5A6070] pt-1">
+          {paypalConfigured
+            ? 'PayPal updates from the live account on Refresh (no CSV). Website PayPal checkout is already in Staff Payments; bank withdrawals to checking are skipped.'
+            : 'PayPal live feed is not configured. Set Client ID and Secret on Vercel, then use Refresh — do not upload a PayPal CSV.'}
         </p>
-        <label className="inline-flex">
-          <input
-            type="file"
-            accept=".csv,text/csv"
-            className="text-sm"
-            disabled={busy || lines.length === 0}
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              e.target.value = ''
-              if (file) void importPaypalFile(file)
-            }}
-          />
-        </label>
       </div>
 
       <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 space-y-1">
@@ -493,12 +460,13 @@ export function StaffBudgetPanel() {
           Planning worksheet — MoneyMinder stays the ledger. This is not a second set of books.
         </p>
         <p>
-          <strong>Bank CSV:</strong> checking activity except processor payouts. Amazon lands on spirit-wear
-          restock; Sam’s / Costco on snack restock. Move a row if that guess is wrong.
+          <strong>Bank CSV:</strong> checking activity except Square/PayPal payouts and transfers. Amazon lands
+          on spirit-wear restock; Sam’s / Costco on snack restock. Move a row if that guess is wrong.
         </p>
         <p>
-          <strong>Refresh from Staff:</strong> Square/PayPal <em>sales</em> (memberships, Cove, tickets).{' '}
-          <strong>You key:</strong> beginning cash, sponsorships, and anything still Unclassified.
+          <strong>Refresh:</strong> Square/PayPal <em>sales</em> (memberships, Cove, tickets) plus live PayPal
+          account activity (no CSV). <strong>You key:</strong> beginning cash, sponsorships, and anything still
+          Unclassified.
         </p>
       </div>
 
@@ -649,7 +617,7 @@ export function StaffBudgetPanel() {
             </div>
             {entries.length === 0 ? (
               <p className="text-sm text-[#5A6070]">
-                Nothing recorded yet. Import a Bank of America CSV, then Refresh from Staff.
+                Nothing recorded yet. Import a Bank of America CSV, then Refresh.
               </p>
             ) : filteredEntries.length === 0 ? (
               <p className="text-sm text-[#5A6070]">No rows match this filter.</p>

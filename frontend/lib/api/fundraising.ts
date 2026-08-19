@@ -4,7 +4,8 @@
  * Cove Digital Card bar = family paid to load the card (not window spend).
  * Cove shop = spirit wear and snacks sold any other way (Stand, cash, Zelle, site).
  * Square / PayPal site checkout and Stand POS → Payments.
- * Bank of America and PayPal activity CSVs (Staff → Budget import) → PtoBudgetEntries.
+ * Bank of America CSV (Staff → Budget import) → PtoBudgetEntries.
+ * Live PayPal Transaction Search (Refresh) → PtoBudgetEntries, skipping payouts to bank.
  * Only Aug 1 – Jul 31 of the current school year. Square/PayPal *payouts* in the
  * bank file are skipped so those sales are not counted twice.
  *

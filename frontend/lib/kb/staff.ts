@@ -627,10 +627,10 @@ Expense **budgeted** amounts for 2026–27 start from **FY 2025–26 checking sp
 Two feeds. Using both on purpose avoids counting the same dollars twice.
 
 ### 1. Bank of America CSV (checking cash)
-In BoA: checking → Activity → Download → **CSV** (not PDF). Upload it on the Budget page.
+In BoA: checking → Activity → Download → **CSV** (not PDF). Upload it on the Budget page. This is the only CSV Budget accepts.
 
 - Checks, ACH, Zelle, Sam’s, Amazon, Jumbula, insurance, and tools **do** import
-- Square and PayPal **payouts into checking are skipped** (same dollars as memberships / Cove / tickets)
+- Square and PayPal **payouts / transfers into checking are skipped** (same dollars as memberships / Cove / tickets, or the live PayPal feed)
 - Processor **fees** and card purchases (Apple, Square hardware, Adobe) still import
 - Debit charges on our own Square terminal (SQ *SHMSPTO) are skipped — those sales already live in Staff Payments
 - Internal transfers are skipped
@@ -638,10 +638,10 @@ In BoA: checking → Activity → Download → **CSV** (not PDF). Upload it on t
 - If you move a row to another line, a later re-import leaves that move alone
 - Amazon lands on spirit-wear restock; Sam’s / Costco on snack restock. Change the line if that guess is wrong
 
-### 2. Refresh from Staff (sale-level)
-Pulls Square/PayPal **sales** already in Staff: memberships, Cove Digital loads, shop, in-person POS, tickets, and **paid** reimbursements. That is the split by what was sold, not the lump Square deposit.
+### 2. Refresh (sale-level + live PayPal)
+Pulls Square/PayPal **sales** already in Staff: memberships, Cove Digital loads, shop, in-person POS, tickets, and **paid** reimbursements. Also pulls **live PayPal** activity via Transaction Search (no PayPal CSV). PayPal withdrawals to BoA are skipped so they are not counted twice.
 
-Typical month: download a fresh BoA CSV → import → **Refresh from Staff**.
+Typical month: download a fresh BoA CSV → import → **Refresh**.
 
 ## Using the page
 - Totals at the top: income, expense, net — budgeted vs actual, and remaining
