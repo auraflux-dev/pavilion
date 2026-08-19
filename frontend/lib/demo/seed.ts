@@ -1,91 +1,15 @@
 import { DEMO_BRAND } from '@/lib/demo/brand'
+import {
+  DEMO_JOIN_PROFILES,
+  reviewerPortalStudents,
+  riversideSnapshot,
+  rosterSummary,
+  snapshotToRoster,
+} from '@/lib/crm'
 
-export const DEMO_SEED_MEMBERS = [
-  {
-    parentEmail: 'alex.nguyen@example.com',
-    parentFirstName: 'Alex',
-    parentLastName: 'Nguyen',
-    parentPhone: '555-0101',
-    membershipTier: 'lagoon',
-    accountType: 'paid' as const,
-    students: [
-      {
-        id: 'demo-stu-1',
-        firstName: 'Maya',
-        lastName: 'Nguyen',
-        grade: '3',
-        membershipTier: 'lagoon',
-        archived: false,
-      },
-      {
-        id: 'demo-stu-2',
-        firstName: 'Leo',
-        lastName: 'Nguyen',
-        grade: '5',
-        membershipTier: 'lagoon',
-        archived: false,
-      },
-    ],
-  },
-  {
-    parentEmail: 'jordan.patel@example.com',
-    parentFirstName: 'Jordan',
-    parentLastName: 'Patel',
-    parentPhone: '555-0102',
-    membershipTier: 'reef',
-    accountType: 'paid' as const,
-    students: [
-      {
-        id: 'demo-stu-3',
-        firstName: 'Sam',
-        lastName: 'Patel',
-        grade: '2',
-        membershipTier: 'reef',
-        archived: false,
-      },
-    ],
-  },
-  {
-    parentEmail: 'riley.brooks@example.com',
-    parentFirstName: 'Riley',
-    parentLastName: 'Brooks',
-    parentPhone: '',
-    membershipTier: 'free',
-    accountType: 'free' as const,
-    students: [
-      {
-        id: 'demo-stu-4',
-        firstName: 'Casey',
-        lastName: 'Brooks',
-        grade: 'K',
-        membershipTier: 'free',
-        archived: false,
-      },
-    ],
-  },
-]
+export { DEMO_JOIN_PROFILES }
 
-/** Sample CRM households a reviewer can join as (signed cookie, not Clerk). */
-export const DEMO_JOIN_PROFILES = {
-  staff: {
-    firstName: 'Jordan',
-    lastName: 'Lee',
-    email: 'jordan.lee@example.com',
-    school: DEMO_BRAND.pto,
-  },
-  paid: {
-    firstName: DEMO_SEED_MEMBERS[0].parentFirstName,
-    lastName: DEMO_SEED_MEMBERS[0].parentLastName,
-    email: DEMO_SEED_MEMBERS[0].parentEmail,
-    school: DEMO_BRAND.pto,
-  },
-  free: {
-    firstName: DEMO_SEED_MEMBERS[2].parentFirstName,
-    lastName: DEMO_SEED_MEMBERS[2].parentLastName,
-    email: DEMO_SEED_MEMBERS[2].parentEmail,
-    school: DEMO_BRAND.pto,
-  },
-} as const
+export const DEMO_SEED_MEMBERS = snapshotToRoster(riversideSnapshot())
 
 export const DEMO_SEED_ACTIVITY = [
   {
@@ -107,33 +31,8 @@ export const DEMO_SEED_ACTIVITY = [
 export function demoReviewerStudents(session: {
   lastName?: string
   parentKind?: string
-} | null): Array<{
-  id: string
-  firstName: string
-  lastName: string
-  grade: string
-  membershipTier: string
-  membershipStatus: string
-  archived: boolean
-  storeCardBalance: number
-  name: string
-}> {
-  const last = session?.lastName?.trim() || 'Brooks'
-  const paid = session?.parentKind !== 'free'
-  const rows = paid
-    ? [
-        { id: 'demo-stu-1', firstName: 'Maya', lastName: last, grade: '3', membershipTier: 'lagoon' as const, storeCardBalance: 42.5 },
-        { id: 'demo-stu-2', firstName: 'Leo', lastName: last, grade: '5', membershipTier: 'lagoon' as const, storeCardBalance: 42.5 },
-      ]
-    : [
-        { id: 'demo-stu-4', firstName: 'Casey', lastName: last, grade: 'K', membershipTier: 'free' as const, storeCardBalance: 0 },
-      ]
-  return rows.map((s) => ({
-    ...s,
-    membershipStatus: 'active',
-    archived: false,
-    name: `${s.firstName} ${s.lastName}`,
-  }))
+} | null) {
+  return reviewerPortalStudents(session)
 }
 
 export function demoPiiStub(
@@ -142,11 +41,12 @@ export function demoPiiStub(
 ): Record<string, unknown> {
   const students = demoReviewerStudents(session ?? null)
   const paid = session?.parentKind !== 'free'
+  const roster = DEMO_SEED_MEMBERS
 
   if (pathname.startsWith('/api/staff/members')) {
     return {
-      members: DEMO_SEED_MEMBERS,
-      summary: { parents: 3, paid: 2, free: 1, withPhone: 2 },
+      members: roster,
+      summary: rosterSummary(roster),
       demo: true,
     }
   }
@@ -164,9 +64,13 @@ export function demoPiiStub(
   }
   if (pathname.startsWith('/api/gift-card')) {
     return {
-      cards: paid
-        ? [{ studentName: students[0]?.name || 'Maya', balance: 42.5, label: DEMO_BRAND.card }]
-        : [{ studentName: students[0]?.name || 'Casey', balance: 0, label: DEMO_BRAND.card }],
+      cards: [
+        {
+          studentName: students[0]?.name || (paid ? 'Maya' : 'Casey'),
+          balance: students[0]?.storeCardBalance ?? 0,
+          label: DEMO_BRAND.card,
+        },
+      ],
       demo: true,
     }
   }

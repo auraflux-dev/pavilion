@@ -140,7 +140,7 @@ export function CoveFeatureLockBanner({ reason }: { reason: string }) {
     <div className="rounded-xl border border-[#F0D9A0] bg-[#FFF7E6] px-3 py-3 mb-4">
       <p className="text-xs font-bold text-[#8A6400] inline-flex items-center gap-1.5">
         <Lock className="w-3.5 h-3.5" />
-        Cove features locked
+        {vanillaizeIfDemo('Cove features locked')}
       </p>
       <p className="text-xs text-[#8A6400] mt-1 leading-relaxed">{reason}</p>
       <a

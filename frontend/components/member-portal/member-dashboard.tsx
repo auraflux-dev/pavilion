@@ -855,7 +855,9 @@ export function MemberDashboard({
                 Member Help
               </h2>
               <p className="text-sm text-[#5A6070] mt-1 leading-relaxed">
-                Full articles for account, students, membership, The Cove, and programs, organized by category. Signed in parents only.
+                {vanillaizeIfDemo(
+                  'Full articles for account, students, membership, The Cove, and programs, organized by category. Signed in parents only.',
+                )}
               </p>
             </div>
           </div>

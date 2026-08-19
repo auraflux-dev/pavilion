@@ -52,6 +52,7 @@ export function vanillaizeCopy(input: string): string {
     .replace(/\bSHMS PTO\b/g, DEMO_BRAND.short)
     .replace(/\bThe Cove\b/g, DEMO_BRAND.store)
     .replace(/\bCove QR\b/g, `${DEMO_BRAND.card} QR`)
+    .replace(/\bCove features locked\b/gi, 'Store features locked')
     .replace(/\bunlock Cove\b/gi, `unlock ${DEMO_BRAND.store}`)
     .replace(/\bunlock the Cove\b/gi, `unlock ${DEMO_BRAND.store}`)
     .replace(/\bGo Stingrays!/gi, DEMO_BRAND.cheer)

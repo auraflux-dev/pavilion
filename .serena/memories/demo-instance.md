@@ -3,7 +3,7 @@
 Separate Vercel project **`commons-pto-demo`**. URL: https://commons-pto-demo.vercel.app
 Board join: https://commons-pto-demo.vercel.app/review?code=riverside-board
 
-Do **not** use Clerk (too expensive). Demo users are signed review cookies (`demo_review`), not a third-party IdP. Staff Members roster is the sample CRM (Nguyen paid Family, Patel paid Member, Brooks free). Review join can fill Jordan Lee (staff), Alex Nguyen (paid), or Riley Brooks (free). After join/switch, use a full page load so `useAuth` module cache does not keep the previous lane.
+Do **not** use Clerk (too expensive). Prefer Better Auth later. Demo users are signed review cookies (`demo_review`). Sample CRM is `frontend/lib/crm/` (Nguyen paid Family, Patel paid Member, Brooks free). Review join can fill Jordan Lee (staff), Alex Nguyen (paid), or Riley Brooks (free). After join/switch, use a full page load so `useAuth` module cache does not keep the previous lane.
 
 Env (demo project only): `DEMO_INSTANCE=true`, `NEXT_PUBLIC_DEMO_INSTANCE=true`, `DEMO_JOIN_CODE`, `DEMO_SIGNING_SECRET`.
 Demo is **not** git-connected. Deploy `commons-pto-demo` from a clean worktree of the SHA; `frontend` project is Stone Hill.
