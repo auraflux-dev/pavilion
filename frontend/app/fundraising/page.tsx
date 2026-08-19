@@ -19,7 +19,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Star, ShoppingBag, Users, Heart, TrendingUp, Ticket, ArrowRight, RefreshCw,
 }
 
-export const revalidate = 3600 // refresh totals every hour
+export const revalidate = 60
 
 export async function generateMetadata() {
   return {
@@ -130,7 +130,7 @@ export default async function FundraisingPage() {
       id: 'sponsorship',
       icon: Handshake,
       label: 'Sponsorships',
-      description: 'Local businesses and community partners who fund events, programs, and student enrichment.',
+      description: 'Platinum $2,500, Gold $1,500, or Silver $500. One payment for the 2026–27 school year.',
       raised: sponsorshipRaised,
       goal: sponsorshipGoal,
       href: '/fundraising#sponsorship',

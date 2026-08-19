@@ -10,24 +10,24 @@ export type SponsorshipPackage = {
   id: SponsorshipPackageId
   name: string
   price: number
-  duration: string
   featured: boolean
   accent: string
   groups: SponsorshipPerkGroup[]
 }
 
-const WEBSITE_AND_FACEBOOK = [
-  'Logo and link on the PTO website Sponsorship page, Member Portal, and Facebook/Instagram during all events',
-  '1 post per month to WhatsApp groups of over 1,000 parents',
-  '1 post per month to Facebook and Instagram',
-] as const
+function websiteAndFacebook(logoListing: string) {
+  return [
+    `${logoListing} logo and link on the PTO website Sponsorship page, Member Portal, and Facebook/Instagram during all events`,
+    '1 post per month to WhatsApp groups of over 1,000 parents',
+    '1 post per month to Facebook and Instagram',
+  ]
+}
 
 export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
   {
     id: 'platinum',
     name: 'Platinum',
     price: 2500,
-    duration: 'Full Year',
     featured: true,
     accent: '#C9A800',
     groups: [
@@ -42,7 +42,7 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
       },
       {
         label: 'Website & Facebook',
-        items: [...WEBSITE_AND_FACEBOOK],
+        items: websiteAndFacebook('Full-year'),
       },
       {
         label: 'Newsletter & event ads',
@@ -58,7 +58,6 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
     id: 'gold',
     name: 'Gold',
     price: 1500,
-    duration: 'Half Year',
     featured: false,
     accent: 'var(--brand-green)',
     groups: [
@@ -75,7 +74,7 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
       },
       {
         label: 'Website & Facebook',
-        items: [...WEBSITE_AND_FACEBOOK],
+        items: websiteAndFacebook('Half-year'),
       },
       {
         label: 'Newsletter & event ads',
@@ -90,7 +89,6 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
     id: 'silver',
     name: 'Silver',
     price: 500,
-    duration: 'Quarter of Year',
     featured: false,
     accent: '#6B7280',
     groups: [
@@ -107,7 +105,7 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
       },
       {
         label: 'Website & Facebook',
-        items: [...WEBSITE_AND_FACEBOOK],
+        items: websiteAndFacebook('Quarter-year'),
       },
       {
         label: 'Newsletter & event ads',
@@ -121,7 +119,12 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
 ]
 
 export const SPONSORSHIP_COMPARE = [
-  { label: 'Website & Facebook', platinum: 'Full Year', gold: 'Half Year', silver: 'Quarter of Year' },
+  {
+    label: 'Logo on website & portal',
+    platinum: 'Full year',
+    gold: 'Half year',
+    silver: 'Quarter of the year',
+  },
   { label: 'Banner / announced', platinum: 'All events', gold: '3 events', silver: '1 event' },
   { label: 'Newsletters', platinum: 'All PTO and school', gold: '3 monthly', silver: '2 monthly' },
   {
