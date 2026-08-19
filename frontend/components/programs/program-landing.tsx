@@ -2,10 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, Calendar, Clock, Link2, MapPin, Users } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, Link2, MapPin, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { MemberGate } from '@/components/member-gate'
-import { ProgramRegisterModal } from '@/components/programs/program-register-modal'
+import { ProgramLandingCheckout } from '@/components/programs/program-register-form'
 import type { Program } from '@/lib/api/programs'
 import { displayProgramName } from '@/lib/programs/display-name'
 import {
@@ -29,12 +28,10 @@ function hasTag(program: Program, tag: string) {
 }
 
 export function ProgramLanding({ program }: { program: Program }) {
-  const [registerOpen, setRegisterOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const ep = matchFall2026EpClass(program.name)
   const copy = programLandingCopy(ep?.id)
   const title = displayProgramName(program.name)
-  const comingSoon = !program.registrationOpen && (program.featured || hasTag(program, 'coming-soon'))
   const feeTbd = hasTag(program, 'fee-tbd')
   const phase = getRegistrationPhase(program)
   const priorityUntilLabel =
@@ -179,22 +176,11 @@ export function ProgramLanding({ program }: { program: Program }) {
               ) : null}
 
               <div className="space-y-2 pt-2">
-                {program.registrationOpen ? (
-                  <MemberGate label="Register for this program">
-                    <Button
-                      className="w-full font-semibold text-white"
-                      style={{ backgroundColor: 'var(--brand-green)' }}
-                      onClick={() => setRegisterOpen(true)}
-                    >
-                      Register now
-                      <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
-                    </Button>
-                  </MemberGate>
-                ) : (
-                  <Button className="w-full font-semibold" variant="outline" disabled>
-                    {comingSoon ? 'Registration opens soon' : 'Registration closed'}
-                  </Button>
-                )}
+                <Button className="w-full font-semibold text-white" style={{ backgroundColor: 'var(--brand-green)' }} asChild>
+                  <a href="#register">
+                    {program.registrationOpen ? 'Checkout on this page' : 'See checkout dates'}
+                  </a>
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
@@ -215,7 +201,7 @@ export function ProgramLanding({ program }: { program: Program }) {
               </div>
             </header>
 
-            <div className="lg:col-span-7">
+            <div className="lg:col-span-7 space-y-5">
               <div className="overflow-hidden rounded-2xl shadow-[0_24px_48px_-28px_rgba(11,61,11,0.45)] ring-1 ring-[var(--border)] bg-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -233,16 +219,11 @@ export function ProgramLanding({ program }: { program: Program }) {
                   </p>
                 )}
               </div>
+              <ProgramLandingCheckout program={program} />
             </div>
           </div>
         </div>
       </div>
-
-      <ProgramRegisterModal
-        program={program}
-        open={registerOpen}
-        onClose={() => setRegisterOpen(false)}
-      />
     </div>
   )
 }
