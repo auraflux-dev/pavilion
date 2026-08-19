@@ -39,6 +39,8 @@ export const FALL_2026_WEDNESDAY_DATES = [
 export type Fall2026EpClass = {
   id: string
   name: string
+  /** Public landing path: /programs/{publicSlug} */
+  publicSlug: string
   /** Match Wix Programs.name (substring, case-insensitive) */
   cmsNameIncludes: string[]
   dayOfWeek: 'Tuesday' | 'Wednesday'
@@ -58,6 +60,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
   {
     id: 'ye',
     name: 'Young Entrepreneurs I',
+    publicSlug: 'young-entrepreneurs',
     cmsNameIncludes: ['young entrepreneur'],
     dayOfWeek: 'Tuesday',
     classTime: '5:30 to 6:45 PM',
@@ -71,6 +74,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
   {
     id: 'essay',
     name: 'Essay Writing',
+    publicSlug: 'essay',
     cmsNameIncludes: ['essay'],
     dayOfWeek: 'Tuesday',
     classTime: '7:00 to 8:00 PM',
@@ -84,6 +88,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
   {
     id: 'mathcounts',
     name: 'MATHCOUNTS',
+    publicSlug: 'mathcounts',
     cmsNameIncludes: ['mathcounts', 'mathnasium'],
     dayOfWeek: 'Wednesday',
     classTime: '5:30 to 6:45 PM',
@@ -98,6 +103,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
   {
     id: 'robotics',
     name: 'Robotics',
+    publicSlug: 'robotics',
     cmsNameIncludes: ['robotics'],
     dayOfWeek: 'Wednesday',
     classTime: '7:00 to 8:00 PM',

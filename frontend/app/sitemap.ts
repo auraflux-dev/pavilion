@@ -7,6 +7,11 @@ const siteUrl = publicSiteUrl()
 const PUBLIC_PATHS = [
   '/',
   '/programs',
+  '/programs/fall-2026',
+  '/programs/essay',
+  '/programs/young-entrepreneurs',
+  '/programs/mathcounts',
+  '/programs/robotics',
   '/events',
   '/membership',
   '/cove',

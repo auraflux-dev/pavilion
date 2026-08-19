@@ -1,13 +1,11 @@
 import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-react'
 import { getFeaturedPrograms } from '@/lib/api/programs'
+import { displayProgramName } from '@/lib/programs/display-name'
+import { programPublicPath } from '@/lib/programs/public-path'
 import { programDateBadge } from '@/lib/programs/schedule'
 import { matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
-
-function displayProgramName(name: string) {
-  return name.replace(/\s*\((Fall|Spring|Winter|Summer)\s+20\d{2}\)\s*$/i, '').trim()
-}
 
 export async function ProgramsPreview() {
   const programs = await getFeaturedPrograms()
@@ -100,7 +98,9 @@ export async function ProgramsPreview() {
                   </div>
 
                   <h3 className="text-lg font-bold text-[#1A1A1A] leading-snug mb-2">
-                    {displayProgramName(program.name)}
+                    <a href={programPublicPath(program)} className="hover:opacity-80">
+                      {displayProgramName(program.name)}
+                    </a>
                   </h3>
 
                   {summary ? (
@@ -129,8 +129,8 @@ export async function ProgramsPreview() {
                     style={{ backgroundColor: 'var(--brand-green)' }}
                     asChild
                   >
-                    <a href="/programs">
-                      {program.registrationOpen ? 'Register Now' : 'View details'}
+                    <a href={programPublicPath(program)}>
+                      Learn more
                       <ArrowRight
                         className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
                         aria-hidden="true"

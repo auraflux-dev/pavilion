@@ -1,9 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Calendar, Clock, DollarSign, GraduationCap, MapPin, Users } from 'lucide-react'
 import type { Program } from '@/lib/api/programs'
+import { displayProgramName } from '@/lib/programs/display-name'
+import { programPublicPath } from '@/lib/programs/public-path'
 import { formatShortDate, programDateBadge } from '@/lib/programs/schedule'
 import {
   FALL_2026_EP_LOCATION,
@@ -44,10 +47,6 @@ function hasTag(program: Program, tag: string) {
     .split(/[,|;]/)
     .map((t) => t.trim())
     .includes(tag.toLowerCase())
-}
-
-function displayProgramName(name: string) {
-  return name.replace(/\s*\((Fall|Spring|Winter|Summer)\s+20\d{2}\)\s*$/i, '').trim()
 }
 
 function plainText(html: string) {
@@ -192,7 +191,9 @@ export function ProgramCard({ program }: ProgramCardProps) {
         </div>
 
         <h3 className="text-lg font-bold text-[#1A1A1A] leading-snug mb-2">
-          {displayProgramName(program.name)}
+          <Link href={programPublicPath(program)} className="hover:opacity-80 transition-opacity">
+            {displayProgramName(program.name)}
+          </Link>
         </h3>
 
         {lead ? (
@@ -281,23 +282,40 @@ export function ProgramCard({ program }: ProgramCardProps) {
         ) : null}
 
         {program.registrationOpen ? (
-          <MemberGate label="Register for this program">
-            <Button
-              className="w-full font-semibold text-white group"
-              style={{ backgroundColor: colors.accent }}
-              onClick={() => setRegisterOpen(true)}
-            >
-              Register Now
-              <ArrowRight
-                className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
+          <>
+            <MemberGate label="Register for this program">
+              <Button
+                className="w-full font-semibold text-white group"
+                style={{ backgroundColor: colors.accent }}
+                onClick={() => setRegisterOpen(true)}
+              >
+                Register Now
+                <ArrowRight
+                  className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
+              </Button>
+            </MemberGate>
+            <Button className="w-full font-semibold mt-2" variant="outline" asChild>
+              <Link href={programPublicPath(program)}>Learn more</Link>
             </Button>
-          </MemberGate>
+          </>
         ) : (
-          <Button className="w-full font-semibold" variant="outline" disabled>
-            {comingSoon ? 'Registration opens soon' : 'Registration closed'}
-          </Button>
+          <>
+            <Button
+              className="w-full font-semibold text-white"
+              style={{ backgroundColor: colors.accent }}
+              asChild
+            >
+              <Link href={programPublicPath(program)} className="inline-flex items-center justify-center">
+                Learn more
+                <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
+              </Link>
+            </Button>
+            <Button className="w-full font-semibold mt-2" variant="outline" disabled>
+              {comingSoon ? 'Registration opens soon' : 'Registration closed'}
+            </Button>
+          </>
         )}
       </div>
 
