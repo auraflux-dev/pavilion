@@ -49,7 +49,10 @@ export async function ProgramsPreview() {
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#5A6070] max-w-2xl mx-auto leading-relaxed text-pretty">
             PTO-funded programs designed to challenge, inspire, and connect students
-            beyond the standard curriculum.
+            beyond the standard curriculum.{' '}
+            <a href="/programs/fall-2026" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
+              Fall 2026 nights
+            </a>
           </p>
         </div>
 

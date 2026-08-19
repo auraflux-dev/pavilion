@@ -195,6 +195,7 @@ export function ProgramsSectionNav() {
       ariaLabel="Programs page sections"
       items={[
         { href: '#programs-list', label: 'All programs', hint: 'Browse & filter', icon: Sparkles },
+        { href: '/programs/fall-2026', label: 'Fall 2026 nights', hint: 'Instructor schedule', icon: CalendarDays },
         { href: '#programs-contact', label: 'Ask a question', hint: 'VP of Programs', icon: HelpCircle },
       ]}
     />

@@ -7,6 +7,7 @@ import {
   formatMemberPriorityUntil,
   toDatetimeLocalValue,
 } from '@/lib/programs/registration-access'
+import { Fall2026EpSchedule } from '@/components/programs/fall-2026-ep-schedule'
 
 type Program = {
   id: string
@@ -467,6 +468,9 @@ export function StaffProgramsPanel() {
             Ensure schedule fields (day/time/dates/flyer/attendance)
           </button>
         ) : null}
+      </div>
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--brand-warm)] p-4">
+        <Fall2026EpSchedule variant="staff" />
       </div>
       <div className="inline-flex flex-wrap rounded-lg border border-[var(--border)] overflow-hidden text-sm">
         {tabs.map(([id, label]) => (
@@ -1058,10 +1062,10 @@ export function StaffProgramsPanel() {
       {tab === 'calendar' ? (
         <div className="space-y-2">
           <p className="text-xs text-[#5A6070]">
-            Upcoming sessions for programs in your scope (sorted by start time).
+            Fall 2026 dates are locked on the schedule above (not the member portal). CMS session rows below are optional.
           </p>
           {upcomingSessions.length === 0 ? (
-            <p className="text-sm text-[#5A6070]">No upcoming sessions yet. Add some under Sessions.</p>
+            <p className="text-sm text-[#5A6070]">No CMS session rows yet. Use the Fall 2026 schedule above with instructors.</p>
           ) : (
             upcomingSessions.map((s) => (
               <div key={s.id} className="border border-[var(--border)] rounded-lg p-3 text-sm">

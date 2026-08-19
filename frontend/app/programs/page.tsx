@@ -1,7 +1,6 @@
 import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { ProgramCard } from '@/components/programs/program-card'
 import { ProgramsFilter } from '@/components/programs/programs-filter'
 import { PageHero } from '@/components/page-hero'
 import { ProgramsContactForm } from '@/components/programs/programs-contact-form'
@@ -81,7 +80,19 @@ export default async function ProgramsPage() {
             )}
 
             {!error && programs.length > 0 && (
-              <ProgramsFilter programs={programs} />
+              <>
+                <p className="mb-8 text-center text-sm text-[#5A6070]">
+                  <a
+                    href="/programs/fall-2026"
+                    className="font-semibold underline"
+                    style={{ color: 'var(--brand-green)' }}
+                  >
+                    Fall 2026 nights and session dates
+                  </a>
+                  {' — '}library Tuesdays and Wednesdays, 12 meetings. Share with instructors.
+                </p>
+                <ProgramsFilter programs={programs} />
+              </>
             )}
           </div>
         </section>
