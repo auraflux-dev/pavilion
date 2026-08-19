@@ -203,7 +203,7 @@ export default async function FundraisingPage() {
                 <p className="text-white/70 text-sm font-medium">{overallPct}% of annual goal</p>
                 <p className="text-white/40 text-xs flex items-center gap-1">
                   <RefreshCw className="w-3 h-3" aria-hidden="true" />
-                  Updates hourly
+                  Updates every minute
                 </p>
               </div>
             </div>
@@ -341,7 +341,7 @@ export default async function FundraisingPage() {
             </div>
 
             <p className="text-center text-xs text-[#5A6070] mt-8">
-              Based on the current annual goal of {fmtDollars(ANNUAL_GOAL)}. Totals refresh hourly from paid orders.
+              Based on the current annual goal of {fmtDollars(ANNUAL_GOAL)}. Totals refresh every minute from paid Square and PayPal checkouts this school year (August–July).
             </p>
           </div>
         </section>
