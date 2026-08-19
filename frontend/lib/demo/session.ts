@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 import { NextRequest } from 'next/server'
-import { STAFF_ROLES, type StaffProfile, type StaffRole } from '@/lib/staff/roles'
+import type { StaffProfile, StaffRole } from '@/lib/staff/roles'
 import { DEMO_REVIEW_COOKIE } from '@/lib/demo/cookie'
 
 export { DEMO_REVIEW_COOKIE }
@@ -89,10 +89,10 @@ export function demoStaffProfile(session: DemoReviewSession): StaffProfile {
   const name = `${session.firstName} ${session.lastName}`.trim()
   return {
     email: session.email,
-    roles: [...STAFF_ROLES] as StaffRole[],
+    roles: ['admin'] as StaffRole[],
     boardTitle: 'President (demo)',
     name,
-    emailSignature: `${name}\n${session.school} PTO`,
+    emailSignature: `${name}\n${session.school}`,
     assignedProgramIds: [],
     personalEmail: session.email,
     extraWorkspaces: [],

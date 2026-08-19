@@ -15,7 +15,7 @@ export const revalidate = 300 // refresh from Wix CMS every 5 minutes
 
 export async function generateMetadata() {
   return {
-    title: vanillaizeIfDemo('Board Members | SHMS PTO'),
+    title: 'Board',
     description: vanillaizeIfDemo(
       'Meet the 2025-26 Stone Hill Middle School PTO Board, the parent volunteers who make it all happen.',
     ),

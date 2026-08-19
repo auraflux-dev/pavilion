@@ -16,10 +16,12 @@ export function DemoBanner() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ lane, parentKind }),
     })
-    const data = (await res.json()) as { next?: string }
-    if (res.ok && data.next) {
-      window.location.assign(data.next)
+    const data = (await res.json().catch(() => ({}))) as { next?: string }
+    if (!res.ok) {
+      window.location.assign('/review')
+      return
     }
+    window.location.assign(data.next || (lane === 'parent' ? '/member-portal' : '/staff'))
   }
 
   return (

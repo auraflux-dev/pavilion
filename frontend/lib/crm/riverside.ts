@@ -32,12 +32,13 @@ function household(
   id: string,
   primaryPersonId: string,
   safety: { emergency: string; emergencyPhone: string; pickup: string },
+  confirmedAt: string | null = null,
 ): Household {
   return {
     id,
     organizationId: ORG_ID,
     primaryPersonId,
-    confirmedAt: null,
+    confirmedAt,
     emergencyContactName: safety.emergency,
     emergencyContactPhone: safety.emergencyPhone,
     pickupAuthorized: safety.pickup,
@@ -97,11 +98,16 @@ export function riversideSnapshot(): TenantSnapshot {
   const riley = person('p_riley', 'riley.brooks@example.com', 'Riley', 'Brooks', '')
   const staff = person('p_jordan_lee', 'jordan.lee@example.com', 'Jordan', 'Lee', '')
 
-  const hhNguyen = household('hh_nguyen', alex.id, {
-    emergency: 'Sam Nguyen',
-    emergencyPhone: '555-0191',
-    pickup: 'Alex Nguyen, Sam Nguyen',
-  })
+  const hhNguyen = household(
+    'hh_nguyen',
+    alex.id,
+    {
+      emergency: 'Sam Nguyen',
+      emergencyPhone: '555-0191',
+      pickup: 'Alex Nguyen, Sam Nguyen',
+    },
+    '2025-09-08T12:00:00.000Z',
+  )
   const hhPatel = household('hh_patel', jordanP.id, {
     emergency: 'Priya Patel',
     emergencyPhone: '555-0192',

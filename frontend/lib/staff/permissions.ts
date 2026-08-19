@@ -3,6 +3,8 @@
  * you can add without granting a whole extra role.
  */
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
+import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 import type { StaffRole } from '@/lib/staff/roles'
 
 export const STAFF_ROLE_LABEL: Record<StaffRole, string> = {
@@ -12,7 +14,7 @@ export const STAFF_ROLE_LABEL: Record<StaffRole, string> = {
   treasurer: 'Treasurer',
   events: 'Events',
   programs: 'Programs',
-  retail: 'Cove / retail',
+  retail: isDemoInstance() ? `${DEMO_BRAND.store} / retail` : 'Cove / retail',
   membership: 'Membership',
   wellness: 'Wellness',
   instructor: 'Instructor',

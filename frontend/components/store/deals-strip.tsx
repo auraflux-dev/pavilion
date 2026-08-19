@@ -26,8 +26,12 @@ export function DealsStrip({ items }: DealsStripProps) {
             <Zap className="w-5 h-5 text-white fill-current" aria-hidden="true" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[#1A1A1A]">Deals of the Week</h2>
-            <p className="text-xs text-[#5A6070]">Staff picks. Rotating weekly</p>
+            <h2 className="text-xl font-bold text-[#1A1A1A]">
+              {items.length === 1 ? "This week's pick" : 'Deals of the Week'}
+            </h2>
+            <p className="text-xs text-[#5A6070]">
+              {items.length === 1 ? 'Featured at the window' : 'Staff picks. Rotating weekly'}
+            </p>
           </div>
         </div>
 

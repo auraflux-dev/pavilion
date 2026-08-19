@@ -6,6 +6,8 @@
  */
 import { useMemo } from 'react'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 const JOIN_PATH = '/join'
 
@@ -18,6 +20,8 @@ export default function StaffInPersonCardPage() {
     if (typeof window === 'undefined') return `https://www.shmspto.org${JOIN_PATH}`
     return `${window.location.origin}${JOIN_PATH}`
   }, [])
+
+  if (isPublicDemoInstance()) notFound()
 
   return (
     <div className="min-h-screen bg-[#F7F4EE] text-[#1A1A1A]">

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { StoreItem } from '@/lib/api/store'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 interface StoreGridProps {
   items: StoreItem[]
@@ -95,9 +96,11 @@ export function StoreGrid({ items }: StoreGridProps) {
 
         {/* Footer note */}
         <p className="text-center text-xs text-[#5A6070] mt-10 max-w-lg mx-auto">
-          {vanillaizeIfDemo(
-            'Items and prices may vary. Snack-window hours are in person only; load the card online anytime. Use your Cove Digital Card (code or QR) to pay. No cash at the snack window. Guests without a portal login can buy spirit wear / merch on Square Stand with staff.',
-          )}
+          {isPublicDemoInstance()
+            ? 'Items and prices may vary. Window hours are in person. Load the family card online. Students pay with a code or QR. Guests can buy spirit wear with staff at the window.'
+            : vanillaizeIfDemo(
+                'Items and prices may vary. Snack-window hours are in person only; load the card online anytime. Use your Cove Digital Card (code or QR) to pay. No cash at the snack window. Guests without a portal login can buy spirit wear / merch on Square Stand with staff.',
+              )}
         </p>
       </div>
     </section>

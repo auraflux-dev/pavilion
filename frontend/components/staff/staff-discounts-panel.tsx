@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type DiscountRow = {
   id: string
@@ -233,7 +234,9 @@ export function StaffDiscountsPanel() {
           <p className="text-xs text-[#5A6070]">
             Generates a unique code for a parent email. Default % from their highest paid tier
             (Reef 10 / Lagoon 15 / Tide 30 unless CMS override). Leave override blank to use tier.
-            Prefer shared codes SHMSREEF10 / SHMSLAGOON15 / SHMSTIDE30 for normal membership perks.
+            {vanillaizeIfDemo(
+              'Prefer shared codes SHMSREEF10 / SHMSLAGOON15 / SHMSTIDE30 for normal membership perks.',
+            )}
           </p>
         </div>
         <Button

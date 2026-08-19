@@ -6,6 +6,8 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { DEMO_BRAND, vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 type ProgramOption = { id: string; name: string }
 
@@ -140,14 +142,15 @@ export function StaffTimesheetsPanel() {
         <p className="text-sm font-bold text-[#1A1A1A]">Contractors: W-9 required</p>
         <p className="text-xs text-[#5A6070] leading-relaxed">
           If your pay may exceed <span className="font-semibold text-[#1A1A1A]">$600 in a calendar year</span>,
-          SHMS PTO may need to file a Form 1099. Complete IRS Form W-9 before or with your first paid work,
-          then email the finished form to{' '}
+          {vanillaizeIfDemo(
+            'SHMS PTO may need to file a Form 1099. Complete IRS Form W-9 before or with your first paid work, then email the finished form to',
+          )}{' '}
           <a
-            href="mailto:treasurer@shmspto.org?subject=W-9%20for%20SHMS%20PTO%20contractor"
+            href={`mailto:${isPublicDemoInstance() ? `treasurer@${DEMO_BRAND.host}` : 'treasurer@shmspto.org'}?subject=W-9%20for%20contractor`}
             className="font-semibold underline"
             style={{ color: 'var(--brand-green)' }}
           >
-            treasurer@shmspto.org
+            {isPublicDemoInstance() ? `treasurer@${DEMO_BRAND.host}` : 'treasurer@shmspto.org'}
           </a>
           .
         </p>
@@ -161,7 +164,7 @@ export function StaffTimesheetsPanel() {
             Download Form W-9 (PDF)
           </a>
           <a
-            href="mailto:treasurer@shmspto.org?subject=W-9%20for%20SHMS%20PTO%20contractor&body=Hi%20Treasurer%2C%0A%0AAttached%20is%20my%20completed%20Form%20W-9%20for%20SHMS%20PTO%20contractor%20payments.%0A%0AThank%20you."
+            href={`mailto:${isPublicDemoInstance() ? `treasurer@${DEMO_BRAND.host}` : 'treasurer@shmspto.org'}?subject=W-9%20for%20contractor`}
             className="inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold text-white"
             style={{ backgroundColor: 'var(--brand-green)' }}
           >

@@ -41,7 +41,7 @@ export function MemberShell({ children }: Props) {
     viewingEmail,
   } = useAuth()
   const isPaid = accountType === 'paid'
-  const audienceLabel = status === 'loading' ? '…' : isPaid ? 'Paid member' : 'Free member'
+  const audienceLabel = status === 'loading' ? 'Member' : isPaid ? 'Paid member' : 'Free member'
   const signedInEmail = String(member?.email ?? '').trim().toLowerCase()
   const staffChrome =
     isStaff ||
@@ -53,7 +53,7 @@ export function MemberShell({ children }: Props) {
   // Cove opens the full Cove page; PortalReturnBar brings members back.
   const links = [
     { href: '/member-portal', label: 'My Portal' },
-    { href: '/membership', label: isPaid ? 'Membership' : 'Upgrade' },
+    { href: '/membership', label: status === 'loading' || isPaid ? 'Membership' : 'Upgrade' },
     { href: '/cove', label: vanillaizeIfDemo('The Cove') },
     { href: '/programs', label: 'Programs' },
     ...(isPublicDemoInstance() ? [] : [{ href: '/member-portal/videos', label: 'Videos' }]),
@@ -209,7 +209,7 @@ export function MemberShell({ children }: Props) {
 
       <footer className="border-t border-[var(--border)] bg-[#FAFCF9] py-4 mt-auto">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#5A6070]">
-          <span>{audienceLabel} · SHMS PTO</span>
+          <span>{audienceLabel} · {isPublicDemoInstance() ? DEMO_BRAND.short : 'SHMS PTO'}</span>
           <Link href="/privacy" className="underline">Privacy</Link>
           <Link href="/terms" className="underline">Terms</Link>
           <Link href="/data-security" className="underline">Data security</Link>

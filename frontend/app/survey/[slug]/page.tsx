@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params
   const survey = await getSurveyBySlug(slug)
   return {
-    title: survey ? `${survey.title} | SHMS PTO` : 'Survey | SHMS PTO',
+    title: survey ? survey.title : 'Survey',
     description: survey?.description ?? 'SHMS PTO survey',
   }
 }

@@ -117,7 +117,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
 
             <p className="text-sm leading-relaxed mb-6" style={{ color: '#C5CCD6' }}>
               {isPublicDemoInstance()
-                ? `A working PTO operating system demo. Public site, family portal, and staff workspace for ${DEMO_BRAND.school}.`
+                ? `${DEMO_BRAND.school} in ${DEMO_BRAND.town}. Membership, ${DEMO_BRAND.store}, and the family portal.`
                 : 'Enriching the academic and social experience for all SHMS PTO students and families in Ashburn, Virginia.'}
             </p>
 

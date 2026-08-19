@@ -5,11 +5,35 @@
 import { NextResponse } from 'next/server'
 import { listMembershipShirtOptions } from '@/lib/membership-shirt'
 import { reportError } from '@/lib/observability/error-reporting'
+import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
+    if (isDemoInstance()) {
+      return NextResponse.json({
+        productId: 'demo-hawks-tee',
+        productName: `${DEMO_BRAND.mascotPlural} spirit tee`,
+        designsEnabled: true,
+        designs: [
+          {
+            design: `${DEMO_BRAND.mascot} crest`,
+            sizes: ['YS', 'YM', 'YL', 'S', 'M', 'L', 'XL'].map((size) => ({
+              size,
+              variantId: `demo-${size}`,
+              sku: `HAWK-${size}`,
+              quantity: 12,
+              available: true,
+              label: size,
+            })),
+          },
+        ],
+        availableDesigns: [`${DEMO_BRAND.mascot} crest`],
+        demo: true,
+      })
+    }
     const data = await listMembershipShirtOptions()
     const { isMembershipShirtDesignsEnabled } = await import('@/lib/membership-shirt')
     const designsEnabled = await isMembershipShirtDesignsEnabled()

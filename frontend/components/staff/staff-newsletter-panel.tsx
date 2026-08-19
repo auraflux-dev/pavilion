@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 /**
  * Member newsletter: free and/or paid parents via Gmail + WhatsApp grade groups + optional portal.
@@ -174,9 +175,9 @@ export function StaffNewsletterPanel() {
           <option value="all">All members (free + paid)</option>
           <option value="free">Free only</option>
           <option value="paid">Paid only</option>
-          <option value="reef">Reef</option>
-          <option value="lagoon">Lagoon</option>
-          <option value="tide">Tide</option>
+          <option value="reef">{vanillaizeIfDemo('Reef')}</option>
+          <option value="lagoon">{vanillaizeIfDemo('Lagoon')}</option>
+          <option value="tide">{vanillaizeIfDemo('Tide')}</option>
         </select>
         <select
           value={grade}

@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
             needsName: false,
             email: demo.email,
             profileImage: null,
-            memberSince: new Date(demo.iat).toISOString(),
+            memberSince: new Date(demo.iat || Date.parse('2025-09-08T12:00:00.000Z')).toISOString(),
           },
           storeCards: paid
             ? [{ balance: 42.5, studentName: students[0]?.name }]

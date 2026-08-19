@@ -5,6 +5,7 @@
 import { getWixClient } from '@/lib/wix-client'
 import { effectiveStaffRoles, parseExtraWorkspaces } from '@/lib/staff/permissions'
 import type { StaffWorkspace } from '@/lib/audience'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 export const STAFF_ROLES = [
  'admin',
@@ -304,7 +305,7 @@ export const ROLE_HOME_COPY: Record<
  thisWeek: [
  'Review free vs paid roster and missing phones',
  'Send welcome / upgrade touch via portal or email',
- 'Post Middle School 101 note in grade WhatsApp groups',
+ isDemoInstance() ? 'Post a family-night note in grade WhatsApp groups' : 'Post Middle School 101 note in grade WhatsApp groups',
  ],
  },
  wellness: {

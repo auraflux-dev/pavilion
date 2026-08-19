@@ -7,7 +7,7 @@
  */
 
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { demoStorePath, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { DEMO_BRAND } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
 
@@ -101,7 +101,7 @@ function normalizeCommerceNav(links: NavLink[]): NavLink[] {
  const cove: NavLink = {
  id: commerce[0].id || 'cove',
  label: isDemoInstance() ? DEMO_BRAND.store : 'The Cove',
-    href: '/cove',
+    href: demoStorePath(),
  sortOrder: Math.min(...commerce.map((l) => l.sortOrder)),
  showInNav: commerce.some((l) => l.showInNav),
  showInFooter: commerce.some((l) => l.showInFooter),

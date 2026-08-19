@@ -20,6 +20,7 @@ const JOIN_ALLOW = new Set([
   '/api/demo/join',
   '/api/demo/switch',
   '/api/auth/logout',
+  '/api/auth/email-login',
 ])
 
 export function isDemoJoinAllowPath(pathname: string): boolean {

@@ -24,5 +24,5 @@ export function reviewerPortalStudents(
   session: ReviewerSession | null,
 ): PortalStudentRow[] {
   const { snapshot, household } = reviewerHousehold(session)
-  return portalStudentsForHousehold(snapshot, household, session?.lastName)
+  return portalStudentsForHousehold(snapshot, household)
 }

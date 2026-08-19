@@ -9,7 +9,7 @@ import { vanillaizeIfDemo } from '@/lib/demo/brand'
 const TOPICS = [
   'General Question',
   'Programs & Registration',
-  vanillaizeIfDemo('The Cove / Cove Digital Card'),
+  vanillaizeIfDemo('The Cove / store card'),
   'Volunteer Opportunities',
   'Membership',
   'Fundraising',
@@ -27,7 +27,7 @@ interface FormState {
 
 export function ContactForm() {
   const [form, setForm] = useState<FormState>({ name: '', email: '', topic: '', message: '' })
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'preview' | 'error'>('idle')
 
   function update(field: keyof FormState) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -43,15 +43,16 @@ export function ContactForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
+      const data = (await res.json().catch(() => ({}))) as { demo?: boolean }
       if (!res.ok) throw new Error()
       trackGenerateLead({ formId: 'contact', leadType: form.topic || 'contact' })
-      setStatus('success')
+      setStatus(data.demo ? 'preview' : 'success')
     } catch {
       setStatus('error')
     }
   }
 
-  if (status === 'success') {
+  if (status === 'success' || status === 'preview') {
     return (
       <div className="bg-white rounded-2xl p-10 shadow-sm text-center">
         <div
@@ -60,9 +61,13 @@ export function ContactForm() {
         >
           <CheckCircle2 className="w-8 h-8" style={{ color: 'var(--brand-green)' }} />
         </div>
-        <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Message sent!</h3>
+        <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">
+          {status === 'preview' ? 'Preview only' : 'Message sent!'}
+        </h3>
         <p className="text-[#5A6070] text-sm max-w-xs mx-auto">
-          Thank you for reaching out. A PTO board member will get back to you within one business day.
+          {status === 'preview'
+            ? 'This demo does not send mail. On a live school, a board member would reply within one business day.'
+            : 'Thank you for reaching out. A PTO board member will get back to you within one business day.'}
         </p>
       </div>
     )

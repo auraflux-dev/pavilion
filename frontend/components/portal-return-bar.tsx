@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/use-auth'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 /**
  * Shown under the public nav when a member is logged in,
@@ -10,7 +12,9 @@ import { useAuth } from '@/lib/hooks/use-auth'
  */
 export function PortalReturnBar() {
   const { status } = useAuth()
+  const pathname = usePathname()
   if (status !== 'member') return null
+  if (isPublicDemoInstance() && !pathname.startsWith('/member-portal')) return null
 
   return (
     <div

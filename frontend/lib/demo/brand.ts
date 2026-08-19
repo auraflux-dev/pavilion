@@ -21,6 +21,10 @@ export const DEMO_BRAND = {
   },
 } as const
 
+export function demoStorePath(): string {
+  return isDemoInstance() ? '/perch' : '/cove'
+}
+
 export function vanillaizeCopy(input: string): string {
   if (typeof input !== 'string' || !input) return input
   let s = input
@@ -35,14 +39,16 @@ export function vanillaizeCopy(input: string): string {
 
   protect(/\/shms-[a-z0-9._-]+/gi)
   protect(/shms-logo/gi)
-  protect(/SHMSREEF\d+/g)
-  protect(/SHMSLAGOON\d+/g)
-  protect(/SHMSTIDE\d+/g)
-  protect(/SHMSCOVE(?::\d+)?/gi)
 
   s = s
+    .replace(/SHMSREEF\d+/g, 'RIVERSIDEMEMBER10')
+    .replace(/SHMSLAGOON\d+/g, 'RIVERSIDEFAMILY15')
+    .replace(/SHMSTIDE\d+/g, 'RIVERSIDEPATRON20')
+    .replace(/SHMSCOVE(?::\d+)?/gi, 'RIVERSIDEPERCH')
     .replace(/\bCove Digital Cards\b/g, DEMO_BRAND.cardPlural)
     .replace(/\bCove Digital Card\b/g, DEMO_BRAND.card)
+    .replace(/\bFamily Cove code\b/gi, `${DEMO_BRAND.card} code`)
+    .replace(/\bFamily Cove\b/gi, DEMO_BRAND.card)
     .replace(/\bShop The Cove\b/gi, `Shop ${DEMO_BRAND.store}`)
     .replace(/\bThe Cove shop\b/gi, DEMO_BRAND.store)
     .replace(/\bFamily Cove Digital Card\b/gi, DEMO_BRAND.card)
@@ -50,11 +56,20 @@ export function vanillaizeCopy(input: string): string {
     .replace(/\bStone Hill Middle School\b/gi, DEMO_BRAND.school)
     .replace(/\bStone Hill\b/gi, 'Riverside')
     .replace(/\bSHMS PTO\b/g, DEMO_BRAND.short)
+    .replace(/\/cove\b/gi, '/perch')
     .replace(/\bThe Cove\b/g, DEMO_BRAND.store)
     .replace(/\bCove QR\b/g, `${DEMO_BRAND.card} QR`)
     .replace(/\bCove features locked\b/gi, 'Store features locked')
     .replace(/\bunlock Cove\b/gi, `unlock ${DEMO_BRAND.store}`)
     .replace(/\bunlock the Cove\b/gi, `unlock ${DEMO_BRAND.store}`)
+    .replace(/\bduring Cove hours\b/gi, `during ${DEMO_BRAND.store} hours`)
+    .replace(/\bCove \/ retail\b/gi, `${DEMO_BRAND.store} / retail`)
+    .replace(/\bCove register\b/gi, `${DEMO_BRAND.store} register`)
+    .replace(/\bCove \/ marketing copy\b/gi, `${DEMO_BRAND.store} / marketing copy`)
+    .replace(/\bCharge Cove\b/gi, `Charge ${DEMO_BRAND.store}`)
+    .replace(/\bCove hours\b/gi, `${DEMO_BRAND.store} hours`)
+    .replace(/\bCove\b/g, DEMO_BRAND.store)
+    .replace(/\ba The Perch\b/g, 'a Perch')
     .replace(/\bGo Stingrays!/gi, DEMO_BRAND.cheer)
     .replace(/\bStingrays\b/gi, DEMO_BRAND.mascotPlural)
     .replace(/\bStingray\b/gi, DEMO_BRAND.mascot)
@@ -74,10 +89,15 @@ export function vanillaizeCopy(input: string): string {
     .replace(/your town/gi, DEMO_BRAND.town)
     .replace(/your school district/gi, DEMO_BRAND.district)
     .replace(/\bNorthern Virginia\b/gi, DEMO_BRAND.town)
-    .replace(/\bNOVA Math Tournament\b/gi, 'Math meet')
+    .replace(/\bNOVA Math Tournament\b/gi, 'Fairhaven Math Tournament')
+    .replace(/\bMath meet\b/gi, 'Fairhaven Math Tournament')
+    .replace(/\bMoneyMinder\b/gi, 'the budget books')
+    .replace(/\bBank of America\b/gi, 'the operating bank')
+    .replace(/\bBoA\b/g, 'bank')
     .replace(/shmspto\.org/gi, DEMO_BRAND.host)
     .replace(/@shmspto\b/gi, `@${DEMO_BRAND.host}`)
     .replace(/\s{2,}/g, ' ')
+    .replace(/\s+\./g, '.')
     .trim()
 
   return s.replace(/«D(\d+)»/g, (_, i) => protectedChunks[Number(i)] ?? '')

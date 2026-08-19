@@ -513,15 +513,15 @@ export function StaffDashboard() {
             <div className="grid gap-4 md:grid-cols-2">
               {me.homes.map((home) => (
                 <div key={home.role} className="rounded-xl border border-[var(--border)] bg-white p-4">
-                  <h2 className="text-base font-bold text-[#1A1A1A]">{home.title}</h2>
-                  <p className="text-xs text-[#5A6070] mt-1 mb-2">{home.owns}</p>
+                  <h2 className="text-base font-bold text-[#1A1A1A]">{vanillaizeIfDemo(home.title)}</h2>
+                  <p className="text-xs text-[#5A6070] mt-1 mb-2">{vanillaizeIfDemo(home.owns)}</p>
                   <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--brand-green)] mb-1.5">
                     This week
                   </p>
                   <ul className="space-y-1">
                     {home.thisWeek.map((item) => (
                       <li key={item} className="text-sm text-[#1A1A1A]">
-                        • {item}
+                        • {vanillaizeIfDemo(item)}
                       </li>
                     ))}
                   </ul>

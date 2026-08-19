@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Users, BookOpen, Heart } from 'lucide-react'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { demoStorePath, vanillaizeIfDemo } from '@/lib/demo/brand'
 
 function resolveHomeImage(raw: string, fallback: string): string {
   const url = (raw || '').trim()
@@ -99,7 +99,7 @@ export async function Hero() {
                 className="font-bold px-6 sm:px-8 border-2 border-white text-white bg-transparent hover:bg-white hover:text-[var(--brand-green)] transition-colors"
                 asChild
               >
-                <a href="/cove">
+                <a href={demoStorePath()}>
                   <BookOpen className="w-4 h-4 mr-2" aria-hidden="true" />
                   {vanillaizeIfDemo('Shop The Cove')}
                 </a>

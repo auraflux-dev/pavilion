@@ -13,6 +13,8 @@ import {
   workspacesFromRoles,
 } from '@/lib/staff/permissions'
 import type { StaffRole } from '@/lib/staff/roles'
+import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 type StaffRow = {
   id: string
@@ -134,7 +136,8 @@ export function StaffRoleManager() {
         <h2 className="text-lg font-bold">Admin · Staff access</h2>
         <p className="text-xs text-[#5A6070]">
           Pick a role for the usual toolkit, then tick any extra permissions below. You do not need
-          another role just to add one workspace. Staff tools stay on official @shmspto.org accounts.
+          another role just to add one workspace. Staff tools stay on official @
+          {isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org'} accounts.
           Link a personal email for the parent portal.
         </p>
       </div>
@@ -144,7 +147,7 @@ export function StaffRoleManager() {
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          placeholder="person@shmspto.org"
+          placeholder={isPublicDemoInstance() ? `person@${DEMO_BRAND.host}` : 'person@shmspto.org'}
           className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <input
@@ -282,7 +285,8 @@ export function StaffRoleManager() {
         className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
       />
       <p className="text-[11px] text-[#5A6070]">
-        Optional. Their family login for Member Portal. Must not be @shmspto.org.
+        Optional. Their family login for Member Portal. Must not be @
+        {isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org'}.
       </p>
 
       <input

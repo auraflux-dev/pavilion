@@ -8,6 +8,7 @@ import { MeetingMonthFilter } from '@/components/meetings/meeting-month-filter'
 import { MeetingsSectionNav } from '@/components/jump-nav/public-section-navs'
 import { Users } from 'lucide-react'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 export const revalidate = 300
 
@@ -81,7 +82,8 @@ export default async function MeetingsPage() {
           </div>
         </section>
 
-        {/* Committee sections */}
+        {/* Committee sections. Loudoun SEAC/MSAAC/LEAF stay off the elementary demo. */}
+        {!isDemoInstance() ? (
         <section id="committees" className="scroll-mt-28 py-16 md:py-20 bg-white border-t border-[var(--border)]">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
             <div className="text-center mb-4">
@@ -113,6 +115,7 @@ export default async function MeetingsPage() {
             ))}
           </div>
         </section>
+        ) : null}
 
         {/* Stay updated CTA */}
         <section id="join" className="scroll-mt-28 py-14 border-t border-[var(--border)]" style={{ backgroundColor: 'var(--brand-warm)' }}>

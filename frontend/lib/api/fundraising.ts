@@ -224,12 +224,12 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
   if (isDemoInstance()) {
     return {
       totals: {
-        membership: 12480,
-        store: 4860,
-        spiritWear: 1920,
-        danceNight: 1640,
-        novaMath: 720,
-        other: 410,
+        membership: 6400,
+        store: 3180,
+        spiritWear: 1420,
+        danceNight: 980,
+        novaMath: 640,
+        other: 380,
       },
       goals: GOALS_DEFAULT,
       volunteerHoursRaised: 210,

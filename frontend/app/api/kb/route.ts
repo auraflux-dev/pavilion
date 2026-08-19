@@ -5,6 +5,8 @@ import { articlesByCategoryWithExtras, type KbAudience } from '@/lib/kb'
 import { vanillaizeDeep } from '@/lib/demo/brand'
 import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
+import { isDemoInstance } from '@/lib/demo/instance'
+import { getDemoReviewSession } from '@/lib/demo/session'
 
 /**
  * GET /api/kb?audience=member|staff
@@ -23,7 +25,8 @@ export async function GET(req: NextRequest) {
     }
   } else {
     const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
-    if (!isMemberTokens(tokens)) {
+    const demoMember = isDemoInstance() && getDemoReviewSession(req)
+    if (!isMemberTokens(tokens) && !demoMember) {
       return NextResponse.json({ error: 'Sign in required' }, { status: 401 })
     }
   }

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Gift, Loader2 } from 'lucide-react'
 import type { MembershipEntitlement } from '@/lib/membership-entitlements'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type Benefits = {
   tier: string
@@ -73,8 +74,9 @@ export function MembershipBenefitsCard() {
             {data.coveFamilyCode}
           </span>
           <span className="block text-[11px] text-[#5A6070] mt-0.5">
-            Show this 6-digit Family Cove code at food trucks / refreshment tables (Lagoon and Tide
-            codes end in 9).
+            {vanillaizeIfDemo(
+              'Show this 6-digit Family Cove code at food trucks / refreshment tables (Lagoon and Tide codes end in 9).',
+            )}
           </span>
         </p>
       ) : null}

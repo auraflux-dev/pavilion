@@ -96,7 +96,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       pages: merged,
       scope: allPages ? 'all' : 'cove',
-      canBrandFix: allPages,
+      canBrandFix: allPages && !isDemoInstance(),
       demo: isDemoInstance(),
     })
   } catch (err) {

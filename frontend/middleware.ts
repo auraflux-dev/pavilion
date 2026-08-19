@@ -28,6 +28,16 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const demo = isDemoInstance()
 
+  if (demo && (pathname === '/staff/in-person' || pathname.startsWith('/staff/in-person/'))) {
+    return new NextResponse('Not found', { status: 404 })
+  }
+
+  if (demo && (pathname === '/perch' || pathname.startsWith('/perch/'))) {
+    const url = req.nextUrl.clone()
+    url.pathname = pathname.replace(/^\/perch/, '/cove') || '/cove'
+    return NextResponse.rewrite(url)
+  }
+
   // Short table QR URL → free signup (hard redirect for scanners / SMS links)
   if (pathname === '/join') {
     const url = req.nextUrl.clone()
@@ -65,14 +75,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // Printable payment cheat sheet — no session (table QR / print without Staff login)
-  const staffPublic =
-    pathname === '/staff/in-person' || pathname.startsWith('/staff/in-person/')
-
-  if (
-    !staffPublic &&
-    PROTECTED_ROUTES.some((r) => pathname.startsWith(r))
-  ) {
+  if (PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
     const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
     const demoOk =
       demo && hasDemoReviewCookie(req.cookies.get(DEMO_REVIEW_COOKIE)?.value)

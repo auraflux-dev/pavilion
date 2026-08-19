@@ -8,6 +8,7 @@ import { EventCard } from '@/components/events/event-card'
 import { RunForCharityEventDetail } from '@/components/run-for-charity/event-detail'
 import { getEventBySlug } from '@/lib/api/events'
 import { isRunForCharitySlug } from '@/lib/run-for-charity'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { ArrowLeft } from 'lucide-react'
 
 export const revalidate = 300
@@ -20,15 +21,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const event = await getEventBySlug(slug)
   if (!event) {
-    return { title: 'Event | SHMS PTO' }
+    return { title: 'Event' }
   }
   const title = (event.title || 'Event').replace(/\n+/g, ' ')
   const description =
     event.shortDescription ||
     event.description?.slice(0, 160) ||
-    'SHMS PTO upcoming event'
+    vanillaizeIfDemo('SHMS PTO upcoming event')
   return {
-    title: `${title} | SHMS PTO`,
+    title,
     description,
     openGraph: {
       title,

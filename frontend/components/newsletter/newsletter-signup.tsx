@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, Loader2, ArrowRight } from 'lucide-react'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 export function NewsletterSignup() {
   const [email, setEmail] = useState('')
@@ -35,7 +37,9 @@ export function NewsletterSignup() {
         </div>
         <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">You&apos;re subscribed!</h3>
         <p className="text-[#5A6070] text-sm">
-          Welcome to the SHMS PTO newsletter. You&apos;ll hear from us soon.
+          {isPublicDemoInstance()
+            ? 'Preview only. This demo does not add you to a live list.'
+            : vanillaizeIfDemo("Welcome to the SHMS PTO newsletter. You'll hear from us soon.")}
         </p>
       </div>
     )
@@ -45,7 +49,7 @@ export function NewsletterSignup() {
     <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 lg:p-8 shadow-sm">
       <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Subscribe to the Newsletter</h3>
       <p className="text-sm text-[#5A6070] mb-6">
-        Join hundreds of SHMS PTO families already in the loop.
+        {vanillaizeIfDemo('Join hundreds of SHMS PTO families already in the loop.')}
       </p>
 
       <div className="space-y-4">

@@ -14,6 +14,7 @@ import { DonateBlock } from '@/components/donate/donate-block'
 import { SponsorshipPackages } from '@/components/fundraising/sponsorship-packages'
 import { FundraisingSectionNav } from '@/components/jump-nav/public-section-navs'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Star, ShoppingBag, Users, Heart, TrendingUp, Ticket, ArrowRight, RefreshCw,
@@ -23,7 +24,7 @@ export const revalidate = 60
 
 export async function generateMetadata() {
   return {
-    title: vanillaizeIfDemo('Fundraising | SHMS PTO'),
+    title: 'Fundraising',
     description: vanillaizeIfDemo(
       'Every purchase, membership, and Cove sale directly funds SHMS PTO student enrichment. Track live goals here.',
     ),
@@ -202,10 +203,12 @@ export default async function FundraisingPage() {
               </div>
               <div className="flex items-center justify-between">
                 <p className="text-white/70 text-sm font-medium">{overallPct}% of annual goal</p>
+                {!isDemoInstance() ? (
                 <p className="text-white/40 text-xs flex items-center gap-1">
                   <RefreshCw className="w-3 h-3" aria-hidden="true" />
                   Updates every minute
                 </p>
+                ) : null}
               </div>
             </div>
           </div>

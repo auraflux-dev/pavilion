@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Zap, ChevronDown, ChevronUp, Loader2, CheckCircle2 } from 'lucide-react'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 interface Props {
   studentId: string
@@ -79,7 +80,7 @@ export function GiftCardSettings({ studentId, studentName }: Props) {
       {open && (
         <div className="px-4 py-4 space-y-4 border-t border-[var(--border)]">
           <p className="text-xs text-[#5A6070] leading-relaxed">
-            When {studentName}&apos;s balance reaches the threshold, Square securely charges your saved card and loads the Cove Digital Card.
+            When {studentName}&apos;s balance reaches the threshold, Square securely charges your saved card and {vanillaizeIfDemo('loads the Cove Digital Card')}. 
           </p>
 
           {hasPaymentMethod ? (

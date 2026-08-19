@@ -12,7 +12,7 @@ import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export async function generateMetadata() {
   return {
-    title: vanillaizeIfDemo('Contact | SHMS PTO'),
+    title: 'Contact',
     description: vanillaizeIfDemo('Get in touch with the Stone Hill Middle School PTO board.'),
   }
 }

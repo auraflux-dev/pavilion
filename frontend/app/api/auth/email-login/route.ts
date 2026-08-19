@@ -9,6 +9,8 @@ import { createClient, OAuthStrategy, LoginState } from '@wix/sdk'
 import { redirects } from '@wix/redirects'
 import { TOKENS_COOKIE, TOKEN_MAX_AGE, isSecure } from '@/lib/auth-cookies'
 import { approvePendingMemberByEmail } from '@/lib/auth-approve-member'
+import { isDemoInstance } from '@/lib/demo/instance'
+import { issueDemoReviewResponse } from '@/lib/demo/issue-session'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -183,6 +185,21 @@ export async function POST(req: NextRequest) {
     const returnTo = safeReturnTo(body.returnTo)
     const origin = canonicalOrigin(req)
     const mode = body.mode === 'signup' ? 'signup' : 'login'
+
+    if (isDemoInstance()) {
+      const paidHint = /membership|cove|perch|upgrade|card/i.test(returnTo)
+      return issueDemoReviewResponse({
+        req,
+        lane: 'parent',
+        parentKind: paidHint ? 'paid' : 'free',
+        next: returnTo,
+        names: {
+          firstName: signupFirstName,
+          lastName: signupLastName,
+          email,
+        },
+      })
+    }
     const verificationCode = String(body.verificationCode || '').trim()
 
     const signupName =

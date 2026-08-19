@@ -28,7 +28,7 @@ export async function generateMetadata() {
     }
   }
   return {
-    title: 'The Cove | SHMS PTO',
+    title: 'The Cove',
     description:
       'The Cove: SHMS PTO Cove Digital Card, snack window menu, and spirit wear in one place.',
   }

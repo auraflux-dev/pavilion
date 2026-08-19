@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isSecure } from '@/lib/auth-cookies'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { persistDemoJoin } from '@/lib/crm/persist'
+import { DEMO_MEMBER_SINCE_MS } from '@/lib/demo/issue-session'
 import {
   DEMO_REVIEW_COOKIE,
   DEMO_REVIEW_MAX_AGE,
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
     school,
     lane,
     parentKind,
-    iat: Date.now(),
+    iat: DEMO_MEMBER_SINCE_MS,
   })
   if (!token) {
     return bad('Demo signing is not configured.', 503)
