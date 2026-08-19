@@ -405,6 +405,7 @@ export function demoStaffApiStub(
         'instructor',
         'coordinator',
       ],
+      scope: 'all',
       staff: [
         {
           id: 'demo-staff-jordan',

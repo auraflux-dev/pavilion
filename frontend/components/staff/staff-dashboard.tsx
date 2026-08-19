@@ -205,10 +205,10 @@ export function StaffDashboard() {
       { id: 'expenses', label: STAFF_WORKSPACE_LABEL.expenses },
     ]
     if (me.isAdmin) {
-      items.push(
-        { id: 'members', label: STAFF_WORKSPACE_LABEL.members },
-        { id: 'access', label: STAFF_WORKSPACE_LABEL.access },
-      )
+      items.push({ id: 'members', label: STAFF_WORKSPACE_LABEL.members })
+    }
+    if (staffCanWorkspace(me, 'access')) {
+      items.push({ id: 'access', label: STAFF_WORKSPACE_LABEL.access })
     }
     if (canMarketing) items.push({ id: 'social', label: STAFF_WORKSPACE_LABEL.social })
     if (canSurveys) items.push({ id: 'surveys', label: STAFF_WORKSPACE_LABEL.surveys })
@@ -481,12 +481,13 @@ export function StaffDashboard() {
                           docs: 'Drive Docs to read/edit',
                           projects: 'Year board, tasks & calendar',
                           members: 'Lookup, act-as, archive',
-                          access: 'Assign @shmspto.org roles',
+                          access: 'Instructors and @shmspto.org roles',
                           social: 'Facebook from Staff',
                           surveys: 'Create, share, review, CSV',
                           messages: 'Parent portal inbox',
                           minutes: 'Publish meeting minutes',
-                          programs: 'Registration & sessions',
+                          programs: 'Your class: roster, attendance, nights',
+                          timesheets: 'Submit or approve teaching hours',
                           payments: 'Needs Reconciliation',
                           budget: 'BoA CSV · Staff sales · Excel',
                           events: 'Create, edit, cancel events',
@@ -672,7 +673,7 @@ export function StaffDashboard() {
           </section>
         ) : null}
 
-        {active === 'access' && me.isAdmin ? <StaffRoleManager /> : null}
+        {active === 'access' && staffCanWorkspace(me, 'access') ? <StaffRoleManager /> : null}
 
         {active === 'social' && canMarketing ? <SocialComposePanel enabled /> : null}
 

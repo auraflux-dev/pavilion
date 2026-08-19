@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
 import {
+  canManageInstructorStaff,
+  INSTRUCTOR_STAFF_ROLES,
+  isInstructorStaffOnly,
   isPresidentAdminEmail,
   isStaffEmail,
   isValidPersonalEmail,
@@ -62,35 +65,43 @@ function normalizeRoles(value: unknown): StaffRole[] {
   )
 }
 
-async function requireAdmin(req: NextRequest) {
+async function staffRolesSession(req: NextRequest) {
   const session = await getStaffSession(req)
-  return requireStaffRole(session?.staff ?? null, 'admin') ? session : null
+  if (!session?.staff || !canManageInstructorStaff(session.staff)) return null
+  return session
 }
 
 export async function GET(req: NextRequest) {
-  if (!(await requireAdmin(req))) {
+  const session = await staffRolesSession(req)
+  if (!session) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   try {
+    const isAdmin = Boolean(requireStaffRole(session.staff, 'admin'))
     const client = getWixClient()
     const result = await client.items.query('StaffRoles').ascending('email').limit(100).find()
+    let staff = (result.items as StaffRoleRow[]).map((row) => ({
+      id: row._id ?? '',
+      email: String(row.email ?? ''),
+      name: String(row.name ?? ''),
+      boardTitle: String(row.boardTitle ?? ''),
+      roles: normalizeRoles(row.roles),
+      assignedProgramIds: String(row.assignedProgramIds ?? '')
+        .split(/[,|;]/)
+        .map((id) => id.trim())
+        .filter(Boolean),
+      personalEmail: String(row.personalEmail ?? '').trim().toLowerCase(),
+      extraWorkspaces: parseExtraWorkspaces(row.extraWorkspaces),
+      active: row.active !== false,
+    }))
+    if (!isAdmin) {
+      staff = staff.filter((row) => isInstructorStaffOnly(row.roles))
+    }
     return NextResponse.json({
-      availableRoles: STAFF_ROLES,
-      staff: (result.items as StaffRoleRow[]).map((row) => ({
-        id: row._id ?? '',
-        email: String(row.email ?? ''),
-        name: String(row.name ?? ''),
-        boardTitle: String(row.boardTitle ?? ''),
-        roles: normalizeRoles(row.roles),
-        assignedProgramIds: String(row.assignedProgramIds ?? '')
-          .split(/[,|;]/)
-          .map((id) => id.trim())
-          .filter(Boolean),
-        personalEmail: String(row.personalEmail ?? '').trim().toLowerCase(),
-        extraWorkspaces: parseExtraWorkspaces(row.extraWorkspaces),
-        active: row.active !== false,
-      })),
+      scope: isAdmin ? 'all' : 'instructors',
+      availableRoles: isAdmin ? STAFF_ROLES : INSTRUCTOR_STAFF_ROLES,
+      staff,
     })
   } catch (err) {
     console.error('/api/staff/roles GET error:', err)
@@ -99,7 +110,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await requireAdmin(req))) {
+  const session = await staffRolesSession(req)
+  if (!session) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -153,7 +165,33 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    const isAdmin = Boolean(requireStaffRole(session.staff, 'admin'))
     const client = getWixClient()
+    const existing = await client.items.query('StaffRoles').eq('email', email).limit(1).find()
+    const row = existing.items[0] as StaffRoleRow | undefined
+    const existingRoles = normalizeRoles(row?.roles)
+
+    if (!isAdmin) {
+      if (!isInstructorStaffOnly(roles) || extraWorkspaces.length) {
+        return NextResponse.json(
+          { error: 'You can only assign Instructor or Coordinator, with a program ID.' },
+          { status: 403 },
+        )
+      }
+      if (!assignedProgramIds.length) {
+        return NextResponse.json(
+          { error: 'Assign at least one program so they only see their class.' },
+          { status: 400 },
+        )
+      }
+      if (row && existingRoles.length && !isInstructorStaffOnly(existingRoles)) {
+        return NextResponse.json(
+          { error: 'That mailbox is a board seat. Ask the president to change it.' },
+          { status: 403 },
+        )
+      }
+    }
+
     await ensureExtraWorkspacesField()
     if (personalEmail) {
       const clash = await client.items
@@ -173,8 +211,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const existing = await client.items.query('StaffRoles').eq('email', email).limit(1).find()
-    const row = existing.items[0] as StaffRoleRow | undefined
     const data = {
       email,
       name,
@@ -182,7 +218,7 @@ export async function POST(req: NextRequest) {
       roles: roles.join(','),
       assignedProgramIds: assignedProgramIds.join(','),
       personalEmail,
-      extraWorkspaces: extraWorkspaces.join(','),
+      extraWorkspaces: isAdmin ? extraWorkspaces.join(',') : String(row?.extraWorkspaces ?? ''),
       active,
     }
 

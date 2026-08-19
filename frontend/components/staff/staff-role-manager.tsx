@@ -28,6 +28,8 @@ type StaffRow = {
   active: boolean
 }
 
+type ProgramOption = { id: string; name: string }
+
 function roleLabel(role: string) {
   return STAFF_ROLE_LABEL[role as StaffRole] ?? role
 }
@@ -41,6 +43,8 @@ function includedHint(workspace: StaffWorkspace) {
 export function StaffRoleManager() {
   const [staff, setStaff] = useState<StaffRow[]>([])
   const [availableRoles, setAvailableRoles] = useState<string[]>([])
+  const [scope, setScope] = useState<'all' | 'instructors'>('all')
+  const [programs, setPrograms] = useState<ProgramOption[]>([])
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
   const [boardTitle, setBoardTitle] = useState('')
@@ -62,6 +66,24 @@ export function StaffRoleManager() {
     if (!response.ok) throw new Error(data.error ?? 'Could not load staff roles')
     setStaff(data.staff ?? [])
     setAvailableRoles(data.availableRoles ?? [])
+    setScope(data.scope === 'instructors' ? 'instructors' : 'all')
+    const programsRes = await fetch('/api/staff/programs')
+    const programsData = await programsRes.json().catch(() => ({}))
+    if (programsRes.ok) {
+      const mapped = (programsData.programs ?? [])
+        .map((p: { id?: string; name?: string; tags?: string; featured?: boolean }) => ({
+          id: String(p.id ?? ''),
+          name: String(p.name ?? ''),
+          tags: String(p.tags ?? ''),
+          featured: p.featured === true,
+        }))
+        .filter((p: { id: string }) => p.id)
+      const fall = mapped.filter(
+        (p: { name: string; tags: string; featured: boolean }) =>
+          /fall 2026/i.test(p.name) || p.featured || /fall-2026/i.test(p.tags),
+      )
+      setPrograms((fall.length ? fall : mapped).map(({ id, name }: ProgramOption) => ({ id, name })))
+    }
   }, [])
 
   useEffect(() => {
@@ -133,12 +155,15 @@ export function StaffRoleManager() {
   return (
     <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
       <div>
-        <h2 className="text-lg font-bold">Admin · Staff access</h2>
+        <h2 className="text-lg font-bold">
+          {scope === 'instructors' ? 'Instructors & class coordinators' : 'Admin · Staff access'}
+        </h2>
         <p className="text-xs text-[#5A6070]">
-          Pick a role for the usual toolkit, then tick any extra permissions below. You do not need
-          another role just to add one workspace. Staff tools stay on official @
-          {isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org'} accounts.
-          Link a personal email for the parent portal.
+          {scope === 'instructors'
+            ? 'Mailbox must be @shmspto.org. Assign Instructor (teaches) or Coordinator (parent liaison) and tick their class. They only see that roster, messages, attendance, and timesheets.'
+            : 'Pick a role for the usual toolkit, then tick any extra permissions below. Staff tools stay on official @' +
+              (isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org') +
+              ' accounts. Link a personal email for the parent portal.'}
         </p>
       </div>
 
@@ -197,6 +222,7 @@ export function StaffRoleManager() {
         </div>
       </div>
 
+      {scope === 'all' ? (
       <div className="rounded-lg border border-[var(--border)] bg-[#FBF9F6] p-3 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <div className="flex-1">
@@ -276,6 +302,7 @@ export function StaffRoleManager() {
           </p>
         ) : null}
       </div>
+      ) : null}
 
       <input
         type="email"
@@ -289,16 +316,51 @@ export function StaffRoleManager() {
         {isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org'}.
       </p>
 
-      <input
-        value={assignedProgramIds}
-        onChange={(event) => setAssignedProgramIds(event.target.value)}
-        placeholder="Assigned program IDs (comma-separated). Required for instructor/coordinator"
-        className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-      />
-      <p className="text-[11px] text-[#5A6070]">
-        Copy program IDs from Staff → Programs (open a program in Wix CMS, or ask admin). Instructors and
-        coordinators only see assigned programs.
-      </p>
+      {programs.length ? (
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-wide text-[#5A6070] mb-1.5">Class assignment</p>
+          <div className="flex flex-wrap gap-2">
+            {programs.map((program) => {
+              const selected = assignedProgramIds
+                .split(/[,|;]/)
+                .map((id) => id.trim())
+                .filter(Boolean)
+                .includes(program.id)
+              return (
+                <label
+                  key={program.id}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-xs"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={(event) => {
+                      const current = assignedProgramIds
+                        .split(/[,|;]/)
+                        .map((id) => id.trim())
+                        .filter(Boolean)
+                      setAssignedProgramIds(
+                        (event.target.checked
+                          ? [...current, program.id]
+                          : current.filter((id) => id !== program.id)
+                        ).join(', '),
+                      )
+                    }}
+                  />
+                  {program.name}
+                </label>
+              )
+            })}
+          </div>
+        </div>
+      ) : (
+        <input
+          value={assignedProgramIds}
+          onChange={(event) => setAssignedProgramIds(event.target.value)}
+          placeholder="Assigned program IDs (comma-separated). Required for instructor/coordinator"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+        />
+      )}
 
       <Button
         disabled={busy || !canSave}

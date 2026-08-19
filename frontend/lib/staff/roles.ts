@@ -213,6 +213,17 @@ export function canManageAllPrograms(profile: StaffProfile | null): boolean {
  return hasStaffRole(profile, ['admin', 'programs'])
 }
 
+/** Create/edit instructor and class-coordinator StaffRoles (not other board seats). */
+export const INSTRUCTOR_STAFF_ROLES: StaffRole[] = ['instructor', 'coordinator']
+
+export function canManageInstructorStaff(profile: StaffProfile | null): boolean {
+  return hasStaffRole(profile, ['admin', 'programs'])
+}
+
+export function isInstructorStaffOnly(roles: StaffRole[]): boolean {
+  return roles.length > 0 && roles.every((role) => INSTRUCTOR_STAFF_ROLES.includes(role))
+}
+
 export function scopedProgramIds(profile: StaffProfile | null): string[] | null {
  if (!profile) return []
  if (canManageAllPrograms(profile)) return null // null = no filter
@@ -283,11 +294,11 @@ export const ROLE_HOME_COPY: Record<
  },
  programs: {
  title: 'Fundraising & Programs',
- owns: 'Enrichment programs, sponsors, enrollee messaging',
+ owns: 'Enrichment programs, instructors, sponsors, enrollee messaging',
  thisWeek: [
- 'Message parents for active enrollments',
- 'Check seats / waitlists',
- 'Update sponsor pipeline',
+ 'Staff → Access: add instructors and assign their class IDs',
+ 'Staff → Programs: roster, registration, and nights',
+ 'Approve instructor timesheets',
  ],
  },
  retail: {
@@ -319,20 +330,20 @@ export const ROLE_HOME_COPY: Record<
  },
  instructor: {
  title: 'Program Instructor',
- owns: 'Your assigned classes. roster, sessions, parent messages, timesheets',
+ owns: 'Your assigned class: roster, attendance, parent messages, timesheets',
  thisWeek: [
- 'Submit timesheet hours to VP Programs',
- 'Send session reminders to your class',
- 'If paid as a contractor, send a completed W-9 to treasurer@shmspto.org',
+ 'Staff → Programs: open your class (Roster tab)',
+ 'Staff → Messages: email the class from the parent portal inbox',
+ 'Class night: Attendance tab, then Timesheets after you teach',
  ],
  },
  coordinator: {
  title: 'Class Coordinator',
  owns: 'Parent liaison for assigned programs (roster + messaging + hours)',
  thisWeek: [
- 'Confirm roster and waitlist with instructor',
- 'Submit coordinator hours if contracted',
- 'If paid as a contractor, send a completed W-9 to treasurer@shmspto.org',
+ 'Staff → Programs: confirm roster and waitlist with the instructor',
+ 'Staff → Messages: answer parent questions for your class',
+ 'Submit coordinator hours on Timesheets if contracted',
  ],
  },
 }

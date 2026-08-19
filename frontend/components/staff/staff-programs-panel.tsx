@@ -439,8 +439,8 @@ export function StaffProgramsPanel() {
         <h2 className="text-lg font-bold">Programs & sessions</h2>
         <p className="text-xs text-[#5A6070]">
           {canManageAll
-            ? 'Open/close registration, manage roster/waitlist, attendance, sessions, and message a class.'
-            : 'Your assigned programs. Roster, attendance, waitlist, sessions, and class messages.'}
+            ? 'Open/close registration, manage roster/waitlist, attendance, sessions, and message a class. Add instructors under Access.'
+            : 'Start here for your class: Roster (who is in), Messages (parents), Attendance (class night), then Timesheets (hours).'}
         </p>
         {canManageAll ? (
           <button

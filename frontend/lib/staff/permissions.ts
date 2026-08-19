@@ -102,7 +102,7 @@ export const WORKSPACE_ROLES: Record<StaffWorkspace, StaffRole[]> = {
   expenses: ALL_ROLES,
   help: ALL_ROLES,
   members: ['admin'],
-  access: ['admin'],
+  access: ['admin', 'programs'],
   social: ['marketing', 'admin'],
   canva: ['marketing', 'admin'],
   surveys: ['marketing', 'secretary', 'wellness', 'admin'],
