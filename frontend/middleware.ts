@@ -75,7 +75,12 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  if (PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
+  // Printable payment cheat sheet on Stone Hill — no session (table QR / print).
+  const staffPublic =
+    !demo &&
+    (pathname === '/staff/in-person' || pathname.startsWith('/staff/in-person/'))
+
+  if (!staffPublic && PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
     const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
     const demoOk =
       demo && hasDemoReviewCookie(req.cookies.get(DEMO_REVIEW_COOKIE)?.value)
