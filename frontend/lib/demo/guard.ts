@@ -25,7 +25,10 @@ const JOIN_ALLOW = new Set([
 
 export function isDemoJoinAllowPath(pathname: string): boolean {
   if (JOIN_ALLOW.has(pathname)) return true
-  return pathname.startsWith('/api/id')
+  if (pathname.startsWith('/api/id')) return true
+  if (pathname.startsWith('/api/commons')) return true
+  if (pathname.startsWith('/api/webhooks/commons')) return true
+  return false
 }
 
 const STAFF_GET_ALLOW = new Set([

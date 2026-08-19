@@ -261,6 +261,21 @@ async function fetchSiteSettingsGoals(): Promise<{
   }
 }
 
+async function demoFundraisingFetchedAt(): Promise<string> {
+  try {
+    const { commonsDbEnabled } = await import('@/lib/crm/db')
+    if (!commonsDbEnabled()) return ''
+    const { ensureCommonsReady } = await import('@/lib/crm/migrate')
+    const { riversideSnapshot } = await import('@/lib/crm/riverside')
+    const { getOrgSyncState } = await import('@/lib/crm/sync-state')
+    await ensureCommonsReady()
+    const state = await getOrgSyncState(riversideSnapshot().organization.id)
+    return state?.squareLastOkAt || state?.plaidLastOkAt || ''
+  } catch {
+    return ''
+  }
+}
+
 export async function getFundraisingTotals(): Promise<FundraisingData> {
   if (isDemoInstance()) {
     return {
@@ -276,7 +291,7 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
       volunteerHoursRaised: 210,
       volunteerHoursGoal: VOLUNTEER_HOURS_GOAL_DEFAULT,
       sponsorshipFromBank: 0,
-      fetchedAt: new Date().toISOString(),
+      fetchedAt: await demoFundraisingFetchedAt(),
     }
   }
 

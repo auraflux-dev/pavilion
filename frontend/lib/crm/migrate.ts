@@ -2,7 +2,9 @@ import { getMigrations } from 'better-auth/db/migration'
 import { getAuth } from '@/lib/crm/auth'
 import { commonsDbEnabled, sql } from '@/lib/crm/db'
 import { CRM_SCHEMA_SQL } from '@/lib/crm/schema-sql'
+import { CRM_PLATFORM_SQL } from '@/lib/crm/schema-platform-sql'
 import { riversideSnapshot } from '@/lib/crm/riverside'
+import { isDemoInstance } from '@/lib/demo/instance'
 
 let ready: Promise<void> | null = null
 
@@ -19,13 +21,14 @@ export async function ensureCommonsReady(): Promise<void> {
 
 async function migrateAndSeed(): Promise<void> {
   await sql(CRM_SCHEMA_SQL)
+  await sql(CRM_PLATFORM_SQL)
   const auth = getAuth()
   if (auth) {
     const ctx = await auth.$context
     const { runMigrations } = await getMigrations(ctx.options)
     await runMigrations()
   }
-  await seedRiverside()
+  if (isDemoInstance()) await seedRiverside()
 }
 
 async function seedRiverside(): Promise<void> {
@@ -128,8 +131,11 @@ async function seedRiverside(): Promise<void> {
   }
 
   await sql(
-    `insert into staff_assignments (person_id, role, board_title)
-     values ('p_jordan_lee', 'admin', 'President (demo)')
-     on conflict (person_id, role) do update set board_title = excluded.board_title`,
+    `insert into staff_assignments (person_id, role, board_title, organization_id)
+     values ('p_jordan_lee', 'admin', 'President (demo)', $1)
+     on conflict (person_id, role) do update set
+       board_title = excluded.board_title,
+       organization_id = excluded.organization_id`,
+    [org.id],
   )
 }

@@ -4,6 +4,7 @@ import { getAuth } from '@/lib/crm/auth'
 import { commonsDbEnabled, sql } from '@/lib/crm/db'
 import { ensureCommonsReady } from '@/lib/crm/migrate'
 import { riversideSnapshot } from '@/lib/crm/riverside'
+import { requireOrganizationId } from '@/lib/crm/tenant'
 
 function passwordForEmail(email: string): string {
   const secret = process.env.BETTER_AUTH_SECRET || process.env.DEMO_SIGNING_SECRET || 'demo'
@@ -30,7 +31,7 @@ export async function persistDemoJoin(opts: {
   if (!commonsDbEnabled()) return
   try {
     await ensureCommonsReady()
-    const orgId = riversideSnapshot().organization.id
+    const orgId = requireOrganizationId(riversideSnapshot().organization.id)
     const email = opts.email.trim().toLowerCase()
     await sql(
       `insert into people (id, organization_id, email, first_name, last_name, phone)

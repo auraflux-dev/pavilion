@@ -92,3 +92,6 @@ create table if not exists staff_assignments (
   board_title  text not null default '',
   primary key (person_id, role)
 );
+
+-- Platform tables (connectors, sync, audit, errors) live in schema-platform-sql.ts
+-- and are applied by ensureCommonsReady().

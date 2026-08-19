@@ -21,6 +21,7 @@ export type ReportErrorOptions = {
   tags?: Record<string, string>
   extra?: Record<string, unknown>
   eventId?: string
+  organizationId?: string
 }
 
 export async function reportError(
@@ -58,6 +59,33 @@ export async function reportError(
     } catch (webhookErr) {
       console.error('[error-reporting] webhook failed', webhookErr)
     }
+  }
+
+  try {
+    const { commonsDbEnabled } = await import('@/lib/crm/db')
+    if (commonsDbEnabled()) {
+      const { sql } = await import('@/lib/crm/db')
+      await sql(
+        `insert into error_events (
+           event_id, organization_id, route, message, stack, tags_json, extra_json
+         ) values ($1, $2, $3, $4, $5, $6, $7)
+         on conflict (event_id) do nothing`,
+        [
+          eventId,
+          options.organizationId || null,
+          options.route || '',
+          message.slice(0, 2000),
+          (stack || '').slice(0, 8000),
+          JSON.stringify(options.tags || {}),
+          JSON.stringify(options.extra || {}).slice(0, 4000),
+        ],
+      )
+    }
+  } catch (pgErr) {
+    console.warn(
+      '[error-reporting] error_events insert skipped',
+      pgErr instanceof Error ? pgErr.message : pgErr,
+    )
   }
 
   try {

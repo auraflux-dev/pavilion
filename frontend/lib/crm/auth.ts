@@ -34,7 +34,7 @@ export function createCommonsAuth() {
 let cached: ReturnType<typeof createCommonsAuth> | undefined
 
 export function getAuth() {
-  if (!isDemoInstance()) return null
+  if (!isDemoInstance() && process.env.COMMONS_PLATFORM !== 'true') return null
   if (cached !== undefined) return cached
   cached = createCommonsAuth()
   return cached

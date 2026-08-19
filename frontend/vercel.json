@@ -26,6 +26,14 @@
     {
       "path": "/api/cron/sync-paypal-activity",
       "schedule": "20 15 * * *"
+    },
+    {
+      "path": "/api/cron/backup-commons-pg",
+      "schedule": "30 7 * * *"
+    },
+    {
+      "path": "/api/cron/sync-commons-connectors",
+      "schedule": "0 16 * * *"
     }
   ],
   "redirects": [

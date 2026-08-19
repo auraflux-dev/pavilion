@@ -44,6 +44,7 @@ import { StaffWhatsAppQueuePanel } from '@/components/staff/staff-whatsapp-queue
 import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
 import { StaffTimesheetsPanel } from '@/components/staff/staff-timesheets-panel'
 import { StaffHelpPanel } from '@/components/staff/staff-help-panel'
+import { StaffSyncFreshnessChip } from '@/components/staff/staff-sync-freshness-chip'
 import { StaffPersonalEmailPanel } from '@/components/staff/staff-personal-email-panel'
 import { StaffShell } from '@/components/shells/staff-shell'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
@@ -419,6 +420,9 @@ export function StaffDashboard() {
                 Roles: {me.roles.join(', ')}. Staff login: {me.email}. Open a workspace from the top
                 nav. Only what you need for that job.
               </p>
+              <div className="mt-3">
+                <StaffSyncFreshnessChip />
+              </div>
             </div>
             <StaffPersonalEmailPanel
               initialEmail={me.personalEmail ?? ''}

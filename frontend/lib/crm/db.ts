@@ -3,8 +3,13 @@ import { isDemoInstance } from '@/lib/demo/instance'
 
 let pool: Pool | null = null
 
+/** True on the Commons demo project or a paying Commons app. Never set DATABASE_URL on Stone Hill. */
+export function isCommonsPlatform(): boolean {
+  return isDemoInstance() || process.env.COMMONS_PLATFORM === 'true'
+}
+
 export function commonsDbEnabled(): boolean {
-  return Boolean(process.env.DATABASE_URL?.trim()) && isDemoInstance()
+  return Boolean(process.env.DATABASE_URL?.trim()) && isCommonsPlatform()
 }
 
 export function getPool(): Pool | null {
