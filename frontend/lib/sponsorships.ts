@@ -15,9 +15,9 @@ export type SponsorshipPackage = {
   groups: SponsorshipPerkGroup[]
 }
 
-function websiteAndFacebook(logoListing: string) {
+function websiteAndFacebook(promotion: string) {
   return [
-    `${logoListing} logo and link on the PTO website Sponsorship page, Member Portal, and Facebook/Instagram during all events`,
+    `${promotion}: logo and link on the PTO website Sponsorship page, Member Portal, and Facebook/Instagram during all events`,
     '1 post per month to WhatsApp groups of over 1,000 parents',
     '1 post per month to Facebook and Instagram',
   ]
@@ -42,7 +42,7 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
       },
       {
         label: 'Website & Facebook',
-        items: websiteAndFacebook('Full-year'),
+        items: websiteAndFacebook('Full Year Promotion'),
       },
       {
         label: 'Newsletter & event ads',
@@ -65,16 +65,14 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
         label: 'Sponsor recognition',
         items: [
           'Logo on banner at 3 events',
-          'Logo inclusion on take-home folders',
           'Announced at 3 events',
-          'Logo printed on student event tees',
           'Flier distribution at events',
           'Frameable participation certificate',
         ],
       },
       {
         label: 'Website & Facebook',
-        items: websiteAndFacebook('Half-year'),
+        items: websiteAndFacebook('Half Year Promotion'),
       },
       {
         label: 'Newsletter & event ads',
@@ -96,16 +94,14 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
         label: 'Sponsor recognition',
         items: [
           'Logo on banner at 1 event',
-          'Logo inclusion on take-home folders',
           'Announced at 1 event',
-          'Logo printed on student event tees',
           'Flier distribution at events',
           'Frameable participation certificate',
         ],
       },
       {
         label: 'Website & Facebook',
-        items: websiteAndFacebook('Quarter-year'),
+        items: websiteAndFacebook('Quarter of Year Promotion'),
       },
       {
         label: 'Newsletter & event ads',
@@ -120,7 +116,7 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
 
 export const SPONSORSHIP_COMPARE = [
   {
-    label: 'Logo on website & portal',
+    label: 'Website promotion',
     platinum: 'Full year',
     gold: 'Half year',
     silver: 'Quarter of the year',

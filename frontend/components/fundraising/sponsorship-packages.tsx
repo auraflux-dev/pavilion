@@ -117,7 +117,7 @@ export function SponsorshipPackages() {
 
       <p className="text-center text-xs text-[#5A6070] mt-4 max-w-2xl mx-auto">
         {vanillaizeIfDemo(
-          'Each package is one payment for the 2026–27 school year. Full year, half year, and quarter are how long your logo stays on the website and portal. Gifts support SHMS PTO (501(c)(3)), not Loudoun County Public Schools.',
+          'Each package is one payment for the 2026–27 school year. Full Year, Half Year, and Quarter of Year Promotion is how long your logo is listed on the website and portal. Gifts support SHMS PTO (501(c)(3)), not Loudoun County Public Schools.',
         )}
       </p>
     </div>
