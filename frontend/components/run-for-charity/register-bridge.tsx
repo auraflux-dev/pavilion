@@ -46,7 +46,7 @@ export function RunForCharityRegisterBridge({ compact = false }: Props) {
 
       {!compact ? (
         <p className="text-xs text-center text-[#5A6070] whitespace-pre-line leading-relaxed">
-          {`Early bird through Aug 15\nAdults $25 · Kids $15\nRace day: Sunday, Sep 13, 2026 · Rock Ridge High School.`}
+          {`Adults $30 · Kids $20\nRace day: Sunday, Sep 13, 2026 · Rock Ridge High School.`}
         </p>
       ) : null}
     </div>

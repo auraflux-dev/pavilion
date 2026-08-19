@@ -37,6 +37,7 @@ const FALLBACK_CTAS: FundraisingCTA[] = [
   { id: 'f2', title: 'Load the Cove Digital Card', description: 'Load $20 to $50 onto your family Cove Digital Card. They spend, PTO earns.', ctaLabel: 'Load Card', href: '/cove', icon: 'ShoppingBag', sortOrder: 2, active: true },
   { id: 'f3', title: 'Volunteer',          description: 'Give an hour at the store window or help at an event.',                         ctaLabel: 'Sign Up',   href: '/volunteer',  icon: 'Users',       sortOrder: 3, active: true },
   { id: 'f4', title: 'Spread the Word',    description: 'Tell other SHMS PTO families. More members means more programs.',                  ctaLabel: 'Share',     href: '/membership', icon: 'Heart',       sortOrder: 4, active: true },
+  { id: 'f5', title: 'Run for Charity (school code SHMS)', description: 'Best Runners 1K & 5K on Sep 13 at Rock Ridge. Adults $30 · Kids $20. Use code SHMS so Stone Hill receives 100% of your registration fee.', ctaLabel: 'Register with code SHMS', href: '/events/run-for-charity-1k-5k-best-runners-code-shms#register', icon: 'Ticket', sortOrder: 5, active: true },
 ]
 
 function vanillaizeCtas(items: FundraisingCTA[]): FundraisingCTA[] {

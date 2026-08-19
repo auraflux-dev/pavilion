@@ -83,6 +83,16 @@ export function earlyBirdCallout(text?: string, now = new Date()): string | null
   return promo
 }
 
+/** Hosted flyer when Wix Events does not return a mainImage. */
+function localFlyerUrl(slug?: string): string | undefined {
+  const s = String(slug || '').toLowerCase()
+  if (s.includes('back-to-school-night')) return '/events/back-to-school-night-2026.jpg'
+  if (isRunForCharitySlug(slug) || s.includes('run-for-charity')) {
+    return '/events/run-for-charity-2026.jpg'
+  }
+  return undefined
+}
+
 /** Turn a Wix image URI or URL into a browser-safe static URL. */
 function resolveWixImageUrl(image: unknown): string | undefined {
   if (!image) return undefined
@@ -181,7 +191,7 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
               }
             : undefined,
           mainImage: (() => {
-            const url = resolveWixImageUrl(ev.mainImage)
+            const url = localFlyerUrl(slug) || resolveWixImageUrl(ev.mainImage)
             return url ? { url } : undefined
           })(),
           slug,

@@ -22,9 +22,8 @@ export const RUN_FOR_CHARITY_REGISTER_URL = `https://www.shmspto.org${RUN_FOR_CH
 export const BEST_RUNNERS_SIGNUP_URL =
   'https://bestrunners.org/register/signup?ref=SHMS'
 
-/** Printable landing-page flyer (QR already encodes the SHMS signup URL). */
-export const RUN_FOR_CHARITY_FLYER_PDF_URL =
-  'https://509fda24-8dbf-43c6-aa74-df9f8b63c388.usrfiles.com/ugd/1697ba_2bc40804693545079a2772070f2f264f.pdf'
+/** Current official flyer (QR encodes the SHMS signup URL). */
+export const RUN_FOR_CHARITY_FLYER_PDF_URL = '/events/run-for-charity-2026.jpg'
 
 export function isRunForCharitySlug(slug?: string | null): boolean {
   return String(slug || '').trim() === RUN_FOR_CHARITY_EVENT_SLUG

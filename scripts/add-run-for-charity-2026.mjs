@@ -13,7 +13,7 @@ const root = resolve(__dirname, '..')
 
 const FLYER_SRC = resolve(
   process.env.HOME,
-  '.cursor/projects/Users-robertgregory-wix-shmspto/assets/R4C2026-1__1_-2522e732-e79a-47a5-bea5-f8a240f70532.png',
+  '.cursor/projects/Users-robertgregory-wix-shmspto/assets/WhatsApp_Image_2026-08-18_at_21.03.40-53fa3750-bb7e-4c74-bf8a-2382e4151b2a.png',
 )
 const REGISTER_URL =
   'https://www.shmspto.org/events/run-for-charity-1k-5k-best-runners-code-shms#register'
@@ -98,10 +98,10 @@ function descriptionText() {
     'Best Runners USA · 14th Annual Run for Charity — 1K & 5K run/walk for families.',
     `Our register link applies school / referral code ${SCHOOL_CODE} so 100% of registration fees come back to Stone Hill (bonus funding available based on participation).`,
     'Best Runners handles race day; SHMS PTO shares the invite with our community.',
-    'Early bird through Aug 15: Adults $25 · Kids $15. After Aug 15: Adults $30 · Kids $20.',
-    'Includes race shirt, finisher medal, and post-race snacks.',
+    'Adults $30 · Kids $20. Includes race shirt, finisher medal, and post-race snacks.',
     `Register: ${REGISTER_URL}`,
     `Best Runners signup (school code ${SCHOOL_CODE} is in the link): ${BEST_RUNNERS_SIGNUP}`,
+    'Landing page: https://bestrunners.org/run4charity',
   ].join('\n\n')
 }
 
@@ -140,7 +140,7 @@ async function main() {
       timeZoneId: 'America/New_York',
     },
     mainImage: { id: flyer.id },
-    shortDescription: `Our register link applies school code ${SCHOOL_CODE}. Early bird ends Aug 15. 43460 Loudoun Reserve Dr, Ashburn.`,
+    shortDescription: `Adults $30 · Kids $20. Use school code ${SCHOOL_CODE}. Rock Ridge High School, 43460 Loudoun Reserve Dr, Ashburn.`,
   }
   const descriptionPatch = {
     description: {
@@ -208,7 +208,7 @@ async function main() {
   )
   const ctaData = {
     title: 'Run for Charity (school code SHMS)',
-    description: `Copy school code ${SCHOOL_CODE}, then register for Best Runners’ 1K/5K on Sep 13 at Rock Ridge. Stone Hill receives 100% of your registration fee. Early bird through Aug 15.`,
+    description: `Best Runners 1K & 5K on Sep 13 at Rock Ridge. Adults $30 · Kids $20. Use code ${SCHOOL_CODE} so Stone Hill receives 100% of your registration fee.`,
     ctaLabel: 'Register with code SHMS',
     href: '/events/run-for-charity-1k-5k-best-runners-code-shms#register',
     icon: 'Ticket',
@@ -227,6 +227,42 @@ async function main() {
       dataItem: { data: ctaData },
     })
     console.log('Created Fundraising CTA', inserted.dataItem?.id)
+  }
+
+  const calendar = await wix('/wix-data/v2/items/query', {
+    dataCollectionId: 'PortalCalendarEvents',
+    query: { paging: { limit: 50 } },
+  })
+  const calHit = (calendar.dataItems || []).find((it) =>
+    String(it.data?.title || '')
+      .toLowerCase()
+      .includes('run for charity'),
+  )
+  const calData = {
+    title: 'Run for Charity 1K & 5K',
+    subtitle: 'Best Runners · Rock Ridge · Adults $30 · Kids $20 · code SHMS',
+    startAt: startDate,
+    endAt: endDate,
+    href: '/events/run-for-charity-1k-5k-best-runners-code-shms#register',
+    audience: 'all',
+    active: true,
+  }
+  if (calHit?.id) {
+    await wix(
+      `/wix-data/v2/items/${calHit.id}`,
+      {
+        dataCollectionId: 'PortalCalendarEvents',
+        dataItem: { id: calHit.id, data: { ...calHit.data, ...calData } },
+      },
+      'PUT',
+    )
+    console.log('Updated portal calendar', calHit.id)
+  } else {
+    const inserted = await wix('/wix-data/v2/items', {
+      dataCollectionId: 'PortalCalendarEvents',
+      dataItem: { data: calData },
+    })
+    console.log('Created portal calendar', inserted.dataItem?.id)
   }
 
   console.log('\nDone.')

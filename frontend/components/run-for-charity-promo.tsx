@@ -151,7 +151,7 @@ export function RunForCharityPromo() {
                 rel="noopener noreferrer"
                 className="block text-sm font-semibold text-white/80 hover:text-white underline underline-offset-2"
               >
-                Download printable flyer (PDF)
+                Download flyer
               </a>
             </div>
 
@@ -177,8 +177,8 @@ export function RunForCharityPromo() {
               </p>
               <Image
                 src="/events/run-for-charity-2026.jpg"
-                alt="Run for Charity 1K and 5K flyer: Sunday September 13 2026 at Rock Ridge High School, early bird through August 15"
-                width={721}
+                alt="Run for Charity 1K and 5K flyer: Sunday September 13 2026 at Rock Ridge High School, adults $30 kids $20"
+                width={791}
                 height={1024}
                 className="w-full h-auto"
                 priority

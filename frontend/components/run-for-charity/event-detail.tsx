@@ -202,6 +202,9 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
                 <ExternalLink className="w-4 h-4 mr-2" aria-hidden="true" />
                 Register on Best Runners
               </Button>
+              <p className="text-xs text-center text-[#5A6070] leading-relaxed">
+                Adults $30 · Kids $20 · medal, race shirt, post-race snacks
+              </p>
               <p className="text-center">
                 <a
                   href={RUN_FOR_CHARITY_FLYER_PDF_URL}
@@ -209,7 +212,7 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
                   rel="noopener noreferrer"
                   className="text-sm font-semibold text-[var(--brand-green)] hover:underline underline-offset-2"
                 >
-                  Download printable flyer (PDF)
+                  Download flyer
                 </a>
               </p>
             </div>
