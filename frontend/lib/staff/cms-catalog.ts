@@ -473,11 +473,6 @@ export const SITE_SETTING_GROUPS: {
         key: 'volunteerHoursGoal',
  label: 'Internal goal. Volunteer hours (staff only)',
       },
-      { key: 'allocStudentEnrichment', label: 'Alloc % student enrichment' },
-      { key: 'allocSchoolEvents', label: 'Alloc % school events' },
-      { key: 'allocTeacherSupport', label: 'Alloc % teacher support' },
-      { key: 'allocStoreOps', label: 'Alloc % The Cove ops' },
-      { key: 'allocPTOAdmin', label: 'Alloc % PTO admin' },
     ],
   },
   {

@@ -1,6 +1,7 @@
 import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { getFundAllocationActuals } from '@/lib/api/fund-allocation'
 import { getFundraisingTotals } from '@/lib/api/fundraising'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getFundraisingCTAs } from '@/lib/api/fundraising-ctas'
@@ -40,12 +41,13 @@ function fmtDollars(n: number) {
 }
 
 export default async function FundraisingPage() {
-  const [data, settings, ctas, page, sponsors] = await Promise.all([
+  const [data, settings, ctas, page, sponsors, allocations] = await Promise.all([
     getFundraisingTotals(),
     getSiteSettings(),
     getFundraisingCTAs(),
     getPageContent('fundraising'),
     getActiveSponsors(),
+    getFundAllocationActuals(),
   ])
   const { totals, goals, volunteerHoursRaised, volunteerHoursGoal, sponsorshipFromBank } = data
   const sponsorshipRaised =
@@ -57,13 +59,10 @@ export default async function FundraisingPage() {
 
   const ANNUAL_GOAL = settings.getNumber('fundraisingAnnualGoal', 21667)
 
-  const ALLOCATIONS = [
-    { label: 'Student Enrichment Programs', pct: settings.getNumber('allocStudentEnrichment', 45), amount: '' },
-    { label: 'School Events & Celebrations', pct: settings.getNumber('allocSchoolEvents', 25),    amount: '' },
-    { label: 'Teacher & Classroom Support',  pct: settings.getNumber('allocTeacherSupport', 15),  amount: '' },
-    { label: vanillaizeIfDemo('The Cove Operations'),          pct: settings.getNumber('allocStoreOps', 10),         amount: '' },
-    { label: 'PTO Admin & Communications',   pct: settings.getNumber('allocPTOAdmin', 5),          amount: '' },
-  ].map(a => ({ ...a, amount: fmtDollars(ANNUAL_GOAL * a.pct / 100) }))
+  const allocationRows = allocations.rows.map((row) => ({
+    ...row,
+    label: row.id === 'coveOps' ? vanillaizeIfDemo(row.label) : row.label,
+  }))
 
   const totalRaised =
     totals.membership +
@@ -320,13 +319,15 @@ export default async function FundraisingPage() {
             </div>
 
             <div className="space-y-5">
-              {ALLOCATIONS.map((item) => (
-                <div key={item.label}>
+              {allocationRows.map((item) => (
+                <div key={item.id}>
                   <div className="flex justify-between text-sm font-semibold mb-1.5">
                     <span style={{ color: '#1A1A1A' }}>{item.label}</span>
                     <span style={{ color: 'var(--brand-green)' }}>
-                      {item.amount}{' '}
-                      <span className="text-[#5A6070] font-normal">({item.pct}%)</span>
+                      {fmtDollars(item.spent)}{' '}
+                      <span className="text-[#5A6070] font-normal">
+                        ({allocations.totalSpent > 0 ? `${item.pct}%` : '0%'})
+                      </span>
                     </span>
                   </div>
                   <div className="w-full bg-[var(--border)] rounded-full h-3">
@@ -337,7 +338,7 @@ export default async function FundraisingPage() {
                       aria-valuenow={item.pct}
                       aria-valuemin={0}
                       aria-valuemax={100}
-                      aria-label={`${item.label}: ${item.pct}%`}
+                      aria-label={`${item.label}: ${fmtDollars(item.spent)} spent (${item.pct}% of total)`}
                     />
                   </div>
                 </div>
@@ -345,7 +346,12 @@ export default async function FundraisingPage() {
             </div>
 
             <p className="text-center text-xs text-[#5A6070] mt-8">
-              Based on the current annual goal of {fmtDollars(ANNUAL_GOAL)}. Totals are this school year (August–July): Square and PayPal checkout, plus Bank of America deposits that are not Square/PayPal payouts.
+              Actual spending this school year ({allocations.schoolYearLabel}, August–July) from the PTO budget: bank withdrawals, reimbursements, and other logged expenses. Updates when Staff → Budget is refreshed or new activity is imported.
+              {allocations.totalSpent > 0 ? (
+                <> Total spent so far: {fmtDollars(allocations.totalSpent)}.</>
+              ) : (
+                <> No budget expenses logged yet this school year.</>
+              )}
             </p>
           </div>
         </section>
