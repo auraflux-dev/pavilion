@@ -44,6 +44,108 @@ async function getAccessToken(): Promise<string> {
   return data.access_token as string
 }
 
+export type PaypalAccountPayment = {
+  id: string
+  date: string
+  amount: number
+  name: string
+  type: string
+}
+
+function paypalApiDate(d: Date) {
+  return d.toISOString().replace(/\.\d{3}Z$/, 'Z')
+}
+
+/** Transaction Search (Reporting API). Needs Transaction Search enabled on the Live app. 31-day windows. */
+export async function listPayPalAccountPayments(opts: {
+  from: Date
+  to: Date
+}): Promise<{ payments: PaypalAccountPayment[]; error?: string }> {
+  if (!isPayPalConfigured()) {
+    return { payments: [], error: 'PayPal Client ID and Secret are not set on Vercel.' }
+  }
+  let token: string
+  try {
+    token = await getAccessToken()
+  } catch (err) {
+    return {
+      payments: [],
+      error: err instanceof Error ? err.message : 'PayPal login failed',
+    }
+  }
+  const payments: PaypalAccountPayment[] = []
+  const maxMs = 30 * 24 * 60 * 60 * 1000
+  let cursor = opts.from.getTime()
+  const end = Math.min(opts.to.getTime(), Date.now())
+  while (cursor < end) {
+    const sliceEnd = Math.min(cursor + maxMs, end)
+    const start = paypalApiDate(new Date(cursor))
+    const stop = paypalApiDate(new Date(sliceEnd))
+    let page = 1
+    for (;;) {
+      const url = new URL(`${paypalBaseUrl()}/v1/reporting/transactions`)
+      url.searchParams.set('start_date', start)
+      url.searchParams.set('end_date', stop)
+      url.searchParams.set('fields', 'transaction_info,payer_info,cart_info')
+      url.searchParams.set('page_size', '100')
+      url.searchParams.set('page', String(page))
+      url.searchParams.set('transaction_status', 'S')
+      const res = await fetch(url.toString(), {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      })
+      const body = await res.text()
+      if (!res.ok) {
+        const hint =
+          res.status === 403 || res.status === 401
+            ? ' Enable Transaction Search on the PayPal Live app, then confirm Client ID and Secret on Vercel.'
+            : ''
+        return { payments, error: `PayPal reporting ${res.status}.${hint} ${body.slice(0, 180)}` }
+      }
+      const data = JSON.parse(body) as {
+        transaction_details?: Array<{
+          transaction_info?: {
+            transaction_id?: string
+            transaction_initiation_date?: string
+            transaction_amount?: { value?: string }
+            transaction_event_code?: string
+            transaction_subject?: string
+            invoice_id?: string
+            custom_field?: string
+          }
+          payer_info?: { payer_name?: { alternate_full_name?: string } }
+          cart_info?: { item_details?: Array<{ item_name?: string }> }
+        }>
+        total_pages?: number
+      }
+      for (const row of data.transaction_details ?? []) {
+        const info = row.transaction_info ?? {}
+        const amount = Number(info.transaction_amount?.value ?? 0)
+        if (!(amount > 0)) continue
+        const code = String(info.transaction_event_code ?? '')
+        const type = code || 'payment'
+        const item = row.cart_info?.item_details?.map((i) => i.item_name).filter(Boolean).join(' ') ?? ''
+        const name = [info.transaction_subject, info.invoice_id, info.custom_field, item, row.payer_info?.payer_name?.alternate_full_name]
+          .filter(Boolean)
+          .join(' ')
+        const when = String(info.transaction_initiation_date ?? '')
+        payments.push({
+          id: String(info.transaction_id ?? ''),
+          date: when.slice(0, 10),
+          amount,
+          name,
+          type,
+        })
+      }
+      const pages = Number(data.total_pages ?? 1)
+      if (page >= pages) break
+      page += 1
+    }
+    cursor = sliceEnd + 1
+  }
+  return { payments }
+}
+
 export async function createPayPalOrder(opts: {
   amount: number
   description: string

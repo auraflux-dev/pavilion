@@ -34,6 +34,8 @@ import { refreshPlaidIntoBudget } from '@/lib/staff/plaid-sync'
 import { isBankOrigin } from '@/lib/staff/budget-bank'
 import { importBofaCsv } from '@/lib/staff/bofa-csv'
 import { importPaypalCsv } from '@/lib/staff/paypal-csv'
+import { refreshPaypalIntoBudget } from '@/lib/staff/paypal-sync'
+import { isPayPalConfigured } from '@/lib/paypal'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -74,6 +76,9 @@ async function payload(
     plaid: {
       configured: plaidConfigured(),
       ...publicPlaidStatus(plaidItems),
+    },
+    paypal: {
+      configured: isPayPalConfigured(),
     },
     bankConnected,
   }
@@ -154,6 +159,20 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'refresh') {
+      const notes: string[] = []
+      if (isPayPalConfigured()) {
+        const paypal = await refreshPaypalIntoBudget({
+          fiscalYear: year,
+          actorEmail: session.email,
+        })
+        notes.push(
+          paypal.error
+            ? `PayPal: ${paypal.error}`
+            : `PayPal live · ${paypal.added} new, ${paypal.updated} already in`,
+        )
+      } else {
+        notes.push('PayPal live feed is off until Client ID, Secret, and Transaction Search are set.')
+      }
       if (plaidConfigured() && (await hasActivePlaidItem())) {
         const result = await refreshPlaidIntoBudget({
           fiscalYear: year,
@@ -167,7 +186,7 @@ export async function POST(req: NextRequest) {
             added: result.added,
             updated: result.updated,
             source: 'plaid',
-            message: result.message,
+            message: [...notes, result.message].filter(Boolean).join(' · '),
           })),
         })
       }
@@ -177,7 +196,12 @@ export async function POST(req: NextRequest) {
       })
       return NextResponse.json({
         ok: true,
-        ...(await payload(year, { entries, added, source: 'staff' })),
+        ...(await payload(year, {
+          entries,
+          added,
+          source: 'staff',
+          message: notes.join(' · '),
+        })),
       })
     }
 

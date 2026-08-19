@@ -1,7 +1,7 @@
 /**
  * Fundraising totals for the current school year (Aug 1 → Jul 31).
  *
- * Cove Digital Card bar = card used as tender at the window (not loads).
+ * Cove Digital Card bar = family paid to load the card (not window spend).
  * Cove shop = spirit wear and snacks sold any other way (Stand, cash, Zelle, site).
  * Square / PayPal site checkout and Stand POS → Payments.
  * Bank of America and PayPal activity CSVs (Staff → Budget import) → PtoBudgetEntries.
@@ -63,6 +63,7 @@ function inWindow(iso: string, fromMs: number, toMs: number) {
 
 function mapBankSyncKey(key: string): keyof InitiativeTotals | null {
   if (key === 'memberships') return 'membership'
+  if (key === 'cove_loads') return 'store'
   if (key === 'cove_shop') return 'spiritWear'
   if (key === 'dance_night') return 'danceNight'
   if (key === 'nova_math') return 'novaMath'
@@ -80,8 +81,8 @@ function mapBankSyncKey(key: string): keyof InitiativeTotals | null {
 
 /**
  * Public tracker split:
- * - Cove Digital Card = prepaid card used as tender (register redeem), not loads.
- * - Cove shop = spirit wear or snack/candy sold any other way (Stand, cash, Zelle, site).
+ * - Cove Digital Card = family paid to load the card (cash in). Window spend is not new money.
+ * - Cove shop = spirit wear or snack/candy sold with Square, cash, Zelle, or the site.
  */
 function classifyFundraisingPayment(
   source: string,
@@ -95,13 +96,8 @@ function classifyFundraisingPayment(
   const method = paymentMethod.toLowerCase()
   if (src.includes('load_failed') || st.includes('fail') || st.includes('reconcil')) return null
   if (src === 'membership_gift_card') return null
-  if (src.includes('store_card') || src.includes('auto_topoff')) return null
-
-  const cardAsTender =
-    src.includes('register_redeem') ||
-    method.includes('cove family') ||
-    method.includes('cove digital')
-  if (cardAsTender) return 'store'
+  if (src.includes('register_redeem') || method.includes('cove family')) return null
+  if (src.includes('store_card') || src.includes('auto_topoff')) return 'store'
 
   if (src.includes('membership')) return 'membership'
   if (

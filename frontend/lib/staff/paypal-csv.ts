@@ -106,15 +106,15 @@ function findHeaderIndex(rows: string[][]) {
   return -1
 }
 
-function isSkippedType(type: string) {
+export function isSkippedPaypalType(type: string) {
   return /withdraw|payout|transfer to|bank deposit|hold|reserve|reversal|refund|fee|currency conversion|general authorization/i.test(
     type,
   )
 }
 
-function classifyPaypal(type: string, name: string): string | null {
+export function classifyPaypal(type: string, name: string): string | null {
   const t = `${type} ${name}`.toLowerCase()
-  if (isSkippedType(type)) return null
+  if (isSkippedPaypalType(type)) return null
   if (/membership/.test(t)) return 'memberships'
   if (/store card|cove digital|gift card|auto.?top/.test(t)) return 'cove_loads'
   if (/spirit|hoodie|shirt|shop|vintage|drawstring/.test(t)) return 'cove_shop'
@@ -153,7 +153,7 @@ export function parsePaypalCsv(text: string): ParsedPaypalRow[] {
     const amount = moneyCell(raw[grossIdx] ?? '')
     if (amount == null || !(amount > 0)) continue
     const type = String(raw[typeIdx] ?? '').trim()
-    if (isSkippedType(type)) continue
+    if (isSkippedPaypalType(type)) continue
     const description = String(raw[nameIdx >= 0 ? nameIdx : 1] ?? type).trim()
     out.push({ date, description, amount, type })
   }

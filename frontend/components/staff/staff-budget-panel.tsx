@@ -449,7 +449,8 @@ export function StaffBudgetPanel() {
       <div className="rounded-lg border border-[var(--border)] bg-[#F7F4EE] px-3 py-3 space-y-2">
         <p className="text-sm font-bold">Import Bank of America CSV</p>
         <p className="text-xs text-[#5A6070]">
-          Checking → Activity → Download → CSV. Only <strong>August 1 – July 31</strong> of this school year
+          Live BoA is Plaid (Connect bank above). Live PayPal is Transaction Search on the Live app plus
+          non-empty Vercel secrets. CSV is backup. Only <strong>August 1 – July 31</strong> of this school year
           is used (not the whole download). Square and PayPal <strong>payouts are skipped</strong> so
           memberships, Cove, and tickets stay on Staff Payments. Zelle, checks, ACH, Sam’s, and Amazon still
           import and show on Fundraising. Re-importing the same file will not double-count.

@@ -90,7 +90,7 @@ export default async function FundraisingPage() {
       id: 'store',
       icon: ShoppingBag,
       label: vanillaizeIfDemo('The Cove Digital Card'),
-      description: vanillaizeIfDemo('Counted when a student pays with the Cove Digital Card at The Cove window.'),
+      description: vanillaizeIfDemo('Counted when a family loads the Cove Digital Card. Spending the balance at the window is not counted twice.'),
       raised: totals.store,
       goal:   goals.store,
       href: '/cove',

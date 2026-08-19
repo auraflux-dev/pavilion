@@ -26,9 +26,10 @@ Card payments already run **in-portal via Square**. Card + PayPal both run on th
 In the app settings, enable:
 
 - **Checkout** (Orders v2 / PayPal buttons)
+- **Transaction Search** (Reporting API) so Staff/Fundraising can pull account activity hourly without a CSV
 - Optional: **Venmo** if you want Venmo in the US wallet stack
 
-Leave webhooks for later (order capture can be confirmed in the API response first).
+Live Client ID and Secret must be non-empty on Vercel (`NEXT_PUBLIC_PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_ENVIRONMENT=live`). Empty values mean we cannot list the business account.
 
 ## 3. Put credentials in Vercel (and local `.env.local`)
 
