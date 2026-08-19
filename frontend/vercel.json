@@ -21,11 +21,11 @@
     },
     {
       "path": "/api/cron/sync-budget-plaid",
-      "schedule": "25 * * * *"
+      "schedule": "0 15 * * *"
     },
     {
       "path": "/api/cron/sync-paypal-activity",
-      "schedule": "40 * * * *"
+      "schedule": "20 15 * * *"
     }
   ],
   "redirects": [
