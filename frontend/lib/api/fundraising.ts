@@ -1,6 +1,8 @@
 /**
  * Fundraising totals for the current school year (Aug 1 → Jul 31).
  *
+ * Cove Digital Card bar = card used as tender at the window (not loads).
+ * Cove shop = spirit wear and snacks sold any other way (Stand, cash, Zelle, site).
  * Square / PayPal site checkout and Stand POS → Payments.
  * Bank of America and PayPal activity CSVs (Staff → Budget import) → PtoBudgetEntries.
  * Only Aug 1 – Jul 31 of the current school year. Square/PayPal *payouts* in the
@@ -11,7 +13,7 @@
 
 import { getWixClient } from '@/lib/wix-client'
 import { isDemoInstance } from '@/lib/demo/instance'
-import { classifyPayment, listBudgetEntries } from '@/lib/staff/budget-sync'
+import { listBudgetEntries } from '@/lib/staff/budget-sync'
 import { DEFAULT_FISCAL_YEAR } from '@/lib/staff/budget'
 
 export const VOLUNTEER_HOURS_RAISED_DEFAULT = 0
@@ -59,9 +61,8 @@ function inWindow(iso: string, fromMs: number, toMs: number) {
   return Number.isFinite(t) && t >= fromMs && t <= toMs
 }
 
-function mapSyncKey(key: string): keyof InitiativeTotals | null {
+function mapBankSyncKey(key: string): keyof InitiativeTotals | null {
   if (key === 'memberships') return 'membership'
-  if (key === 'cove_loads' || key === 'cove_pos') return 'store'
   if (key === 'cove_shop') return 'spiritWear'
   if (key === 'dance_night') return 'danceNight'
   if (key === 'nova_math') return 'novaMath'
@@ -73,6 +74,71 @@ function mapSyncKey(key: string): keyof InitiativeTotals | null {
     key === 'unclassified_income'
   ) {
     return 'other'
+  }
+  return null
+}
+
+/**
+ * Public tracker split:
+ * - Cove Digital Card = prepaid card used as tender (register redeem), not loads.
+ * - Cove shop = spirit wear or snack/candy sold any other way (Stand, cash, Zelle, site).
+ */
+function classifyFundraisingPayment(
+  source: string,
+  programName: string,
+  status: string,
+  paymentMethod: string,
+): keyof InitiativeTotals | null {
+  const src = source.toLowerCase()
+  const name = programName.toLowerCase()
+  const st = status.toLowerCase()
+  const method = paymentMethod.toLowerCase()
+  if (src.includes('load_failed') || st.includes('fail') || st.includes('reconcil')) return null
+  if (src === 'membership_gift_card') return null
+  if (src.includes('store_card') || src.includes('auto_topoff')) return null
+
+  const cardAsTender =
+    src.includes('register_redeem') ||
+    method.includes('cove family') ||
+    method.includes('cove digital')
+  if (cardAsTender) return 'store'
+
+  if (src.includes('membership')) return 'membership'
+  if (
+    src.includes('cove_product') ||
+    src.includes('pos_stand') ||
+    src.includes('register_stand') ||
+    src.includes('terminal') ||
+    src.includes('register_cash') ||
+    src.includes('register_zelle') ||
+    src.includes('register_paypal') ||
+    src.includes('register_phone') ||
+    src.includes('register_other')
+  ) {
+    return 'spiritWear'
+  }
+  if (src.includes('event_ticket') || name.includes('ticket')) {
+    if (name.includes('dance')) return 'danceNight'
+    if (name.includes('nova')) return 'novaMath'
+    return 'other'
+  }
+  if (src.includes('_program') || src.endsWith('program') || src.includes('enrichment')) {
+    if (name.includes('nova')) return 'novaMath'
+    if (name.includes('dance')) return 'danceNight'
+    return 'other'
+  }
+  if (src.includes('donation') || src.includes('cheddarup') || name.includes('donation')) return 'other'
+  if (name.includes('membership')) return 'membership'
+  if (
+    name.includes('spirit') ||
+    name.includes('shop') ||
+    name.includes('vintage') ||
+    name.includes('hoodie') ||
+    name.includes('candy') ||
+    name.includes('snack') ||
+    name.includes('in-person')
+  ) {
+    return 'spiritWear'
   }
   return null
 }
@@ -191,13 +257,12 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
   ])
 
   for (const raw of payments) {
-    const key = classifyPayment(
+    const bucket = classifyFundraisingPayment(
       String(raw.source ?? ''),
       String(raw.programName ?? ''),
       String(raw.status ?? ''),
+      String(raw.paymentMethod ?? ''),
     )
-    if (!key) continue
-    const bucket = mapSyncKey(key)
     if (!bucket) continue
     const when = String(raw.paymentDate ?? raw._createdDate ?? '')
     if (!inWindow(when, fromMs, toMs)) continue
@@ -215,7 +280,7 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
       sponsorshipFromBank += entry.amount
       continue
     }
-    const bucket = mapSyncKey(entry.lineSyncKey)
+    const bucket = mapBankSyncKey(entry.lineSyncKey)
     if (!bucket) continue
     totals[bucket] += entry.amount
   }
