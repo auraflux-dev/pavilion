@@ -101,9 +101,11 @@ async function uploadFlyer(destPath) {
 }
 
 const DESCRIPTION = [
-  'SHMS PTO will be at Back to School Night.',
-  'Stop by the SHMS PTO table in the cafeteria to learn about memberships, the new Member Portal and website, enrichment programs, the Cove Digital Card, and official SHMS spirit wear.',
-].join('\n\n')
+  'Meet SHMS PTO in the cafeteria during Back to School Night.',
+  'At our table: spirit wear for purchase, PTO memberships, Member Portal and website walkthrough, Cove Digital Card, and enrichment program info. Board members will be on hand.',
+  'Sips & Sweets food truck is on site. Stop by the PTO table for refreshment tickets. Lagoon and Tide members show your Family Cove code for free refreshments (paid codes end in 9).',
+  'Follow the truck on Instagram: @Sipsnsweets.truck',
+].join(' ')
 
 async function main() {
   const dest = copyPublicJpeg()
@@ -122,7 +124,7 @@ async function main() {
     },
     mainImage: { id: flyer.id },
     shortDescription:
-      'Stop by the PTO table in the cafeteria — memberships, Member Portal, enrichment, Cove Digital Card, and spirit wear.',
+      'Cafeteria PTO table: spirit wear, memberships, Member Portal, Cove Digital Card, enrichment, and Sips & Sweets tickets.',
     description: {
       nodes: [
         {

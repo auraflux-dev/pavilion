@@ -203,7 +203,7 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
 
         {event.description && (
           <p
-            className={`text-sm text-[#5A6070] leading-relaxed mb-5 flex-1 ${
+            className={`text-sm text-[#5A6070] leading-relaxed mb-5 ${
               detailPage ? '' : 'line-clamp-3'
             }`}
           >
@@ -238,7 +238,7 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
           ) : null}
         </div>
 
-        <div className="space-y-2 mt-auto">
+        <div className="space-y-2">
           {canBuy ? (
             <>
               <label className="flex items-center justify-between gap-2 text-xs text-[#5A6070]">
