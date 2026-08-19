@@ -37,11 +37,11 @@ export async function ProgramsPreview() {
           >
             Enrichment programs
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#5A6070] max-w-2xl mx-auto leading-relaxed text-pretty">
-            PTO-funded programs designed to challenge, inspire, and connect students
-            beyond the standard curriculum.{' '}
+          <p className="mt-4 text-base sm:text-lg text-[#5A6070] max-w-2xl mx-auto leading-relaxed whitespace-pre-line">
+            {`After-school classes for grades 6 to 8.\nTuesdays and Wednesdays in the library.`}
+            {'\n'}
             <a href="/programs/fall-2026" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
-              Fall 2026 nights
+              Fall 2026 schedule
             </a>
           </p>
         </div>

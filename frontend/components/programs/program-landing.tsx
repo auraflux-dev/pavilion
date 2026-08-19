@@ -195,7 +195,7 @@ export function ProgramLanding({ program }: { program: Program }) {
                     href="/programs/fall-2026"
                     className="text-sm font-semibold text-[var(--brand-green)] hover:underline underline-offset-2"
                   >
-                    All Fall 2026 nights
+                    Fall 2026 schedule
                   </Link>
                 </p>
               </div>

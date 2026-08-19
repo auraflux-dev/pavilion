@@ -89,9 +89,9 @@ export default async function ProgramsPage() {
                     className="font-semibold underline"
                     style={{ color: 'var(--brand-green)' }}
                   >
-                    Fall 2026 nights and session dates
+                    Fall 2026 schedule
                   </a>
-                  {`\nLibrary Tuesdays and Wednesdays, 12 meetings.\nShare with instructors.`}
+                  {`\nTuesdays and Wednesdays in the library.\n12 sessions each. Share with instructors.`}
                 </p>
                 <ProgramsFilter programs={programs} />
               </>

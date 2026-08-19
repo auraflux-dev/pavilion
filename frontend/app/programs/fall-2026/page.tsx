@@ -7,7 +7,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Fall 2026 Enrichment Schedule | SHMS PTO',
   description:
-    'Stone Hill Middle School PTO Fall 2026 enrichment: library Tuesday and Wednesday, 12 sessions. Share with instructors.',
+    'Fall 2026 enrichment at Stone Hill: Tuesdays and Wednesdays in the library, 12 sessions each. Share with instructors.',
 }
 
 export default function Fall2026EpSchedulePage() {

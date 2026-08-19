@@ -11,7 +11,7 @@ export function Fall2026EpSchedule({ variant = 'public' }: { variant?: 'public' 
   const printHint =
     variant === 'staff'
       ? 'Share https://www.shmspto.org/programs/fall-2026 with instructors, or print this page.'
-      : 'Print this page or save as PDF to share with instructors. Registration is not open yet.'
+      : 'Print this page or save as PDF to share with instructors.'
 
   return (
     <div className="space-y-8">
