@@ -6,7 +6,11 @@
  */
 import { createHash } from 'node:crypto'
 import { classifyBankTransaction, isProcessorPayout } from '@/lib/staff/plaid-classify'
-import { DEFAULT_FISCAL_YEAR, ensureMissingPlaceholderLines, fiscalYearWindow } from '@/lib/staff/budget'
+import {
+  DEFAULT_FISCAL_YEAR,
+  ensureMissingPlaceholderLines,
+  schoolYearWindowForFiscalYear,
+} from '@/lib/staff/budget'
 import { ensureBankBudgetLines } from '@/lib/staff/budget-bank'
 import {
   listBudgetEntries,
@@ -150,7 +154,8 @@ export async function importBofaCsv(opts: {
   actorEmail: string
 }): Promise<{ added: number; updated: number; skipped: number; skippedPayouts: number; rows: number }> {
   const fiscalYear = opts.fiscalYear || DEFAULT_FISCAL_YEAR
-  const { from, to } = fiscalYearWindow(fiscalYear)
+  // Fundraising and this import use Aug–Jul, not the whole downloaded statement.
+  const { from, to } = schoolYearWindowForFiscalYear(fiscalYear)
   const fromMs = from.getTime()
   const toMs = to.getTime()
   await ensureBankBudgetLines(fiscalYear)

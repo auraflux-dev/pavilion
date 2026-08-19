@@ -9,6 +9,7 @@ import { applyEntryTotals, trackingFor, type BudgetEntry } from '@/lib/staff/bud
 
 function originLabel(origin: string) {
   if (origin === 'auto-plaid' || origin === 'auto-bofa') return 'Bank · BoA'
+  if (origin === 'auto-paypal') return 'PayPal activity'
   if (origin === 'auto-payment') return 'Staff · sale'
   if (origin === 'auto-expense') return 'Staff · reimbursement'
   if (origin === 'reclass') return 'Moved'

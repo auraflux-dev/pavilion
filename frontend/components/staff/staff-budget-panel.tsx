@@ -65,6 +65,7 @@ const money = (n: number) =>
 
 function originLabel(origin: string) {
   if (origin === 'auto-plaid' || origin === 'auto-bofa') return 'Bank · BoA'
+  if (origin === 'auto-paypal') return 'PayPal activity'
   if (origin === 'auto-payment') return 'Staff · sale'
   if (origin === 'auto-expense') return 'Staff · reimbursement'
   if (origin === 'reclass') return 'Moved'
@@ -326,6 +327,29 @@ export function StaffBudgetPanel() {
     }
   }
 
+  async function importPaypalFile(file: File) {
+    setBusy(true)
+    setStatus('')
+    try {
+      const csv = await file.text()
+      const r = await fetch('/api/staff/budget', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'import-paypal', fiscalYear: year, csv }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Import failed')
+      applyPayload(d)
+      setStatusKind('ok')
+      setStatus(d.message ? String(d.message) : 'Imported PayPal activity.')
+    } catch (err) {
+      setStatusKind('err')
+      setStatus(err instanceof Error ? err.message : 'Import failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function importBofaFile(file: File) {
     setBusy(true)
     setStatus('')
@@ -425,10 +449,10 @@ export function StaffBudgetPanel() {
       <div className="rounded-lg border border-[var(--border)] bg-[#F7F4EE] px-3 py-3 space-y-2">
         <p className="text-sm font-bold">Import Bank of America CSV</p>
         <p className="text-xs text-[#5A6070]">
-          Checking → Activity → Download → CSV. Square and PayPal <strong>payouts are skipped</strong> so
-          memberships, Cove, and tickets stay on Staff Payments. Fees, checks, ACH, Sam’s, Amazon, and Zelle
-          still import. Re-importing the same file will not double-count; rows you moved to another line stay
-          put.
+          Checking → Activity → Download → CSV. Only <strong>August 1 – July 31</strong> of this school year
+          is used (not the whole download). Square and PayPal <strong>payouts are skipped</strong> so
+          memberships, Cove, and tickets stay on Staff Payments. Zelle, checks, ACH, Sam’s, and Amazon still
+          import and show on Fundraising. Re-importing the same file will not double-count.
         </p>
         <label className="inline-flex">
           <input
@@ -440,6 +464,24 @@ export function StaffBudgetPanel() {
               const file = e.target.files?.[0]
               e.target.value = ''
               if (file) void importBofaFile(file)
+            }}
+          />
+        </label>
+        <p className="text-sm font-bold pt-2">Import PayPal activity CSV</p>
+        <p className="text-xs text-[#5A6070]">
+          PayPal → Activity → Download CSV. Same Aug–Jul window. Bank withdrawals are skipped. Website PayPal
+          checkout is already in Staff Payments; this is for money that never hit the site.
+        </p>
+        <label className="inline-flex">
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            className="text-sm"
+            disabled={busy || lines.length === 0}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              e.target.value = ''
+              if (file) void importPaypalFile(file)
             }}
           />
         </label>

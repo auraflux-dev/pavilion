@@ -55,5 +55,5 @@ export async function ensureBankBudgetLines(fiscalYear: string) {
 }
 
 export function isBankOrigin(origin: string) {
-  return origin === 'auto-plaid' || origin === 'auto-bofa'
+  return origin === 'auto-plaid' || origin === 'auto-bofa' || origin === 'auto-paypal'
 }

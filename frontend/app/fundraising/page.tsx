@@ -46,8 +46,9 @@ export default async function FundraisingPage() {
     getPageContent('fundraising'),
     getActiveSponsors(),
   ])
-  const { totals, goals, volunteerHoursRaised, volunteerHoursGoal } = data
-  const sponsorshipRaised = settings.getNumber('sponsorshipRaised', 0)
+  const { totals, goals, volunteerHoursRaised, volunteerHoursGoal, sponsorshipFromBank } = data
+  const sponsorshipRaised =
+    settings.getNumber('sponsorshipRaised', 0) + (sponsorshipFromBank ?? 0)
   const sponsorshipGoal = settings.getNumber('goalSponsorship', 5000)
   const sponsorshipEmail = normalizeStaffInbox(
     settings.get('contactEmailSponsorship', 'vp-initiatives@shmspto.org'),
@@ -341,7 +342,7 @@ export default async function FundraisingPage() {
             </div>
 
             <p className="text-center text-xs text-[#5A6070] mt-8">
-              Based on the current annual goal of {fmtDollars(ANNUAL_GOAL)}. Totals refresh every minute from paid Square and PayPal checkouts this school year (August–July).
+              Based on the current annual goal of {fmtDollars(ANNUAL_GOAL)}. Totals are this school year (August–July): Square and PayPal checkout, plus Bank of America deposits that are not Square/PayPal payouts.
             </p>
           </div>
         </section>

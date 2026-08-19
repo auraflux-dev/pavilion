@@ -1,17 +1,18 @@
 /**
  * Fundraising totals for the current school year (Aug 1 → Jul 31).
  *
- * Sales go through Square (and PayPal) and land in the Payments CMS collection.
- * This page used to search Wix eCom orders in a hardcoded 2025–26 window, so
- * after Jul 31 2026 every bar stayed at $0. We now sum the same Staff Payments
- * ledger the treasurer budget uses.
+ * Square / PayPal site checkout and Stand POS → Payments.
+ * Bank of America and PayPal activity CSVs (Staff → Budget import) → PtoBudgetEntries.
+ * Only Aug 1 – Jul 31 of the current school year. Square/PayPal *payouts* in the
+ * bank file are skipped so those sales are not counted twice.
  *
  * Volunteer hours remain manual. SiteSettings volunteerHoursRaised/Goal.
  */
 
 import { getWixClient } from '@/lib/wix-client'
 import { isDemoInstance } from '@/lib/demo/instance'
-import { classifyPayment } from '@/lib/staff/budget-sync'
+import { classifyPayment, listBudgetEntries } from '@/lib/staff/budget-sync'
+import { DEFAULT_FISCAL_YEAR } from '@/lib/staff/budget'
 
 export const VOLUNTEER_HOURS_RAISED_DEFAULT = 0
 export const VOLUNTEER_HOURS_GOAL_DEFAULT = 500
@@ -39,6 +40,7 @@ export interface FundraisingData {
   goals: typeof GOALS_DEFAULT
   volunteerHoursRaised: number
   volunteerHoursGoal: number
+  sponsorshipFromBank: number
   fetchedAt: string
 }
 
@@ -66,12 +68,16 @@ function mapSyncKey(key: string): keyof InitiativeTotals | null {
   if (
     key === 'events_other' ||
     key === 'enrichment_fees' ||
-    key === 'gifts'
+    key === 'gifts' ||
+    key === 'run_for_charity' ||
+    key === 'unclassified_income'
   ) {
     return 'other'
   }
   return null
 }
+
+const BANK_CSV_ORIGINS = new Set(['auto-bofa', 'auto-plaid', 'auto-paypal'])
 
 async function fetchAllPayments(): Promise<Record<string, unknown>[]> {
   try {
@@ -162,6 +168,7 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
       goals: GOALS_DEFAULT,
       volunteerHoursRaised: 210,
       volunteerHoursGoal: VOLUNTEER_HOURS_GOAL_DEFAULT,
+      sponsorshipFromBank: 0,
       fetchedAt: new Date().toISOString(),
     }
   }
@@ -176,7 +183,12 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
   }
 
   const { fromMs, toMs } = schoolYearWindow()
-  const [settingsData, payments] = await Promise.all([fetchSiteSettingsGoals(), fetchAllPayments()])
+  const fy = `${new Date(fromMs).getUTCFullYear()}-${String(new Date(fromMs).getUTCFullYear() + 1).slice(-2)}`
+  const [settingsData, payments, bankEntries] = await Promise.all([
+    fetchSiteSettingsGoals(),
+    fetchAllPayments(),
+    listBudgetEntries(fy || DEFAULT_FISCAL_YEAR).catch(() => []),
+  ])
 
   for (const raw of payments) {
     const key = classifyPayment(
@@ -194,11 +206,26 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
     totals[bucket] += amount
   }
 
+  let sponsorshipFromBank = 0
+  for (const entry of bankEntries) {
+    if (!BANK_CSV_ORIGINS.has(entry.origin)) continue
+    if (!inWindow(`${entry.occurredAt}T12:00:00.000Z`, fromMs, toMs)) continue
+    if (!(entry.amount > 0)) continue
+    if (entry.lineSyncKey === 'sponsorships') {
+      sponsorshipFromBank += entry.amount
+      continue
+    }
+    const bucket = mapSyncKey(entry.lineSyncKey)
+    if (!bucket) continue
+    totals[bucket] += entry.amount
+  }
+
   return {
     totals,
     goals: settingsData.goals,
     volunteerHoursRaised: settingsData.volunteerHoursRaised,
     volunteerHoursGoal: settingsData.volunteerHoursGoal,
+    sponsorshipFromBank,
     fetchedAt: new Date().toISOString(),
   }
 }

@@ -43,6 +43,7 @@ export type BudgetEntryOrigin =
   | 'auto-expense'
   | 'auto-plaid'
   | 'auto-bofa'
+  | 'auto-paypal'
   | 'reclass'
   | 'keyed'
   | 'opening'
@@ -145,6 +146,7 @@ function mapEntry(row: Record<string, unknown>): BudgetEntry {
     originRaw === 'auto-expense' ||
     originRaw === 'auto-plaid' ||
     originRaw === 'auto-bofa' ||
+    originRaw === 'auto-paypal' ||
     originRaw === 'reclass' ||
     originRaw === 'opening'
       ? originRaw

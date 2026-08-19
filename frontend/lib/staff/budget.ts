@@ -39,6 +39,15 @@ export function fiscalYearWindow(year = DEFAULT_FISCAL_YEAR) {
   }
 }
 
+/** Public fundraising year: Aug 1 startYear → Jul 31 next. Not the treasurer Jul–Jun fiscal year. */
+export function schoolYearWindowForFiscalYear(year = DEFAULT_FISCAL_YEAR) {
+  const startYear = Number(String(year).split('-')[0]) || 2026
+  return {
+    from: new Date(Date.UTC(startYear, 7, 1, 0, 0, 0, 0)),
+    to: new Date(Date.UTC(startYear + 1, 6, 31, 23, 59, 59, 999)),
+  }
+}
+
 const SYNC_KEY_BY_SORT: Record<number, string> = {
   10: 'beginning_cash',
   20: 'memberships',

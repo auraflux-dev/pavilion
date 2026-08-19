@@ -1,6 +1,6 @@
 /**
  * GET    /api/staff/budget?year=2026-27  list lines, actuals, activity
- * POST   seed | refresh | entry | create | import-bofa | reclassify
+ * POST   seed | refresh | entry | create | import-bofa | import-paypal | reclassify
  * PATCH  update a line (budgeted / notes)
  * DELETE line (?id=) or keyed activity (?entryId=)
  */
@@ -33,6 +33,7 @@ import { plaidConfigured } from '@/lib/staff/plaid'
 import { refreshPlaidIntoBudget } from '@/lib/staff/plaid-sync'
 import { isBankOrigin } from '@/lib/staff/budget-bank'
 import { importBofaCsv } from '@/lib/staff/bofa-csv'
+import { importPaypalCsv } from '@/lib/staff/paypal-csv'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -126,7 +127,28 @@ export async function POST(req: NextRequest) {
           added: result.added,
           updated: result.updated,
           source: 'bofa',
-          message: `Imported BoA CSV · ${result.added} new, ${result.updated} already in, ${result.skippedPayouts} Square/PayPal payouts skipped (those sales stay in Staff Payments), ${result.skipped} other skipped.`,
+          message: `Imported BoA CSV (Aug–Jul school year only) · ${result.added} new, ${result.updated} already in, ${result.skippedPayouts} Square/PayPal payouts skipped (those sales stay in Staff Payments), ${result.skipped} other skipped.`,
+        })),
+      })
+    }
+
+    if (action === 'import-paypal') {
+      const csv = String(body.csv ?? '')
+      if (!csv.trim()) return NextResponse.json({ error: 'Paste or upload a PayPal activity CSV' }, { status: 400 })
+      const result = await importPaypalCsv({
+        csv,
+        fiscalYear: year,
+        actorEmail: session.email,
+      })
+      const entries = await listBudgetEntries(year)
+      return NextResponse.json({
+        ok: true,
+        ...(await payload(year, {
+          entries,
+          added: result.added,
+          updated: result.updated,
+          source: 'paypal',
+          message: `Imported PayPal CSV (Aug–Jul school year only) · ${result.added} new, ${result.updated} already in, ${result.skipped} skipped (withdrawals, refunds, or outside the school year).`,
         })),
       })
     }
