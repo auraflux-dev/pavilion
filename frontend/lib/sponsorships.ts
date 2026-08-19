@@ -66,7 +66,7 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
         items: [
           'Logo on banner at 3 events',
           'Announced at 3 events',
-          'Flier distribution at events',
+          'Flyer distribution at events',
           'Frameable participation certificate',
         ],
       },
@@ -95,7 +95,7 @@ export const SPONSORSHIP_PACKAGES: SponsorshipPackage[] = [
         items: [
           'Logo on banner at 1 event',
           'Announced at 1 event',
-          'Flier distribution at events',
+          'Flyer distribution at events',
           'Frameable participation certificate',
         ],
       },
