@@ -365,7 +365,7 @@ export default async function FundraisingPage() {
               </h2>
               <p className="text-[#5A6070] mt-3 max-w-2xl mx-auto">
                 {vanillaizeIfDemo(
-                  '2026–27 packages: Platinum, Gold, and Silver. Recognition at events, logo and link on the Sponsorship page and Member Portal, Facebook/Instagram, newsletters, and WhatsApp groups of 1,000+ parents. Apply below. Family-owned businesses can also introduce themselves so Membership Experience can connect with you.',
+                  'One payment for the 2026–27 school year. Choose Platinum, Gold, or Silver below.',
                 )}
               </p>
             </div>
