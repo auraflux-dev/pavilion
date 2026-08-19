@@ -1,8 +1,7 @@
-Commons CRM is our own household model, not Clerk.
+Commons CRM Postgres + Better Auth (no Clerk).
 
-- Postgres contract: `frontend/lib/crm/schema.sql` (organizations, people, households, household_adults, students, memberships, store_cards, staff_assignments).
-- TypeScript: `frontend/lib/crm/`.
-- Demo in-memory tenant: `riversideSnapshot()` — Nguyen (Family/lagoon, $42.50), Patel (Member/reef), Brooks (free). Staff Jordan Lee is a person without a household.
-- Stone Hill stays on Wix Members/Students/Memberships. Do not run this schema on SHMS.
-- Better Auth is later: `people.auth_user_id` stays null; demo still uses signed `demo_review` cookies.
-- Demo staff Members + portal students are mapped from this snapshot (`frontend/lib/demo/seed.ts`).
+- Render Postgres **commons-crm** (`dpg-da2fomm417fc73eq5jng-a`, virginia, free, expires 2026-09-18). Dashboard: https://dashboard.render.com/d/dpg-da2fomm417fc73eq5jng-a
+- App uses `DATABASE_URL` only when `DEMO_INSTANCE=true`. Better Auth is at `/api/id` (not `/api/auth`).
+- `BETTER_AUTH_SECRET` + `BETTER_AUTH_URL` are on the commons-pto-demo Vercel project.
+- Join (`/api/demo/join`) upserts `people` and creates a Better Auth session when `DATABASE_URL` is set. First request runs schema + Better Auth migrations + Riverside seed.
+- Neon Marketplace install is blocked until treasurer accepts https://vercel.com/treasurer-4353s-projects/~/integrations/accept-terms/neon?source=cli (`-m auth=false --plan free_v3`).

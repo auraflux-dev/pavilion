@@ -52,6 +52,7 @@
     "@wix/sdk": "^1.21.12",
     "@wix/stores": "^1.0.801",
     "autoprefixer": "^10.4.20",
+    "better-auth": "^1.7.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.1.1",
@@ -65,6 +66,7 @@
     "next": "16.2.6",
     "next-themes": "^0.4.6",
     "passkit-generator": "^3.5.7",
+    "pg": "^8.23.0",
     "plaid": "^45.0.0",
     "react": "19.2.4",
     "react-day-picker": "9.13.2",
@@ -83,6 +85,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^24",
+    "@types/pg": "^8.23.1",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "postcss": "^8.5",

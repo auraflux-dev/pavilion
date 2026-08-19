@@ -5,7 +5,7 @@ Board join: https://commons-pto-demo.vercel.app/review?code=riverside-board
 
 Do **not** use Clerk (too expensive). Prefer Better Auth later. Demo users are signed review cookies (`demo_review`). Sample CRM is `frontend/lib/crm/` (Nguyen paid Family, Patel paid Member, Brooks free). Review join can fill Jordan Lee (staff), Alex Nguyen (paid), or Riley Brooks (free). After join/switch, use a full page load so `useAuth` module cache does not keep the previous lane.
 
-Env (demo project only): `DEMO_INSTANCE=true`, `NEXT_PUBLIC_DEMO_INSTANCE=true`, `DEMO_JOIN_CODE`, `DEMO_SIGNING_SECRET`.
+Env (demo project only): `DEMO_INSTANCE=true`, `NEXT_PUBLIC_DEMO_INSTANCE=true`, `DEMO_JOIN_CODE`, `DEMO_SIGNING_SECRET`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `DATABASE_URL` (Render commons-crm). Better Auth path: `/api/id`.
 Demo is **not** git-connected. Deploy `commons-pto-demo` from a clean worktree of the SHA; `frontend` project is Stone Hill.
 
 ## Tour lanes

@@ -23,7 +23,8 @@ const JOIN_ALLOW = new Set([
 ])
 
 export function isDemoJoinAllowPath(pathname: string): boolean {
-  return JOIN_ALLOW.has(pathname)
+  if (JOIN_ALLOW.has(pathname)) return true
+  return pathname.startsWith('/api/id')
 }
 
 const STAFF_GET_ALLOW = new Set([

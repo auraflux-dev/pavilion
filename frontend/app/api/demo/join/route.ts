@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isSecure } from '@/lib/auth-cookies'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { persistDemoJoin } from '@/lib/crm/persist'
 import {
   DEMO_REVIEW_COOKIE,
   DEMO_REVIEW_MAX_AGE,
@@ -57,6 +58,13 @@ export async function POST(req: NextRequest) {
 
   const next = lane === 'parent' ? '/member-portal' : '/staff'
   const res = NextResponse.json({ ok: true, next })
+  await persistDemoJoin({
+    req,
+    res,
+    email,
+    firstName,
+    lastName,
+  })
   res.cookies.set(DEMO_REVIEW_COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
