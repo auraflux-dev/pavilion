@@ -26,4 +26,3 @@ export {
   type PortalStudentRow,
 } from '@/lib/crm/mappers'
 export { reviewerHousehold, reviewerPortalStudents } from '@/lib/crm/reviewer'
-export { requireOrganizationId, sqlForOrg, organizationIdFromRequest } from '@/lib/crm/tenant'

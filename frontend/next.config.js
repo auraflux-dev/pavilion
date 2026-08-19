@@ -34,6 +34,7 @@ const securityHeaders = [
 ]
 
 const nextConfig = {
+  serverExternalPackages: ['pg'],
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'static.wixstatic.com' },
