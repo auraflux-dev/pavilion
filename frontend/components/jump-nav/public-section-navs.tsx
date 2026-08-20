@@ -10,6 +10,7 @@ import {
   Megaphone,
   PieChart,
   Sparkles,
+  Star,
   Users,
   UserPlus,
 } from 'lucide-react'
@@ -109,6 +110,7 @@ export function FundraisingSectionNav() {
       items={[
         { href: '#donate', label: 'Donate', hint: 'Make a gift', icon: Heart },
         { href: '#initiatives', label: 'Initiatives', hint: 'Ways to help', icon: Megaphone },
+        { href: '#membership', label: 'Memberships', hint: 'Reef · Lagoon · Tide', icon: Star },
         { href: '#allocations', label: 'Where funds go', hint: 'Budget', icon: PieChart },
         { href: '#sponsorship', label: 'Sponsorships', hint: 'Partners', icon: Handshake },
         { href: '#contribute', label: 'Contribute', hint: 'Pick an action', icon: Gift },

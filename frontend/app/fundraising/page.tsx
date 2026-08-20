@@ -254,15 +254,32 @@ export default async function FundraisingPage() {
                 return (
                   <article
                     key={initiative.id}
-                    className="bg-white rounded-2xl p-6 shadow-sm border border-[var(--border)] flex flex-col hover:shadow-md transition-shadow duration-300"
+                    id={initiative.id}
+                    className="scroll-mt-28 bg-white rounded-2xl p-6 shadow-sm border border-[var(--border)] flex flex-col hover:shadow-md transition-shadow duration-300"
                   >
-                    <div className="mb-4">
+                    <div className="mb-4 flex items-start justify-between gap-3">
                       <div
                         className="w-11 h-11 rounded-xl flex items-center justify-center"
                         style={{ backgroundColor: 'var(--brand-soft)' }}
                       >
                         <Icon className="w-5 h-5" style={{ color: 'var(--brand-green)' }} aria-hidden="true" />
                       </div>
+                      {initiative.id === 'membership' ? (
+                        <div className="text-center shrink-0">
+                          <img
+                            src="/fundraising/membership-qr.png"
+                            alt="QR code to Memberships on this page"
+                            width={88}
+                            height={88}
+                            className="rounded-md border border-[var(--border)] bg-white"
+                          />
+                          <p className="text-[10px] font-semibold text-[#5A6070] mt-1 leading-tight">
+                            Scan for
+                            <br />
+                            Memberships
+                          </p>
+                        </div>
+                      ) : null}
                     </div>
 
                     <h3 className="text-lg font-bold text-[#1A1A1A] mb-2">{initiative.label}</h3>
