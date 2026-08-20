@@ -1,0 +1,22 @@
+---
+description: Keep Commons on the same shipped SHA as Stone Hill; check at session start
+alwaysApply: true
+---
+
+# Commons follows every ship
+
+Stone Hill (`frontend` / www.shmspto.org) and Commons (`commons-pto-demo` / commons-pto-demo.vercel.app) share this repo. Commons is **not** git-connected.
+
+After Serena QA on a shippable **application** change:
+
+1. Commit task files only.
+2. Deploy **both** Vercel projects from a **clean worktree of that SHA** (`frontend` then `commons-pto-demo`). Never `vercel --prod` from a dirty tree. Never put Stone Hill `DATABASE_URL` / Wix / Square env on Commons, or Commons `DATABASE_URL` on Stone Hill.
+3. Push that commit to GitHub.
+
+If you only deployed Stone Hill, Commons is behind. Catch it up immediately from the same SHA.
+
+At the **start of a session** (or first message of the day): run `node scripts/commons-parity.mjs`. If Commons production SHA ≠ origin/main (or ≠ Stone Hill production SHA), deploy `commons-pto-demo` from a clean worktree of the SHA that is already on GitHub / Stone Hill. Do not invent a new commit for parity.
+
+Plaid stays on the **Trial** account until there are paying Commons clients. Do not buy a 100-Item Production plan for the demo.
+
+Vanillaize / demo gates still apply on the Commons project. Do not copy Stone Hill PII into the demo database.

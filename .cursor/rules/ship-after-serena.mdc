@@ -12,7 +12,7 @@ If Serena fails: fix and re-run. Do not commit, deploy, or push.
 If Serena passes (diagnostics clean, scoped to the task), do this in order **without waiting to be asked**:
 
 1. **Commit** only the files for that change.
-2. **Deploy** production from that commit (clean worktree of that SHA — never `vercel --prod` from a dirty working tree).
+2. **Deploy** production from that commit (clean worktree of that SHA — never `vercel --prod` from a dirty working tree). Deploy **both** Vercel projects: Stone Hill `frontend` and Commons `commons-pto-demo`. Commons is not git-connected.
 3. **Then push** that commit to GitHub.
 
 This overrides “only commit/push when asked.”

@@ -6,7 +6,7 @@ Board join: https://commons-pto-demo.vercel.app/review?code=riverside-board
 Do **not** use Clerk (too expensive). Prefer Better Auth later. Demo users are signed review cookies (`demo_review`). Sample CRM is `frontend/lib/crm/` (Nguyen paid Family, Patel paid Member, Brooks free). Review join can fill Jordan Lee (staff), Alex Nguyen (paid), or Riley Brooks (free). After join/switch, use a full page load so `useAuth` module cache does not keep the previous lane.
 
 Env (demo project only, production): `DEMO_INSTANCE=true`, `NEXT_PUBLIC_DEMO_INSTANCE=true`, `DEMO_JOIN_CODE`, `DEMO_SIGNING_SECRET`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `DATABASE_URL` (Render **commons-crm**, live). Better Auth path: `/api/id`. Do not set `DATABASE_URL` on Stone Hill `frontend`.
-Demo is **not** git-connected. Deploy `commons-pto-demo` from a clean worktree of the SHA; `frontend` project is Stone Hill.
+Demo is **not** git-connected. After every application ship, deploy `commons-pto-demo` from a **clean worktree of the same SHA** as Stone Hill `frontend`. Catch-up: `node scripts/commons-parity.mjs`. Plaid stays on Trial until paying clients.
 
 ## Tour lanes
 

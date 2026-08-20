@@ -1,7 +1,7 @@
 /**
  * Auraflux cost envelope for Commons ($399/mo list).
- * Plaid Transactions is billed per Item. Set PLAID_TRANSACTIONS_ITEM_USD_MONTH from the
- * SHMS Plaid Production dashboard (Billing) to replace the planning band.
+ * Plaid Transactions is billed per Item. Stay on Trial until paying Commons clients.
+ * Set PLAID_TRANSACTIONS_ITEM_USD_MONTH from Billing when leaving Trial.
  */
 export const COMMONS_LIST_PRICE_USD = 399
 
