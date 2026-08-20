@@ -15,6 +15,7 @@ export const DEMO_BRAND = {
   town: 'Fairhaven',
   district: 'Fairhaven Public Schools',
   host: 'riversidepto.org',
+  logoPath: '/demo/mark.png',
   tiers: {
     reef: 'Member',
     lagoon: 'Family',
@@ -36,6 +37,7 @@ export type PublicBrandFace = {
   town: string
   district: string
   host: string
+  logoPath: string
   tiers: {
     reef: string
     lagoon: string
@@ -57,6 +59,7 @@ const STONE_HILL_BRAND: PublicBrandFace = {
   town: 'Ashburn',
   district: 'Loudoun County Public Schools',
   host: 'shmspto.org',
+  logoPath: '/shms-logo.png',
   tiers: {
     reef: 'Reef',
     lagoon: 'Lagoon',
@@ -79,6 +82,7 @@ function brandFaceFromTrial(b: TrialBrand): PublicBrandFace {
     town: b.town,
     district: `${b.town} schools`,
     host: b.host,
+    logoPath: b.logoPath,
     tiers: {
       reef: 'Member',
       lagoon: 'Family',

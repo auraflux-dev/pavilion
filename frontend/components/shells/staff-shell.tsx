@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { SocialFooterLinks } from '@/components/social-footer-links'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
-import { DEMO_BRAND } from '@/lib/demo/brand'
+import { publicBrandFace } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { DemoMark } from '@/components/demo/demo-mark'
 
@@ -58,6 +58,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
   const moreRef = useRef<HTMLDivElement>(null)
   const { primary, overflow } = splitNav(items, active)
   const activeInMore = overflow.some((i) => i.id === active)
+  const brand = publicBrandFace()
 
   useEffect(() => {
     if (!moreOpen) return
@@ -75,13 +76,13 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
           <Link
             href="/"
             className="flex items-center gap-2.5 min-w-0 rounded-md hover:bg-white/10 px-1 py-0.5 -ml-1"
-            aria-label={isPublicDemoInstance() ? `Return to ${DEMO_BRAND.short} home` : 'Return to SHMS PTO home'}
+            aria-label={`Return to ${brand.short} home`}
           >
             {isPublicDemoInstance() ? (
               <DemoMark size={36} className="rounded-sm" />
             ) : (
               <Image
-                src="/shms-logo.png"
+                src={brand.logoPath}
                 alt=""
                 width={36}
                 height={36}

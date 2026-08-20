@@ -7,7 +7,8 @@ import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SocialFooterLinks } from '@/components/social-footer-links'
 import { useAuth } from '@/lib/hooks/use-auth'
-import { DEMO_BRAND, vanillaizeIfDemo } from '@/lib/demo/brand'
+import { publicBrandFace, vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isCommonsPlatform } from '@/lib/crm/active-trial'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { DemoMark } from '@/components/demo/demo-mark'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
@@ -41,23 +42,27 @@ export function MemberShell({ children }: Props) {
     viewingEmail,
   } = useAuth()
   const isPaid = accountType === 'paid'
+  const commons = isCommonsPlatform()
+  const brand = publicBrandFace()
   const audienceLabel = status === 'loading' ? 'Member' : isPaid ? 'Paid member' : 'Free member'
   const signedInEmail = String(member?.email ?? '').trim().toLowerCase()
   const staffChrome =
     isStaff ||
-    (!isPublicDemoInstance() && signedInEmail.endsWith('@shmspto.org'))
+    (!isPublicDemoInstance() && !commons && signedInEmail.endsWith('@shmspto.org'))
   const displayName = staffChrome
     ? boardTitle || staffName || member?.name || 'Board member'
     : member?.name || 'Member portal'
 
-  // Cove opens the full Cove page; PortalReturnBar brings members back.
+  // Cove / SHMS videos stay on Stone Hill only.
   const links = [
     { href: '/member-portal', label: 'My Portal' },
     { href: '/membership', label: status === 'loading' || isPaid ? 'Membership' : 'Upgrade' },
-    { href: '/cove', label: vanillaizeIfDemo('The Cove') },
-    { href: '/programs', label: 'Programs' },
+    ...(commons ? [] : [{ href: '/cove', label: vanillaizeIfDemo('The Cove') }]),
+    ...(commons ? [] : [{ href: '/programs', label: 'Programs' }]),
     { href: '/member-portal/payment-methods', label: 'Payment methods' },
-    ...(isPublicDemoInstance() ? [] : [{ href: '/member-portal/videos', label: 'Videos' }]),
+    ...(isPublicDemoInstance() || commons
+      ? []
+      : [{ href: '/member-portal/videos', label: 'Videos' }]),
     { href: '/member-portal/help', label: 'Help' },
   ]
 
@@ -69,7 +74,13 @@ export function MemberShell({ children }: Props) {
             {isPublicDemoInstance() ? (
               <DemoMark size={36} />
             ) : (
-              <Image src="/shms-logo.png" alt="" width={36} height={36} className="shrink-0" />
+              <Image
+                src={brand.logoPath}
+                alt=""
+                width={36}
+                height={36}
+                className="shrink-0"
+              />
             )}
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--brand-green)' }}>
@@ -210,7 +221,7 @@ export function MemberShell({ children }: Props) {
 
       <footer className="border-t border-[var(--border)] bg-[#FAFCF9] py-4 mt-auto">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#5A6070]">
-          <span>{audienceLabel} · {isPublicDemoInstance() ? DEMO_BRAND.short : 'SHMS PTO'}</span>
+          <span>{audienceLabel} · {brand.short}</span>
           <Link href="/privacy" className="underline">Privacy</Link>
           <Link href="/terms" className="underline">Terms</Link>
           <Link href="/data-security" className="underline">Data security</Link>

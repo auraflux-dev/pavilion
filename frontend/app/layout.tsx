@@ -7,7 +7,7 @@ import { TrafficBeacon } from '@/components/traffic-beacon'
 import { DemoBanner } from '@/components/demo/demo-banner'
 import { CommonsSurfaceShell } from '@/components/demo/commons-surface-shell'
 import { publicBrandFace } from '@/lib/demo/brand'
-import { isCommonsPlatform } from '@/lib/crm/active-trial'
+import { activeTrialPackSlug, isCommonsPlatform } from '@/lib/crm/active-trial'
 import { isDemoInstance, publicSiteUrl } from '@/lib/demo/instance'
 import './globals.css'
 
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
         : 'Enriching the academic and social experience for all SHMS PTO students and families in Ashburn, Virginia.',
     images: [
       {
-        url: demo ? '/demo/mark.png' : '/shms-logo.png',
+        url: brand.logoPath,
         width: 1200,
         height: 1200,
         alt: `${brand.pto}`,
@@ -68,13 +68,13 @@ export const metadata: Metadata = {
     card: 'summary',
     title: titleDefault,
     description: demo || commons ? description : 'Enriching the academic and social experience for all SHMS PTO students and families in Ashburn, Virginia.',
-    images: [demo ? '/demo/mark.png' : '/shms-logo.png'],
+    images: [brand.logoPath],
   },
   robots: {
     index: !demo && !commons,
     follow: !demo && !commons,
   },
-  icons: demo ? [{ url: '/demo/mark.png' }] : undefined,
+  icons: demo || commons ? [{ url: brand.logoPath }] : undefined,
 }
 
 export default function RootLayout({
@@ -85,7 +85,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-pto={demo ? 'riverside' : commons ? 'commons' : 'shms'}
+      data-pto={
+        demo ? 'riverside' : commons ? activeTrialPackSlug() || 'commons' : 'shms'
+      }
       className="bg-background"
     >
       <head>

@@ -91,6 +91,41 @@ html[data-pto='riverside'] body {
   font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Spring Hill Elementary private trial — Toolkit navy + gold (not Stone Hill forest). */
+html[data-pto='spring-hill'],
+html[data-pto='commons'] {
+  --brand-green: #2b3857;
+  --brand-dark: #11116e;
+  --brand-gold: #eeaa32;
+  --brand-warm: #f9f4e8;
+  --brand-soft: #eef1f6;
+  --brand-line: #d5dce8;
+  --brand-mist: #f3f5f9;
+  --brand-text: #1a1a1a;
+  --background: #f9f4e8;
+  --foreground: #1a1a1a;
+  --primary: #2b3857;
+  --secondary: #eeaa32;
+  --secondary-foreground: #1a1a1a;
+  --muted: #e8ecf2;
+  --muted-foreground: #5a6070;
+  --accent: #eeaa32;
+  --accent-foreground: #1a1a1a;
+  --border: #e0e4ec;
+  --input: #e0e4ec;
+  --ring: #2b3857;
+  --chart-1: #2b3857;
+  --chart-2: #eeaa32;
+  --chart-3: #5c88a9;
+  --sidebar: #2b3857;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #2b3857;
+  --sidebar-accent: #2b3857;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2b3857;
+}
+
 @theme inline {
   --font-sans: 'Inter', 'Inter Fallback';
   --font-serif: 'Merriweather', 'Georgia Fallback';

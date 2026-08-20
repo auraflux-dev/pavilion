@@ -18,6 +18,16 @@ export type TrialBrand = {
   card: string
   /** Navbar / cheer line, e.g. Be a CHAMPION */
   cheer: string
+  /** Public path under /public, e.g. /trial/spring-hill/logo.png */
+  logoPath: string
+  /** CSS theme tokens — applied via data-pto={slug} */
+  colors: {
+    primary: string
+    dark: string
+    accent: string
+    warm: string
+    soft: string
+  }
 }
 
 export type TrialPack = {
@@ -58,6 +68,15 @@ export function springHillPack(): TrialPack {
     store: 'Spirit Shop',
     card: 'Family card',
     cheer: 'Be a CHAMPION',
+    logoPath: '/trial/spring-hill/logo.png',
+    // From springhillpto.org Toolkit skin (navy + gold, not Stone Hill forest).
+    colors: {
+      primary: '#2b3857',
+      dark: '#11116e',
+      accent: '#eeaa32',
+      warm: '#f9f4e8',
+      soft: '#eef1f6',
+    },
   }
   const b = brand
 

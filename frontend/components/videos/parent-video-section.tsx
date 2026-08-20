@@ -6,6 +6,7 @@ import {
   type ParentVideoId,
 } from '@/lib/videos/parent-videos'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { isCommonsPlatform } from '@/lib/crm/active-trial'
 
 interface ParentVideoSectionProps {
   placement?: ParentVideo['placements'][number]
@@ -30,7 +31,8 @@ export function ParentVideoSection({
   className = '',
   background = 'var(--brand-warm)',
 }: ParentVideoSectionProps) {
-  if (isDemoInstance()) return null
+  // SHMS explainers only — never on Riverside demo or private Commons trials.
+  if (isDemoInstance() || isCommonsPlatform()) return null
   const videos = videoId
     ? ([getParentVideo(videoId)].filter(Boolean) as ParentVideo[])
     : placement

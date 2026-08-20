@@ -16,6 +16,7 @@ export async function Navbar() {
         short: brand.short,
         pto: brand.pto,
         cheer: brand.cheer,
+        logoPath: brand.logoPath,
       }}
       mode={mode}
     />

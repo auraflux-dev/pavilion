@@ -25,6 +25,7 @@ import {
   type PortalCopy,
 } from '@/lib/defaults/portal-copy'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isCommonsPlatform } from '@/lib/crm/active-trial'
 import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
 import { pickHighestTier, tierRank } from '@/lib/staff/members-roster'
 import { StudentCard } from './student-card'
@@ -346,6 +347,7 @@ You're on Tide. Benefits show on each student card below.`
           : null
 
   const onboarding = buildOnboardingChecklist({ students, accountType })
+  const commons = isCommonsPlatform()
   const coveGate = coveFeaturesUnlocked(students)
   const highlightChecklist =
     membershipSuccessNudge || !onboarding.complete || accountType === 'paid'
@@ -793,19 +795,19 @@ You're on Tide. Benefits show on each student card below.`
           </div>
 
           <MembershipBenefitsCard />
-          {coveGate.ok ? (
+          {commons ? null : coveGate.ok ? (
             <CoveFamilyCodeCard refreshKey={students.length} />
           ) : (
             <CoveFeatureLockBanner reason={coveGate.error ?? 'Complete family setup first.'} />
           )}
 
           <div className="flex flex-wrap gap-2 mb-4">
-            {coveGate.ok ? (
+            {commons ? null : coveGate.ok ? (
               <StoreCardReload
                 students={students.map(({ id, firstName, lastName }) => ({ id, firstName, lastName }))}
                 onLoaded={load}
               />
-            ) : (
+            ) : commons ? null : (
               <button
                 type="button"
                 disabled
@@ -815,7 +817,7 @@ You're on Tide. Benefits show on each student card below.`
                 {vanillaizeIfDemo('Load Cove Digital Card (locked)')}
               </button>
             )}
-            {liveCommerce ? (
+            {liveCommerce && !commons ? (
             <a
               href="/cove#shop"
               className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#1A1A1A]"

@@ -29,6 +29,7 @@ interface Props {
     cheer: string
     town: string
     store: string
+    logoPath: string
   }
   mode: 'demo' | 'commons' | 'stone-hill'
 }
@@ -113,22 +114,9 @@ export function FooterClient({
             >
               {mode === 'demo' ? (
                 <DemoMark size={44} />
-              ) : mode === 'commons' ? (
-                <span
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
-                  style={{ backgroundColor: 'var(--brand-green)' }}
-                  aria-hidden="true"
-                >
-                  {brand.short
-                    .replace(/\s*PTO$/i, '')
-                    .split(/\s+/)
-                    .map((w) => w[0])
-                    .join('')
-                    .slice(0, 2)}
-                </span>
               ) : (
                 <Image
-                  src="/shms-logo.png"
+                  src={brand.logoPath}
                   alt={`${brand.school} logo`}
                   width={44}
                   height={44}

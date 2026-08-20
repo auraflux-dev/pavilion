@@ -16,10 +16,12 @@ import { DonateBlock } from '@/components/donate/donate-block'
 import { MembershipSectionNav } from '@/components/jump-nav/public-section-navs'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isCommonsPlatform } from '@/lib/crm/active-trial'
 
 export const revalidate = 60
 
 export default async function MembershipPage() {
+  const commons = isCommonsPlatform()
   const [settings, allTiers, faqItems, page] = await Promise.all([
     getSiteSettings(),
     getMembershipTiers(),
@@ -48,14 +50,16 @@ export default async function MembershipPage() {
       <main id="main-content">
         <PageHero content={page} />
         <MembershipSectionNav />
-        <ParentVideoSection
-          videoId="membership-tiers"
-          id="membership-video"
-          eyebrow="Watch"
-          title="Membership tiers in about 3 minutes"
-          body="Reef, Lagoon, and Tide explained before you choose a plan."
-          background="#FFFFFF"
-        />
+        {commons ? null : (
+          <ParentVideoSection
+            videoId="membership-tiers"
+            id="membership-video"
+            eyebrow="Watch"
+            title="Membership tiers in about 3 minutes"
+            body="Reef, Lagoon, and Tide explained before you choose a plan."
+            background="#FFFFFF"
+          />
+        )}
 
         {/* Tiers */}
         <section
@@ -80,8 +84,8 @@ export default async function MembershipPage() {
 
         <MembershipPortalCallouts lines={sharedBenefits} />
 
-        {/* Faculty membership */}
-        <section id="faculty" className="scroll-mt-28 py-14" style={{ backgroundColor: 'var(--brand-warm)' }}>
+        {/* Faculty membership — Stone Hill only */}
+        {commons ? null : <section id="faculty" className="scroll-mt-28 py-14" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-2xl p-6 lg:p-8 border border-[var(--border)] flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-10">
               <div className="flex-1 min-w-0">
@@ -103,13 +107,17 @@ export default async function MembershipPage() {
               </div>
             </div>
           </div>
-        </section>
+        </section>}
 
         <DonateBlock
-          title="Not joining a paid tier? You can still donate"
-          body={vanillaizeIfDemo(
-            'Reef, Lagoon, and Tide are optional. If paid membership isn’t for you right now, any gift still helps the PTO fund enrichment, The Cove, and events for Stone Hill students.',
-          )}
+          title={commons ? 'Prefer to give directly?' : 'Not joining a paid tier? You can still donate'}
+          body={
+            commons
+              ? 'Membership is $25 for the year. Direct gifts also help programs and events.'
+              : vanillaizeIfDemo(
+                  'Reef, Lagoon, and Tide are optional. If paid membership isn’t for you right now, any gift still helps the PTO fund enrichment, The Cove, and events for Stone Hill students.',
+                )
+          }
         />
 
         {/* FAQ */}

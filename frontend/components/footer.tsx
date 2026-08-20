@@ -45,6 +45,7 @@ export async function Footer() {
         cheer: brand.cheer,
         town: brand.town,
         store: brand.store,
+        logoPath: brand.logoPath,
       }}
       mode={mode}
     />
