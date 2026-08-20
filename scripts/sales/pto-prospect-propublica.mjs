@@ -9,7 +9,7 @@
  *
  * Usage:
  *   COMMONS_PROD_DATABASE_URL=… node scripts/sales/pto-prospect-propublica.mjs --states=VA --min=50000
- *   COMMONS_PROD_DATABASE_URL_FILE=/tmp/commons-prod.url node scripts/sales/pto-prospect-propublica.mjs --states=VA,MD --min=50000
+ *   COMMONS_PROD_DATABASE_URL_FILE=/tmp/commons-prod.url node scripts/sales/pto-prospect-propublica.mjs --states=VA,MD --min=50000 --year=2024
  */
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -23,12 +23,24 @@ const BASE = 'https://projects.propublica.org/nonprofits/api/v2'
 const QUERIES = ['PTO', 'PTA', '"parent teacher"', '"parents association"']
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
+/** ProPublica rarely has the current calendar year yet; latest usable tax year is usually Y-2. */
+function defaultTaxYear() {
+  return new Date().getFullYear() - 2
+}
+
 function parseArgs(argv) {
-  const out = { states: ['VA'], min: 50_000, pagesPerQuery: 40 }
+  const out = { states: ['VA'], min: 50_000, pagesPerQuery: 40, year: defaultTaxYear() }
   for (const a of argv.slice(2)) {
     if (a.startsWith('--states=')) out.states = a.slice(9).split(',').map((s) => s.trim().toUpperCase()).filter(Boolean)
     else if (a.startsWith('--min=')) out.min = Number(a.slice(6))
     else if (a.startsWith('--pages=')) out.pagesPerQuery = Number(a.slice(8))
+    else if (a.startsWith('--year=')) {
+      const raw = a.slice(7).trim().toLowerCase()
+      out.year = raw === 'latest' ? defaultTaxYear() : Number(raw)
+    }
+  }
+  if (!Number.isFinite(out.year) || out.year < 2000) {
+    throw new Error(`Invalid --year=${out.year}`)
   }
   return out
 }
@@ -170,7 +182,7 @@ async function main() {
     }
   }
 
-  console.log(JSON.stringify({ candidates: byEin.size, states: opts.states, min: opts.min }))
+  console.log(JSON.stringify({ candidates: byEin.size, states: opts.states, min: opts.min, year: opts.year }))
 
   let kept = 0
   let skipped = 0
@@ -181,11 +193,21 @@ async function main() {
       const latest = latestRevenue(detail.filings_with_data)
       await sleep(300)
       const orgName = detail.organization?.name || org.name
-      if (looksLikeBoosterOrBand(orgName)) {
+      const displayName =
+        (detail.organization?.sub_name || '').trim() &&
+        /pta|pto|parent/i.test(detail.organization.sub_name)
+          ? `${detail.organization.sub_name}`.trim()
+          : orgName
+      if (looksLikeBoosterOrBand(orgName) || looksLikeBoosterOrBand(displayName)) {
         skipped++
         continue
       }
       if (!latest || latest.revenue < opts.min) {
+        skipped++
+        continue
+      }
+      // Latest tax year only (e.g. 2024) — drop stale 2015–2023 last filings.
+      if (latest.year !== opts.year) {
         skipped++
         continue
       }
@@ -208,7 +230,7 @@ async function main() {
            updated_at = now()`,
         [
           org.ein,
-          orgName,
+          displayName,
           detail.organization?.city || org.city,
           detail.organization?.state || org.state,
           detail.organization?.ntee_code || org.ntee_code,
