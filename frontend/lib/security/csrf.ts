@@ -19,6 +19,9 @@ function allowedOrigins(): string[] {
   if (isDemoInstance()) {
     set.add('https://commons-pto-demo.vercel.app')
   }
+  if (process.env.COMMONS_PLATFORM === 'true') {
+    set.add('https://commons-pto.vercel.app')
+  }
   if (process.env.NODE_ENV !== 'production') {
     set.add('http://localhost:3000')
     set.add('http://127.0.0.1:3000')
