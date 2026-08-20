@@ -429,13 +429,16 @@ export async function sendDailyActivityReport(): Promise<{
   const president = settings.get('presidentEmail', 'president@shmspto.org')
   const recipients = parseReportEmails(settings.get('dailyActivityReportEmails'), president)
 
-  const result = await sendMassEmail({
-    subject: report.subject,
-    body: report.body,
-    fromName: 'SHMS PTO',
-    replyTo: president,
-    recipients,
-  })
+  const result = await sendMassEmail(
+    {
+      subject: report.subject,
+      body: report.body,
+      fromName: 'SHMS PTO',
+      replyTo: president,
+      recipients,
+    },
+    { allowInternal: true },
+  )
 
   return {
     ok: result.ok,

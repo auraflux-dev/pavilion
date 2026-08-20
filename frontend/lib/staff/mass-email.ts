@@ -81,13 +81,18 @@ export function buildMailtoBcc(draft: MassEmailDraft, opts: { testSend?: boolean
   return `mailto:${encodeURIComponent(draft.replyTo || '')}?${params.toString()}`
 }
 
+function pickRecipientSanitizer(opts: { testSend?: boolean; allowInternal?: boolean }) {
+  if (opts.testSend || opts.allowInternal) return sanitizeTestRecipients
+  return sanitizeRecipients
+}
+
 export function validateMassEmailDraft(
   draft: MassEmailDraft,
-  opts: { testSend?: boolean } = {},
+  opts: { testSend?: boolean; allowInternal?: boolean } = {},
 ): string | null {
   if (!draft.subject.trim()) return 'Subject is required'
   if (!draft.body.trim()) return 'Message body is required'
-  const sanitize = opts.testSend ? sanitizeTestRecipients : sanitizeRecipients
+  const sanitize = pickRecipientSanitizer(opts)
   if (sanitize(draft.recipients).length === 0) {
     return opts.testSend
       ? 'No valid test recipients (add a personal email on your Staff profile, or pick Board test group)'
@@ -146,6 +151,8 @@ export async function sendMassEmail(
   opts: {
     dryRun?: boolean
     testSend?: boolean
+    /** Allow @shmspto.org board/staff inboxes (ops mail, not parent outreach). */
+    allowInternal?: boolean
     /** Per-recipient subject/body/html overrides (merge fields). */
     personalize?: (to: string) => {
       subject?: string
@@ -154,12 +161,15 @@ export async function sendMassEmail(
     }
   } = {},
 ): Promise<SendMassEmailResult> {
-  const validation = validateMassEmailDraft(draft, { testSend: opts.testSend })
+  const validation = validateMassEmailDraft(draft, {
+    testSend: opts.testSend,
+    allowInternal: opts.allowInternal,
+  })
   if (validation) {
     return { ok: false, mode: 'unavailable', sent: 0, failed: 0, errors: [validation] }
   }
 
-  const sanitize = opts.testSend ? sanitizeTestRecipients : sanitizeRecipients
+  const sanitize = pickRecipientSanitizer(opts)
   const recipients = sanitize(draft.recipients)
   if (opts.dryRun) {
     return {

@@ -157,13 +157,16 @@ export async function notifyStaffSubmission(opts: {
     ? opts.subject
     : `${prefix} ${opts.subject}`.trim()
 
-  return sendMassEmail({
-    subject,
-    body: opts.body.trim(),
-    fromName: opts.fromName || 'SHMS PTO Website',
-    replyTo: opts.replyTo || undefined,
-    recipients,
-  })
+  return sendMassEmail(
+    {
+      subject,
+      body: opts.body.trim(),
+      fromName: opts.fromName || 'SHMS PTO Website',
+      replyTo: opts.replyTo || undefined,
+      recipients,
+    },
+    { allowInternal: true },
+  )
 }
 
 export type TransactionNotifyKind =
@@ -282,11 +285,14 @@ export async function notifyStaffTransaction(opts: {
 
   lines.push('', 'Staff → Members / Payments / Fulfillments for details.')
 
-  return sendMassEmail({
-    subject: `[SHMS PTO · ${transactionLabel(opts.kind)}] ${opts.description} · ${amount}`,
-    body: lines.join('\n'),
-    fromName: 'SHMS PTO Website',
-    replyTo: opts.parentEmail,
-    recipients,
-  })
+  return sendMassEmail(
+    {
+      subject: `[SHMS PTO · ${transactionLabel(opts.kind)}] ${opts.description} · ${amount}`,
+      body: lines.join('\n'),
+      fromName: 'SHMS PTO Website',
+      replyTo: opts.parentEmail,
+      recipients,
+    },
+    { allowInternal: true },
+  )
 }
