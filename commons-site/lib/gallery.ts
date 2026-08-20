@@ -43,7 +43,7 @@ export type WatchItem = {
 export const WATCH_ITEMS: WatchItem[] = [
   {
     id: 'overview',
-    title: 'Commons in five minutes',
+    title: 'Pavilion in five minutes',
     blurb: 'Public site, family portal, staff portal. What parents see vs what the board runs.',
     duration: 'Coming soon',
     placeholder: true,
@@ -58,7 +58,7 @@ export const WATCH_ITEMS: WatchItem[] = [
   {
     id: 'billing',
     title: 'Pay and /account',
-    blurb: 'HSKRG Stripe checkout, invoices, and add-ons without mixing school Square.',
+    blurb: 'Pavilion billing on HSKRG Stripe. Invoices and add-ons without mixing school Square.',
     duration: 'Coming soon',
     placeholder: true,
   },

@@ -1,4 +1,4 @@
-Commons sales and onboarding (locked).
+Pavilion sales and onboarding (locked).
 
 ## Do not auto-provision on pay
 Checkout does not spin up a live tenant. Branding and a human trial pass come first.
@@ -22,11 +22,11 @@ Checkout does not spin up a live tenant. Branding and a human trial pass come fi
    Deeper work (store window, creative, treasurer flows, integrations) is done **with/for them** under the subscription.
 
 ## Money split
-- Commons SaaS: HSKRG Stripe (marketing + `/account`). Never Auraflux branding on invoices.
+- Pavilion SaaS: HSKRG Stripe (marketing + `/account`). Never Auraflux branding on invoices.
 - School parent cards / in-person: that school’s Square.
 
 ## Support split
-- Platform help (what Commons is, billing, add-ons, partners): commons-site `/help`.
+- Platform help (what Pavilion is, billing, add-ons, partners): commons-site `/help`.
 - Day-to-day PTO ops: each tenant’s Staff/Member portals (SHMS-style KB).
 
 ## Marketing proof (required)

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Working brand direction: ink + sea glass (see brand strategy canvas). Swap tokens when locked. */
+/* Locked brand: Pavilion · ink + sea glass. Tokens for pavilionpto.com marketing. */
 :root {
   --paper: #f3efe6;
   --paper-deep: #e8e1d4;

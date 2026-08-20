@@ -1,6 +1,7 @@
-# Commons marketing site
+# Pavilion marketing site (Vercel project: commons-site)
 
-Public marketing for the Commons PTO OS.
+Public marketing for **Pavilion**, the PTO OS (HSKRG LLC).
+Target domain: **pavilionpto.com**. Colors: ink + sea glass.
 
 - List: **$399/mo** via **HSKRG LLC Stripe** Checkout (subscription)
 - School parent payments and in-person stay on **each school’s Square**

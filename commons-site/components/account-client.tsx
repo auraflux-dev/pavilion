@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { PRODUCT_NAME } from '@/lib/brand'
 
 export function AccountSignInForm() {
   const [email, setEmail] = useState('')
@@ -43,7 +44,7 @@ export function AccountSignInForm() {
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-4">
       <label className="block text-sm">
-        <span className="font-medium">Email on your Commons invoice</span>
+        <span className="font-medium">Email on your {PRODUCT_NAME} invoice</span>
         <input
           required
           type="email"

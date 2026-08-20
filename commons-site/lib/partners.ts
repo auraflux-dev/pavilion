@@ -9,13 +9,13 @@ export const PARTNERS: Partner[] = [
   {
     name: 'Square',
     category: 'Payments',
-    blurb: 'School Square for parent cards and in-person. Not for Commons SaaS billing.',
+    blurb: 'School Square for parent cards and in-person. Not for Pavilion SaaS billing.',
     url: 'https://squareup.com',
   },
   {
     name: 'Stripe',
     category: 'Platform billing',
-    blurb: 'HSKRG LLC uses Stripe Checkout and Customer Portal for Commons software.',
+    blurb: 'HSKRG LLC uses Stripe Checkout and Customer Portal for Pavilion software.',
     url: 'https://stripe.com',
   },
   {

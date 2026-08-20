@@ -1,3 +1,5 @@
+import { PRODUCT_NAME } from '@/lib/brand'
+
 export type HelpArticle = {
   slug: string
   title: string
@@ -7,16 +9,16 @@ export type HelpArticle = {
 
 export const HELP_ARTICLES: HelpArticle[] = [
   {
-    slug: 'what-is-commons',
-    title: 'What Commons is',
+    slug: 'what-is-pavilion',
+    title: `What ${PRODUCT_NAME} is`,
     summary: 'Public site, family portal, and staff portal on your school brand.',
-    body: `Commons is the PTO operating system.
+    body: `${PRODUCT_NAME} is the PTO operating system.
 
 Parents see your school brand, not our product name.
 Staff run membership, events, programs, and board work from one login.
 
 Your school keeps its own Square for parent cards and in-person sales.
-Commons software billing is separate, on HSKRG LLC Stripe.`,
+${PRODUCT_NAME} software billing is separate, on HSKRG LLC Stripe.`,
   },
   {
     slug: 'trial-then-pay',
@@ -36,7 +38,7 @@ We do not auto-provision a live tenant the moment checkout completes.`,
     slug: 'billing-and-account',
     title: 'Billing and /account',
     summary: 'Magic-link sign-in, Stripe Customer Portal, add-ons.',
-    body: `Use /account with the email on your Commons invoice.
+    body: `Use /account with the email on your ${PRODUCT_NAME} invoice.
 
 We email a one-time sign-in link.
 From there you open the Stripe billing portal for invoices, cards, and cancel.
@@ -46,11 +48,11 @@ Otherwise email us and we add them on your subscription.`,
   },
   {
     slug: 'school-square-vs-saas',
-    title: 'School Square vs Commons SaaS',
+    title: `School Square vs ${PRODUCT_NAME} SaaS`,
     summary: 'Two money paths. Do not mix them.',
     body: `Parent memberships, store cards, and in-person sales stay on your school Square.
 
-Commons software is $399 per month on HSKRG LLC Stripe.
+${PRODUCT_NAME} software is $399 per month on HSKRG LLC Stripe.
 That invoice is for the platform, not for parent checkout fees.`,
   },
   {

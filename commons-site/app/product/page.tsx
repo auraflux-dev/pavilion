@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { PRODUCT_NAME } from '@/lib/brand'
 
 export const metadata: Metadata = { title: 'Product' }
 
 const sections = [
   {
     title: 'Public site',
-    body: 'Membership, events, programs, and fundraising on your school brand.\nParents do not see Commons. They see your PTO.',
+    body: `Membership, events, programs, and fundraising on your school brand.\nParents do not see ${PRODUCT_NAME}. They see your PTO.`,
   },
   {
     title: 'Family portal',
