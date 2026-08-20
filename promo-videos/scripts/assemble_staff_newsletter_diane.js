@@ -45,7 +45,10 @@ const FONT = [
 const W = 1920;
 const H = 1080;
 const FPS = 30;
-const VF = `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1,fps=${FPS}`;
+// Letterbox on brand green — never crop-zoom thin UI strips (that blanks frames).
+const BG = '0x0b1f17';
+const VF_FIT = `scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=${BG},setsar=1,fps=${FPS}`;
+const V_ENCODE = ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'medium', '-crf', '18', '-r', String(FPS)];
 const PAD = 0.55;
 const TAIL_PAD = 0.9;
 
@@ -53,7 +56,7 @@ const TAIL_PAD = 0.9;
 const BEATS = [
   {
     part: 'vo/_parts/staff_newsletter_diane_p01_sign_in.m4a',
-    still: 'assets/staff-newsletter/01-templates-canva.png',
+    still: 'assets/staff-newsletter/00-nav-newsletter.png',
     caption: 'Step 1 · Sign In · Open Newsletter',
   },
   {
@@ -163,12 +166,17 @@ function makeBrandCard(dest, { title, subtitle }) {
   run(['-y', '-i', bg, '-i', logo, '-filter_complex', fc, '-frames:v', '1', '-update', '1', dest]);
 }
 
-function muxStillVo(img, vo, dest, seconds) {
+function muxStillVo(img, vo, dest, seconds, caption) {
+  const font = FONT.replace(/:/g, '\\:');
+  const cap = caption ? esc(caption) : '';
+  const vf = caption
+    ? `${VF_FIT},drawtext=fontfile=${font}:text='${cap}':fontsize=36:fontcolor=white:borderw=2:bordercolor=black@0.55:x=(w-text_w)/2:y=h-72`
+    : VF_FIT;
   run([
     '-y', '-loop', '1', '-i', img, '-i', vo,
-    '-vf', VF, '-t', String(seconds),
-    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', String(FPS),
-    '-c:a', 'aac', '-shortest',
+    '-vf', vf, '-t', String(seconds),
+    ...V_ENCODE,
+    '-c:a', 'aac', '-b:a', '192k', '-shortest',
     dest,
   ]);
 }
@@ -232,7 +240,7 @@ function main() {
     const vo = a(b.part);
     const d = dur(vo) + PAD + TAIL_PAD;
     const clip = path.join(WORK, `${String(i + 1).padStart(2, '0')}.mp4`);
-    muxStillVo(a(b.still), vo, clip, d);
+    muxStillVo(a(b.still), vo, clip, d, b.caption);
     bodyClips.push(clip);
     srt.push(`${i + 2}\n${tsFmt(t)} --> ${tsFmt(t + dur(vo))}\n${b.caption}\n`);
     t += d;
@@ -261,7 +269,8 @@ function main() {
     `[1:a]volume=0.08,afade=t=in:st=0:d=0.5[a1];` +
       `[0:a][a1]amix=inputs=2:duration=first:dropout_transition=2:weights=1 0.35[a]`,
     '-map', '0:v', '-map', '[a]',
-    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-c:a', 'aac',
+    ...V_ENCODE,
+    '-c:a', 'aac', '-b:a', '192k',
     '-movflags', '+faststart',
     out,
   ]);

@@ -28,6 +28,19 @@ const OUT_SHOTS = path.join(ROOT, 'scripts/shots')
 
 const SHOTS = [
   {
+    file: '00-nav-newsletter.png',
+    shotFile: '39-staff-newsletter-nav.png',
+    selector: 'nav, [data-staff-nav], aside',
+    fallback: 'a[href*="view=newsletter"], button:has-text("Newsletter")',
+    minHeight: 720,
+    minWidth: 1280,
+    prepare: async (page) => {
+      // Prefer full Staff chrome with Newsletter selected.
+      const nav = page.locator('a[href*="view=newsletter"], button:has-text("Newsletter"), [href*="newsletter"]').first()
+      if (await nav.count()) await nav.scrollIntoViewIfNeeded()
+    },
+  },
+  {
     file: '01-templates-canva.png',
     shotFile: '39-staff-newsletter-templates.png',
     selector: '#newsletter-templates',
@@ -46,6 +59,7 @@ const SHOTS = [
     shotFile: '39-staff-newsletter-type.png',
     selector: '[data-help-shot="newsletter-type"]',
     fallback: '#member-newsletter label:has-text("Who this is for")',
+    minHeight: 520,
   },
   {
     file: '04-weekly-scoop.png',
@@ -82,6 +96,7 @@ const SHOTS = [
     shotFile: '39-staff-newsletter-copy.png',
     selector: '[data-help-shot="copy-tracking"]',
     fallback: '#member-newsletter input[placeholder*="Subject"], #member-newsletter input[placeholder*="headline"]',
+    minHeight: 560,
   },
   {
     file: '07-schedule-approval.png',
@@ -94,6 +109,7 @@ const SHOTS = [
     shotFile: '39-staff-newsletter-actions.png',
     selector: '[data-help-shot="send-actions"]',
     fallback: '#member-newsletter div.flex.flex-wrap.gap-2:has(button:text("Send email now"), button:text("Preview recipients"))',
+    minHeight: 480,
   },
   {
     file: '09-send-report.png',
@@ -110,6 +126,39 @@ async function locateShot(page, shot) {
     if (await fb.count()) return fb
   }
   throw new Error(`Could not find ${shot.file} (${shot.selector})`)
+}
+
+/**
+ * Element-only crops of thin form rows become blank white bars when
+ * force-zoomed to 16:9. Capture a padded viewport clip with a min size
+ * so help stills + training video stay readable.
+ */
+async function screenshotReadable(page, el, dest, {
+  pad = 28,
+  minWidth = 1080,
+  minHeight = 420,
+} = {}) {
+  await el.scrollIntoViewIfNeeded()
+  await page.waitForTimeout(200)
+  const box = await el.boundingBox()
+  if (!box) throw new Error(`No bounding box for ${dest}`)
+  const vp = page.viewportSize() || { width: 1440, height: 900 }
+
+  let width = Math.max(minWidth, Math.ceil(box.width + pad * 2))
+  let height = Math.max(minHeight, Math.ceil(box.height + pad * 2))
+  width = Math.min(width, vp.width)
+  height = Math.min(height, vp.height)
+
+  let x = Math.floor(box.x + box.width / 2 - width / 2)
+  let y = Math.floor(box.y + box.height / 2 - height / 2)
+  x = Math.max(0, Math.min(x, vp.width - width))
+  y = Math.max(0, Math.min(y, vp.height - height))
+
+  await page.screenshot({
+    path: dest,
+    type: 'png',
+    clip: { x, y, width, height },
+  })
 }
 
 async function loginFlow() {
@@ -229,11 +278,12 @@ async function captureFromPage(page) {
   for (const shot of SHOTS) {
     if (shot.prepare) await shot.prepare(page)
     const el = await locateShot(page, shot)
-    await el.scrollIntoViewIfNeeded()
-    await page.waitForTimeout(250)
     const pubPath = path.join(OUT_PUBLIC, shot.file)
     const shotsPath = path.join(OUT_SHOTS, shot.shotFile)
-    await el.screenshot({ path: pubPath })
+    await screenshotReadable(page, el, pubPath, {
+      minHeight: shot.minHeight || 420,
+      minWidth: shot.minWidth || 1080,
+    })
     fs.copyFileSync(pubPath, shotsPath)
     console.log(`✅ ${shot.file}`)
   }
