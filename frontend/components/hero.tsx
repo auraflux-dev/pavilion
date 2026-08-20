@@ -13,11 +13,17 @@ function resolveHomeImage(raw: string, fallback: string): string {
 export async function Hero() {
   const [settings, content] = await Promise.all([getSiteSettings(), getPageContent('home')])
   const inSession = settings.getBool('schoolInSession', false)
+  const commons = process.env.COMMONS_PLATFORM === 'true'
   const stats = [
     { value: settings.get('heroStatFamilies', '500+'), label: 'Student Families' },
     ...(inSession
       ? [{ value: settings.get('heroStatPrograms', '12+'), label: 'Active Programs' }]
-      : [{ value: 'Year-round', label: vanillaizeIfDemo('The Cove shop') }]),
+      : [
+          {
+            value: 'Year-round',
+            label: commons ? 'Events & Scoop' : vanillaizeIfDemo('The Cove shop'),
+          },
+        ]),
     { value: settings.get('heroStatVolunteers', '200+'), label: 'Volunteers' },
   ]
 
@@ -93,17 +99,31 @@ export async function Hero() {
                 </a>
               </Button>
 
-              <Button
-                size="lg"
-                variant="outline"
-                className="font-bold px-6 sm:px-8 border-2 border-white text-white bg-transparent hover:bg-white hover:text-[var(--brand-green)] transition-colors"
-                asChild
-              >
-                <a href={demoStorePath()}>
-                  <BookOpen className="w-4 h-4 mr-2" aria-hidden="true" />
-                  {vanillaizeIfDemo('Shop The Cove')}
-                </a>
-              </Button>
+              {commons ? (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="font-bold px-6 sm:px-8 border-2 border-white text-white bg-transparent hover:bg-white hover:text-[var(--brand-green)] transition-colors"
+                  asChild
+                >
+                  <a href="/newsletter">
+                    <BookOpen className="w-4 h-4 mr-2" aria-hidden="true" />
+                    The Scoop
+                  </a>
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="font-bold px-6 sm:px-8 border-2 border-white text-white bg-transparent hover:bg-white hover:text-[var(--brand-green)] transition-colors"
+                  asChild
+                >
+                  <a href={demoStorePath()}>
+                    <BookOpen className="w-4 h-4 mr-2" aria-hidden="true" />
+                    {vanillaizeIfDemo('Shop The Cove')}
+                  </a>
+                </Button>
+              )}
 
               <Button
                 size="lg"

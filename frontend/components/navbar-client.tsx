@@ -9,12 +9,17 @@ import { Button } from '@/components/ui/button'
 import type { NavLink } from '@/lib/api/nav'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { PortalReturnBar } from '@/components/portal-return-bar'
-import { DEMO_BRAND } from '@/lib/demo/brand'
-import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { DemoMark } from '@/components/demo/demo-mark'
 
 interface Props {
   links: NavLink[]
+  brand: {
+    school: string
+    short: string
+    pto: string
+    cheer: string
+  }
+  mode: 'demo' | 'commons' | 'stone-hill'
 }
 
 type OverflowItem = { id: string; label: string; href: string }
@@ -133,7 +138,7 @@ function DesktopOverflowNav({ items }: { items: OverflowItem[] }) {
   )
 }
 
-export function NavbarClient({ links }: Props) {
+export function NavbarClient({ links, brand, mode }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [pendingHref, setPendingHref] = useState<string | null>(null)
@@ -217,15 +222,28 @@ export function NavbarClient({ links }: Props) {
         <Link
           href="/"
           className="flex items-center gap-2.5 shrink-0 group"
-          aria-label={isPublicDemoInstance() ? `${DEMO_BRAND.pto} Home` : 'Stone Hill Middle School PTO Home'}
+          aria-label={`${brand.pto} Home`}
           onClick={() => setPendingHref('/')}
         >
-          {isPublicDemoInstance() ? (
+          {mode === 'demo' ? (
             <DemoMark size={44} />
+          ) : mode === 'commons' ? (
+            <span
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+              style={{ backgroundColor: 'var(--brand-green)' }}
+              aria-hidden="true"
+            >
+              {brand.short
+                .replace(/\s*PTO$/i, '')
+                .split(/\s+/)
+                .map((w) => w[0])
+                .join('')
+                .slice(0, 2)}
+            </span>
           ) : (
             <Image
               src="/shms-logo.png"
-              alt="Stone Hill Middle School Stingrays logo"
+              alt={`${brand.school} logo`}
               width={44}
               height={44}
               className="shrink-0"
@@ -237,18 +255,18 @@ export function NavbarClient({ links }: Props) {
               className="font-bold text-sm leading-tight block"
               style={{ color: 'var(--brand-green)' }}
             >
-              {isPublicDemoInstance() ? DEMO_BRAND.school : 'Stone Hill Middle School'}
+              {brand.school}
             </span>
             <span
               className="text-xs font-semibold tracking-wide uppercase whitespace-nowrap"
               style={{ color: 'var(--brand-gold)' }}
             >
-              {isPublicDemoInstance() ? `PTO · ${DEMO_BRAND.cheer}` : 'PTO · Go Stingrays!'}
+              {`PTO · ${brand.cheer}`}
             </span>
           </div>
           <div className="xl:hidden">
             <span className="font-bold text-sm" style={{ color: 'var(--brand-green)' }}>
-              {isPublicDemoInstance() ? DEMO_BRAND.short : 'SHMS PTO'}
+              {brand.short}
             </span>
           </div>
         </Link>

@@ -1,4 +1,6 @@
 import { isDemoInstance } from '@/lib/demo/instance'
+import { getActiveTrialBrand, isCommonsPlatform } from '@/lib/crm/active-trial'
+import type { TrialBrand } from '@/lib/crm/trial-packs'
 
 export const DEMO_BRAND = {
   school: 'Riverside Elementary School',
@@ -21,11 +23,86 @@ export const DEMO_BRAND = {
   },
 } as const
 
-export function demoStorePath(): string {
-  return isDemoInstance() ? '/perch' : '/cove'
+export type PublicBrandFace = {
+  school: string
+  pto: string
+  short: string
+  mascot: string
+  mascotPlural: string
+  cheer: string
+  store: string
+  card: string
+  cardPlural: string
+  town: string
+  district: string
+  host: string
+  tiers: {
+    reef: string
+    lagoon: string
+    tide: string
+    faculty: string
+  }
 }
 
-export function vanillaizeCopy(input: string): string {
+const STONE_HILL_BRAND: PublicBrandFace = {
+  school: 'Stone Hill Middle School',
+  pto: 'Stone Hill Middle School PTO',
+  short: 'SHMS PTO',
+  mascot: 'Stingray',
+  mascotPlural: 'Stingrays',
+  cheer: 'Go Stingrays!',
+  store: 'The Cove',
+  card: 'Cove Digital Card',
+  cardPlural: 'Cove Digital Cards',
+  town: 'Ashburn',
+  district: 'Loudoun County Public Schools',
+  host: 'shmspto.org',
+  tiers: {
+    reef: 'Reef',
+    lagoon: 'Lagoon',
+    tide: 'Tide',
+    faculty: 'Faculty',
+  },
+}
+
+function brandFaceFromTrial(b: TrialBrand): PublicBrandFace {
+  return {
+    school: b.school,
+    pto: b.pto,
+    short: b.short,
+    mascot: 'Champion',
+    mascotPlural: 'Champions',
+    cheer: b.cheer,
+    store: b.store,
+    card: b.card,
+    cardPlural: `${b.card}s`,
+    town: b.town,
+    district: `${b.town} schools`,
+    host: b.host,
+    tiers: {
+      reef: 'Member',
+      lagoon: 'Family',
+      tide: 'Patron',
+      faculty: 'Faculty',
+    },
+  }
+}
+
+/** Active visitor chrome brand: demo, private trial pack, or Stone Hill. */
+export function publicBrandFace(): PublicBrandFace {
+  if (isDemoInstance()) return DEMO_BRAND
+  const trial = getActiveTrialBrand()
+  if (trial) return brandFaceFromTrial(trial)
+  return STONE_HILL_BRAND
+}
+
+export function demoStorePath(): string {
+  if (isDemoInstance()) return '/perch'
+  if (isCommonsPlatform()) return '/membership'
+  return '/cove'
+}
+
+export function vanillaizeCopy(input: string, brand: PublicBrandFace = DEMO_BRAND): string {
   if (typeof input !== 'string' || !input) return input
   let s = input
 
@@ -45,57 +122,57 @@ export function vanillaizeCopy(input: string): string {
     .replace(/SHMSLAGOON\d+/g, 'RIVERSIDEFAMILY15')
     .replace(/SHMSTIDE\d+/g, 'RIVERSIDEPATRON20')
     .replace(/SHMSCOVE(?::\d+)?/gi, 'RIVERSIDEPERCH')
-    .replace(/\bCove Digital Cards\b/g, DEMO_BRAND.cardPlural)
-    .replace(/\bCove Digital Card\b/g, DEMO_BRAND.card)
-    .replace(/\bFamily Cove code\b/gi, `${DEMO_BRAND.card} code`)
-    .replace(/\bFamily Cove\b/gi, DEMO_BRAND.card)
-    .replace(/\bShop The Cove\b/gi, `Shop ${DEMO_BRAND.store}`)
-    .replace(/\bThe Cove shop\b/gi, DEMO_BRAND.store)
-    .replace(/\bFamily Cove Digital Card\b/gi, DEMO_BRAND.card)
-    .replace(/\bStone Hill Middle School PTO\b/gi, DEMO_BRAND.pto)
-    .replace(/\bStone Hill Middle School\b/gi, DEMO_BRAND.school)
-    .replace(/\bStone Hill\b/gi, 'Riverside')
-    .replace(/\bSHMS PTO\b/g, DEMO_BRAND.short)
-    .replace(/\/cove\b/gi, '/perch')
-    .replace(/\bThe Cove\b/g, DEMO_BRAND.store)
-    .replace(/\bCove QR\b/g, `${DEMO_BRAND.card} QR`)
+    .replace(/\bCove Digital Cards\b/g, brand.cardPlural)
+    .replace(/\bCove Digital Card\b/g, brand.card)
+    .replace(/\bFamily Cove code\b/gi, `${brand.card} code`)
+    .replace(/\bFamily Cove\b/gi, brand.card)
+    .replace(/\bShop The Cove\b/gi, `Shop ${brand.store}`)
+    .replace(/\bThe Cove shop\b/gi, brand.store)
+    .replace(/\bFamily Cove Digital Card\b/gi, brand.card)
+    .replace(/\bStone Hill Middle School PTO\b/gi, brand.pto)
+    .replace(/\bStone Hill Middle School\b/gi, brand.school)
+    .replace(/\bStone Hill\b/gi, brand.short.replace(/\s*PTO$/i, '').trim() || brand.town)
+    .replace(/\bSHMS PTO\b/g, brand.short)
+    .replace(/\/cove\b/gi, brand.store === 'The Perch' ? '/perch' : brand.store === 'The Cove' ? '/cove' : '/membership')
+    .replace(/\bThe Cove\b/g, brand.store)
+    .replace(/\bCove QR\b/g, `${brand.card} QR`)
     .replace(/\bCove features locked\b/gi, 'Store features locked')
-    .replace(/\bunlock Cove\b/gi, `unlock ${DEMO_BRAND.store}`)
-    .replace(/\bunlock the Cove\b/gi, `unlock ${DEMO_BRAND.store}`)
-    .replace(/\bduring Cove hours\b/gi, `during ${DEMO_BRAND.store} hours`)
-    .replace(/\bCove \/ retail\b/gi, `${DEMO_BRAND.store} / retail`)
-    .replace(/\bCove register\b/gi, `${DEMO_BRAND.store} register`)
-    .replace(/\bCove \/ marketing copy\b/gi, `${DEMO_BRAND.store} / marketing copy`)
-    .replace(/\bCharge Cove\b/gi, `Charge ${DEMO_BRAND.store}`)
-    .replace(/\bCove hours\b/gi, `${DEMO_BRAND.store} hours`)
-    .replace(/\bCove\b/g, DEMO_BRAND.store)
+    .replace(/\bunlock Cove\b/gi, `unlock ${brand.store}`)
+    .replace(/\bunlock the Cove\b/gi, `unlock ${brand.store}`)
+    .replace(/\bduring Cove hours\b/gi, `during ${brand.store} hours`)
+    .replace(/\bCove \/ retail\b/gi, `${brand.store} / retail`)
+    .replace(/\bCove register\b/gi, `${brand.store} register`)
+    .replace(/\bCove \/ marketing copy\b/gi, `${brand.store} / marketing copy`)
+    .replace(/\bCharge Cove\b/gi, `Charge ${brand.store}`)
+    .replace(/\bCove hours\b/gi, `${brand.store} hours`)
+    .replace(/\bCove\b/g, brand.store)
     .replace(/\ba The Perch\b/g, 'a Perch')
-    .replace(/\bGo Stingrays!/gi, DEMO_BRAND.cheer)
-    .replace(/\bStingrays\b/gi, DEMO_BRAND.mascotPlural)
-    .replace(/\bStingray\b/gi, DEMO_BRAND.mascot)
+    .replace(/\bGo Stingrays!/gi, brand.cheer)
+    .replace(/\bStingrays\b/gi, brand.mascotPlural)
+    .replace(/\bStingray\b/gi, brand.mascot)
     .replace(/\bSHMS led\b/g, 'School led')
     .replace(/\bPTO\/SHMS\b/g, 'PTO/School')
-    .replace(/\bSHMS\b/g, DEMO_BRAND.short)
-    .replace(/\bLagoon\b/g, DEMO_BRAND.tiers.lagoon)
-    .replace(/\bReef\b/g, DEMO_BRAND.tiers.reef)
-    .replace(/\bTide\b/g, DEMO_BRAND.tiers.tide)
-    .replace(/\bLoudoun County Public Schools\b/gi, DEMO_BRAND.district)
-    .replace(/\bRock Ridge High School\b/gi, `${DEMO_BRAND.school}`)
-    .replace(/\bAshburn, Virginia\b/gi, `${DEMO_BRAND.town}`)
-    .replace(/\bAshburn\b/gi, DEMO_BRAND.town)
-    .replace(/\bLCPS\b/g, DEMO_BRAND.district)
-    .replace(/\bCampus Store\b/g, DEMO_BRAND.store)
-    .replace(/\bCampus Card\b/g, DEMO_BRAND.card)
-    .replace(/your town/gi, DEMO_BRAND.town)
-    .replace(/your school district/gi, DEMO_BRAND.district)
-    .replace(/\bNorthern Virginia\b/gi, DEMO_BRAND.town)
+    .replace(/\bSHMS\b/g, brand.short)
+    .replace(/\bLagoon\b/g, brand.tiers.lagoon)
+    .replace(/\bReef\b/g, brand.tiers.reef)
+    .replace(/\bTide\b/g, brand.tiers.tide)
+    .replace(/\bLoudoun County Public Schools\b/gi, brand.district)
+    .replace(/\bRock Ridge High School\b/gi, `${brand.school}`)
+    .replace(/\bAshburn, Virginia\b/gi, `${brand.town}`)
+    .replace(/\bAshburn\b/gi, brand.town)
+    .replace(/\bLCPS\b/g, brand.district)
+    .replace(/\bCampus Store\b/g, brand.store)
+    .replace(/\bCampus Card\b/g, brand.card)
+    .replace(/your town/gi, brand.town)
+    .replace(/your school district/gi, brand.district)
+    .replace(/\bNorthern Virginia\b/gi, brand.town)
     .replace(/\bNOVA Math Tournament\b/gi, 'Fairhaven Math Tournament')
     .replace(/\bMath meet\b/gi, 'Fairhaven Math Tournament')
     .replace(/\bMoneyMinder\b/gi, 'the budget books')
     .replace(/\bBank of America\b/gi, 'the operating bank')
     .replace(/\bBoA\b/g, 'bank')
-    .replace(/shmspto\.org/gi, DEMO_BRAND.host)
-    .replace(/@shmspto\b/gi, `@${DEMO_BRAND.host}`)
+    .replace(/shmspto\.org/gi, brand.host)
+    .replace(/@shmspto\b/gi, `@${brand.host}`)
     .replace(/\s{2,}/g, ' ')
     .replace(/\s+\./g, '.')
     .trim()
@@ -104,7 +181,11 @@ export function vanillaizeCopy(input: string): string {
 }
 
 export function vanillaizeIfDemo(input: string): string {
-  return isDemoInstance() ? vanillaizeCopy(input) : input
+  if (isDemoInstance()) return vanillaizeCopy(input)
+  if (isCommonsPlatform() && getActiveTrialBrand()) {
+    return vanillaizeCopy(input, publicBrandFace())
+  }
+  return input
 }
 
 export function vanillaizeRecord(raw: Record<string, string>): Record<string, string> {
@@ -116,8 +197,11 @@ export function vanillaizeRecord(raw: Record<string, string>): Record<string, st
 }
 
 export function vanillaizeDeep<T>(input: T): T {
-  if (!isDemoInstance()) return input
-  if (typeof input === 'string') return vanillaizeCopy(input) as T
+  const active =
+    isDemoInstance() || (isCommonsPlatform() && Boolean(getActiveTrialBrand()))
+  if (!active) return input
+  const face = publicBrandFace()
+  if (typeof input === 'string') return vanillaizeCopy(input, face) as T
   if (Array.isArray(input)) return input.map((v) => vanillaizeDeep(v)) as T
   if (input && typeof input === 'object') {
     const out: Record<string, unknown> = {}
@@ -133,9 +217,10 @@ export function vanillaizeDeep<T>(input: T): T {
 export function displayMembershipTier(tier: string): string {
   const key = String(tier || '').trim().toLowerCase()
   if (!key || key === 'free') return 'Free'
-  if (isDemoInstance()) {
-    const mapped = DEMO_BRAND.tiers[key as keyof typeof DEMO_BRAND.tiers]
-    return mapped || vanillaizeCopy(tier)
+  if (isDemoInstance() || (isCommonsPlatform() && getActiveTrialBrand())) {
+    const face = publicBrandFace()
+    const mapped = face.tiers[key as keyof typeof face.tiers]
+    return mapped || vanillaizeCopy(tier, face)
   }
   return key.charAt(0).toUpperCase() + key.slice(1)
 }

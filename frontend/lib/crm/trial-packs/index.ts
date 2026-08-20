@@ -16,6 +16,8 @@ export type TrialBrand = {
   host: string
   store: string
   card: string
+  /** Navbar / cheer line, e.g. Be a CHAMPION */
+  cheer: string
 }
 
 export type TrialPack = {
@@ -55,6 +57,7 @@ export function springHillPack(): TrialPack {
     host: 'spring-hill.commons-pto.org',
     store: 'Spirit Shop',
     card: 'Family card',
+    cheer: 'Be a CHAMPION',
   }
   const b = brand
 

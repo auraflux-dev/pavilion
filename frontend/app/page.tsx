@@ -46,6 +46,7 @@ export default async function HomePage() {
         {inSession ? <UpcomingEvents /> : null}
         <DonateBlock
           compact
+          eyebrow={commons ? 'Support the PTO' : undefined}
           title={
             commons
               ? 'Donate'
