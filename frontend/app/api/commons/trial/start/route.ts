@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       {
         ok: false,
         error:
-          'Trial sites are private.\nAuraflux provisions accounts — open /trial with your provision key.',
+          'Trial sites are private.\nAuraflux provisions accounts.\nOpen /trial with your provision key.',
       },
       { status: 401 },
     )

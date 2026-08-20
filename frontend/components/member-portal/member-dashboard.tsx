@@ -802,12 +802,13 @@ You're on Tide. Benefits show on each student card below.`
           )}
 
           <div className="flex flex-wrap gap-2 mb-4">
-            {commons ? null : coveGate.ok ? (
+            {!commons && coveGate.ok ? (
               <StoreCardReload
                 students={students.map(({ id, firstName, lastName }) => ({ id, firstName, lastName }))}
                 onLoaded={load}
               />
-            ) : commons ? null : (
+            ) : null}
+            {!commons && !coveGate.ok ? (
               <button
                 type="button"
                 disabled
@@ -816,7 +817,7 @@ You're on Tide. Benefits show on each student card below.`
               >
                 {vanillaizeIfDemo('Load Cove Digital Card (locked)')}
               </button>
-            )}
+            ) : null}
             {liveCommerce && !commons ? (
             <a
               href="/cove#shop"

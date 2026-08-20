@@ -1,13 +1,12 @@
+import { redirect } from 'next/navigation'
 import { MemberShell } from '@/components/shells/member-shell'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
+import { isCommonsPlatform } from '@/lib/crm/active-trial'
 
 export const metadata = {
   title: 'Parent Videos',
   description: 'Watch short guides for the website, Member Portal, membership tiers, and board volunteering.',
 }
-
-import { isCommonsPlatform } from '@/lib/crm/active-trial'
-import { redirect } from 'next/navigation'
 
 export default function MemberPortalVideosPage() {
   if (isCommonsPlatform()) redirect('/member-portal')
