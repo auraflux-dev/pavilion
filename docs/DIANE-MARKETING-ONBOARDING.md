@@ -41,7 +41,7 @@ You do **not** need the Canva Developer Portal. Day-to-day is folder + Staff.
 | **Comms & content** | Month calendar — parent / school / board messages + content planner |
 | **Canva** | Open the Marketing folder, copy design links |
 | **Social** | Facebook / Instagram posts from Staff |
-| **Newsletter** | Member email + WhatsApp grade queue |
+| **Newsletter** | Member email + Weekly Scoop. Full how-to: Staff → Help → **Member newsletter (for Diane)** |
 | **Page copy** / **Site settings** | Heroes, announcement bar, public CTAs |
 | **Surveys** | Create / share parent surveys |
 | **Projects** | Year board (Open House, spirit wear, etc.) |
@@ -55,7 +55,7 @@ You do **not** need the Canva Developer Portal. Day-to-day is folder + Staff.
 - [ ] Connect Google (Inbox)  
 - [ ] Open **Canva** → Marketing folder (confirm you can edit)  
 - [ ] Open **Comms & content** — add or review the next two weeks  
-- [ ] Skim **Help** → Marketing / Comms articles  
+- [ ] Skim **Help** → **Member newsletter (for Diane)** and send yourself a test email  
 - [ ] Optional: finish the Home onboarding checklist  
 
 ---
@@ -74,6 +74,7 @@ You do **not** need the Canva Developer Portal. Day-to-day is folder + Staff.
 ## Quick links
 
 - Staff: https://www.shmspto.org/staff  
+- Newsletter how-to: https://www.shmspto.org/staff?view=help&article=member-newsletter-diane  
 - Canva Marketing folder: https://www.canva.com/folder/FAHMLjYIWX0  
 - Brand assets: https://www.shmspto.org/brand  
 - Public site: https://www.shmspto.org  

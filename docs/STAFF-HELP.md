@@ -31,7 +31,7 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | Programs | Programs / instructor | Registration toggles + sessions |
 | Payments | Treasurer | Needs Reconciliation + retry load |
 | Events | Events (+ related) | Create / edit / cancel + public /events |
-| **Newsletter** | Marketing / secretary / membership | Member email (free/paid) + WhatsApp grade groups |
+| **Newsletter** | Marketing / secretary / membership | Paid email, Weekly Scoop, test groups. Staff Help: **Member newsletter (for Diane)** |
 | Store & spirit | Retail | Product ID allowlists |
 | **Memberships** | membership / secretary / admin | Roster, mass email, WhatsApp compose |
 | **Discounts** | retail / related | Coupon codes for checkout / spirit |
@@ -61,7 +61,7 @@ Browsing the public site while logged in still uses the marketing nav (with a Fr
 | **36 - Discount Codes & Spirit Coupons** | Retail / treasurer | Coupon tools |
 | **37 - Site Capability Audit & Test Plans** | Everyone / QA | Visitor · portal · staff gaps + TP checklists |
 | **38 - Parent Portal Checklist** | Staff helping parents | Free vs paid what parents can do |
-| **39 - Member Newsletter** | Marketing / secretary / membership | Email + WhatsApp to free/paid members |
+| **39 - Member Newsletter** | Marketing / secretary / membership | In-app: Staff → Help → **Member newsletter (for Diane)** |
 | **46 - Comms & Content Calendar** | Marketing / secretary / membership / events | Month + agenda planners; publish via Newsletter / Social / WA |
 | **47 - Staff Role Onboarding** | All staff except president@ | First-week checklists on Staff Home (all system roles) |
 | **48 - Where form emails go** | Everyone | Public + portal forms, Help, sale alerts — who gets each email |

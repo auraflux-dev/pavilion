@@ -58,6 +58,7 @@ export const STAFF_KB: KbIndex = {
 - **Help**: this knowledge base
 - **Inbox / Calendar / Docs**. Connect Google once, then work stays in Staff
 - **Comms calendar**: plan parent / school / board messages and content
+- **Newsletter**: paid email and Weekly Scoop. Open Help → **Member newsletter (for Diane)**
 - **The Cove**: register + products when you run the snack window
 
 ## Stay in Staff
@@ -357,6 +358,123 @@ Prefer portal messages + email for official notices so parents are not chased on
 Mass email and WhatsApp share actions open the compose/share flow for that campaign. WhatsApp may leave Staff briefly to the WhatsApp app. That is intentional for sharing, not a second CMS.
 
 Keep MoneyMinder / bank exports with Treasurer. Do not duplicate finance ledgers in the roster.`,
+    },
+    {
+      slug: 'member-newsletter-diane',
+      title: 'Member newsletter (for Diane)',
+      categoryId: 'comms',
+      summary: 'Plain text plus Canva. Paid email, Weekly Scoop, test sends, schedule, WhatsApp.',
+      order: 3.5,
+      need: 'marketing',
+      body: `This is your working guide for **Staff → Newsletter**. You never write HTML or code. Design lives in Canva. Copy lives in plain text boxes.
+
+Open: https://www.shmspto.org/staff (Newsletter workspace)
+
+## What parents actually get
+- **Paid members**: the full email. SHMS header, your Canva PNG pages, then your text, then footer.
+- **Free parents (Weekly Scoop, about once a month)**: a **link**, not the full designed email. You share that link on WhatsApp, in the member portal, and optionally by email.
+- **Footer signups**: people who signed up on the public site. Email only. No portal.
+
+## Before you send anything
+1. Sign in as **vp-marketing@shmspto.org**
+2. **Inbox → Connect Google** if Gmail send is not ready (president@ mailbox is what actually sends)
+3. **Canva** workspace: open the Marketing folder and **Connect Canva** so PNG export works
+4. On Staff **Home**, save your **personal Gmail** so **Test send → Just me** can reach you
+
+## Design in Canva (not in Staff)
+1. Staff → **Canva** → Open Marketing folder
+2. Make a Doc, Presentation, or email-sized design
+3. Brand files: https://www.shmspto.org/brand
+4. Put the look in Canva. Put **clickable links in the text box** in Newsletter too (those get tracking)
+
+Do not paste HTML from Canva. Do not edit the design inside Staff. Use **Edit in Canva**, then re-attach or Export PNG again.
+
+## Attach Canva and export PNG
+1. In Newsletter, paste a Canva view/edit link, or pick a recent design
+2. **Export PNG for email** (it also starts on attach if Canva is connected)
+3. Preview the graphic. Multi-page designs export **every page**. All pages stack in the email
+4. **Save current as template** if you will reuse this
+
+## Write the copy
+Type in the subject and body like a normal email.
+
+Optional: check **Write in beats**. Fill intro, Event, Ask, CTA, sign-off. Staff joins those into the body. You can still read the combined text.
+
+Personal bits you can type in subject or body:
+- {{firstName}} {{lastName}} {{name}}
+- {{tier}} {{grade}} {{email}}
+
+Example: Hi {{firstName}}, your {{tier}} membership…
+
+If a name is missing, it becomes “there”.
+
+## Always test first
+1. Pick **Just me**, **Board**, or **Board + Site Settings test list**
+2. **Preview test recipients**, then **Send test email**
+3. Subject gets **[TEST]**. It does **not** go to the parent portal archive
+4. Open the test inbox and click a link once so you know tracking works
+
+## Choose the newsletter type
+- **Paid members (full email)**: default. Sends to paid roster only. Optional portal post for paid parents.
+- **Weekly Scoop (free monthly link)**: paste the Canva view link (or we use the attached Canva / https://www.shmspto.org/newsletter). Then **Copy + open WhatsApp** and **Post scoop to portal**. Optional: **Email scoop link** to free parents (checkbox to include footer signups).
+- **Footer signup list only**: public form emails. No portal.
+
+## Send paid email
+1. Confirm type is **Paid members**
+2. **Preview recipients**
+3. **Send email now**. Confirm the count. If 25 or more, type **SEND**
+4. Check **Send report** for delivered, failed, opens, clicks
+
+## Schedule or get approval
+1. Pick **Send at** (your local time)
+2. Marketing: **Request approval & schedule**. Secretary or president clicks **Approve**
+3. If you can approve, **Schedule send**
+4. Jobs send within about 15 minutes of that time. Cancel from the same list if needed
+
+Test sends stay one-click. They do not need this queue.
+
+## WhatsApp (including the graphic)
+WhatsApp cannot attach a file from the website.
+
+**Copy + open WhatsApp** will:
+- Copy the caption
+- Open your PNG in a new tab
+- Open the grade group invite links
+
+In WhatsApp: attach that PNG, then paste the caption.
+
+Grade links live in **Site settings** (6th / 7th / 8th announcement links).
+
+## Weekly Scoop, step by step
+1. Type = Weekly Scoop
+2. Subject can stay **SHMS Weekly Scoop**
+3. Short note in the body. Scoop link field: Canva view URL
+4. **Copy + open WhatsApp** (PNG tab + groups)
+5. **Post scoop to portal** (free parents only. Paid members will not see this scoop)
+6. Optional **Email scoop link** after a test send
+
+## What not to do
+- Do not paste HTML or ask someone to “code the newsletter”
+- Do not skip **Test send**
+- Do not use Paid type for the monthly free link. Use Weekly Scoop
+- Do not expect WhatsApp to auto-attach the PNG. You attach it.
+
+## Screen walkthrough (record this when you have 8 minutes)
+Record Staff in the browser. Speak these beats. Pause on each screen.
+
+- 0:00 Sign in. Open Newsletter. “No HTML. Canva plus plain text.”
+- 0:40 Attach Canva. Export PNG. Show a multi-page preview if you have one.
+- 1:40 Write copy or turn on beats. Show {{firstName}}.
+- 2:30 Test send to Just me. Open the test email.
+- 3:20 Switch type to Paid. Preview. Do not send live on the recording unless it is a real test group.
+- 4:10 Switch to Weekly Scoop. Show scoop link, WhatsApp, Post to portal.
+- 5:20 Show schedule / approval list.
+- 6:00 Send report cards.
+- 6:40 What not to do. Point to this Help article.
+
+Save the recording in Drive (Marketing folder) and paste the link at the top of this article in Staff → Help when you have it.
+
+Questions: president@shmspto.org`,
     },
     {
       slug: 'role-onboarding',

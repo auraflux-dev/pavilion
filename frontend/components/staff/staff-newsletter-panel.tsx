@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { defaultUtmCampaign } from '@/lib/staff/newsletter-utm'
@@ -514,6 +515,14 @@ export function StaffNewsletterPanel() {
       >
         <div>
           <h2 className="text-lg font-bold">Member newsletter</h2>
+          <p className="text-xs mt-1">
+            <Link
+              href="/staff?view=help&article=member-newsletter-diane"
+              className="font-semibold text-[var(--brand-green)] hover:underline"
+            >
+              How this works (Diane walkthrough)
+            </Link>
+          </p>
           <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
             No HTML coding required. Write plain text, attach a Canva design, Export PNG for email.
             Sends include SHMS header/footer + your graphic + body.
