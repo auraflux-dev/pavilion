@@ -92,6 +92,17 @@ function looksLikePto(name = '') {
   )
 }
 
+function looksLikeBoosterOrBand(name = '') {
+  const n = name.toUpperCase()
+  return (
+    /\bBOOSTER\b/.test(n) ||
+    /\bBAND\b/.test(n) ||
+    /\bATHLETIC\b/.test(n) ||
+    /\bFOOTBALL\b/.test(n) ||
+    /\bCHEER\b/.test(n)
+  )
+}
+
 const DDL = `
 create table if not exists pto_prospects (
   ein              text primary key,
@@ -135,6 +146,7 @@ async function main() {
         for (const o of orgs) {
           if (!o?.ein) continue
           if (!looksLikePto(o.name || '') && !looksLikePto(o.sub_name || '')) continue
+          if (looksLikeBoosterOrBand(o.name || '') || looksLikeBoosterOrBand(o.sub_name || '')) continue
           const key = String(o.ein)
           if (!byEin.has(key)) {
             byEin.set(key, {
@@ -163,6 +175,11 @@ async function main() {
       const detail = await fetchJson(`${BASE}/organizations/${org.ein}.json`)
       const latest = latestRevenue(detail.filings_with_data)
       await sleep(300)
+      const orgName = detail.organization?.name || org.name
+      if (looksLikeBoosterOrBand(orgName)) {
+        skipped++
+        continue
+      }
       if (!latest || latest.revenue < opts.min) {
         skipped++
         continue
@@ -186,7 +203,7 @@ async function main() {
            updated_at = now()`,
         [
           org.ein,
-          detail.organization?.name || org.name,
+          orgName,
           detail.organization?.city || org.city,
           detail.organization?.state || org.state,
           detail.organization?.ntee_code || org.ntee_code,
