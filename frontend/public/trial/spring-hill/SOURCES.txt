@@ -1,0 +1,5 @@
+# Unsplash (free to use). Not Stone Hill campus.
+# hero-a:   https://unsplash.com/photos/1503676260728-1c00da094a0b  (kids learning)
+# hero-b:   https://unsplash.com/photos/1503454537195-1dcabb73ffb9  (classroom)
+# community: https://unsplash.com/photos/1577896851231-70ef18881754 (school kids)
+# volunteer: https://unsplash.com/photos/1469571486292-0ba58a3f068b (volunteers)

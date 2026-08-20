@@ -86,7 +86,6 @@ export function springHillPack(): TrialPack {
     settings: {
       schoolInSession: 'true',
       storeCardBonusPercent: '0',
-      homeCommunityImageAlt: `${b.pto} community`,
       presidentEmail: `president@${b.host}`,
       announcementEnabled: 'false',
       contactEmailGeneral: `president@${b.host}`,
@@ -95,8 +94,16 @@ export function springHillPack(): TrialPack {
       contactEmailEvents: `events@${b.host}`,
       contactEmailSponsorship: `sponsors@${b.host}`,
       contactAddress: `8201 Lewinsville Road, ${b.town}, VA 22102`,
-      homeVolunteerImageAlt: `${b.pto} volunteers`,
       portalGrades: 'K,1,2,3,4,5,6',
+      // Public Unsplash school/family photos — not Stone Hill campus.
+      homeHeroImageTopUrl: '/trial/spring-hill/hero-a.jpg',
+      homeHeroImageBottomUrl: '/trial/spring-hill/hero-b.jpg',
+      homeHeroImageTopAlt: `${b.school} students learning together`,
+      homeHeroImageBottomAlt: `${b.school} classroom energy`,
+      homeCommunityImageUrl: '/trial/spring-hill/community.jpg',
+      homeCommunityImageAlt: `${b.pto} community`,
+      homeVolunteerImageUrl: '/trial/spring-hill/volunteer.jpg',
+      homeVolunteerImageAlt: `${b.pto} volunteers`,
     },
     nav: [
       { id: 'sh0', label: 'Home', href: '/', sortOrder: 0, showInNav: true, showInFooter: true, active: true },

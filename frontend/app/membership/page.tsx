@@ -67,7 +67,10 @@ export default async function MembershipPage() {
           className="relative overflow-hidden scroll-mt-28 py-16 md:py-24"
           style={{ backgroundColor: 'var(--brand-warm)' }}
         >
-          <BrandImageWash src="/home/community.jpg" side="right" />
+          <BrandImageWash
+            src={settings.get('homeCommunityImageUrl', '/home/community.jpg')}
+            side="right"
+          />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-[#1A1A1A] mb-3">
