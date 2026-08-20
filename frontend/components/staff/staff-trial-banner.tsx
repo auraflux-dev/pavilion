@@ -39,8 +39,8 @@ export function StaffTrialBanner() {
       }`}
     >
       {status.plan === 'trial' && status.writesAllowed
-        ? `Private 30-day trial. Writes on through ${ends}.\nSign-in only — not a public site.\nTemp host: ${status.tempHost || 'pending'}.`
-        : `Trial ended ${ends}. Reads stay. Writes are off.\nData is kept until ${hold}, then we export and delete.`}
+        ? `Private 30-day trial.\nWrites on through ${ends}.\nSign-in only. Not a public site.\nTemp host: ${status.tempHost || 'pending'}.`
+        : `Trial ended ${ends}.\nReads stay. Writes are off.\nData is kept until ${hold}, then we export and delete.`}
       {'\n'}
       <Link href="/staff?view=site" className="underline font-semibold" style={{ color: 'var(--brand-green)' }}>
         Point your own domain

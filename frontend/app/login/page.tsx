@@ -9,7 +9,7 @@ const AUTH_BASE_PATH = '/api/id'
 
 function CommonsLoginForm() {
   const search = useSearchParams()
-  // Private trials open on the school site first — Staff is a second step, not the lobby.
+  // Private trials open on the school site first. Staff is a second step, not the lobby.
   const returnTo = search.get('returnTo') || '/'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -55,7 +55,9 @@ function CommonsLoginForm() {
         {'\n'}
         Use the email and password Auraflux gave you.
         {'\n'}
-        After sign-in you land on the school homepage — Staff is in the nav when you want it.
+        After sign-in you land on the school homepage.
+        {'\n'}
+        Staff is in the nav when you want it.
       </p>
 
       <form className="space-y-4" onSubmit={(e) => void onSubmit(e)}>

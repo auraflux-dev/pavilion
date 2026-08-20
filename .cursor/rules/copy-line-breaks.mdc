@@ -1,13 +1,36 @@
 ---
-description: Multi-line website and portal copy must use real line breaks
+description: Public and portal copy — no em dashes; real line breaks; no orphan words
 alwaysApply: true
 ---
 
-# Copy line breaks
+# Copy voice and line breaks
 
-When adding or editing visitor, member-portal, or staff copy that is more than one sentence or beat:
+Applies to Stone Hill, Commons demo, and private trials. Visitor, member-portal, and staff UI copy.
+
+## No em / en dashes
+
+- Do **not** use em dashes (`—`) or en dashes (`–`) as punctuation. Rob treats them as an AI tell.
+- Prefer periods, commas, colons, or a short new sentence.
+- Bad: `Join the PTO — $25 annually.`
+- Good: `Join the PTO. $25 annually.`
+- Bad: `Private trial — forms stay in-app.`
+- Good: `Private trial.\nForms stay in-app.`
+- Money/time ranges: use `to` (`$20 to $50`), not dashes.
+- `humanizePublicCopy` strips CMS em/en dashes. Still write source copy clean. Do not rely on the sanitizer for new strings in TSX/TS.
+
+## Real line breaks (not soft wrap luck)
+
+When copy is more than one sentence or beat:
 
 - Put each beat on its own line in the source (`\n` in strings, `<br />` in HTML, or separate `<p>` tags).
-- Render it so those breaks show (`whitespace-pre-line`, HTML breaks, or stacked paragraphs). Do not dump a long run-on into one cramped line and hope wrapping looks clean.
+- Render so breaks show (`whitespace-pre-line`, HTML breaks, or stacked paragraphs).
+- Do **not** leave a long run-on and hope wrapping looks clean.
+- Do **not** leave a short orphan hang (one or two words alone at the end of a thought). Start the next line when the idea turns: new step, new clause, new CTA beat.
+- Bad (one cramped string): `Open a workspace from the top nav — start with Membership, Events, or Site.`
+- Good:
+  ```
+  Open a workspace from the top nav.
+  Start with Membership, Events, or Site.
+  ```
 - `humanizePublicCopy` must keep newlines. Never collapse `\n` to spaces.
-- Same rule for CMS fields (PageContent body, program descriptions, announcements).
+- Same for CMS fields (PageContent body, program descriptions, announcements).

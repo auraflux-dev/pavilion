@@ -147,7 +147,7 @@ export async function getPageContent(page: string): Promise<PageContentFields> {
     const { trialPackForSlug } = await import('@/lib/crm/trial-packs')
     const pack = trialPackForSlug(process.env.COMMONS_TRIAL_PACK || '')
     const row = pack?.pages[page]
-    if (row) return { ...row }
+    if (row) return merge(page, row)
   }
   const cms = await fetchPageRow(page)
   if (

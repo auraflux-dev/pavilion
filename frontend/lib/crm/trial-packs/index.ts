@@ -122,8 +122,9 @@ export function springHillPack(): TrialPack {
         body:
           'Three easy steps.\n' +
           '1. Register and add your family.\n' +
-          '2. Join the PTO — $25 annually.\n' +
-          '3. Subscribe to The Scoop so you stay in the loop every Wednesday.',
+          '2. Join the PTO. $25 annually.\n' +
+          '3. Subscribe to The Scoop.\n' +
+          'Stay in the loop every Wednesday.',
         ctaLabel: 'Join our PTO · $25',
         ctaHref: '/membership',
         sectionTitle: 'Quick links',
@@ -135,7 +136,9 @@ export function springHillPack(): TrialPack {
       'home-volunteer': empty('home-volunteer', {
         eyebrow: 'Get involved',
         title: 'Apply to volunteer',
-        body: `Classroom help, events, and board roles at ${b.school}.`,
+        body:
+          `Classroom help, events, and board roles.\n` +
+          `All at ${b.school}.`,
         ctaLabel: 'Volunteer openings',
         ctaHref: '/volunteer',
       }),
@@ -144,31 +147,41 @@ export function springHillPack(): TrialPack {
         title: 'Family membership · $25',
         body:
           `Annual family membership funds programs and community events at ${b.school}.\n` +
-          'Join once for the school year. Renew each year.',
+          'Join once for the school year.\n' +
+          'Renew each year.',
         ctaLabel: 'Join our PTO',
         ctaHref: '/membership',
       }),
       events: empty('events', {
         eyebrow: 'This year',
         title: 'PTO events',
-        body: `Block Party, Book Fair, Fun Fair, Staff Appreciation, and more — coordinated by ${b.short}.`,
+        body:
+          'Block Party, Book Fair, Fun Fair, Staff Appreciation, and more.\n' +
+          `Coordinated by ${b.short}.`,
       }),
       volunteer: empty('volunteer', {
         eyebrow: 'Help',
         title: 'Volunteer at Spring Hill',
-        body: 'Room parents, event shifts, and board interest. Tell us how you want to help.',
+        body:
+          'Room parents, event shifts, and board interest.\n' +
+          'Tell us how you want to help.',
         ctaLabel: 'Sign in to volunteer',
         ctaHref: '/login',
       }),
       board: empty('board', {
         eyebrow: 'Leadership',
         title: 'PTO board',
-        body: 'Executive board and general roles. Sample roster for this private trial — replace with live officers in Staff.',
+        body:
+          'Executive board and general roles.\n' +
+          'Sample roster for this private trial.\n' +
+          'Replace with live officers in Staff.',
       }),
       newsletter: empty('newsletter', {
         eyebrow: 'The Scoop',
         title: 'Subscribe to The Scoop',
-        body: `Weekly Wednesday updates from ${b.short}: announcements, events, and ways to help.`,
+        body:
+          `Weekly Wednesday updates from ${b.short}.\n` +
+          'Announcements, events, and ways to help.',
         ctaLabel: 'Stay on The Scoop',
         ctaHref: '/newsletter',
       }),
@@ -176,23 +189,31 @@ export function springHillPack(): TrialPack {
         eyebrow: 'Support',
         title: 'Fundraising & matching',
         body:
-          `${b.short} is a 501(c)(3). Direct donations and corporate matching help programs and teachers.\n` +
+          `${b.short} is a 501(c)(3).\n` +
+          'Direct donations and corporate matching help programs and teachers.\n' +
           'EIN details live with the treasurer for matching-gift forms.',
       }),
       contact: empty('contact', {
         eyebrow: 'Reach us',
         title: 'Contact',
-        body: `Questions for ${b.short} go to the right officer. This trial is private — forms stay in-app.`,
+        body:
+          `Questions for ${b.short} go to the right officer.\n` +
+          'This trial is private.\n' +
+          'Forms stay in-app.',
       }),
       meetings: empty('meetings', {
         eyebrow: 'Board',
         title: 'Meetings',
-        body: 'Community meetings and board sessions. Dates post on Events as the year firms up.',
+        body:
+          'Community meetings and board sessions.\n' +
+          'Dates post on Events as the year firms up.',
       }),
       programs: empty('programs', {
         eyebrow: 'Enrichment',
         title: 'Programs',
-        body: `After-school and enrichment offerings through ${b.short}. Catalog fills in as the year opens.`,
+        body:
+          `After-school and enrichment offerings through ${b.short}.\n` +
+          'Catalog fills in as the year opens.',
       }),
     },
     tiers: [
@@ -217,7 +238,7 @@ export function springHillPack(): TrialPack {
         name: 'President',
         role: 'President',
         email: `president@${b.host}`,
-        bio: 'Private trial placeholder — replace in Staff.',
+        bio: 'Private trial placeholder. Replace in Staff.',
         photo: null,
         isExec: true,
         sortOrder: 1,
@@ -227,7 +248,7 @@ export function springHillPack(): TrialPack {
         name: 'Treasurer',
         role: 'Treasurer',
         email: `treasurer@${b.host}`,
-        bio: 'Private trial placeholder — replace in Staff.',
+        bio: 'Private trial placeholder. Replace in Staff.',
         photo: null,
         isExec: true,
         sortOrder: 2,
@@ -261,7 +282,7 @@ export function springHillPack(): TrialPack {
         id: 'sh-ev-2',
         title: 'First Day of School',
         description: 'First day of school.',
-        shortDescription: 'Cheers & Tears energy — first day.',
+        shortDescription: 'Cheers & Tears energy. First day.',
         slug: 'first-day-of-school',
         location: { name: b.school },
         dateAndTimeSettings: {

@@ -428,8 +428,8 @@ export function StaffDashboard() {
               <h1 className="text-2xl font-bold text-[#1A1A1A]">Home</h1>
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
                 {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
-                  ? `Private trial staff for your school.\nOpen a workspace from the top nav — start with Membership, Events, or Site.`
-                  : `Roles: ${me.roles.join(', ')}. Staff login: ${me.email}. Open a workspace from the top nav. Only what you need for that job.`}
+                  ? `Private trial staff for your school.\nOpen a workspace from the top nav.\nStart with Membership, Events, or Site.`
+                  : `Roles: ${me.roles.join(', ')}.\nStaff login: ${me.email}.\nOpen a workspace from the top nav.\nOnly what you need for that job.`}
               </p>
               {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
                 <div className="mt-3">

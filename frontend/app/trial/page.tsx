@@ -73,13 +73,13 @@ function TrialForm() {
       </h1>
       <p className="text-sm text-[#5A6070] mb-6 whitespace-pre-line leading-relaxed">
         {demo
-          ? 'This public demo is Riverside sample data. Provisioning stays on the Commons host.\nTrials are private — the school only sees the site after the login we send them.'
-          : 'Auraflux only. Requires the provision key.\nCreates a private school: URL + treasurer login.\nThey sign in at /login. No public visitor site until you say so.\nWrites on 30 days. $399/month if they stay.'}
+          ? 'This public demo is Riverside sample data.\nProvisioning stays on the Commons host.\nTrials are private.\nThe school only sees the site after the login we send them.'
+          : 'Auraflux only. Requires the provision key.\nCreates a private school: URL + treasurer login.\nThey sign in at /login.\nNo public visitor site until you say so.\nWrites on 30 days. $399/month if they stay.'}
       </p>
 
       {done ? (
         <div className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-2">
-          <p className="text-sm font-bold">Private trial ready — send them this</p>
+          <p className="text-sm font-bold">Private trial ready. Send them this.</p>
           <p className="text-sm text-[#5A6070] whitespace-pre-line">
             URL: https://{done.tempHost}/login
             {'\n'}
@@ -101,7 +101,9 @@ function TrialForm() {
             <p className="text-sm text-amber-800 whitespace-pre-line">
               Open this page as /trial?key=… with COMMONS_PROVISION_SECRET.
               {'\n'}
-              Schools never use this form — they get /login from us.
+              Schools never use this form.
+              {'\n'}
+              They get /login from us.
             </p>
           ) : null}
           <label className="block text-sm font-medium">
