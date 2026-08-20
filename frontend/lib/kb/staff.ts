@@ -623,8 +623,8 @@ Change one list at a time, save, then **View site** to confirm. Leave deep Wix E
       summary: 'CNAME and A records when you leave the trial URL.',
       order: 3,
       need: 'site',
-      body: `Your trial starts on a temp host (yourpto.commons-pto.org).
-The public demo URL is not your school.
+      body: `Your trial is private. Sign in at your temp host /login with the email and password Auraflux sent you (yourpto.commons-pto.org).
+The public Riverside demo is not your school.
 
 When you want pto.yourschool.org (or yourpto.org):
 

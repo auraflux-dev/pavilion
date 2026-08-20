@@ -64,6 +64,21 @@ if (!layout.includes('CommonsSurfaceShell')) {
   errors.push('layout must wrap CommonsSurfaceShell on demo/platform')
 }
 
+if (!read('frontend/middleware.ts').includes('commonsRequiresLogin')) {
+  errors.push('middleware must gate Commons platform behind login')
+}
+if (!read('frontend/lib/crm/private-tenant.ts').includes('isCommonsPublicPath')) {
+  errors.push('missing private-tenant allowlist')
+}
+if (!read('frontend/app/api/commons/trial/start/route.ts').includes('COMMONS_PROVISION_SECRET')) {
+  errors.push('trial start must require COMMONS_PROVISION_SECRET')
+}
+try {
+  read('frontend/app/login/page.tsx')
+} catch {
+  errors.push('missing /login for private trials')
+}
+
 for (const rel of [
   'frontend/app/trial/page.tsx',
   'frontend/app/api/commons/trial/start/route.ts',

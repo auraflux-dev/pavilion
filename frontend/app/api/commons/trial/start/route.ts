@@ -5,6 +5,14 @@ import { isDemoInstance } from '@/lib/demo/instance'
 
 export const dynamic = 'force-dynamic'
 
+function provisionKeyOk(req: NextRequest, bodyKey?: string): boolean {
+  const expected = process.env.COMMONS_PROVISION_SECRET?.trim()
+  if (!expected || expected.length < 16) return false
+  const header = req.headers.get('x-commons-provision-key')?.trim()
+  const query = req.nextUrl.searchParams.get('key')?.trim()
+  return header === expected || query === expected || bodyKey === expected
+}
+
 export async function POST(req: NextRequest) {
   if (isDemoInstance() && !isCommonsPlatformHost()) {
     return NextResponse.json(
@@ -12,7 +20,7 @@ export async function POST(req: NextRequest) {
         ok: false,
         preview: true,
         error:
-          'This sample school stays preview-only.\nStart a 30-day trial on your own Commons host (not this demo).\nWe will give you a temp URL like yourpto.commons-pto.org.',
+          'This sample school stays preview-only.\nAuraflux starts a private trial on the Commons host and sends you the URL plus login.',
       },
       { status: 409 },
     )
@@ -22,7 +30,7 @@ export async function POST(req: NextRequest) {
       {
         ok: false,
         error:
-          'Trial signup runs on the Commons app, not Stone Hill.\nAsk Auraflux for your temp host.',
+          'Trial signup runs on the Commons app, not Stone Hill.\nAsk Auraflux for a private trial login.',
       },
       { status: 503 },
     )
@@ -35,6 +43,18 @@ export async function POST(req: NextRequest) {
     password?: string
     firstName?: string
     lastName?: string
+    provisionKey?: string
+  }
+
+  if (!provisionKeyOk(req, body.provisionKey)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          'Trial sites are private.\nAuraflux provisions accounts — open /trial with your provision key.',
+      },
+      { status: 401 },
+    )
   }
   try {
     const started = await persistTrialStart({

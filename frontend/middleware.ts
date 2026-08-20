@@ -20,6 +20,7 @@ import {
   isWriteMethod,
 } from '@/lib/demo/guard'
 import { hasBetterAuthCookie, isCommonsPlatformHost } from '@/lib/crm/auth-edge'
+import { commonsRequiresLogin, isCommonsPublicPath } from '@/lib/crm/private-tenant'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { isCommonsDemoHiddenPath } from '@/lib/demo/commons-surface'
 import { demoPiiStub } from '@/lib/demo/seed'
@@ -29,6 +30,18 @@ const PROTECTED_ROUTES = ['/member-portal', '/staff']
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const demo = isDemoInstance()
+
+  // Commons platform tenants are private — login we issue, not a public school site.
+  if (commonsRequiresLogin() && !isCommonsPublicPath(pathname)) {
+    const commonsOk = hasBetterAuthCookie(req.cookies.getAll().map((c) => c.name))
+    if (!commonsOk) {
+      const loginUrl = req.nextUrl.clone()
+      loginUrl.pathname = '/login'
+      loginUrl.search = ''
+      loginUrl.searchParams.set('returnTo', pathname + (req.nextUrl.search || ''))
+      return NextResponse.redirect(loginUrl)
+    }
+  }
 
   if (demo && isCommonsDemoHiddenPath(pathname)) {
     if (pathname.startsWith('/api/')) {
@@ -95,8 +108,12 @@ export async function middleware(req: NextRequest) {
       hasBetterAuthCookie(req.cookies.getAll().map((c) => c.name))
     if (!isMemberTokens(tokens) && !demoOk && !commonsOk) {
       const loginUrl = req.nextUrl.clone()
-      loginUrl.pathname = demo ? '/review' : isCommonsPlatformHost() ? '/trial' : '/auth/join'
-      if (!demo) loginUrl.searchParams.set('mode', 'login')
+      loginUrl.pathname = demo
+        ? '/review'
+        : isCommonsPlatformHost()
+          ? '/login'
+          : '/auth/join'
+      if (!demo && !isCommonsPlatformHost()) loginUrl.searchParams.set('mode', 'login')
       loginUrl.searchParams.set('returnTo', pathname + (req.nextUrl.search || ''))
       return NextResponse.redirect(loginUrl)
     }

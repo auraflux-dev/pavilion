@@ -37,7 +37,7 @@ export function DemoBanner() {
           Board join
         </Link>
         <Link href="/trial" className="underline font-semibold">
-          Start a 30-day trial
+          Ask about a private trial
         </Link>
         <button type="button" className="underline" onClick={() => void switchLane('both', 'paid')}>
           Staff
