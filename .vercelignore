@@ -14,5 +14,6 @@ promo-videos
 out
 frontend/out
 *.mp4
+!frontend/public/help/**/*.mp4
 *.webm
 *.pdf
