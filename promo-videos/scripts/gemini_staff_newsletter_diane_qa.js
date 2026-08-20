@@ -61,7 +61,7 @@ function buildPrompt(durationSec) {
 Watch the ENTIRE video with audio. Duration ≈ ${durationSec.toFixed(1)}s.
 NORTH STAR: SEE = HEAR. When VO names a UI section, that section must be clearly readable on screen.
 
-This is a how-to for Staff → Newsletter. Audience: board volunteer Diane. Tone: calm training, not a promo ad.
+This is a how-to for Staff → Newsletter. Audience: board volunteer Diane. Tone: warm coach talking her through the screen — NOT a robotic Step 1/2/3 checklist read.
 
 MUST-PASS:
 0. STAPLE bookends: cold-open brand card at start (seal + SHMS PTO) and thank-you / Go Stingrays outro at end. Missing either = critical FAIL

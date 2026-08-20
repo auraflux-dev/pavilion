@@ -28,7 +28,6 @@ import {
   StaffExpensesSectionNav,
   StaffFundraisingSectionNav,
   StaffMembershipSectionNav,
-  StaffNewsletterSectionNav,
   StaffRetailSectionNav,
 } from '@/components/staff/staff-section-navs'
 import { StaffWorkspaceHub } from '@/components/staff/staff-workspace-hub'
@@ -851,7 +850,6 @@ export function StaffDashboard() {
         ) : null}
         {active === 'newsletter' && canNewsletter ? (
           <div className="space-y-4">
-            <StaffNewsletterSectionNav />
             <StaffWhatsAppQueuePanel />
             <StaffNewsletterPanel />
             <StaffNewsletterSendReportPanel />

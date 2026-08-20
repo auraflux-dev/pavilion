@@ -30,14 +30,14 @@ const SHOTS = [
   {
     file: '00-nav-newsletter.png',
     shotFile: '39-staff-newsletter-nav.png',
-    selector: 'nav, [data-staff-nav], aside',
-    fallback: 'a[href*="view=newsletter"], button:has-text("Newsletter")',
-    minHeight: 720,
+    // Staff chrome + Templates (Jump to strip removed when it has no copy).
+    selector: '#newsletter-templates',
+    fallback: 'header, [data-staff-nav]',
+    minHeight: 640,
     minWidth: 1280,
     prepare: async (page) => {
-      // Prefer full Staff chrome with Newsletter selected.
-      const nav = page.locator('a[href*="view=newsletter"], button:has-text("Newsletter"), [href*="newsletter"]').first()
-      if (await nav.count()) await nav.scrollIntoViewIfNeeded()
+      await page.evaluate(() => window.scrollTo(0, 0))
+      await page.waitForTimeout(200)
     },
   },
   {

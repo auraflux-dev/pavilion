@@ -13,6 +13,11 @@ type Props = {
   ariaLabel: string
   items: readonly SectionJumpItem[]
   /**
+   * Optional body under the eyebrow.
+   * Empty / whitespace-only copy hides the whole jump panel (no empty chrome).
+   */
+  copy?: string
+  /**
    * `band`. full-bleed bar under a page hero (Cove).
    * `card`. inset card above dense content (member portal).
    */
@@ -29,9 +34,13 @@ export function SectionJumpNav({
   eyebrow,
   ariaLabel,
   items,
+  copy,
   variant = 'card',
   className = '',
 }: Props) {
+  // No empty top panel: if copy is provided but blank, omit the nav entirely.
+  if (copy !== undefined && !copy.trim()) return null
+
   const cols =
     items.length <= 3
       ? 'grid-cols-1 sm:grid-cols-3'
@@ -44,6 +53,11 @@ export function SectionJumpNav({
       <p className="text-[10px] font-bold tracking-widest uppercase text-[#5A6070] mb-2 text-center sm:text-left">
         {eyebrow}
       </p>
+      {copy?.trim() ? (
+        <p className="mb-3 text-sm leading-relaxed text-[#5A6070] whitespace-pre-line text-center sm:text-left">
+          {copy.trim()}
+        </p>
+      ) : null}
       <ul className={`grid ${cols} gap-2 justify-items-stretch max-w-lg sm:max-w-none mx-auto sm:mx-0`}>
         {items.map(({ href, label, hint, icon: Icon }) => (
           <li key={href} className="w-full">

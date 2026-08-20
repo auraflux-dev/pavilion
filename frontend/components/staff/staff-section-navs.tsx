@@ -130,9 +130,11 @@ export function StaffFundraisingSectionNav() {
 
 /** Jump links for Newsletter tab. */
 export function StaffNewsletterSectionNav() {
+  // No body copy for this jump strip — hide empty top panel.
   return (
     <SectionJumpNav
       eyebrow="Jump to"
+      copy=""
       ariaLabel="Newsletter sections"
       items={[
         {

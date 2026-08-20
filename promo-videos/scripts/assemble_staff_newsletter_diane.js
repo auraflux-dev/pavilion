@@ -53,71 +53,72 @@ const PAD = 0.55;
 const TAIL_PAD = 0.9;
 
 /** SEE = HEAR — one help screenshot per VO beat */
+/** Soft labels only — no Step 1/2/3 checklist captions (VO carries the coach tone). */
 const BEATS = [
   {
     part: 'vo/_parts/staff_newsletter_diane_p01_sign_in.m4a',
     still: 'assets/staff-newsletter/00-nav-newsletter.png',
-    caption: 'Step 1 · Sign In · Open Newsletter',
+    caption: '',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p02_no_html.m4a',
     still: 'assets/staff-newsletter/01-templates-canva.png',
-    caption: 'No HTML · Canva + Plain Text',
+    caption: '',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p03_templates.m4a',
     still: 'assets/staff-newsletter/01-templates-canva.png',
-    caption: 'Templates · Attach Canva',
+    caption: '',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p04_export_png.m4a',
     still: 'assets/staff-newsletter/01-templates-canva.png',
-    caption: 'Export PNG · Multi-Page Preview',
+    caption: '',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p05_test_send.m4a',
     still: 'assets/staff-newsletter/02-test-send.png',
-    caption: 'Test Send · Just Me or Board',
+    caption: '',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p06_type.m4a',
     still: 'assets/staff-newsletter/03-newsletter-type.png',
-    caption: 'Paid · Weekly Scoop · Footer Signups',
+    caption: '',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p07_scoop.m4a',
     still: 'assets/staff-newsletter/04-weekly-scoop.png',
-    caption: 'Weekly Scoop · Link + WhatsApp',
+    caption: '',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p08_beats.m4a',
     still: 'assets/staff-newsletter/05-beats.png',
-    caption: 'Write in Beats · Plain Text',
+    caption: '',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p09_copy_utm.m4a',
     still: 'assets/staff-newsletter/06-copy-tracking.png',
-    caption: 'Subject · Body · UTM · Tracking',
+    caption: '',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p10_paid_send.m4a',
     still: 'assets/staff-newsletter/08-send-actions.png',
-    caption: 'Preview · Send Email Now',
+    caption: '',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p11_schedule.m4a',
     still: 'assets/staff-newsletter/07-schedule-approval.png',
-    caption: 'Schedule · Approval Queue',
+    caption: '',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p12_report.m4a',
     still: 'assets/staff-newsletter/09-send-report.png',
-    caption: 'Send Report · Opens + Clicks',
+    caption: '',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p13_close.m4a',
     still: 'assets/staff-newsletter/08-send-actions.png',
-    caption: 'Staff Help · Member Newsletter',
+    caption: '',
   },
 ];
 
@@ -242,7 +243,9 @@ function main() {
     const clip = path.join(WORK, `${String(i + 1).padStart(2, '0')}.mp4`);
     muxStillVo(a(b.still), vo, clip, d, b.caption);
     bodyClips.push(clip);
-    srt.push(`${i + 2}\n${tsFmt(t)} --> ${tsFmt(t + dur(vo))}\n${b.caption}\n`);
+    if (b.caption) {
+      srt.push(`${i + 2}\n${tsFmt(t)} --> ${tsFmt(t + dur(vo))}\n${b.caption}\n`);
+    }
     t += d;
   });
 
