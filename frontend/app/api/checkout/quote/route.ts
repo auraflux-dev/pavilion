@@ -150,6 +150,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid kind' }, { status: 400 })
   } catch (err) {
     console.error('/api/checkout/quote', err)
-    return NextResponse.json({ error: 'Quote failed' }, { status: 500 })
+    const message = err instanceof Error ? err.message : 'Quote failed'
+    const clientError =
+      /discount|code|Product|Program|Choose|available|assigned|expired|used|open|required|Unknown/i.test(
+        message,
+      )
+    return NextResponse.json({ error: message }, { status: clientError ? 400 : 500 })
   }
 }

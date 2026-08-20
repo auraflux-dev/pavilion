@@ -11,7 +11,15 @@ export async function withCoveSplit(
   parentEmail: string,
   useCove: boolean,
 ): Promise<ResolvedCheckout> {
-  if (resolved.kind !== 'product' || !useCove) {
+  if (resolved.kind !== 'product') {
+    return resolved
+  }
+
+  const family = await listFamilyStudents(parentEmail)
+  const card = resolveFamilyGiftCard(family)
+  const live = card.gan ? await getGiftCardBalance(card.gan) : 0
+
+  if (!useCove) {
     return {
       ...resolved,
       meta: {
@@ -19,13 +27,11 @@ export async function withCoveSplit(
         coveCents: '0',
         cardCents: String(resolved.amountCents),
         gan: '',
+        coveBalance: String(live),
       },
     }
   }
 
-  const family = await listFamilyStudents(parentEmail)
-  const card = resolveFamilyGiftCard(family)
-  const live = card.gan ? await getGiftCardBalance(card.gan) : 0
   const split = splitCoveAndCard({
     totalCents: resolved.amountCents,
     coveBalanceCents: Math.round(live * 100),
