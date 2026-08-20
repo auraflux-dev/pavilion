@@ -515,20 +515,22 @@ export function StaffNewsletterPanel() {
       >
         <div>
           <h2 className="text-lg font-bold">Member newsletter</h2>
-          <div className="mt-2 rounded-lg border border-[var(--brand-green)]/25 bg-[#E8F3E8] px-3 py-2.5 space-y-1">
-            <p className="text-xs font-bold text-[#1A1A1A]">
-              Ready for review — Diane walkthrough (video + screenshots)
-            </p>
-            <p className="text-xs text-[#5A6070] leading-relaxed">
-              <Link
-                href="/staff?view=help&article=member-newsletter-diane"
-                className="font-semibold text-[var(--brand-green)] hover:underline"
-              >
-                Watch How this works
-              </Link>
-              {' · '}Canva PNG, test send, Weekly Scoop, schedule.
-            </p>
-          </div>
+          {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
+            <div className="mt-2 rounded-lg border border-[var(--brand-green)]/25 bg-[#E8F3E8] px-3 py-2.5 space-y-1">
+              <p className="text-xs font-bold text-[#1A1A1A]">
+                Ready for review — Diane walkthrough (video + screenshots)
+              </p>
+              <p className="text-xs text-[#5A6070] leading-relaxed">
+                <Link
+                  href="/staff?view=help&article=member-newsletter-diane"
+                  className="font-semibold text-[var(--brand-green)] hover:underline"
+                >
+                  Watch How this works
+                </Link>
+                {' · '}Canva PNG, test send, Weekly Scoop, schedule.
+              </p>
+            </div>
+          )}
           <p className="text-xs text-[#5A6070] mt-2 whitespace-pre-line">
             No HTML coding required. Write plain text, attach a Canva design, Export PNG for email.
             Sends include SHMS header/footer + your graphic + body.
