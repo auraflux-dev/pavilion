@@ -12,6 +12,7 @@ const REDIRECTS: Record<string, string> = {
   'run-for-charity-SHMS-flyer.pdf': RUN_FOR_CHARITY_FLYER_PDF_URL,
   'run-for-charity-official-flyer.pdf': RUN_FOR_CHARITY_FLYER_PDF_URL,
   'sponsorship-2026-27.pdf': SPONSORSHIP_FLYER_PDF_URL,
+  'sponsorship-packages-2026-27.pdf': SPONSORSHIP_FLYER_PDF_URL,
   'sponsorship.pdf': SPONSORSHIP_FLYER_PDF_URL,
 }
 

@@ -373,7 +373,7 @@ export default async function FundraisingPage() {
               </p>
               <p className="mt-4">
                 <a
-                  href="/fundraising/sponsorship-2026-27.pdf"
+                  href="/fundraising/sponsorship-packages-2026-27.pdf"
                   className="inline-flex items-center gap-1.5 text-sm font-semibold"
                   style={{ color: 'var(--brand-green)' }}
                   target="_blank"
