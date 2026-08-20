@@ -2,19 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import Script from 'next/script'
-import { usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { shouldExcludeAnalytics } from '@/lib/ga-exclude'
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim()
 
 /**
- * Google Analytics 4 — loads only for real public/member traffic.
- * Skips staff, opt-out, localhost/previews, and automation (Cursor agents).
+ * Google Analytics 4 — skips owner browsers, opt-out, localhost/previews,
+ * and automation (Cursor agents). Other staff still count.
  */
 export function GoogleAnalytics() {
-  const pathname = usePathname()
-  const { status, isStaff } = useAuth()
+  const { status, member, personalEmail, viewingEmail } = useAuth()
   const [allowed, setAllowed] = useState(false)
 
   useEffect(() => {
@@ -22,10 +20,14 @@ export function GoogleAnalytics() {
       setAllowed(false)
       return
     }
-    // Wait for auth so staff sessions never fire a first page_view.
+    // Wait for auth so owner sessions never fire a first page_view.
     if (status === 'loading') return
-    setAllowed(!shouldExcludeAnalytics({ isStaff, pathname: pathname || '/' }))
-  }, [status, isStaff, pathname])
+    setAllowed(
+      !shouldExcludeAnalytics({
+        emails: [member?.email, personalEmail, viewingEmail],
+      }),
+    )
+  }, [status, member?.email, personalEmail, viewingEmail])
 
   if (!GA_ID || !allowed) return null
 
