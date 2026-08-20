@@ -1,3 +1,4 @@
+/** HSKRG LLC Stripe for Commons SaaS. Not school Square. Not Auraflux branding. */
 import 'server-only'
 import Stripe from 'stripe'
 

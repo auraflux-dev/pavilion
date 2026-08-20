@@ -91,7 +91,7 @@ export function StartForm() {
         {busy ? 'Opening Stripe…' : `Continue to Stripe · $${COMMONS_LIST_PRICE_USD}/mo`}
       </button>
       <p className="whitespace-pre-line text-xs text-[var(--ink-muted)]">
-        {`You will pay on Stripe for Commons software.\nYour school still uses its own Square for parent cards and in-person sales.\nWe email you next steps within one business day.\nTenant setup is still provisioned by Auraflux in v1.`}
+        {`You will pay on Stripe for Commons software.\nYour school still uses its own Square for parent cards and in-person sales.\nWe email you next steps within one business day.\nTenant setup is provisioned by HSKRG after pay. Not automatic at checkout.`}
       </p>
     </form>
   )

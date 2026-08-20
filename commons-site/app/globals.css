@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* Working brand direction: ink + sea glass (see brand strategy canvas). Swap tokens when locked. */
 :root {
   --paper: #f3efe6;
   --paper-deep: #e8e1d4;

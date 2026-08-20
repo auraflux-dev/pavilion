@@ -45,6 +45,17 @@ alter table commons_subscriptions add column if not exists stripe_checkout_sessi
 alter table commons_subscriptions add column if not exists stripe_customer_id text;
 alter table commons_subscriptions add column if not exists stripe_subscription_id text;
 alter table commons_subscriptions add column if not exists stripe_event_id text;
+
+create table if not exists commons_account_tokens (
+  id         bigserial primary key,
+  email      text not null,
+  token_hash text not null unique,
+  expires_at timestamptz not null,
+  used_at    timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists commons_account_tokens_email_idx
+  on commons_account_tokens (email);
 `
 
 let pool: pg.Pool | null = null
@@ -143,4 +154,66 @@ export async function upsertFromStripeEvent(input: {
       JSON.stringify(input.raw ?? {}),
     ],
   )
+}
+
+export type SubscriptionRow = {
+  id: number
+  email: string
+  school_name: string
+  city: string
+  role: string
+  status: string
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  amount_cents: number
+  updated_at: Date
+}
+
+export async function findLatestSubscriptionByEmail(
+  email: string,
+): Promise<SubscriptionRow | null> {
+  await ensureSubscriptionsSchema()
+  const p = getPool()
+  const r = await p.query<SubscriptionRow>(
+    `select id, email, school_name, city, role, status, stripe_customer_id,
+            stripe_subscription_id, amount_cents, updated_at
+       from commons_subscriptions
+      where lower(email) = lower($1)
+        and email <> ''
+      order by updated_at desc
+      limit 1`,
+    [email],
+  )
+  return r.rows[0] || null
+}
+
+export async function insertAccountToken(input: {
+  email: string
+  tokenHash: string
+  expiresAt: Date
+}): Promise<void> {
+  await ensureSubscriptionsSchema()
+  const p = getPool()
+  await p.query(
+    `insert into commons_account_tokens (email, token_hash, expires_at)
+     values ($1, $2, $3)`,
+    [input.email.toLowerCase(), input.tokenHash, input.expiresAt],
+  )
+}
+
+export async function consumeAccountToken(
+  tokenHash: string,
+): Promise<string | null> {
+  await ensureSubscriptionsSchema()
+  const p = getPool()
+  const r = await p.query<{ email: string }>(
+    `update commons_account_tokens
+        set used_at = now()
+      where token_hash = $1
+        and used_at is null
+        and expires_at > now()
+      returning email`,
+    [tokenHash],
+  )
+  return r.rows[0]?.email || null
 }

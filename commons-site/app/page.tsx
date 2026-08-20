@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { PRODUCT_NAME, PRODUCT_TAGLINE } from '@/lib/brand'
 import { COMMONS_LIST_PRICE_USD, DEMO_URL } from '@/lib/pricing'
 
 export default function HomePage() {
@@ -7,10 +8,10 @@ export default function HomePage() {
       <section className="hero-plane relative min-h-[88vh] overflow-hidden text-[#f3efe6]">
         <div className="relative z-10 mx-auto flex min-h-[88vh] max-w-5xl flex-col justify-end gap-8 px-5 pb-16 pt-28">
           <p className="font-[family-name:var(--font-display)] text-6xl leading-none tracking-tight sm:text-7xl md:text-8xl">
-            Commons
+            {PRODUCT_NAME}
           </p>
           <p className="max-w-xl whitespace-pre-line text-lg text-[#e8e1d4] sm:text-xl">
-            {`The PTO operating system.\nPublic site, family portal, and staff portal.`}
+            {`${PRODUCT_TAGLINE}\nPublic site, family portal, and staff portal.`}
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
