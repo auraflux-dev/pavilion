@@ -4,6 +4,7 @@ import { CreditCard } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 import { StoreCardReload } from '@/components/member-portal/store-card-reload'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { hideLiveCommerceUi } from '@/lib/demo/commons-surface'
 
 type Props = {
   amounts: number[]
@@ -43,6 +44,13 @@ export function StoreCardCta({
           label={vanillaizeIfDemo('Load a Cove Digital Card')}
           className="inline-flex items-center justify-center w-full max-w-sm mx-auto font-bold text-sm px-5 py-3 rounded-lg bg-white text-[var(--brand-green)] transition-opacity hover:opacity-90"
         >
+          {hideLiveCommerceUi() ? (
+            <p className="text-white/70 text-sm whitespace-pre-line">
+              Sample school.
+              {'\n'}
+              Live card loads stay off here.
+            </p>
+          ) : (
           <div className="max-w-sm mx-auto">
             <StoreCardReload
               amounts={amounts}
@@ -52,6 +60,7 @@ export function StoreCardCta({
               triggerClassName="w-full justify-center !bg-[var(--brand-gold)] !text-[#1A1A1A] px-8 py-3"
             />
           </div>
+          )}
         </MemberGate>
 
         <p className="text-white/30 text-xs mt-6">

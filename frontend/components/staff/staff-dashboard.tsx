@@ -48,6 +48,9 @@ import { StaffHelpPanel } from '@/components/staff/staff-help-panel'
 import { StaffSyncFreshnessChip } from '@/components/staff/staff-sync-freshness-chip'
 import { StaffPersonalEmailPanel } from '@/components/staff/staff-personal-email-panel'
 import { StaffShell } from '@/components/shells/staff-shell'
+import { StaffTrialBanner } from '@/components/staff/staff-trial-banner'
+import { StaffCustomDomainPanel } from '@/components/staff/staff-custom-domain-panel'
+import { filterCommonsDemoWorkspaces } from '@/lib/demo/commons-surface'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 import { trackLogin } from '@/lib/ga'
 
@@ -239,7 +242,8 @@ export function StaffDashboard() {
       items.push({ id: 'reports', label: STAFF_WORKSPACE_LABEL.reports })
     }
     items.push({ id: 'help', label: STAFF_WORKSPACE_LABEL.help })
-    return items
+    const allowed = new Set(filterCommonsDemoWorkspaces(items.map((i) => i.id)))
+    return items.filter((i) => allowed.has(i.id))
   }, [
     me,
     canMarketing,
@@ -413,6 +417,7 @@ export function StaffDashboard() {
       onNavigate={go}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <StaffTrialBanner />
         {active === 'home' ? (
           <section className="space-y-4">
             <div>
@@ -790,7 +795,12 @@ export function StaffDashboard() {
         {active === 'calendar' ? <StaffWorkspaceHub tab="calendar" /> : null}
         {active === 'docs' ? <StaffWorkspaceHub tab="docs" /> : null}
         {active === 'content' && canContent ? <StaffPageContentPanel /> : null}
-        {active === 'site' && canSite ? <StaffSiteSettingsPanel /> : null}
+        {active === 'site' && canSite ? (
+          <div className="space-y-4">
+            <StaffCustomDomainPanel />
+            <StaffSiteSettingsPanel />
+          </div>
+        ) : null}
         {active === 'board' && canBoard ? (
           <StaffCmsCollectionPanel collection="BoardMembers" title="Board roster" />
         ) : null}

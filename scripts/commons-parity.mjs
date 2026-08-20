@@ -3,10 +3,11 @@
  * Compare origin/main, Stone Hill production, and Commons production git SHAs.
  * Commons is not git-connected — if it lags, deploy commons-pto-demo from a clean worktree.
  */
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const TEAM = 'team_RXhJ9wjn7h5OcGCE86ILmftT'
 const SHMS_PROJECT = 'prj_zYYjrqLzcZ4imfYWLo8Iv8coavqG'
@@ -83,5 +84,16 @@ const report = {
 }
 
 console.log(JSON.stringify(report, null, 2))
+
+const surface = spawnSync(
+  process.execPath,
+  [join(dirname(fileURLToPath(import.meta.url)), 'commons-surface-check.mjs')],
+  { encoding: 'utf8' },
+)
+if (surface.status !== 0) {
+  console.error(surface.stdout || surface.stderr || 'commons-surface-check failed')
+  process.exit(1)
+}
+
 if (behind) process.exit(2)
 process.exit(0)

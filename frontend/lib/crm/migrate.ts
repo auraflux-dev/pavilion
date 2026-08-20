@@ -35,8 +35,8 @@ async function seedRiverside(): Promise<void> {
   const snap = riversideSnapshot()
   const org = snap.organization
   await sql(
-    `insert into organizations (id, name, slug) values ($1, $2, $3)
-     on conflict (id) do update set name = excluded.name, slug = excluded.slug`,
+    `insert into organizations (id, name, slug, plan) values ($1, $2, $3, 'demo')
+     on conflict (id) do update set name = excluded.name, slug = excluded.slug, plan = 'demo'`,
     [org.id, org.name, org.slug],
   )
 

@@ -8,7 +8,7 @@ import { DEMO_BRAND } from '@/lib/demo/brand'
 export function DemoBanner() {
   const pathname = usePathname()
   if (!isPublicDemoInstance()) return null
-  if (pathname === '/review') return null
+  if (pathname === '/review' || pathname === '/trial') return null
 
   async function switchLane(lane: 'both' | 'parent', parentKind?: 'paid' | 'free') {
     const res = await fetch('/api/demo/switch', {
@@ -35,6 +35,9 @@ export function DemoBanner() {
       <span className="flex items-center gap-3">
         <Link href="/review" className="underline font-semibold">
           Board join
+        </Link>
+        <Link href="/trial" className="underline font-semibold">
+          Start a 30-day trial
         </Link>
         <button type="button" className="underline" onClick={() => void switchLane('both', 'paid')}>
           Staff

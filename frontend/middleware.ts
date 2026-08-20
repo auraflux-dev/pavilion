@@ -19,6 +19,7 @@ import {
   isDemoPiiPath,
   isWriteMethod,
 } from '@/lib/demo/guard'
+import { hasBetterAuthCookie, isCommonsPlatformHost } from '@/lib/crm/auth-edge'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { demoPiiStub } from '@/lib/demo/seed'
 
@@ -84,9 +85,12 @@ export async function middleware(req: NextRequest) {
     const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
     const demoOk =
       demo && hasDemoReviewCookie(req.cookies.get(DEMO_REVIEW_COOKIE)?.value)
-    if (!isMemberTokens(tokens) && !demoOk) {
+    const commonsOk =
+      isCommonsPlatformHost() &&
+      hasBetterAuthCookie(req.cookies.getAll().map((c) => c.name))
+    if (!isMemberTokens(tokens) && !demoOk && !commonsOk) {
       const loginUrl = req.nextUrl.clone()
-      loginUrl.pathname = demo ? '/review' : '/auth/join'
+      loginUrl.pathname = demo ? '/review' : isCommonsPlatformHost() ? '/trial' : '/auth/join'
       if (!demo) loginUrl.searchParams.set('mode', 'login')
       loginUrl.searchParams.set('returnTo', pathname + (req.nextUrl.search || ''))
       return NextResponse.redirect(loginUrl)

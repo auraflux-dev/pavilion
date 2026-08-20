@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
+import { loadCommonsStaffJson } from '@/lib/crm/commons-staff'
 import {
   isStaffEmail,
   resolveStaffForSession,
@@ -35,6 +36,9 @@ async function ensureStaffRegistration(email: string, displayName: string) {
 }
 
 export async function GET(req: NextRequest) {
+  const commons = await loadCommonsStaffJson(req)
+  if (commons) return NextResponse.json(commons)
+
   if (isDemoInstance()) {
     const demoStaff = await getStaffSession(req)
     if (demoStaff) {

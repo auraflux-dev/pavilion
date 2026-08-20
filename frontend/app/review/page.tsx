@@ -182,10 +182,15 @@ function ReviewJoinInner() {
           </Button>
         </div>
       </form>
-      <p className="text-xs text-[#5A6070] mt-6">
-        You can browse the public site without joining.{' '}
+      <p className="text-xs text-[#5A6070] mt-6 whitespace-pre-line">
+        You can browse the public site without joining.
+        {'\n'}
         <a href="/" className="underline" style={{ color: 'var(--brand-green)' }}>
           View {DEMO_BRAND.school}
+        </a>
+        {' · '}
+        <a href="/trial" className="underline" style={{ color: 'var(--brand-green)' }}>
+          Start a 30-day trial for your school
         </a>
       </p>
     </main>

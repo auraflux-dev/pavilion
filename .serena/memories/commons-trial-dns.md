@@ -1,0 +1,5 @@
+Commons trial is a real school org (plan=trial, 30 days) on COMMONS_PLATFORM=true without DEMO_INSTANCE. Public Riverside demo stays sample-only; /trial on the demo explains that and does not create orgs. Signup: /trial → POST /api/commons/trial/start (Better Auth). Day 31: plan=locked (reads on, CRM writes via sqlForOrg blocked). Day 61: R2 export commons/offboard/{orgId}/ then delete org. Cron /api/cron/commons-trial-lifecycle.
+
+Custom DNS: Staff Help article custom-domain. Staff → Site settings → Your own domain (demo + NEXT_PUBLIC_COMMONS_PLATFORM). POST /api/commons/domain adds the hostname on Vercel project prj_kEgcls4K0JjeAL3kBHWwobIhKEco when COMMONS_VERCEL_TOKEN or VERCEL_TOKEN is set. Records: apex A 76.76.21.21, www/sub CNAME cname.vercel-dns.com.
+
+Surface: frontend/lib/demo/commons-surface.ts hides live-money Staff workspaces on the demo. scripts/commons-surface-check.mjs runs from commons-parity.mjs.

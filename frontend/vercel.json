@@ -38,6 +38,10 @@
     {
       "path": "/api/cron/sync-commons-connectors",
       "schedule": "0 16 * * *"
+    },
+    {
+      "path": "/api/cron/commons-trial-lifecycle",
+      "schedule": "0 8 * * *"
     }
   ],
   "redirects": [

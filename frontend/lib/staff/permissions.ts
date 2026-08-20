@@ -3,8 +3,9 @@
  * you can add without granting a whole extra role.
  */
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
+import { COMMONS_DEMO_HIDDEN_WORKSPACES } from '@/lib/demo/commons-surface'
 import { DEMO_BRAND } from '@/lib/demo/brand'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstance, isPublicDemoInstance } from '@/lib/demo/instance'
 import type { StaffRole } from '@/lib/staff/roles'
 
 export const STAFF_ROLE_LABEL: Record<StaffRole, string> = {
@@ -212,6 +213,12 @@ export function staffCanWorkspace(
   workspace: StaffWorkspace,
 ): boolean {
   if (!staff) return false
+  if (
+    (isDemoInstance() || isPublicDemoInstance()) &&
+    COMMONS_DEMO_HIDDEN_WORKSPACES.includes(workspace)
+  ) {
+    return false
+  }
   if (staff.roles.includes('admin')) return true
   const extras = staff.extraWorkspaces ?? []
   if (extras.includes(workspace)) return true

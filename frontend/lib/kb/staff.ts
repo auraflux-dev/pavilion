@@ -609,11 +609,37 @@ Use reports for counts and follow-ups. Official books stay in MoneyMinder / bank
 Change one list at a time, save, then **View site** to confirm. Leave deep Wix Editor work to whoever owns theme-level changes.`,
     },
     {
+      slug: 'custom-domain',
+      title: 'Point DNS off the temp domain',
+      categoryId: 'admin',
+      summary: 'CNAME and A records when you leave the trial URL.',
+      order: 3,
+      need: 'site',
+      body: `Your trial starts on a temp host (yourpto.commons-pto.org).
+The public demo URL is not your school.
+
+When you want pto.yourschool.org (or yourpto.org):
+
+1. Open Staff → Site settings → Your own domain.
+2. Type the hostname and tap Add domain. That attaches it on Vercel.
+3. At your registrar (GoDaddy, Cloudflare, Google Domains), create the records we show.
+
+## Records
+- **Apex** (yourpto.org): A record name \`@\` value \`76.76.21.21\`
+- **www** or a subdomain (pto.yourschool.org): CNAME name \`www\` or \`pto\` value \`cname.vercel-dns.com\`
+
+Wait for DNS (often under an hour). Tap Check DNS. HTTPS finishes after Vercel sees the records.
+
+If Add domain says Vercel is not connected, still create those records and send the hostname to Auraflux. We attach it when the token is on the Commons project.
+
+Do not point Stone Hill (shmspto.org) here.`,
+    },
+    {
       slug: 'purchase-confirmations',
       title: 'Purchase confirmations & portal messages',
       categoryId: 'admin',
       summary: 'What parents get after checkout.',
-      order: 3,
+      order: 4,
       body: `Successful membership, Cove load, ticket, donation, and shop purchases create a parent portal message (and email when Gmail send is connected). The same checkout also emails **vp-membershipexperience@shmspto.org**, **president@shmspto.org**, **treasurer@shmspto.org**, **cove@shmspto.org** (Cove Coordinator), **cove-staff@shmspto.org**, **vp-sales@shmspto.org** (VP Digital & Retail Sales), and **secretary@shmspto.org** a staff sale alert (includes shirt size / magnet / refreshments notes when membership).
 
 If a parent paid but sees nothing:
@@ -644,7 +670,7 @@ If a parent paid but sees nothing:
       title: 'Refunds & cancellations (online purchases)',
       categoryId: 'admin',
       summary: 'Square/PayPal money plus CMS or fulfill steps by product type.',
-      order: 4,
+      order: 5,
       body: `Online checkout (Square or PayPal) does **not** auto-refund. Treasurer/President refunds money in **Square** (or PayPal). Staff then fix the matching record so seats, tickets, and balances stay accurate.
 
 Default contact for money issues: **treasurer@shmspto.org** (cc spiritwear or programs lead when relevant).
@@ -703,7 +729,7 @@ Square may keep a small processing fee on refunds. That is normal.
       title: 'PayPal, Square, MoneyMinder, Bank of America',
       categoryId: 'admin',
       summary: 'These stay separate logins on purpose.',
-      order: 5,
+      order: 6,
       body: `Treasurer and President keep **separate** logins for:
 
 - PayPal
@@ -720,7 +746,7 @@ Planning vs actual for the year lives in Staff → **Budget**. Full walkthrough:
       title: 'Staff planning budget (2026–27)',
       categoryId: 'admin',
       summary: 'Plan vs actual for Treasurer. Not the ledger. Jul 1–Jun 30.',
-      order: 6,
+      order: 7,
       body: `Open **Staff → Budget** (Treasurer and Admin). This is a **planning worksheet** so the board can see plan vs actual during the year.
 
 It is **not** the official books. MoneyMinder, Square, PayPal, and Bank of America stay the ledger. Staff Budget does not need to match them to the penny.

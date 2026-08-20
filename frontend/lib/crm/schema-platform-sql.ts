@@ -1,5 +1,11 @@
 /** Tenant isolation, connectors, sync, audit, errors. Applied after CRM_SCHEMA_SQL. */
 export const CRM_PLATFORM_SQL = `
+alter table organizations add column if not exists plan text not null default 'demo';
+alter table organizations add column if not exists trial_started_at timestamptz;
+alter table organizations add column if not exists trial_ends_at timestamptz;
+alter table organizations add column if not exists custom_domain text not null default '';
+alter table organizations add column if not exists temp_host text not null default '';
+
 alter table students add column if not exists organization_id text references organizations (id) on delete cascade;
 alter table memberships add column if not exists organization_id text references organizations (id) on delete cascade;
 alter table store_cards add column if not exists organization_id text references organizations (id) on delete cascade;

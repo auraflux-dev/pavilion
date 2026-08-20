@@ -25,6 +25,7 @@ import {
   type PortalCopy,
 } from '@/lib/defaults/portal-copy'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
+import { hideLiveCommerceUi } from '@/lib/demo/commons-surface'
 import { pickHighestTier, tierRank } from '@/lib/staff/members-roster'
 import { StudentCard } from './student-card'
 import { AddStudentForm } from './add-student-form'
@@ -798,7 +799,13 @@ You're on Tide. Benefits show on each student card below.`
           )}
 
           <div className="flex flex-wrap gap-2 mb-4">
-            {coveGate.ok ? (
+            {hideLiveCommerceUi() ? (
+              <p className="text-xs text-[#5A6070] whitespace-pre-line">
+                Sample school.
+                {'\n'}
+                Card loads and live shop checkout stay off here.
+              </p>
+            ) : coveGate.ok ? (
               <StoreCardReload
                 students={students.map(({ id, firstName, lastName }) => ({ id, firstName, lastName }))}
                 onLoaded={load}
@@ -813,12 +820,14 @@ You're on Tide. Benefits show on each student card below.`
                 {vanillaizeIfDemo('Load Cove Digital Card (locked)')}
               </button>
             )}
+            {hideLiveCommerceUi() ? null : (
             <a
               href="/cove#shop"
               className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#1A1A1A]"
             >
               <ShoppingBag className="w-3.5 h-3.5" /> {copy.ctaSpiritWear}
             </a>
+            )}
             <a
               href={onboarding.complete ? '/programs' : '#portal-onboarding'}
               className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#1A1A1A]"
