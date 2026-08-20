@@ -102,7 +102,8 @@ async function attachPurchaseConfirmation(
 
 export async function resolveCheckoutIntent(
   intent: CheckoutIntent,
-  parentEmail: string
+  parentEmail: string,
+  accountEmails?: string[],
 ): Promise<ResolvedCheckout> {
   const kind = intent.kind
 
@@ -186,6 +187,7 @@ export async function resolveCheckoutIntent(
       listAmount: amount,
       couponCode: intent.couponCode,
       parentEmail,
+      accountEmails,
     })
     if (applied.error) throw new Error(applied.error)
     const charged = applied.amount
@@ -238,6 +240,7 @@ export async function resolveCheckoutIntent(
       listAmount: fee,
       couponCode: intent.couponCode,
       parentEmail,
+      accountEmails,
       tierPercent: percent,
     })
     if (applied.error) throw new Error(applied.error)

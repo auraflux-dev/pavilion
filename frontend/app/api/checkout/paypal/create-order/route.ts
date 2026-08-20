@@ -4,6 +4,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 import { resolveCheckoutIntent, type CheckoutIntent } from '@/lib/checkout-fulfill'
 import { createPayPalOrder, isPayPalConfigured } from '@/lib/paypal'
 import {
@@ -31,10 +32,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }
 
-    const resolved = await resolveCheckoutIntent(intent, session.email)
+    const effective = await getEffectiveParentEmail(req)
+    const parentEmail = effective?.parentEmail ?? session.email
+    const accountEmails = [
+      effective?.actorEmail ?? session.email,
+      ...session.emails,
+    ]
+    const resolved = await resolveCheckoutIntent(intent, parentEmail, accountEmails)
     const { withCoveSplit } = await import('@/lib/checkout-cove-split')
     const useCove = intent.kind === 'product' && intent.useCoveBalance !== false
-    const split = await withCoveSplit(resolved, session.email, useCove)
+    const split = await withCoveSplit(resolved, parentEmail, useCove)
     const cardCents = Math.round(Number(split.meta.cardCents ?? split.amountCents) || 0)
     if (cardCents <= 0) {
       return NextResponse.json(

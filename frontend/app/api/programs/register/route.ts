@@ -5,6 +5,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 import { getProgramById } from '@/lib/api/programs'
 import {
   enrollInProgram,
@@ -29,6 +30,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'programId and studentId required' }, { status: 400 })
     }
 
+    const effective = await getEffectiveParentEmail(req)
+    const parentEmail = effective?.parentEmail ?? session.email
+    const accountEmails = [
+      effective?.actorEmail ?? session.email,
+      ...session.emails,
+    ]
+
     const program = await getProgramById(programId)
     if (!program) return NextResponse.json({ error: 'Program not found' }, { status: 404 })
     if (!program.registrationOpen) {
@@ -36,7 +44,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { assertCanRegisterForProgram } = await import('@/lib/programs/registration-access')
-    const access = await assertCanRegisterForProgram(program, session.email)
+    const access = await assertCanRegisterForProgram(program, parentEmail)
     if (!access.ok) {
       return NextResponse.json(
         {
@@ -48,7 +56,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const student = await getOwnedStudent(session.email, studentId)
+    const student = await getOwnedStudent(parentEmail, studentId)
     if (!student) return NextResponse.json({ error: 'Student not found' }, { status: 404 })
 
     const safety = studentSafetyComplete(student)
@@ -72,7 +80,8 @@ export async function POST(req: NextRequest) {
         scope: 'program',
         listAmount: fee,
         couponCode,
-        parentEmail: session.email,
+        parentEmail,
+        accountEmails,
         tierPercent: percent,
       })
       if (applied.error) {
@@ -93,7 +102,7 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await enrollInProgram({
-      parentEmail: session.email,
+      parentEmail,
       programId,
       studentId,
       consents: consents ?? [],

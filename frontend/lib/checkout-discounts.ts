@@ -84,6 +84,8 @@ export async function applyCheckoutDiscount(opts: {
   listAmount: number
   couponCode?: string | null
   parentEmail: string
+  /** Staff login / guardian aliases that may also match issuedToEmail. */
+  accountEmails?: string[]
   /** Program only: automatic membership tier % when no better coupon. */
   tierPercent?: number
 }): Promise<{ amount: number; discount: AppliedCheckoutDiscount | null; error?: string }> {
@@ -130,8 +132,12 @@ export async function applyCheckoutDiscount(opts: {
   }
 
   const issued = String(row.issuedToEmail ?? '').trim().toLowerCase()
-  const email = opts.parentEmail.trim().toLowerCase()
-  if (issued && issued !== email) {
+  const allowed = new Set(
+    [opts.parentEmail, ...(opts.accountEmails ?? [])]
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean),
+  )
+  if (issued && !allowed.has(issued)) {
     return { amount: listAmount, discount: null, error: 'That discount code is not assigned to this account.' }
   }
 

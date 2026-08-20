@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPaidMembershipTiers } from '@/lib/api/membership'
 import { getMemberSession } from '@/lib/auth-member'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 import {
   getParentHighestTier,
   membershipChargeDollars,
@@ -66,8 +67,13 @@ export async function POST(req: NextRequest) {
     }
 
     if (kind === 'product') {
-      const session = await getMemberSession(req)
-      if (!session) return NextResponse.json({ error: 'Log in to quote' }, { status: 401 })
+      const effective = await getEffectiveParentEmail(req)
+      if (!effective) return NextResponse.json({ error: 'Log in to quote' }, { status: 401 })
+      const parentEmail = effective.parentEmail
+      const accountEmails = [
+        effective.actorEmail,
+        ...effective.session.emails,
+      ]
       const { resolveCheckoutIntent } = await import('@/lib/checkout-fulfill')
       const { withCoveSplit } = await import('@/lib/checkout-cove-split')
       const productId = String(body.productId ?? '').trim()
@@ -76,9 +82,10 @@ export async function POST(req: NextRequest) {
       const useCoveBalance = body.useCoveBalance !== false
       let resolved = await resolveCheckoutIntent(
         { kind: 'product', productId, variantId, couponCode },
-        session.email,
+        parentEmail,
+        accountEmails,
       )
-      resolved = await withCoveSplit(resolved, session.email, useCoveBalance)
+      resolved = await withCoveSplit(resolved, parentEmail, useCoveBalance)
       const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
       const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
       return NextResponse.json({
@@ -96,15 +103,21 @@ export async function POST(req: NextRequest) {
     }
 
     if (kind === 'program') {
-      const session = await getMemberSession(req)
-      if (!session) return NextResponse.json({ error: 'Log in to quote' }, { status: 401 })
+      const effective = await getEffectiveParentEmail(req)
+      if (!effective) return NextResponse.json({ error: 'Log in to quote' }, { status: 401 })
+      const parentEmail = effective.parentEmail
+      const accountEmails = [
+        effective.actorEmail,
+        ...effective.session.emails,
+      ]
       const { resolveCheckoutIntent } = await import('@/lib/checkout-fulfill')
       const programId = String(body.programId ?? '').trim()
       const studentId = String(body.studentId ?? '').trim()
       const couponCode = String(body.couponCode ?? '').trim() || null
       const resolved = await resolveCheckoutIntent(
         { kind: 'program', programId, studentId, couponCode },
-        session.email,
+        parentEmail,
+        accountEmails,
       )
       return NextResponse.json({
         kind,

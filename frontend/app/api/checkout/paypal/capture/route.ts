@@ -4,6 +4,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 import {
   fulfillPaidCheckout,
   resolveCheckoutIntent,
@@ -38,10 +39,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }
 
-    const resolved0 = await resolveCheckoutIntent(intent, session.email)
+    const effective = await getEffectiveParentEmail(req)
+    const parentEmail = effective?.parentEmail ?? session.email
+    const accountEmails = [
+      effective?.actorEmail ?? session.email,
+      ...session.emails,
+    ]
+    const resolved0 = await resolveCheckoutIntent(intent, parentEmail, accountEmails)
     const { withCoveSplit } = await import('@/lib/checkout-cove-split')
     const useCove = intent.kind === 'product' && intent.useCoveBalance !== false
-    const resolved = await withCoveSplit(resolved0, session.email, useCove)
+    const resolved = await withCoveSplit(resolved0, parentEmail, useCove)
     const cardDue = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0) / 100
     const captured = await capturePayPalOrder(orderId)
 
@@ -66,7 +73,7 @@ export async function POST(req: NextRequest) {
     const transactionId = captured.captureId || captured.id
     const result = await fulfillPaidCheckout({
       resolved,
-      parentEmail: session.email,
+      parentEmail,
       parentName: name,
       transactionId,
       paymentMethod: 'PayPal',
@@ -77,7 +84,7 @@ export async function POST(req: NextRequest) {
     // Program enroll records its own consents; membership/other need this trail here.
     if (intent.kind !== 'program') {
       await recordConsentAcknowledgments({
-        parentEmail: session.email,
+        parentEmail,
         kind: intent.kind as CheckoutConsentKind,
         transactionId,
         studentId: intent.studentId,

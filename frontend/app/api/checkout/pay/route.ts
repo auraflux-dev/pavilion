@@ -6,6 +6,7 @@
 import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 import { getCatalogConfig, isAllowedStoreCardLoadAmount } from '@/lib/api/catalog-config'
 import { getPaidMembershipTiers } from '@/lib/api/membership'
 
@@ -171,13 +172,20 @@ export async function POST(req: NextRequest) {
 
     // ── Enrichment program ──────────────────────────────────────
     if (kind === 'program') {
+      const effective = await getEffectiveParentEmail(req)
+      const parentEmail = effective?.parentEmail ?? session.email
+      const accountEmails = [
+        effective?.actorEmail ?? session.email,
+        ...session.emails,
+      ]
       const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
       const programId = String(body.programId ?? '').trim()
       const studentId = String(body.studentId ?? '').trim()
       const couponCode = String(body.couponCode ?? '').trim() || null
       const resolved = await resolveCheckoutIntent(
         { kind: 'program', programId, studentId, couponCode },
-        session.email
+        parentEmail,
+        accountEmails,
       )
       if (!paymentSource) {
         return NextResponse.json(
@@ -197,7 +205,7 @@ export async function POST(req: NextRequest) {
       })
       const result = await fulfillPaidCheckout({
         resolved,
-        parentEmail: session.email,
+        parentEmail,
         parentName: name,
         transactionId: payment.id ?? paymentKey,
         paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
@@ -460,6 +468,12 @@ export async function POST(req: NextRequest) {
 
     // ── Cove / spirit product ───────────────────────────────────
     if (kind === 'product') {
+      const effective = await getEffectiveParentEmail(req)
+      const parentEmail = effective?.parentEmail ?? session.email
+      const accountEmails = [
+        effective?.actorEmail ?? session.email,
+        ...session.emails,
+      ]
       const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
       const { withCoveSplit } = await import('@/lib/checkout-cove-split')
       const productId = String(body.productId ?? '').trim()
@@ -468,9 +482,10 @@ export async function POST(req: NextRequest) {
       const useCoveBalance = body.useCoveBalance !== false
       let resolved = await resolveCheckoutIntent(
         { kind: 'product', productId, variantId, couponCode },
-        session.email,
+        parentEmail,
+        accountEmails,
       )
-      resolved = await withCoveSplit(resolved, session.email, useCoveBalance)
+      resolved = await withCoveSplit(resolved, parentEmail, useCoveBalance)
       const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
       const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
       if (cardCents > 0 && cardCents < 100) {
@@ -509,7 +524,7 @@ export async function POST(req: NextRequest) {
       try {
         const result = await fulfillPaidCheckout({
           resolved,
-          parentEmail: session.email,
+          parentEmail,
           parentName: name,
           transactionId: paymentId,
           paymentMethod:
