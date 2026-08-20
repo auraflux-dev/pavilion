@@ -242,7 +242,8 @@ export async function getMembershipEntitlements(
     shirtSize,
     enrichmentCode,
   })
-  const entitlements = mergePortalEntitlements(stored, fresh)
+  const { appendBoardEntitlements } = await import('@/lib/staff/board-enrichment-discounts')
+  const entitlements = appendBoardEntitlements(row, mergePortalEntitlements(stored, fresh))
 
   let coveFamilyCode = ''
   let paidMemberCode = false

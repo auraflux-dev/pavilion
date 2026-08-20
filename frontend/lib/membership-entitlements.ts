@@ -7,6 +7,8 @@ import { vanillaizeIfDemo } from '@/lib/demo/brand'
 export type MembershipEntitlementKind =
   | 'cove_credit'
   | 'enrichment_discount'
+  | 'board_enrichment_fall'
+  | 'board_enrichment_spring'
   | 'event_refreshments'
   | 'spirit_shirt'
   | 'magnet'
@@ -293,16 +295,24 @@ export function parseEntitlementsJson(raw: unknown): MembershipEntitlement[] {
   }
 }
 
+const PRESERVE_STORED_ENTITLEMENT_KINDS = new Set<MembershipEntitlementKind>([
+  'cove_credit',
+  'board_enrichment_fall',
+  'board_enrichment_spring',
+])
+
 /** Rebuild portal perks from the live tier, keeping shirt/magnet fulfillment progress. */
 export function mergePortalEntitlements(
   stored: MembershipEntitlement[],
   fresh: MembershipEntitlement[],
 ): MembershipEntitlement[] {
   const entitlements: MembershipEntitlement[] = []
-  const storedCove = stored.find((s) => s.kind === 'cove_credit')
-  if (storedCove) entitlements.push(storedCove)
+  for (const s of stored) {
+    if (PRESERVE_STORED_ENTITLEMENT_KINDS.has(s.kind)) entitlements.push(s)
+  }
   for (const f of fresh) {
     if (f.kind === 'cove_credit') continue
+    if (PRESERVE_STORED_ENTITLEMENT_KINDS.has(f.kind)) continue
     const prev = stored.find((s) => s.kind === f.kind)
     if (prev && (f.kind === 'spirit_shirt' || f.kind === 'magnet')) {
       if (isPhysicalPerkPickedUp(prev.status) || prev.status === 'ordered') {
