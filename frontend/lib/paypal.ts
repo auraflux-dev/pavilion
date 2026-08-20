@@ -151,12 +151,52 @@ export async function createPayPalOrder(opts: {
   description: string
   customId: string
   softDescriptor?: string
+  /** Vault PayPal on successful capture (first-time save at checkout). */
+  savePayPal?: boolean
 }): Promise<{ id: string }> {
   if (!Number.isFinite(opts.amount) || opts.amount < 1) {
     throw new Error('Invalid PayPal amount')
   }
   const token = await getAccessToken()
   const value = opts.amount.toFixed(2)
+  const body: Record<string, unknown> = {
+    intent: 'CAPTURE',
+    purchase_units: [
+      {
+        amount: {
+          currency_code: 'USD',
+          value,
+        },
+        description: opts.description.slice(0, 127),
+        custom_id: opts.customId.slice(0, 127),
+        soft_descriptor: (opts.softDescriptor || 'SHMSPTO').slice(0, 22),
+      },
+    ],
+    application_context: {
+      shipping_preference: 'NO_SHIPPING',
+      user_action: 'PAY_NOW',
+      brand_name: 'SHMS PTO',
+    },
+  }
+  if (opts.savePayPal) {
+    body.payment_source = {
+      paypal: {
+        attributes: {
+          vault: {
+            store_in_vault: 'ON_SUCCESS',
+            usage_type: 'MERCHANT',
+            customer_type: 'CONSUMER',
+          },
+        },
+        experience_context: {
+          shipping_preference: 'NO_SHIPPING',
+          user_action: 'PAY_NOW',
+          brand_name: 'SHMS PTO',
+        },
+      },
+    }
+    delete body.application_context
+  }
   const res = await fetch(`${paypalBaseUrl()}/v2/checkout/orders`, {
     method: 'POST',
     headers: {
@@ -164,25 +204,7 @@ export async function createPayPalOrder(opts: {
       'Content-Type': 'application/json',
       Prefer: 'return=representation',
     },
-    body: JSON.stringify({
-      intent: 'CAPTURE',
-      purchase_units: [
-        {
-          amount: {
-            currency_code: 'USD',
-            value,
-          },
-          description: opts.description.slice(0, 127),
-          custom_id: opts.customId.slice(0, 127),
-          soft_descriptor: (opts.softDescriptor || 'SHMSPTO').slice(0, 22),
-        },
-      ],
-      application_context: {
-        shipping_preference: 'NO_SHIPPING',
-        user_action: 'PAY_NOW',
-        brand_name: 'SHMS PTO',
-      },
-    }),
+    body: JSON.stringify(body),
     cache: 'no-store',
   })
   const data = await res.json()
@@ -198,6 +220,9 @@ export async function capturePayPalOrder(orderId: string): Promise<{
   status: string
   captureId?: string
   amount?: number
+  vaultId?: string
+  paypalCustomerId?: string
+  payerEmail?: string
 }> {
   const token = await getAccessToken()
   const res = await fetch(`${paypalBaseUrl()}/v2/checkout/orders/${orderId}/capture`, {
@@ -222,10 +247,186 @@ export async function capturePayPalOrder(orderId: string): Promise<{
     throw new Error(`PayPal payment not completed (${status || data.status})`)
   }
   const amount = capture?.amount?.value ? parseFloat(capture.amount.value) : undefined
+  const vaultAttr = data.payment_source?.paypal?.attributes?.vault
+  const vaultId =
+    typeof vaultAttr?.id === 'string'
+      ? vaultAttr.id
+      : typeof data.payment_source?.paypal?.vault_id === 'string'
+        ? data.payment_source.paypal.vault_id
+        : undefined
+  const paypalCustomerId =
+    typeof vaultAttr?.customer?.id === 'string'
+      ? vaultAttr.customer.id
+      : typeof data.customer?.id === 'string'
+        ? data.customer.id
+        : undefined
+  const payerEmail =
+    typeof data.payment_source?.paypal?.email_address === 'string'
+      ? data.payment_source.paypal.email_address
+      : typeof data.payer?.email_address === 'string'
+        ? data.payer.email_address
+        : undefined
   return {
     id: data.id as string,
     status: 'COMPLETED',
     captureId: capture?.id as string | undefined,
     amount,
+    vaultId,
+    paypalCustomerId,
+    payerEmail,
+  }
+}
+
+export async function createPayPalVaultSetupToken(): Promise<{ id: string }> {
+  const token = await getAccessToken()
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shmspto.org').replace(/\/$/, '')
+  const res = await fetch(`${paypalBaseUrl()}/v3/vault/setup-tokens`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'PayPal-Request-Id': `setup-${Date.now()}`,
+    },
+    body: JSON.stringify({
+      payment_source: {
+        paypal: {
+          description: 'SHMS PTO saved PayPal',
+          usage_pattern: 'IMMEDIATE',
+          usage_type: 'MERCHANT',
+          customer_type: 'CONSUMER',
+          experience_context: {
+            brand_name: 'SHMS PTO',
+            locale: 'en-US',
+            shipping_preference: 'NO_SHIPPING',
+            return_url: `${site}/member-portal/payment-methods`,
+            cancel_url: `${site}/member-portal/payment-methods`,
+          },
+        },
+      },
+    }),
+    cache: 'no-store',
+  })
+  const data = await res.json()
+  if (!res.ok || !data.id) {
+    console.error('PayPal setup token failed', data)
+    throw new Error(data.message || data.details?.[0]?.description || 'Could not start PayPal save')
+  }
+  return { id: data.id as string }
+}
+
+export async function createPayPalPaymentTokenFromSetup(
+  setupTokenId: string,
+): Promise<{ vaultId: string; customerId?: string; payerEmail?: string }> {
+  const token = await getAccessToken()
+  const res = await fetch(`${paypalBaseUrl()}/v3/vault/payment-tokens`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'PayPal-Request-Id': `token-${Date.now()}`,
+    },
+    body: JSON.stringify({
+      payment_source: {
+        token: {
+          id: setupTokenId,
+          type: 'SETUP_TOKEN',
+        },
+      },
+    }),
+    cache: 'no-store',
+  })
+  const data = await res.json()
+  if (!res.ok || !data.id) {
+    console.error('PayPal payment token failed', data)
+    throw new Error(data.message || data.details?.[0]?.description || 'Could not save PayPal')
+  }
+  return {
+    vaultId: data.id as string,
+    customerId: typeof data.customer?.id === 'string' ? data.customer.id : undefined,
+    payerEmail:
+      typeof data.payment_source?.paypal?.email_address === 'string'
+        ? data.payment_source.paypal.email_address
+        : undefined,
+  }
+}
+
+export async function deletePayPalPaymentToken(vaultId: string): Promise<void> {
+  const token = await getAccessToken()
+  const res = await fetch(`${paypalBaseUrl()}/v3/vault/payment-tokens/${encodeURIComponent(vaultId)}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  })
+  if (!res.ok && res.status !== 404) {
+    const data = await res.json().catch(() => ({}))
+    console.error('PayPal delete vault failed', data)
+    throw new Error(data.message || 'Could not remove saved PayPal')
+  }
+}
+
+/** Charge a vaulted PayPal account (create + capture). */
+export async function chargePayPalVault(opts: {
+  amount: number
+  description: string
+  customId: string
+  vaultId: string
+  softDescriptor?: string
+}): Promise<{ id: string; captureId?: string; amount?: number }> {
+  if (!Number.isFinite(opts.amount) || opts.amount < 1) {
+    throw new Error('Invalid PayPal amount')
+  }
+  const token = await getAccessToken()
+  const value = opts.amount.toFixed(2)
+  const createRes = await fetch(`${paypalBaseUrl()}/v2/checkout/orders`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+      'PayPal-Request-Id': `vault-pay-${Date.now()}`,
+    },
+    body: JSON.stringify({
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          amount: { currency_code: 'USD', value },
+          description: opts.description.slice(0, 127),
+          custom_id: opts.customId.slice(0, 127),
+          soft_descriptor: (opts.softDescriptor || 'SHMSPTO').slice(0, 22),
+        },
+      ],
+      payment_source: {
+        paypal: {
+          vault_id: opts.vaultId,
+          stored_payment_source: {
+            payment_initiator: 'CUSTOMER',
+            usage: 'SUBSEQUENT',
+          },
+        },
+      },
+    }),
+    cache: 'no-store',
+  })
+  const created = await createRes.json()
+  if (!createRes.ok || !created.id) {
+    console.error('PayPal vault charge create failed', created)
+    throw new Error(
+      created.message || created.details?.[0]?.description || 'Saved PayPal charge failed',
+    )
+  }
+  if (created.status === 'COMPLETED') {
+    const unit = created.purchase_units?.[0]
+    const capture = unit?.payments?.captures?.[0]
+    return {
+      id: created.id as string,
+      captureId: capture?.id as string | undefined,
+      amount: capture?.amount?.value ? parseFloat(capture.amount.value) : opts.amount,
+    }
+  }
+  const captured = await capturePayPalOrder(created.id as string)
+  return {
+    id: captured.id,
+    captureId: captured.captureId,
+    amount: captured.amount,
   }
 }

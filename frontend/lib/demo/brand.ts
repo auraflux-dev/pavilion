@@ -132,8 +132,10 @@ export function vanillaizeDeep<T>(input: T): T {
 /** Catalog ids stay reef/lagoon/tide; demo UI shows Member/Family/Patron. */
 export function displayMembershipTier(tier: string): string {
   const key = String(tier || '').trim().toLowerCase()
-  if (!key || key === 'free') return key || 'free'
-  if (!isDemoInstance()) return tier
-  const mapped = DEMO_BRAND.tiers[key as keyof typeof DEMO_BRAND.tiers]
-  return mapped || vanillaizeCopy(tier)
+  if (!key || key === 'free') return 'Free'
+  if (isDemoInstance()) {
+    const mapped = DEMO_BRAND.tiers[key as keyof typeof DEMO_BRAND.tiers]
+    return mapped || vanillaizeCopy(tier)
+  }
+  return key.charAt(0).toUpperCase() + key.slice(1)
 }

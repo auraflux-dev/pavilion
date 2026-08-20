@@ -49,11 +49,13 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       )
     }
+    const savePayPal = Boolean(body.savePayPal)
     const order = await createPayPalOrder({
       amount: cardCents / 100,
       description: resolved.description,
       customId: resolved.customId,
       softDescriptor: 'SHMSPTO',
+      savePayPal,
     })
 
     return NextResponse.json({

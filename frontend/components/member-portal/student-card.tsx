@@ -5,6 +5,8 @@ import { ChevronDown, ChevronUp, CreditCard, BookOpen, Receipt, ArrowRight, Star
 import { GiftCardSettings } from './gift-card-settings'
 import { EditStudentForm } from './edit-student-form'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
+import { normalizeMembershipTier, tierRank } from '@/lib/staff/members-roster'
+import { normalizeMembershipTier, tierRank } from '@/lib/staff/members-roster'
 
 interface Enrollment {
   id: string
@@ -151,7 +153,15 @@ export function StudentCard({
     student.membershipStatus?.toLowerCase() !== 'historical' &&
     Boolean(student.membershipTier) &&
     student.membershipTier !== 'free'
-  const tierLabel = isPaid ? displayMembershipTier(student.membershipTier) : 'Free'
+  const normalizedTier = normalizeMembershipTier(student.membershipTier)
+  const tierLabel = isPaid ? displayMembershipTier(normalizedTier) : 'Free'
+  const canUpgradePaid = isPaid && tierRank(normalizedTier) > 0 && tierRank(normalizedTier) < tierRank('tide')
+  const upgradeCtaLabel =
+    normalizedTier === 'reef'
+      ? 'Upgrade to Lagoon or Tide'
+      : normalizedTier === 'lagoon'
+        ? 'Upgrade to Tide'
+        : 'Upgrade'
 
   // Live gift card balance. Fetched on mount
   useEffect(() => {
@@ -306,9 +316,18 @@ export function StudentCard({
         {isPaid && student.discountCode ? (
           <div className="flex items-center gap-2 px-5 py-3">
             <Tag className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
-            <div>
+            <div className="min-w-0">
               <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Discount Code</p>
               <p className="text-sm font-bold font-mono text-[var(--brand-green)]">{student.discountCode}</p>
+              {canUpgradePaid ? (
+                <a
+                  href={`/membership?studentId=${student.id}`}
+                  className="text-xs font-bold flex items-center gap-1 mt-1 transition-opacity hover:opacity-70"
+                  style={{ color: 'var(--brand-green)' }}
+                >
+                  {upgradeCtaLabel} <ArrowRight className="w-3 h-3" />
+                </a>
+              ) : null}
             </div>
           </div>
         ) : (
@@ -316,13 +335,17 @@ export function StudentCard({
             <Star className="w-4 h-4 shrink-0 text-[#5A6070]" />
             <div>
               <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Membership</p>
-              <a
-                href={`/membership?studentId=${student.id}`}
-                className="text-sm font-bold flex items-center gap-1 transition-opacity hover:opacity-70"
-                style={{ color: 'var(--brand-green)' }}
-              >
-                Upgrade <ArrowRight className="w-3 h-3" />
-              </a>
+              {!isPaid || canUpgradePaid ? (
+                <a
+                  href={`/membership?studentId=${student.id}`}
+                  className="text-sm font-bold flex items-center gap-1 transition-opacity hover:opacity-70"
+                  style={{ color: 'var(--brand-green)' }}
+                >
+                  {isPaid ? upgradeCtaLabel : 'Upgrade'} <ArrowRight className="w-3 h-3" />
+                </a>
+              ) : (
+                <p className="text-sm font-bold text-[#1A1A1A]">{tierLabel}</p>
+              )}
             </div>
           </div>
         )}
@@ -592,16 +615,18 @@ export function StudentCard({
                 )}
               </div>
 
-              {/* Upgrade nudge for free members */}
-              {!isPaid && (
+              {/* Upgrade nudge for free or upgradeable paid tiers */}
+              {(!isPaid || canUpgradePaid) && (
                 <div
                   className="rounded-xl p-4 flex items-start gap-3"
                   style={{ backgroundColor: 'var(--brand-soft)' }}
                 >
                   <Star className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'var(--brand-green)' }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-[#1A1A1A] mb-1">Upgrade to a paid membership</p>
-                    <p className="text-xs text-[#5A6070] leading-relaxed mb-3">
+                    <p className="text-sm font-bold text-[#1A1A1A] mb-1">
+                      {isPaid ? upgradeCtaLabel : 'Upgrade to a paid membership'}
+                    </p>
+                    <p className="text-xs text-[#5A6070] leading-relaxed mb-3 whitespace-pre-line">
                       {upgradeBody}
                     </p>
                     <a

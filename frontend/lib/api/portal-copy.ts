@@ -38,13 +38,33 @@ export async function getPortalCopy(): Promise<PortalCopy> {
     portalText(keyed[key] || '') || vanillaizeIfDemo(PORTAL_COPY_DEFAULTS[key])
 
   return {
-    paidTitle: portalText(portal.sectionTitle) || vanillaizeIfDemo(PORTAL_COPY_DEFAULTS.paidTitle),
-    paidBody: portalText(portal.sectionBody) || vanillaizeIfDemo(PORTAL_COPY_DEFAULTS.paidBody),
-    freeTitle: portalText(portal.title) || vanillaizeIfDemo(PORTAL_COPY_DEFAULTS.freeTitle),
-    freeBody: portalText(portal.body) || vanillaizeIfDemo(PORTAL_COPY_DEFAULTS.freeBody),
+    paidTitle: preferDefault(
+      'paidTitle',
+      portal.sectionTitle || '',
+      [/Ruby|Supreme/i],
+    ),
+    paidBody: preferDefault(
+      'paidBody',
+      portal.sectionBody || '',
+      [/Ruby|Supreme/i],
+    ),
+    freeTitle: preferDefault(
+      'freeTitle',
+      portal.title || '',
+      [/Ruby|Supreme/i],
+    ),
+    freeBody: preferDefault(
+      'freeBody',
+      portal.body || '',
+      [/Ruby|Supreme/i],
+    ),
     emptyTitle: portalText(portal.bullets[0] || '') || vanillaizeIfDemo(PORTAL_COPY_DEFAULTS.emptyTitle),
     emptyBody: portalText(portal.bullets[1] || '') || vanillaizeIfDemo(PORTAL_COPY_DEFAULTS.emptyBody),
-    upgradeBody: portalText(portal.bullets[2] || '') || vanillaizeIfDemo(PORTAL_COPY_DEFAULTS.upgradeBody),
+    upgradeBody: preferDefault(
+      'upgradeBody',
+      portal.bullets[2] || '',
+      [/Ruby|Supreme/i],
+    ),
 
     calendarTitle: pick('calendarTitle'),
     accountTitle: pick('accountTitle'),

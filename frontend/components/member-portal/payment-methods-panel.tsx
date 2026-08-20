@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { CreditCard, Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -13,13 +13,30 @@ type StoredCard = {
   expYear: number | null
 }
 
+type StoredPayPal = {
+  payerEmail: string
+}
+
+type PayPalButtonsApi = {
+  Buttons: (config: {
+    style?: { layout?: string; color?: string; shape?: string; label?: string }
+    createVaultSetupToken: () => Promise<string>
+    onApprove: (data: { vaultSetupToken: string }) => Promise<void>
+    onError?: (err: unknown) => void
+  }) => { render: (el: HTMLElement) => Promise<void> }
+}
+
 export function PaymentMethodsPanel() {
   const [busy, setBusy] = useState(true)
-  const [removing, setRemoving] = useState(false)
+  const [removing, setRemoving] = useState<'card' | 'paypal' | null>(null)
   const [card, setCard] = useState<StoredCard | null>(null)
+  const [paypal, setPaypal] = useState<StoredPayPal | null>(null)
   const [configured, setConfigured] = useState(true)
+  const [paypalConfigured, setPaypalConfigured] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [paypalReady, setPaypalReady] = useState(false)
+  const paypalHostRef = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
     setBusy(true)
@@ -30,13 +47,17 @@ export function PaymentMethodsPanel() {
       if (!r.ok) {
         setError(data.error || 'Could not load payment methods.')
         setCard(null)
+        setPaypal(null)
         return
       }
       setConfigured(Boolean(data.configured))
+      setPaypalConfigured(Boolean(data.paypalConfigured))
       setCard(data.paymentMethod ?? null)
+      setPaypal(data.paypalMethod ?? null)
     } catch {
       setError('Could not load payment methods.')
       setCard(null)
+      setPaypal(null)
     } finally {
       setBusy(false)
     }
@@ -46,15 +67,95 @@ export function PaymentMethodsPanel() {
     void load()
   }, [load])
 
+  useEffect(() => {
+    if (busy || paypal || !paypalConfigured) return
+    let cancelled = false
+
+    async function bootVaultButtons() {
+      const cfgRes = await fetch('/api/checkout/paypal/config')
+      const cfg = await cfgRes.json()
+      if (!cfg.configured || !cfg.clientId) return
+
+      const src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
+        cfg.clientId,
+      )}&components=buttons&vault=true&enable-funding=paypal`
+      let script = document.querySelector<HTMLScriptElement>(`script[src^="https://www.paypal.com/sdk/js"]`)
+      if (!script) {
+        script = document.createElement('script')
+        script.src = src
+        script.async = true
+        document.head.appendChild(script)
+        await new Promise<void>((resolve, reject) => {
+          script!.onload = () => resolve()
+          script!.onerror = () => reject(new Error('PayPal failed to load'))
+        })
+      } else if (!(window as Window & { paypal?: PayPalButtonsApi }).paypal) {
+        await new Promise<void>((resolve) => {
+          script!.addEventListener('load', () => resolve(), { once: true })
+        })
+      }
+
+      const paypal = (window as Window & { paypal?: PayPalButtonsApi }).paypal
+      if (cancelled || !paypal || !paypalHostRef.current) return
+      paypalHostRef.current.innerHTML = ''
+      await paypal
+        .Buttons({
+          style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+          createVaultSetupToken: async () => {
+            const res = await fetch('/api/gift-card/payment-method', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'paypalSetupToken' }),
+            })
+            const data = await res.json()
+            if (!res.ok || !data.setupToken) {
+              throw new Error(data.error || 'Could not start PayPal save')
+            }
+            return data.setupToken as string
+          },
+          onApprove: async ({ vaultSetupToken }) => {
+            const res = await fetch('/api/gift-card/payment-method', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'paypalPaymentToken', vaultSetupToken }),
+            })
+            const data = await res.json()
+            if (!res.ok) {
+              setError(data.error || 'Could not save PayPal')
+              return
+            }
+            setSuccess('PayPal saved for faster checkout.')
+            await load()
+          },
+          onError: (err) => {
+            console.error(err)
+            setError(err instanceof Error ? err.message : 'PayPal save failed')
+          },
+        })
+        .render(paypalHostRef.current)
+      if (!cancelled) setPaypalReady(true)
+    }
+
+    bootVaultButtons().catch((err) => {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'PayPal save unavailable')
+    })
+
+    return () => {
+      cancelled = true
+      if (paypalHostRef.current) paypalHostRef.current.innerHTML = ''
+    }
+  }, [busy, paypal, paypalConfigured, load])
+
   async function removeCard() {
     if (!window.confirm('Remove this saved card and turn off auto top-off for all students?')) {
       return
     }
-    setRemoving(true)
+    setRemoving('card')
     setError('')
     setSuccess('')
     try {
-      const r = await fetch('/api/gift-card/payment-method', { method: 'DELETE' })
+      const r = await fetch('/api/gift-card/payment-method?kind=card', { method: 'DELETE' })
       const data = await r.json().catch(() => ({}))
       if (!r.ok) {
         setError(data.error || 'Could not remove card.')
@@ -65,7 +166,30 @@ export function PaymentMethodsPanel() {
     } catch {
       setError('Could not remove card.')
     } finally {
-      setRemoving(false)
+      setRemoving(null)
+    }
+  }
+
+  async function removePayPal() {
+    if (!window.confirm('Remove this saved PayPal from Payment methods?')) {
+      return
+    }
+    setRemoving('paypal')
+    setError('')
+    setSuccess('')
+    try {
+      const r = await fetch('/api/gift-card/payment-method?kind=paypal', { method: 'DELETE' })
+      const data = await r.json().catch(() => ({}))
+      if (!r.ok) {
+        setError(data.error || 'Could not remove PayPal.')
+        return
+      }
+      setPaypal(null)
+      setSuccess('Saved PayPal removed.')
+    } catch {
+      setError('Could not remove PayPal.')
+    } finally {
+      setRemoving(null)
     }
   }
 
@@ -79,11 +203,11 @@ export function PaymentMethodsPanel() {
           <CreditCard className="h-4 w-4" style={{ color: 'var(--brand-green)' }} />
         </div>
         <div className="min-w-0">
-          <h2 className="text-base font-bold text-[#1A1A1A]">Cards on file</h2>
+          <h2 className="text-base font-bold text-[#1A1A1A]">Cards and PayPal on file</h2>
           <p className="mt-1 text-sm text-[#5A6070] whitespace-pre-line">
             {`Square stores your card securely for Cove reloads, membership, spirit wear, and enrichment.
-SHMS PTO never keeps the full card number.
-PayPal is available at checkout each time. We do not store a PayPal login.`}
+You can also save PayPal here for one-tap checkout.
+SHMS PTO never keeps the full card number.`}
           </p>
         </div>
       </div>
@@ -118,11 +242,11 @@ PayPal is available at checkout each time. We do not store a PayPal login.`}
             type="button"
             variant="outline"
             size="sm"
-            disabled={removing}
+            disabled={removing === 'card'}
             onClick={() => void removeCard()}
             className="text-red-700 border-red-200 hover:bg-red-50"
           >
-            {removing ? (
+            {removing === 'card' ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
@@ -160,13 +284,54 @@ It will show up here automatically.`}
         </div>
       ) : null}
 
+      <div className="border-t border-[var(--border)] pt-4 space-y-3">
+        <h3 className="text-sm font-bold text-[#1A1A1A]">PayPal</h3>
+        {!busy && paypal ? (
+          <div className="rounded-lg border border-[var(--brand-line)] bg-[#FAFCF9] px-3 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-[#1A1A1A]">PayPal</p>
+              <p className="text-xs text-[#5A6070]">{paypal.payerEmail}</p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={removing === 'paypal'}
+              onClick={() => void removePayPal()}
+              className="text-red-700 border-red-200 hover:bg-red-50"
+            >
+              {removing === 'paypal' ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                  Remove
+                </>
+              )}
+            </Button>
+          </div>
+        ) : null}
+
+        {!busy && !paypal && paypalConfigured ? (
+          <div className="rounded-lg border border-dashed border-[var(--border)] px-3 py-4 space-y-3">
+            <p className="text-sm text-[#1A1A1A] whitespace-pre-line">
+              {`Save PayPal here for one-tap checkout.
+Or check “Save this PayPal…” the next time you pay with PayPal.`}
+            </p>
+            {!paypalReady ? (
+              <p className="text-xs text-[#5A6070]">Loading PayPal…</p>
+            ) : null}
+            <div ref={paypalHostRef} />
+          </div>
+        ) : null}
+
+        {!busy && !paypalConfigured ? (
+          <p className="text-sm text-amber-800">PayPal save is temporarily unavailable.</p>
+        ) : null}
+      </div>
+
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {success ? <p className="text-sm font-semibold text-green-700">{success}</p> : null}
-
-      <p className="text-xs text-[#5A6070]">
-        Prefer to pay with PayPal? Use the PayPal buttons on any checkout. There is nothing to save
-        here for PayPal.
-      </p>
     </div>
   )
 }

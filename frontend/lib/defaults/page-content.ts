@@ -161,7 +161,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   portal: empty('portal', {
     sectionTitle: 'Paid PTO membership active',
     sectionBody:
-      'Thanks for supporting SHMS PTO. Your paid membership benefits show on each student card below.',
+      'Thanks for supporting SHMS PTO.\nYour membership benefits show on each student card below.',
     title: 'Free parent account',
     body: "You're signed in as a free parent member. Add your students here, then upgrade to Reef, Lagoon, or Tide anytime for paid benefits.",
     bullets: [

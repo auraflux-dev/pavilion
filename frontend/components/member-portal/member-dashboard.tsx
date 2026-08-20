@@ -24,7 +24,8 @@ import {
   PORTAL_COPY_DEFAULTS,
   type PortalCopy,
 } from '@/lib/defaults/portal-copy'
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
+import { pickHighestTier, tierRank } from '@/lib/staff/members-roster'
 import { StudentCard } from './student-card'
 import { AddStudentForm } from './add-student-form'
 import { EditAccountForm } from './edit-account-form'
@@ -308,6 +309,39 @@ export function MemberDashboard({
   const paidStudents = students.filter(
     (s) => s.membershipTier && s.membershipTier !== 'free'
   ).length
+  const householdTier = pickHighestTier(students.map((s) => s.membershipTier))
+  const householdTierRank = tierRank(householdTier)
+  const tierDisplay = displayMembershipTier(householdTier)
+  const accountBannerTitle =
+    accountType === 'paid' && householdTierRank > 0
+      ? `${tierDisplay} membership active`
+      : accountType === 'paid'
+        ? copy.paidTitle
+        : copy.freeTitle
+  const accountBannerBody =
+    accountType === 'paid' && householdTier === 'reef'
+      ? `Thanks for supporting SHMS PTO.
+You're on Reef. Benefits show on each student card below.
+Upgrade to Lagoon or Tide anytime for more perks.`
+      : accountType === 'paid' && householdTier === 'lagoon'
+        ? `Thanks for supporting SHMS PTO.
+You're on Lagoon. Benefits show on each student card below.
+Upgrade to Tide anytime for more perks.`
+        : accountType === 'paid' && householdTier === 'tide'
+          ? `Thanks for supporting SHMS PTO.
+You're on Tide. Benefits show on each student card below.`
+          : accountType === 'paid'
+            ? copy.paidBody
+            : copy.freeBody
+  const membershipCtaHref = '/membership'
+  const membershipCtaLabel =
+    accountType === 'free'
+      ? copy.viewMemberships
+      : householdTier === 'reef'
+        ? 'Upgrade to Lagoon or Tide'
+        : householdTier === 'lagoon'
+          ? 'Upgrade to Tide'
+          : null
 
   const onboarding = buildOnboardingChecklist({ students, accountType })
   const coveGate = coveFeaturesUnlocked(students)
@@ -607,20 +641,20 @@ export function MemberDashboard({
           >
             <p className="text-sm font-bold text-[#1A1A1A] flex items-center gap-1.5">
               {accountType === 'paid' && <Star className="w-3.5 h-3.5" style={{ color: 'var(--brand-green)' }} />}
-              {accountType === 'paid' ? copy.paidTitle : copy.freeTitle}
+              {vanillaizeIfDemo(accountBannerTitle)}
             </p>
-            <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
-              {accountType === 'paid' ? copy.paidBody : copy.freeBody}
+            <p className="text-xs text-[#5A6070] mt-1 leading-relaxed whitespace-pre-line">
+              {vanillaizeIfDemo(accountBannerBody)}
             </p>
-            {accountType === 'free' && (
+            {membershipCtaLabel ? (
               <a
-                href="/membership"
+                href={membershipCtaHref}
                 className="inline-flex items-center gap-1 text-xs font-bold mt-2"
                 style={{ color: 'var(--brand-green)' }}
               >
-                {copy.viewMemberships} <ArrowRight className="w-3 h-3" />
+                {vanillaizeIfDemo(membershipCtaLabel)} <ArrowRight className="w-3 h-3" />
               </a>
-            )}
+            ) : null}
           </div>
 
           <dl className="space-y-3 text-sm mb-4">

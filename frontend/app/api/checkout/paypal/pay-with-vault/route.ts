@@ -1,24 +1,24 @@
 /**
- * POST /api/checkout/paypal/capture
- * Capture approved PayPal order and fulfill membership / Cove / store-card.
+ * POST /api/checkout/paypal/pay-with-vault
+ * Charge a PayPal wallet already saved on Payment methods.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
-import { getEffectiveParentEmail } from '@/lib/staff/session'
-import {
-  fulfillPaidCheckout,
-  resolveCheckoutIntent,
-  type CheckoutIntent,
-} from '@/lib/checkout-fulfill'
-import { resolvePrimaryParentEmail } from '@/lib/family-guardians'
-import { capturePayPalOrder, isPayPalConfigured } from '@/lib/paypal'
-import { upsertStoredPaymentMethod } from '@/lib/stored-payment-methods'
 import {
   recordConsentAcknowledgments,
   validateConsentAcks,
   type CheckoutConsentKind,
   type ConsentAck,
 } from '@/lib/checkout-consent'
+import {
+  fulfillPaidCheckout,
+  resolveCheckoutIntent,
+  type CheckoutIntent,
+} from '@/lib/checkout-fulfill'
+import { resolvePrimaryParentEmail } from '@/lib/family-guardians'
+import { chargePayPalVault, isPayPalConfigured } from '@/lib/paypal'
+import { findStoredPaymentMethod, hasPayPalVault } from '@/lib/stored-payment-methods'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 
 export async function POST(req: NextRequest) {
   const session = await getMemberSession(req)
@@ -29,10 +29,11 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const orderId = String(body.orderId ?? '').trim()
-    const intent = body as CheckoutIntent & { orderId?: string; consents?: ConsentAck[] }
-    if (!orderId) return NextResponse.json({ error: 'Missing PayPal order' }, { status: 400 })
-    if (!intent.kind || !['membership', 'product', 'store-card', 'program', 'event', 'donation'].includes(intent.kind)) {
+    const intent = body as CheckoutIntent & { consents?: ConsentAck[] }
+    if (
+      !intent.kind ||
+      !['membership', 'product', 'store-card', 'program', 'event', 'donation'].includes(intent.kind)
+    ) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
     }
 
@@ -42,22 +43,27 @@ export async function POST(req: NextRequest) {
     }
 
     const effective = await getEffectiveParentEmail(req)
+    if (effective?.actingAs) {
+      return NextResponse.json({ error: 'Act-as is read-only for payments.' }, { status: 403 })
+    }
     const parentEmail = effective?.parentEmail ?? session.email
-    const accountEmails = [
-      effective?.actorEmail ?? session.email,
-      ...session.emails,
-    ]
+    const householdEmail = await resolvePrimaryParentEmail(parentEmail)
+    const stored = await findStoredPaymentMethod(householdEmail)
+    if (!hasPayPalVault(stored) || !stored?.paypalVaultId) {
+      return NextResponse.json({ error: 'No saved PayPal on file.' }, { status: 400 })
+    }
+
+    const accountEmails = [effective?.actorEmail ?? session.email, ...session.emails]
     const resolved0 = await resolveCheckoutIntent(intent, parentEmail, accountEmails)
     const { withCoveSplit } = await import('@/lib/checkout-cove-split')
     const useCove = intent.kind === 'product' && intent.useCoveBalance !== false
     const resolved = await withCoveSplit(resolved0, parentEmail, useCove)
     const cardDue = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0) / 100
-    const captured = await capturePayPalOrder(orderId)
-
-    // Soft-check captured amount vs card remainder (tolerance 1 cent)
-    if (captured.amount != null && Math.abs(captured.amount - cardDue) > 0.02) {
-      console.error('PayPal amount mismatch', captured.amount, cardDue)
-      return NextResponse.json({ error: 'Payment amount mismatch. contact the PTO' }, { status: 409 })
+    if (!(cardDue > 0)) {
+      return NextResponse.json(
+        { error: 'Nothing left for PayPal. Pay with your Cove Digital Card in this checkout.' },
+        { status: 400 },
+      )
     }
 
     let name =
@@ -72,28 +78,30 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const householdEmail = await resolvePrimaryParentEmail(parentEmail)
-    if (Boolean(body.savePayPal) && captured.vaultId) {
-      await upsertStoredPaymentMethod(householdEmail, {
-        wixMemberId: session.memberId,
-        paypalVaultId: captured.vaultId,
-        paypalCustomerId: captured.paypalCustomerId,
-        paypalPayerEmail: captured.payerEmail,
-      })
+    const charged = await chargePayPalVault({
+      amount: cardDue,
+      description: resolved.description,
+      customId: resolved.customId,
+      vaultId: stored.paypalVaultId,
+      softDescriptor: 'SHMSPTO',
+    })
+
+    if (charged.amount != null && Math.abs(charged.amount - cardDue) > 0.02) {
+      console.error('PayPal vault amount mismatch', charged.amount, cardDue)
+      return NextResponse.json({ error: 'Payment amount mismatch. contact the PTO' }, { status: 409 })
     }
 
-    const transactionId = captured.captureId || captured.id
+    const transactionId = charged.captureId || charged.id
     const result = await fulfillPaidCheckout({
       resolved,
       parentEmail,
       parentName: name,
       transactionId,
-      paymentMethod: 'PayPal',
+      paymentMethod: 'PayPal (saved)',
       sourcePrefix: 'paypal',
       consents: consentCheck.acks,
     })
 
-    // Program enroll records its own consents; membership/other need this trail here.
     if (intent.kind !== 'program') {
       await recordConsentAcknowledgments({
         parentEmail,
@@ -106,14 +114,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, ...result })
   } catch (err) {
-    console.error('PayPal capture', err)
-    const status = (err as { status?: number })?.status === 502 ? 502 : 400
+    console.error('PayPal pay-with-vault', err)
     return NextResponse.json(
-      {
-        error: err instanceof Error ? err.message : 'PayPal payment failed',
-        paymentId: (err as { paymentId?: string })?.paymentId,
-      },
-      { status }
+      { error: err instanceof Error ? err.message : 'Saved PayPal payment failed' },
+      { status: 400 },
     )
   }
 }

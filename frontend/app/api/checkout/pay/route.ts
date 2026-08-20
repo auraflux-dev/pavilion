@@ -6,7 +6,12 @@
 import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
+import { resolvePrimaryParentEmail } from '@/lib/family-guardians'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
+import {
+  findStoredPaymentMethod,
+  upsertStoredPaymentMethod,
+} from '@/lib/stored-payment-methods'
 import { getCatalogConfig, isAllowedStoreCardLoadAmount } from '@/lib/api/catalog-config'
 import { getPaidMembershipTiers } from '@/lib/api/membership'
 
@@ -47,28 +52,6 @@ type StudentRow = {
   parentEmail?: string
   squareGiftCardGan?: string
   archived?: boolean
-}
-
-type StoredMethod = {
-  _id?: string
-  parentEmail?: string
-  squareCustomerId?: string
-  squareCardId?: string
-  brand?: string
-  last4?: string
-  expMonth?: number | null
-  expYear?: number | null
-  active?: boolean
-}
-
-async function findStoredMethod(email: string): Promise<StoredMethod | null> {
-  const client = getWixClient()
-  const result = await client.items
-    .query('StoredPaymentMethods')
-    .eq('parentEmail', email)
-    .eq('active', true)
-    .find()
-  return (result.items?.[0] as StoredMethod | undefined) ?? null
 }
 
 export async function POST(req: NextRequest) {
@@ -120,7 +103,11 @@ export async function POST(req: NextRequest) {
       )
     }
     const client = getWixClient()
-    let stored = await findStoredMethod(session.email)
+    const effective = await getEffectiveParentEmail(req)
+    const householdEmail = await resolvePrimaryParentEmail(
+      effective?.parentEmail ?? session.email,
+    )
+    let stored = await findStoredPaymentMethod(householdEmail)
     let paymentSource = sourceId
     let customerId = stored?.squareCustomerId
 
@@ -132,7 +119,7 @@ export async function POST(req: NextRequest) {
       customerId = stored.squareCustomerId
     } else if (saveCard) {
       if (!sourceId) return NextResponse.json({ error: 'Card details required' }, { status: 400 })
-      const customer = await upsertSquareCustomer(session.email, name || session.email)
+      const customer = await upsertSquareCustomer(householdEmail, name || householdEmail)
       if (!customer?.id) throw new Error('Could not create Square customer')
       const card = await createCardOnFile({
         sourceId,
@@ -143,10 +130,7 @@ export async function POST(req: NextRequest) {
       if (!card?.id) throw new Error('Could not save card')
       paymentSource = card.id
       customerId = customer.id
-      const row = {
-        ...(stored ?? {}),
-        _id: stored?._id,
-        parentEmail: session.email,
+      stored = await upsertStoredPaymentMethod(householdEmail, {
         wixMemberId: session.memberId,
         squareCustomerId: customer.id,
         squareCardId: card.id,
@@ -154,16 +138,7 @@ export async function POST(req: NextRequest) {
         last4: card.last4 ?? '',
         expMonth: card.expMonth ? Number(card.expMonth) : null,
         expYear: card.expYear ? Number(card.expYear) : null,
-        active: true,
-        updatedAt: new Date().toISOString(),
-      }
-      if (stored?._id) {
-        await client.items.update('StoredPaymentMethods', row as never)
-      } else {
-        delete row._id
-        await client.items.insert('StoredPaymentMethods', row)
-      }
-      stored = row
+      })
     }
 
     if (!paymentSource) {

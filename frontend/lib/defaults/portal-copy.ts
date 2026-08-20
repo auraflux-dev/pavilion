@@ -67,7 +67,7 @@ export type PortalCopy = {
 export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   paidTitle: 'Paid PTO membership active',
   paidBody:
-    'Thanks for supporting SHMS PTO. Your paid membership benefits show on each student card below.',
+    'Thanks for supporting SHMS PTO.\nYour membership benefits show on each student card below.',
   freeTitle: 'Free parent account',
   freeBody:
     "You're signed in as a free parent member. Add your students here, then upgrade to Reef, Lagoon, or Tide anytime for paid benefits.",

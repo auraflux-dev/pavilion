@@ -1,7 +1,18 @@
 import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { resolvePrimaryParentEmail } from '@/lib/family-guardians'
-import { getWixClient } from '@/lib/wix-client'
+import {
+  createPayPalPaymentTokenFromSetup,
+  createPayPalVaultSetupToken,
+  deletePayPalPaymentToken,
+  isPayPalConfigured,
+} from '@/lib/paypal'
+import {
+  findStoredPaymentMethod,
+  hasPayPalVault,
+  hasSquareCard,
+  upsertStoredPaymentMethod,
+} from '@/lib/stored-payment-methods'
 import {
   createCardOnFile,
   disableCardOnFile,
@@ -9,28 +20,7 @@ import {
   upsertSquareCustomer,
 } from '@/lib/square'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
-
-type StoredMethod = {
-  _id?: string
-  parentEmail?: string
-  squareCustomerId?: string
-  squareCardId?: string
-  brand?: string
-  last4?: string
-  expMonth?: number
-  expYear?: number
-  active?: boolean
-}
-
-async function findMethod(email: string): Promise<StoredMethod | null> {
-  const client = getWixClient()
-  const result = await client.items
-    .query('StoredPaymentMethods')
-    .eq('parentEmail', email)
-    .eq('active', true)
-    .find()
-  return (result.items?.[0] as StoredMethod | undefined) ?? null
-}
+import { getWixClient } from '@/lib/wix-client'
 
 async function householdFromRequest(req: NextRequest) {
   const effective = await getEffectiveParentEmail(req)
@@ -43,19 +33,25 @@ export async function GET(req: NextRequest) {
   const resolved = await householdFromRequest(req)
   if (!resolved) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const method = await findMethod(resolved.householdEmail)
+  const method = await findStoredPaymentMethod(resolved.householdEmail)
   const config = getSquareWebPaymentsConfig()
   return NextResponse.json({
     configured: Boolean(config.applicationId && config.locationId),
     applicationId: config.applicationId,
     locationId: config.locationId,
     environment: config.environment,
-    paymentMethod: method
+    paypalConfigured: isPayPalConfigured(),
+    paymentMethod: hasSquareCard(method)
       ? {
-          brand: method.brand ?? 'Card',
-          last4: method.last4 ?? '',
-          expMonth: method.expMonth ?? null,
-          expYear: method.expYear ?? null,
+          brand: method!.brand ?? 'Card',
+          last4: method!.last4 ?? '',
+          expMonth: method!.expMonth ?? null,
+          expYear: method!.expYear ?? null,
+        }
+      : null,
+    paypalMethod: hasPayPalVault(method)
+      ? {
+          payerEmail: method!.paypalPayerEmail ?? 'PayPal',
         }
       : null,
   })
@@ -69,13 +65,45 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { sourceId } = await req.json()
+    const body = await req.json()
+    const action = String(body.action ?? 'saveCard').trim()
+    const { session } = resolved.effective
+    const householdEmail = resolved.householdEmail
+
+    if (action === 'paypalSetupToken') {
+      if (!isPayPalConfigured()) {
+        return NextResponse.json({ error: 'PayPal is not configured' }, { status: 503 })
+      }
+      const setup = await createPayPalVaultSetupToken()
+      return NextResponse.json({ setupToken: setup.id })
+    }
+
+    if (action === 'paypalPaymentToken') {
+      if (!isPayPalConfigured()) {
+        return NextResponse.json({ error: 'PayPal is not configured' }, { status: 503 })
+      }
+      const setupToken = String(body.vaultSetupToken ?? body.setupToken ?? '').trim()
+      if (!setupToken) {
+        return NextResponse.json({ error: 'PayPal setup token required' }, { status: 400 })
+      }
+      const token = await createPayPalPaymentTokenFromSetup(setupToken)
+      await upsertStoredPaymentMethod(householdEmail, {
+        wixMemberId: session.memberId,
+        paypalVaultId: token.vaultId,
+        paypalCustomerId: token.customerId,
+        paypalPayerEmail: token.payerEmail,
+      })
+      return NextResponse.json({
+        ok: true,
+        paypalMethod: { payerEmail: token.payerEmail ?? 'PayPal' },
+      })
+    }
+
+    const { sourceId } = body
     if (!sourceId) {
       return NextResponse.json({ error: 'Card token required' }, { status: 400 })
     }
 
-    const { session } = resolved.effective
-    const householdEmail = resolved.householdEmail
     const name =
       `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim()
     const customer = await upsertSquareCustomer(householdEmail, name)
@@ -89,12 +117,7 @@ export async function POST(req: NextRequest) {
     })
     if (!card?.id) throw new Error('Could not store card')
 
-    const client = getWixClient()
-    const existing = await findMethod(householdEmail)
-    const row = {
-      ...(existing ?? {}),
-      _id: existing?._id,
-      parentEmail: householdEmail,
+    const row = await upsertStoredPaymentMethod(householdEmail, {
       wixMemberId: session.memberId,
       squareCustomerId: customer.id,
       squareCardId: card.id,
@@ -102,16 +125,7 @@ export async function POST(req: NextRequest) {
       last4: card.last4 ?? '',
       expMonth: card.expMonth ? Number(card.expMonth) : null,
       expYear: card.expYear ? Number(card.expYear) : null,
-      active: true,
-      updatedAt: new Date().toISOString(),
-    }
-
-    if (existing?._id) {
-      await client.items.update('StoredPaymentMethods', row as any)
-    } else {
-      delete row._id
-      await client.items.insert('StoredPaymentMethods', row)
-    }
+    })
 
     return NextResponse.json({
       ok: true,
@@ -124,7 +138,10 @@ export async function POST(req: NextRequest) {
     })
   } catch (err) {
     console.error('/api/gift-card/payment-method POST error:', err)
-    return NextResponse.json({ error: 'Could not save payment method' }, { status: 500 })
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Could not save payment method' },
+      { status: 500 },
+    )
   }
 }
 
@@ -136,18 +153,58 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
+    const url = new URL(req.url)
+    let kind = url.searchParams.get('kind') || 'card'
+    try {
+      const body = await req.json()
+      if (body?.kind) kind = String(body.kind)
+    } catch {
+      // no body
+    }
+
     const householdEmail = resolved.householdEmail
-    const method = await findMethod(householdEmail)
+    const method = await findStoredPaymentMethod(householdEmail)
     if (!method?._id) return NextResponse.json({ ok: true })
-    if (method.squareCardId) await disableCardOnFile(method.squareCardId)
 
     const client = getWixClient()
+
+    if (kind === 'paypal') {
+      if (method.paypalVaultId) {
+        try {
+          await deletePayPalPaymentToken(method.paypalVaultId)
+        } catch (err) {
+          console.error('PayPal vault delete', err)
+        }
+      }
+      await client.items.update('StoredPaymentMethods', {
+        ...method,
+        _id: method._id,
+        paypalVaultId: '',
+        paypalCustomerId: '',
+        paypalPayerEmail: '',
+        updatedAt: new Date().toISOString(),
+      } as never)
+      return NextResponse.json({ ok: true })
+    }
+
+    if (method.squareCardId) await disableCardOnFile(method.squareCardId)
+
+    const stillHasPaypal = hasPayPalVault({
+      ...method,
+      squareCardId: '',
+    })
     await client.items.update('StoredPaymentMethods', {
       ...method,
       _id: method._id,
-      active: false,
+      squareCardId: '',
+      squareCustomerId: method.squareCustomerId ?? '',
+      brand: '',
+      last4: '',
+      expMonth: null,
+      expYear: null,
+      active: stillHasPaypal,
       updatedAt: new Date().toISOString(),
-    } as any)
+    } as never)
 
     const students = await client.items
       .query('Students')
