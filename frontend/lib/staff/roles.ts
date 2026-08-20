@@ -293,7 +293,7 @@ export const ROLE_HOME_COPY: Record<
  ],
  },
  programs: {
- title: 'Fundraising & Programs',
+ title: 'Fundraising & Programs / Initiatives',
  owns: 'Enrichment programs, instructors, sponsors, enrollee messaging',
  thisWeek: [
  'Staff → Access: add instructors and assign their class IDs',

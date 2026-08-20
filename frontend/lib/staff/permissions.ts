@@ -14,7 +14,7 @@ export const STAFF_ROLE_LABEL: Record<StaffRole, string> = {
   secretary: 'Secretary',
   treasurer: 'Treasurer',
   events: 'Events',
-  programs: 'Programs',
+  programs: 'Programs / Initiatives',
   retail: isDemoInstance() ? `${DEMO_BRAND.store} / retail` : 'Cove / retail',
   membership: 'Membership',
   wellness: 'Wellness',

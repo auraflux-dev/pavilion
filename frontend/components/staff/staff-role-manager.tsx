@@ -58,6 +58,7 @@ export function StaffRoleManager() {
   const [extras, setExtras] = useState<StaffWorkspace[]>([])
   const [assignedProgramIds, setAssignedProgramIds] = useState('')
   const [personalEmail, setPersonalEmail] = useState('')
+  const [grantBoardSeatBenefits, setGrantBoardSeatBenefits] = useState(false)
   const [active, setActive] = useState(true)
   const [permissionQuery, setPermissionQuery] = useState('')
   const [busy, setBusy] = useState(false)
@@ -104,6 +105,7 @@ export function StaffRoleManager() {
     setExtras(row.extraWorkspaces ?? [])
     setAssignedProgramIds((row.assignedProgramIds ?? []).join(', '))
     setPersonalEmail(row.personalEmail ?? '')
+    setGrantBoardSeatBenefits(false)
     setActive(row.active)
     setPermissionQuery('')
     setStatus(`Editing ${row.email}`)
@@ -132,6 +134,7 @@ export function StaffRoleManager() {
           extraWorkspaces: extras,
           assignedProgramIds,
           personalEmail,
+          grantBoardSeatBenefits: scope === 'all' ? grantBoardSeatBenefits : false,
           active,
         }),
       })
@@ -145,9 +148,18 @@ export function StaffRoleManager() {
       setExtras([])
       setAssignedProgramIds('')
       setPersonalEmail('')
+      setGrantBoardSeatBenefits(false)
       setActive(true)
       setPermissionQuery('')
-      setStatus('Staff access saved.')
+      const perks = data.boardSeatBenefits as
+        | { fallCode?: string; springCode?: string; enrichmentCode?: string | null }
+        | null
+        | undefined
+      setStatus(
+        perks?.fallCode
+          ? `Staff access saved. Board Reef + 75% codes: ${perks.fallCode} / ${perks.springCode}${perks.enrichmentCode ? ` · ${perks.enrichmentCode}` : ''}.`
+          : 'Staff access saved.',
+      )
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Could not save staff role')
     } finally {
@@ -187,7 +199,14 @@ export function StaffRoleManager() {
               const box = findWorkspaceMailbox(next)
               if (box) {
                 setName(box.displayName)
-                setBoardTitle(box.displayName)
+                setBoardTitle(
+                  next === 'initiatives-coordinator@shmspto.org'
+                    ? 'Initiatives Coordinator'
+                    : box.displayName,
+                )
+              }
+              if (next === 'initiatives-coordinator@shmspto.org' && roles.length === 0) {
+                setRoles(['programs'])
               }
               if (scope === 'instructors' && roles.length === 0) setRoles(['instructor'])
               const klass = FALL_2026_EP_CLASSES.find((c) => c.suggestedMailbox === next)
@@ -365,6 +384,25 @@ export function StaffRoleManager() {
         Optional. Their family login for Member Portal. Must not be @
         {isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org'}.
       </p>
+      {scope === 'all' ? (
+        <label className="flex items-start gap-2 rounded-lg border border-[var(--border)] bg-[#FBF9F6] px-3 py-2 text-sm">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={grantBoardSeatBenefits}
+            disabled={!personalEmail.trim()}
+            onChange={(event) => setGrantBoardSeatBenefits(event.target.checked)}
+          />
+          <span>
+            <span className="font-medium">Grant board seat perks</span>
+            <span className="block text-[11px] text-[#5A6070] whitespace-pre-line">
+              Complimentary Reef on the personal email above.
+              Plus 75% off 1 enrichment program for Fall and 1 for Spring.
+              Magnet fulfillment stays on Membership → Fulfillments.
+            </span>
+          </span>
+        </label>
+      ) : null}
 
       {programs.length ? (
         <div>

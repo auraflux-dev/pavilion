@@ -38,6 +38,7 @@ export const WORKSPACE_MAILBOXES: WorkspaceMailbox[] = [
   { email: 'secretary@shmspto.org', displayName: 'SHMS PTO Secretary', group: 'board' },
   { email: 'vp-membershipexperience@shmspto.org', displayName: 'SHMS PTO VP Membership Experience', group: 'board' },
   { email: 'vp-community-events@shmspto.org', displayName: 'SHMS PTO VP Community Events', group: 'board' },
+  { email: 'initiatives-coordinator@shmspto.org', displayName: 'Initiatives Coordinator', group: 'board', note: 'Programs · board seat (Reef + 75% EP)' },
   { email: 'vp-initiatives@shmspto.org', displayName: 'SHMSPTO VP Initiatives', group: 'board', note: 'Programs / all instructors' },
   { email: 'spiritwear@shmspto.org', displayName: 'Spirit Wear', group: 'cove' },
   { email: 'vp-sales@shmspto.org', displayName: 'Vice President Sales', group: 'board' },

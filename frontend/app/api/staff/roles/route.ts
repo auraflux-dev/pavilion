@@ -232,9 +232,47 @@ export async function POST(req: NextRequest) {
       await client.items.insert('StaffRoles', data)
     }
 
-    return NextResponse.json({ ok: true })
+    let boardSeatBenefits: {
+      parentEmail: string
+      fallCode: string
+      springCode: string
+      enrichmentCode: string | null
+    } | null = null
+    const wantBoardPerks = body.grantBoardSeatBenefits === true
+    if (wantBoardPerks) {
+      if (!isAdmin) {
+        return NextResponse.json(
+          { error: 'Only the president can grant board seat Reef + 75% enrichment perks.' },
+          { status: 403 },
+        )
+      }
+      if (!personalEmail) {
+        return NextResponse.json(
+          {
+            error:
+              'Link a personal parent email before granting board seat Reef + 75% enrichment perks.',
+          },
+          { status: 400 },
+        )
+      }
+      const { grantBoardSeatBenefits } = await import('@/lib/staff/board-seat-benefits')
+      const granted = await grantBoardSeatBenefits({
+        parentEmail: personalEmail,
+        displayName: name || boardTitle || personalEmail,
+        staffEmail: email,
+      })
+      boardSeatBenefits = {
+        parentEmail: granted.parentEmail,
+        fallCode: granted.fallCode,
+        springCode: granted.springCode,
+        enrichmentCode: granted.enrichmentCode,
+      }
+    }
+
+    return NextResponse.json({ ok: true, boardSeatBenefits })
   } catch (err) {
     console.error('/api/staff/roles POST error:', err)
-    return NextResponse.json({ error: 'Could not save staff role' }, { status: 500 })
+    const message = err instanceof Error ? err.message : 'Could not save staff role'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
