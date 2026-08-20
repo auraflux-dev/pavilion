@@ -10,6 +10,7 @@ import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { demoStorePath, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { DEMO_BRAND } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { fetchWithRetry } from '@/lib/fetch-with-retry'
 
 export interface NavLink {
  id: string
@@ -39,7 +40,7 @@ async function fetchNavLinks(): Promise<NavLink[]> {
  if (!apiKey || !siteId) return []
 
  try {
-    const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+    const res = await fetchWithRetry('https://www.wixapis.com/wix-data/v2/items/query', {
  method: 'POST',
  headers: {
         'Content-Type': 'application/json',

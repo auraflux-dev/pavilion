@@ -40,6 +40,17 @@ export async function GET(req: NextRequest, ctx: Ctx) {
       items: items.map((i) => mapCmsRow(i, config.fields)),
     })
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    if (/WDE0025|does not exist/i.test(msg)) {
+      return NextResponse.json({
+        collection: config.id,
+        label: config.label,
+        fields: config.fields,
+        items: [],
+        missingCollection: true,
+        hint: 'Collection missing. Use Staff → Help → Create KbArticles collection (or Site CMS ensure-fields).',
+      })
+    }
     console.error(`/api/staff/cms/${collection} GET`, err)
     return NextResponse.json({ error: 'Could not load collection' }, { status: 500 })
   }

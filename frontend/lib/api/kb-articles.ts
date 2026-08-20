@@ -63,7 +63,8 @@ async function fetchCmsArticles(audience: KbAudience): Promise<KbArticle[]> {
   if (!apiKey || !siteId) return []
 
   try {
-    const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+    const { fetchWithRetry } = await import('@/lib/fetch-with-retry')
+    const res = await fetchWithRetry('https://www.wixapis.com/wix-data/v2/items/query', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

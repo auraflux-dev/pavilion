@@ -44,6 +44,12 @@ export async function reportError(
     reportingEnabled: isErrorReportingEnabled(),
   }
 
+  const { isTransientNetworkError } = await import('@/lib/fetch-with-retry')
+  if (isTransientNetworkError(err)) {
+    console.warn(`[transient ${eventId}]`, options.route || 'unknown', message)
+    return eventId
+  }
+
   console.error(`[error ${eventId}]`, options.route || 'unknown', message, err)
 
   if (process.env.NEXT_RUNTIME === 'nodejs') {

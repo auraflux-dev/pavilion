@@ -1,4 +1,5 @@
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
+import { fetchWithRetry } from '@/lib/fetch-with-retry'
 
 /**
  * Board members. fetched live from Wix CMS BoardMembers collection.
@@ -53,7 +54,7 @@ export async function getBoardMembers(): Promise<BoardMember[]> {
   }
 
   try {
-    const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+    const res = await fetchWithRetry('https://www.wixapis.com/wix-data/v2/items/query', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

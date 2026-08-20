@@ -15,6 +15,7 @@ import { brandifyShmsPto } from '@/lib/copy/brandify-shms-pto'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { fetchWithRetry } from '@/lib/fetch-with-retry'
 
 interface WixDataItem {
   id?: string
@@ -93,7 +94,7 @@ async function fetchPageRow(page: string): Promise<Partial<PageContentFields> | 
   if (!apiKey || !siteId) return null
 
   try {
-    const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+    const res = await fetchWithRetry('https://www.wixapis.com/wix-data/v2/items/query', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

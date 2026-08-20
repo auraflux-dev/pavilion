@@ -13,6 +13,7 @@
 
 import { vanillaizeRecord } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { fetchWithRetry } from '@/lib/fetch-with-retry'
 
 interface SiteSettingsMap {
  get(key: string, fallback?: string): string
@@ -35,7 +36,7 @@ async function fetchAllSettings(): Promise<Record<string, string>> {
  if (!apiKey || !siteId) return {}
 
  try {
-    const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+    const res = await fetchWithRetry('https://www.wixapis.com/wix-data/v2/items/query', {
  method: 'POST',
  headers: {
         'Content-Type': 'application/json',

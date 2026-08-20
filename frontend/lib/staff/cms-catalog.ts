@@ -672,9 +672,17 @@ export async function listCollection(collectionId: string, sortField = 'sortOrde
   try {
     const result = await client.items.query(collectionId).ascending(sortField).limit(100).find()
     return (result.items ?? []) as Record<string, unknown>[]
-  } catch {
-    const result = await client.items.query(collectionId).limit(100).find()
-    return (result.items ?? []) as Record<string, unknown>[]
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    if (/WDE0025|does not exist/i.test(msg)) throw err
+    try {
+      const result = await client.items.query(collectionId).limit(100).find()
+      return (result.items ?? []) as Record<string, unknown>[]
+    } catch (err2) {
+      const msg2 = err2 instanceof Error ? err2.message : String(err2)
+      if (/WDE0025|does not exist/i.test(msg2)) throw err2
+      throw err2
+    }
   }
 }
 
