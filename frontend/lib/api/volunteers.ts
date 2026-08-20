@@ -17,6 +17,7 @@ export async function getVolunteerOpportunities(): Promise<VolunteerOpportunity[
     const { DEMO_VOLUNTEER } = await import('@/lib/demo/content')
     return [...DEMO_VOLUNTEER]
   }
+  if (process.env.COMMONS_PLATFORM === 'true') return []
   const client = getWixClient();
   try {
     const result = await client.items

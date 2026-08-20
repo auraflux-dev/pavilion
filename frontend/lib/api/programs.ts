@@ -105,6 +105,7 @@ export async function getPrograms(): Promise<Program[]> {
     const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
     return DEMO_PROGRAMS.filter((p) => p.registrationOpen)
   }
+  if (process.env.COMMONS_PLATFORM === 'true') return []
   const client = getWixClient();
   const result = await client.items
     .query("Programs")
@@ -119,6 +120,7 @@ export async function getAllPrograms(): Promise<Program[]> {
     const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
     return [...DEMO_PROGRAMS]
   }
+  if (process.env.COMMONS_PLATFORM === 'true') return []
   const client = getWixClient();
   const result = await client.items.query("Programs").find();
   return publicPrograms(result.items as Record<string, unknown>[]);
@@ -129,6 +131,7 @@ export async function getFeaturedPrograms(): Promise<Program[]> {
     const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
     return DEMO_PROGRAMS.filter((p) => p.featured)
   }
+  if (process.env.COMMONS_PLATFORM === 'true') return []
   const client = getWixClient();
   const result = await client.items
     .query("Programs")

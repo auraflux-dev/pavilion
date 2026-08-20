@@ -4,6 +4,9 @@ import * as wixEvents from "@wix/events";
 
 // Server-side only. never import this in client components
 export function getWixClient() {
+  if (process.env.COMMONS_PLATFORM === 'true') {
+    throw new Error('Wix client is not used on Commons platform')
+  }
   const siteId = process.env.WIX_SITE_ID;
   const apiKey = process.env.WIX_API_KEY;
 

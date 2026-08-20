@@ -94,6 +94,7 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
     const { trialPackForSlug } = await import('@/lib/crm/trial-packs')
     const pack = trialPackForSlug(process.env.COMMONS_TRIAL_PACK || '')
     if (pack?.events?.length) return pack.events.slice(0, limit)
+    return []
   }
   try {
     const client = getWixClient()

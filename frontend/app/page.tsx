@@ -17,6 +17,7 @@ import { DEMO_BRAND } from '@/lib/demo/brand'
 export default async function HomePage() {
   const inSession = await isSchoolInSession()
   const demo = isDemoInstance()
+  const commons = process.env.COMMONS_PLATFORM === 'true'
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -24,30 +25,40 @@ export default async function HomePage() {
       <Navbar />
       <main id="main-content">
         <Hero />
-        {demo ? null : <RunForCharityPromo />}
+        {demo || commons ? null : <RunForCharityPromo />}
         <ParentVideoSection
           videoId="parent-tour"
           id="parent-tour"
           eyebrow="New this year"
           title="Take a 3-minute website tour"
           body={
-            demo
+            commons
+              ? 'Private trial. Sign in to tour membership, events, and board tools for your school.'
+              : demo
               ? `See how families use the ${DEMO_BRAND.short} site for membership, the ${DEMO_BRAND.card}, and ${DEMO_BRAND.store}.`
               : 'See how families use shmspto.org for membership, The Cove Digital Card, and more.'
           }
           background="#FFFFFF"
         />
-        <HomeSectionNav showPrograms={inSession} showEvents={inSession} />
-        {inSession ? <ProgramsPreview /> : null}
+        <HomeSectionNav showPrograms={inSession && !commons} showEvents={inSession} />
+        {inSession && !commons ? <ProgramsPreview /> : null}
         <VolunteerSection />
         {inSession ? <UpcomingEvents /> : null}
         <DonateBlock
           compact
-          title={demo ? `Donate to ${DEMO_BRAND.short}` : 'Donate to SHMS PTO'}
+          title={
+            commons
+              ? 'Donate'
+              : demo
+                ? `Donate to ${DEMO_BRAND.short}`
+                : 'Donate to SHMS PTO'
+          }
           body={
-            demo
-              ? `Any amount helps ${DEMO_BRAND.short} fund enrichment, ${DEMO_BRAND.store}, and events for ${DEMO_BRAND.school} students.`
-              : 'Any amount helps the PTO fund enrichment, The Cove, and events for Stone Hill students.'
+            commons
+              ? 'Direct donations support programs and events. Checkout stays off until Square is connected.'
+              : demo
+                ? `Any amount helps ${DEMO_BRAND.short} fund enrichment, ${DEMO_BRAND.store}, and events for ${DEMO_BRAND.school} students.`
+                : 'Any amount helps the PTO fund enrichment, The Cove, and events for Stone Hill students.'
           }
         />
         <CommunityBanner />
