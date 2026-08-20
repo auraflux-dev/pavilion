@@ -20,6 +20,10 @@
       "schedule": "15 12 * * *"
     },
     {
+      "path": "/api/cron/send-newsletter-jobs",
+      "schedule": "*/15 * * * *"
+    },
+    {
       "path": "/api/cron/sync-budget-plaid",
       "schedule": "0 15 * * *"
     },

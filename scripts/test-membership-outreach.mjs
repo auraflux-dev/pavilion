@@ -45,6 +45,11 @@ import {
   normalizeNewsletterAssetKey,
   publicNewsletterAssetUrl,
 } from '../frontend/lib/staff/newsletter-assets.ts'
+import {
+  canApproveNewsletter,
+  jobIsDue,
+  parseJobPayload,
+} from '../frontend/lib/staff/newsletter-jobs-pure.ts'
 
 let failures = 0
 function check(name, fn) {
@@ -280,6 +285,51 @@ check('branded newsletter HTML header hero footer', () => {
   assert.ok(!html.includes('<script'))
 })
 
+check('newsletter jobs approval + due + payload', () => {
+  const secretary = { roles: ['secretary'] }
+  const marketing = { roles: ['marketing'] }
+  assert.equal(canApproveNewsletter(secretary, 'sec@shmspto.org'), true)
+  assert.equal(canApproveNewsletter(marketing, 'diane@shmspto.org'), false)
+  assert.equal(canApproveNewsletter(marketing, 'president@shmspto.org'), true)
+  const payload = parseJobPayload(JSON.stringify({ subject: 'Hi', message: 'Body' }))
+  assert.equal(payload?.subject, 'Hi')
+  assert.equal(parseJobPayload('nope'), null)
+  assert.equal(
+    jobIsDue(
+      {
+        id: '1',
+        subject: 'x',
+        sendAt: '2000-01-01T00:00:00.000Z',
+        status: 'scheduled',
+        sendAudience: 'members',
+        needsApproval: false,
+        createdByEmail: 'a@b.com',
+        createdByName: 'A',
+        payloadJson: '{}',
+      },
+      new Date('2026-01-01T00:00:00.000Z'),
+    ),
+    true,
+  )
+  assert.equal(
+    jobIsDue(
+      {
+        id: '1',
+        subject: 'x',
+        sendAt: '2099-01-01T00:00:00.000Z',
+        status: 'scheduled',
+        sendAudience: 'members',
+        needsApproval: false,
+        createdByEmail: 'a@b.com',
+        createdByName: 'A',
+        payloadJson: '{}',
+      },
+      new Date('2026-01-01T00:00:00.000Z'),
+    ),
+    false,
+  )
+})
+
 const dry = await sendMassEmail(
   { subject: 'T', body: 'B', fromName: 'PTO', recipients: ['a@b.com'] },
   { dryRun: true },
@@ -327,6 +377,7 @@ for (const c of [
     method: 'POST',
     body: { channel: 'portal', subject: 'x', body: 'y' },
   },
+  { name: 'newsletter jobs GET anon', path: '/api/staff/newsletter/jobs' },
 ]) {
   try {
     const res = await fetch(`${base}${c.path}`, {
@@ -335,7 +386,10 @@ for (const c of [
       body: c.method === 'POST' ? JSON.stringify(c.body) : undefined,
       redirect: 'manual',
     })
-    const ok = res.status === 401 || res.status === 403
+    const ok =
+      c.name === 'newsletter jobs GET anon'
+        ? res.status === 401 || res.status === 403 || res.status === 404
+        : res.status === 401 || res.status === 403
     if (!ok) failures += 1
     console.log(`${ok ? 'PASS' : 'FAIL'} ${c.name}: ${res.status}`)
   } catch (err) {

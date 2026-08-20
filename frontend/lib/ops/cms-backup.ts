@@ -34,6 +34,8 @@ export const BACKUP_COLLECTIONS = [
   'Newsletters',
   'NewsletterTemplates',
   'NewsletterSends',
+  'NewsletterJobs',
+  'NewsletterSubscribers',
   'PortalCalendarEvents',
   'StaffRoles',
   'StaffTasks',

@@ -1160,6 +1160,45 @@ async function ensureNewsletterSendsCollection() {
   }
 }
 
+async function ensureNewsletterJobsCollection() {
+  try {
+    await wix('/wix-data/v2/collections', {
+      collection: {
+        id: 'NewsletterJobs',
+        displayName: 'Newsletter Jobs',
+        fields: [
+          { key: 'subject', displayName: 'Subject', type: 'TEXT' },
+          { key: 'sendAt', displayName: 'Send At', type: 'DATETIME' },
+          { key: 'status', displayName: 'Status', type: 'TEXT' },
+          { key: 'sendAudience', displayName: 'Send Audience', type: 'TEXT' },
+          { key: 'needsApproval', displayName: 'Needs Approval', type: 'BOOLEAN' },
+          { key: 'createdByEmail', displayName: 'Created By Email', type: 'TEXT' },
+          { key: 'createdByName', displayName: 'Created By Name', type: 'TEXT' },
+          { key: 'approvedByEmail', displayName: 'Approved By Email', type: 'TEXT' },
+          { key: 'approvedAt', displayName: 'Approved At', type: 'DATETIME' },
+          { key: 'sentAt', displayName: 'Sent At', type: 'DATETIME' },
+          { key: 'error', displayName: 'Error', type: 'TEXT' },
+          { key: 'payloadJson', displayName: 'Payload JSON', type: 'TEXT' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+        ],
+        permissions: {
+          insert: 'ADMIN',
+          update: 'ADMIN',
+          remove: 'ADMIN',
+          read: 'ADMIN',
+        },
+      },
+    })
+    console.log('Created NewsletterJobs collection')
+  } catch (err) {
+    if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
+      console.log('NewsletterJobs collection already exists')
+      return
+    }
+    console.warn('NewsletterJobs create skipped:', err.message.slice(0, 200))
+  }
+}
+
 async function main() {
   await ensurePageContentCollection()
   await ensureParentMessagesCollection()
@@ -1178,6 +1217,7 @@ async function main() {
   await ensureNewsletterTemplateHeroFields()
   await ensureNewsletterSendsCollection()
   await ensureNewsletterSendsDeliveryFields()
+  await ensureNewsletterJobsCollection()
   await upsertSiteSettings()
   await upsertPageContent()
   await upsertSurveys()

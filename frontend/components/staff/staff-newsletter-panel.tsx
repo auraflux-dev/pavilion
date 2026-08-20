@@ -27,6 +27,21 @@ export function StaffNewsletterPanel() {
   const [testGroups, setTestGroups] = useState<TestGroups | null>(null)
   const [testGroup, setTestGroup] = useState<'me' | 'board' | 'board_and_custom'>('me')
   const [testEmailsExtra, setTestEmailsExtra] = useState('')
+  const [sendAudience, setSendAudience] = useState<'members' | 'subscribers'>('members')
+  const [subscriberCount, setSubscriberCount] = useState(0)
+  const [canApprove, setCanApprove] = useState(false)
+  const [sendAtLocal, setSendAtLocal] = useState('')
+  const [jobs, setJobs] = useState<
+    {
+      id: string
+      subject: string
+      sendAt: string
+      status: string
+      sendAudience: string
+      createdByEmail: string
+      error?: string
+    }[]
+  >([])
   const [tier, setTier] = useState('all')
   const [grade, setGrade] = useState('')
   const [waGrade, setWaGrade] = useState('all')
@@ -48,6 +63,18 @@ export function StaffNewsletterPanel() {
     setEmailConfigured(Boolean(d.emailConfigured))
     setWaLinks(d.whatsapp ?? { grade6: '', grade7: '', grade8: '' })
     setTestGroups(d.testGroups ?? null)
+    setSubscriberCount(Number(d.subscriberCount ?? 0))
+    setCanApprove(Boolean(d.canApproveNewsletter))
+    try {
+      const jr = await fetch('/api/staff/newsletter/jobs')
+      const jd = await jr.json()
+      if (jr.ok) {
+        setJobs(Array.isArray(jd.jobs) ? jd.jobs : [])
+        if (typeof jd.canApprove === 'boolean') setCanApprove(jd.canApprove)
+      }
+    } catch {
+      // jobs collection may not exist yet
+    }
   }, [])
 
   useEffect(() => {
@@ -67,7 +94,8 @@ export function StaffNewsletterPanel() {
       body,
       tier,
       grade,
-      alsoPortal,
+      alsoPortal: sendAudience === 'subscribers' ? false : alsoPortal,
+      sendAudience,
       utmCampaign: utmCampaign.trim() || defaultUtmCampaign(subject),
       trackClicks,
       trackOpens,
@@ -93,7 +121,7 @@ export function StaffNewsletterPanel() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Preview failed')
       setStatus(
-        `Preview: ${d.recipientCount} member parents` +
+        `Preview: ${d.recipientCount} ${sendAudience === 'subscribers' ? 'footer signup' : 'member parent'}${d.recipientCount === 1 ? '' : 's'}` +
           (d.recipientsPreview?.length
             ? `. E.g. ${d.recipientsPreview.slice(0, 5).join(', ')}`
             : '') +
@@ -188,8 +216,9 @@ export function StaffNewsletterPanel() {
       const preview = await previewRes.json()
       if (!previewRes.ok) throw new Error(preview.error ?? 'Preview failed')
       const n = Number(preview.recipientCount ?? 0)
+      const who = sendAudience === 'subscribers' ? 'footer signup' : 'member parent'
       const ok = window.confirm(
-        `Send this newsletter to ${n} member parent${n === 1 ? '' : 's'}?\n\nThis is not a test send. Type OK in the next step only if you meant the full roster.`,
+        `Send this newsletter to ${n} ${who}${n === 1 ? '' : 's'}?\n\nThis is not a test send. Type OK in the next step only if you meant the full list.`,
       )
       if (!ok) {
         setStatus('Member send cancelled.')
@@ -197,7 +226,7 @@ export function StaffNewsletterPanel() {
       }
       if (n >= 25) {
         const typed = window.prompt(
-          `This will email ${n} parents.\n\nType SEND to confirm.`,
+          `This will email ${n} ${who}${n === 1 ? '' : 's'}.\n\nType SEND to confirm.`,
         )
         if (String(typed ?? '').trim().toUpperCase() !== 'SEND') {
           setStatus('Member send cancelled (confirmation not typed).')
@@ -280,6 +309,71 @@ export function StaffNewsletterPanel() {
     }
   }
 
+  async function queueSend() {
+    if (!sendAtLocal.trim()) {
+      setStatus('Pick a send date and time first.')
+      return
+    }
+    setBusy(true)
+    setStatus('')
+    try {
+      const sendAt = new Date(sendAtLocal).toISOString()
+      const r = await fetch('/api/staff/newsletter/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...outreachPayload(),
+          action: 'create',
+          sendAt,
+        }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not queue')
+      await load()
+      if (d.sentNow) {
+        setStatus('Queued time was now (or past). Send completed.')
+      } else if (d.status === 'pending_approval') {
+        setStatus(
+          `Queued for ${new Date(d.sendAt).toLocaleString()}. Waiting for secretary/president approval.`,
+        )
+      } else {
+        setStatus(`Scheduled for ${new Date(d.sendAt).toLocaleString()}. Cron sends within 15 minutes of that time.`)
+      }
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Could not queue')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function jobAction(action: 'approve' | 'cancel', id: string) {
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/newsletter/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, id }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Job update failed')
+      await load()
+      if (action === 'approve') {
+        setStatus(
+          d.sentNow
+            ? 'Approved and sent.'
+            : 'Approved. It will send at the scheduled time.',
+        )
+      } else {
+        setStatus('Job cancelled.')
+      }
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Job update failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="space-y-4">
       <StaffNewsletterTemplatesPanel
@@ -316,8 +410,8 @@ export function StaffNewsletterPanel() {
             No HTML coding required. Write plain text, attach a Canva design, Export PNG for email.
             Sends include SHMS header/footer + your graphic + body.
             {'\n'}
-            Parent sends use the Students roster. Use Test send first so board can preview in a real
-            inbox.
+            Parent sends use the Students roster. Footer signups use the public newsletter list.
+            Use Test send first so board can preview in a real inbox.
             {emailConfigured
               ? ''
               : '\nGmail send is not ready yet. Connect Google in Staff → Inbox (president@) or sends fall back to your mail app.'}
@@ -386,9 +480,25 @@ export function StaffNewsletterPanel() {
           </div>
         </div>
 
-        <p className="text-xs font-semibold text-[#1A1A1A]">Member send</p>
+        <p className="text-xs font-semibold text-[#1A1A1A]">Audience + member send</p>
 
-        <div className="grid sm:grid-cols-3 gap-2">
+        <label className="text-xs text-[#5A6070]">
+          Who gets this email
+          <select
+            value={sendAudience}
+            onChange={(e) =>
+              setSendAudience(e.target.value === 'subscribers' ? 'subscribers' : 'members')
+            }
+            className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="members">Member parents (Students roster)</option>
+            <option value="subscribers">
+              Footer signup list ({subscriberCount} email{subscriberCount === 1 ? '' : 's'})
+            </option>
+          </select>
+        </label>
+
+        <div className={`grid sm:grid-cols-3 gap-2 ${sendAudience === 'subscribers' ? 'opacity-50' : ''}`}>
           <select
             value={tier}
             onChange={(e) => setTier(e.target.value)}
@@ -482,11 +592,87 @@ export function StaffNewsletterPanel() {
         <label className="flex items-center gap-2 text-xs text-[#5A6070]">
           <input
             type="checkbox"
-            checked={alsoPortal}
+            checked={sendAudience === 'subscribers' ? false : alsoPortal}
+            disabled={sendAudience === 'subscribers'}
             onChange={(e) => setAlsoPortal(e.target.checked)}
           />
           Also post to parent portal inbox when sending email
+          {sendAudience === 'subscribers' ? ' (signup list is email-only)' : ''}
         </label>
+
+        <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2">
+          <p className="text-sm font-semibold text-[#1A1A1A]">Schedule / approval</p>
+          <p className="text-xs text-[#5A6070] whitespace-pre-line">
+            Test send stays one-click. Queue a later send here.
+            Marketing queues wait for secretary or president approval.
+            Approved jobs send at the chosen time (checked every 15 minutes).
+          </p>
+          <label className="text-xs text-[#5A6070] block">
+            Send at (your local time)
+            <input
+              type="datetime-local"
+              value={sendAtLocal}
+              onChange={(e) => setSendAtLocal(e.target.value)}
+              className="mt-1 w-full sm:w-auto border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+            />
+          </label>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy || !subject || !body || !sendAtLocal}
+            onClick={() => void queueSend()}
+          >
+            {canApprove ? 'Schedule send' : 'Request approval & schedule'}
+          </Button>
+          {jobs.filter((j) =>
+            ['pending_approval', 'scheduled', 'sending', 'failed'].includes(j.status),
+          ).length ? (
+            <ul className="text-xs text-[#1A1A1A] space-y-2 pt-2">
+              {jobs
+                .filter((j) =>
+                  ['pending_approval', 'scheduled', 'sending', 'failed'].includes(j.status),
+                )
+                .map((j) => (
+                  <li key={j.id} className="border border-[var(--border)] rounded-lg p-2 space-y-1">
+                    <p>
+                      <span className="font-semibold">{j.subject || '(no subject)'}</span>
+                      {' · '}
+                      {j.status.replace('_', ' ')}
+                      {' · '}
+                      {j.sendAudience}
+                      {' · '}
+                      {j.sendAt ? new Date(j.sendAt).toLocaleString() : ''}
+                    </p>
+                    {j.error ? <p className="text-red-700">{j.error}</p> : null}
+                    <div className="flex flex-wrap gap-2">
+                      {canApprove && j.status === 'pending_approval' ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={busy}
+                          onClick={() => void jobAction('approve', j.id)}
+                        >
+                          Approve
+                        </Button>
+                      ) : null}
+                      {j.status === 'pending_approval' || j.status === 'scheduled' ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={busy}
+                          onClick={() => void jobAction('cancel', j.id)}
+                        >
+                          Cancel
+                        </Button>
+                      ) : null}
+                    </div>
+                  </li>
+                ))}
+            </ul>
+          ) : (
+            <p className="text-[11px] text-[#5A6070]">No pending or scheduled jobs.</p>
+          )}
+        </div>
 
         <div className="flex flex-wrap gap-2">
           <Button
@@ -504,7 +690,7 @@ export function StaffNewsletterPanel() {
             style={{ backgroundColor: 'var(--brand-green)' }}
             onClick={() => void sendEmail()}
           >
-            Send email
+            Send email now
           </Button>
           <Button
             type="button"
