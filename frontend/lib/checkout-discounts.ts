@@ -66,6 +66,51 @@ function boardCodeExpired(code: string): boolean {
   return false
 }
 
+/** Fall Jul–Jan; Spring Feb–Jun (school enrichment seasons). */
+export function currentBoardSeason(now = new Date()): 'fall' | 'spring' {
+  const m = now.getMonth()
+  if (m >= 1 && m <= 5) return 'spring'
+  return 'fall'
+}
+
+/** Unused board 75% code for this household and current season, if any. */
+export async function resolveUnusedBoardDiscountCode(opts: {
+  parentEmail: string
+  accountEmails?: string[]
+}): Promise<string | null> {
+  const emails = [
+    ...new Set(
+      [opts.parentEmail, ...(opts.accountEmails ?? [])]
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ]
+  if (emails.length === 0) return null
+  const season = currentBoardSeason()
+  const field = season === 'fall' ? 'boardDiscountFallCode' : 'boardDiscountSpringCode'
+  const client = getWixClient()
+
+  for (const email of emails) {
+    if (email.endsWith('@shmspto.org')) continue
+    const res = await client.items.query('Memberships').eq('email', email).limit(1).find()
+    const row = res.items?.[0] as Record<string, unknown> | undefined
+    if (!row) continue
+    const code = String(row[field] ?? '').trim()
+    if (!code) continue
+    const disc = await lookupDiscountCode(code)
+    if (!disc || disc.active === false) continue
+    const usageLimit = Number(disc.usageLimit ?? 0) || 0
+    const timesUsed = Number(disc.timesUsed ?? 0) || 0
+    if (usageLimit > 0 && timesUsed >= usageLimit) continue
+    const normalized = String(disc.code ?? code).toUpperCase()
+    if (boardCodeExpired(normalized)) continue
+    const issued = String(disc.issuedToEmail ?? '').trim().toLowerCase()
+    if (issued && !emails.includes(issued)) continue
+    return normalized
+  }
+  return null
+}
+
 function money(n: number): number {
   return Math.max(0, Math.round(n * 100) / 100)
 }
@@ -94,6 +139,15 @@ export async function applyCheckoutDiscount(opts: {
   const typed = (opts.couponCode ?? '').trim()
 
   if (!typed) {
+    if (opts.scope === 'program') {
+      const autoBoard = await resolveUnusedBoardDiscountCode({
+        parentEmail: opts.parentEmail,
+        accountEmails: opts.accountEmails,
+      })
+      if (autoBoard) {
+        return applyCheckoutDiscount({ ...opts, couponCode: autoBoard })
+      }
+    }
     if (opts.scope !== 'program' || tierPercent <= 0) {
       return { amount: listAmount, discount: null }
     }

@@ -22,6 +22,12 @@ const SECTIONS = [
     icon: CreditCard,
   },
   {
+    href: '/member-portal/payment-methods',
+    label: 'Payment methods',
+    hint: 'Card on file',
+    icon: CreditCard,
+  },
+  {
     href: '#business',
     label: 'Business owners',
     hint: 'Tell us about your business',

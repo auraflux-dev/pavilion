@@ -220,10 +220,12 @@ export function PortalCardCheckout({
       .then((r) => r.json())
       .then((data) => {
         setConfig(data)
-        setStoredCard(data.paymentMethod ?? null)
+        const method = data.paymentMethod ?? null
+        setStoredCard(method)
         // Prefer typing your own card; saved is an option, not the default gate
         setUseStored(false)
-        setSaveCard(false)
+        // First purchase: offer save by default so the card lands on Payment methods.
+        setSaveCard(!method)
       })
       .catch(() => setError('Payment settings could not be loaded.'))
     fetch('/api/auth/me')
@@ -511,7 +513,9 @@ export function PortalCardCheckout({
                 onChange={(e) => setSaveCard(e.target.checked)}
                 className="mt-0.5"
               />
-              Optionally save this card for faster reloads later (never required).
+              {storedCard
+                ? 'Optionally save this card for faster checkout later (never required).'
+                : 'Save this card to Payment methods for faster checkout later (never required). Checked by default on your first card payment.'}
             </label>
           </>
         ) : null}

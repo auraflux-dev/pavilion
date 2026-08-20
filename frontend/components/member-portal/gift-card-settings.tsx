@@ -89,7 +89,11 @@ export function GiftCardSettings({ studentId, studentName }: Props) {
             </p>
           ) : (
             <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
-              Save a card during a manual reload in Store &amp; Purchases before enabling auto top-off.
+              Save a card on{' '}
+              <a href="/member-portal/payment-methods" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
+                Payment methods
+              </a>{' '}
+              (or during a Cove reload) before enabling auto top-off.
             </p>
           )}
 

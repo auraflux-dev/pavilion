@@ -93,9 +93,11 @@ export function StoreCardReload({
       .then((r) => r.json())
       .then((data) => {
         setConfig(data)
-        setStoredCard(data.paymentMethod ?? null)
+        const method = data.paymentMethod ?? null
+        setStoredCard(method)
         // Own CC first. Saved card is optional, never required
         setUseStored(false)
+        setSaveCard(!method)
       })
       .catch(() => setError('Payment settings could not be loaded.'))
   }, [open])
@@ -372,8 +374,10 @@ export function StoreCardReload({
               onChange={(event) => setSaveCard(event.target.checked)}
               className="mt-0.5"
             />
-            Save this card securely for future reloads and optional auto top-off.
-            {vanillaizeIfDemo('SHMS PTO never stores the card number.')}
+            {storedCard
+              ? 'Save this card securely for future reloads and optional auto top-off.'
+              : 'Save this card to Payment methods (checked by default on first save). Optional auto top-off uses the same card.'}
+            {vanillaizeIfDemo(' SHMS PTO never stores the card number.')}
           </label>
         </>
       ) : null}

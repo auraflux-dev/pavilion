@@ -104,7 +104,7 @@ export function MembershipBenefitsCard() {
       </ul>
       {data.discountCode ? (
         <p className="text-xs mt-2 text-[#5A6070]">
-          Enrichment code:{' '}
+          Membership enrichment code (tier % also auto-applies):{' '}
           <span className="font-mono font-bold text-[var(--brand-green)]">{data.discountCode}</span>
         </p>
       ) : null}

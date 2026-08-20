@@ -262,10 +262,15 @@ export function ProgramRegisterForm({
                   type="text"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  placeholder="Optional. Board 75% or membership code"
+                  placeholder="Optional override"
                   autoComplete="off"
                   className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-mono tracking-wide uppercase"
                 />
+                <span className="mt-1.5 block text-[11px] font-normal text-[#5A6070] whitespace-pre-line">
+                  {`Membership tier % applies automatically.
+Board 75% (one enrichment program per season) also applies automatically when unused.
+Only paste a code here if you need to override.`}
+                </span>
               </label>
             ) : null}
 

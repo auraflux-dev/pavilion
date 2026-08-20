@@ -672,7 +672,7 @@ export async function POST(req: NextRequest) {
       amountCents,
       idempotencyKey: paymentKey,
       customerId,
-      referenceId: `store-card:${session.email}`,
+      referenceId: `sc:${session.email.replace(/[^a-zA-Z0-9]/g, '').slice(0, 37)}`,
       buyerEmailAddress: session.email,
       note: 'SHMS PTO family Cove Digital Card load',
     })

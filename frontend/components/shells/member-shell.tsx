@@ -56,6 +56,7 @@ export function MemberShell({ children }: Props) {
     { href: '/membership', label: status === 'loading' || isPaid ? 'Membership' : 'Upgrade' },
     { href: '/cove', label: vanillaizeIfDemo('The Cove') },
     { href: '/programs', label: 'Programs' },
+    { href: '/member-portal/payment-methods', label: 'Payment methods' },
     ...(isPublicDemoInstance() ? [] : [{ href: '/member-portal/videos', label: 'Videos' }]),
     { href: '/member-portal/help', label: 'Help' },
   ]

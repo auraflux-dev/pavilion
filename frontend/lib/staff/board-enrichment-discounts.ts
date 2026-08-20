@@ -53,7 +53,7 @@ function boardEntitlement(
     label,
     status: 'info',
     detail: code,
-    notes: `Board benefit · one use only · ${when}. Use this code instead of your tier code for that enrollment.`,
+    notes: `Board benefit · one use only · ${when}. Applied automatically on your next enrichment registration this season (or paste the code yourself).`,
   }
 }
 
