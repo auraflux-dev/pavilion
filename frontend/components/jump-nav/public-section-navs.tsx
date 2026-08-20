@@ -118,19 +118,29 @@ export function FundraisingSectionNav() {
 }
 
 export function MembershipSectionNav() {
+  const commons =
+    typeof process !== 'undefined' &&
+    process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
+  const tierHint = isPublicDemoInstance()
+    ? 'Member · Family · Patron'
+    : commons
+      ? 'Family · $25'
+      : 'Reef · Lagoon · Tide'
   return (
     <BandNav
       ariaLabel="Membership page sections"
       items={[
         {
           href: '#tiers',
-          label: 'Tiers',
-          hint: isPublicDemoInstance() ? 'Member · Family · Patron' : 'Reef · Lagoon · Tide',
+          label: commons ? 'Join' : 'Tiers',
+          hint: tierHint,
           icon: Gift,
         },
         { href: '#portal', label: 'Portal', hint: 'What you get', icon: LayoutList },
-        { href: '#faculty', label: 'Faculty', hint: 'Staff membership', icon: Users },
-        { href: '#donate', label: 'Donate', hint: 'Skip paid tier', icon: Heart },
+        ...(commons
+          ? []
+          : [{ href: '#faculty', label: 'Faculty', hint: 'Staff membership', icon: Users }]),
+        { href: '#donate', label: 'Donate', hint: commons ? 'Give directly' : 'Skip paid tier', icon: Heart },
         { href: '#faq', label: 'FAQ', hint: 'Common questions', icon: HelpCircle },
       ]}
     />

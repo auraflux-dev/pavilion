@@ -11,12 +11,17 @@
  */
 'use strict'
 
-require('dotenv').config({ path: '/Users/robertgregory/cwn-c0/.env' })
+import { createRequire } from 'module'
+import fs from 'fs'
+import path from 'path'
+import { execFileSync } from 'child_process'
+import { fileURLToPath } from 'url'
 
-const fs = require('fs')
-const path = require('path')
+const require = createRequire(import.meta.url)
+require('dotenv').config({ path: '/Users/robertgregory/cwn-c0/.env' })
 const axios = require('axios')
-const { execFileSync } = require('child_process')
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
