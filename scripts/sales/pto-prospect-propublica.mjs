@@ -10,6 +10,9 @@
  * Usage:
  *   COMMONS_PROD_DATABASE_URL=… node scripts/sales/pto-prospect-propublica.mjs --states=VA --min=50000
  *   COMMONS_PROD_DATABASE_URL_FILE=/tmp/commons-prod.url node scripts/sales/pto-prospect-propublica.mjs --states=VA,MD --min=50000 --year=2024
+ *
+ * --year is a floor (keep latest year >= value). Default is calendar year − 2.
+ * Revenue/year prefer organization.tax_period + revenue_amount (ProPublica org page).
  */
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -81,8 +84,16 @@ async function searchPage(q, state, page) {
   return fetchJson(`${BASE}/search.json?${params}`)
 }
 
-function latestRevenue(filings) {
-  const rows = (filings || [])
+function yearFromTaxPeriod(taxPeriod) {
+  if (!taxPeriod) return 0
+  const m = String(taxPeriod).match(/^(\d{4})/)
+  return m ? Number(m[1]) : 0
+}
+
+/** Prefer org-page summary (matches ProPublica UI). Fall back to parsed filings. */
+function latestFromDetail(detail) {
+  const org = detail?.organization || {}
+  const filings = (detail?.filings_with_data || [])
     .map((f) => ({
       year: Number(f.tax_prd_yr) || 0,
       revenue: Number(f.totrevenue ?? f.totrevnue ?? f.totrcptperbks),
@@ -90,7 +101,19 @@ function latestRevenue(filings) {
     }))
     .filter((r) => Number.isFinite(r.revenue))
     .sort((a, b) => b.year - a.year)
-  return rows[0] || null
+  const filing = filings[0] || null
+  const orgYear = yearFromTaxPeriod(org.tax_period)
+  const orgRev = Number(org.revenue_amount)
+  if (orgYear > 0 && Number.isFinite(orgRev)) {
+    const matchingForm = filings.find((f) => f.year === orgYear)
+    return {
+      year: orgYear,
+      revenue: orgRev,
+      formtype: matchingForm?.formtype ?? filing?.formtype ?? null,
+      source: 'organization',
+    }
+  }
+  return filing ? { ...filing, source: 'filing' } : null
 }
 
 function looksLikePto(name = '') {
@@ -182,7 +205,7 @@ async function main() {
     }
   }
 
-  console.log(JSON.stringify({ candidates: byEin.size, states: opts.states, min: opts.min, year: opts.year }))
+  console.log(JSON.stringify({ candidates: byEin.size, states: opts.states, min: opts.min, yearFloor: opts.year }))
 
   let kept = 0
   let skipped = 0
@@ -190,7 +213,7 @@ async function main() {
   for (const org of byEin.values()) {
     try {
       const detail = await fetchJson(`${BASE}/organizations/${org.ein}.json`)
-      const latest = latestRevenue(detail.filings_with_data)
+      const latest = latestFromDetail(detail)
       await sleep(300)
       const orgName = detail.organization?.name || org.name
       const displayName =
@@ -206,8 +229,8 @@ async function main() {
         skipped++
         continue
       }
-      // Latest tax year only (e.g. 2024) — drop stale 2015–2023 last filings.
-      if (latest.year !== opts.year) {
+      // Floor year (default Y-2): keep 2024 and 2025 when both appear on ProPublica.
+      if (latest.year < opts.year) {
         skipped++
         continue
       }
