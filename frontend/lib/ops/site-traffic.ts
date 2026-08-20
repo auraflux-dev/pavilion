@@ -195,7 +195,12 @@ export async function summarizeTrafficWeek(toDayInclusive: string): Promise<Week
   const rows: TrafficDayRow[] = []
   try {
     const client = getWixClient()
-    const found = await client.items.query(SITE_TRAFFIC_COLLECTION).limit(40).find()
+    const found = await client.items
+      .query(SITE_TRAFFIC_COLLECTION)
+      .ge('day', fromDay)
+      .le('day', toDayInclusive)
+      .limit(14)
+      .find()
     const wanted = new Set(days)
     for (const item of (found.items ?? []) as TrafficDayRow[]) {
       if (item.day && wanted.has(item.day)) rows.push(item)
@@ -242,7 +247,7 @@ export async function summarizeTrafficWeek(toDayInclusive: string): Promise<Week
 
 export function formatWeeklyTraffic(summary: WeeklyTrafficSummary): string[] {
   const lines = [
-    `WEEKLY TRAFFIC (${summary.fromDay} → ${summary.toDay} Eastern)`,
+    `WEEKLY TRAFFIC (${summary.fromDay} → ${summary.toDay} Eastern, ${summary.daysRecorded} of 7 days with counters)`,
     `  Website: ${summary.websitePageviews} pageviews · ${summary.websiteVisitorDays} unique-browser days`,
     `  Member portal: ${summary.memberPageviews} pageviews · ${summary.memberVisitorDays} unique-browser days`,
     `  Staff: ${summary.staffPageviews} pageviews · ${summary.staffVisitorDays} unique-browser days`,
@@ -252,8 +257,10 @@ export function formatWeeklyTraffic(summary: WeeklyTrafficSummary): string[] {
     for (const row of summary.topPaths) {
       lines.push(`  - ${row.path}  ${row.views}`)
     }
+  } else if (summary.daysRecorded === 0) {
+    lines.push('  No pageview days in this window yet. Counters started 2026-08-18.')
   } else {
-    lines.push('  No pageviews recorded yet for this week (counters start after this deploy).')
+    lines.push('  Days recorded, but path totals are empty.')
   }
   lines.push(
     '  Unique-browser days count a browser once per area per day, not unique people for the whole week.',

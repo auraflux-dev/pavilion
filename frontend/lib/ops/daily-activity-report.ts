@@ -67,14 +67,6 @@ function zonedLocalToUtc(year: number, month: number, day: number, hour = 0, min
   return instant
 }
 
-export function isMondayEastern(now = new Date()): boolean {
-  const weekday = new Intl.DateTimeFormat('en-US', {
-    timeZone: TZ,
-    weekday: 'short',
-  }).format(now)
-  return weekday === 'Mon'
-}
-
 export function easternYesterdayWindow(now = new Date()): DailyActivityWindow {
   const today = etParts(now)
   const todayStart = zonedLocalToUtc(today.year, today.month, today.day, 0, 0)
@@ -270,13 +262,11 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
   const errorRows = filterRows(errors, ['createdAt', '_createdDate'], win)
 
   let trafficLines: string[] = []
-  if (isMondayEastern(now)) {
-    try {
-      trafficLines = formatWeeklyTraffic(await summarizeTrafficWeek(win.label))
-    } catch (err) {
-      console.warn('[daily-activity] weekly traffic skipped', err)
-      trafficLines = ['WEEKLY TRAFFIC', '  Could not load pageview counters.', '']
-    }
+  try {
+    trafficLines = formatWeeklyTraffic(await summarizeTrafficWeek(win.label))
+  } catch (err) {
+    console.warn('[daily-activity] weekly traffic skipped', err)
+    trafficLines = ['WEEKLY TRAFFIC', '  Could not load pageview counters.', '']
   }
 
   const paidTotal = payRows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
@@ -285,7 +275,7 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
   const lines: string[] = [
     `SHMS PTO daily activity — ${win.label} (US Eastern, midnight–midnight)`,
     `Window: ${win.startIso} → ${win.endIso}`,
-    'This is recorded actions (forms, checkouts, enrollments, staff work). Weekly pageviews are included on Mondays.',
+    'This is recorded actions (forms, checkouts, enrollments, staff work), then weekly pageviews for the last 7 Eastern days.',
     '',
     ...trafficLines,
     'WEBSITE',
@@ -407,9 +397,7 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
 
   return {
     window: win,
-    subject: isMondayEastern(now)
-      ? `SHMS PTO daily activity — ${win.label} + weekly traffic`
-      : `SHMS PTO daily activity — ${win.label}`,
+    subject: `SHMS PTO daily activity — ${win.label} + weekly traffic`,
     body: lines.join('\n').replace(/\n{3,}/g, '\n\n'),
     counts,
   }
