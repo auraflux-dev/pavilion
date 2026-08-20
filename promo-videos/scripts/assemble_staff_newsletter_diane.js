@@ -56,72 +56,72 @@ const PAD = 0.55;
 const TAIL_PAD = 0.9;
 
 /** SEE = HEAR — one help screenshot per VO beat */
-/** Soft labels only — no Step 1/2/3 checklist captions (VO carries the coach tone). */
+/** Bottom-bar copy only — short coach lines, never Step 1/2/3. Empty caption = no bar. */
 const BEATS = [
   {
     part: 'vo/_parts/staff_newsletter_diane_p01_sign_in.m4a',
     still: 'assets/staff-newsletter/00-nav-newsletter.png',
-    caption: '',
+    caption: 'Sign in · open Newsletter',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p02_no_html.m4a',
     still: 'assets/staff-newsletter/01-templates-canva.png',
-    caption: '',
+    caption: 'Canva for design · plain text for words',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p03_templates.m4a',
     still: 'assets/staff-newsletter/01-templates-canva.png',
-    caption: '',
+    caption: 'Templates · Canva plus copy',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p04_export_png.m4a',
     still: 'assets/staff-newsletter/01-templates-canva.png',
-    caption: '',
+    caption: 'Export PNG for email',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p05_test_send.m4a',
     still: 'assets/staff-newsletter/02-test-send.png',
-    caption: '',
+    caption: 'Test send before parents see it',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p06_type.m4a',
     still: 'assets/staff-newsletter/03-newsletter-type.png',
-    caption: '',
+    caption: 'Paid email · Weekly Scoop · footer signups',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p07_scoop.m4a',
     still: 'assets/staff-newsletter/04-weekly-scoop.png',
-    caption: '',
+    caption: 'Scoop link · attach PNG in WhatsApp',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p08_beats.m4a',
     still: 'assets/staff-newsletter/05-beats.png',
-    caption: '',
+    caption: 'Write in beats · still plain text',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p09_copy_utm.m4a',
     still: 'assets/staff-newsletter/06-copy-tracking.png',
-    caption: '',
+    caption: 'Subject · body · UTM · tracking',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p10_paid_send.m4a',
     still: 'assets/staff-newsletter/08-send-actions.png',
-    caption: '',
+    caption: 'Preview · then Send email now',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p11_schedule.m4a',
     still: 'assets/staff-newsletter/07-schedule-approval.png',
-    caption: '',
+    caption: 'Schedule · approval when needed',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p12_report.m4a',
     still: 'assets/staff-newsletter/09-send-report.png',
-    caption: '',
+    caption: 'Send report · opens and clicks',
   },
   {
     part: 'vo/_parts/staff_newsletter_diane_p13_close.m4a',
     still: 'assets/staff-newsletter/08-send-actions.png',
-    caption: '',
+    caption: 'Staff Help has the full walkthrough',
   },
 ];
 
@@ -173,8 +173,11 @@ function makeBrandCard(dest, { title, subtitle }) {
 function muxStillVo(img, vo, dest, seconds, { caption = '', bookend = false } = {}) {
   const font = FONT.replace(/:/g, '\\:');
   const base = bookend ? VF_BOOKEND : VF_FIT;
+  // Bottom bar carries the copy — never leave an empty brand strip with no text.
   const vf = caption
-    ? `${base},drawtext=fontfile=${font}:text='${esc(caption)}':fontsize=36:fontcolor=#1A1A1A:x=(w-text_w)/2:y=h-72`
+    ? `${base},drawbox=x=0:y=ih-110:w=iw:h=110:color=0x0b1f17@0.92:t=fill,` +
+      `drawtext=fontfile=${font}:text='${esc(caption)}':fontsize=40:fontcolor=white:` +
+      `x=(w-text_w)/2:y=h-68`
     : base;
   run([
     '-y', '-loop', '1', '-i', img, '-i', vo,
