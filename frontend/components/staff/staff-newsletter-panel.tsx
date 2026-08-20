@@ -337,7 +337,7 @@ export function StaffNewsletterPanel() {
           `Queued for ${new Date(d.sendAt).toLocaleString()}. Waiting for secretary/president approval.`,
         )
       } else {
-        setStatus(`Scheduled for ${new Date(d.sendAt).toLocaleString()}. Cron sends within 15 minutes of that time.`)
+        setStatus(`Scheduled for ${new Date(d.sendAt).toLocaleString()}. It sends within about 15 minutes of that time.`)
       }
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Could not queue')
@@ -605,7 +605,7 @@ export function StaffNewsletterPanel() {
           <p className="text-xs text-[#5A6070] whitespace-pre-line">
             Test send stays one-click. Queue a later send here.
             Marketing queues wait for secretary or president approval.
-            Approved jobs send at the chosen time (checked every 15 minutes).
+            Approved jobs send at the chosen time (checked about every 15 minutes).
           </p>
           <label className="text-xs text-[#5A6070] block">
             Send at (your local time)

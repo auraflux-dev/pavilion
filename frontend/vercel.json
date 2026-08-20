@@ -21,7 +21,7 @@
     },
     {
       "path": "/api/cron/send-newsletter-jobs",
-      "schedule": "*/15 * * * *"
+      "schedule": "20 14 * * *"
     },
     {
       "path": "/api/cron/sync-budget-plaid",

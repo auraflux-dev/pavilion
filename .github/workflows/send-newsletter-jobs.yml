@@ -1,0 +1,36 @@
+# Send approved NewsletterJobs whose sendAt is due.
+# Vercel Hobby only allows daily crons; this GitHub schedule is the 15-minute runner.
+name: Send scheduled newsletters
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call newsletter jobs cron
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          CRON_URL: https://www.shmspto.org/api/cron/send-newsletter-jobs
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET GitHub secret is not set"
+            exit 1
+          fi
+          curl -fsS -X GET "$CRON_URL" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -H "Accept: application/json" \
+            -o /tmp/newsletter-jobs.json
+          cat /tmp/newsletter-jobs.json
+          python3 - <<'PY'
+          import json, sys
+          data = json.load(open("/tmp/newsletter-jobs.json"))
+          if not data.get("ok"):
+              sys.exit("newsletter jobs response missing ok=true")
+          print(
+              f"scanned={data.get('scanned')} sent={data.get('sent')} failed={data.get('failed')}"
+          )
+          PY
