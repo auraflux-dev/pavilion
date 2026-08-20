@@ -86,9 +86,10 @@ function looksLikePto(name = '') {
   return (
     /\bPTO\b/.test(n) ||
     /\bPTA\b/.test(n) ||
-    /PARENT\s*TEACHER/.test(n) ||
-    /PARENTS?\s+ASSOCIATION/.test(n) ||
-    /PARENT\s+ORGANIZATION/.test(n)
+    /PARENT\s*[-]?\s*TEACHER/.test(n) ||
+    /PARENTS?\s+AND\s+TEACHERS?/.test(n) ||
+    (/PARENT\s+ORGANIZATION/.test(n) &&
+      /\b(ELEMENTARY|MIDDLE|HIGH|SCHOOL|ACADEMY)\b/.test(n))
   )
 }
 
@@ -97,9 +98,13 @@ function looksLikeBoosterOrBand(name = '') {
   return (
     /\bBOOSTER\b/.test(n) ||
     /\bBAND\b/.test(n) ||
+    /\bORCHESTRA\b/.test(n) ||
+    /\bMARCHING\b/.test(n) ||
     /\bATHLETIC\b/.test(n) ||
     /\bFOOTBALL\b/.test(n) ||
-    /\bCHEER\b/.test(n)
+    /\bCHEER\b/.test(n) ||
+    /\bGYMNAST/.test(n) ||
+    /\bPARENTS?\s+ASSOCIATION\b/.test(n)
   )
 }
 
