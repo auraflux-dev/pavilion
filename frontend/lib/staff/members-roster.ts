@@ -1,7 +1,7 @@
 /**
  * Aggregate Students CMS rows into parent membership roster records.
  * Pure helpers. unit-tested without Wix.
- * Paid tier also merges Memberships.tier (checkout source of truth — Students can lag).
+ * Paid tier also merges Memberships.tier (checkout source of truth. Students can lag).
  */
 
 export type StudentRosterRow = {

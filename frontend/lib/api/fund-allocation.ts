@@ -1,6 +1,6 @@
 /**
- * Public "Where the Funds Go" — actual spending from the treasurer budget.
- * Sums PtoBudgetEntries on expense lines for the current school year (Aug–Jul).
+ * Public "Where the Funds Go". actual spending from the treasurer budget.
+ * Sums PtoBudgetEntries on expense lines for the current school year (Aug to Jul).
  */
 import { isDemoInstance } from '@/lib/demo/instance'
 import { listBudgetLines, money, schoolYearWindowForFiscalYear } from '@/lib/staff/budget'
@@ -53,7 +53,7 @@ export interface FundAllocationRow {
   id: FundAllocationBucket
   label: string
   spent: number
-  /** Share of total spending this school year (0–100). */
+  /** Share of total spending this school year (0-100). */
   pct: number
 }
 
@@ -66,7 +66,7 @@ export interface FundAllocationData {
 function currentSchoolYearLabel(now = new Date()) {
   const year = now.getUTCFullYear()
   const startYear = now.getUTCMonth() >= 7 ? year : year - 1
-  return `${startYear}–${startYear + 1}`
+  return `${startYear}-${startYear + 1}`
 }
 
 function schoolYearFiscalKey(now = new Date()) {

@@ -173,7 +173,7 @@ export async function updateEntitlementFulfillment(opts: {
   const next = entitlements.map((e) => {
     if (e.kind !== opts.kind) return e
     if (opts.action === 'ordered' && isPhysicalPerkPickedUp(e.status)) {
-      throw new Error('Already picked up — cannot mark ordered')
+      throw new Error('Already picked up. cannot mark ordered')
     }
     if (opts.action === 'ordered' && e.status === 'ordered') {
       return e

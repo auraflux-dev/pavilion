@@ -134,7 +134,7 @@ export function RunForCharityPromo() {
             >
               <p className="text-sm text-white/80 leading-relaxed">
                 {vanillaizeIfDemo(
-                  'Tap register — Best Runners fills in SHMS for you.',
+                  'Tap register. Best Runners fills in SHMS for you.',
                 )}
               </p>
               <button

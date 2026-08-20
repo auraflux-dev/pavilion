@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
           added: result.added,
           updated: result.updated,
           source: 'bofa',
-          message: `Imported BoA CSV (Aug–Jul school year only) · ${result.added} new, ${result.updated} already in, ${result.skippedPayouts} Square/PayPal payouts skipped (those sales stay in Staff Payments), ${result.skipped} other skipped.`,
+          message: `Imported BoA CSV (Aug to Jul school year only) · ${result.added} new, ${result.updated} already in, ${result.skippedPayouts} Square/PayPal payouts skipped (those sales stay in Staff Payments), ${result.skipped} other skipped.`,
         })),
       })
     }

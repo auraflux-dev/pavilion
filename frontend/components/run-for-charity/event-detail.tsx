@@ -57,7 +57,7 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
       .filter((l) => !/^register\b/i.test(l) && !/^https?:\/\//i.test(l))
       .slice(0, 2)
       .join(' ') ||
-    'Best Runners 1K & 5K for families — our register link applies school code SHMS so Stone Hill receives the registration fees.'
+    'Best Runners 1K & 5K for families. Our register link applies school code SHMS so Stone Hill receives the registration fees.'
 
   async function copyShareLink() {
     if (!path || typeof window === 'undefined') return
@@ -120,7 +120,7 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
               <div className="text-sm text-[#5A6070]">
                 <p className="font-semibold text-[#1A1A1A]">
                   {weekday}
-                  {time ? ` · ${time}${endTime ? `–${endTime}` : ''}` : ''}
+                  {time ? ` · ${time}${endTime ? `-${endTime}` : ''}` : ''}
                 </p>
                 {event.location?.name ? (
                   <p className="flex items-center gap-1.5 mt-0.5">
@@ -188,7 +188,7 @@ export function RunForCharityEventDetail({ event }: { event: WixEvent }) {
                   Run for Charity registration
                 </h2>
                 <p className="mt-2 text-sm sm:text-base text-[#5A6070] leading-relaxed">
-                  Best Runners runs the race. Tap register — the link fills in school
+                  Best Runners runs the race. Tap register. The link fills in school
                   code SHMS so Stone Hill gets the registration fees.
                 </p>
               </div>

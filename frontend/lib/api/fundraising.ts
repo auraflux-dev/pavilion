@@ -6,7 +6,7 @@
  * Square / PayPal site checkout and Stand POS → Payments.
  * Bank of America CSV (Staff → Budget import) → PtoBudgetEntries.
  * Live PayPal Transaction Search (Refresh) → PtoBudgetEntries, skipping payouts to bank.
- * Only Aug 1 – Jul 31 of the current school year. Square/PayPal *payouts* in the
+ * Only Aug 1 to Jul 31 of the current school year. Square/PayPal *payouts* in the
  * bank file are skipped so those sales are not counted twice.
  *
  * Volunteer hours remain manual. SiteSettings volunteerHoursRaised/Goal.
@@ -57,7 +57,7 @@ export interface FundraisingData {
   fetchedAt: string
 }
 
-/** Aug 1 – Jul 31 in UTC, rolling with the calendar. */
+/** Aug 1 to Jul 31 in UTC, rolling with the calendar. */
 export function schoolYearWindow(now = new Date()) {
   const year = now.getUTCFullYear()
   const startYear = now.getUTCMonth() >= 7 ? year : year - 1

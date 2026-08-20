@@ -109,7 +109,7 @@ function HandlerInner() {
         {needsFacultyChoice ? (
           <fieldset className="space-y-2">
             <legend className="text-xs font-semibold text-[#5A6070]">
-              Included perk — choose one
+              Included perk. choose one
             </legend>
             <label className="flex items-start gap-2 text-sm text-[#1A1A1A] cursor-pointer">
               <input

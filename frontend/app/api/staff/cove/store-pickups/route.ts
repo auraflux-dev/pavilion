@@ -1,5 +1,5 @@
 /**
- * GET  /api/staff/cove/store-pickups — today's window Cove product payments
+ * GET  /api/staff/cove/store-pickups. today's window Cove product payments
  * PATCH { id, action: 'handed_out' | 'undo' }
  */
 import { NextRequest, NextResponse } from 'next/server'

@@ -5,7 +5,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { shouldExcludeAnalytics } from '@/lib/ga-exclude'
 
-/** Vercel Analytics — same exclusions as GA4 (owner / agents, not all staff). */
+/** Vercel Analytics. same exclusions as GA4 (owner / agents, not all staff). */
 export function SiteAnalytics() {
   const { status, member, personalEmail, viewingEmail } = useAuth()
   const [allowed, setAllowed] = useState(false)

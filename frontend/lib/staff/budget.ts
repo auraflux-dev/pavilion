@@ -6,7 +6,7 @@ import { getWixClient } from '@/lib/wix-client'
 
 export const BUDGET_COLLECTION = 'PtoBudgetLines'
 export const DEFAULT_FISCAL_YEAR = '2026-27'
-export const FISCAL_YEAR_LABEL = 'Jul 1, 2026 – Jun 30, 2027'
+export const FISCAL_YEAR_LABEL = 'Jul 1, 2026 to Jun 30, 2027'
 
 export type BudgetKind = 'income' | 'expense'
 
@@ -30,7 +30,7 @@ export function money(n: unknown) {
   return Math.round((Number(n) || 0) * 100) / 100
 }
 
-/** Jul 1 startYear → Jun 30 next year. `2026-27` → Jul 1 2026 – Jun 30 2027. */
+/** Jul 1 startYear → Jun 30 next year. `2026-27` → Jul 1 2026 to Jun 30 2027. */
 export function fiscalYearWindow(year = DEFAULT_FISCAL_YEAR) {
   const startYear = Number(String(year).split('-')[0]) || 2026
   return {
@@ -39,7 +39,7 @@ export function fiscalYearWindow(year = DEFAULT_FISCAL_YEAR) {
   }
 }
 
-/** Public fundraising year: Aug 1 startYear → Jul 31 next. Not the treasurer Jul–Jun fiscal year. */
+/** Public fundraising year: Aug 1 startYear → Jul 31 next. Not the treasurer Jul-Jun fiscal year. */
 export function schoolYearWindowForFiscalYear(year = DEFAULT_FISCAL_YEAR) {
   const startYear = Number(String(year).split('-')[0]) || 2026
   return {
@@ -123,7 +123,7 @@ export function summarizeBudget(lines: BudgetLine[]) {
   }
 }
 
-/** FY 2026–27 lines. Expense budgeted amounts are FY25 checking (Jul 1 2025 – Jun 30 2026), rounded. */
+/** FY 2026-27 lines. Expense budgeted amounts are FY25 checking (Jul 1 2025 to Jun 30 2026), rounded. */
 export function placeholderBudgetLines(_fiscalYear = DEFAULT_FISCAL_YEAR): SeedLine[] {
   const income: SeedLine[] = [
     {
@@ -306,7 +306,7 @@ export function placeholderBudgetLines(_fiscalYear = DEFAULT_FISCAL_YEAR): SeedL
       budgeted: 0,
       actual: 0,
       owner: 'Treasurer',
-      notes: 'One-off campus project in 2025–26. Not in the 2026–27 operating plan.',
+      notes: 'One-off campus project in 2025-26. Not in the 2026-27 operating plan.',
       sortOrder: 225,
     },
     {

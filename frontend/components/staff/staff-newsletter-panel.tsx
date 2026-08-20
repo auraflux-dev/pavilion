@@ -518,7 +518,7 @@ export function StaffNewsletterPanel() {
           {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
             <div className="mt-2 rounded-lg border border-[var(--brand-green)]/25 bg-[#E8F3E8] px-3 py-2.5 space-y-1">
               <p className="text-xs font-bold text-[#1A1A1A]">
-                Ready for review — Diane walkthrough (video + screenshots)
+                Ready for review. Diane walkthrough (video + screenshots)
               </p>
               <p className="text-xs text-[#5A6070] leading-relaxed">
                 <Link
@@ -793,7 +793,7 @@ export function StaffNewsletterPanel() {
           placeholder={
             sendAudience === 'scoop'
               ? 'Short note above the scoop link (plain text)'
-              : 'Newsletter body (plain text; paste links — UTM + tracking added on send)'
+              : 'Newsletter body (plain text; paste links. UTM + tracking added on send)'
           }
           className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />

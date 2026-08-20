@@ -215,9 +215,9 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
             className="w-full rounded-lg border border-[var(--border)] px-3.5 py-2.5 text-sm bg-white focus:border-[var(--brand-green)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20"
           >
             <option value="">Not sure yet</option>
-            <option value="Platinum — $2,500">Platinum — $2,500</option>
-            <option value="Gold — $1,500">Gold — $1,500</option>
-            <option value="Silver — $500">Silver — $500</option>
+            <option value="Platinum: $2,500">Platinum: $2,500</option>
+            <option value="Gold: $1,500">Gold: $1,500</option>
+            <option value="Silver: $500">Silver: $500</option>
           </select>
         </div>
       ) : null}

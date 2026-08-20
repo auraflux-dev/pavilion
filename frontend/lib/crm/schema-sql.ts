@@ -1,4 +1,4 @@
-/** Same DDL as schema.sql — inlined so Vercel bundles it. */
+/** Same DDL as schema.sql. inlined so Vercel bundles it. */
 export const CRM_SCHEMA_SQL = `
 create table if not exists organizations (
   id            text primary key,

@@ -133,8 +133,8 @@ export async function sendStaffInviteEmail(input: {
   const name = (input.firstName || '').trim()
   const hello = name ? `Hi ${name},` : 'Hi,'
   const subject = input.alreadyMember
-    ? 'SHMS PTO — finish signing in to your parent account'
-    : 'SHMS PTO — create your free parent account'
+    ? 'SHMS PTO. Finish signing in to your parent account'
+    : 'SHMS PTO. Create your free parent account'
 
   const body = [
     hello,
@@ -152,7 +152,7 @@ export async function sendStaffInviteEmail(input: {
     '',
     'Questions? Email vp-membershipexperience@shmspto.org',
     '',
-    '— SHMS PTO',
+    'SHMS PTO',
   ].join('\n')
 
   const mail = await sendMassEmail({

@@ -1,7 +1,7 @@
 /**
- * GET  /api/portal/guardians — list co-parents for this household
- * POST /api/portal/guardians — invite { email }
- * DELETE /api/portal/guardians — revoke { email }
+ * GET  /api/portal/guardians. List co-parents for this household
+ * POST /api/portal/guardians. Invite { email }
+ * DELETE /api/portal/guardians. Revoke { email }
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'
@@ -35,7 +35,7 @@ async function notifyPrimaryOfInvite(opts: {
     `You invited ${opts.guardianEmail} to share your SHMS PTO family account.`,
     '',
     opts.emailedInvitee
-      ? `We emailed them that address. If it was mistyped, they will not get it — remove them in Household adults and invite again.`
+      ? `We emailed them that address. If it was mistyped, they will not get it. Remove them in Household adults and invite again.`
       : `We did not email ${opts.guardianEmail}. Share the link below instead.`,
     '',
     'Share this link (they must sign in as that email):',
@@ -194,7 +194,7 @@ export async function POST(req: NextRequest) {
       acceptUrl,
       message: mail?.ok
         ? `Invite sent to ${guardianEmail}. We also emailed you a copy with the share link.`
-        : `Invite created. Copy and share this link — we emailed you a copy too.`,
+        : `Invite created. Copy and share this link. We emailed you a copy too.`,
     })
   } catch (err) {
     console.error('/api/portal/guardians POST', err)

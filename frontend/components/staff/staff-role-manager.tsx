@@ -224,7 +224,7 @@ export function StaffRoleManager() {
               {EP_INSTRUCTOR_MAILBOXES.map((row) => (
                 <option key={row.email} value={row.email}>
                   {row.displayName} ({row.email})
-                  {row.note ? ` — ${row.note}` : ''}
+                  {row.note ? `. ${row.note}` : ''}
                 </option>
               ))}
             </optgroup>

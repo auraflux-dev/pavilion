@@ -47,7 +47,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
     null
   const chargeAmount = selected?.price ?? price
   const chargeTitle = selected
-    ? `${productName || detail?.name || vanillaizeIfDemo('The Cove')} — ${selected.label}`
+    ? `${productName || detail?.name || vanillaizeIfDemo('The Cove')}. ${selected.label}`
     : productName || vanillaizeIfDemo('The Cove')
 
   async function startBuy() {

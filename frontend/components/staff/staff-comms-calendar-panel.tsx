@@ -497,7 +497,7 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
                   : 'Select a day'}
               </h3>
               {selectedDate && selectedDayItems.length === 0 ? (
-                <p className="mt-2 text-xs text-[#5A6070]">Nothing yet — use the form below to add one.</p>
+                <p className="mt-2 text-xs text-[#5A6070]">Nothing yet. Use the form below to add one.</p>
               ) : null}
               {selectedDayItems.length > 0 ? (
                 <ul className="mt-2 divide-y divide-[#E8ECF2]">{selectedDayItems.map(renderItemRow)}</ul>
@@ -579,7 +579,7 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
             placeholder={
               plannerTab === 'content'
                 ? 'e.g. Open House Instagram carousel'
-                : 'e.g. Open House reminder — parents WhatsApp'
+                : 'e.g. Open House reminder. Parents WhatsApp'
             }
           />
         </label>

@@ -1,7 +1,7 @@
 /**
- * POST /api/staff/terminal/checkout — start Terminal checkout for cart lines
- * GET  /api/staff/terminal/checkout?id= — poll status; fulfill inventory when COMPLETED
- * POST { action: 'cancel', checkoutId } — cancel open checkout
+ * POST /api/staff/terminal/checkout. Start Terminal checkout for cart lines
+ * GET  /api/staff/terminal/checkout?id=. Poll status; fulfill inventory when COMPLETED
+ * POST { action: 'cancel', checkoutId }. Cancel open checkout
  */
 import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
@@ -87,7 +87,7 @@ async function fulfillIfCompleted(
     })
   }
 
-  // Payment succeeded on Terminal — inventory + ledger
+  // Payment succeeded on Terminal. Inventory + ledger
   const { priced } = await priceRegisterCart(pending.sale.lines)
   await decrementPricedInventory(priced)
   const lineSummary = registerLineSummary(priced)
@@ -259,7 +259,7 @@ export async function POST(req: NextRequest) {
       ok: true,
       checkout,
       total: totalDollars,
-      message: 'Amount sent to Square Terminal — customer can tap / swipe / dip.',
+      message: 'Amount sent to Square Terminal. Customer can tap / swipe / dip.',
     })
   } catch (err) {
     console.error('terminal checkout POST', err)

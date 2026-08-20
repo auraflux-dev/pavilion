@@ -494,7 +494,7 @@ export function flattenRegisterProducts(
 }
 
 /**
- * Membership dues + Cove Digital Card *load* products — never sold as table tiles.
+ * Membership dues + Cove Digital Card *load* products. never sold as table tiles.
  * Spirit wear and Cove snacks are in-person sellable.
  */
 export async function registerBlockedProductIds(): Promise<Set<string>> {

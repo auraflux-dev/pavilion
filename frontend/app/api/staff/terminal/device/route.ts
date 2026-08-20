@@ -1,6 +1,6 @@
 /**
- * GET  /api/staff/terminal/device — paired device + active pairing code
- * POST /api/staff/terminal/device — { action: 'pair' } create device code
+ * GET  /api/staff/terminal/device. Paired device + active pairing code
+ * POST /api/staff/terminal/device. { action: 'pair' } create device code
  *      { action: 'refresh', deviceCodeId? } poll pairing; save deviceId when PAIRED
  *      { action: 'clear' } forget saved device
  */
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
       instructions: [
         'On the Square Terminal open Settings → Device code / Change mode for Terminal API.',
         `Enter code ${pairing.code}`,
-        'Return here and tap Refresh pairing — then Charge on Terminal will send the amount to the device.',
+        'Return here and tap Refresh pairing. Then Charge on Terminal will send the amount to the device.',
       ],
     })
   } catch (err) {

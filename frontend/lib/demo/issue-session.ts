@@ -11,7 +11,7 @@ import {
   type DemoReviewSession,
 } from '@/lib/demo/session'
 
-/** Sample households joined in Sept 2025 — not the click timestamp. */
+/** Sample households joined in Sept 2025. not the click timestamp. */
 export const DEMO_MEMBER_SINCE_MS = Date.parse('2025-09-08T12:00:00.000Z')
 
 export function demoIdentity(lane: DemoLane, parentKind: DemoParentKind) {

@@ -131,7 +131,7 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
         href={registerLocal}
         className="block rounded-xl overflow-hidden border border-[var(--border)] hover:opacity-95 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
         style={{ outlineColor: colors.accent }}
-        aria-label="Register — open flyer link"
+        aria-label="Register. Open flyer link"
       >
         {flyerImg}
       </Link>
@@ -142,7 +142,7 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
         rel="noopener noreferrer"
         className="block rounded-xl overflow-hidden border border-[var(--border)] hover:opacity-95 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
         style={{ outlineColor: colors.accent }}
-        aria-label="Register — open flyer link"
+        aria-label="Register. Open flyer link"
       >
         {flyerImg}
       </a>

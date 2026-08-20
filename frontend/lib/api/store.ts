@@ -44,7 +44,7 @@ function getProductImage(product: Record<string, unknown>): string | undefined {
  try {
  const media = product.media as Record<string, unknown> | undefined;
  if (!media) return undefined;
- // Prefer main media — Wix often omits itemsInfo on query responses.
+ // Prefer main media. Wix often omits itemsInfo on query responses.
  const main = media.main as Record<string, unknown> | undefined;
  const mainImage = main?.image as Record<string, unknown> | undefined;
  const fromMain =

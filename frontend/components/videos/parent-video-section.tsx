@@ -31,7 +31,7 @@ export function ParentVideoSection({
   className = '',
   background = 'var(--brand-warm)',
 }: ParentVideoSectionProps) {
-  // SHMS explainers only — never on Riverside demo or private Commons trials.
+  // SHMS explainers only. never on Riverside demo or private Commons trials.
   if (isDemoInstance() || isCommonsPlatform()) return null
   const videos = videoId
     ? ([getParentVideo(videoId)].filter(Boolean) as ParentVideo[])

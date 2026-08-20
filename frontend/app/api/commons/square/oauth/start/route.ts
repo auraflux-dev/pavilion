@@ -1,5 +1,5 @@
 /**
- * GET /api/commons/square/oauth/start — send treasurer to Square OAuth (this school's seller).
+ * GET /api/commons/square/oauth/start. send treasurer to Square OAuth (this school's seller).
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac } from 'node:crypto'

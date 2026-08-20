@@ -132,7 +132,7 @@ export default async function FundraisingPage() {
       id: 'sponsorship',
       icon: Handshake,
       label: 'Sponsorships',
-      description: 'Platinum $2,500, Gold $1,500, or Silver $500. One payment for the 2026–27 school year.',
+      description: 'Platinum $2,500, Gold $1,500, or Silver $500. One payment for the 2026-27 school year.',
       raised: sponsorshipRaised,
       goal: sponsorshipGoal,
       href: '/fundraising#sponsorship',
@@ -367,7 +367,7 @@ export default async function FundraisingPage() {
               </h2>
               <p className="text-[#5A6070] mt-3 max-w-2xl mx-auto">
                 {vanillaizeIfDemo(
-                  'One payment for the 2026–27 school year. Choose Platinum, Gold, or Silver below.',
+                  'One payment for the 2026-27 school year. Choose Platinum, Gold, or Silver below.',
                 )}
               </p>
             </div>

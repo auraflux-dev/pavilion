@@ -277,7 +277,7 @@ export function StaffMembershipPanel() {
       await navigator.clipboard.writeText(value)
       setInviteStatus(`${label} copied.`)
     } catch {
-      setInviteStatus(`Copy failed — select the ${label.toLowerCase()} manually.`)
+      setInviteStatus(`Copy failed. Select the ${label.toLowerCase()} manually.`)
     }
   }
 

@@ -1,11 +1,11 @@
 /**
- * Today's Cove store window pickups — paid portal/site snack & spirit lines.
- * Window: Mon–Fri 8:25–8:50 AM America/New_York (soft buffer 8:20–8:55).
+ * Today's Cove store window pickups. paid portal/site snack & spirit lines.
+ * Window: Mon to Fri 8:25 to 8:50 AM America/New_York (soft buffer 8:20 to 8:55).
  */
 import { getWixClient } from '@/lib/wix-client'
 
 export const STORE_WINDOW_TZ = 'America/New_York'
-/** Inclusive soft buffer around the posted 8:25–8:50 window. */
+/** Inclusive soft buffer around the posted 8:25 to 8:50 window. */
 export const STORE_WINDOW_START_MIN = 8 * 60 + 20 // 8:20
 export const STORE_WINDOW_END_MIN = 8 * 60 + 55 // 8:55
 
@@ -181,7 +181,7 @@ export async function listTodayStorePickups(opts?: {
   return {
     dateEt,
     weekday,
-    windowLabel: 'M–Fri 8:25–8:50 AM ET (list uses 8:20–8:55 buffer)',
+    windowLabel: 'Mon to Fri 8:25 to 8:50 AM ET (list uses 8:20 to 8:55 buffer)',
     items,
   }
 }

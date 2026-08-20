@@ -1,7 +1,7 @@
 /**
- * GET   /api/staff/cove/demand — list demand + size rollup
- * POST  /api/staff/cove/demand — log OOS size interest (events/membership/retail/admin)
- * PATCH /api/staff/cove/demand — mark ordered / fulfilled / cancelled (retail/admin)
+ * GET   /api/staff/cove/demand. list demand + size rollup
+ * POST  /api/staff/cove/demand. log OOS size interest (events/membership/retail/admin)
+ * PATCH /api/staff/cove/demand. mark ordered / fulfilled / cancelled (retail/admin)
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'

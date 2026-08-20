@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { StaffPlaidConnect } from '@/components/staff/staff-plaid-connect'
 
 const DEFAULT_FISCAL_YEAR = '2026-27'
-const FISCAL_YEAR_LABEL = 'Jul 1, 2026 – Jun 30, 2027'
+const FISCAL_YEAR_LABEL = 'Jul 1, 2026 to Jun 30, 2027'
 
 type BudgetKind = 'income' | 'expense'
 type BudgetTracking = 'auto' | 'bank' | 'keyed' | 'skip'
@@ -430,7 +430,7 @@ export function StaffBudgetPanel() {
         <p className="text-sm font-bold">Import Bank of America CSV</p>
         <p className="text-xs text-[#5A6070]">
           Only CSV this page accepts. Bank of America checking → Activity → Download CSV. Only{' '}
-          <strong>August 1 – July 31</strong> of this school year is used. Square and PayPal{' '}
+          <strong>August 1 to July 31</strong> of this school year is used. Square and PayPal{' '}
           <strong>payouts and transfers into checking are skipped</strong> so those sales are not counted
           twice. Zelle, checks, ACH, Sam’s, and Amazon still import. Re-importing the same file will not
           double-count.
@@ -451,13 +451,13 @@ export function StaffBudgetPanel() {
         <p className="text-xs text-[#5A6070] pt-1">
           {paypalConfigured
             ? 'PayPal updates from the live account on Refresh (no CSV). Website PayPal checkout is already in Staff Payments; bank withdrawals to checking are skipped.'
-            : 'PayPal live feed is not configured. Set Client ID and Secret on Vercel, then use Refresh — do not upload a PayPal CSV.'}
+            : 'PayPal live feed is not configured. Set Client ID and Secret on Vercel, then use Refresh. Do not upload a PayPal CSV.'}
         </p>
       </div>
 
       <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 space-y-1">
         <p>
-          Planning worksheet — MoneyMinder stays the ledger. This is not a second set of books.
+          Planning worksheet. MoneyMinder stays the ledger. This is not a second set of books.
         </p>
         <p>
           <strong>Bank CSV:</strong> checking activity except Square/PayPal payouts and transfers. Amazon lands
@@ -502,7 +502,7 @@ export function StaffBudgetPanel() {
             style={{ backgroundColor: 'var(--brand-green)' }}
             onClick={() => void post({ action: 'seed' }, 'Placeholder loaded.')}
           >
-            {busy ? 'Loading…' : 'Load 2026–27 placeholder'}
+            {busy ? 'Loading…' : 'Load 2026-27 placeholder'}
           </Button>
         </div>
       ) : (

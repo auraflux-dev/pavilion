@@ -117,7 +117,7 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Admin Members workspace — full list by default; optional filter via q
+    // Admin Members workspace. full list by default; optional filter via q
     if (!canLookup) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }

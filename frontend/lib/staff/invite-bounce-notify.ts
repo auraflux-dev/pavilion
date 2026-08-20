@@ -47,7 +47,7 @@ function bounceCopy(guardianEmail: string): { subject: string; body: string } {
     '',
     'Please open Member Portal → My Students → Household adults:',
     '1. Remove that address if it is still listed',
-    '2. Invite again — type the email twice so it matches',
+    '2. Invite again. Type the email twice so it matches',
     '3. If they still do not get mail, use Copy link and send it yourself',
     '',
     'https://shmspto.org/member-portal',

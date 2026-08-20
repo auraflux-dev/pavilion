@@ -191,7 +191,7 @@ export function StaffNewsletterTemplatesPanel({
       setStatus(
         n > 1
           ? `PNG exported (${n} pages). All pages go in the email. Preview below.`
-          : 'PNG exported for email. Preview below — then save template or send a test.',
+          : 'PNG exported for email. Preview below. Then save template or send a test.',
       )
     } catch (err) {
       setStatus(

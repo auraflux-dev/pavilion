@@ -52,7 +52,7 @@ export function classifyBankTransaction(input: {
   const t = blob(input)
   if (INTERNAL_TRANSFER.test(t)) return null
   if (isProcessorPayout({ ...input, amount })) return null
-  // PTO debit card rung on our own Square Stand — already a Staff sale.
+  // PTO debit card rung on our own Square Stand. already a Staff sale.
   if (/sq \*shmspto/i.test(t)) return null
 
   const abs = Math.abs(amount)

@@ -196,7 +196,7 @@ export function StaffMonthCalendar({
                         'block truncate rounded border px-1 py-0.5 text-[10px] leading-tight',
                         TONE_CLASS[ev.tone ?? 'slate'],
                       ].join(' ')}
-                      title={ev.subtitle ? `${ev.title} — ${ev.subtitle}` : ev.title}
+                      title={ev.subtitle ? `${ev.title}. ${ev.subtitle}` : ev.title}
                     >
                       {ev.title}
                     </span>

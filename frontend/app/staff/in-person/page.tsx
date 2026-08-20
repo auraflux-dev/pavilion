@@ -2,7 +2,7 @@
 
 /**
  * Printable Open House / window table card.
- * Sell first — login and Cove card are optional.
+ * Sell first. Login and Cove card are optional.
  */
 import { useMemo } from 'react'
 import Link from 'next/link'
@@ -27,7 +27,7 @@ export default function StaffInPersonCardPage() {
     <div className="min-h-screen bg-[#F7F4EE] text-[#1A1A1A]">
       <div className="print:hidden mx-auto max-w-3xl px-4 py-4 flex flex-wrap gap-2 items-center justify-between">
         <p className="text-sm text-[#5A6070]">
-          Printable cheat sheet — no login required to buy · never charge twice.
+          Printable cheat sheet. No login required to buy · never charge twice.
         </p>
         <div className="flex gap-2 flex-wrap">
           <Link href="/staff" className="text-xs font-bold underline" style={{ color: 'var(--brand-green)' }}>
@@ -78,20 +78,20 @@ export default function StaffInPersonCardPage() {
               <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top font-semibold">Cash · card · Apple Pay · Google Pay</td>
                 <td className="p-3 align-top">
-                  <strong>Square Stand</strong> — ring → take payment → stop. Do not also charge in
+                  <strong>Square Stand</strong>: ring → take payment → stop. Do not also charge in
                   Staff.
                 </td>
               </tr>
               <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top font-semibold">Cove Photos QR</td>
                 <td className="p-3 align-top">
-                  <strong>Square Stand</strong> — <strong>Gift card</strong> → scan → stop.
+                  <strong>Square Stand</strong>: <strong>Gift card</strong> → scan → stop.
                 </td>
               </tr>
               <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top font-semibold">Cove 6-digit or word passcode</td>
                 <td className="p-3 align-top">
-                  <strong>Square Stand</strong> — search Customer → <strong>Card on File</strong> →
+                  <strong>Square Stand</strong>: search Customer → <strong>Card on File</strong> →
                   stop. (Must have loaded Cove in portal.)
                 </td>
               </tr>
@@ -155,7 +155,7 @@ export default function StaffInPersonCardPage() {
             <h2 className="text-base font-bold text-[var(--brand-green)]">Events (BTSN Aug 27)</h2>
             <p className="mt-2 text-sm text-[#5A6070] leading-relaxed">
               Stand owns Cove tenders. Guests pay the food truck. Reef: lookup → $6 Cove ticket
-              → hand ticket. Soft-ask Join QR — purchases will outnumber joins.
+              → hand ticket. Soft-ask Join QR. Purchases will outnumber joins.
             </p>
           </div>
         </section>
@@ -169,7 +169,7 @@ export default function StaffInPersonCardPage() {
                 (not Stand).
               </li>
               <li>
-                <strong>Free join:</strong> optional QR — not required to buy spirit or snacks.
+                <strong>Free join:</strong> optional QR. Not required to buy spirit or snacks.
               </li>
               <li>
                 <strong>Cove load:</strong> parents do later in portal when ready.

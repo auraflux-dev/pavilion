@@ -183,7 +183,7 @@ export function StaffSpiritWearDemandPanel({
                       <td className="px-3 py-2 tabular-nums">{row.openQty}</td>
                       <td className="px-3 py-2 tabular-nums">{row.openCount}</td>
                       <td className="px-3 py-2 text-xs text-[#5A6070] font-mono">
-                        {row.sku || '—'}
+                        {row.sku || '-'}
                       </td>
                     </tr>
                   ))}

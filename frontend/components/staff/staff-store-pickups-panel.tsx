@@ -113,8 +113,8 @@ export function StaffStorePickupsPanel() {
           </h2>
           <p className="text-xs text-[#5A6070] mt-1 max-w-xl leading-relaxed">
             Paid portal / site snack &amp; spirit checkouts during the morning window
-            {dateEt ? ` (${dateEt} ET)` : ''}. {windowLabel || 'M–Fri 8:25–8:50 AM ET'}. Mark{' '}
-            <strong>Handed out</strong> when you pass the item — not for Stand / Cove card sales.
+            {dateEt ? ` (${dateEt} ET)` : ''}. {windowLabel || 'Mon to Fri 8:25 to 8:50 AM ET'}. Mark{' '}
+            <strong>Handed out</strong> when you pass the item. Not for Stand / Cove card sales.
           </p>
         </div>
         <Button
@@ -131,14 +131,14 @@ export function StaffStorePickupsPanel() {
 
       {!weekday ? (
         <p className="text-sm text-[#5A6070] rounded-lg bg-[#FAFCF9] border border-[var(--border)] px-3 py-2">
-          No school store window on weekends. Come back Monday–Friday morning.
+          No school store window on weekends. Come back Monday-Friday morning.
         </p>
       ) : null}
 
       {pending.length === 0 && done.length === 0 ? (
         <p className="text-sm text-[#5A6070]">
           {weekday
-            ? 'No window checkouts yet today. When parents pay for candy/spirit in the portal during 8:25–8:50, they show here.'
+            ? 'No window checkouts yet today. When parents pay for candy/spirit in the portal during 8:25 to 8:50, they show here.'
             : null}
         </p>
       ) : null}

@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Valid email required' }, { status: 400 })
     }
     if (!isBusinessOwner) {
-      // "No" is acknowledged in the portal UI only — do not email staff or create a ticket.
+      // "No" is acknowledged in the portal UI only. do not email staff or create a ticket.
       return NextResponse.json({ ok: true, emailed: false, skipped: 'not_business_owner' })
     }
     if (!businessName) {

@@ -57,7 +57,7 @@ export async function buildBudgetWorkbook(input: {
   summarySheet.mergeCells('A1:C1')
   summarySheet.getCell('A2').value = label
   summarySheet.getCell('A3').value =
-    'Planning worksheet — MoneyMinder remains the ledger. Checking actuals from the BoA CSV; sales from Refresh from Staff.'
+    'Planning worksheet. MoneyMinder remains the ledger. Checking actuals from the BoA CSV; sales from Refresh from Staff.'
   summarySheet.mergeCells('A3:C3')
   summarySheet.getCell('A3').alignment = { wrapText: true }
   summarySheet.getRow(3).height = 32

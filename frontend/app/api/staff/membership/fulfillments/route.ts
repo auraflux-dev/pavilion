@@ -1,6 +1,6 @@
 /**
- * GET /api/staff/membership/fulfillments — open shirt/magnet queue (pending + ordered)
- * PATCH — action: ordered | picked_up (default picked_up for backward compat)
+ * GET /api/staff/membership/fulfillments. open shirt/magnet queue (pending + ordered)
+ * PATCH. action: ordered | picked_up (default picked_up for backward compat)
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'

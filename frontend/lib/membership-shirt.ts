@@ -214,7 +214,7 @@ export async function listMembershipShirtOptions(): Promise<{
 
 /**
  * Hard hold: require a CoveInventory row for this variant and decrement it.
- * Throws if missing or insufficient — call before completing membership payment.
+ * Throws if missing or insufficient. call before completing membership payment.
  */
 export async function holdMembershipShirtInventory(opts: {
   productId: string

@@ -14,13 +14,13 @@ import { resolvePrimaryParentEmail } from '@/lib/family-guardians'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
 
 /**
- * GET  /api/gift-card/family-code — numeric code + word passcode + QR payload
- * POST { action: 'reset' } — rotate 6-digit backup (primary only)
- * POST { action: 'set-passcode', passcode } — set spoken word passcode (primary only)
- * POST { action: 'suggest-passcode' } — name-based suggestion
+ * GET  /api/gift-card/family-code. Numeric code + word passcode + QR payload
+ * POST { action: 'reset' }. Rotate 6-digit backup (primary only)
+ * POST { action: 'set-passcode', passcode }. Set spoken word passcode (primary only)
+ * POST { action: 'suggest-passcode' }. Name-based suggestion
  *
  * Uses getEffectiveParentEmail so staff with linked personalEmail (or act-as)
- * see the same household as /api/students — not an empty staff@ mailbox.
+ * see the same household as /api/students. Not an empty staff@ mailbox.
  */
 export async function GET(req: NextRequest) {
   const effective = await getEffectiveParentEmail(req)
@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
       coveFamilyPasscode: passcode || null,
       suggestedPasscode: suggestedPasscode || null,
       passcodeRules:
-        '6–24 letters or numbers, at least one letter, no spaces. Suggested: last name + first letters of first name.',
+        '6-24 letters or numbers, at least one letter, no spaces. Suggested: last name + first letters of first name.',
       balance,
       gan: card.gan ? `${card.gan.slice(0, 4)}…${card.gan.slice(-4)}` : '',
       hasCard: Boolean(card.gan),
@@ -122,7 +122,7 @@ export async function GET(req: NextRequest) {
       reason: card.gan ? 'ready' : 'needs_load',
       message: card.gan
         ? undefined
-        : 'Load money to activate your phone QR for The Cove and Square Stand. Free accounts can use the card anytime after a load — paid membership is optional.',
+        : 'Load money to activate your phone QR for The Cove and Square Stand. Free accounts can use the card anytime after a load. Paid membership is optional.',
       codeHint: paidMemberCode
         ? 'Lagoon/Tide member code (ends in 9). Show this 6-digit code at event food tables for refreshment tickets.'
         : 'Family Cove backup code. Lagoon and Tide member codes end in 9 for event refreshments.',

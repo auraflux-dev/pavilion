@@ -1,4 +1,4 @@
-/** Public 2026–27 SHMS PTO sponsorship packages. Copy matches the 2026–27 table. */
+/** Public 2026-27 SHMS PTO sponsorship packages. Copy matches the 2026-27 table. */
 export type SponsorshipPackageId = 'platinum' | 'gold' | 'silver'
 
 export type SponsorshipPerkGroup = {

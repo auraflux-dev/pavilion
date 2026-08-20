@@ -37,7 +37,7 @@ export function PortalBusinessOwnerForm({
       setError('Please choose Yes or No.')
       return
     }
-    // "No" stays on-device — staff only get Yes + business details.
+    // "No" stays on-device. staff only get Yes + business details.
     if (isOwner === 'no') {
       setStatus('success')
       return

@@ -1,5 +1,5 @@
 /**
- * Commons CRM — households, students, membership, store card.
+ * Commons CRM. households, students, membership, store card.
  * Stone Hill stays on Wix CMS. These types are the Postgres contract and the
  * demo in-memory tenant. Login (Better Auth) is a later FK on Person.authUserId.
  */

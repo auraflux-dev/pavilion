@@ -1,6 +1,6 @@
 /**
  * POST /api/staff/cove/sale
- * Cash, Stand backup, or external (Zelle / PayPal / phone Square) — inventory + ledger.
+ * Cash, Stand backup, or external (Zelle / PayPal / phone Square). inventory + ledger.
  *
  * Body: {
  *   tender: 'cash' | 'stand' | 'zelle' | 'paypal' | 'phone_square' | 'other',

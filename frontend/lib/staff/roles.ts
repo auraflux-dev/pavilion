@@ -278,7 +278,7 @@ export const ROLE_HOME_COPY: Record<
  owns: 'Funds, AR/AP, reimbursements, insurance, contractors',
  thisWeek: [
  'Finish Treasurer onboarding on Home (if new)',
- 'Review the 2026–27 planning budget (Staff → Budget)',
+ 'Review the 2026-27 planning budget (Staff → Budget)',
  'Reconcile store-card and membership payments',
  'Clear reimbursement queue',
  ],

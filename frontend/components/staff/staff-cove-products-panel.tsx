@@ -148,13 +148,13 @@ export function StaffCoveProductsPanel() {
       setForm(emptyForm)
       const syncNote =
         d.squareSync?.createdSkus?.length
-          ? ` Square Stand: added ${d.squareSync.createdSkus.join(', ')} — refresh Library on the iPad.`
+          ? ` Square Stand: added ${d.squareSync.createdSkus.join(', ')}. Refresh Library on the iPad.`
           : d.squareSync?.skipped && d.squareSync?.reason === 'already on Square'
             ? ' Already on Square Stand.'
             : d.squareSync?.ok === false
-              ? ` Square sync note: ${d.squareSync.reason || 'failed'} — run sync script if needed.`
+              ? ` Square sync note: ${d.squareSync.reason || 'failed'}. Run sync script if needed.`
               : d.squareSync?.reason === 'variants missing SKU'
-                ? ' SKU was missing — try Save again (SKUs auto-fill from the name).'
+                ? ' SKU was missing. Try Save again (SKUs auto-fill from the name).'
                 : ''
       setStatus(`Added “${d.product.name}”. Live on /cove within a few minutes.${syncNote}`)
 
@@ -203,7 +203,7 @@ export function StaffCoveProductsPanel() {
       if (!r.ok) throw new Error(d.error ?? 'Save failed')
       const syncNote =
         d.squareSync?.createdSkus?.length
-          ? ` Square Stand: added ${d.squareSync.createdSkus.join(', ')} — refresh Library on the iPad.`
+          ? ` Square Stand: added ${d.squareSync.createdSkus.join(', ')}. Refresh Library on the iPad.`
           : d.squareSync?.skipped && d.squareSync?.reason === 'already on Square'
             ? ' Already on Square Stand.'
             : d.squareSync?.ok === false
@@ -279,7 +279,7 @@ export function StaffCoveProductsPanel() {
           <h2 className="text-lg font-bold">Cove products</h2>
           <p className="text-xs text-[#5A6070] mt-1">
             Add snacks, photos, flavors/sizes, and restock here. No Wix Dashboard needed. “On Cove”
-            controls the visitor menu. Leave SKU blank — we generate one from the name so Square Stand
+            controls the visitor menu. Leave SKU blank. We generate one from the name so Square Stand
             can track inventory.
           </p>
         </div>
@@ -325,7 +325,7 @@ export function StaffCoveProductsPanel() {
                 onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
                 placeholder="SKU (auto from name)"
                 className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-mono"
-                title="Leave blank — we generate from the product name"
+                title="Leave blank. We generate from the product name"
               />
             </>
           ) : null}

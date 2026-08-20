@@ -1,5 +1,5 @@
 /**
- * POST /api/commons/plaid/exchange — store Item access token on this organization.
+ * POST /api/commons/plaid/exchange. store Item access token on this organization.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { isSameOriginRequest } from '@/lib/security/csrf'

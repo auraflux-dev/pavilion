@@ -133,7 +133,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
             ) : null}
             {item.tier}
             {item.kind === 'spirit_shirt'
-              ? ` · ${item.detail || item.shirtSize || 'Design/size —'}`
+              ? ` · ${item.detail || item.shirtSize || 'Design/size'}`
               : item.detail
                 ? ` · ${item.detail}`
                 : ' · 1 magnet'}
@@ -205,7 +205,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
       {busy && items.length === 0 ? (
         <Loader2 className="w-5 h-5 animate-spin text-[var(--brand-green)]" />
       ) : items.length === 0 ? (
-        <p className="text-sm text-[#5A6070]">Queue clear — nothing waiting.</p>
+        <p className="text-sm text-[#5A6070]">Queue clear. Nothing waiting.</p>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-[#5A6070]">No matches for “{lookup.trim()}”.</p>
       ) : (

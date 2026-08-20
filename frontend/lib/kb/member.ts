@@ -94,10 +94,10 @@ Add every student in your household so programs, The Cove balance, and messages 
       order: 2,
       body: `On **My Students**, open **Household adults**.
 
-This is for **any** second adult — married spouses, separated co-parents, or guardians with no parents on the account.
+This is for **any** second adult. Married spouses, separated co-parents, or guardians with no parents on the account.
 
 1. Type their email, then type it **again** to confirm (this catches most misspellings)
-2. **Send invite** — they get an email, and **you** get a copy in email and portal messages with a share link
+2. **Send invite**. They get an email, and **you** get a copy in email and portal messages with a share link
 3. They open the link, sign in (or create an account) with **that exact email**, then **Accept invite**
 4. Both logins see the same students
 5. Cove Digital Card stays with the **primary account holder** (whoever signed up first) unless they ask for a separate card
@@ -166,9 +166,9 @@ First-load bonus (when offered) applies once; reloads are dollar-for-dollar.`,
       order: 2,
       body: `In **Store & Cove Digital Card** you will see:
 
-1. **Photos QR** — best at Square Stand / the window
-2. **Word passcode (new)** — easier to say (suggested from your last name + first letters of your first name)
-3. **6-digit backup** — if the phone dies (paid member codes end in **9**)
+1. **Photos QR**. Best at Square Stand / the window
+2. **Word passcode (new)**. Easier to say (suggested from your last name + first letters of your first name)
+3. **6-digit backup**. If the phone dies (paid member codes end in **9**)
 
 Give your student the QR or the word passcode. Reset the 6-digit backup anytime if it was shared or lost.`,
     },
@@ -180,7 +180,7 @@ Give your student the QR or the word passcode. Reset the 6-digit backup anytime 
       order: 3,
       body: `Load the Cove Digital Card online first (portal → Store & Cove Digital Card).
 
-At the snack window, open **Apple/Google Wallet** or show the **Photos QR**. Square Stand scans it as a **gift card** — same Cove balance as the portal.
+At the snack window, open **Apple/Google Wallet** or show the **Photos QR**. Square Stand scans it as a **gift card**. Same Cove balance as the portal.
 
 Word passcode / 6-digit is backup if Wallet is not open (staff looks up the family).
 
@@ -240,7 +240,7 @@ Instructor and PTO messages for your students land in the same area. Refresh if 
       order: 1,
       body: `Open **Videos** in the Member Portal menu for the full parent library (website tour, portal walkthrough, membership tiers, board).
 
-Under each video, the page prints a share URL and a **Copy link** button. Use that — you do not have to remember a hash.
+Under each video, the page prints a share URL and a **Copy link** button. Use that. You do not have to remember a hash.
 
 The same clips also appear on Help and on matching public pages (Home, Membership, The Cove, Board).
 

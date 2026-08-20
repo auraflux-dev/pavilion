@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Faculty / staff $20 membership — choose magnet OR Spirit Wear design/size, then pay.
+ * Faculty / staff $20 membership. choose magnet OR Spirit Wear design/size, then pay.
  */
 import { useState } from 'react'
 import { ArrowRight } from 'lucide-react'
@@ -34,7 +34,7 @@ export function FacultyMembershipJoin({ price }: Props) {
       <div className="space-y-3 text-left w-full">
         <fieldset className="space-y-2">
           <legend className="text-xs font-semibold text-[#5A6070]">
-            Included perk — choose one
+            Included perk. choose one
           </legend>
           <label className="flex items-start gap-2 text-sm text-[#1A1A1A] cursor-pointer">
             <input

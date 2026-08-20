@@ -1,6 +1,6 @@
 /**
  * Pull BoA transactions via Plaid into PtoBudgetEntries.
- * When Plaid is connected this is the cash actuals source — not Staff Payments.
+ * When Plaid is connected this is the cash actuals source. not Staff Payments.
  */
 import { AccountType } from 'plaid'
 import { classifyBankTransaction } from '@/lib/staff/plaid-classify'

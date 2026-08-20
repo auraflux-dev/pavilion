@@ -6,7 +6,7 @@ export interface StaffVideo {
   id: StaffVideoId
   title: string
   summary: string
-  /** 720p MP4 — Wix Media or /public help asset */
+  /** 720p MP4. Wix Media or /public help asset */
   src: string
   poster: string
   durationLabel: string

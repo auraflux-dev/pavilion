@@ -1,4 +1,4 @@
-/** Best Runners partnership — school code on the event page (no middle hop). */
+/** Best Runners partnership. school code on the event page (no middle hop). */
 export const RUN_FOR_CHARITY_SCHOOL_CODE = 'SHMS'
 
 export const RUN_FOR_CHARITY_EVENT_SLUG =
@@ -11,7 +11,7 @@ export const RUN_FOR_CHARITY_REGISTER_HASH = '#register'
 
 export const RUN_FOR_CHARITY_REGISTER_PATH = `${RUN_FOR_CHARITY_EVENT_PATH}${RUN_FOR_CHARITY_REGISTER_HASH}`
 
-/** @deprecated Use RUN_FOR_CHARITY_EVENT_PATH — old bridge redirects there. */
+/** @deprecated Use RUN_FOR_CHARITY_EVENT_PATH. old bridge redirects there. */
 export const RUN_FOR_CHARITY_BRIDGE_PATH = '/run-for-charity'
 
 export const RUN_FOR_CHARITY_BRIDGE_URL = `https://www.shmspto.org${RUN_FOR_CHARITY_EVENT_PATH}`

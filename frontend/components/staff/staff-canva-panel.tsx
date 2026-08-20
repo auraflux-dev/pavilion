@@ -83,7 +83,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
     try {
       await navigator.clipboard.writeText(design.editUrl)
       setCopiedId(design.id)
-      setMsg('Edit link copied — paste into Comms calendar Asset link or Social caption.')
+      setMsg('Edit link copied. Paste into Comms calendar Asset link or Social caption.')
       setTimeout(() => setCopiedId(''), 2000)
     } catch {
       setMsg(design.editUrl)
@@ -141,7 +141,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
         <h2 className="text-lg font-semibold text-[#1B2A4A]">Canva</h2>
         <p className="mt-1 max-w-2xl text-sm text-[#5A6070]">
           VP Marketing works in the designated PTO Canva folder (currently owned by{' '}
-          <strong>gregory.robert.c@gmail.com</strong> — invite Marketing / Diane for access). Save
+          <strong>gregory.robert.c@gmail.com</strong>. Invite Marketing / Diane for access). Save
           designs there, then paste edit links into Comms & content or Social. Brand logos:{' '}
           <a href="/brand" className="underline" target="_blank" rel="noreferrer">
             /brand
@@ -294,12 +294,12 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
             <div className="space-y-3 pt-1">
               <p className="text-xs text-[#5A6070] leading-relaxed">
                 Optional later. Day-to-day Marketing only needs the folder link above. API Connect
-                can wait until a PTO-owned Canva app exists — see{' '}
+                can wait until a PTO-owned Canva app exists. See{' '}
                 <code className="text-[11px]">docs/CANVA-SETUP.md</code>.
               </p>
               {!status?.clientConfigured ? (
                 <p className="text-xs text-[#5A6070]">
-                  Client id/secret not configured yet — folder workflow still works.
+                  Client id/secret not configured yet. Folder workflow still works.
                 </p>
               ) : (
                 <Button

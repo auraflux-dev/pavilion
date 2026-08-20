@@ -72,7 +72,7 @@ export type PhysicalPerkChoice = 'spirit_shirt' | 'magnet'
 
 export function tierOffersPhysicalPerkChoice(tier: string): boolean {
   const t = tier.trim().toLowerCase()
-  // Faculty/teacher membership only — parents on Lagoon/Tide get both shirt + magnet.
+  // Faculty/teacher membership only. parents on Lagoon/Tide get both shirt + magnet.
   return t === 'faculty'
 }
 
@@ -102,7 +102,7 @@ export function tierNeedsMagnet(tier: string): boolean {
   return tierAutoMagnet(tier) || tierIncludesMagnetWithShirt(tier)
 }
 
-/** Lagoon / Tide only — Reef does not include free event food. */
+/** Lagoon / Tide only. Reef does not include free event food. */
 export function tierNeedsEventRefreshments(tier: string): boolean {
   const t = tier.trim().toLowerCase()
   return (
@@ -251,12 +251,12 @@ export function staffMembershipPerkLines(opts: {
   const lines = ['Fulfillment / member perks:']
   for (const e of physical) {
     lines.push(
-      `• ${e.label}${e.detail ? ` (${e.detail})` : ''} — ${e.status}. ${e.notes || ''}`.trim(),
+      `• ${e.label}${e.detail ? ` (${e.detail})` : ''}. ${e.status}. ${e.notes || ''}`.trim(),
     )
   }
   if (refreshments) {
     lines.push(
-      `• ${refreshments.label} — parent shows Family Cove 6-digit code (Lagoon/Tide codes end in 9); record code and hand tickets.`,
+      `• ${refreshments.label}. parent shows Family Cove 6-digit code (Lagoon/Tide codes end in 9); record code and hand tickets.`,
     )
   }
   lines.push(

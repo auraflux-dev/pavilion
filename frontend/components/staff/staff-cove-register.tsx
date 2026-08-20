@@ -204,20 +204,20 @@ export function StaffCoveRegister() {
     if (lane === 'pickup') {
       setMode('idle')
       setFamily(null)
-      setStatus('Paid in portal/site — Pickup only. Do not use Stand or Charge Cove.')
+      setStatus('Paid in portal/site. Pickup only. Do not use Stand or Charge Cove.')
       return
     }
     if (lane === 'cove') {
       setMode('idle')
       setFamily(null)
-      setStatus('Backup only — when Stand Card on File fails or customer has no Cove gift card loaded yet.')
+      setStatus('Backup only: when Stand Card on File fails or customer has no Cove gift card loaded yet.')
       setTimeout(() => codeRef.current?.focus(), 50)
       return
     }
     if (lane === 'external') {
       setMode('guest')
       setFamily(null)
-      setStatus('External pay — amount + method. Optional email for join.')
+      setStatus('External pay: amount + method. Optional email for join.')
     }
   }
 
@@ -243,7 +243,7 @@ export function StaffCoveRegister() {
         setFamily({ ...d.family, hasCard: false, balance: 0 })
         setMode('member')
         setCode(trimmed)
-        setStatus('Member found — no Cove card. Use Square Stand (cash or card).')
+        setStatus('Member found. No Cove card. Use Square Stand (cash or card).')
         setError('')
         return
       }
@@ -254,10 +254,10 @@ export function StaffCoveRegister() {
       const refreshmentsPerk = Boolean(d.paidMember)
       setStatus(
         refreshmentsPerk
-          ? 'Lagoon/Tide perk (code ends in 9) — refreshments free · no charge'
+          ? 'Lagoon/Tide perk (code ends in 9): refreshments free · no charge'
           : d.hasCard
             ? `Cove balance $${Number(d.balance).toFixed(2)}`
-            : 'Member found — no Cove balance (use Square Stand)',
+            : 'Member found. No Cove balance (use Square Stand)',
       )
     } catch (err) {
       setFamily(null)
@@ -736,7 +736,7 @@ export function StaffCoveRegister() {
           : 'Window mode: Stand for cash/card/Cove Wallet · Staff Charge Cove only if no Wallet · portal checkout → Pickup only.'}
         {' · '}
         <span className="font-semibold text-[var(--brand-dark)]">
-          Optional — buy first, join anytime
+          Optional. Buy first, join anytime
         </span>
       </p>
 
@@ -775,10 +775,10 @@ export function StaffCoveRegister() {
           <ol className="text-sm text-[#5A6070] list-decimal pl-5 space-y-1">
             <li>Ring snacks / spirit on Stand</li>
             <li>
-              Cash or Card — or Gift card (Photos QR) — or search Customer by 6-digit/passcode →{' '}
+              Cash or Card, or Gift card (Photos QR). Or search Customer by 6-digit/passcode →{' '}
               <strong>Card on File</strong>
             </li>
-            <li>Stop — do not also Charge Cove in Staff</li>
+            <li>Stop. Do not also Charge Cove in Staff</li>
           </ol>
           <p className="text-xs text-[#5A6070]">
             Card on File needs a Cove load in the portal. &quot;Unable to load cards&quot; → cash/card or
@@ -802,7 +802,7 @@ export function StaffCoveRegister() {
         <div className="rounded-xl border-2 border-[var(--brand-green)] p-4 space-y-3 bg-[#FAFCF9]">
           <p className="text-sm font-bold text-[#1A1A1A]">External pay logger</p>
           <p className="text-xs text-[#5A6070]">
-            Morning / no Stand — log money that landed outside cash drawer or Stand.
+            Morning / no Stand: log money that landed outside cash drawer or Stand.
           </p>
           <div className="flex flex-wrap gap-2">
             {(
@@ -962,7 +962,7 @@ export function StaffCoveRegister() {
             </p>
           ) : (
             <p className="text-sm font-bold text-amber-900">
-              No Cove card — use Square Stand (cash or card).
+              No Cove card. Use Square Stand (cash or card).
             </p>
           )}
         </div>
@@ -1026,7 +1026,7 @@ export function StaffCoveRegister() {
                     : 'border-[var(--border)] text-[#5A6070]'
                 }`}
               >
-                A–Z
+                A-Z
               </button>
               {lettersWithStock.map((letter) => (
                 <button
@@ -1144,7 +1144,7 @@ export function StaffCoveRegister() {
 
                 {payLane === 'cove' && !canUseCove ? (
                   <p className="text-xs text-amber-900 font-semibold">
-                    Need Cove balance to charge here — switch to Square Stand (cash, card, or load Cove online).
+                    Need Cove balance to charge here. Switch to Square Stand (cash, card, or load Cove online).
                   </p>
                 ) : null}
 

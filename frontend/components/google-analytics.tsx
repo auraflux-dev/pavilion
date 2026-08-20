@@ -8,7 +8,7 @@ import { shouldExcludeAnalytics } from '@/lib/ga-exclude'
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim()
 
 /**
- * Google Analytics 4 — skips owner browsers, opt-out, localhost/previews,
+ * Google Analytics 4. skips owner browsers, opt-out, localhost/previews,
  * and automation (Cursor agents). Other staff still count.
  */
 export function GoogleAnalytics() {

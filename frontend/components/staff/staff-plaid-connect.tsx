@@ -168,11 +168,11 @@ export function StaffPlaidConnect({
                 ? ` · balance $${status.lastBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
                 : ''}
               {status?.lastSyncedAt ? ` · synced ${status.lastSyncedAt.slice(0, 16).replace('T', ' ')}` : ''}
-              {status?.needsReauth ? ' · login expired — reconnect' : ''}
+              {status?.needsReauth ? ' · login expired. Reconnect' : ''}
             </p>
           ) : (
             <p className="text-xs text-[#5A6070] mt-1">
-              Connect the PTO checking account. Square and PayPal payouts already land here — this is the cash feed for
+              Connect the PTO checking account. Square and PayPal payouts already land here. This is the cash feed for
               actuals.
             </p>
           )}

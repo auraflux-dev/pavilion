@@ -521,7 +521,7 @@ export function StudentCard({
                     {showPast ? (
                       <div className="mt-2 space-y-2 rounded-lg border border-[var(--border)] bg-[#FAFAF8] px-3 py-2">
                         <p className="text-[11px] text-[#5A6070]">
-                          Past Jumbula / prior-season records — not current programs.
+                          Past Jumbula / prior-season records. not current programs.
                         </p>
                         {history.pastEnrollments!.map((e) => (
                           <div

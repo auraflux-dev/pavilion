@@ -66,7 +66,7 @@ function boardCodeExpired(code: string): boolean {
   return false
 }
 
-/** Fall Jul–Jan; Spring Feb–Jun (school enrichment seasons). */
+/** Fall Jul to Jan; Spring Feb to Jun (school enrichment seasons). */
 export function currentBoardSeason(now = new Date()): 'fall' | 'spring' {
   const m = now.getMonth()
   if (m >= 1 && m <= 5) return 'spring'

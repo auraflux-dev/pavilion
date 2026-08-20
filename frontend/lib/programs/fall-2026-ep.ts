@@ -118,8 +118,8 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
 ]
 
 export const FALL_2026_EP_SALES = {
-  paidMembers: 'Thu Aug 27 – Wed Sep 2, 2026',
-  public: 'Thu Sep 3 – Wed Sep 9, 2026',
+  paidMembers: 'Thu Aug 27 to Wed Sep 2, 2026',
+  public: 'Thu Sep 3 to Wed Sep 9, 2026',
 }
 
 export function formatFall2026EpDate(iso: string): string {

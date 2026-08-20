@@ -1,5 +1,5 @@
 /**
- * Private trial content packs — keyed by organizations.slug.
+ * Private trial content packs. keyed by organizations.slug.
  * Trial #1: Spring Hill (McLean). Code packs until org CMS tables exist.
  */
 import type { PageContentFields } from '@/lib/defaults/page-content'
@@ -20,7 +20,7 @@ export type TrialBrand = {
   cheer: string
   /** Public path under /public, e.g. /trial/spring-hill/logo.png */
   logoPath: string
-  /** CSS theme tokens — applied via data-pto={slug} */
+  /** CSS theme tokens. applied via data-pto={slug} */
   colors: {
     primary: string
     dark: string
@@ -95,7 +95,7 @@ export function springHillPack(): TrialPack {
       contactEmailSponsorship: `sponsors@${b.host}`,
       contactAddress: `8201 Lewinsville Road, ${b.town}, VA 22102`,
       portalGrades: 'K,1,2,3,4,5,6',
-      // Public Unsplash school/family photos — not Stone Hill campus.
+      // Public Unsplash school/family photos. not Stone Hill campus.
       homeHeroImageTopUrl: '/trial/spring-hill/hero-a.jpg',
       homeHeroImageBottomUrl: '/trial/spring-hill/hero-b.jpg',
       homeHeroImageTopAlt: `${b.school} students learning together`,

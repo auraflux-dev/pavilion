@@ -1,6 +1,6 @@
 /**
  * Square SDK client + Gift Card helpers.
- * All calls are server-side only. never import this in client components.
+ * All calls are server-side only. Never import this in client components.
  */
 import { SquareClient, SquareEnvironment } from 'square'
 
@@ -181,7 +181,7 @@ export async function createOrLoadStudentGiftCard(opts: {
       try {
         await linkGiftCardToCustomer(giftCardId, opts.customerId)
       } catch {
- // Linking is best-effort. card still usable by GAN
+ // Linking is best-effort. Card still usable by GAN
       }
     }
   }
@@ -281,7 +281,7 @@ export async function upsertSquareCustomerForCoveStand(opts: {
         nickname: pin || undefined,
         referenceId: buildCoveStandReferenceId(pin, passcode) || undefined,
         companyName: passcode || undefined,
-        note: pin || passcode ? `Cove Digital Card · PIN ${pin || '—'} · passcode ${passcode || '—'}` : undefined,
+        note: pin || passcode ? `Cove Digital Card · PIN ${pin || '-'} · passcode ${passcode || '-'}` : undefined,
       })
       customer = (createResult as any).customer
     } else {
@@ -298,7 +298,7 @@ export async function upsertSquareCustomerForCoveStand(opts: {
       if (ref) updatePayload.referenceId = ref
       if (passcode) updatePayload.companyName = passcode
       if (pin || passcode) {
-        updatePayload.note = `Cove Digital Card · PIN ${pin || '—'} · passcode ${passcode || '—'}`
+        updatePayload.note = `Cove Digital Card · PIN ${pin || '-'} · passcode ${passcode || '-'}`
       }
       const updated = await client.customers.update(updatePayload as any)
       customer = (updated as any).customer || customer
@@ -320,7 +320,7 @@ export async function upsertSquareCustomerForCoveStand(opts: {
           customAttribute: { value },
         })
       } catch {
-        // Definitions may be missing in some envs — nickname/reference_id still work
+        // Definitions may be missing in some envs. nickname/reference_id still work
       }
     }
 

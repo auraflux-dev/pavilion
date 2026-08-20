@@ -7,7 +7,7 @@ function mailThreads() {
   return [
     {
       id: 'demo-mail-1',
-      subject: `Fall Festival volunteers — ${DEMO_BRAND.store} window`,
+      subject: `Fall Festival volunteers. ${DEMO_BRAND.store} window`,
       snippet: 'Can we add a second Saturday shift for snack pickup?',
       date: '2026-09-12T14:22:00.000Z',
       from: 'Elena Ruiz <secretary@riversidepto.org>',
@@ -16,7 +16,7 @@ function mailThreads() {
       unread: true,
       labelIds: ['INBOX'],
       bodyText:
-        'Jordan — we are short one window shift on Fall Festival Saturday. Can Membership ping Family-tier parents?',
+        'Jordan. we are short one window shift on Fall Festival Saturday. Can Membership ping Family-tier parents?',
       bodyHtml: '',
       threadId: 'demo-mail-1',
     },
@@ -101,7 +101,7 @@ function budgetPayload() {
   ]
   return {
     year: YEAR,
-    label: 'Jul 1, 2026 – Jun 30, 2027',
+    label: 'Jul 1, 2026 to Jun 30, 2027',
     lines,
     summary: {
       incomeBudgeted: 14000,
@@ -159,14 +159,14 @@ function familyExtras(paid: boolean, students: PortalStudentRow[]) {
       {
         id: 'demo-msg-1',
         subject: 'Art studio supply list',
-        body: `Hi — ${child} is in Tuesday art. Smock optional. ${DEMO_BRAND.short} provides clay.`,
+        body: `Hi. ${child} is in Tuesday art. Smock optional. ${DEMO_BRAND.short} provides clay.`,
         sentAt: '2026-09-09T15:00:00.000Z',
         fromName: 'Programs',
       },
       {
         id: 'demo-msg-2',
         subject: `${DEMO_BRAND.store} hours this week`,
-        body: 'Window is open Monday–Friday during lunch. Load the family card anytime.',
+        body: 'Window is open Monday-Friday during lunch. Load the family card anytime.',
         sentAt: '2026-09-10T12:00:00.000Z',
         fromName: DEMO_BRAND.store,
       },

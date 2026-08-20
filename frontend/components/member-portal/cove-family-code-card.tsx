@@ -160,7 +160,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
       await navigator.clipboard.writeText(text)
       setMessage(`${label} copied`)
     } catch {
-      setMessage('Could not copy — write it down for your student')
+      setMessage('Could not copy. Write it down for your student')
     }
   }
 
@@ -178,9 +178,9 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
         await navigator.share({
           files: [file],
           title: 'SHMS PTO Cove Digital Card',
-          text: `Family Cove Digital Card. show this QR at The Cove or school store`,
+          text: `Family Cove Digital Card. Show this QR at The Cove or school store`,
         })
-        setMessage('Shared. add to Photos so your student can open it at checkout')
+        setMessage('Shared. Add to Photos so your student can open it at checkout')
         return
       }
       const url = URL.createObjectURL(blob)
@@ -217,7 +217,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
         a.download = `shms-cove-${code}.pkpass`
         a.click()
         URL.revokeObjectURL(url)
-        setMessage('Apple Wallet pass downloaded. open it to Add to Wallet.')
+        setMessage('Apple Wallet pass downloaded. Open it to Add to Wallet.')
         return
       }
       const d = await r.json().catch(() => ({}))
@@ -278,7 +278,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
               <p className="text-2xl font-bold font-mono tracking-[0.2em] text-[#1A1A1A]">{code}</p>
               {paidMemberCode ? (
                 <p className="text-[11px] font-bold text-[var(--brand-green)] mt-1">
-                  Lagoon/Tide member code (ends in 9) — show at event food tables for refreshment tickets
+                  Lagoon/Tide member code (ends in 9). Show at event food tables for refreshment tickets
                 </p>
               ) : codeHint ? (
                 <p className="text-[11px] text-[#5A6070] mt-1">{codeHint}</p>
@@ -337,7 +337,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
                 ) : (
                   <>
                     <strong className="text-[#1A1A1A]">Load money</strong> to activate your phone QR
-                    for The Cove. Free accounts can use the card after a load — paid membership is
+                    for The Cove. Free accounts can use the card after a load. Paid membership is
                     optional.{' '}
                     <a href="/cove" className="font-bold underline" style={{ color: 'var(--brand-green)' }}>
                       Load Cove Digital Card
@@ -374,7 +374,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
                       New
                     </span>
                     <span className="text-sm font-bold text-[#1A1A1A]">
-                      Word passcode — easier at The Cove
+                      Word passcode. Easier at The Cove
                     </span>
                   </p>
                   <p className="text-[12px] text-[#5A6070] mt-1 leading-relaxed">
@@ -441,7 +441,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
               <div className="mt-2 space-y-2">
                 <p className="text-[11px] text-[#5A6070] leading-relaxed">
                   {passcodeRules ||
-                    '6–24 letters or numbers, at least one letter, no spaces. Suggested from your last name + first letters of your first name.'}
+                    '6-24 letters or numbers, at least one letter, no spaces. Suggested from your last name + first letters of your first name.'}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <input

@@ -29,7 +29,7 @@ export function RunForCharityRegisterBridge({ compact = false }: Props) {
           Run for Charity registration
         </h2>
         <p className="text-sm sm:text-base text-[#5A6070] leading-relaxed">
-          Best Runners runs the race. Tap register — the link fills in school code
+          Best Runners runs the race. Tap register. the link fills in school code
           SHMS so Stone Hill receives the registration fees.
         </p>
       </header>

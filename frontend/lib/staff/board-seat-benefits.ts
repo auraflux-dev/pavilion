@@ -1,6 +1,6 @@
 /**
  * Board seat package: complimentary Reef + 75% off one enrichment program per season.
- * Applied to the board member's personal (parent portal) email — not @shmspto.org.
+ * Applied to the board member's personal (parent portal) email. not @shmspto.org.
  */
 import { applyPaidMembership } from '@/lib/membership-sync'
 import { issueBoardEnrichmentDiscounts } from '@/lib/staff/board-enrichment-discounts'

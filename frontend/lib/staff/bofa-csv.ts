@@ -154,7 +154,7 @@ export async function importBofaCsv(opts: {
   actorEmail: string
 }): Promise<{ added: number; updated: number; skipped: number; skippedPayouts: number; rows: number }> {
   const fiscalYear = opts.fiscalYear || DEFAULT_FISCAL_YEAR
-  // Fundraising and this import use Aug–Jul, not the whole downloaded statement.
+  // Fundraising and this import use Aug-Jul, not the whole downloaded statement.
   const { from, to } = schoolYearWindowForFiscalYear(fiscalYear)
   const fromMs = from.getTime()
   const toMs = to.getTime()

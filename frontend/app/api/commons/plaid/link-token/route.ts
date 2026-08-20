@@ -1,5 +1,5 @@
 /**
- * POST /api/commons/plaid/link-token — Plaid Link for this organization (not SHMS Wix items).
+ * POST /api/commons/plaid/link-token. Plaid Link for this organization (not SHMS Wix items).
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { DepositoryAccountSubtype } from 'plaid'

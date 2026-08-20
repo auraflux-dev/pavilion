@@ -1,6 +1,6 @@
 /**
- * GET  /api/portal/guardians/accept?token= — preview invite
- * POST /api/portal/guardians/accept { token } — accept while signed in
+ * GET  /api/portal/guardians/accept?token=. preview invite
+ * POST /api/portal/guardians/accept { token }. accept while signed in
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getMemberSession } from '@/lib/auth-member'

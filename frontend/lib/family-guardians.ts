@@ -239,7 +239,7 @@ export async function acceptGuardianInvite(opts: {
     throw new Error('Invite already accepted by someone else')
   }
   if (row.inviteExpiresAt && new Date(row.inviteExpiresAt).getTime() < Date.now()) {
-    throw new Error('This invite has expired — ask them to send a new one')
+    throw new Error('This invite has expired. Ask them to send a new one')
   }
   const expected = norm(String(row.guardianEmail ?? ''))
   if (expected && expected !== email) {

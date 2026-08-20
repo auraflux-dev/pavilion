@@ -83,10 +83,10 @@ export function JoinFamilyClient() {
             ) : null}
             .
           </p>
-          <p className="text-xs text-[#5A6070]">
-            Sign in as <strong>{preview.guardianEmail}</strong>. You’ll see the same students —
+          <p className="text-xs text-[#5A6070] whitespace-pre-line">
+            Sign in as <strong>{preview.guardianEmail}</strong>. You’ll see the same students.
             {vanillaizeIfDemo(
-              'whether you’re a spouse, co-parent, or guardian. Cove Digital Card stays with the primary household account unless you buy separately.',
+              'Whether you’re a spouse, co-parent, or guardian.\nCove Digital Card stays with the primary household account unless you buy separately.',
             )}
           </p>
           <p className="text-[11px] text-[#5A6070]">Status: {preview.status}</p>

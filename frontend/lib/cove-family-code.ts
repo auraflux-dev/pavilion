@@ -17,7 +17,7 @@ export type CoveFamilyLookup = {
   coveFamilyPasscode: string
   gan: string
   balance: number
-  /** Lagoon / Tide — event refreshments + code marker (ends in 9). Reef is paid but not this perk. */
+  /** Lagoon / Tide. event refreshments + code marker (ends in 9). Reef is paid but not this perk. */
   paidMember: boolean
   membershipTier: string
   students: Array<{ id: string; firstName: string; lastName: string; grade?: string }>
@@ -38,7 +38,7 @@ export type PasscodeValidation =
   | { ok: true; passcode: string }
   | { ok: false; error: string }
 
-/** Rules: 6–24 letters/numbers, at least one letter. Case-insensitive. */
+/** Rules: 6-24 letters/numbers, at least one letter. Case-insensitive. */
 export function validateCovePasscode(raw: string): PasscodeValidation {
   const passcode = normalizePasscode(raw)
   if (passcode.length < PASSCODE_MIN) {
@@ -95,7 +95,7 @@ function randomCode(paidMember: boolean): string {
   // 6 digits, avoid leading zeros for easier verbal share
   const head = String(Math.floor(10000 + Math.random() * 90000)) // 5 digits
   if (paidMember) return head + PAID_MEMBER_CODE_SUFFIX
-  // Free: last digit 0–8 only
+  // Free: last digit 0-8 only
   const last = String(Math.floor(Math.random() * 9))
   return head + last
 }
@@ -349,7 +349,7 @@ export async function setCoveFamilyPasscode(
 }
 
 /**
- * Lookup by word passcode, short family PIN (4–8 digits), or Square gift-card GAN.
+ * Lookup by word passcode, short family PIN (4-8 digits), or Square gift-card GAN.
  * Square Stand / iPad scans encode the GAN only. no SHMSCOVE: prefix.
  */
 export async function lookupFamilyByCoveCode(rawCode: string): Promise<CoveFamilyLookup | null> {

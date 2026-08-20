@@ -10,7 +10,7 @@
 
 const OPT_OUT_KEY = 'shms_ga_opt_out'
 
-/** Personal / president identities — not board role mailboxes broadly. */
+/** Personal / president identities. not board role mailboxes broadly. */
 const OWNER_EMAILS = new Set([
   'gregory.robert.c@gmail.com',
   'president@shmspto.org',

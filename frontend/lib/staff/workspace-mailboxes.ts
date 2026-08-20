@@ -1,6 +1,6 @@
 /**
  * Google Workspace directory as of 19 Aug 2026 (all mailboxes Rob pasted).
- * Use this list when assigning Staff access — do not invent new EP aliases.
+ * Use this list when assigning Staff access. do not invent new EP aliases.
  */
 export type WorkspaceMailboxGroup = 'ep' | 'board' | 'cove' | 'person' | 'liaison'
 

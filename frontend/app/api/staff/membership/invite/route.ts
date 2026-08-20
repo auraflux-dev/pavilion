@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
     if (wixResetSent) parts.push('Wix set-password email sent.')
     if (gmailSent) parts.push('PTO email sent.')
     if (sendEmail && !emailed) {
-      parts.push('Email did not send — copy the link or SMS text below.')
+      parts.push('Email did not send. Copy the link or SMS text below.')
     } else if (!sendEmail) {
       parts.push('Link ready to copy / text.')
     }

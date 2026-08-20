@@ -5,7 +5,7 @@
  * 2. Same-origin CSRF guard for mutating API routes.
  * 3. Wix auth path rewrites after DNS cutover.
  *
- * Visitor Wix tokens are minted in auth routes (login/join/email/google), not here —
+ * Visitor Wix tokens are minted in auth routes (login/join/email/google), not here.
  * eager generateVisitorTokens on every first page hit burned Fluid Active CPU.
  */
 import { NextRequest, NextResponse } from 'next/server'
@@ -31,7 +31,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const demo = isDemoInstance()
 
-  // Commons platform tenants are private — login we issue, not a public school site.
+  // Commons platform tenants are private. login we issue, not a public school site.
   if (commonsRequiresLogin() && !isCommonsPublicPath(pathname)) {
     const commonsOk = hasBetterAuthCookie(req.cookies.getAll().map((c) => c.name))
     if (!commonsOk) {
@@ -94,7 +94,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // Printable payment cheat sheet on Stone Hill — no session (table QR / print).
+  // Printable payment cheat sheet on Stone Hill. no session (table QR / print).
   const staffPublic =
     !demo &&
     (pathname === '/staff/in-person' || pathname.startsWith('/staff/in-person/'))
@@ -125,7 +125,7 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Skip static assets, Next internals, and Vercel probes — they do not need
+     * Skip static assets, Next internals, and Vercel probes. they do not need
      * auth/CSRF and were inflating middleware Active CPU under Open House load.
      */
     '/((?!_next/static|_next/image|_vercel|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|woff2?)$).*)',

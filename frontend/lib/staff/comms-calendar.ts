@@ -1,5 +1,5 @@
 /**
- * Staff Comms Calendar — plan, draft, and track outbound communications
+ * Staff Comms Calendar. plan, draft, and track outbound communications
  * to parents, school staff (teachers/principal/admin), and the board.
  * Publishing still happens in Newsletter / Social / WhatsApp / email tools;
  * this is the shared schedule of record.
@@ -184,7 +184,7 @@ export function formatWeekLabel(weekStartIsoDate: string): string {
   if (Number.isNaN(start.getTime())) return weekStartIsoDate
   const end = addDays(start, 6)
   const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
-  return `${start.toLocaleDateString(undefined, opts)} – ${end.toLocaleDateString(undefined, {
+  return `${start.toLocaleDateString(undefined, opts)} to ${end.toLocaleDateString(undefined, {
     ...opts,
     year: 'numeric',
   })}`

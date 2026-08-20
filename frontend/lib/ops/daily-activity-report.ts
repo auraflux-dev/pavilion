@@ -273,7 +273,7 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
   const ticketTotal = ticketRows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
 
   const lines: string[] = [
-    `SHMS PTO daily activity — ${win.label} (US Eastern, midnight–midnight)`,
+    `SHMS PTO daily activity. ${win.label} (US Eastern, midnight-midnight)`,
     `Window: ${win.startIso} → ${win.endIso}`,
     'This is recorded actions (forms, checkouts, enrollments, staff work), then weekly pageviews for the last 7 Eastern days.',
     '',
@@ -397,7 +397,7 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
 
   return {
     window: win,
-    subject: `SHMS PTO daily activity — ${win.label} + weekly traffic`,
+    subject: `SHMS PTO daily activity. ${win.label} + weekly traffic`,
     body: lines.join('\n').replace(/\n{3,}/g, '\n\n'),
     counts,
   }

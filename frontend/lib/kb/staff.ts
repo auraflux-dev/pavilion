@@ -56,7 +56,7 @@ export const STAFF_KB: KbIndex = {
 ## First stops
 - **Home**: role onboarding checklists (Marketing / Secretary / Treasurer), personal email, activity notices
 - **Help**: this knowledge base
-- **Inbox / Calendar / Docs**. Connect Google once, then work stays in Staff
+- **Inbox / Calendar / Docs**: Connect Google once, then work stays in Staff
 - **Comms calendar**: plan parent / school / board messages and content
 - **Newsletter**: paid email and Weekly Scoop. Open Help → **Member newsletter (for Diane)**
 - **The Cove**: register + products when you run the snack window
@@ -212,7 +212,7 @@ Staff can adjust roster/waitlist from Programs when needed.`,
       categoryId: 'programs',
       summary: 'Sell tickets on /events; manage from Staff Events.',
       order: 4,
-      body: `Public tickets sell on **/events**. Staff **Events** manages listings, capacity, and ticket ops inside Staff.
+      body: `Public tickets sell on **/events**: Staff **Events** manages listings, capacity, and ticket ops inside Staff.
 
 Parents get purchase confirmation in portal messages (and email when Gmail send is connected).
 
@@ -239,7 +239,7 @@ Printable: **/staff/in-person**
 | Cash or card / wallet | **Stand** → Cash or Card → stop |
 | Cove **Photos QR** | **Stand** → Gift card → scan → stop |
 | Cove **6-digit or word passcode** | **Stand** → search Customer → **Card on File** → stop |
-| Unable to load cards | No Cove load yet — cash/card, or Staff Charge Cove backup |
+| Unable to load cards | No Cove load yet: cash/card, or Staff Charge Cove backup |
 | Portal already paid | **Today's store pickups** → Handed out |
 | Zelle / PayPal / phone (no Stand) | Staff → **External** |
 | Code ends in **9** | Lagoon/Tide free food ticket · no charge |
@@ -251,7 +251,7 @@ Printable: **/staff/in-person**
 1. Ring items
 2. Search Customer by **6-digit** or **passcode**
 3. Charge → **Card on File** → gift card
-4. Stop — do not also Charge Cove in Staff
+4. Stop. Do not also Charge Cove in Staff
 
 They must have loaded Cove in the portal at least once.
 
@@ -298,11 +298,11 @@ Never Charge Cove after Stand already took the same items.
    - **Cash** / **Card** for cash and tap
    - **Gift card** → scan Photos QR
    - Search **Customer** by 6-digit or passcode → **Card on File**
-3. Stop — do **not** also Charge Cove or External for the same items
+3. Stop. Do **not** also Charge Cove or External for the same items
 
 Cove balance is the Square gift card on file. Portal follows after redeem.
 
-If **Unable to load cards**, that family has not loaded Cove yet — take cash/card or Staff backup.
+If **Unable to load cards**, that family has not loaded Cove yet: take cash/card or Staff backup.
 
 Stand syncs to Staff Payments (inventory when SKU matches).
 
@@ -316,7 +316,7 @@ See **Cove in-person transactions manual** for the full decision table. Printabl
       order: 4,
       body: `In **The Cove**, use **Cove products** to add items, prices, barcodes, and restock quantities.
 
-Multiple staff can work products at once. **Spirit wear** stock is separate (Wix Stores / Cove shop merch + Square Stand items) — not the snack register catalog. In person, sell spirit on **Square Stand**; browse online under **/cove → Stingrays Pride**.
+Multiple staff can work products at once. **Spirit wear** stock is separate (Wix Stores / Cove shop merch + Square Stand items), not the snack register catalog. In person, sell spirit on **Square Stand**; browse online under **/cove → Stingrays Pride**.
 
 Use advanced inventory only when you need deeper stock tools. Day-to-day is products + register.`,
     },
@@ -367,7 +367,7 @@ Keep MoneyMinder / bank exports with Treasurer. Do not duplicate finance ledgers
       order: 3.5,
       need: 'marketing',
       body: `Watch the walkthrough video at the top of this article first.
-Then use the screenshots below — each one matches a section in Staff → Newsletter.
+Then use the screenshots below. Each one matches a section in Staff → Newsletter.
 
 Open: https://www.shmspto.org/staff (Newsletter workspace)
 
@@ -393,15 +393,15 @@ Do not paste HTML from Canva. Do not edit the design inside Staff. Use **Edit in
 ## Attach Canva and export PNG
 1. In Newsletter, paste a Canva view/edit link, or pick a recent design
 2. **Export PNG for email** (it also starts on attach if Canva is connected)
-3. Preview the graphic. Multi-page designs export **every page**. All pages stack in the email
+3. Preview the graphic. Multi-page designs export **every page**: All pages stack in the email
 4. **Save current as template** if you will reuse this
 
-![Templates (Canva + copy) — attach link, export PNG, multi-page preview, save template](/help/staff-newsletter/01-templates-canva.png)
+![Templates (Canva + copy). Attach link, export PNG, multi-page preview, save template](/help/staff-newsletter/01-templates-canva.png)
 
 ## Write the copy
 Type in the subject and body like a normal email.
 
-Optional: check **Write in beats**. Fill intro, Event, Ask, CTA, sign-off. Staff joins those into the body. You can still read the combined text.
+Optional: check **Write in beats**: Fill intro, Event, Ask, CTA, sign-off. Staff joins those into the body. You can still read the combined text.
 
 Personal bits you can type in subject or body:
 - {{firstName}} {{lastName}} {{name}}
@@ -416,39 +416,39 @@ If a name is missing, it becomes “there”.
 ## Always test first
 1. Pick **Just me**, **Board**, or **Board + Site Settings test list**
 2. **Preview test recipients**, then **Send test email**
-3. Subject gets **[TEST]**. It does **not** go to the parent portal archive
+3. Subject gets **[TEST]**: It does **not** go to the parent portal archive
 4. Open the test inbox and click a link once so you know tracking works
 
-![Test send — group, preview, send test email](/help/staff-newsletter/02-test-send.png)
+![Test send. Group, preview, send test email](/help/staff-newsletter/02-test-send.png)
 
 ## Choose the newsletter type
 - **Paid members (full email)**: default. Sends to paid roster only. Optional portal post for paid parents.
-- **Weekly Scoop (free monthly link)**: paste the Canva view link (or we use the attached Canva / https://www.shmspto.org/newsletter). Then **Copy + open WhatsApp** and **Post scoop to portal**. Optional: **Email scoop link** to free parents (checkbox to include footer signups).
+- **Weekly Scoop (free monthly link)**: paste the Canva view link (or we use the attached Canva / https://www.shmspto.org/newsletter). Then **Copy + open WhatsApp** and **Post scoop to portal**: Optional: **Email scoop link** to free parents (checkbox to include footer signups).
 - **Footer signup list only**: public form emails. No portal.
 
-![Newsletter type — Paid, Weekly Scoop, or footer signups](/help/staff-newsletter/03-newsletter-type.png)
+![Newsletter type. Paid, Weekly Scoop, or footer signups](/help/staff-newsletter/03-newsletter-type.png)
 
-![Weekly Scoop — link field and optional footer signups](/help/staff-newsletter/04-weekly-scoop.png)
+![Weekly Scoop. Link field and optional footer signups](/help/staff-newsletter/04-weekly-scoop.png)
 
-![Write in beats — intro, Event, Ask, CTA, sign-off](/help/staff-newsletter/05-beats.png)
+![Write in beats. Intro, Event, Ask, CTA, sign-off](/help/staff-newsletter/05-beats.png)
 
 ## Send paid email
 1. Confirm type is **Paid members**
 2. **Preview recipients**
-3. **Send email now**. Confirm the count. If 25 or more, type **SEND**
+3. **Send email now**: Confirm the count. If 25 or more, type **SEND**
 4. Check **Send report** for delivered, failed, opens, clicks
 
-![Send actions — Preview, Send email now, Copy + open WhatsApp](/help/staff-newsletter/08-send-actions.png)
+![Send actions. Preview, Send email now, Copy + open WhatsApp](/help/staff-newsletter/08-send-actions.png)
 
 ## Schedule or get approval
 1. Pick **Send at** (your local time)
-2. Marketing: **Request approval & schedule**. Secretary or president clicks **Approve**
+2. Marketing: **Request approval & schedule**: Secretary or president clicks **Approve**
 3. If you can approve, **Schedule send**
 4. Jobs send within about 15 minutes of that time. Cancel from the same list if needed
 
 Test sends stay one-click. They do not need this queue.
 
-![Schedule / approval — datetime, job list, Approve or Cancel](/help/staff-newsletter/07-schedule-approval.png)
+![Schedule / approval. Datetime, job list, Approve or Cancel](/help/staff-newsletter/07-schedule-approval.png)
 
 ## WhatsApp (including the graphic)
 WhatsApp cannot attach a file from the website.
@@ -474,7 +474,7 @@ Grade links live in **Site settings** (6th / 7th / 8th announcement links).
 After a live send, open **Send report** on the same Newsletter page.
 Refresh to see delivered, failed, opens, and top link clicks.
 
-![Send report — delivered, failed, opens, clicks](/help/staff-newsletter/09-send-report.png)
+![Send report. Delivered, failed, opens, clicks](/help/staff-newsletter/09-send-report.png)
 
 ## What not to do
 - Do not paste HTML or ask someone to “code the newsletter”
@@ -501,10 +501,10 @@ Questions: president@shmspto.org`,
 Progress is saved on your StaffRoles row so it follows you across devices.
 
 ## Tracks
-- **VP Marketing** — Google, Projects, Comms, Canva folder, Social, Newsletter, page copy, surveys
-- **Secretary** — Minutes, Comms, Board roster, Events, Newsletter
-- **Treasurer** — Budget (2026–27 planning worksheet), Payments, Expenses, Reports, MoneyMinder, Square
-- **Events / Programs / Retail / Membership / Wellness / Instructor / Coordinator** — role-specific workspaces
+- **VP Marketing**: Google, Projects, Comms, Canva folder, Social, Newsletter, page copy, surveys
+- **Secretary**: Minutes, Comms, Board roster, Events, Newsletter
+- **Treasurer**: Budget (2026-27 planning worksheet), Payments, Expenses, Reports, MoneyMinder, Square
+- **Events / Programs / Retail / Membership / Wellness / Instructor / Coordinator**: Role-specific workspaces
 
 See Drive doc **47 - Staff Role Onboarding** for the board-facing guide.`,
     },
@@ -517,19 +517,19 @@ See Drive doc **47 - Staff Role Onboarding** for the board-facing guide.`,
       body: `Open **Comms & content** for the shared month calendar.
 
 ## Two planners
-- **Communications** — email, WhatsApp, meetings to parents / school / board
-- **Content planner** — social posts, flyers, portal content
+- **Communications**: Email, WhatsApp, meetings to parents / school / board
+- **Content planner**: Social posts, flyers, portal content
 
 ## Views
-- **Month** — real calendar grid; click a day to schedule
-- **Agenda** — week list
+- **Month**: Real calendar grid; click a day to schedule
+- **Agenda**: Week list
 
 ## How to use it
 1. Pick Communications or Content planner
 2. Click a day on the month grid (or use Agenda)
 3. Add title, draft, audience(s), channel, and status
 4. Attach a Canva/Doc/Drive link
-5. When ready to send, open Newsletter / WA or Social — those tools still publish
+5. When ready to send, open Newsletter / WA or Social. Those tools still publish
 6. Click **Mark published** after the send
 
 Projects also has a **Calendar** tab for tasks by due date.
@@ -551,17 +551,17 @@ Do not post payment or private parent data. Link parents back to shmspto.org pag
       slug: 'where-form-emails-go',
       title: 'Where form emails go',
       categoryId: 'comms',
-      summary: 'Help, contact forms, sale alerts — which @shmspto.org inbox gets each.',
+      summary: 'Help, contact forms, sale alerts. Which @shmspto.org inbox gets each.',
       order: 6,
       need: 'message',
       body: `Use this when a parent asks who got their message, or when your inbox did or did not get an alert.
 
-All website and portal form mail sends from the shared SHMS PTO Gmail mailbox. **Reply-To** is usually the parent. Change destinations in **Staff → Site settings → Contact**. Dead aliases (info@, membership@, etc.) route to **president@**.
+All website and portal form mail sends from the shared SHMS PTO Gmail mailbox. **Reply-To** is usually the parent. Change destinations in **Staff → Site settings → Contact**: Dead aliases (info@, membership@, etc.) route to **president@**.
 
-Household adult invites also send from that mailbox, so a mistyped invitee address can bounce to **president@**. The portal asks the owner to type the email twice, blocks common misspellings (gmial, etc.), skips domains with no mail server, emails **the owner** a copy with a share link, and posts the same note in portal messages. A cron also scans bounce notices and emails the owner plus a portal message (so president@ is not the only alert). If a bounce still arrives, reply to the owner (Reply-To) rather than chasing the bad address.
+Household adult invites also send from that mailbox, so a mistyped invitee address can bounce to **president@**: The portal asks the owner to type the email twice, blocks common misspellings (gmial, etc.), skips domains with no mail server, emails **the owner** a copy with a share link, and posts the same note in portal messages. A cron also scans bounce notices and emails the owner plus a portal message (so president@ is not the only alert). If a bounce still arrives, reply to the owner (Reply-To) rather than chasing the bad address.
 
 ## Daily activity report
-Every morning at **6:00am Eastern during daylight time** (5:00am during standard time) president@ gets an email of **yesterday** (Eastern midnight–midnight): website forms and surveys, payments and event tickets, member portal students / memberships / enrollments / household invites / help / portal messages, staff tasks / minutes / outreach / audit, president inbox mail, and logged errors. Every report also includes **weekly traffic** (last 7 Eastern days ending yesterday): website vs member portal vs staff pageviews, unique-browser days, and top paths. Extra recipients: **Staff → Site settings → Contact → Daily activity report extra emails**.
+Every morning at **6:00am Eastern during daylight time** (5:00am during standard time) president@ gets an email of **yesterday** (Eastern midnight-midnight): website forms and surveys, payments and event tickets, member portal students / memberships / enrollments / household invites / help / portal messages, staff tasks / minutes / outreach / audit, president inbox mail, and logged errors. Every report also includes **weekly traffic** (last 7 Eastern days ending yesterday): website vs member portal vs staff pageviews, unique-browser days, and top paths. Extra recipients: **Staff → Site settings → Contact → Daily activity report extra emails**.
 
 ## Member Portal → Help (Ask the PTO)
 Goes to **all three**:
@@ -747,28 +747,28 @@ Square may keep a small processing fee on refunds. That is normal.
 
 Staff does not embed those consoles. Use them only for finance ops, then return to Staff for parent-facing and program work.
 
-Planning vs actual for the year lives in Staff → **Budget**. Full walkthrough: Help → **Staff planning budget (2026–27)**.`,
+Planning vs actual for the year lives in Staff → **Budget**: Full walkthrough: Help → **Staff planning budget (2026-27)**.`,
     },
     {
       slug: 'staff-budget',
-      title: 'Staff planning budget (2026–27)',
+      title: 'Staff planning budget (2026-27)',
       categoryId: 'admin',
-      summary: 'Plan vs actual for Treasurer. Not the ledger. Jul 1–Jun 30.',
+      summary: 'Plan vs actual for Treasurer. Not the ledger. Jul 1-Jun 30.',
       order: 7,
       body: `Open **Staff → Budget** (Treasurer and Admin). This is a **planning worksheet** so the board can see plan vs actual during the year.
 
 It is **not** the official books. MoneyMinder, Square, PayPal, and Bank of America stay the ledger. Staff Budget does not need to match them to the penny.
 
 ## Fiscal year
-**July 1, 2026 – June 30, 2027.**
+**July 1, 2026 to June 30, 2027.**
 
 ## Budgeted vs Actual
 - **Budgeted** is the plan. Edit the box on a line and tab away to save.
 - **Actual** is the sum of activity rows. Do not type over Actual. Add or move rows instead.
 
-Expense **budgeted** amounts for 2026–27 start from **FY 2025–26 checking spend** (July 1, 2025 – June 30, 2026), rounded.
+Expense **budgeted** amounts for 2026-27 start from **FY 2025-26 checking spend** (July 1, 2025 to June 30, 2026), rounded.
 
-- **Beautification / community project** is **$0**. Last year’s campus work was a one-off, not this year’s operating plan.
+- **Beautification / community project** is **$0**: Last year’s campus work was a one-off, not this year’s operating plan.
 - **Contingency $2,000** is a board cushion, not last year’s spend.
 - **Card processing $800** is about 3% of last year’s Square deposits. Those fees are taken by Square/PayPal and usually never appear as a checking withdrawal.
 - **Membership perk shirts** are **$0** on their own line because last year those shirts hit spirit-wear restock. Type a budget here if perk shirts are bought separately this year.
@@ -784,7 +784,7 @@ In BoA: checking → Activity → Download → **CSV** (not PDF). Upload it on t
 - Checks, ACH, Zelle, Sam’s, Amazon, Jumbula, insurance, and tools **do** import
 - Square and PayPal **payouts / transfers into checking are skipped** (same dollars as memberships / Cove / tickets, or the live PayPal feed)
 - Processor **fees** and card purchases (Apple, Square hardware, Adobe) still import
-- Debit charges on our own Square terminal (SQ *SHMSPTO) are skipped — those sales already live in Staff Payments
+- Debit charges on our own Square terminal (SQ *SHMSPTO) are skipped. Those sales already live in Staff Payments
 - Internal transfers are skipped
 - Re-importing the same file will not double-count
 - If you move a row to another line, a later re-import leaves that move alone
@@ -796,11 +796,11 @@ Pulls Square/PayPal **sales** already in Staff: memberships, Cove Digital loads,
 Typical month: download a fresh BoA CSV → import → **Refresh**.
 
 ## Using the page
-- Totals at the top: income, expense, net — budgeted vs actual, and remaining
+- Totals at the top: income, expense, net. Budgeted vs actual, and remaining
 - Click a line name to filter the activity log
 - Wrong category: change the line on the row in the activity log
 - **Record activity** is for beginning cash, a check, or a spirit night that never hit Square or the CSV
-- **Undo** removes a bank or keyed row. Staff sales come back on Refresh — recategorize those instead of deleting
+- **Undo** removes a bank or keyed row. Staff sales come back on Refresh. Recategorize those instead of deleting
 - **Download Excel** exports Summary, Budget, and Activity sheets
 
 Unclassified deposits/withdrawals are catch-alls. Move those rows to a real line.

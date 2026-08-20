@@ -396,7 +396,7 @@ export async function deleteBudgetEntry(id: string, fiscalYear: string): Promise
   const existing = (await client.items.get(BUDGET_ENTRIES_COLLECTION, id)) as Record<string, unknown>
   const origin = String(existing.origin ?? '')
   if (origin === 'auto-payment' || origin === 'auto-expense') {
-    throw new Error('Staff sales and reimbursements come back on Refresh from Staff — recategorize instead')
+    throw new Error('Staff sales and reimbursements come back on Refresh from Staff. Recategorize instead')
   }
   await client.items.remove(BUDGET_ENTRIES_COLLECTION, id)
   const entries = await listBudgetEntries(fiscalYear)

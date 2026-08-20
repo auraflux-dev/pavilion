@@ -1,5 +1,5 @@
 /**
- * POST /api/staff/canva/export — export Canva design as PNG, re-host for email.
+ * POST /api/staff/canva/export. export Canva design as PNG, re-host for email.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'

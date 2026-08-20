@@ -56,7 +56,7 @@ const sharedStart = (prefix: string): StaffOnboardingStep[] => [
   {
     id: `${prefix}_personal_email`,
     title: 'Save personal email on Home',
-    detail: 'Parent portal (students / Cove) uses personal Gmail — not @shmspto.org.',
+    detail: 'Parent portal (students / Cove) uses personal Gmail. Not @shmspto.org.',
     workspace: 'home',
     actionLabel: 'Go to Home',
     autoKey: 'personalEmail',
@@ -180,7 +180,7 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
       {
         id: 'sec_newsletter',
         title: 'Tour Newsletter / WhatsApp',
-        detail: 'Member sends and grade WhatsApp queue — often co-owned with Marketing.',
+        detail: 'Member sends and grade WhatsApp queue. Often co-owned with Marketing.',
         workspace: 'newsletter',
         actionLabel: 'Open Newsletter',
       },
@@ -191,13 +191,13 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
     role: 'treasurer',
     title: 'Treasurer onboarding',
     summary:
-      'Keep the 2026–27 planning budget, reconcile payments, clear expenses, and leave MoneyMinder / Square / bank as books of record.',
+      'Keep the 2026-27 planning budget, reconcile payments, clear expenses, and leave MoneyMinder / Square / bank as books of record.',
     steps: [
       ...sharedStart('tre'),
       {
         id: 'tre_budget',
-        title: 'Open the 2026–27 planning budget',
-        detail: '2026–27 is Jul 1–Jun 30. Expense budgets start from FY25 checking. Import a Bank of America CSV. Square/PayPal payouts already settle in checking. Not the ledger.',
+        title: 'Open the 2026-27 planning budget',
+        detail: '2026-27 is Jul 1-Jun 30. Expense budgets start from FY25 checking. Import a Bank of America CSV. Square/PayPal payouts already settle in checking. Not the ledger.',
         workspace: 'budget',
         actionLabel: 'Open Budget',
       },
@@ -225,7 +225,7 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
       {
         id: 'tre_moneyminder',
         title: 'Confirm MoneyMinder access',
-        detail: 'Official books stay in MoneyMinder — not duplicated in Staff.',
+        detail: 'Official books stay in MoneyMinder. Not duplicated in Staff.',
         externalHref: 'https://www.moneyminder.com/',
         actionLabel: 'Open MoneyMinder',
       },
@@ -269,7 +269,7 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
       {
         id: 'evt_wellness',
         title: 'Know Wellness partnership',
-        detail: 'Teacher appreciation often pairs with Events — skim Wellness tools.',
+        detail: 'Teacher appreciation often pairs with Events. Skim Wellness tools.',
         workspace: 'wellness',
         actionLabel: 'Open Wellness',
       },
@@ -344,7 +344,7 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
       {
         id: 'rtl_discounts',
         title: 'Review Discount codes',
-        detail: 'Coupons for checkout / spirit — coordinate with Treasurer.',
+        detail: 'Coupons for checkout / spirit. Coordinate with Treasurer.',
         workspace: 'discounts',
         actionLabel: 'Open Discounts',
       },
@@ -381,7 +381,7 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
       {
         id: 'mem_tiers',
         title: 'Review Membership tiers',
-        detail: 'Reef · Lagoon · Tide map — Catalog still owns paid display copy.',
+        detail: 'Reef · Lagoon · Tide map. Catalog still owns paid display copy.',
         workspace: 'tiers',
         actionLabel: 'Open Membership tiers',
       },
@@ -425,7 +425,7 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
       {
         id: 'wel_events',
         title: 'Partner with Events',
-        detail: 'Appreciation often runs through Events — know the Events board.',
+        detail: 'Appreciation often runs through Events. Know the Events board.',
         workspace: 'events',
         actionLabel: 'Open Events',
       },

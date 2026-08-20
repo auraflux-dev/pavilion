@@ -87,7 +87,7 @@ export default async function MembershipPage() {
 
         <MembershipPortalCallouts lines={sharedBenefits} />
 
-        {/* Faculty membership — Stone Hill only */}
+        {/* Faculty membership. Stone Hill only */}
         {commons ? null : <section id="faculty" className="scroll-mt-28 py-14" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-2xl p-6 lg:p-8 border border-[var(--border)] flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-10">
