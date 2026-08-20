@@ -38,3 +38,7 @@ tmp/
 
 .DS_Store
 **/.DS_Store
+
+# Local Commons sales exports (ProPublica prospects)
+scripts/sales/out/
+
