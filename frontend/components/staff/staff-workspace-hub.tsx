@@ -270,10 +270,10 @@ export function StaffWorkspaceHub({ tab }: { tab: HubTab }) {
 
  const loadDocs = useCallback(async () => {
     const r = await fetch('/api/staff/workspace/docs')
- const d = await r.json()
- if (!r.ok) throw new Error(d.error ?? 'Docs failed')
- setDocs(d.files ?? [])
- }, [])
+    const d = (await r.json().catch(() => ({}))) as { error?: string; files?: DocFile[] }
+    if (!r.ok) throw new Error(d.error ?? `Docs failed (${r.status})`)
+    setDocs(d.files ?? [])
+  }, [])
 
  useEffect(() => {
  if (searchParams.get('google') !== 'connected') return

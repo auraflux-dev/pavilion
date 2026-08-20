@@ -10,7 +10,7 @@ scripts/shots
 frontend/tsconfig.tsbuildinfo
 .git
 promo-videos
-docs
+/docs
 out
 frontend/out
 *.mp4
