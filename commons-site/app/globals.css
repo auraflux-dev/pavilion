@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f3efe6;
+  --paper-deep: #e8e1d4;
+  --ink: #12231f;
+  --ink-muted: #3d4f49;
+  --accent: #0f6b5c;
+  --accent-soft: #c5ddd6;
+  --line: #cfc6b6;
+  --hero-glow: #1a4a42;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+@theme inline {
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+.hero-plane {
+  background:
+    radial-gradient(1200px 600px at 70% 10%, rgba(15, 107, 92, 0.35), transparent 55%),
+    linear-gradient(160deg, #0d2a26 0%, #163f38 42%, #1f4f46 100%);
+}
