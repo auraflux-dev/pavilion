@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import { Analytics } from '@vercel/analytics/next'
 import { Inter, Merriweather } from 'next/font/google'
 import { GaAuthBridge } from '@/components/ga-auth-bridge'
 import { GoogleAnalytics } from '@/components/google-analytics'
+import { SiteAnalytics } from '@/components/site-analytics'
 import { TrafficBeacon } from '@/components/traffic-beacon'
 import { DemoBanner } from '@/components/demo/demo-banner'
 import { CommonsSurfaceShell } from '@/components/demo/commons-surface-shell'
@@ -92,7 +92,7 @@ export default function RootLayout({
         </CommonsSurfaceShell>
         <TrafficBeacon />
         <GaAuthBridge />
-        <Analytics />
+        <SiteAnalytics />
         <GoogleAnalytics />
       </body>
     </html>

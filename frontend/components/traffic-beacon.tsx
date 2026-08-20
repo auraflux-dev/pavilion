@@ -2,16 +2,19 @@
 
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { useAuth } from '@/lib/hooks/use-auth'
+import { shouldExcludeAnalytics } from '@/lib/ga-exclude'
 
 /** Sends an anonymous pageview so Monday’s activity email can include weekly traffic. */
 export function TrafficBeacon() {
   const pathname = usePathname()
+  const { status, isStaff } = useAuth()
 
   useEffect(() => {
     if (!pathname) return
-    if (typeof window !== 'undefined' && /localhost|127\.0\.0\.1/.test(window.location.hostname)) {
-      return
-    }
+    if (status === 'loading') return
+    if (shouldExcludeAnalytics({ isStaff, pathname })) return
+
     const ctrl = new AbortController()
     const t = window.setTimeout(() => {
       void fetch('/api/ops/pageview', {
@@ -26,7 +29,7 @@ export function TrafficBeacon() {
       window.clearTimeout(t)
       ctrl.abort()
     }
-  }, [pathname])
+  }, [pathname, status, isStaff])
 
   return null
 }
