@@ -187,9 +187,14 @@ export function PortalCardCheckout({
     payBody.kind === 'membership' || payBody.kind === 'program' || payBody.kind === 'event'
   const showConsentUi = needsConsent && !prefilledConsents?.length
   const due = quote?.amount ?? amount
-  const cardDue = payBody.kind === 'product' ? Number(quote?.cardDollars ?? due) : due
+  /** Wait for product quote before mounting Square; otherwise cardDue falls back to list price and attach races the DOM. */
+  const productAwaitingQuote = payBody.kind === 'product' && quote == null
+  const cardDue =
+    payBody.kind === 'product'
+      ? Number(quote?.cardDollars ?? (productAwaitingQuote ? 0 : due))
+      : due
   const coveDue = payBody.kind === 'product' ? Number(quote?.coveDollars ?? 0) : 0
-  const needsCard = cardDue >= 1
+  const needsCard = !productAwaitingQuote && cardDue >= 1
   const nameReady = !needsName || (firstName.trim().length > 0 && lastName.trim().length > 0)
 
   const onConsentChange = useCallback((acks: ConsentAck[] | null, complete: boolean) => {
@@ -283,6 +288,10 @@ export function PortalCardCheckout({
       setReady(false)
     }
   }, [open, config, useStored, containerId, needsCard])
+
+  useEffect(() => {
+    if (!needsCard) setError('')
+  }, [needsCard])
 
   async function ensureParentNameSaved() {
     if (!needsName) return
