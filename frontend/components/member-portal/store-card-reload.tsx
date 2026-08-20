@@ -5,6 +5,7 @@ import { CreditCard, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PortalPayPalButtons } from '@/components/checkout/portal-paypal-buttons'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
 
 type Student = {
   id: string
@@ -56,6 +57,7 @@ export function StoreCardReload({
   triggerClassName = '',
   bonusPercent = 10,
 }: Props) {
+  const { allowed, loading, note } = useLiveCommerceGate()
   const [studentList, setStudentList] = useState(students)
   const [open, setOpen] = useState(false)
   const [studentId, setStudentId] = useState(students[0]?.id ?? '')
@@ -242,6 +244,15 @@ export function StoreCardReload({
     } finally {
       setBusy(false)
     }
+  }
+
+  if (loading) return null
+  if (!allowed) {
+    return (
+      <p className="text-xs text-[#5A6070] whitespace-pre-line">
+        {note || 'Live card loads stay off until Square is connected.'}
+      </p>
+    )
   }
 
   if (!open) {

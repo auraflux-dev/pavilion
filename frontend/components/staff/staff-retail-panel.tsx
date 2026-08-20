@@ -3,6 +3,7 @@
 import { StaffCoveRegister } from '@/components/staff/staff-cove-register'
 import { StaffCoveProductsPanel } from '@/components/staff/staff-cove-products-panel'
 import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection-panel'
+import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
 import { CreditCard, Smartphone } from 'lucide-react'
 
 /**
@@ -10,6 +11,8 @@ import { CreditCard, Smartphone } from 'lucide-react'
  * Stock/catalog is a separate admin block far below so table staff do not confuse it with ringing.
  */
 export function StaffRetailPanel() {
+  const { allowed: liveCommerce } = useLiveCommerceGate()
+
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -48,16 +51,20 @@ export function StaffRetailPanel() {
         <a href="#cove-store-pickups" className="font-bold underline" style={{ color: 'var(--brand-green)' }}>
           Today&apos;s store pickups
         </a>
-        {' · '}
-        <a
-          href="/staff/in-person"
-          target="_blank"
-          rel="noreferrer"
-          className="font-bold underline"
-          style={{ color: 'var(--brand-green)' }}
-        >
-          Print table card
-        </a>
+        {liveCommerce ? (
+          <>
+            {' · '}
+            <a
+              href="/staff/in-person"
+              target="_blank"
+              rel="noreferrer"
+              className="font-bold underline"
+              style={{ color: 'var(--brand-green)' }}
+            >
+              Print table card
+            </a>
+          </>
+        ) : null}
         {' · '}
         <a
           href="/staff?view=help&article=cove-in-person-manual"
@@ -68,7 +75,11 @@ export function StaffRetailPanel() {
         </a>
       </p>
 
-      <StaffCoveRegister />
+      {liveCommerce ? <StaffCoveRegister /> : (
+        <p className="text-sm text-[#5A6070] whitespace-pre-line">
+          Connect Square in Staff → Payments to use the register and in-person POS.
+        </p>
+      )}
 
       {/* Hard separation: sell surface ends above. Catalog is admin-only. */}
       <div

@@ -14,6 +14,7 @@ import {
   type MembershipShirtSelection,
 } from '@/components/membership/membership-shirt-picker'
 import { tierNeedsShirtSize } from '@/lib/membership-entitlements'
+import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
 
@@ -33,6 +34,7 @@ function JoinInner({ tierId, tierName, price }: Props) {
   const [quoteError, setQuoteError] = useState<string | null>(null)
   const [shirt, setShirt] = useState<MembershipShirtSelection | null>(null)
   const needsShirt = tierNeedsShirtSize(tierId)
+  const { allowed, loading: commerceLoading, note } = useLiveCommerceGate()
 
   useEffect(() => {
     let cancelled = false
@@ -103,6 +105,14 @@ function JoinInner({ tierId, tierName, price }: Props) {
     if (cur > 0 && next > cur) return 'upgrade' as const
     return 'join' as const
   }, [currentTier, target])
+
+  if (!allowed && !commerceLoading) {
+    return (
+      <p className="text-xs text-[#5A6070] whitespace-pre-line">
+        {note || 'Online membership checkout stays off until Square is connected.'}
+      </p>
+    )
+  }
 
   if (relation === 'current' || quoteError?.toLowerCase().includes('already have')) {
     return (

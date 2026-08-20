@@ -50,7 +50,8 @@ import { StaffPersonalEmailPanel } from '@/components/staff/staff-personal-email
 import { StaffShell } from '@/components/shells/staff-shell'
 import { StaffTrialBanner } from '@/components/staff/staff-trial-banner'
 import { StaffCustomDomainPanel } from '@/components/staff/staff-custom-domain-panel'
-import { filterCommonsDemoWorkspaces } from '@/lib/demo/commons-surface'
+import { filterCommonsDemoWorkspaces, filterHiddenStaffWorkspaces } from '@/lib/demo/commons-surface'
+import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 import { trackLogin } from '@/lib/ga'
 
@@ -197,6 +198,7 @@ export function StaffDashboard() {
   const canWellness = staffCanWorkspace(me, 'wellness')
   const canNewsletter = staffCanWorkspace(me, 'newsletter')
   const canComms = staffCanWorkspace(me, 'comms')
+  const { hiddenStaffWorkspaces } = useLiveCommerceGate()
 
   const navItems = useMemo(() => {
     if (!me) return []
@@ -242,10 +244,12 @@ export function StaffDashboard() {
       items.push({ id: 'reports', label: STAFF_WORKSPACE_LABEL.reports })
     }
     items.push({ id: 'help', label: STAFF_WORKSPACE_LABEL.help })
-    const allowed = new Set(filterCommonsDemoWorkspaces(items.map((i) => i.id)))
+    const demoFiltered = filterCommonsDemoWorkspaces(items.map((i) => i.id))
+    const allowed = new Set(filterHiddenStaffWorkspaces(demoFiltered, hiddenStaffWorkspaces))
     return items.filter((i) => allowed.has(i.id))
   }, [
     me,
+    hiddenStaffWorkspaces,
     canMarketing,
     canSurveys,
     canMessage,

@@ -1,4 +1,8 @@
 import { NextResponse } from 'next/server'
+import {
+  COMMONS_DEMO_ALLOWED_STAFF_GET,
+  isCommonsDemoHiddenPath,
+} from '@/lib/demo/commons-surface'
 
 export const DEMO_WRITE_MESSAGE =
   'Preview only. Demo does not save, charge, or email. Nothing is written to a live school.'
@@ -31,18 +35,13 @@ export function isDemoJoinAllowPath(pathname: string): boolean {
   return false
 }
 
-const STAFF_GET_ALLOW = new Set([
-  '/api/staff/me',
-  '/api/staff/onboarding',
-  '/api/staff/site-settings',
-  '/api/staff/page-content',
-])
+const STAFF_GET_ALLOW = new Set(COMMONS_DEMO_ALLOWED_STAFF_GET)
 
 /** Staff/portal routes that would expose Stone Hill families, money, or mail. */
 export function isDemoPiiPath(pathname: string): boolean {
   if (pathname.startsWith('/api/staff/') && !STAFF_GET_ALLOW.has(pathname)) return true
   if (pathname.startsWith('/api/portal/')) return true
   if (pathname.startsWith('/api/students')) return true
-  if (pathname.startsWith('/api/gift-card')) return true
+  if (isCommonsDemoHiddenPath(pathname) && pathname.startsWith('/api/')) return true
   return false
 }

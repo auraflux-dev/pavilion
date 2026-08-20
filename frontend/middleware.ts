@@ -21,6 +21,7 @@ import {
 } from '@/lib/demo/guard'
 import { hasBetterAuthCookie, isCommonsPlatformHost } from '@/lib/crm/auth-edge'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { isCommonsDemoHiddenPath } from '@/lib/demo/commons-surface'
 import { demoPiiStub } from '@/lib/demo/seed'
 
 const PROTECTED_ROUTES = ['/member-portal', '/staff']
@@ -29,7 +30,11 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const demo = isDemoInstance()
 
-  if (demo && (pathname === '/staff/in-person' || pathname.startsWith('/staff/in-person/'))) {
+  if (demo && isCommonsDemoHiddenPath(pathname)) {
+    if (pathname.startsWith('/api/')) {
+      if (isWriteMethod(req.method)) return demoWriteResponse()
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
     return new NextResponse('Not found', { status: 404 })
   }
 

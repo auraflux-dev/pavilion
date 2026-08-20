@@ -5,6 +5,7 @@ import { GaAuthBridge } from '@/components/ga-auth-bridge'
 import { GoogleAnalytics } from '@/components/google-analytics'
 import { TrafficBeacon } from '@/components/traffic-beacon'
 import { DemoBanner } from '@/components/demo/demo-banner'
+import { CommonsSurfaceShell } from '@/components/demo/commons-surface-shell'
 import { DEMO_BRAND } from '@/lib/demo/brand'
 import { isDemoInstance, publicSiteUrl } from '@/lib/demo/instance'
 import './globals.css'
@@ -13,6 +14,8 @@ const _inter = Inter({ subsets: ['latin'] })
 const _merriweather = Merriweather({ subsets: ['latin'], weight: ['400', '700', '900'] })
 
 const demo = isDemoInstance()
+const surfaceShell =
+  demo || process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
 const siteUrl = publicSiteUrl()
 
 export const metadata: Metadata = {
@@ -83,8 +86,10 @@ export default function RootLayout({
         ) : null}
       </head>
       <body className="font-sans antialiased text-foreground">
-        <DemoBanner />
-        {children}
+        <CommonsSurfaceShell enabled={surfaceShell}>
+          <DemoBanner />
+          {children}
+        </CommonsSurfaceShell>
         <TrafficBeacon />
         <GaAuthBridge />
         <Analytics />

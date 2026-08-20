@@ -6,10 +6,40 @@ import {
   resolveStaffForSession,
   type StaffProfile,
 } from '@/lib/staff/roles'
+import { commonsStaffProfile, loadCommonsStaffJson } from '@/lib/crm/commons-staff'
+import { isCommonsPlatformHost } from '@/lib/crm/auth-edge'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { demoStaffProfile, getDemoReviewSession } from '@/lib/demo/session'
 
+function commonsStaffSession(
+  commons: NonNullable<Awaited<ReturnType<typeof loadCommonsStaffJson>>>,
+) {
+  const staff = commonsStaffProfile(commons)
+  const [firstName = '', ...rest] = commons.name.split(' ')
+  const lastName = rest.join(' ')
+  return {
+    email: commons.email,
+    emails: [commons.email],
+    memberId: `commons:${commons.email}`,
+    member: {
+      _id: `commons:${commons.email}`,
+      loginEmail: commons.email,
+      contact: { firstName, lastName },
+      profile: {},
+    },
+    tokens: null,
+    oauthClient: null,
+    staff,
+    commons: true as const,
+  }
+}
+
 export async function getStaffSession(req: NextRequest) {
+  if (isCommonsPlatformHost()) {
+    const commons = await loadCommonsStaffJson(req)
+    if (commons) return commonsStaffSession(commons)
+  }
+
   if (isDemoInstance()) {
     const demo = getDemoReviewSession(req)
     if (demo && (demo.lane === 'staff' || demo.lane === 'both')) {

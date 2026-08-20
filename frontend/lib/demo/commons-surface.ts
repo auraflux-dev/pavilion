@@ -15,6 +15,15 @@ export const COMMONS_DEMO_HIDDEN_WORKSPACES: StaffWorkspace[] = [
   'social',
 ]
 
+/** Hidden on Commons trial/platform until Square OAuth is connected. */
+export const COMMONS_COMMERCE_GATED_WORKSPACES: StaffWorkspace[] = [
+  'payments',
+  'retail',
+  'discounts',
+  'budget',
+  'timesheets',
+]
+
 /** Paths that must 404 or stay stubbed on the sample demo (not a trial tenant). */
 export const COMMONS_DEMO_HIDDEN_PATHS = [
   '/staff/in-person',
@@ -33,15 +42,37 @@ export const COMMONS_DEMO_ALLOWED_STAFF_GET = [
   '/api/staff/onboarding',
   '/api/staff/site-settings',
   '/api/staff/page-content',
+  '/api/staff/activity',
+  '/api/commons/surface',
+  '/api/commons/trial/status',
+  '/api/commons/domain',
+  '/api/commons/sync-status',
 ]
 
-export function hideLiveCommerceUi(): boolean {
+export function isDemoSurface(): boolean {
   return isPublicDemoInstance() || isDemoInstance()
 }
 
+/** @deprecated Prefer useLiveCommerceGate() in client components. */
+export function hideLiveCommerceUi(): boolean {
+  return isDemoSurface()
+}
+
+export function filterSurfaceWorkspaces(ids: StaffWorkspace[]): StaffWorkspace[] {
+  return [...new Set(ids)]
+}
+
 export function filterCommonsDemoWorkspaces(ids: StaffWorkspace[]): StaffWorkspace[] {
-  if (!isPublicDemoInstance() && !isDemoInstance()) return ids
+  if (!isDemoSurface()) return ids
   const hidden = new Set(COMMONS_DEMO_HIDDEN_WORKSPACES)
+  return ids.filter((id) => !hidden.has(id))
+}
+
+export function filterHiddenStaffWorkspaces(
+  ids: StaffWorkspace[],
+  extraHidden: StaffWorkspace[],
+): StaffWorkspace[] {
+  const hidden = new Set(extraHidden)
   return ids.filter((id) => !hidden.has(id))
 }
 

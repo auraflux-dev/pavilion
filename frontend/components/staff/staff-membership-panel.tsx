@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { displayMembershipTier } from '@/lib/demo/brand'
+import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
 
 type StudentRow = {
   id: string
@@ -35,6 +36,7 @@ type Summary = {
  * VP Memberships workspace: roster + contact info, portal/email blast, WhatsApp group compose.
  */
 export function StaffMembershipPanel() {
+  const { allowed: liveCommerce } = useLiveCommerceGate()
   const [members, setMembers] = useState<ParentRow[]>([])
   const [summary, setSummary] = useState<Summary | null>(null)
   const [q, setQ] = useState('')
@@ -325,6 +327,7 @@ export function StaffMembershipPanel() {
               text to paste from your phone. Parents can also scan the QR.
             </p>
           </div>
+          {liveCommerce ? (
           <a
             href="/staff/in-person"
             target="_blank"
@@ -334,6 +337,7 @@ export function StaffMembershipPanel() {
           >
             Print table card
           </a>
+          ) : null}
         </div>
 
         <div className="grid gap-4 md:grid-cols-[1fr_auto]">

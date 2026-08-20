@@ -20,3 +20,10 @@ At the **start of a session** (or first message of the day): run `node scripts/c
 Plaid stays on the **Trial** account until there are paying Commons clients. Do not buy a 100-Item Production plan for the demo.
 
 Vanillaize / demo gates still apply on the Commons project. Do not copy Stone Hill PII into the demo database.
+
+After a Commons-facing ship, run `node scripts/commons-surface-check.mjs` (also runs inside `commons-parity.mjs`). Agent checklist on the demo:
+
+- Staff nav hides live-money workspaces (payments, retail, inbox, newsletter, …).
+- Member load / membership checkout CTAs respect `/api/commons/surface` (off on demo; off on trial until Square).
+- `/staff/in-person` and hidden API paths 404 or stub on demo.
+- No new `shmspto.org` treasurer copy on visitor/demo surfaces without vanillaize.
