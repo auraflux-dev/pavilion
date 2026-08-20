@@ -840,6 +840,11 @@ export function StaffDashboard() {
             <StaffWhatsAppQueuePanel />
             <StaffNewsletterPanel />
             <StaffCmsCollectionPanel
+              collection="NewsletterSends"
+              title="Send stats (opens & clicks)"
+              sectionId="newsletter-send-stats"
+            />
+            <StaffCmsCollectionPanel
               collection="Newsletters"
               title="Newsletter archive → portal Messages"
               sectionId="newsletter-archive"

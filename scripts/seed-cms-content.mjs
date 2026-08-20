@@ -1045,6 +1045,83 @@ async function upsertStaffRoles() {
   }
 }
 
+async function ensureNewsletterTemplatesCollection() {
+  try {
+    await wix('/wix-data/v2/collections', {
+      collection: {
+        id: 'NewsletterTemplates',
+        displayName: 'Newsletter Templates',
+        fields: [
+          { key: 'name', displayName: 'Name', type: 'TEXT' },
+          { key: 'subject', displayName: 'Subject', type: 'TEXT' },
+          { key: 'body', displayName: 'Body', type: 'TEXT' },
+          { key: 'utmCampaign', displayName: 'UTM Campaign', type: 'TEXT' },
+          { key: 'canvaDesignId', displayName: 'Canva Design Id', type: 'TEXT' },
+          { key: 'canvaTitle', displayName: 'Canva Title', type: 'TEXT' },
+          { key: 'canvaEditUrl', displayName: 'Canva Edit URL', type: 'TEXT' },
+          { key: 'canvaViewUrl', displayName: 'Canva View URL', type: 'TEXT' },
+          { key: 'canvaThumbnailUrl', displayName: 'Canva Thumbnail URL', type: 'TEXT' },
+          { key: 'updatedAt', displayName: 'Updated At', type: 'DATETIME' },
+          { key: 'createdByEmail', displayName: 'Created By Email', type: 'TEXT' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+        ],
+        permissions: {
+          insert: 'ADMIN',
+          update: 'ADMIN',
+          remove: 'ADMIN',
+          read: 'ADMIN',
+        },
+      },
+    })
+    console.log('Created NewsletterTemplates collection')
+  } catch (err) {
+    if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
+      console.log('NewsletterTemplates collection already exists')
+      return
+    }
+    console.warn('NewsletterTemplates create skipped:', err.message.slice(0, 200))
+  }
+}
+
+async function ensureNewsletterSendsCollection() {
+  try {
+    await wix('/wix-data/v2/collections', {
+      collection: {
+        id: 'NewsletterSends',
+        displayName: 'Newsletter Sends',
+        fields: [
+          { key: 'templateId', displayName: 'Template Id', type: 'TEXT' },
+          { key: 'subject', displayName: 'Subject', type: 'TEXT' },
+          { key: 'body', displayName: 'Body', type: 'TEXT' },
+          { key: 'linksJson', displayName: 'Links JSON', type: 'TEXT' },
+          { key: 'utmCampaign', displayName: 'UTM Campaign', type: 'TEXT' },
+          { key: 'tier', displayName: 'Tier', type: 'TEXT' },
+          { key: 'grade', displayName: 'Grade', type: 'TEXT' },
+          { key: 'recipientCount', displayName: 'Recipient Count', type: 'NUMBER' },
+          { key: 'openCount', displayName: 'Open Count', type: 'NUMBER' },
+          { key: 'clickCount', displayName: 'Click Count', type: 'NUMBER' },
+          { key: 'sentAt', displayName: 'Sent At', type: 'DATETIME' },
+          { key: 'sentByEmail', displayName: 'Sent By Email', type: 'TEXT' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+        ],
+        permissions: {
+          insert: 'ADMIN',
+          update: 'ADMIN',
+          remove: 'ADMIN',
+          read: 'ADMIN',
+        },
+      },
+    })
+    console.log('Created NewsletterSends collection')
+  } catch (err) {
+    if (err.status === 409 || /already exists|ALREADY_EXISTS/i.test(String(err.message))) {
+      console.log('NewsletterSends collection already exists')
+      return
+    }
+    console.warn('NewsletterSends create skipped:', err.message.slice(0, 200))
+  }
+}
+
 async function main() {
   await ensurePageContentCollection()
   await ensureParentMessagesCollection()
@@ -1059,6 +1136,8 @@ async function main() {
   await ensureStaffProjectsCollection()
   await ensureStaffTasksCollection()
   await ensureCommsCalendarItemsCollection()
+  await ensureNewsletterTemplatesCollection()
+  await ensureNewsletterSendsCollection()
   await upsertSiteSettings()
   await upsertPageContent()
   await upsertSurveys()

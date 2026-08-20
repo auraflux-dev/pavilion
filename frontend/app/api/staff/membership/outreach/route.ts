@@ -19,6 +19,9 @@ import {
   type GradeWhatsAppLinks,
   type WhatsAppGrade,
 } from '@/lib/staff/whatsapp-compose'
+import { defaultUtmCampaign } from '@/lib/staff/newsletter-utm'
+import { prepareTrackedNewsletterSend } from '@/lib/staff/newsletter-tracking'
+import { buildNewsletterHtml } from '@/lib/staff/newsletter-html'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -168,6 +171,13 @@ export async function POST(req: NextRequest) {
     const customEmails = Array.isArray(body.emails)
       ? body.emails.map((e: unknown) => String(e))
       : []
+    const utmCampaign = defaultUtmCampaign(subject, String(body.utmCampaign ?? '').trim())
+    const trackClicks = body.trackClicks !== false
+    const trackOpens = body.trackOpens === true
+    const templateId = String(body.templateId ?? '').trim()
+    const canvaViewUrl = String(body.canvaViewUrl ?? '').trim()
+    const canvaThumbnailUrl = String(body.canvaThumbnailUrl ?? '').trim()
+    const canvaTitle = String(body.canvaTitle ?? '').trim()
 
     if (channel === 'whatsapp') {
       const links = await loadWhatsAppLinks()
@@ -195,12 +205,53 @@ export async function POST(req: NextRequest) {
     )
 
     if (channel === 'email') {
-      const draft = {
+      let outboundBody = message
+      let archiveBody = message
+      let newsletterSendId: string | null = null
+
+      const draftBase = {
         subject,
-        body: message,
         fromName: session.staff.name || session.staff.boardTitle || session.email,
         replyTo: session.email,
         recipients,
+      }
+
+      if (!dryRun) {
+        try {
+          const prepared = await prepareTrackedNewsletterSend({
+            body: message,
+            utm: { campaign: utmCampaign, source: 'newsletter', medium: 'email' },
+            trackClicks,
+            sentByEmail: session.email,
+            subject,
+            tier,
+            grade,
+            templateId: templateId || undefined,
+            recipientCount: recipients.length,
+          })
+          outboundBody = prepared.bodyForSend
+          archiveBody = prepared.bodyForArchive
+          newsletterSendId = prepared.sendId
+        } catch (err) {
+          console.warn('[outreach] newsletter tracking setup failed', err)
+        }
+      }
+
+      const html =
+        !dryRun && newsletterSendId
+          ? buildNewsletterHtml({
+              textBody: outboundBody,
+              sendId: trackOpens || canvaThumbnailUrl ? newsletterSendId : undefined,
+              canvaViewUrl: canvaViewUrl || undefined,
+              canvaThumbnailUrl: canvaThumbnailUrl || undefined,
+              canvaTitle: canvaTitle || undefined,
+            })
+          : undefined
+
+      const draft = {
+        ...draftBase,
+        body: dryRun ? message : outboundBody,
+        html,
       }
       const validation = validateMassEmailDraft(draft)
       if (validation) {
@@ -226,7 +277,7 @@ export async function POST(req: NextRequest) {
                 programName: null,
                 fromName: draft.fromName,
                 subject,
-                body: message,
+                body: archiveBody,
                 sentAt: new Date().toISOString(),
                 active: true,
               })
@@ -241,7 +292,7 @@ export async function POST(req: NextRequest) {
               programName: null,
               fromName: draft.fromName,
               subject,
-              body: message,
+              body: archiveBody,
               sentAt: new Date().toISOString(),
               active: true,
             })
@@ -252,7 +303,7 @@ export async function POST(req: NextRequest) {
         }
         newsletterArchived = await archiveNewsletter({
           title: subject,
-          body: message,
+          body: archiveBody,
           fromName: draft.fromName,
           tier,
           grade,
@@ -270,6 +321,9 @@ export async function POST(req: NextRequest) {
         send: sendResult,
         portalInserted,
         newsletterArchived,
+        utmCampaign,
+        newsletterSendId,
+        trackClicks: !dryRun && trackClicks,
       })
     }
 

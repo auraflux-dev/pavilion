@@ -32,6 +32,8 @@ export const BACKUP_COLLECTIONS = [
   'FamilyGuardians',
   'SiteTrafficDaily',
   'Newsletters',
+  'NewsletterTemplates',
+  'NewsletterSends',
   'PortalCalendarEvents',
   'StaffRoles',
   'StaffTasks',

@@ -1,0 +1,296 @@
+'use client'
+
+import { useCallback, useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { parseCanvaDesignUrl } from '@/lib/canva/parse-design-url'
+import type { CanvaDesign } from '@/lib/canva/client'
+
+export type NewsletterCanvaMeta = {
+  canvaDesignId?: string
+  canvaTitle?: string
+  canvaEditUrl?: string
+  canvaViewUrl?: string
+  canvaThumbnailUrl?: string
+}
+
+export type NewsletterTemplateRow = {
+  id: string
+  name: string
+  subject: string
+  body: string
+  utmCampaign: string
+  canvaDesignId: string
+  canvaTitle: string
+  canvaEditUrl: string
+  canvaViewUrl: string
+  canvaThumbnailUrl: string
+  updatedAt: string
+}
+
+type Props = {
+  subject: string
+  body: string
+  utmCampaign: string
+  canvaMeta: NewsletterCanvaMeta
+  onCanvaMetaChange: (meta: NewsletterCanvaMeta) => void
+  onLoad: (tpl: {
+    subject: string
+    body: string
+    utmCampaign: string
+    canvaViewUrl: string
+    canvaThumbnailUrl: string
+    canvaTitle: string
+    canvaDesignId: string
+    canvaEditUrl: string
+    templateId: string
+  }) => void
+}
+
+export function StaffNewsletterTemplatesPanel({
+  subject,
+  body,
+  utmCampaign,
+  canvaMeta,
+  onCanvaMetaChange,
+  onLoad,
+}: Props) {
+  const [templates, setTemplates] = useState<NewsletterTemplateRow[]>([])
+  const [selectedId, setSelectedId] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [status, setStatus] = useState('')
+  const [canvaUrl, setCanvaUrl] = useState('')
+  const [canvaDesigns, setCanvaDesigns] = useState<CanvaDesign[]>([])
+  const [canvaConnected, setCanvaConnected] = useState(false)
+
+  const loadTemplates = useCallback(async () => {
+    const r = await fetch('/api/staff/cms/NewsletterTemplates')
+    const d = await r.json()
+    if (!r.ok) throw new Error(d.error ?? 'Could not load templates')
+    const rows = (d.items ?? []) as Record<string, unknown>[]
+    setTemplates(
+      rows
+        .filter((row) => row.active !== false)
+        .map((row) => ({
+          id: String(row.id ?? ''),
+          name: String(row.name ?? 'Untitled'),
+          subject: String(row.subject ?? ''),
+          body: String(row.body ?? ''),
+          utmCampaign: String(row.utmCampaign ?? ''),
+          canvaDesignId: String(row.canvaDesignId ?? ''),
+          canvaTitle: String(row.canvaTitle ?? ''),
+          canvaEditUrl: String(row.canvaEditUrl ?? ''),
+          canvaViewUrl: String(row.canvaViewUrl ?? ''),
+          canvaThumbnailUrl: String(row.canvaThumbnailUrl ?? ''),
+          updatedAt: String(row.updatedAt ?? ''),
+        }))
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+    )
+  }, [])
+
+  useEffect(() => {
+    void loadTemplates().catch(() => setTemplates([]))
+    void fetch('/api/staff/canva/status')
+      .then((r) => r.json())
+      .then((d) => setCanvaConnected(Boolean(d.connected)))
+      .catch(() => setCanvaConnected(false))
+  }, [loadTemplates])
+
+  useEffect(() => {
+    if (!canvaConnected) return
+    void fetch('/api/staff/canva/designs?limit=12')
+      .then((r) => r.json())
+      .then((d) => setCanvaDesigns(d.designs ?? []))
+      .catch(() => setCanvaDesigns([]))
+  }, [canvaConnected])
+
+  function applyCanvaMeta(meta: NewsletterCanvaMeta) {
+    onCanvaMetaChange({
+      canvaDesignId: meta.canvaDesignId ?? '',
+      canvaTitle: meta.canvaTitle ?? '',
+      canvaEditUrl: meta.canvaEditUrl ?? '',
+      canvaViewUrl: meta.canvaViewUrl ?? '',
+      canvaThumbnailUrl: meta.canvaThumbnailUrl ?? '',
+    })
+  }
+
+  function importCanvaUrl() {
+    const parsed = parseCanvaDesignUrl(canvaUrl)
+    if (!parsed) {
+      setStatus('Paste a Canva design link (canva.com/design/…/view or /edit).')
+      return
+    }
+    applyCanvaMeta({
+      canvaDesignId: parsed.designId,
+      canvaEditUrl: parsed.editUrl,
+      canvaViewUrl: parsed.viewUrl,
+    })
+    setStatus('Canva link attached. Save as template or load into the composer.')
+  }
+
+  function loadSelected() {
+    const tpl = templates.find((t) => t.id === selectedId)
+    if (!tpl) {
+      setStatus('Choose a saved template first.')
+      return
+    }
+    onLoad({
+      subject: tpl.subject,
+      body: tpl.body,
+      utmCampaign: tpl.utmCampaign,
+      canvaViewUrl: tpl.canvaViewUrl,
+      canvaThumbnailUrl: tpl.canvaThumbnailUrl,
+      canvaTitle: tpl.canvaTitle,
+      canvaDesignId: tpl.canvaDesignId,
+      canvaEditUrl: tpl.canvaEditUrl,
+      templateId: tpl.id,
+    })
+    setStatus(`Loaded “${tpl.name}”.`)
+  }
+
+  async function saveTemplate() {
+    if (!body.trim()) {
+      setStatus('Write a newsletter body before saving a template.')
+      return
+    }
+    const name = window.prompt('Template name', subject.trim() || 'Newsletter template')
+    if (!name?.trim()) return
+
+    setBusy(true)
+    setStatus('')
+    try {
+      const payload = {
+        name: name.trim(),
+        subject: subject.trim(),
+        body: body.trim(),
+        utmCampaign: utmCampaign.trim(),
+        canvaDesignId: canvaMeta.canvaDesignId ?? '',
+        canvaTitle: canvaMeta.canvaTitle ?? '',
+        canvaEditUrl: canvaMeta.canvaEditUrl ?? '',
+        canvaViewUrl: canvaMeta.canvaViewUrl ?? '',
+        canvaThumbnailUrl: canvaMeta.canvaThumbnailUrl ?? '',
+        updatedAt: new Date().toISOString(),
+        active: true,
+      }
+      const r = await fetch('/api/staff/cms/NewsletterTemplates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Save failed')
+      await loadTemplates()
+      if (d.id) setSelectedId(String(d.id))
+      setStatus(`Saved template “${name.trim()}”.`)
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Save failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <section
+      id="newsletter-templates"
+      className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
+    >
+      <div>
+        <h2 className="text-lg font-bold">Templates (Canva + copy)</h2>
+        <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
+          Design in Canva, paste links or pick a design below, then save subject + body here.
+          {'\n'}
+          Sends add UTM tags and optional click tracking automatically.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-2 items-end">
+        <label className="flex-1 min-w-[12rem] text-xs text-[#5A6070]">
+          Saved template
+          <select
+            value={selectedId}
+            onChange={(e) => setSelectedId(e.target.value)}
+            className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#1A1A1A]"
+          >
+            <option value="">Choose…</option>
+            {templates.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <Button type="button" variant="outline" disabled={busy || !selectedId} onClick={loadSelected}>
+          Load template
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy || !body.trim()}
+          onClick={() => void saveTemplate()}
+        >
+          Save current as template
+        </Button>
+      </div>
+
+      <div className="rounded-lg border border-[var(--border)] bg-[#FAFAF8] p-3 space-y-2">
+        <p className="text-xs font-semibold text-[#1A1A1A]">Attach Canva design</p>
+        <div className="flex flex-wrap gap-2">
+          <input
+            value={canvaUrl}
+            onChange={(e) => setCanvaUrl(e.target.value)}
+            placeholder="Paste Canva design URL…"
+            className="flex-1 min-w-[14rem] border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+          />
+          <Button type="button" variant="outline" disabled={busy} onClick={importCanvaUrl}>
+            Attach link
+          </Button>
+        </div>
+        {canvaConnected && canvaDesigns.length ? (
+          <div className="grid gap-2 sm:grid-cols-3">
+            {canvaDesigns.slice(0, 6).map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                className="text-left rounded-lg border border-[var(--border)] bg-white p-2 hover:border-[var(--brand-green)]"
+                onClick={() => {
+                  applyCanvaMeta({
+                    canvaDesignId: d.id,
+                    canvaTitle: d.title,
+                    canvaEditUrl: d.editUrl,
+                    canvaViewUrl: d.viewUrl,
+                    canvaThumbnailUrl: d.thumbnailUrl,
+                  })
+                  setStatus(`Attached Canva: ${d.title}`)
+                }}
+              >
+                {d.thumbnailUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={d.thumbnailUrl} alt="" className="mb-1 h-16 w-full rounded object-cover" />
+                ) : null}
+                <span className="text-[11px] font-medium text-[#1A1A1A] line-clamp-2">{d.title}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[11px] text-[#5A6070]">
+            Canva API not connected? Paste an edit/view link from the Marketing folder.
+          </p>
+        )}
+        {canvaMeta.canvaViewUrl ? (
+          <p className="text-[11px] text-[#5A6070] break-all">
+            Attached: {canvaMeta.canvaTitle || canvaMeta.canvaDesignId}{' '}
+            <a
+              href={canvaMeta.canvaEditUrl || canvaMeta.canvaViewUrl}
+              className="underline"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open in Canva
+            </a>
+          </p>
+        ) : null}
+      </div>
+
+      {status ? <p className="text-sm text-[#1A1A1A]">{status}</p> : null}
+    </section>
+  )
+}

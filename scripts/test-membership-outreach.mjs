@@ -22,6 +22,11 @@ import {
   validateMassEmailDraft,
 } from '../frontend/lib/staff/mass-email.ts'
 import { buildWhatsAppGroupPlan } from '../frontend/lib/staff/whatsapp-compose.ts'
+import {
+  defaultUtmCampaign,
+  tagUrlWithUtm,
+  tagUrlsInText,
+} from '../frontend/lib/staff/newsletter-utm.ts'
 
 let failures = 0
 function check(name, fn) {
@@ -179,6 +184,20 @@ check('whatsapp group plan copies + opens configured grades', () => {
   assert.equal(plan.openUrls.length, 2)
   assert.ok(plan.waMeShare.includes('wa.me'))
   assert.ok(plan.instructions.includes('Missing invite links'))
+})
+
+check('utm campaign slug + link tagging', () => {
+  assert.equal(defaultUtmCampaign('Run For Charity 2026!'), 'run-for-charity-2026')
+  const tagged = tagUrlWithUtm('https://www.shmspto.org/events/foo', {
+    campaign: 'run-for-charity-2026',
+  })
+  assert.ok(tagged.includes('utm_source=newsletter'))
+  assert.ok(tagged.includes('utm_campaign=run-for-charity-2026'))
+  const body = tagUrlsInText('Register: https://www.shmspto.org/join now.', {
+    campaign: 'sep-2026',
+  })
+  assert.ok(body.includes('utm_medium=email'))
+  assert.ok(body.endsWith('now.'))
 })
 
 const dry = await sendMassEmail(

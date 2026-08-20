@@ -20,6 +20,7 @@ export type MassEmailDraft = {
   fromName: string
   replyTo?: string
   recipients: string[]
+  html?: string
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -193,6 +194,7 @@ export async function sendMassEmail(
         replyTo,
         subject: draft.subject.trim(),
         text: draft.body.trim(),
+        html: draft.html?.trim(),
       })
       const res = await fetch(GMAIL_SEND_URL, {
         method: 'POST',
@@ -273,20 +275,51 @@ export function buildRawMimeMessage(opts: {
   replyTo?: string
   subject: string
   text: string
+  html?: string
 }): string {
   const subject = encodeRfc2047(opts.subject)
-  const mime = [
+  const text = opts.text.replace(/\r?\n/g, '\r\n')
+  const headers = [
     `From: ${opts.from}`,
     `To: ${opts.to}`,
     ...(opts.replyTo ? [`Reply-To: ${opts.replyTo}`] : []),
     `Subject: ${subject}`,
     'MIME-Version: 1.0',
+  ]
+
+  if (opts.html?.trim()) {
+    const boundary = `nl_${Date.now().toString(36)}`
+    const html = opts.html.replace(/\r?\n/g, '\r\n')
+    const mime = [
+      ...headers,
+      `Content-Type: multipart/alternative; boundary="${boundary}"`,
+      '',
+      `--${boundary}`,
+      'Content-Type: text/plain; charset="UTF-8"',
+      'Content-Transfer-Encoding: 8bit',
+      '',
+      text,
+      `--${boundary}`,
+      'Content-Type: text/html; charset="UTF-8"',
+      'Content-Transfer-Encoding: 8bit',
+      '',
+      html,
+      `--${boundary}--`,
+    ].join('\r\n')
+    return encodeRawMime(mime)
+  }
+
+  const mime = [
+    ...headers,
     'Content-Type: text/plain; charset="UTF-8"',
     'Content-Transfer-Encoding: 8bit',
     '',
-    opts.text.replace(/\r?\n/g, '\r\n'),
+    text,
   ].join('\r\n')
+  return encodeRawMime(mime)
+}
 
+function encodeRawMime(mime: string): string {
   return Buffer.from(mime, 'utf8')
     .toString('base64')
     .replace(/\+/g, '-')

@@ -141,7 +141,19 @@ export function StaffNewsletterSectionNav() {
           hint: 'Grade groups',
           icon: MessageCircle,
         },
+        {
+          href: '#newsletter-templates',
+          label: 'Templates',
+          hint: 'Canva + copy',
+          icon: FileText,
+        },
         { href: '#member-newsletter', label: 'Newsletter', hint: 'Compose & send', icon: Newspaper },
+        {
+          href: '#newsletter-send-stats',
+          label: 'Send stats',
+          hint: 'Opens & clicks',
+          icon: FileText,
+        },
         {
           href: '#newsletter-archive',
           label: 'Archive',
