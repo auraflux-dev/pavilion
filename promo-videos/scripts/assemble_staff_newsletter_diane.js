@@ -45,9 +45,12 @@ const FONT = [
 const W = 1920;
 const H = 1080;
 const FPS = 30;
-// Letterbox on brand green — never crop-zoom thin UI strips (that blanks frames).
-const BG = '0x0b1f17';
-const VF_FIT = `scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=${BG},setsar=1,fps=${FPS}`;
+// Fit UI stills without empty green header bars. Pad with staff cream, top-aligned
+// so leftover space sits at the bottom — never a blank dark panel with no copy.
+const BG = '0xFAFCF9';
+const VF_FIT = `scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:0:color=${BG},setsar=1,fps=${FPS}`;
+const VF_BOOKEND = `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1,fps=${FPS}`;
+
 const V_ENCODE = ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'medium', '-crf', '18', '-r', String(FPS)];
 const PAD = 0.55;
 const TAIL_PAD = 0.9;
@@ -167,12 +170,12 @@ function makeBrandCard(dest, { title, subtitle }) {
   run(['-y', '-i', bg, '-i', logo, '-filter_complex', fc, '-frames:v', '1', '-update', '1', dest]);
 }
 
-function muxStillVo(img, vo, dest, seconds, caption) {
+function muxStillVo(img, vo, dest, seconds, { caption = '', bookend = false } = {}) {
   const font = FONT.replace(/:/g, '\\:');
-  const cap = caption ? esc(caption) : '';
+  const base = bookend ? VF_BOOKEND : VF_FIT;
   const vf = caption
-    ? `${VF_FIT},drawtext=fontfile=${font}:text='${cap}':fontsize=36:fontcolor=white:borderw=2:bordercolor=black@0.55:x=(w-text_w)/2:y=h-72`
-    : VF_FIT;
+    ? `${base},drawtext=fontfile=${font}:text='${esc(caption)}':fontsize=36:fontcolor=#1A1A1A:x=(w-text_w)/2:y=h-72`
+    : base;
   run([
     '-y', '-loop', '1', '-i', img, '-i', vo,
     '-vf', vf, '-t', String(seconds),
@@ -231,7 +234,7 @@ function main() {
   const coldA = path.join(WORK, 'cold_a.m4a');
   musicBed(music, coldA, COLD_SEC);
   const coldClip = path.join(WORK, '00_cold.mp4');
-  muxStillVo(coldImg, coldA, coldClip, COLD_SEC);
+  muxStillVo(coldImg, coldA, coldClip, COLD_SEC, { bookend: true });
 
   const bodyClips = [];
   const srt = [`1\n00:00:00,000 --> ${tsFmt(COLD_SEC - 0.05)}\nMember Newsletter · SHMS PTO\n`];
@@ -241,7 +244,7 @@ function main() {
     const vo = a(b.part);
     const d = dur(vo) + PAD + TAIL_PAD;
     const clip = path.join(WORK, `${String(i + 1).padStart(2, '0')}.mp4`);
-    muxStillVo(a(b.still), vo, clip, d, b.caption);
+    muxStillVo(a(b.still), vo, clip, d, { caption: b.caption });
     bodyClips.push(clip);
     if (b.caption) {
       srt.push(`${i + 2}\n${tsFmt(t)} --> ${tsFmt(t + dur(vo))}\n${b.caption}\n`);
@@ -252,7 +255,7 @@ function main() {
   const outroA = path.join(WORK, 'outro_a.m4a');
   musicBed(music, outroA, OUTRO_SEC);
   const outroClip = path.join(WORK, '99_outro.mp4');
-  muxStillVo(outroImg, outroA, outroClip, OUTRO_SEC);
+  muxStillVo(outroImg, outroA, outroClip, OUTRO_SEC, { bookend: true });
   srt.push(`${BEATS.length + 2}\n${tsFmt(t)} --> ${tsFmt(t + OUTRO_SEC - 0.05)}\nThank You · Go Stingrays · SHMS PTO\n`);
 
   const list = path.join(WORK, 'concat.txt');

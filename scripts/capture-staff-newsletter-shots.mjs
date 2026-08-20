@@ -30,22 +30,25 @@ const SHOTS = [
   {
     file: '00-nav-newsletter.png',
     shotFile: '39-staff-newsletter-nav.png',
-    // Staff chrome + Templates (Jump to strip removed when it has no copy).
     selector: '#newsletter-templates',
     fallback: 'header, [data-staff-nav]',
-    minHeight: 640,
+    minHeight: 560,
     minWidth: 1280,
+    align: 'top',
     prepare: async (page) => {
-      await page.evaluate(() => window.scrollTo(0, 0))
-      await page.waitForTimeout(200)
+      await page.locator('#newsletter-templates').evaluate((el) => el.scrollIntoView({ block: 'start' }))
+      await page.waitForTimeout(250)
     },
   },
   {
     file: '01-templates-canva.png',
     shotFile: '39-staff-newsletter-templates.png',
     selector: '#newsletter-templates',
+    align: 'top',
+    minHeight: 480,
     prepare: async (page) => {
-      await page.locator('#newsletter-templates').scrollIntoViewIfNeeded()
+      await page.locator('#newsletter-templates').evaluate((el) => el.scrollIntoView({ block: 'start' }))
+      await page.waitForTimeout(250)
     },
   },
   {
@@ -137,6 +140,7 @@ async function screenshotReadable(page, el, dest, {
   pad = 28,
   minWidth = 1080,
   minHeight = 420,
+  align = 'center',
 } = {}) {
   await el.scrollIntoViewIfNeeded()
   await page.waitForTimeout(200)
@@ -150,7 +154,11 @@ async function screenshotReadable(page, el, dest, {
   height = Math.min(height, vp.height)
 
   let x = Math.floor(box.x + box.width / 2 - width / 2)
-  let y = Math.floor(box.y + box.height / 2 - height / 2)
+  // Top-align: no upward bleed into the previous section (empty queue chrome).
+  let y =
+    align === 'top'
+      ? Math.floor(box.y)
+      : Math.floor(box.y + box.height / 2 - height / 2)
   x = Math.max(0, Math.min(x, vp.width - width))
   y = Math.max(0, Math.min(y, vp.height - height))
 
@@ -283,6 +291,7 @@ async function captureFromPage(page) {
     await screenshotReadable(page, el, pubPath, {
       minHeight: shot.minHeight || 420,
       minWidth: shot.minWidth || 1080,
+      align: shot.align || 'center',
     })
     fs.copyFileSync(pubPath, shotsPath)
     console.log(`✅ ${shot.file}`)
