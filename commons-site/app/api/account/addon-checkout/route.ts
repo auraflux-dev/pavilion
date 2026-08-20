@@ -46,13 +46,13 @@ export async function POST(req: NextRequest) {
       cancel_url: `${origin}/account`,
       allow_promotion_codes: true,
       metadata: {
-        product: 'commons-addon',
+        product: 'pavilion-addon',
         addonId: addon.id,
         schoolName: sub?.school_name || '',
       },
       subscription_data: {
         metadata: {
-          product: 'commons-addon',
+          product: 'pavilion-addon',
           addonId: addon.id,
         },
       },

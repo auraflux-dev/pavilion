@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Create Auraflux Stripe Product + $399/mo Price for Commons SaaS.
+ * Create Pavilion Product + $399/mo Price on HSKRG LLC Stripe (Pavilion account).
  *
  * Env:
- *   STRIPE_SECRET_KEY (Auraflux Stripe account)
+ *   STRIPE_SECRET_KEY (Pavilion Stripe account under HSKRG LLC. Not SHMS. Not Auraflux studio.)
  *
  * Prints STRIPE_PRICE_ID for Vercel commons-site.
  * School parent payments stay on each school's Square. Not this key.
@@ -17,7 +17,7 @@ const Stripe = require('stripe')
 
 const key = process.env.STRIPE_SECRET_KEY?.trim()
 if (!key) {
-  console.error('Set STRIPE_SECRET_KEY (Auraflux)')
+  console.error('Set STRIPE_SECRET_KEY (Pavilion / HSKRG LLC Stripe)')
   process.exit(1)
 }
 
@@ -25,9 +25,10 @@ const stripe = new Stripe(key)
 
 async function main() {
   const product = await stripe.products.create({
-    name: 'Commons PTO OS',
-    description: 'Public site, family portal, and staff portal. $399 per school per month.',
-    metadata: { product: 'commons' },
+    name: 'Pavilion PTO OS',
+    description:
+      'Public site, family portal, and staff portal. $399 per school per month. A product of HSKRG LLC.',
+    metadata: { product: 'pavilion', legalEntity: 'HSKRG LLC' },
   })
 
   const price = await stripe.prices.create({
@@ -35,7 +36,7 @@ async function main() {
     unit_amount: 39900,
     currency: 'usd',
     recurring: { interval: 'month' },
-    metadata: { product: 'commons' },
+    metadata: { product: 'pavilion' },
   })
 
   console.log(
@@ -44,7 +45,7 @@ async function main() {
         ok: true,
         productId: product.id,
         priceId: price.id,
-        envNote: 'Set STRIPE_PRICE_ID on Vercel project commons-site',
+        envNote: 'Set STRIPE_PRICE_ID on Vercel project commons-site (Pavilion only)',
       },
       null,
       2,

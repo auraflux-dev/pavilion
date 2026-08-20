@@ -1,17 +1,18 @@
-Product brand: **Pavilion** (locked 20 Aug 2026).
-Colors: ink + sea glass (`commons-site/app/globals.css`).
-Legal seller: HSKRG LLC Stripe.
-Marketing domain: **onpavilion.com** (purchased, attached to commons-site; www → apex).
-Primary live URL: https://onpavilion.com (also https://commons-site.vercel.app).
+Product brand: **Pavilion** (locked).
+Colors: ink + sea glass.
+Legal seller: **HSKRG LLC** (Pavilion Stripe account). Not Auraflux studio branding. Not SHMS.
+Marketing domain: **https://onpavilion.com** (www → apex). Also commons-site.vercel.app.
 `NEXT_PUBLIC_SITE_URL=https://onpavilion.com`.
 
 Marketing site: Vercel **commons-site**, root `commons-site/`.
-- Live primary: https://onpavilion.com (also https://commons-site.vercel.app; PRODUCT_NAME = Pavilion)
-- SaaS: Stripe Checkout $399/mo + `/account`
-- Env: `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, add-on price IDs, `STRIPE_WEBHOOK_SECRET`, `COMMONS_PROD_DATABASE_URL`, `NEXT_PUBLIC_SITE_URL`; optional `RESEND_API_KEY`, `ACCOUNT_*`
-- School Square stays for parent cards / in-person.
-- Demo CTA: https://commons-pto-demo.vercel.app/review?code=riverside-board
-- Brand constants: `commons-site/lib/brand.ts` (`PRODUCT_NAME`, `PRODUCT_DOMAIN`)
+- SaaS: Stripe Checkout $399/mo + `/account` (magic link, Customer Portal, add-ons)
+- Env (Pavilion Stripe only): `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`, `COMMONS_PROD_DATABASE_URL`, `NEXT_PUBLIC_SITE_URL`; optional add-on prices + `RESEND_API_KEY` / `ACCOUNT_*`
+- Webhook: `https://onpavilion.com/api/webhooks/stripe`
+- School Square stays for parent cards / in-person
+- Demo: https://commons-pto-demo.vercel.app/review?code=riverside-board
 - Surfaces: `/`, `/product`, `/pricing`, `/start`, `/thanks`, `/account`, `/help`, `/partners`, `/gallery`, `/watch`
-- Provisioning: `commons-sales-onboarding` (trial-first; no auto-provision on pay).
-- Infra nicknames (commons-site, commons-prod, commons-pto) stay until a deliberate rename.
+- Partners data: `content/partners.json`
+- Help: `lib/help-articles.ts` (+ `content/help/` notes)
+- Price script: `scripts/sales/stripe-commons-price.mjs` (Pavilion product on HSKRG Stripe)
+- Never put Stone Hill DATABASE_URL / Wix / school Square on commons-site
+- Provisioning: `commons-sales-onboarding` (trial-first; no auto-provision on pay)

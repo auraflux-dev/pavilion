@@ -1,0 +1,65 @@
+[
+  {
+    "name": "Square",
+    "category": "School payments",
+    "blurb": "Your school Square for parent cards and in-person sales.\nNot for Pavilion SaaS billing.",
+    "url": "https://squareup.com",
+    "note": "Optional. Not affiliated."
+  },
+  {
+    "name": "Stripe",
+    "category": "Platform billing",
+    "blurb": "HSKRG LLC uses Stripe Checkout and Customer Portal for Pavilion software.",
+    "url": "https://stripe.com",
+    "note": "Seller of record for Pavilion SaaS."
+  },
+  {
+    "name": "Google Workspace",
+    "category": "School IT",
+    "blurb": "Domain and staff email connect during onboarding when the school is ready.",
+    "url": "https://workspace.google.com",
+    "note": "Optional. Not affiliated."
+  },
+  {
+    "name": "Cheddar Up",
+    "category": "Race / registration",
+    "blurb": "Some boards still use Cheddar Up for enrichment until checkout lives in Pavilion.",
+    "url": "https://www.cheddarup.com",
+    "note": "Optional. Not affiliated."
+  },
+  {
+    "name": "Tax1099",
+    "category": "Tax e-file",
+    "blurb": "1099 and related e-file if the board keeps contractor filing outside Pavilion.",
+    "url": "https://www.tax1099.com",
+    "note": "Optional. Not affiliated."
+  },
+  {
+    "name": "Canva",
+    "category": "Print / merch creative",
+    "blurb": "Staff can open Canva from the board portal. Print vendors stay school choice.",
+    "url": "https://www.canva.com",
+    "note": "Optional. Not affiliated."
+  },
+  {
+    "name": "Mailchimp",
+    "category": "Email blast",
+    "blurb": "External blast tools if you keep a list outside the in-app newsletter.",
+    "url": "https://mailchimp.com",
+    "note": "Optional. Not affiliated."
+  },
+  {
+    "name": "MoneyMinder",
+    "category": "Bookkeeping",
+    "blurb": "External ledger some PTOs keep while official books stay with the treasurer.",
+    "url": "https://www.moneyminder.com",
+    "note": "Optional. Not affiliated."
+  },
+  {
+    "name": "ProPublica Nonprofit Explorer",
+    "category": "Research",
+    "blurb": "Public 990 filings help understand PTO scale. Not a product integration.",
+    "url": "https://projects.propublica.org/nonprofits/",
+    "note": "Public data. Not affiliated."
+  }
+]

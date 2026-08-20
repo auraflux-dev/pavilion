@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       cancel_url: `${origin}/start`,
       allow_promotion_codes: true,
       metadata: {
-        product: 'commons',
+        product: 'pavilion',
         schoolName,
         city,
         role,
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       },
       subscription_data: {
         metadata: {
-          product: 'commons',
+          product: 'pavilion',
           schoolName,
           city,
           role,
