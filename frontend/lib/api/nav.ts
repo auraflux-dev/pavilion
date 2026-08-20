@@ -140,6 +140,12 @@ export async function getNavLinks(): Promise<NavLink[]> {
    const { DEMO_NAV } = await import('@/lib/demo/content')
    return DEMO_NAV.map((l) => ({ ...l }))
  }
+ if (process.env.COMMONS_PLATFORM === 'true') {
+   const { headers } = await import('next/headers')
+   const { loadTrialPackFromHeaders } = await import('@/lib/crm/trial-packs/load')
+   const pack = await loadTrialPackFromHeaders(await headers())
+   if (pack?.nav?.length) return pack.nav.map((l) => ({ ...l }))
+ }
  const raw = await fetchNavLinks()
  // Always use CMS active links; home sections still gate Programs/Events via schoolInSession.
  const links = ensureHomeLink(normalizeCommerceNav(raw.length > 0 ? raw : FALLBACK_NAV))

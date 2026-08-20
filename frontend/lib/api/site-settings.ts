@@ -31,6 +31,12 @@ async function fetchAllSettings(): Promise<Record<string, string>> {
    const { DEMO_SETTINGS } = await import('@/lib/demo/content')
    return { ...DEMO_SETTINGS }
  }
+ if (process.env.COMMONS_PLATFORM === 'true') {
+   const { headers } = await import('next/headers')
+   const { loadTrialPackFromHeaders } = await import('@/lib/crm/trial-packs/load')
+   const pack = await loadTrialPackFromHeaders(await headers())
+   if (pack?.settings) return { ...pack.settings }
+ }
  const apiKey = process.env.WIX_API_KEY
  const siteId = process.env.WIX_SITE_ID
  if (!apiKey || !siteId) return {}

@@ -234,6 +234,12 @@ export async function getMembershipTiers(): Promise<MembershipTier[]> {
     const { DEMO_TIERS } = await import('@/lib/demo/content')
     return DEMO_TIERS.map((t) => ({ ...t, perks: [...t.perks] }))
   }
+  if (process.env.COMMONS_PLATFORM === 'true') {
+    const { headers } = await import('next/headers')
+    const { loadTrialPackFromHeaders } = await import('@/lib/crm/trial-packs/load')
+    const pack = await loadTrialPackFromHeaders(await headers())
+    if (pack?.tiers?.length) return pack.tiers.map((t) => ({ ...t, perks: [...t.perks] }))
+  }
   const cmsTiers = await fetchCmsTiers()
   if (!cmsTiers.length) return []
 

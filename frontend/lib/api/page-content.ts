@@ -143,6 +143,13 @@ export async function getPageContent(page: string): Promise<PageContentFields> {
     if (row) return { ...row }
     return merge(page, null)
   }
+  if (process.env.COMMONS_PLATFORM === 'true') {
+    const { headers } = await import('next/headers')
+    const { loadTrialPackFromHeaders } = await import('@/lib/crm/trial-packs/load')
+    const pack = await loadTrialPackFromHeaders(await headers())
+    const row = pack?.pages[page]
+    if (row) return { ...row }
+  }
   const cms = await fetchPageRow(page)
   if (
     cms &&

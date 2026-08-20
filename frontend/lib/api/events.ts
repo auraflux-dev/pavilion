@@ -155,6 +155,12 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
     const { DEMO_EVENTS } = await import('@/lib/demo/content')
     return DEMO_EVENTS.slice(0, limit)
   }
+  if (process.env.COMMONS_PLATFORM === 'true') {
+    const { headers } = await import('next/headers')
+    const { loadTrialPackFromHeaders } = await import('@/lib/crm/trial-packs/load')
+    const pack = await loadTrialPackFromHeaders(await headers())
+    if (pack?.events?.length) return pack.events.slice(0, limit)
+  }
   try {
     const client = getWixClient()
     const result = await client.wixEventsV2

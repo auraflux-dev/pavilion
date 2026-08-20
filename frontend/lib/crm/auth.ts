@@ -25,6 +25,7 @@ export function createCommonsAuth() {
     trustedOrigins: [
       publicSiteUrl(),
       'https://commons-pto-demo.vercel.app',
+      'https://commons-pto.vercel.app',
     ],
     emailAndPassword: { enabled: true },
     plugins: [nextCookies()],
