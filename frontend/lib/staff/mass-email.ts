@@ -143,7 +143,16 @@ export type SendMassEmailResult = {
  */
 export async function sendMassEmail(
   draft: MassEmailDraft,
-  opts: { dryRun?: boolean; testSend?: boolean } = {},
+  opts: {
+    dryRun?: boolean
+    testSend?: boolean
+    /** Per-recipient subject/body/html overrides (merge fields). */
+    personalize?: (to: string) => {
+      subject?: string
+      body?: string
+      html?: string
+    }
+  } = {},
 ): Promise<SendMassEmailResult> {
   const validation = validateMassEmailDraft(draft, { testSend: opts.testSend })
   if (validation) {
@@ -198,13 +207,14 @@ export async function sendMassEmail(
 
   for (const to of recipients) {
     try {
+      const personalized = opts.personalize?.(to)
       const raw = buildRawMimeMessage({
         from,
         to,
         replyTo,
-        subject: draft.subject.trim(),
-        text: draft.body.trim(),
-        html: draft.html?.trim(),
+        subject: (personalized?.subject ?? draft.subject).trim(),
+        text: (personalized?.body ?? draft.body).trim(),
+        html: (personalized?.html ?? draft.html)?.trim(),
       })
       const res = await fetch(GMAIL_SEND_URL, {
         method: 'POST',

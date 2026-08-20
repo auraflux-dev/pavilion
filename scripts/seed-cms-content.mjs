@@ -1062,6 +1062,23 @@ async function ensureNewsletterTemplateHeroFields() {
   }
 }
 
+async function ensureNewsletterSendsDeliveryFields() {
+  try {
+    const collection = await wix('/wix-data/v2/collections/NewsletterSends', undefined, 'GET')
+    const existing = new Set((collection.collection?.fields ?? []).map((f) => f.key))
+    for (const field of [
+      { key: 'deliveredCount', displayName: 'Delivered Count', type: 'NUMBER' },
+      { key: 'failedCount', displayName: 'Failed Count', type: 'NUMBER' },
+    ]) {
+      if (existing.has(field.key)) continue
+      await wix('/wix-data/v2/collections/create-field', { dataCollectionId: 'NewsletterSends', field })
+      console.log('Created NewsletterSends field', field.key)
+    }
+  } catch (err) {
+    console.warn('NewsletterSends delivery fields:', String(err.message || err).slice(0, 200))
+  }
+}
+
 async function ensureNewsletterTemplatesCollection() {
   try {
     await wix('/wix-data/v2/collections', {
@@ -1117,6 +1134,8 @@ async function ensureNewsletterSendsCollection() {
           { key: 'tier', displayName: 'Tier', type: 'TEXT' },
           { key: 'grade', displayName: 'Grade', type: 'TEXT' },
           { key: 'recipientCount', displayName: 'Recipient Count', type: 'NUMBER' },
+          { key: 'deliveredCount', displayName: 'Delivered Count', type: 'NUMBER' },
+          { key: 'failedCount', displayName: 'Failed Count', type: 'NUMBER' },
           { key: 'openCount', displayName: 'Open Count', type: 'NUMBER' },
           { key: 'clickCount', displayName: 'Click Count', type: 'NUMBER' },
           { key: 'sentAt', displayName: 'Sent At', type: 'DATETIME' },
@@ -1158,6 +1177,7 @@ async function main() {
   await ensureNewsletterTemplatesCollection()
   await ensureNewsletterTemplateHeroFields()
   await ensureNewsletterSendsCollection()
+  await ensureNewsletterSendsDeliveryFields()
   await upsertSiteSettings()
   await upsertPageContent()
   await upsertSurveys()

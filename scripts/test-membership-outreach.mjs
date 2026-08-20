@@ -28,6 +28,11 @@ import {
   tagUrlsInText,
 } from '../frontend/lib/staff/newsletter-utm.ts'
 import {
+  applyMergeFields,
+  hasMergeFields,
+  mergeVarsFromParent,
+} from '../frontend/lib/staff/newsletter-merge.ts'
+import {
   buildNewsletterTestGroups,
   resolveTestGroupRecipients,
   testSubject,
@@ -211,6 +216,20 @@ check('utm campaign slug + link tagging', () => {
   })
   assert.ok(body.includes('utm_medium=email'))
   assert.ok(body.endsWith('now.'))
+})
+
+check('newsletter merge fields', () => {
+  assert.equal(hasMergeFields('Hi {{firstName}}'), true)
+  assert.equal(hasMergeFields('Hi there'), false)
+  const vars = mergeVarsFromParent({
+    parentEmail: 'a@b.com',
+    parentFirstName: 'Ann',
+    parentLastName: 'Lee',
+    membershipTier: 'lagoon',
+    students: [{ grade: '7', archived: false }],
+  })
+  assert.equal(applyMergeFields('Hi {{firstName}} ({{tier}}, grade {{grade}})', vars), 'Hi Ann (lagoon, grade 7)')
+  assert.equal(applyMergeFields('Hi {{firstName}}', {}), 'Hi there')
 })
 
 check('newsletter test groups + subject prefix', () => {

@@ -136,11 +136,23 @@ export function StaffNewsletterTemplatesPanel({
       heroImageUrl: '',
       heroImageKey: '',
     })
-    setStatus('Canva link attached. Export PNG for email, then save as template.')
+    setStatus('Canva link attached. Exporting PNG for email…')
+    if (canvaConnected) {
+      void exportPng({
+        canvaDesignId: parsed.designId,
+        canvaEditUrl: parsed.editUrl,
+        canvaViewUrl: parsed.viewUrl,
+      })
+    } else {
+      setStatus(
+        'Canva link attached. Connect Canva to auto-export PNG, or click Export PNG for email.',
+      )
+    }
   }
 
-  async function exportPng() {
-    const designId = canvaMeta.canvaDesignId?.trim()
+  async function exportPng(fromMeta?: NewsletterCanvaMeta) {
+    const meta = { ...canvaMeta, ...fromMeta }
+    const designId = String(meta.canvaDesignId ?? '').trim()
     if (!designId) {
       setStatus('Attach a Canva design first, then Export PNG for email.')
       return
@@ -156,13 +168,16 @@ export function StaffNewsletterTemplatesPanel({
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Export failed')
       onCanvaMetaChange({
-        ...canvaMeta,
+        ...meta,
         heroImageUrl: String(d.heroImageUrl ?? ''),
         heroImageKey: String(d.heroImageKey ?? ''),
       })
       setStatus('PNG exported for email. Preview below — then save template or send a test.')
     } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Export failed')
+      setStatus(
+        (err instanceof Error ? err.message : 'Export failed') +
+          '\nYou can still send with a thumbnail if export is unavailable.',
+      )
     } finally {
       setBusy(false)
     }
@@ -245,7 +260,7 @@ export function StaffNewsletterTemplatesPanel({
         <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
           Design = Canva PNG + SHMS header/footer. Body stays plain text (no HTML coding).
           {'\n'}
-          Attach Canva → Export PNG for email → write copy → test send.
+          Attach Canva → PNG exports automatically when Canva is connected → write copy → test send.
         </p>
       </div>
 
@@ -308,7 +323,7 @@ export function StaffNewsletterTemplatesPanel({
                 type="button"
                 className="text-left rounded-lg border border-[var(--border)] bg-white p-2 hover:border-[var(--brand-green)]"
                 onClick={() => {
-                  applyCanvaMeta({
+                  const next = {
                     canvaDesignId: d.id,
                     canvaTitle: d.title,
                     canvaEditUrl: d.editUrl,
@@ -316,8 +331,10 @@ export function StaffNewsletterTemplatesPanel({
                     canvaThumbnailUrl: d.thumbnailUrl,
                     heroImageUrl: '',
                     heroImageKey: '',
-                  })
-                  setStatus(`Attached Canva: ${d.title}. Click Export PNG for email.`)
+                  }
+                  applyCanvaMeta(next)
+                  setStatus(`Attached Canva: ${d.title}. Exporting PNG…`)
+                  if (canvaConnected) void exportPng(next)
                 }}
               >
                 {d.thumbnailUrl ? (

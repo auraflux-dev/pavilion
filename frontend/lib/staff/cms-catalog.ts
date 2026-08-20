@@ -256,6 +256,8 @@ export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
       { key: 'tier', label: 'Tier filter', type: 'text' },
       { key: 'grade', label: 'Grade filter', type: 'text' },
       { key: 'recipientCount', label: 'Recipients', type: 'number' },
+      { key: 'deliveredCount', label: 'Delivered (Gmail)', type: 'number' },
+      { key: 'failedCount', label: 'Failed', type: 'number' },
       { key: 'openCount', label: 'Opens (pixel)', type: 'number' },
       { key: 'clickCount', label: 'Clicks (total)', type: 'number' },
       { key: 'linksJson', label: 'Links JSON', type: 'textarea' },

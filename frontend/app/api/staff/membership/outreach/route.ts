@@ -23,6 +23,11 @@ import { defaultUtmCampaign } from '@/lib/staff/newsletter-utm'
 import { prepareTrackedNewsletterSend } from '@/lib/staff/newsletter-tracking'
 import { buildNewsletterHtml } from '@/lib/staff/newsletter-html'
 import {
+  applyMergeFields,
+  hasMergeFields,
+  mergeVarsFromParent,
+} from '@/lib/staff/newsletter-merge'
+import {
   buildNewsletterTestGroups,
   resolveTestGroupRecipients,
   testSubject,
@@ -239,6 +244,7 @@ export async function POST(req: NextRequest) {
     let effectiveAlsoPortal = alsoPortal
     let effectiveUtmCampaign = utmCampaign
     let isTestAudience = false
+    let filteredRoster = roster
 
     if (isTestSend) {
       const staffRows = await loadAll('StaffRoles')
@@ -277,6 +283,7 @@ export async function POST(req: NextRequest) {
               sanitizeRecipients(customEmails).includes(r.parentEmail),
             )
           : filterParentRoster(roster, { tier, grade })
+      filteredRoster = filtered
 
       recipients = sanitizeRecipients(
         customEmails.length ? customEmails : rosterEmails(filtered),
@@ -365,7 +372,56 @@ export async function POST(req: NextRequest) {
       }
 
       const mailto = buildMailtoBcc(draft, { testSend: isTestAudience })
-      const sendResult = await sendMassEmail(draft, { dryRun, testSend: isTestAudience })
+      const wantsMerge =
+        hasMergeFields(effectiveSubject) || hasMergeFields(outboundBody)
+      const byEmail = new Map(
+        filteredRoster.map((r) => [r.parentEmail.toLowerCase(), r]),
+      )
+      const htmlOpts = {
+        sendId: trackOpens ? newsletterSendId || undefined : undefined,
+        heroImageUrl: heroImageUrl || undefined,
+        canvaViewUrl: canvaViewUrl || undefined,
+        canvaThumbnailUrl: canvaThumbnailUrl || undefined,
+        canvaTitle: canvaTitle || undefined,
+      }
+      const sendResult = await sendMassEmail(draft, {
+        dryRun,
+        testSend: isTestAudience,
+        personalize: wantsMerge
+          ? (to) => {
+              const row = byEmail.get(to.toLowerCase())
+              const vars = row
+                ? mergeVarsFromParent(row)
+                : {
+                    firstName: session.staff.name?.split(/\s+/)[0] || 'there',
+                    lastName: '',
+                    email: to,
+                    tier: isTestAudience ? 'board' : 'member',
+                    grade: '',
+                  }
+              const subj = applyMergeFields(effectiveSubject, vars)
+              const text = applyMergeFields(outboundBody, vars)
+              return {
+                subject: subj,
+                body: text,
+                html: buildNewsletterHtml({ ...htmlOpts, textBody: text }),
+              }
+            }
+          : undefined,
+      })
+
+      if (!dryRun && newsletterSendId) {
+        try {
+          const client = getWixClient()
+          await client.items.update('NewsletterSends', {
+            _id: newsletterSendId,
+            deliveredCount: sendResult.sent,
+            failedCount: sendResult.failed,
+          })
+        } catch (err) {
+          console.warn('[outreach] could not store delivered counts', err)
+        }
+      }
 
       let portalInserted = false
       let newsletterArchived = false

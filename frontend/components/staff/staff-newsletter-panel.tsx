@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { defaultUtmCampaign } from '@/lib/staff/newsletter-utm'
+import { NEWSLETTER_MERGE_HINT } from '@/lib/staff/newsletter-merge'
 import {
   StaffNewsletterTemplatesPanel,
   type NewsletterCanvaMeta,
@@ -179,6 +180,31 @@ export function StaffNewsletterPanel() {
     setBusy(true)
     setStatus('')
     try {
+      const previewRes = await fetch('/api/staff/membership/outreach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(outreachPayload({ dryRun: true, alsoPortal: false })),
+      })
+      const preview = await previewRes.json()
+      if (!previewRes.ok) throw new Error(preview.error ?? 'Preview failed')
+      const n = Number(preview.recipientCount ?? 0)
+      const ok = window.confirm(
+        `Send this newsletter to ${n} member parent${n === 1 ? '' : 's'}?\n\nThis is not a test send. Type OK in the next step only if you meant the full roster.`,
+      )
+      if (!ok) {
+        setStatus('Member send cancelled.')
+        return
+      }
+      if (n >= 25) {
+        const typed = window.prompt(
+          `This will email ${n} parents.\n\nType SEND to confirm.`,
+        )
+        if (String(typed ?? '').trim().toUpperCase() !== 'SEND') {
+          setStatus('Member send cancelled (confirmation not typed).')
+          return
+        }
+      }
+
       const r = await fetch('/api/staff/membership/outreach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -196,7 +222,7 @@ export function StaffNewsletterPanel() {
                 ? ' · newsletter archive skipped or failed. Check Newsletters CMS'
                 : '') +
             (d.newsletterSendId
-              ? ` · tracking id ${d.newsletterSendId} (see Send stats below)`
+              ? ` · tracking id ${d.newsletterSendId} (see Send report below)`
               : ''),
         )
       } else if (d.mailto) {
@@ -292,6 +318,9 @@ export function StaffNewsletterPanel() {
             {'\n'}
             Parent sends use the Students roster. Use Test send first so board can preview in a real
             inbox.
+            {emailConfigured
+              ? ''
+              : '\nGmail send is not ready yet. Connect Google in Staff → Inbox (president@) or sends fall back to your mail app.'}
           </p>
         </div>
 
@@ -418,6 +447,7 @@ export function StaffNewsletterPanel() {
           placeholder="Newsletter body (plain text; paste links — UTM + tracking added on send)"
           className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
+        <p className="text-[11px] text-[#5A6070]">{NEWSLETTER_MERGE_HINT}</p>
 
         <div className="grid sm:grid-cols-2 gap-2">
           <label className="text-xs text-[#5A6070]">

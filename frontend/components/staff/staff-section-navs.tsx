@@ -150,7 +150,7 @@ export function StaffNewsletterSectionNav() {
         { href: '#member-newsletter', label: 'Newsletter', hint: 'Compose & send', icon: Newspaper },
         {
           href: '#newsletter-send-stats',
-          label: 'Send stats',
+          label: 'Send report',
           hint: 'Opens & clicks',
           icon: FileText,
         },

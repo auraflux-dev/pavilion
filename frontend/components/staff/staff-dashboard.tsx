@@ -36,6 +36,7 @@ import { StaffPageContentPanel } from '@/components/staff/staff-page-content-pan
 import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-panel'
 import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection-panel'
 import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
+import { StaffNewsletterSendReportPanel } from '@/components/staff/staff-newsletter-send-report'
 import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
 import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
 import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
@@ -839,11 +840,7 @@ export function StaffDashboard() {
             <StaffNewsletterSectionNav />
             <StaffWhatsAppQueuePanel />
             <StaffNewsletterPanel />
-            <StaffCmsCollectionPanel
-              collection="NewsletterSends"
-              title="Send stats (opens & clicks)"
-              sectionId="newsletter-send-stats"
-            />
+            <StaffNewsletterSendReportPanel />
             <StaffCmsCollectionPanel
               collection="Newsletters"
               title="Newsletter archive → portal Messages"
