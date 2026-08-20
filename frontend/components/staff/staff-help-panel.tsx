@@ -10,6 +10,7 @@ import {
   getCategory,
   type KbArticle,
 } from '@/lib/kb'
+import { staffVideoForHelpArticle } from '@/lib/videos/staff-videos'
 
 export function StaffHelpPanel({
   isAdmin,
@@ -88,6 +89,7 @@ export function StaffHelpPanel({
   const activeCategory = visibleActive
     ? getCategory('staff', visibleActive.categoryId)
     : null
+  const staffVideo = visibleActive ? staffVideoForHelpArticle(visibleActive.slug) : null
 
   async function ensureCollection() {
     setEnsureBusy(true)
@@ -145,6 +147,7 @@ export function StaffHelpPanel({
         articleHrefTemplate="/staff?view=help&article={slug}"
         active={visibleActive}
         activeCategory={activeCategory}
+        staffVideo={staffVideo}
       />
 
       {canEditKb ? (

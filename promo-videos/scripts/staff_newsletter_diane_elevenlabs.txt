@@ -1,0 +1,13 @@
+Open your browser and go to SHMS PTO dot org slash staff. Sign in with Google as vp-marketing at shmspto.org.
+This walkthrough is for Diane. No HTML coding. Design lives in Canva. Copy lives in plain text boxes in Staff Newsletter.
+After sign-in, open Newsletter in the top nav. The first block is Templates, Canva plus copy.
+Paste a Canva design link or pick a recent design. Click Export PNG for email. Multi-page Canva exports every page into the email. Save as a template when you reuse a layout.
+Scroll to Test send. Pick Just me, Board, or Board plus Site Settings test list. Preview test recipients, then Send test email. Subject gets TEST in brackets. It does not post to the parent portal.
+Choose the newsletter type. Paid members get the full email with your Canva PNG and plain text. Weekly Scoop sends free parents a link once a month, not the full designed email. Footer signups are email only.
+For Weekly Scoop, paste the Canva view link. Use Copy plus open WhatsApp and Post scoop to portal. You attach the PNG yourself in WhatsApp.
+Optional: check Write in beats. Fill intro, Event, Ask, CTA, and sign-off. Still plain text. You can use firstName and tier merge tags in subject or body.
+Type your subject and body. Set UTM campaign and leave click tracking on. Track opens when you have a Canva hero PNG.
+For a paid send: Preview recipients, then Send email now. Large sends ask you to type SEND to confirm.
+Schedule or approval: pick Send at in your local time. Marketing requests approval. Secretary or president approves. Jobs send within about fifteen minutes of that time.
+After a send, open Send report on the same page. Refresh for delivered, failed, opens, and top link clicks.
+Remember: never paste HTML, always test first, use Weekly Scoop for the free monthly link, and attach the PNG manually in WhatsApp. Full screenshots and this video live in Staff Help under Member newsletter for Diane.

@@ -1,10 +1,18 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import type { ParentVideo } from '@/lib/videos/parent-videos'
+
+export type HelpVideoPlayer = {
+  id: string
+  title: string
+  summary: string
+  src: string
+  poster: string
+  durationLabel: string
+}
 
 interface ParentVideoEmbedProps {
-  video: ParentVideo
+  video: HelpVideoPlayer
   /** Compact card for grids; default is a full-width player block */
   compact?: boolean
 }

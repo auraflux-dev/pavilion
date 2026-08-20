@@ -536,7 +536,10 @@ export function StaffNewsletterPanel() {
           </p>
         </div>
 
-        <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3">
+        <div
+          data-help-shot="test-send"
+          className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3"
+        >
           <p className="text-sm font-semibold text-[#1A1A1A]">Test send (board preview)</p>
           <p className="text-xs text-[#5A6070] whitespace-pre-line">
             Subject is prefixed with [TEST]. Does not post to the parent portal or member archive.
@@ -598,32 +601,37 @@ export function StaffNewsletterPanel() {
           </div>
         </div>
 
-        <p className="text-xs font-semibold text-[#1A1A1A]">Newsletter type</p>
+        <div data-help-shot="newsletter-type" className="space-y-2">
+          <p className="text-xs font-semibold text-[#1A1A1A]">Newsletter type</p>
 
-        <label className="text-xs text-[#5A6070]">
-          Who this is for
-          <select
-            value={sendAudience}
-            onChange={(e) => {
-              const v = e.target.value
-              const next: NewsletterKind =
-                v === 'scoop' || v === 'subscribers' || v === 'paid' ? v : 'paid'
-              setSendAudience(next)
-              if (next === 'paid' && (tier === 'all' || tier === 'free')) setTier('paid')
-              if (next === 'scoop' && !subject.trim()) setSubject(SCOOP_DEFAULT_SUBJECT)
-            }}
-            className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="paid">Paid members (full email)</option>
-            <option value="scoop">Weekly Scoop (free monthly link)</option>
-            <option value="subscribers">
-              Footer signup list only ({subscriberCount} email{subscriberCount === 1 ? '' : 's'})
-            </option>
-          </select>
-        </label>
+          <label className="text-xs text-[#5A6070]">
+            Who this is for
+            <select
+              value={sendAudience}
+              onChange={(e) => {
+                const v = e.target.value
+                const next: NewsletterKind =
+                  v === 'scoop' || v === 'subscribers' || v === 'paid' ? v : 'paid'
+                setSendAudience(next)
+                if (next === 'paid' && (tier === 'all' || tier === 'free')) setTier('paid')
+                if (next === 'scoop' && !subject.trim()) setSubject(SCOOP_DEFAULT_SUBJECT)
+              }}
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+            >
+              <option value="paid">Paid members (full email)</option>
+              <option value="scoop">Weekly Scoop (free monthly link)</option>
+              <option value="subscribers">
+                Footer signup list only ({subscriberCount} email{subscriberCount === 1 ? '' : 's'})
+              </option>
+            </select>
+          </label>
+        </div>
 
         {sendAudience === 'scoop' ? (
-          <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2">
+          <div
+            data-help-shot="weekly-scoop"
+            className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2"
+          >
             <p className="text-xs text-[#5A6070] whitespace-pre-line">
               Free audience gets a link, not the full newsletter in their inbox.
               Paste the Canva view link (or we use the attached Canva / the site newsletter page).
@@ -696,6 +704,7 @@ export function StaffNewsletterPanel() {
             .join(', ') || 'none. Add in Site settings'}
         </p>
 
+        <div data-help-shot="copy-tracking" className="space-y-2">
         <input
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
@@ -714,7 +723,10 @@ export function StaffNewsletterPanel() {
           Write in beats (event, ask, CTA). Still plain text. We join them into the body.
         </label>
         {useBeats ? (
-          <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3">
+          <div
+            data-help-shot="beats"
+            className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3"
+          >
             <label className="text-xs text-[#5A6070] block">
               Intro
               <textarea
@@ -808,6 +820,7 @@ export function StaffNewsletterPanel() {
             </label>
           </div>
         </div>
+        </div>
 
         {sendAudience === 'scoop' ? null : (
         <label className="flex items-center gap-2 text-xs text-[#5A6070]">
@@ -826,7 +839,10 @@ export function StaffNewsletterPanel() {
         </label>
         )}
 
-        <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2">
+        <div
+          data-help-shot="schedule-approval"
+          className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2"
+        >
           <p className="text-sm font-semibold text-[#1A1A1A]">Schedule / approval</p>
           <p className="text-xs text-[#5A6070] whitespace-pre-line">
             Test send stays one-click. Queue a later send here.
@@ -900,7 +916,7 @@ export function StaffNewsletterPanel() {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div data-help-shot="send-actions" className="flex flex-wrap gap-2">
           {sendAudience === 'scoop' ? (
             <>
               <Button

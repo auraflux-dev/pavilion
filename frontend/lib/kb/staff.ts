@@ -366,7 +366,8 @@ Keep MoneyMinder / bank exports with Treasurer. Do not duplicate finance ledgers
       summary: 'Plain text plus Canva. Paid email, Weekly Scoop, test sends, schedule, WhatsApp.',
       order: 3.5,
       need: 'marketing',
-      body: `This is your working guide for **Staff → Newsletter**. You never write HTML or code. Design lives in Canva. Copy lives in plain text boxes.
+      body: `Watch the walkthrough video at the top of this article first.
+Then use the screenshots below — each one matches a section in Staff → Newsletter.
 
 Open: https://www.shmspto.org/staff (Newsletter workspace)
 
@@ -395,6 +396,8 @@ Do not paste HTML from Canva. Do not edit the design inside Staff. Use **Edit in
 3. Preview the graphic. Multi-page designs export **every page**. All pages stack in the email
 4. **Save current as template** if you will reuse this
 
+![Templates (Canva + copy) — attach link, export PNG, multi-page preview, save template](/help/staff-newsletter/01-templates-canva.png)
+
 ## Write the copy
 Type in the subject and body like a normal email.
 
@@ -408,22 +411,34 @@ Example: Hi {{firstName}}, your {{tier}} membership…
 
 If a name is missing, it becomes “there”.
 
+![Subject, body, beats, UTM, and tracking toggles](/help/staff-newsletter/06-copy-tracking.png)
+
 ## Always test first
 1. Pick **Just me**, **Board**, or **Board + Site Settings test list**
 2. **Preview test recipients**, then **Send test email**
 3. Subject gets **[TEST]**. It does **not** go to the parent portal archive
 4. Open the test inbox and click a link once so you know tracking works
 
+![Test send — group, preview, send test email](/help/staff-newsletter/02-test-send.png)
+
 ## Choose the newsletter type
 - **Paid members (full email)**: default. Sends to paid roster only. Optional portal post for paid parents.
 - **Weekly Scoop (free monthly link)**: paste the Canva view link (or we use the attached Canva / https://www.shmspto.org/newsletter). Then **Copy + open WhatsApp** and **Post scoop to portal**. Optional: **Email scoop link** to free parents (checkbox to include footer signups).
 - **Footer signup list only**: public form emails. No portal.
+
+![Newsletter type — Paid, Weekly Scoop, or footer signups](/help/staff-newsletter/03-newsletter-type.png)
+
+![Weekly Scoop — link field and optional footer signups](/help/staff-newsletter/04-weekly-scoop.png)
+
+![Write in beats — intro, Event, Ask, CTA, sign-off](/help/staff-newsletter/05-beats.png)
 
 ## Send paid email
 1. Confirm type is **Paid members**
 2. **Preview recipients**
 3. **Send email now**. Confirm the count. If 25 or more, type **SEND**
 4. Check **Send report** for delivered, failed, opens, clicks
+
+![Send actions — Preview, Send email now, Copy + open WhatsApp](/help/staff-newsletter/08-send-actions.png)
 
 ## Schedule or get approval
 1. Pick **Send at** (your local time)
@@ -432,6 +447,8 @@ If a name is missing, it becomes “there”.
 4. Jobs send within about 15 minutes of that time. Cancel from the same list if needed
 
 Test sends stay one-click. They do not need this queue.
+
+![Schedule / approval — datetime, job list, Approve or Cancel](/help/staff-newsletter/07-schedule-approval.png)
 
 ## WhatsApp (including the graphic)
 WhatsApp cannot attach a file from the website.
@@ -453,26 +470,17 @@ Grade links live in **Site settings** (6th / 7th / 8th announcement links).
 5. **Post scoop to portal** (free parents only. Paid members will not see this scoop)
 6. Optional **Email scoop link** after a test send
 
+## Send report
+After a live send, open **Send report** on the same Newsletter page.
+Refresh to see delivered, failed, opens, and top link clicks.
+
+![Send report — delivered, failed, opens, clicks](/help/staff-newsletter/09-send-report.png)
+
 ## What not to do
 - Do not paste HTML or ask someone to “code the newsletter”
 - Do not skip **Test send**
 - Do not use Paid type for the monthly free link. Use Weekly Scoop
 - Do not expect WhatsApp to auto-attach the PNG. You attach it.
-
-## Screen walkthrough (record this when you have 8 minutes)
-Record Staff in the browser. Speak these beats. Pause on each screen.
-
-- 0:00 Sign in. Open Newsletter. “No HTML. Canva plus plain text.”
-- 0:40 Attach Canva. Export PNG. Show a multi-page preview if you have one.
-- 1:40 Write copy or turn on beats. Show {{firstName}}.
-- 2:30 Test send to Just me. Open the test email.
-- 3:20 Switch type to Paid. Preview. Do not send live on the recording unless it is a real test group.
-- 4:10 Switch to Weekly Scoop. Show scoop link, WhatsApp, Post to portal.
-- 5:20 Show schedule / approval list.
-- 6:00 Send report cards.
-- 6:40 What not to do. Point to this Help article.
-
-Save the recording in Drive (Marketing folder) and paste the link at the top of this article in Staff → Help when you have it.
 
 Questions: president@shmspto.org`,
     },

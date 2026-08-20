@@ -1,4 +1,7 @@
+import Image from 'next/image'
 import type { ReactNode } from 'react'
+
+const IMG_RE = /^!\[(.*?)\]\((.+?)\)$/
 
 function renderInline(text: string): ReactNode[] {
   const parts: ReactNode[] = []
@@ -53,6 +56,30 @@ export function KbArticleBody({ body }: { body: string }) {
     }
 
     flushList()
+
+    const img = trimmed.match(IMG_RE)
+    if (img) {
+      const alt = img[1].trim()
+      const src = img[2].trim()
+      blocks.push(
+        <figure key={`img-${key++}`} className="space-y-1.5">
+          <div className="overflow-hidden rounded-lg border border-[var(--border)] bg-[#FAFAF8]">
+            <Image
+              src={src}
+              alt={alt || 'Help screenshot'}
+              width={1280}
+              height={720}
+              className="h-auto w-full"
+              unoptimized
+            />
+          </div>
+          {alt ? (
+            <figcaption className="text-[11px] text-[#8A9099] leading-snug">{alt}</figcaption>
+          ) : null}
+        </figure>,
+      )
+      continue
+    }
 
     if (trimmed.startsWith('## ')) {
       blocks.push(

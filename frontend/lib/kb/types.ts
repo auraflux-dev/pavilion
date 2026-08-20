@@ -14,7 +14,7 @@ export type KbArticle = {
   title: string
   categoryId: string
   summary: string
-  /** Plain article body. paragraphs, ## headings, - lists, **bold**. */
+  /** Plain article body. paragraphs, ## headings, - lists, **bold**, ![alt](/path.png) images. */
   body: string
   order: number
   /** Staff-only gates (ignored for member KB). */

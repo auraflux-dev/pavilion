@@ -4,7 +4,9 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { BookOpen, ChevronRight } from 'lucide-react'
 import { KbArticleBody } from '@/components/kb/kb-article-body'
+import { ParentVideoEmbed } from '@/components/videos/parent-video-embed'
 import type { KbArticle, KbCategory } from '@/lib/kb'
+import type { StaffVideo } from '@/lib/videos/staff-videos'
 
 export type KbGroup = { category: KbCategory; articles: KbArticle[] }
 
@@ -17,6 +19,8 @@ type Props = {
   articleHrefTemplate: string
   active?: KbArticle | null
   activeCategory?: KbCategory | null
+  /** Optional staff training video for the active article */
+  staffVideo?: StaffVideo | null
 }
 
 function hrefForArticle(template: string, slug: string) {
@@ -31,6 +35,7 @@ export function KnowledgeBase({
   articleHrefTemplate,
   active,
   activeCategory,
+  staffVideo,
 }: Props) {
   const [categoryId, setCategoryId] = useState<string | 'all'>(active?.categoryId ?? 'all')
 
@@ -57,7 +62,8 @@ export function KnowledgeBase({
           <h1 className="text-xl font-bold text-[#1A1A1A]">{active.title}</h1>
           {active.summary ? <p className="text-sm text-[#5A6070]">{active.summary}</p> : null}
         </div>
-        <article className="px-5 py-5">
+        <article className="px-5 py-5 space-y-5">
+          {staffVideo ? <ParentVideoEmbed video={staffVideo} /> : null}
           <KbArticleBody body={active.body} />
         </article>
       </section>

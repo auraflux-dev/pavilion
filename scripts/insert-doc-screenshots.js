@@ -327,9 +327,34 @@ const PLACEMENTS = [
     docTitle: '39 - Member Newsletter (Email & WhatsApp)',
     images: [
       {
-        file: '39-staff-newsletter.png',
-        after: '1. Staff → Newsletter.',
-        caption: 'Action screenshot — Staff → Newsletter email & WhatsApp send.',
+        file: '39-staff-newsletter-templates.png',
+        after: '1. In Newsletter, paste a Canva view/edit link, or pick a recent design',
+        caption: 'Action screenshot — Templates (Canva + copy).',
+      },
+      {
+        file: '39-staff-newsletter-test-send.png',
+        after: '1. Pick **Just me**, **Board**, or **Board + Site Settings test list**',
+        caption: 'Action screenshot — Test send group and buttons.',
+      },
+      {
+        file: '39-staff-newsletter-type.png',
+        after: 'Choose the newsletter type',
+        caption: 'Action screenshot — Paid, Weekly Scoop, footer signups.',
+      },
+      {
+        file: '39-staff-newsletter-scoop.png',
+        after: 'For Weekly Scoop, paste the Canva view link',
+        caption: 'Action screenshot — Weekly Scoop link field.',
+      },
+      {
+        file: '39-staff-newsletter-schedule.png',
+        after: 'Schedule or approval: pick Send at in your local time',
+        caption: 'Action screenshot — Schedule / approval queue.',
+      },
+      {
+        file: '39-staff-newsletter-report.png',
+        after: 'After a send, open Send report on the same page',
+        caption: 'Action screenshot — Send report stats.',
       },
     ],
   },
