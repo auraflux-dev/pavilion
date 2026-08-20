@@ -38,6 +38,7 @@ import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
 import { StaffNewsletterSendReportPanel } from '@/components/staff/staff-newsletter-send-report'
 import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
 import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
+import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-notice'
 import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { StaffWhatsAppQueuePanel } from '@/components/staff/staff-whatsapp-queue-panel'
@@ -437,6 +438,7 @@ export function StaffDashboard() {
               initialEmail={me.personalEmail ?? ''}
               onSaved={(email) => setMe((current) => (current ? { ...current, personalEmail: email } : current))}
             />
+            <StaffWalkthroughNotice roles={me.roles} email={me.email} />
             <StaffOnboardingPanel onOpenWorkspace={go} />
             {activityItems.length > 0 ? (
               <div className="rounded-xl border border-[var(--brand-green)]/25 bg-[#E8F3E8] p-4 space-y-2">

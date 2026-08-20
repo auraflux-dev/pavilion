@@ -157,7 +157,12 @@ export function StaffOnboardingPanel({ onOpenWorkspace }: Props) {
                     ) : null}
                     {item.externalHref ? (
                       <Button type="button" size="sm" variant="outline" asChild>
-                        <a href={item.externalHref} target="_blank" rel="noreferrer">
+                        <a
+                          href={item.externalHref}
+                          {...(item.externalHref.startsWith('/')
+                            ? {}
+                            : { target: '_blank', rel: 'noreferrer' })}
+                        >
                           {item.actionLabel}
                         </a>
                       </Button>

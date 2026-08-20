@@ -17,6 +17,8 @@ Use this Google account for Staff only. Keep a personal Gmail for the parent por
 
 You’ll also see a short **Marketing onboarding** checklist on Home — work through it this week.
 
+When you sign in, Home may show a green notice: **Member Newsletter walkthrough is ready to review**. Open it (or Help → **Member newsletter for Diane**) and watch the short video before your first real send.
+
 ---
 
 ## 2. Canva (your design home)
@@ -55,7 +57,7 @@ You do **not** need the Canva Developer Portal. Day-to-day is folder + Staff.
 - [ ] Connect Google (Inbox)  
 - [ ] Open **Canva** → Marketing folder (confirm you can edit)  
 - [ ] Open **Comms & content** — add or review the next two weeks  
-- [ ] Skim **Help** → **Member newsletter (for Diane)** and send yourself a test email  
+- [ ] Watch **Help** → **Member newsletter (for Diane)** (video) and send yourself a test email  
 - [ ] Optional: finish the Home onboarding checklist  
 
 ---

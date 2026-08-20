@@ -118,6 +118,14 @@ export const STAFF_ONBOARDING_TRACKS: Record<StaffOnboardingRole, StaffOnboardin
         actionLabel: 'Open Newsletter',
       },
       {
+        id: 'mkt_newsletter_walkthrough',
+        title: 'Review the Member Newsletter walkthrough',
+        detail:
+          'Watch the short training video (Canva PNG + plain text, test send, Weekly Scoop, schedule). Then send yourself a test.',
+        externalHref: '/staff?view=help&article=member-newsletter-diane',
+        actionLabel: 'Watch walkthrough',
+      },
+      {
         id: 'mkt_page_copy',
         title: 'Review Page copy & site settings',
         detail: 'Heroes, announcement bar, and public marketing CTAs.',
