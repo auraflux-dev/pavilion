@@ -235,8 +235,8 @@ export async function getMembershipTiers(): Promise<MembershipTier[]> {
     return DEMO_TIERS.map((t) => ({ ...t, perks: [...t.perks] }))
   }
   if (process.env.COMMONS_PLATFORM === 'true') {
-    const { loadTrialPackFromCookies } = await import('@/lib/crm/trial-packs/from-cookies')
-    const pack = await loadTrialPackFromCookies()
+    const { trialPackForSlug } = await import('@/lib/crm/trial-packs')
+    const pack = trialPackForSlug(process.env.COMMONS_TRIAL_PACK || '')
     if (pack?.tiers?.length) return pack.tiers.map((t) => ({ ...t, perks: [...t.perks] }))
   }
   const cmsTiers = await fetchCmsTiers()

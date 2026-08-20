@@ -144,8 +144,8 @@ export async function getPageContent(page: string): Promise<PageContentFields> {
     return merge(page, null)
   }
   if (process.env.COMMONS_PLATFORM === 'true') {
-    const { loadTrialPackFromCookies } = await import('@/lib/crm/trial-packs/from-cookies')
-    const pack = await loadTrialPackFromCookies()
+    const { trialPackForSlug } = await import('@/lib/crm/trial-packs')
+    const pack = trialPackForSlug(process.env.COMMONS_TRIAL_PACK || '')
     const row = pack?.pages[page]
     if (row) return { ...row }
   }

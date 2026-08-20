@@ -91,8 +91,8 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
     return DEMO_EVENTS.slice(0, limit)
   }
   if (process.env.COMMONS_PLATFORM === 'true') {
-    const { loadTrialPackFromCookies } = await import('@/lib/crm/trial-packs/from-cookies')
-    const pack = await loadTrialPackFromCookies()
+    const { trialPackForSlug } = await import('@/lib/crm/trial-packs')
+    const pack = trialPackForSlug(process.env.COMMONS_TRIAL_PACK || '')
     if (pack?.events?.length) return pack.events.slice(0, limit)
   }
   try {

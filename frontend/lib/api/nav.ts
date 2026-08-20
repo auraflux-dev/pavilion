@@ -141,8 +141,8 @@ export async function getNavLinks(): Promise<NavLink[]> {
    return DEMO_NAV.map((l) => ({ ...l }))
  }
  if (process.env.COMMONS_PLATFORM === 'true') {
-   const { loadTrialPackFromCookies } = await import('@/lib/crm/trial-packs/from-cookies')
-   const pack = await loadTrialPackFromCookies()
+    const { trialPackForSlug } = await import('@/lib/crm/trial-packs')
+    const pack = trialPackForSlug(process.env.COMMONS_TRIAL_PACK || '')
    if (pack?.nav?.length) return pack.nav.map((l) => ({ ...l }))
  }
  const raw = await fetchNavLinks()

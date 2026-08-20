@@ -32,8 +32,8 @@ async function fetchAllSettings(): Promise<Record<string, string>> {
    return { ...DEMO_SETTINGS }
  }
  if (process.env.COMMONS_PLATFORM === 'true') {
-   const { loadTrialPackFromCookies } = await import('@/lib/crm/trial-packs/from-cookies')
-   const pack = await loadTrialPackFromCookies()
+    const { trialPackForSlug } = await import('@/lib/crm/trial-packs')
+    const pack = trialPackForSlug(process.env.COMMONS_TRIAL_PACK || '')
    if (pack?.settings) return { ...pack.settings }
  }
  const apiKey = process.env.WIX_API_KEY

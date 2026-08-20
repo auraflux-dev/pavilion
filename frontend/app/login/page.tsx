@@ -30,7 +30,6 @@ function CommonsLoginForm() {
       if (!r.ok) {
         throw new Error(d.message || d.error || 'Could not sign in.\nCheck the email and password we sent you.')
       }
-      await fetch('/api/commons/session/bootstrap', { credentials: 'include' })
       window.location.assign(returnTo.startsWith('/') ? returnTo : '/staff')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not sign in')

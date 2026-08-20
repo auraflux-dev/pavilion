@@ -46,8 +46,8 @@ export async function getBoardMembers(): Promise<BoardMember[]> {
     return DEMO_BOARD.map((m) => ({ ...m }))
   }
   if (process.env.COMMONS_PLATFORM === 'true') {
-    const { loadTrialPackFromCookies } = await import('@/lib/crm/trial-packs/from-cookies')
-    const pack = await loadTrialPackFromCookies()
+    const { trialPackForSlug } = await import('@/lib/crm/trial-packs')
+    const pack = trialPackForSlug(process.env.COMMONS_TRIAL_PACK || '')
     if (pack?.board?.length) return pack.board.map((m) => ({ ...m }))
   }
   const apiKey = process.env.WIX_API_KEY

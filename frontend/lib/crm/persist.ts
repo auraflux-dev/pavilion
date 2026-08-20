@@ -176,9 +176,5 @@ export async function persistTrialStart(opts: {
     await sql(`update people set auth_user_id = $1 where id = $2`, [userId, personId])
   }
 
-  const { COMMONS_TRIAL_SLUG_COOKIE } = await import('@/lib/crm/trial-packs/from-cookies')
-  const slugCookie = `${COMMONS_TRIAL_SLUG_COOKIE}=${slug}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 40}`
-  setCookies.push(slugCookie)
-
   return { orgId, slug, tempHost, trialEndsAt: ends.toISOString(), setCookies }
 }
