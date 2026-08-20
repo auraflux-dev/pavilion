@@ -294,7 +294,7 @@ export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
         key: 'sendAudience',
         label: 'Audience',
         type: 'select',
-        options: ['members', 'subscribers'],
+        options: ['members', 'subscribers', 'paid', 'scoop'],
         required: true,
       },
       { key: 'needsApproval', label: 'Needs approval', type: 'boolean' },

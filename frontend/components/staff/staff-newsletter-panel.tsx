@@ -6,6 +6,11 @@ import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { defaultUtmCampaign } from '@/lib/staff/newsletter-utm'
 import { NEWSLETTER_MERGE_HINT } from '@/lib/staff/newsletter-merge'
 import {
+  SCOOP_DEFAULT_SUBJECT,
+  buildScoopShareText,
+  resolveScoopUrl,
+} from '@/lib/staff/newsletter-scoop'
+import {
   StaffNewsletterTemplatesPanel,
   type NewsletterCanvaMeta,
 } from '@/components/staff/staff-newsletter-templates-panel'
@@ -21,13 +26,17 @@ type TestGroups = {
  * Member newsletter: free and/or paid parents via Gmail + WhatsApp grade groups + optional portal.
  * Reuses /api/staff/membership/outreach (same roster + Gmail send as Memberships).
  */
+type NewsletterKind = 'paid' | 'scoop' | 'subscribers'
+
 export function StaffNewsletterPanel() {
   const [emailConfigured, setEmailConfigured] = useState(false)
   const [waLinks, setWaLinks] = useState({ grade6: '', grade7: '', grade8: '' })
   const [testGroups, setTestGroups] = useState<TestGroups | null>(null)
   const [testGroup, setTestGroup] = useState<'me' | 'board' | 'board_and_custom'>('me')
   const [testEmailsExtra, setTestEmailsExtra] = useState('')
-  const [sendAudience, setSendAudience] = useState<'members' | 'subscribers'>('members')
+  const [sendAudience, setSendAudience] = useState<NewsletterKind>('paid')
+  const [scoopUrl, setScoopUrl] = useState('')
+  const [scoopIncludeSignups, setScoopIncludeSignups] = useState(true)
   const [subscriberCount, setSubscriberCount] = useState(0)
   const [canApprove, setCanApprove] = useState(false)
   const [sendAtLocal, setSendAtLocal] = useState('')
@@ -87,16 +96,31 @@ export function StaffNewsletterPanel() {
     }
   }, [subject, utmCampaign])
 
+  function scoopLink() {
+    return resolveScoopUrl(scoopUrl, canvaMeta.canvaViewUrl)
+  }
+
+  function scoopShareText() {
+    return buildScoopShareText({
+      subject: subject || SCOOP_DEFAULT_SUBJECT,
+      body,
+      url: scoopLink(),
+    })
+  }
+
   function outreachPayload(extra: Record<string, unknown> = {}) {
+    const kind = sendAudience
+    const emailBody = kind === 'scoop' ? scoopShareText() : body
     return {
       channel: 'email',
-      subject,
-      body,
-      tier,
+      subject: kind === 'scoop' ? subject || SCOOP_DEFAULT_SUBJECT : subject,
+      body: emailBody,
+      tier: kind === 'paid' ? (tier === 'free' || tier === 'all' ? 'paid' : tier) : kind === 'scoop' ? 'free' : tier,
       grade,
-      alsoPortal: sendAudience === 'subscribers' ? false : alsoPortal,
-      sendAudience,
-      utmCampaign: utmCampaign.trim() || defaultUtmCampaign(subject),
+      alsoPortal: kind === 'subscribers' ? false : kind === 'scoop' ? extra.alsoPortal === true : alsoPortal,
+      sendAudience: kind,
+      includeSubscribers: kind === 'scoop' && scoopIncludeSignups,
+      utmCampaign: utmCampaign.trim() || defaultUtmCampaign(subject || SCOOP_DEFAULT_SUBJECT),
       trackClicks,
       trackOpens,
       templateId: templateId || undefined,
@@ -121,7 +145,15 @@ export function StaffNewsletterPanel() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Preview failed')
       setStatus(
-        `Preview: ${d.recipientCount} ${sendAudience === 'subscribers' ? 'footer signup' : 'member parent'}${d.recipientCount === 1 ? '' : 's'}` +
+        `Preview: ${d.recipientCount} ${
+          sendAudience === 'subscribers'
+            ? 'footer signup'
+            : sendAudience === 'scoop'
+              ? 'free parent (Weekly Scoop link)'
+              : sendAudience === 'paid'
+                ? 'paid member'
+                : 'member parent'
+        }${d.recipientCount === 1 ? '' : 's'}` +
           (d.recipientsPreview?.length
             ? `. E.g. ${d.recipientsPreview.slice(0, 5).join(', ')}`
             : '') +
@@ -216,7 +248,14 @@ export function StaffNewsletterPanel() {
       const preview = await previewRes.json()
       if (!previewRes.ok) throw new Error(preview.error ?? 'Preview failed')
       const n = Number(preview.recipientCount ?? 0)
-      const who = sendAudience === 'subscribers' ? 'footer signup' : 'member parent'
+      const who =
+        sendAudience === 'subscribers'
+          ? 'footer signup'
+          : sendAudience === 'scoop'
+            ? 'free parent (Weekly Scoop link)'
+            : sendAudience === 'paid'
+              ? 'paid member'
+              : 'member parent'
       const ok = window.confirm(
         `Send this newsletter to ${n} ${who}${n === 1 ? '' : 's'}?\n\nThis is not a test send. Type OK in the next step only if you meant the full list.`,
       )
@@ -276,7 +315,10 @@ export function StaffNewsletterPanel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           channel: 'whatsapp',
-          message: [subject, body].filter(Boolean).join('\n\n'),
+          message:
+            sendAudience === 'scoop'
+              ? scoopShareText()
+              : [subject, body].filter(Boolean).join('\n\n'),
           whatsappGrade: waGrade,
         }),
       })
@@ -304,6 +346,33 @@ export function StaffNewsletterPanel() {
       setStatus(`${plan.instructions} Message copied when clipboard allowed.`)
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'WhatsApp failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function postScoopToPortal() {
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/membership/outreach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel: 'scoop-portal',
+          subject: subject || SCOOP_DEFAULT_SUBJECT,
+          body: scoopShareText(),
+        }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Portal post failed')
+      setStatus(
+        d.newsletterArchived
+          ? 'Posted to member portal Messages for free parents (paid members will not see this scoop).'
+          : d.error ?? 'Portal post failed',
+      )
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Portal post failed')
     } finally {
       setBusy(false)
     }
@@ -410,8 +479,9 @@ export function StaffNewsletterPanel() {
             No HTML coding required. Write plain text, attach a Canva design, Export PNG for email.
             Sends include SHMS header/footer + your graphic + body.
             {'\n'}
-            Parent sends use the Students roster. Footer signups use the public newsletter list.
-            Use Test send first so board can preview in a real inbox.
+            Paid members get the full email (plain text + Canva).
+            Free parents get the SHMS Weekly Scoop as a link once a month: WhatsApp, portal, optional email.
+            Footer signups are the public form list.
             {emailConfigured
               ? ''
               : '\nGmail send is not ready yet. Connect Google in Staff → Inbox (president@) or sends fall back to your mail app.'}
@@ -480,32 +550,66 @@ export function StaffNewsletterPanel() {
           </div>
         </div>
 
-        <p className="text-xs font-semibold text-[#1A1A1A]">Audience + member send</p>
+        <p className="text-xs font-semibold text-[#1A1A1A]">Newsletter type</p>
 
         <label className="text-xs text-[#5A6070]">
-          Who gets this email
+          Who this is for
           <select
             value={sendAudience}
-            onChange={(e) =>
-              setSendAudience(e.target.value === 'subscribers' ? 'subscribers' : 'members')
-            }
+            onChange={(e) => {
+              const v = e.target.value
+              const next: NewsletterKind =
+                v === 'scoop' || v === 'subscribers' || v === 'paid' ? v : 'paid'
+              setSendAudience(next)
+              if (next === 'paid' && (tier === 'all' || tier === 'free')) setTier('paid')
+              if (next === 'scoop' && !subject.trim()) setSubject(SCOOP_DEFAULT_SUBJECT)
+            }}
             className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           >
-            <option value="members">Member parents (Students roster)</option>
+            <option value="paid">Paid members (full email)</option>
+            <option value="scoop">Weekly Scoop (free monthly link)</option>
             <option value="subscribers">
-              Footer signup list ({subscriberCount} email{subscriberCount === 1 ? '' : 's'})
+              Footer signup list only ({subscriberCount} email{subscriberCount === 1 ? '' : 's'})
             </option>
           </select>
         </label>
 
+        {sendAudience === 'scoop' ? (
+          <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2">
+            <p className="text-xs text-[#5A6070] whitespace-pre-line">
+              Free audience gets a link, not the full newsletter in their inbox.
+              Paste the Canva view link (or we use the attached Canva / the site newsletter page).
+              Then export to WhatsApp and post to the member portal.
+            </p>
+            <label className="text-xs text-[#5A6070] block">
+              Scoop link
+              <input
+                value={scoopUrl}
+                onChange={(e) => setScoopUrl(e.target.value)}
+                placeholder={resolveScoopUrl('', canvaMeta.canvaViewUrl)}
+                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="flex items-center gap-2 text-xs text-[#5A6070]">
+              <input
+                type="checkbox"
+                checked={scoopIncludeSignups}
+                onChange={(e) => setScoopIncludeSignups(e.target.checked)}
+              />
+              If you email the scoop link, also include footer signups
+            </label>
+          </div>
+        ) : null}
+
         <div className={`grid sm:grid-cols-3 gap-2 ${sendAudience === 'subscribers' ? 'opacity-50' : ''}`}>
           <select
-            value={tier}
+            value={sendAudience === 'paid' && (tier === 'all' || tier === 'free') ? 'paid' : tier}
             onChange={(e) => setTier(e.target.value)}
+            disabled={sendAudience === 'scoop' || sendAudience === 'subscribers'}
             className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           >
-            <option value="all">All members (free + paid)</option>
-            <option value="free">Free only</option>
+            {sendAudience === 'paid' ? null : <option value="all">All members (free + paid)</option>}
+            {sendAudience === 'paid' ? null : <option value="free">Free only</option>}
             <option value="paid">Paid only</option>
             <option value="reef">{vanillaizeIfDemo('Reef')}</option>
             <option value="lagoon">{vanillaizeIfDemo('Lagoon')}</option>
@@ -547,14 +651,20 @@ export function StaffNewsletterPanel() {
         <input
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
-          placeholder="Subject / headline"
+          placeholder={
+            sendAudience === 'scoop' ? SCOOP_DEFAULT_SUBJECT : 'Subject / headline'
+          }
           className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={8}
-          placeholder="Newsletter body (plain text; paste links — UTM + tracking added on send)"
+          placeholder={
+            sendAudience === 'scoop'
+              ? 'Short note above the scoop link (plain text)'
+              : 'Newsletter body (plain text; paste links — UTM + tracking added on send)'
+          }
           className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
         <p className="text-[11px] text-[#5A6070]">{NEWSLETTER_MERGE_HINT}</p>
@@ -589,6 +699,7 @@ export function StaffNewsletterPanel() {
           </div>
         </div>
 
+        {sendAudience === 'scoop' ? null : (
         <label className="flex items-center gap-2 text-xs text-[#5A6070]">
           <input
             type="checkbox"
@@ -597,8 +708,13 @@ export function StaffNewsletterPanel() {
             onChange={(e) => setAlsoPortal(e.target.checked)}
           />
           Also post to parent portal inbox when sending email
-          {sendAudience === 'subscribers' ? ' (signup list is email-only)' : ''}
+          {sendAudience === 'subscribers'
+            ? ' (signup list is email-only)'
+            : sendAudience === 'paid'
+              ? ' (paid parents only in Messages)'
+              : ''}
         </label>
+        )}
 
         <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2">
           <p className="text-sm font-semibold text-[#1A1A1A]">Schedule / approval</p>
@@ -675,31 +791,71 @@ export function StaffNewsletterPanel() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy || !subject || !body}
-            onClick={() => void preview()}
-          >
-            Preview recipients
-          </Button>
-          <Button
-            type="button"
-            disabled={busy || !subject || !body}
-            className="text-white"
-            style={{ backgroundColor: 'var(--brand-green)' }}
-            onClick={() => void sendEmail()}
-          >
-            Send email now
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy || (!subject && !body)}
-            onClick={() => void openWhatsApp()}
-          >
-            Copy + open WhatsApp
-          </Button>
+          {sendAudience === 'scoop' ? (
+            <>
+              <Button
+                type="button"
+                disabled={busy || (!subject && !body)}
+                className="text-white"
+                style={{ backgroundColor: 'var(--brand-green)' }}
+                onClick={() => void openWhatsApp()}
+              >
+                Copy + open WhatsApp
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy || (!subject && !body)}
+                onClick={() => void postScoopToPortal()}
+              >
+                Post scoop to portal
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy || (!subject && !body)}
+                onClick={() => void preview()}
+              >
+                Preview free + signup recipients
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy || (!subject && !body)}
+                onClick={() => void sendEmail()}
+              >
+                Email scoop link
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy || !subject || !body}
+                onClick={() => void preview()}
+              >
+                Preview recipients
+              </Button>
+              <Button
+                type="button"
+                disabled={busy || !subject || !body}
+                className="text-white"
+                style={{ backgroundColor: 'var(--brand-green)' }}
+                onClick={() => void sendEmail()}
+              >
+                Send email now
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy || (!subject && !body)}
+                onClick={() => void openWhatsApp()}
+              >
+                Copy + open WhatsApp
+              </Button>
+            </>
+          )}
         </div>
         {status ? <p className="text-sm text-[#1A1A1A] whitespace-pre-line">{status}</p> : null}
       </section>

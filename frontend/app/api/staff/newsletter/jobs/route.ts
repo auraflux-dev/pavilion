@@ -20,13 +20,21 @@ async function gate(req: NextRequest) {
   return { status: 200 as const, session }
 }
 
-function payloadFromBody(body: Record<string, unknown>, sendAudience: 'members' | 'subscribers'): NewsletterJobPayload {
+function parseSendAudience(raw: string): 'members' | 'subscribers' | 'paid' | 'scoop' {
+  if (raw === 'subscribers' || raw === 'paid' || raw === 'scoop') return raw
+  return 'members'
+}
+
+function payloadFromBody(
+  body: Record<string, unknown>,
+  sendAudience: 'members' | 'subscribers' | 'paid' | 'scoop',
+): NewsletterJobPayload {
   const subject = String(body.subject ?? '').trim()
   const message = String(body.body ?? body.message ?? '').trim()
   return {
     subject,
     message,
-    tier: String(body.tier ?? 'all').trim() || 'all',
+    tier: sendAudience === 'paid' ? 'paid' : sendAudience === 'scoop' ? 'free' : String(body.tier ?? 'all').trim() || 'all',
     grade: String(body.grade ?? '').trim(),
     alsoPortal: sendAudience === 'subscribers' ? false : body.alsoPortal !== false,
     utmCampaign: defaultUtmCampaign(subject, String(body.utmCampaign ?? '').trim()),
@@ -38,6 +46,7 @@ function payloadFromBody(body: Record<string, unknown>, sendAudience: 'members' 
     canvaTitle: String(body.canvaTitle ?? '').trim() || undefined,
     heroImageUrl: String(body.heroImageUrl ?? '').trim() || undefined,
     sendAudience,
+    includeSubscribers: body.includeSubscribers === true,
   }
 }
 
@@ -109,8 +118,7 @@ export async function POST(req: NextRequest) {
     if (!subject || !message) {
       return NextResponse.json({ error: 'subject and body are required' }, { status: 400 })
     }
-    const audienceRaw = String(body.sendAudience ?? 'members').trim()
-    const sendAudience = audienceRaw === 'subscribers' ? 'subscribers' : 'members'
+    const sendAudience = parseSendAudience(String(body.sendAudience ?? 'members').trim())
     const sendAtRaw = String(body.sendAt ?? '').trim()
     const sendAtMs = Date.parse(sendAtRaw)
     if (!sendAtRaw || !Number.isFinite(sendAtMs)) {

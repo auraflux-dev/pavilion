@@ -31,7 +31,7 @@ import {
   testSubject,
 } from '@/lib/staff/newsletter-test-groups'
 
-export type NewsletterSendAudience = 'members' | 'test' | 'subscribers'
+export type NewsletterSendAudience = 'members' | 'test' | 'subscribers' | 'paid' | 'scoop'
 
 export type NewsletterExecuteInput = {
   actorEmail: string
@@ -53,6 +53,7 @@ export type NewsletterExecuteInput = {
   testGroup?: 'me' | 'board' | 'custom' | 'board_and_custom'
   testEmails?: string
   emails?: string[]
+  includeSubscribers?: boolean
   dryRun?: boolean
   actorPersonalEmail?: string
 }
@@ -171,6 +172,22 @@ async function archiveNewsletter(opts: {
   }
 }
 
+/** Portal Messages for free parents (Weekly Scoop). Paid parents do not see audience=free. */
+export async function publishScoopToPortal(opts: {
+  title: string
+  body: string
+  fromName: string
+}): Promise<boolean> {
+  return archiveNewsletter({
+    title: opts.title,
+    body: opts.body,
+    fromName: opts.fromName,
+    tier: 'free',
+    grade: '',
+    customEmails: [],
+  })
+}
+
 export async function executeNewsletterEmail(
   input: NewsletterExecuteInput,
 ): Promise<NewsletterExecuteResult> {
@@ -185,11 +202,17 @@ export async function executeNewsletterEmail(
   const trackClicks = input.trackClicks !== false
   const trackOpens = input.trackOpens === true
   const sendAudience: NewsletterSendAudience =
-    input.sendAudience === 'test' || input.sendAudience === 'subscribers'
+    input.sendAudience === 'test' ||
+    input.sendAudience === 'subscribers' ||
+    input.sendAudience === 'paid' ||
+    input.sendAudience === 'scoop'
       ? input.sendAudience
       : 'members'
   const isTestAudience = sendAudience === 'test'
   const isSubscribers = sendAudience === 'subscribers'
+  const isPaidAudience = sendAudience === 'paid'
+  const isScoop = sendAudience === 'scoop'
+  const rosterTier = isPaidAudience ? 'paid' : isScoop ? 'free' : tier
 
   const roster = await loadRoster()
   let recipients: string[] = []
@@ -228,17 +251,30 @@ export async function executeNewsletterEmail(
     recipients = await loadSubscriberEmails()
     filteredRoster = []
     effectiveUtmCampaign = `${utmCampaign}-signup`.replace(/-signup-signup$/, '-signup')
+  } else if (isScoop) {
+    const filtered = filterParentRoster(roster, { tier: 'free', grade })
+    filteredRoster = filtered
+    recipients = sanitizeRecipients(rosterEmails(filtered))
+    if (input.includeSubscribers) {
+      const extra = await loadSubscriberEmails()
+      recipients = sanitizeRecipients([...recipients, ...extra])
+    }
+    effectiveUtmCampaign = `${utmCampaign}-scoop`.replace(/-scoop-scoop$/, '-scoop')
   } else {
+    const filterTier = isPaidAudience ? (tier === 'all' || tier === 'free' ? 'paid' : tier) : rosterTier
     const filtered =
       customEmails.length > 0
         ? filterParentRoster(roster, { tier: 'all' }).filter((r) =>
             sanitizeRecipients(customEmails).includes(r.parentEmail),
           )
-        : filterParentRoster(roster, { tier, grade })
+        : filterParentRoster(roster, { tier: filterTier, grade })
     filteredRoster = filtered
     recipients = sanitizeRecipients(
       customEmails.length ? customEmails : rosterEmails(filtered),
     )
+    if (isPaidAudience) {
+      effectiveUtmCampaign = `${utmCampaign}-paid`.replace(/-paid-paid$/, '-paid')
+    }
   }
 
   let outboundBody = message
@@ -260,12 +296,18 @@ export async function executeNewsletterEmail(
         utm: {
           campaign: effectiveUtmCampaign,
           source: 'newsletter',
-          medium: isSubscribers ? 'email-signup' : 'email',
+          medium: isSubscribers
+            ? 'email-signup'
+            : isScoop
+              ? 'email-scoop'
+              : isPaidAudience
+                ? 'email-paid'
+                : 'email',
         },
         trackClicks,
         sentByEmail: input.actorEmail,
         subject: effectiveSubject,
-        tier: isSubscribers ? 'subscribers' : tier,
+        tier: isSubscribers ? 'subscribers' : isScoop ? 'free' : isPaidAudience ? 'paid' : tier,
         grade: isSubscribers ? '' : grade,
         templateId: input.templateId,
         recipientCount: recipients.length,
@@ -381,14 +423,30 @@ export async function executeNewsletterEmail(
   let portalInserted = false
   let newsletterArchived = false
   if (effectiveAlsoPortal && !dryRun && !isTestAudience && !isSubscribers) {
-    try {
-      const client = getWixClient()
-      if (tier !== 'all' || grade || customEmails.length) {
-        for (const email of recipients) {
+    if (!isScoop) {
+      try {
+        const client = getWixClient()
+        if (tier !== 'all' || grade || customEmails.length || isPaidAudience) {
+          for (const email of recipients) {
+            await client.items.insert('ParentMessages', {
+              parentEmail: email,
+              audience: 'custom',
+              grade: grade || null,
+              studentId: null,
+              studentName: null,
+              programName: null,
+              fromName,
+              subject: effectiveSubject,
+              body: archiveBody,
+              sentAt: new Date().toISOString(),
+              active: true,
+            })
+          }
+        } else {
           await client.items.insert('ParentMessages', {
-            parentEmail: email,
-            audience: 'custom',
-            grade: grade || null,
+            parentEmail: null,
+            audience: 'all',
+            grade: null,
             studentId: null,
             studentName: null,
             programName: null,
@@ -399,33 +457,20 @@ export async function executeNewsletterEmail(
             active: true,
           })
         }
-      } else {
-        await client.items.insert('ParentMessages', {
-          parentEmail: null,
-          audience: 'all',
-          grade: null,
-          studentId: null,
-          studentName: null,
-          programName: null,
-          fromName,
-          subject: effectiveSubject,
-          body: archiveBody,
-          sentAt: new Date().toISOString(),
-          active: true,
-        })
+        portalInserted = true
+      } catch {
+        // ParentMessages optional
       }
-      portalInserted = true
-    } catch {
-      // ParentMessages optional
     }
     newsletterArchived = await archiveNewsletter({
       title: effectiveSubject,
       body: archiveBody,
       fromName,
-      tier,
-      grade,
+      tier: isScoop ? 'free' : isPaidAudience ? 'paid' : tier,
+      grade: isScoop || isPaidAudience ? '' : grade,
       customEmails: isTestAudience ? recipients : customEmails,
     })
+    if (isScoop && newsletterArchived) portalInserted = true
   }
 
   return {

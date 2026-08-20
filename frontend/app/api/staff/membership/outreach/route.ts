@@ -22,6 +22,7 @@ import {
 import {
   countNewsletterSubscribers,
   executeNewsletterEmail,
+  publishScoopToPortal,
 } from '@/lib/staff/newsletter-execute'
 import { canApproveNewsletter } from '@/lib/staff/newsletter-jobs'
 
@@ -225,9 +226,13 @@ export async function POST(req: NextRequest) {
     const sendAudience =
       sendAudienceRaw === 'subscribers'
         ? ('subscribers' as const)
-        : isTestSend
-          ? ('test' as const)
-          : ('members' as const)
+        : sendAudienceRaw === 'paid'
+          ? ('paid' as const)
+          : sendAudienceRaw === 'scoop'
+            ? ('scoop' as const)
+            : isTestSend
+              ? ('test' as const)
+              : ('members' as const)
 
     if (channel === 'whatsapp') {
       const links = await loadWhatsAppLinks()
@@ -242,6 +247,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, channel: 'whatsapp', plan })
     }
 
+    if (channel === 'scoop-portal') {
+      const fromName = session.staff.name || session.staff.boardTitle || session.email
+      const title = subject || 'SHMS Weekly Scoop'
+      if (!message && !title) {
+        return NextResponse.json({ error: 'Subject or body is required' }, { status: 400 })
+      }
+      const newsletterArchived = await publishScoopToPortal({
+        title,
+        body: message || title,
+        fromName,
+      })
+      return NextResponse.json({
+        ok: newsletterArchived,
+        channel: 'scoop-portal',
+        newsletterArchived,
+        error: newsletterArchived ? undefined : 'Could not save to portal Messages (Newsletters CMS).',
+      })
+    }
+
     if (channel === 'email') {
       const result = await executeNewsletterEmail({
         actorEmail: session.email,
@@ -251,7 +275,13 @@ export async function POST(req: NextRequest) {
         message,
         tier,
         grade,
-        alsoPortal: sendAudience === 'subscribers' ? false : alsoPortal,
+        alsoPortal:
+          sendAudience === 'subscribers'
+            ? false
+            : sendAudience === 'scoop'
+              ? alsoPortal
+              : alsoPortal,
+        includeSubscribers: body.includeSubscribers === true,
         utmCampaign: String(body.utmCampaign ?? '').trim(),
         trackClicks,
         trackOpens,

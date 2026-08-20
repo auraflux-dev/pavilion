@@ -46,6 +46,11 @@ import {
   publicNewsletterAssetUrl,
 } from '../frontend/lib/staff/newsletter-assets.ts'
 import {
+  buildScoopShareText,
+  defaultScoopPageUrl,
+  resolveScoopUrl,
+} from '../frontend/lib/staff/newsletter-scoop.ts'
+import {
   canApproveNewsletter,
   jobIsDue,
   parseJobPayload,
@@ -283,6 +288,22 @@ check('branded newsletter HTML header hero footer', () => {
   assert.ok(html.includes('Hello<br'))
   assert.ok(html.includes('/api/o/send123'))
   assert.ok(!html.includes('<script'))
+})
+
+check('weekly scoop share text + url fallback', () => {
+  const text = buildScoopShareText({
+    subject: 'SHMS Weekly Scoop',
+    body: 'This month at Stone Hill.',
+    url: 'https://www.canva.com/design/ABC/view',
+  })
+  assert.ok(text.includes('SHMS Weekly Scoop'))
+  assert.ok(text.includes('This month at Stone Hill.'))
+  assert.ok(text.includes('https://www.canva.com/design/ABC/view'))
+  assert.equal(
+    resolveScoopUrl('', 'https://www.canva.com/design/ABC/view'),
+    'https://www.canva.com/design/ABC/view',
+  )
+  assert.ok(defaultScoopPageUrl().includes('/newsletter'))
 })
 
 check('newsletter jobs approval + due + payload', () => {

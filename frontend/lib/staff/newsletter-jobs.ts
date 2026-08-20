@@ -33,7 +33,12 @@ function mapJob(row: Record<string, unknown>): NewsletterJob {
     : 'pending_approval'
   const audienceRaw = String(row.sendAudience ?? 'members')
   const sendAudience: NewsletterSendAudience =
-    audienceRaw === 'subscribers' || audienceRaw === 'test' ? audienceRaw : 'members'
+    audienceRaw === 'subscribers' ||
+    audienceRaw === 'test' ||
+    audienceRaw === 'paid' ||
+    audienceRaw === 'scoop'
+      ? audienceRaw
+      : 'members'
   return {
     id: String(row._id ?? row.id ?? ''),
     subject: String(row.subject ?? ''),

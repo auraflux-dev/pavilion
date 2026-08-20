@@ -12,7 +12,7 @@ export const NEWSLETTER_JOB_STATUSES = [
 ] as const
 export type NewsletterJobStatus = (typeof NEWSLETTER_JOB_STATUSES)[number]
 
-export type NewsletterSendAudience = 'members' | 'test' | 'subscribers'
+export type NewsletterSendAudience = 'members' | 'test' | 'subscribers' | 'paid' | 'scoop'
 
 export type NewsletterJobPayload = {
   subject: string
@@ -29,6 +29,7 @@ export type NewsletterJobPayload = {
   canvaTitle?: string
   heroImageUrl?: string
   sendAudience?: NewsletterSendAudience
+  includeSubscribers?: boolean
   testGroup?: 'me' | 'board' | 'custom' | 'board_and_custom'
   testEmails?: string
   emails?: string[]
