@@ -1,29 +1,26 @@
 ---
-description: Keep Commons on the same shipped SHA as Stone Hill; check at session start
+description: Pavilion deploy is opt-in after SHMS ships; never mix env
 alwaysApply: true
 ---
 
-# Commons follows every ship
+# Pavilion vs SHMS deploys
 
-Stone Hill (`frontend` / www.shmspto.org) and Commons (`commons-pto-demo` / commons-pto-demo.vercel.app) share this repo. Commons is **not** git-connected.
+Build **Pavilion** as if SHMS never existed (product, tenants, `onpavilion.com`, demo/trials). No Stone Hill PII or school cost on Pavilion.
+
+Stone Hill (`frontend` / www.shmspto.org) and Pavilion apps (`commons-pto-demo`, `commons-pto`, `commons-site`) share this monorepo for now but are **separate products**.
 
 After Serena QA on a shippable **application** change:
 
 1. Commit task files only.
-2. Deploy **both** Vercel projects from a **clean worktree of that SHA** (`frontend` then `commons-pto-demo`). Never `vercel --prod` from a dirty tree. Never put Stone Hill `DATABASE_URL` / Wix / Square env on Commons, or Commons `DATABASE_URL` on Stone Hill.
+2. Deploy the **target product(s) for that task** from a **clean worktree of that SHA**. Never `vercel --prod` from a dirty tree.
 3. Push that commit to GitHub.
+4. **If you shipped Stone Hill** and the change could improve the Pavilion platform: **ask Rob** whether to also deploy Pavilion (`commons-pto-demo` and/or `commons-pto`) from the same SHA. Do **not** auto-deploy Pavilion on every SHMS ship.
+5. If the task is Pavilion-only (`commons-site`, demo vanillaize, trial packs), deploy Pavilion projects only. Do not require a Stone Hill deploy.
 
-If you only deployed Stone Hill, Commons is behind. Catch it up immediately from the same SHA.
+Never put Stone Hill `DATABASE_URL` / Wix / Square env on Pavilion projects, or Pavilion `DATABASE_URL` / Stripe on Stone Hill.
 
-At the **start of a session** (or first message of the day): run `node scripts/commons-parity.mjs`. If Commons production SHA ≠ origin/main (or ≠ Stone Hill production SHA), deploy `commons-pto-demo` from a clean worktree of the SHA that is already on GitHub / Stone Hill. Do not invent a new commit for parity.
+At session start: `node scripts/commons-parity.mjs` is informational. Do not force catch-up unless Rob wants Pavilion on that SHA or the task is Pavilion-facing.
 
-Plaid stays on the **Trial** account until there are paying Commons clients. Do not buy a 100-Item Production plan for the demo.
+Plaid stays on the **Trial** account until paying Pavilion clients.
 
-Vanillaize / demo gates still apply on the Commons project. Do not copy Stone Hill PII into the demo database.
-
-After a Commons-facing ship, run `node scripts/commons-surface-check.mjs` (also runs inside `commons-parity.mjs`). Agent checklist on the demo:
-
-- Staff nav hides live-money workspaces (payments, retail, inbox, newsletter, …).
-- Member load / membership checkout CTAs respect `/api/commons/surface` (off on demo; off on trial until Square).
-- `/staff/in-person` and hidden API paths 404 or stub on demo.
-- No new `shmspto.org` treasurer copy on visitor/demo surfaces without vanillaize.
+Vanillaize / demo gates still apply on Commons demo. After a Pavilion-facing ship, run `node scripts/commons-surface-check.mjs`.

@@ -1,9 +1,17 @@
-# Commons follows Stone Hill ships
+# Pavilion deploy is opt-in after SHMS ships
 
-Same git repo. Two Vercel projects. Commons **`commons-pto-demo` is not git-connected**.
+Same monorepo for now. Separate products:
+- `frontend` → Stone Hill / www.shmspto.org
+- `commons-pto-demo` → Riverside demo (not git-connected)
+- `commons-pto` → private trials (not git-connected)
+- `commons-site` → Pavilion marketing / onpavilion.com
 
-Every application ship: commit → clean-worktree deploy **frontend** (www.shmspto.org) **and** **commons-pto-demo** → push GitHub.
+**Build Pavilion as if SHMS never existed.** No Stone Hill PII on demo/trials.
 
-Catch-up: `node scripts/commons-parity.mjs` (exit 2 if Commons SHA differs). Session start hook `.cursor/hooks/commons-parity-session.py` injects the latest check. Rule: `.cursor/rules/commons-parity.mdc`.
+**Ship rule:** Deploy the product the task is for. After an SHMS application ship, **ask** whether to also deploy Pavilion from that SHA when it helps the platform. Do **not** auto-deploy Commons on every Stone Hill change.
 
-Do not copy env between projects. Plaid stays Trial until paying clients (`mem:commons-plaid`).
+`node scripts/commons-parity.mjs` at session start is informational. Catch up Pavilion only when Rob says yes or the task is Pavilion-facing.
+
+Never copy env between Stone Hill and Pavilion projects. Plaid stays Trial until paying Pavilion clients (`mem:commons-plaid`).
+
+After Pavilion-facing ships: `node scripts/commons-surface-check.mjs`.

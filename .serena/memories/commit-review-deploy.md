@@ -1,5 +1,11 @@
-After finishing website/member/staff code changes: have Serena review the diff (diagnostics + a pass over the changed files). If that review passes, commit without asking, push to GitHub (origin, current branch), and deploy production. Do not ask Rob whether to commit, push, or deploy.
+After finishing website/member/staff code changes: Serena review (diagnostics + pass over changed files). If that passes, commit without asking, deploy the **target product** for the task from a clean worktree of that SHA, then push GitHub.
 
-Commit only the files for the current task. Never commit secrets, .DS_Store, tmp/, spirit-wear photo dumps, or unrelated .serena memories.
+- Stone Hill task → `frontend`
+- Pavilion marketing → `commons-site`
+- Pavilion demo/trial → `commons-pto-demo` / `commons-pto`
 
-Deploy from repo root (`~/wix-shmspto`), not `frontend/`. Production is Vercel (www.shmspto.org) **and** Commons `commons-pto-demo` from the same SHA (Commons is not git-connected). Pushing `main` also triggers Vercel git deploy for Stone Hill — still run production deploy if git deploy is not already in flight. Catch-up: `node scripts/commons-parity.mjs`.
+After a Stone Hill application ship: **ask Rob** if the same SHA should also go to Pavilion when it makes sense. Do not auto-deploy both every time.
+
+Commit only task files. Never secrets, .DS_Store, tmp/, spirit-wear dumps, or unrelated .serena memories.
+
+Never mix Stone Hill and Pavilion env.

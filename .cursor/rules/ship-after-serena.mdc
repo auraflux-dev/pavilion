@@ -1,5 +1,5 @@
 ---
-description: Serena QA, then commit, deploy production, then push GitHub
+description: Serena QA, then commit, deploy target product, then push GitHub
 alwaysApply: true
 ---
 
@@ -12,11 +12,17 @@ If Serena fails: fix and re-run. Do not commit, deploy, or push.
 If Serena passes (diagnostics clean, scoped to the task), do this in order **without waiting to be asked**:
 
 1. **Commit** only the files for that change.
-2. **Deploy** production from that commit (clean worktree of that SHA — never `vercel --prod` from a dirty working tree). Deploy **both** Vercel projects: Stone Hill `frontend` and Commons `commons-pto-demo`. Commons is not git-connected.
+2. **Deploy** production for the **product this task is for** from that commit (clean worktree of that SHA — never `vercel --prod` from a dirty working tree).
+   - Stone Hill task → `frontend` (www.shmspto.org).
+   - Pavilion marketing → `commons-site` (onpavilion.com).
+   - Pavilion demo/trial → `commons-pto-demo` / `commons-pto` as relevant.
 3. **Then push** that commit to GitHub.
+4. After a **Stone Hill** application ship: **ask** whether to also deploy Pavilion from the same SHA when it makes sense. Do not auto-deploy both on every SHMS change.
 
 This overrides “only commit/push when asked.”
 
 Never include unrelated WIP, secrets, Budget/Plaid/terminal/spirit-wear/`tmp` unless they are the task.
 
 If the change is not application code (Cursor rules only), skip production deploy; still commit then push.
+
+Never mix Stone Hill and Pavilion env (DATABASE_URL, Wix, Square, Stripe).
