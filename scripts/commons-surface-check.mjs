@@ -64,6 +64,30 @@ if (!layout.includes('CommonsSurfaceShell')) {
   errors.push('layout must wrap CommonsSurfaceShell on demo/platform')
 }
 
+for (const rel of [
+  'frontend/app/trial/page.tsx',
+  'frontend/app/api/commons/trial/start/route.ts',
+  'frontend/app/api/commons/trial/status/route.ts',
+  'frontend/app/api/cron/commons-trial-lifecycle/route.ts',
+  'frontend/lib/crm/trial-lifecycle.ts',
+  'frontend/lib/crm/org-plan.ts',
+]) {
+  try {
+    read(rel)
+  } catch {
+    errors.push(`missing trial surface ${rel}`)
+  }
+}
+if (!read('frontend/lib/crm/tenant.ts').includes('assertOrgWritable')) {
+  errors.push('sqlForOrg mutations must call assertOrgWritable')
+}
+if (!read('frontend/lib/crm/trial-lifecycle.ts').includes('notifyTreasurerBeforeOffboard')) {
+  errors.push('trial lifecycle must notify treasurer before offboard')
+}
+if (!read('frontend/components/demo/demo-banner.tsx').includes('/trial')) {
+  errors.push('demo banner must link Start a 30-day trial')
+}
+
 const shmsFingerprints = ['treasurer@shmspto.org', 'president@shmspto.org', 'SQ *SHMSPTO']
 const kb = read('frontend/lib/kb/staff.ts')
 for (const fp of shmsFingerprints) {

@@ -1,5 +1,10 @@
 import { commonsDbEnabled, sql } from '@/lib/crm/db'
-import { requireOrganizationId } from '@/lib/crm/tenant'
+
+function orgIdOrThrow(orgId: string | null | undefined): string {
+  const id = (orgId || '').trim()
+  if (!id) throw new Error('organization_id is required')
+  return id
+}
 
 export type OrgPlan = 'demo' | 'trial' | 'locked' | 'active'
 
@@ -29,7 +34,7 @@ export function writesAllowed(plan: OrgPlan, trialEndsAt: string | null): boolea
 
 export async function getOrgBilling(orgId: string): Promise<OrgBilling | null> {
   if (!commonsDbEnabled()) return null
-  const id = requireOrganizationId(orgId)
+  const id = orgIdOrThrow(orgId)
   const found = await sql<{
     id: string
     name: string

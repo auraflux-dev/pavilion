@@ -1,6 +1,7 @@
 import type { PoolClient, QueryResult, QueryResultRow } from 'pg'
 import { getAuth } from '@/lib/crm/auth'
 import { commonsDbEnabled, getPool, sql } from '@/lib/crm/db'
+import { assertOrgWritable } from '@/lib/crm/org-plan'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { riversideSnapshot } from '@/lib/crm/riverside'
 
@@ -51,25 +52,7 @@ export async function sqlForOrg<T extends QueryResultRow = QueryResultRow>(
   const pool = getPool()
   if (!pool) throw new Error('Commons database is not configured')
   if (/^\s*(insert|update|delete|merge)/i.test(text)) {
-    const billing = await sql<{ plan: string | null; trial_ends_at: Date | null }>(
-      `select plan, trial_ends_at from organizations where id = $1`,
-      [id],
-    )
-    const row = billing.rows[0]
-    if (row) {
-      const plan = row.plan || 'demo'
-      const trialEnded =
-        plan === 'trial' &&
-        row.trial_ends_at &&
-        Date.now() >= row.trial_ends_at.getTime()
-      if (plan === 'locked' || trialEnded) {
-        const err = new Error(
-          'Trial ended. Data stays for 30 days. Subscribe to keep writing.',
-        ) as Error & { status: number }
-        err.status = 402
-        throw err
-      }
-    }
+    await assertOrgWritable(id)
   }
   const client = await pool.connect()
   try {

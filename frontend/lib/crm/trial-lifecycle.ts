@@ -2,8 +2,56 @@ import { gzipSync } from 'node:zlib'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { commonsDbEnabled, sql } from '@/lib/crm/db'
 import { encryptJson } from '@/lib/crm/crypto'
-import { holdEndsAt, listOrgsForLifecycle } from '@/lib/crm/org-plan'
+import { holdEndsAt, listOrgsForLifecycle, type OrgBilling } from '@/lib/crm/org-plan'
 import { reportError } from '@/lib/observability/error-reporting'
+
+async function treasurerEmail(orgId: string): Promise<string> {
+  const found = await sql<{ email: string }>(
+    `select p.email
+       from people p
+       join staff_assignments a on a.person_id = p.id
+      where p.organization_id = $1
+        and a.role in ('admin', 'treasurer')
+      order by case when a.role = 'admin' then 0 else 1 end
+      limit 1`,
+    [orgId],
+  )
+  return (found.rows[0]?.email || '').trim().toLowerCase()
+}
+
+/** Best-effort notice before export+delete. Webhook if set; always report + note. */
+async function notifyTreasurerBeforeOffboard(org: OrgBilling): Promise<string> {
+  const email = await treasurerEmail(org.id)
+  const hold = holdEndsAt(org.trialEndsAt)
+  const body = {
+    type: 'commons-trial-offboard',
+    orgId: org.id,
+    slug: org.slug,
+    schoolName: org.name,
+    treasurerEmail: email || null,
+    holdEndsAt: hold?.toISOString() ?? null,
+    message:
+      'Your Commons trial data is being exported and deleted.\n' +
+      'Contact Auraflux if you need the export sooner.',
+  }
+  const webhook = process.env.COMMONS_LIFECYCLE_NOTIFY_URL?.trim()
+  if (webhook) {
+    try {
+      await fetch(webhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+    } catch (err) {
+      await reportError(err, { route: 'commons-trial-lifecycle-notify', organizationId: org.id })
+    }
+  }
+  await reportError(new Error(`Commons offboard notice: ${org.slug} → ${email || 'no-email'}`), {
+    route: 'commons-trial-lifecycle-notify',
+    organizationId: org.id,
+  })
+  return email ? `Notified ${email} before offboard` : `No treasurer email for ${org.slug}; logged offboard notice`
+}
 
 function r2Client(): S3Client | null {
   if (
@@ -74,6 +122,7 @@ export async function runTrialLifecycle(now = new Date()): Promise<{
     const planNow = org.plan === 'trial' && trialEnded ? 'locked' : org.plan
     if (planNow === 'locked' && hold && now.getTime() >= hold.getTime()) {
       try {
+        notes.push(await notifyTreasurerBeforeOffboard(org))
         const payload = encryptJson({
           meta: {
             createdAt: now.toISOString(),
