@@ -6,7 +6,6 @@ import { GiftCardSettings } from './gift-card-settings'
 import { EditStudentForm } from './edit-student-form'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { normalizeMembershipTier, tierRank } from '@/lib/staff/members-roster'
-import { normalizeMembershipTier, tierRank } from '@/lib/staff/members-roster'
 
 interface Enrollment {
   id: string
