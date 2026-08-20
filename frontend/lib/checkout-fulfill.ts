@@ -197,7 +197,8 @@ export async function resolveCheckoutIntent(
       amount: charged,
       amountCents: Math.round(charged * 100),
       description: `The Cove: ${label}`,
-      customId: `cove:${productId.slice(0, 40)}`,
+      // Square reference_id max length is 40.
+      customId: `cv:${productId.replace(/-/g, '').slice(0, 37)}`,
       meta: {
         productId,
         productName: label,
@@ -257,7 +258,7 @@ export async function resolveCheckoutIntent(
         appliedPercent > 0
           ? `Enrichment: ${program.name} (${appliedPercent}% discount)`
           : `Enrichment: ${program.name}`,
-      customId: `program:${programId.slice(0, 36)}`,
+      customId: `pg:${programId.replace(/-/g, '').slice(0, 37)}`,
       meta: {
         programId,
         programName: program.name,
@@ -293,7 +294,7 @@ export async function resolveCheckoutIntent(
       amount,
       amountCents: Math.round(amount * 100),
  description: `Event tickets: ${offer.eventTitle} × ${quantity}`,
-      customId: `event:${eventId.slice(0, 36)}`,
+      customId: `ev:${eventId.replace(/-/g, '').slice(0, 37)}`,
       meta: {
         eventId,
         eventTitle: offer.eventTitle,
@@ -316,7 +317,7 @@ export async function resolveCheckoutIntent(
       amount,
       amountCents: donationAmountCents(amount),
       description: 'SHMS PTO donation',
-      customId: `donation:${parentEmail}`,
+      customId: `dn:${parentEmail.replace(/[^a-zA-Z0-9]/g, '').slice(0, 37)}`,
       meta: {
         parentEmail,
         note,
@@ -347,7 +348,7 @@ export async function resolveCheckoutIntent(
     amount,
     amountCents,
     description: 'Family Cove Digital Card load',
-    customId: `store-card:${parentEmail}`,
+    customId: `sc:${parentEmail.replace(/[^a-zA-Z0-9]/g, '').slice(0, 37)}`,
     meta: {
       studentId: student._id,
       gan: familyCard.gan,

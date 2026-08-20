@@ -580,7 +580,7 @@ export async function POST(req: NextRequest) {
         amountCents,
         idempotencyKey: paymentKey,
         customerId,
-        referenceId: `donation:${session.email}`,
+        referenceId: `dn:${session.email.replace(/[^a-zA-Z0-9]/g, '').slice(0, 37)}`,
         buyerEmailAddress: session.email,
  note: note ? `PTO donation: ${note}` : 'SHMS PTO donation',
       })
