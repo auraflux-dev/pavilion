@@ -6,7 +6,12 @@ export const metadata = {
   description: 'Watch short guides for the website, Member Portal, membership tiers, and board volunteering.',
 }
 
+import { isCommonsPlatform } from '@/lib/crm/active-trial'
+import { redirect } from 'next/navigation'
+
 export default function MemberPortalVideosPage() {
+  if (isCommonsPlatform()) redirect('/member-portal')
+
   return (
     <MemberShell>
       <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
