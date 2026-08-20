@@ -21,6 +21,7 @@ import {
   createCardOnFile,
   createOrLoadStudentGiftCard,
   loadGiftCard,
+  refundPayment,
   upsertSquareCustomer,
 } from '@/lib/square'
 import { getSiteSettings } from '@/lib/api/site-settings'
@@ -165,10 +166,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!paymentSource) {
-      return NextResponse.json(
-        { error: 'Enter your credit or debit card to pay' },
-        { status: 400 }
-      )
+      paymentSource = undefined
     }
 
     // ── Enrichment program ──────────────────────────────────────
@@ -176,10 +174,17 @@ export async function POST(req: NextRequest) {
       const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
       const programId = String(body.programId ?? '').trim()
       const studentId = String(body.studentId ?? '').trim()
+      const couponCode = String(body.couponCode ?? '').trim() || null
       const resolved = await resolveCheckoutIntent(
-        { kind: 'program', programId, studentId },
+        { kind: 'program', programId, studentId, couponCode },
         session.email
       )
+      if (!paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card to pay' },
+          { status: 400 }
+        )
+      }
       const paymentKey = randomUUID()
       const payment = await chargePayment({
         sourceId: paymentSource,
@@ -204,6 +209,12 @@ export async function POST(req: NextRequest) {
 
     // ── Event tickets ───────────────────────────────────────────
     if (kind === 'event') {
+      if (!paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card to pay' },
+          { status: 400 }
+        )
+      }
       const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
       const eventId = String(body.eventId ?? '').trim()
       const quantity = Number(body.quantity ?? 1) || 1
@@ -235,6 +246,12 @@ export async function POST(req: NextRequest) {
 
     // ── Membership ──────────────────────────────────────────────
     if (kind === 'membership') {
+      if (!paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card to pay' },
+          { status: 400 }
+        )
+      }
       const tier = String(body.tier ?? '').trim().toLowerCase()
       const studentId = typeof body.studentId === 'string' ? body.studentId : null
       const shirtSize = typeof body.shirtSize === 'string' ? body.shirtSize.trim() : ''
@@ -443,129 +460,95 @@ export async function POST(req: NextRequest) {
 
     // ── Cove / spirit product ───────────────────────────────────
     if (kind === 'product') {
+      const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
+      const { withCoveSplit } = await import('@/lib/checkout-cove-split')
       const productId = String(body.productId ?? '').trim()
       const variantId = String(body.variantId ?? '').trim()
-      const productStudentId = String(body.studentId ?? '').trim()
-      const cfg = await getCatalogConfig()
-      const allowed = new Set([
-        ...cfg.spiritWearProductIds,
-        ...cfg.storeProductIds,
-      ])
-      if (!productId || !allowed.has(productId)) {
-        return NextResponse.json({ error: 'Product not available for checkout' }, { status: 400 })
-      }
-      const { fetchCatalogProductDetail, fetchCatalogVariantPrice } = await import(
-        '@/lib/catalog-price'
+      const couponCode = String(body.couponCode ?? '').trim() || null
+      const useCoveBalance = body.useCoveBalance !== false
+      let resolved = await resolveCheckoutIntent(
+        { kind: 'product', productId, variantId, couponCode },
+        session.email,
       )
-      let catalogName = ''
-      let catalogPrice = 0
-      let variantLabel = ''
-      if (variantId) {
-        const variant = await fetchCatalogVariantPrice(productId, variantId)
-        if (!variant) {
-          return NextResponse.json({ error: 'Could not resolve product price' }, { status: 400 })
-        }
-        catalogName = variant.name
-        catalogPrice = variant.price
-        variantLabel = variant.variantLabel
-      } else {
-        const detail = await fetchCatalogProductDetail(productId)
-        if (!detail) {
-          return NextResponse.json({ error: 'Could not resolve product price' }, { status: 400 })
-        }
-        if (detail.variants.length > 1) {
+      resolved = await withCoveSplit(resolved, session.email, useCoveBalance)
+      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
+      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+      if (cardCents > 0 && cardCents < 100) {
+        return NextResponse.json(
+          { error: 'Remaining card amount is under $1. Pay the full amount by card, or load more on your Cove Digital Card.' },
+          { status: 400 },
+        )
+      }
+      if (cardCents >= 100 && !paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card for the remaining balance.' },
+          { status: 400 },
+        )
+      }
+      const paymentKey = randomUUID()
+      let paymentId = paymentKey
+      if (cardCents >= 100 && paymentSource) {
+        try {
+          const payment = await chargePayment({
+            sourceId: paymentSource,
+            amountCents: cardCents,
+            idempotencyKey: paymentKey,
+            customerId,
+            referenceId: resolved.customId,
+            buyerEmailAddress: session.email,
+            note: resolved.description,
+          })
+          paymentId = payment.id ?? paymentKey
+        } catch (err) {
           return NextResponse.json(
-            { error: 'Choose a color or size before checkout' },
+            { error: err instanceof Error ? err.message : 'Card payment failed' },
             { status: 400 },
           )
         }
-        catalogName = detail.name
-        catalogPrice = detail.variants[0]?.price ?? detail.price
-        variantLabel = detail.variants[0]?.label ?? ''
       }
-      const displayName =
-        variantLabel && variantLabel !== 'Default'
-          ? `${catalogName} (${variantLabel})`
-          : catalogName
-      const amountCents = Math.round(catalogPrice * 100)
-      if (amountCents < 100) {
-        return NextResponse.json({ error: 'Invalid product price' }, { status: 400 })
-      }
-      // Prefer explicit studentId; otherwise attach the family's first student so
-      // the purchase appears in portal student payment history (not only family).
-      let resolvedStudentId = productStudentId || null
-      if (!resolvedStudentId) {
-        const familyStudents = await listFamilyStudents(session.email)
-        resolvedStudentId = familyStudents[0]?._id ?? null
-      }
-      const paymentKey = randomUUID()
-      const payment = await chargePayment({
-        sourceId: paymentSource,
-        amountCents,
-        idempotencyKey: paymentKey,
-        customerId,
-        referenceId: `cove:${productId.slice(0, 20)}`,
-        buyerEmailAddress: session.email,
-        note: `The Cove: ${displayName}`,
-      })
-
-      await client.items.insert('Payments', {
-        programName: `The Cove: ${displayName}`,
-        amount: catalogPrice,
-        status: 'Paid',
-        paymentDate: new Date().toISOString(),
-        paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
-        transactionId: payment.id ?? paymentKey,
-        source: 'square_cove_product',
-        parentEmail: session.email,
-        notes: variantId ? `${productId}:${variantId}` : productId,
-        ...(resolvedStudentId ? { studentId: resolvedStudentId } : {}),
-      })
-
-      const { sendPurchaseConfirmation } = await import('@/lib/purchase-confirmation')
-      let confirmation: Record<string, unknown> | undefined
       try {
-        const conf = await sendPurchaseConfirmation({
-          kind: 'product',
+        const result = await fulfillPaidCheckout({
+          resolved,
           parentEmail: session.email,
           parentName: name,
-          amount: catalogPrice,
-          description: `The Cove: ${displayName}`,
-          transactionId: payment.id ?? paymentKey,
-          meta: {
-            productId,
-            productName: displayName,
-            ...(variantId ? { variantId } : {}),
-            ...(variantLabel ? { variantLabel } : {}),
-          },
+          transactionId: paymentId,
+          paymentMethod:
+            cardCents <= 0
+              ? 'Cove Digital Card'
+              : useStoredCard || saveCard
+                ? 'Square Card on File'
+                : 'Square Card',
+          sourcePrefix: 'square',
+          consents: consentCheck.acks,
         })
-        confirmation = {
-          subject: conf.subject,
-          nextSteps: conf.nextSteps,
-          portalHref: conf.portalHref,
-          emailed: conf.emailed,
-        }
+        return NextResponse.json({
+          ok: true,
+          ...result,
+          coveCents,
+          cardCents,
+        })
       } catch (err) {
-        console.warn('product confirmation failed', err)
+        if (cardCents >= 100) {
+          await refundPayment({
+            paymentId,
+            amountCents: cardCents,
+            idempotencyKey: `${paymentKey}-refund`.slice(0, 45),
+          }).catch((refundErr) => {
+            console.error('checkout/pay product refund after fulfill fail', refundErr)
+          })
+        }
+        throw err
       }
-
-      return NextResponse.json({
-        ok: true,
-        kind,
-        paymentId: payment.id,
-        productId,
-        productName: displayName,
-        amount: catalogPrice,
-        ...(variantId ? { variantId } : {}),
-        paymentMethod: stored
-          ? { brand: stored.brand, last4: stored.last4 }
-          : null,
-        confirmation,
-      })
     }
 
     // ── PTO donation (any amount) ───────────────────────────────
     if (kind === 'donation') {
+      if (!paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card to pay' },
+          { status: 400 }
+        )
+      }
       const { isAllowedDonationAmount } = await import('@/lib/donation')
       const amountCents = Number(body.amountCents)
       const amount = amountCents / 100
@@ -634,6 +617,13 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Family Cove Digital Card load / reload ──────────────────────────
+    if (kind === 'store-card') {
+      if (!paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card to pay' },
+          { status: 400 }
+        )
+      }
     const studentId = String(body.studentId ?? '').trim()
     const amountCents = Number(body.amountCents)
     const amount = amountCents / 100
@@ -790,6 +780,8 @@ export async function POST(req: NextRequest) {
         { status: 502 }
       )
     }
+    }
+
   } catch (err) {
     console.error('/api/checkout/pay POST error:', err)
     return NextResponse.json(

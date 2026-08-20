@@ -32,8 +32,18 @@ export async function POST(req: NextRequest) {
     }
 
     const resolved = await resolveCheckoutIntent(intent, session.email)
+    const { withCoveSplit } = await import('@/lib/checkout-cove-split')
+    const useCove = intent.kind === 'product' && intent.useCoveBalance !== false
+    const split = await withCoveSplit(resolved, session.email, useCove)
+    const cardCents = Math.round(Number(split.meta.cardCents ?? split.amountCents) || 0)
+    if (cardCents <= 0) {
+      return NextResponse.json(
+        { error: 'Nothing left for PayPal. Pay with your Cove Digital Card in this checkout.' },
+        { status: 400 },
+      )
+    }
     const order = await createPayPalOrder({
-      amount: resolved.amount,
+      amount: cardCents / 100,
       description: resolved.description,
       customId: resolved.customId,
       softDescriptor: 'SHMSPTO',
@@ -41,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       orderId: order.id,
-      amount: resolved.amount,
+      amount: cardCents / 100,
       description: resolved.description,
     })
   } catch (err) {

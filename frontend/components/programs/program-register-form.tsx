@@ -53,6 +53,7 @@ export function ProgramRegisterForm({
   const [consentComplete, setConsentComplete] = useState(false)
   const [payOpen, setPayOpen] = useState(false)
   const [payAmount, setPayAmount] = useState(0)
+  const [couponCode, setCouponCode] = useState('')
   const phase = getRegistrationPhase(program)
   const priorityUntilLabel =
     phase === 'member_priority' ? formatMemberPriorityUntil(program.memberPriorityUntil) : ''
@@ -108,6 +109,7 @@ export function ProgramRegisterForm({
           programId: program._id,
           studentId,
           consents,
+          couponCode: couponCode.trim() || undefined,
         }),
       })
       const data = await res.json()
@@ -253,6 +255,20 @@ export function ProgramRegisterForm({
               </p>
             </div>
 
+            {fee > 0 && !feeTbd ? (
+              <label className="block text-xs font-semibold text-[#5A6070]">
+                Discount code
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder="Optional. Board 75% or membership code"
+                  autoComplete="off"
+                  className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-mono tracking-wide uppercase"
+                />
+              </label>
+            ) : null}
+
             <CheckoutConsent kind="program" onChange={onConsentChange} />
 
             {error ? <p className="text-xs text-red-600">{error}</p> : null}
@@ -293,6 +309,7 @@ export function ProgramRegisterForm({
           kind: 'program',
           programId: program._id,
           studentId,
+          couponCode: couponCode.trim() || undefined,
           consents: consents ?? undefined,
         }}
         prefilledConsents={consents ?? undefined}

@@ -402,12 +402,7 @@ export function StaffCoveRegister() {
 
   async function chargeCove() {
     if (!family?.hasCard || !cart.length) return
-    if (remainingAfter < 0) {
-      setError(
-        `Not enough Cove balance ($${balance.toFixed(2)}). Use Square Stand, or remove items.`,
-      )
-      return
-    }
+    const short = remainingAfter < 0
     setBusy(true)
     setError('')
     setStatus('')
@@ -418,26 +413,30 @@ export function StaffCoveRegister() {
         body: JSON.stringify({
           code: family.coveFamilyCode,
           lines: cartPayload(),
+          allowPartial: short,
         }),
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Checkout failed')
+      const remainder = Number(d.remainderDue ?? 0)
       trackPurchase({
         transactionId: `cove-balance-${Date.now()}`,
-        value: Number(d.total),
+        value: Number(d.coveCharged ?? d.total),
         items: [
           {
             item_name: 'Cove snack window',
             item_category: 'cove',
-            price: Number(d.total),
+            price: Number(d.coveCharged ?? d.total),
             quantity: 1,
           },
         ],
         surface: 'staff',
-        paymentType: 'cove_balance',
+        paymentType: remainder > 0 ? 'cove_then_stand' : 'cove_balance',
       })
       setStatus(
-        `Cove charged $${Number(d.total).toFixed(2)}. New balance $${Number(d.newBalance).toFixed(2)}.`,
+        remainder > 0
+          ? `Cove charged $${Number(d.coveCharged).toFixed(2)}. Collect $${remainder.toFixed(2)} on Square Stand as a custom amount. Do not re-ring these items.`
+          : `Cove charged $${Number(d.total).toFixed(2)}. New balance $${Number(d.newBalance).toFixed(2)}.`,
       )
       resetSale()
       await loadProducts()
@@ -1115,8 +1114,9 @@ export function StaffCoveRegister() {
               </p>
               {canUseCove ? (
                 <p className="text-xs" style={{ color: remainingAfter < 0 ? '#b91c1c' : 'var(--brand-green)' }}>
-                  Cove left after charge:{' '}
-                  {remainingAfter < 0 ? 'Not enough' : `$${remainingAfter.toFixed(2)}`}
+                  {remainingAfter < 0
+                    ? `Cove covers $${balance.toFixed(2)}. Remainder $${Math.abs(remainingAfter).toFixed(2)} on Square Stand.`
+                    : `Cove left after charge: $${remainingAfter.toFixed(2)}`}
                 </p>
               ) : null}
             </div>
@@ -1127,13 +1127,15 @@ export function StaffCoveRegister() {
               <>
                 {payLane === 'cove' && canUseCove ? (
                   <Button
-                    disabled={busy || remainingAfter < 0}
+                    disabled={busy}
                     onClick={() => void chargeCove()}
                     className="text-white text-base px-8 py-6 font-bold w-full sm:w-auto"
                     style={{ backgroundColor: 'var(--brand-green)' }}
                   >
                     {busy ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : remainingAfter < 0 ? (
+                      `Charge Cove $${balance.toFixed(2)}, then Stand $${Math.abs(remainingAfter).toFixed(2)}`
                     ) : (
                       `Charge Cove $${cartTotal.toFixed(2)}`
                     )}

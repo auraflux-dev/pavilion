@@ -20,7 +20,7 @@ export type DiscountCodeRow = {
   createdAt: string
 }
 
-function normalizeCode(raw: string): string {
+export function normalizeCode(raw: string): string {
   return raw.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 20)
 }
 

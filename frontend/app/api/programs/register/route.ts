@@ -64,17 +64,28 @@ export async function POST(req: NextRequest) {
     if (fee > 0) {
       const { enrichmentDiscountPercent } = await import('@/lib/membership-entitlements')
       const { normalizeMembershipTier } = await import('@/lib/staff/members-roster')
+      const { applyCheckoutDiscount } = await import('@/lib/checkout-discounts')
+      const couponCode = String(body.couponCode ?? '').trim() || null
       const tier = normalizeMembershipTier(String(student.membershipTier ?? 'free'))
       const percent = enrichmentDiscountPercent(tier)
-      const discountDollars =
-        percent > 0 ? Math.round(fee * (percent / 100) * 100) / 100 : 0
-      const amount = Math.max(0, Math.round((fee - discountDollars) * 100) / 100)
+      const applied = await applyCheckoutDiscount({
+        scope: 'program',
+        listAmount: fee,
+        couponCode,
+        parentEmail: session.email,
+        tierPercent: percent,
+      })
+      if (applied.error) {
+        return NextResponse.json({ error: applied.error }, { status: 400 })
+      }
+      const discount = applied.discount
       return NextResponse.json({
         requiresPayment: true,
-        fee: amount,
+        fee: applied.amount,
         listFee: fee,
-        memberDiscountPercent: percent,
-        memberDiscountDollars: discountDollars,
+        memberDiscountPercent: discount?.percent ?? 0,
+        memberDiscountDollars: discount?.dollars ?? 0,
+        discountCode: discount?.code || '',
         programName: program.name,
         programId,
         studentId,

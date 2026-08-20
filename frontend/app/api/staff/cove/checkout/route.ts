@@ -135,13 +135,23 @@ export async function POST(req: NextRequest) {
     }
 
     const liveBalance = await getGiftCardBalance(family.gan)
-    if (liveBalance * 100 < totalCents) {
+    const balanceCents = Math.round(liveBalance * 100)
+    const allowPartial = body.allowPartial === true
+    if (balanceCents < totalCents && !allowPartial) {
       return NextResponse.json(
         {
-          error: `Insufficient balance. Family has $${liveBalance.toFixed(2)}; cart is $${totalDollars.toFixed(2)}.`,
+          error: `Insufficient balance. Family has $${liveBalance.toFixed(2)}; cart is $${totalDollars.toFixed(2)}. Charge Cove for the balance, then collect the rest on Square Stand.`,
           balance: liveBalance,
+          remainderDue: Math.round((totalDollars - liveBalance) * 100) / 100,
         },
         { status: 402 }
+      )
+    }
+    const redeemCents = Math.min(balanceCents, totalCents)
+    if (redeemCents <= 0) {
+      return NextResponse.json(
+        { error: 'No Cove Digital Card balance to apply.' },
+        { status: 402 },
       )
     }
 
@@ -153,10 +163,12 @@ export async function POST(req: NextRequest) {
       }))
     )
 
-    const activity = await redeemGiftCard(family.gan, totalCents, idempotencyKey)
+    const activity = await redeemGiftCard(family.gan, redeemCents, idempotencyKey)
+    const coveCharged = redeemCents / 100
+    const remainderDue = Math.round((totalDollars - coveCharged) * 100) / 100
     const newBalance = activity?.giftCardBalanceMoney
       ? Number(activity.giftCardBalanceMoney.amount) / 100
-      : liveBalance - totalDollars
+      : liveBalance - coveCharged
 
     await syncFamilyStoreCard({
       parentEmail: family.parentEmail,
@@ -171,14 +183,18 @@ export async function POST(req: NextRequest) {
       await client.items.insert('Payments', {
         parentEmail: family.parentEmail,
         studentId: studentId || undefined,
-        amount: totalDollars,
+        amount: coveCharged,
         status: 'Paid',
         paymentDate: new Date().toISOString(),
-        paymentMethod: 'Cove Family Card',
+        paymentMethod:
+          remainderDue > 0 ? 'Cove Digital Card + Square Stand remainder' : 'Cove Family Card',
         transactionId: idempotencyKey,
         source: 'cove_register_redeem',
         programName: 'The Cove. snack window',
-        notes: `Code ${family.coveFamilyCode}: ${lineSummary}`,
+        notes:
+          remainderDue > 0
+            ? `Code ${family.coveFamilyCode}: ${lineSummary}. Cove $${coveCharged.toFixed(2)}. Collect $${remainderDue.toFixed(2)} on Square Stand as a custom amount. Do not re-ring items.`
+            : `Code ${family.coveFamilyCode}: ${lineSummary}`,
       })
     } catch (err) {
       console.warn('Cove sale Payments insert failed:', err)
@@ -187,6 +203,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       total: totalDollars,
+      coveCharged,
+      remainderDue,
       newBalance,
       lines: priced,
       parentEmail: family.parentEmail,

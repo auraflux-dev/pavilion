@@ -18,6 +18,7 @@ import { getWixClient } from '@/lib/wix-client'
 import {
   createOrLoadStudentGiftCard,
   loadGiftCard,
+  redeemGiftCard,
   upsertSquareCustomerForCoveStand,
 } from '@/lib/square'
 import {
@@ -25,6 +26,7 @@ import {
   resolveParentLoadBonusPercent,
   storeCardLoadCents,
 } from '@/lib/store-card-bonus'
+import { applyCheckoutDiscount, consumeDiscountCode } from '@/lib/checkout-discounts'
 import { enrollInProgram } from '@/lib/program-enroll'
 import type { ConsentAck } from '@/lib/checkout-consent'
 import {
@@ -51,6 +53,8 @@ export type CheckoutIntent = {
   eventId?: string
   quantity?: number
   amountCents?: number
+  couponCode?: string | null
+  useCoveBalance?: boolean
   /** Optional parent note for donations */
   note?: string
   consents?: import('@/lib/checkout-consent').ConsentAck[]
@@ -177,10 +181,19 @@ export async function resolveCheckoutIntent(
       variantLabel && variantLabel !== 'Default'
         ? `${productName} (${variantLabel})`
         : productName
+    const applied = await applyCheckoutDiscount({
+      scope: 'product',
+      listAmount: amount,
+      couponCode: intent.couponCode,
+      parentEmail,
+    })
+    if (applied.error) throw new Error(applied.error)
+    const charged = applied.amount
+    const discount = applied.discount
     return {
       kind,
-      amount,
-      amountCents: Math.round(amount * 100),
+      amount: charged,
+      amountCents: Math.round(charged * 100),
       description: `The Cove: ${label}`,
       customId: `cove:${productId.slice(0, 40)}`,
       meta: {
@@ -188,6 +201,11 @@ export async function resolveCheckoutIntent(
         productName: label,
         ...(variantId ? { variantId } : {}),
         ...(variantLabel ? { variantLabel } : {}),
+        ...(discount?.code ? { discountCode: discount.code } : {}),
+        ...(discount ? { discountPercent: String(discount.percent) } : {}),
+        ...(discount ? { discountDollars: String(discount.dollars) } : {}),
+        ...(discount?.consumeId ? { consumeDiscountId: discount.consumeId } : {}),
+        listPrice: String(amount),
       },
     }
   }
@@ -215,27 +233,37 @@ export async function resolveCheckoutIntent(
     } | null
     const tier = normalizeMembershipTier(String(student?.membershipTier ?? 'free'))
     const percent = enrichmentDiscountPercent(tier)
-    const discountDollars =
-      percent > 0 ? Math.round(fee * (percent / 100) * 100) / 100 : 0
-    const amount = Math.max(0, Math.round((fee - discountDollars) * 100) / 100)
+    const applied = await applyCheckoutDiscount({
+      scope: 'program',
+      listAmount: fee,
+      couponCode: intent.couponCode,
+      parentEmail,
+      tierPercent: percent,
+    })
+    if (applied.error) throw new Error(applied.error)
+    const discount = applied.discount
+    const amount = applied.amount
+    const discountDollars = discount?.dollars ?? 0
+    const appliedPercent = discount?.percent ?? 0
 
     return {
       kind,
       amount,
       amountCents: Math.round(amount * 100),
       description:
-        discountDollars > 0
- ? `Enrichment: ${program.name} (${percent}% member discount)`
- : `Enrichment: ${program.name}`,
+        appliedPercent > 0
+          ? `Enrichment: ${program.name} (${appliedPercent}% discount)`
+          : `Enrichment: ${program.name}`,
       customId: `program:${programId.slice(0, 36)}`,
       meta: {
         programId,
         programName: program.name,
         studentId,
         listFee: String(fee),
-        memberDiscountPercent: String(percent || 0),
+        memberDiscountPercent: String(appliedPercent || 0),
         memberDiscountDollars: String(discountDollars || 0),
-        discountCode: String(student?.discountCode ?? ''),
+        discountCode: discount?.code || String(student?.discountCode ?? ''),
+        ...(discount?.consumeId ? { consumeDiscountId: discount.consumeId } : {}),
       },
     }
   }
@@ -359,8 +387,13 @@ export async function fulfillPaidCheckout(opts: {
       source: `${sourcePrefix}_program`,
       parentEmail,
       studentId: resolved.meta.studentId,
-      notes: resolved.meta.programId,
+      notes: resolved.meta.discountCode
+        ? `${resolved.meta.programId} · ${resolved.meta.discountCode}`
+        : resolved.meta.programId,
     })
+    if (resolved.meta.consumeDiscountId) {
+      await consumeDiscountCode(resolved.meta.consumeDiscountId)
+    }
     return attachPurchaseConfirmation(
       {
         kind: 'program',
@@ -426,18 +459,57 @@ export async function fulfillPaidCheckout(opts: {
   }
 
   if (resolved.kind === 'product') {
+    const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+    const gan = String(resolved.meta.gan ?? '').trim()
+    let coveNewBalance = ''
+    if (coveCents > 0) {
+      if (!gan) throw new Error('Cove Digital Card is missing for this split payment')
+      const activity = await redeemGiftCard(gan, coveCents, `${transactionId}-cove`)
+      const newBalance = activity?.giftCardBalanceMoney
+        ? Number(activity.giftCardBalanceMoney.amount) / 100
+        : 0
+      coveNewBalance = newBalance.toFixed(2)
+      await syncFamilyStoreCard({
+        parentEmail,
+        gan,
+        giftCardId: resolved.meta.giftCardId,
+        balanceDollars: newBalance,
+      })
+    }
+    if (resolved.meta.consumeDiscountId) {
+      await consumeDiscountCode(resolved.meta.consumeDiscountId)
+    }
+    const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
+    const methodNote =
+      coveCents > 0 && cardCents > 0
+        ? `${paymentMethod} + Cove Digital Card`
+        : coveCents > 0 && cardCents <= 0
+          ? 'Cove Digital Card'
+          : paymentMethod
+    let productStudentId = ''
+    const familyStudents = await listFamilyStudents(parentEmail)
+    productStudentId = familyStudents[0]?._id ?? ''
     await client.items.insert('Payments', {
  programName: `The Cove: ${resolved.meta.productName}`,
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
-      paymentMethod,
+      paymentMethod: methodNote,
       transactionId,
       source: `${sourcePrefix}_cove_product`,
       parentEmail,
-      notes: resolved.meta.variantId
-        ? `${resolved.meta.productId}:${resolved.meta.variantId}`
-        : resolved.meta.productId,
+      ...(productStudentId ? { studentId: productStudentId } : {}),
+      notes: [
+        resolved.meta.variantId
+          ? `${resolved.meta.productId}:${resolved.meta.variantId}`
+          : resolved.meta.productId,
+        resolved.meta.discountCode ? `code ${resolved.meta.discountCode}` : '',
+        coveCents > 0 ? `Cove $${(coveCents / 100).toFixed(2)}` : '',
+        cardCents > 0 ? `card $${(cardCents / 100).toFixed(2)}` : '',
+        coveNewBalance ? `Cove balance $${coveNewBalance}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · '),
     })
     return attachPurchaseConfirmation(
       {

@@ -4,11 +4,6 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getPaidMembershipTiers } from '@/lib/api/membership'
-import { getCatalogConfig } from '@/lib/api/catalog-config'
-import {
-  fetchCatalogProductDetail,
-  fetchCatalogVariantPrice,
-} from '@/lib/catalog-price'
 import { getMemberSession } from '@/lib/auth-member'
 import {
   getParentHighestTier,
@@ -71,38 +66,54 @@ export async function POST(req: NextRequest) {
     }
 
     if (kind === 'product') {
+      const session = await getMemberSession(req)
+      if (!session) return NextResponse.json({ error: 'Log in to quote' }, { status: 401 })
+      const { resolveCheckoutIntent } = await import('@/lib/checkout-fulfill')
+      const { withCoveSplit } = await import('@/lib/checkout-cove-split')
       const productId = String(body.productId ?? '').trim()
       const variantId = String(body.variantId ?? '').trim()
-      const cfg = await getCatalogConfig()
-      const allowed = new Set([...cfg.spiritWearProductIds, ...cfg.storeProductIds])
-      if (!productId || !allowed.has(productId)) {
-        return NextResponse.json({ error: 'Product not available' }, { status: 404 })
-      }
-      if (variantId) {
-        const variant = await fetchCatalogVariantPrice(productId, variantId)
-        if (!variant) return NextResponse.json({ error: 'Price unavailable' }, { status: 404 })
-        return NextResponse.json({
-          kind,
-          productId,
-          variantId,
-          name: variant.name,
-          variantLabel: variant.variantLabel,
-          amount: variant.price,
-        })
-      }
-      const detail = await fetchCatalogProductDetail(productId)
-      if (!detail) return NextResponse.json({ error: 'Price unavailable' }, { status: 404 })
-      if (detail.variants.length > 1) {
-        return NextResponse.json(
-          { error: 'Choose a color or size before checkout' },
-          { status: 400 },
-        )
-      }
+      const couponCode = String(body.couponCode ?? '').trim() || null
+      const useCoveBalance = body.useCoveBalance !== false
+      let resolved = await resolveCheckoutIntent(
+        { kind: 'product', productId, variantId, couponCode },
+        session.email,
+      )
+      resolved = await withCoveSplit(resolved, session.email, useCoveBalance)
+      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
       return NextResponse.json({
         kind,
         productId,
-        name: detail.name,
-        amount: detail.variants[0]?.price ?? detail.price,
+        name: resolved.meta.productName,
+        listAmount: Number(resolved.meta.listPrice ?? resolved.amount),
+        amount: resolved.amount,
+        discountCode: resolved.meta.discountCode || '',
+        discountPercent: Number(resolved.meta.discountPercent ?? 0) || 0,
+        coveDollars: coveCents / 100,
+        cardDollars: cardCents / 100,
+        coveBalance: Number(resolved.meta.coveBalance ?? 0) || 0,
+      })
+    }
+
+    if (kind === 'program') {
+      const session = await getMemberSession(req)
+      if (!session) return NextResponse.json({ error: 'Log in to quote' }, { status: 401 })
+      const { resolveCheckoutIntent } = await import('@/lib/checkout-fulfill')
+      const programId = String(body.programId ?? '').trim()
+      const studentId = String(body.studentId ?? '').trim()
+      const couponCode = String(body.couponCode ?? '').trim() || null
+      const resolved = await resolveCheckoutIntent(
+        { kind: 'program', programId, studentId, couponCode },
+        session.email,
+      )
+      return NextResponse.json({
+        kind,
+        programId,
+        name: resolved.meta.programName,
+        listAmount: Number(resolved.meta.listFee ?? resolved.amount),
+        amount: resolved.amount,
+        discountCode: resolved.meta.discountCode || '',
+        discountPercent: Number(resolved.meta.memberDiscountPercent ?? 0) || 0,
       })
     }
 

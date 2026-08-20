@@ -403,6 +403,22 @@ export async function chargePayment(input: {
   return payment
 }
 
+export async function refundPayment(opts: {
+  paymentId: string
+  amountCents: number
+  idempotencyKey: string
+}) {
+  if (!opts.paymentId) return null
+  if (!Number.isInteger(opts.amountCents) || opts.amountCents < 1) return null
+  const client = getSquareClient()
+  const result = await client.refunds.refundPayment({
+    idempotencyKey: opts.idempotencyKey,
+    paymentId: opts.paymentId,
+    amountMoney: { amount: BigInt(opts.amountCents), currency: 'USD' },
+  } as any)
+  return (result as any).refund ?? null
+}
+
 
 /** Disable a Square card-on-file so it cannot be charged again. */
 export async function disableCardOnFile(cardId: string) {

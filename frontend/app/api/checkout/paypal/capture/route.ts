@@ -38,12 +38,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }
 
-    const resolved = await resolveCheckoutIntent(intent, session.email)
+    const resolved0 = await resolveCheckoutIntent(intent, session.email)
+    const { withCoveSplit } = await import('@/lib/checkout-cove-split')
+    const useCove = intent.kind === 'product' && intent.useCoveBalance !== false
+    const resolved = await withCoveSplit(resolved0, session.email, useCove)
+    const cardDue = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0) / 100
     const captured = await capturePayPalOrder(orderId)
 
-    // Soft-check captured amount vs quote (tolerance 1 cent)
-    if (captured.amount != null && Math.abs(captured.amount - resolved.amount) > 0.02) {
-      console.error('PayPal amount mismatch', captured.amount, resolved.amount)
+    // Soft-check captured amount vs card remainder (tolerance 1 cent)
+    if (captured.amount != null && Math.abs(captured.amount - cardDue) > 0.02) {
+      console.error('PayPal amount mismatch', captured.amount, cardDue)
       return NextResponse.json({ error: 'Payment amount mismatch. contact the PTO' }, { status: 409 })
     }
 
