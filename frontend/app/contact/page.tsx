@@ -7,7 +7,7 @@ import { Mail, MapPin, Clock } from 'lucide-react'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 import { CONTACT_DEFAULTS } from '@/lib/defaults/page-content'
-import { normalizeStaffInbox } from '@/lib/staff/inbox'
+import { normalizeStaffInbox, resolveTreasurerInboxes } from '@/lib/staff/inbox'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export async function generateMetadata() {
@@ -28,9 +28,10 @@ export default async function ContactPage() {
   const general = normalizeStaffInbox(
     settings.get('contactEmailGeneral', CONTACT_DEFAULTS.contactEmailGeneral),
   )
-  const treasurer = normalizeStaffInbox(
+  const treasurerList = resolveTreasurerInboxes(
     settings.get('contactEmailTreasurer', CONTACT_DEFAULTS.contactEmailTreasurer),
   )
+  const treasurer = treasurerList.join(', ') || 'treasurer@shmspto.org'
   const address = settings.get('contactAddress', CONTACT_DEFAULTS.contactAddress)
   const storeHours = settings.get(
     'contactStoreHours',

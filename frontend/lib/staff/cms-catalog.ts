@@ -461,7 +461,11 @@ export const SITE_SETTING_GROUPS: {
     roles: ['marketing', 'secretary', 'admin'],
     keys: [
       { key: 'contactEmailGeneral', label: 'General email (contact form inbox)' },
-      { key: 'contactEmailTreasurer', label: 'Treasurer email' },
+      {
+        key: 'contactEmailTreasurer',
+        label:
+          'Treasurer inboxes (treasurer@; president@ auto-added through Labor Day 2026)',
+      },
       {
         key: 'contactEmailStoreCoordinator',
         label: 'Cove / store coordinator email (sale alerts)',

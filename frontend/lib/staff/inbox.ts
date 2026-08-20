@@ -27,6 +27,42 @@ export const DEFAULT_SPONSORSHIP_INBOXES =
 export const DEFAULT_PROGRAMS_INBOXES =
   'vp-initiatives@shmspto.org, president@shmspto.org'
 
+/** Canonical treasurer inbox (president@ is added while Labor Day coverage is active). */
+export const DEFAULT_TREASURER_INBOX =
+  'treasurer@shmspto.org'
+
+/** Coverage ends the morning after Labor Day 2026 (Mon Sep 7). */
+export const TREASURER_COVERAGE_UNTIL_ISO = '2026-09-08'
+
+export function treasurerCoverageActive(now = new Date()): boolean {
+  return now.getTime() < Date.parse(`${TREASURER_COVERAGE_UNTIL_ISO}T04:00:00.000Z`)
+}
+
+/** Resolve treasurer inboxes (SiteSettings may be comma-separated; president@ while covered). */
+export function resolveTreasurerInboxes(raw?: string | null): string[] {
+  const list = parseStaffInboxes(raw || DEFAULT_TREASURER_INBOX)
+  const base = list.length ? list : parseStaffInboxes(DEFAULT_TREASURER_INBOX)
+  return ensureTreasurerCoverage(base)
+}
+
+/** If any recipient is treasurer@, also include president@ while coverage is active. */
+export function ensureTreasurerCoverage(recipients: string[]): string[] {
+  const out = Array.from(
+    new Set(
+      recipients
+        .flatMap((e) => parseStaffInboxes(e))
+        .map((e) => e.trim().toLowerCase())
+        .filter((e) => e.includes('@')),
+    ),
+  )
+  if (!treasurerCoverageActive()) return out
+  const hitsTreasurer = out.some((e) => e.startsWith('treasurer@'))
+  if (!hitsTreasurer) return out
+  const president = normalizeStaffInbox(STAFF_INBOX_FALLBACK)
+  if (president && !out.includes(president)) out.push(president)
+  return out
+}
+
 /** Map missing board aliases to a live mailbox. */
 export function normalizeStaffInbox(email: string | null | undefined): string {
   const e = String(email ?? '')

@@ -7,8 +7,10 @@ import { reportError } from '@/lib/observability/error-reporting'
 import {
   DEFAULT_PROGRAMS_INBOXES,
   DEFAULT_SPONSORSHIP_INBOXES,
+  DEFAULT_TREASURER_INBOX,
   normalizeStaffInbox,
   parseStaffInboxes,
+  resolveTreasurerInboxes,
   STAFF_INBOX_FALLBACK,
 } from '@/lib/staff/inbox'
 
@@ -49,8 +51,10 @@ function resolveAssignedTo(
     )
   }
   if (dept === 'treasurer') {
-    return normalizeStaffInbox(
-      settings.get('contactEmailTreasurer', 'treasurer@shmspto.org'),
+    return (
+      resolveTreasurerInboxes(
+        settings.get('contactEmailTreasurer', DEFAULT_TREASURER_INBOX),
+      ).join(', ') || DEFAULT_TREASURER_INBOX
     )
   }
   return normalizeStaffInbox(

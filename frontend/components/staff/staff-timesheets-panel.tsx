@@ -146,11 +146,13 @@ export function StaffTimesheetsPanel() {
             'SHMS PTO may need to file a Form 1099. Complete IRS Form W-9 before or with your first paid work, then email the finished form to',
           )}{' '}
           <a
-            href={`mailto:${isPublicDemoInstance() ? `treasurer@${DEMO_BRAND.host}` : 'treasurer@shmspto.org'}?subject=W-9%20for%20contractor`}
+            href={`mailto:${isPublicDemoInstance() ? `treasurer@${DEMO_BRAND.host}` : 'treasurer@shmspto.org'}?cc=${isPublicDemoInstance() ? `president@${DEMO_BRAND.host}` : 'president@shmspto.org'}&subject=W-9%20for%20contractor`}
             className="font-semibold underline"
             style={{ color: 'var(--brand-green)' }}
           >
-            {isPublicDemoInstance() ? `treasurer@${DEMO_BRAND.host}` : 'treasurer@shmspto.org'}
+            {isPublicDemoInstance()
+              ? `treasurer@${DEMO_BRAND.host}`
+              : 'treasurer@shmspto.org (cc president@)'}
           </a>
           .
         </p>
@@ -164,7 +166,7 @@ export function StaffTimesheetsPanel() {
             Download Form W-9 (PDF)
           </a>
           <a
-            href={`mailto:${isPublicDemoInstance() ? `treasurer@${DEMO_BRAND.host}` : 'treasurer@shmspto.org'}?subject=W-9%20for%20contractor`}
+            href={`mailto:${isPublicDemoInstance() ? `treasurer@${DEMO_BRAND.host}` : 'treasurer@shmspto.org'}?cc=${isPublicDemoInstance() ? `president@${DEMO_BRAND.host}` : 'president@shmspto.org'}&subject=W-9%20for%20contractor`}
             className="inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold text-white"
             style={{ backgroundColor: 'var(--brand-green)' }}
           >

@@ -9,8 +9,11 @@ import { resolveGmailSendAuth } from '@/lib/staff/gmail-send-auth'
 import {
   DEFAULT_PROGRAMS_INBOXES,
   DEFAULT_SPONSORSHIP_INBOXES,
+  DEFAULT_TREASURER_INBOX,
+  ensureTreasurerCoverage,
   normalizeStaffInbox,
   parseStaffInboxes,
+  resolveTreasurerInboxes,
   STAFF_INBOX_FALLBACK,
 } from '@/lib/staff/inbox'
 
@@ -145,10 +148,11 @@ export async function notifyStaffSubmission(opts: {
     return { ok: false, mode: 'skipped', reason: 'Gmail send not configured' }
   }
 
-  const recipients =
+  const recipients = ensureTreasurerCoverage(
     opts.recipients && opts.recipients.length
-      ? Array.from(new Set(opts.recipients.flatMap((e) => parseStaffInboxes(e))))
-      : parseStaffInboxes(await resolveSubmissionInbox(opts.kind, opts.to))
+      ? opts.recipients.flatMap((e) => parseStaffInboxes(e))
+      : parseStaffInboxes(await resolveSubmissionInbox(opts.kind, opts.to)),
+  )
 
   if (!recipients.length || !recipients[0]) {
     return { ok: false, mode: 'skipped', reason: 'No staff inbox resolved' }
@@ -229,8 +233,8 @@ export async function notifyStaffTransaction(opts: {
   const president = normalizeStaffInbox(
     settings.get('presidentEmail', 'president@shmspto.org'),
   )
-  const treasurer = normalizeStaffInbox(
-    settings.get('contactEmailTreasurer', 'treasurer@shmspto.org'),
+  const treasurerList = resolveTreasurerInboxes(
+    settings.get('contactEmailTreasurer', DEFAULT_TREASURER_INBOX),
   )
   const storeCoordinator = normalizeStaffInbox(
     settings.get('contactEmailStoreCoordinator', 'cove@shmspto.org'),
@@ -244,12 +248,10 @@ export async function notifyStaffTransaction(opts: {
   const secretary = normalizeStaffInbox(
     settings.get('contactEmailSecretary', 'secretary@shmspto.org'),
   )
-  const recipients = Array.from(
-    new Set(
-      [to, president, treasurer, storeCoordinator, coveStaff, vpSales, secretary]
-        .map((e) => e.trim().toLowerCase())
-        .filter(Boolean),
-    ),
+  const recipients = ensureTreasurerCoverage(
+    [to, president, ...treasurerList, storeCoordinator, coveStaff, vpSales, secretary]
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean),
   )
 
   const amount =
