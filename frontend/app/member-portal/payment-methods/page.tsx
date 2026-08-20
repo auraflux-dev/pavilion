@@ -21,7 +21,7 @@ export default function MemberPortalPaymentMethodsPage() {
             <h1 className="mt-1 text-2xl font-bold text-[#1A1A1A]">Payment methods</h1>
             <p className="mt-2 text-sm text-[#5A6070] whitespace-pre-line">
               {`Manage the debit or credit card saved with Square, or save PayPal for one-tap checkout.
-Add either during checkout, or link PayPal below.`}
+Add a card or PayPal on this page. You can also save either at checkout.`}
             </p>
           </div>
           <PaymentMethodsPanel />

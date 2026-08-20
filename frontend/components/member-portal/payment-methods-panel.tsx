@@ -1,10 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
 import { CreditCard, Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type StoredCard = {
   brand: string
@@ -15,6 +13,18 @@ type StoredCard = {
 
 type StoredPayPal = {
   payerEmail: string
+}
+
+type SquareConfig = {
+  applicationId: string
+  locationId: string
+  environment: string
+}
+
+type SquareCard = {
+  attach(selector: string): Promise<void>
+  tokenize(): Promise<{ status: string; token?: string; errors?: { message?: string }[] }>
+  destroy(): Promise<void>
 }
 
 type PayPalButtonsApi = {
@@ -36,7 +46,11 @@ export function PaymentMethodsPanel() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [paypalReady, setPaypalReady] = useState(false)
+  const [squareConfig, setSquareConfig] = useState<SquareConfig | null>(null)
+  const [squareReady, setSquareReady] = useState(false)
+  const [savingCard, setSavingCard] = useState(false)
   const paypalHostRef = useRef<HTMLDivElement>(null)
+  const squareCardRef = useRef<SquareCard | null>(null)
 
   const load = useCallback(async () => {
     setBusy(true)
@@ -52,6 +66,15 @@ export function PaymentMethodsPanel() {
       }
       setConfigured(Boolean(data.configured))
       setPaypalConfigured(Boolean(data.paypalConfigured))
+      setSquareConfig(
+        data.applicationId && data.locationId
+          ? {
+              applicationId: String(data.applicationId),
+              locationId: String(data.locationId),
+              environment: String(data.environment ?? 'production'),
+            }
+          : null,
+      )
       setCard(data.paymentMethod ?? null)
       setPaypal(data.paypalMethod ?? null)
     } catch {
@@ -147,6 +170,87 @@ export function PaymentMethodsPanel() {
     }
   }, [busy, paypal, paypalConfigured, load])
 
+  useEffect(() => {
+    if (busy || card || !configured || !squareConfig) return
+    let cancelled = false
+
+    async function setupSquare() {
+      const src =
+        squareConfig?.environment === 'sandbox'
+          ? 'https://sandbox.web.squarecdn.com/v1/square.js'
+          : 'https://web.squarecdn.com/v1/square.js'
+      let script = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`)
+      if (!script) {
+        script = document.createElement('script')
+        script.src = src
+        script.async = true
+        document.head.appendChild(script)
+        await new Promise<void>((resolve, reject) => {
+          script!.onload = () => resolve()
+          script!.onerror = () => reject(new Error('Square payment form failed to load'))
+        })
+      } else if (!(window as { Square?: unknown }).Square) {
+        await new Promise<void>((resolve) => {
+          script!.addEventListener('load', () => resolve(), { once: true })
+        })
+      }
+
+      const Square = (
+        window as Window & {
+          Square?: {
+            payments(applicationId: string, locationId: string): Promise<{ card(): Promise<SquareCard> }>
+          }
+        }
+      ).Square
+      if (cancelled || !Square || !squareConfig) return
+      await squareCardRef.current?.destroy().catch(() => undefined)
+      const payments = await Square.payments(squareConfig.applicationId, squareConfig.locationId)
+      const sqCard = await payments.card()
+      await sqCard.attach('#payment-methods-square-card')
+      squareCardRef.current = sqCard
+      if (!cancelled) setSquareReady(true)
+    }
+
+    setupSquare().catch((err) => {
+      setError(err instanceof Error ? err.message : 'Card form unavailable')
+    })
+
+    return () => {
+      cancelled = true
+      squareCardRef.current?.destroy().catch(() => undefined)
+      squareCardRef.current = null
+      setSquareReady(false)
+    }
+  }, [busy, card, configured, squareConfig])
+
+  async function saveCard() {
+    setSavingCard(true)
+    setError('')
+    setSuccess('')
+    try {
+      if (!squareCardRef.current || !squareReady) {
+        throw new Error('Card form is not ready yet.')
+      }
+      const tokenized = await squareCardRef.current.tokenize()
+      if (tokenized.status !== 'OK' || !tokenized.token) {
+        throw new Error(tokenized.errors?.[0]?.message ?? 'Card details could not be verified.')
+      }
+      const r = await fetch('/api/gift-card/payment-method', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sourceId: tokenized.token }),
+      })
+      const data = await r.json().catch(() => ({}))
+      if (!r.ok) throw new Error(data.error || 'Could not save card.')
+      setCard(data.paymentMethod ?? null)
+      setSuccess('Card saved for faster checkout.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save card.')
+    } finally {
+      setSavingCard(false)
+    }
+  }
+
   async function removeCard() {
     if (!window.confirm('Remove this saved card and turn off auto top-off for all students?')) {
       return
@@ -206,7 +310,7 @@ export function PaymentMethodsPanel() {
           <h2 className="text-base font-bold text-[#1A1A1A]">Cards and PayPal on file</h2>
           <p className="mt-1 text-sm text-[#5A6070] whitespace-pre-line">
             {`Square stores your card securely for Cove reloads, membership, spirit wear, and enrichment.
-You can also save PayPal here for one-tap checkout.
+Save a card or PayPal here for one-tap checkout.
 SHMS PTO never keeps the full card number.`}
           </p>
         </div>
@@ -260,27 +364,35 @@ SHMS PTO never keeps the full card number.`}
 
       {!busy && configured && !card ? (
         <div className="rounded-lg border border-dashed border-[var(--border)] px-3 py-4 space-y-3">
-          <p className="text-sm text-[#1A1A1A] whitespace-pre-line">
+          <h3 className="text-sm font-bold text-[#1A1A1A]">Add a card</h3>
+          <p className="text-sm text-[#5A6070] whitespace-pre-line">
             {`No card saved yet.
-On your next Square checkout, leave “Save this card…” checked (default on first purchase).
-It will show up here automatically.`}
+Enter a debit or credit card here. Square stores it for later checkouts. This does not charge you.`}
           </p>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/cove">
-              <Button
-                size="sm"
-                className="text-white font-semibold"
-                style={{ backgroundColor: 'var(--brand-green)' }}
-              >
-                {vanillaizeIfDemo('Load Cove Digital Card')}
-              </Button>
-            </Link>
-            <Link href="/cove#spirit">
-              <Button size="sm" variant="outline">
-                Shop spirit wear
-              </Button>
-            </Link>
-          </div>
+          <div
+            id="payment-methods-square-card"
+            className="min-h-12 rounded-lg border border-[var(--border)] bg-white px-2 py-1"
+          />
+          {!squareReady ? (
+            <p className="text-xs text-[#5A6070]">Loading card form…</p>
+          ) : null}
+          <Button
+            type="button"
+            size="sm"
+            disabled={savingCard || !squareReady}
+            onClick={() => void saveCard()}
+            className="text-white font-semibold"
+            style={{ backgroundColor: 'var(--brand-green)' }}
+          >
+            {savingCard ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                Saving…
+              </>
+            ) : (
+              'Save card'
+            )}
+          </Button>
         </div>
       ) : null}
 

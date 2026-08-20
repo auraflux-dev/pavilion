@@ -106,6 +106,15 @@ export async function POST(req: NextRequest) {
 
     const name =
       `${session.member.contact?.firstName ?? ''} ${session.member.contact?.lastName ?? ''}`.trim()
+    const existing = await findStoredPaymentMethod(householdEmail)
+    if (existing?.squareCardId) {
+      try {
+        await disableCardOnFile(existing.squareCardId)
+      } catch (err) {
+        console.error('disable previous Square card', err)
+      }
+    }
+
     const customer = await upsertSquareCustomer(householdEmail, name)
     if (!customer?.id) throw new Error('Could not create Square customer')
 
