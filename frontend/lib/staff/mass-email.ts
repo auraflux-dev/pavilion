@@ -4,6 +4,8 @@
  * Fallback: preview + mailto BCC when Gmail is not configured.
  */
 
+import { sanitizeTestRecipients } from '@/lib/staff/newsletter-test-groups'
+
 export type EmailAudience =
   | 'all'
   | 'free'
@@ -69,8 +71,9 @@ export function sanitizeRecipients(emails: string[]): string[] {
 }
 
 /** Build a mailto URL with BCC for staffer's own mail client (no API key needed). */
-export function buildMailtoBcc(draft: MassEmailDraft): string {
-  const recipients = sanitizeRecipients(draft.recipients)
+export function buildMailtoBcc(draft: MassEmailDraft, opts: { testSend?: boolean } = {}): string {
+  const sanitize = opts.testSend ? sanitizeTestRecipients : sanitizeRecipients
+  const recipients = sanitize(draft.recipients)
   const params = new URLSearchParams()
   params.set('subject', draft.subject.trim())
   params.set('body', draft.body.trim())
@@ -78,11 +81,17 @@ export function buildMailtoBcc(draft: MassEmailDraft): string {
   return `mailto:${encodeURIComponent(draft.replyTo || '')}?${params.toString()}`
 }
 
-export function validateMassEmailDraft(draft: MassEmailDraft): string | null {
+export function validateMassEmailDraft(
+  draft: MassEmailDraft,
+  opts: { testSend?: boolean } = {},
+): string | null {
   if (!draft.subject.trim()) return 'Subject is required'
   if (!draft.body.trim()) return 'Message body is required'
-  if (sanitizeRecipients(draft.recipients).length === 0) {
-    return 'No valid recipient emails for this audience'
+  const sanitize = opts.testSend ? sanitizeTestRecipients : sanitizeRecipients
+  if (sanitize(draft.recipients).length === 0) {
+    return opts.testSend
+      ? 'No valid test recipients (add a personal email on your Staff profile, or pick Board test group)'
+      : 'No valid recipient emails for this audience'
   }
   return null
 }
@@ -134,14 +143,15 @@ export type SendMassEmailResult = {
  */
 export async function sendMassEmail(
   draft: MassEmailDraft,
-  opts: { dryRun?: boolean } = {},
+  opts: { dryRun?: boolean; testSend?: boolean } = {},
 ): Promise<SendMassEmailResult> {
-  const validation = validateMassEmailDraft(draft)
+  const validation = validateMassEmailDraft(draft, { testSend: opts.testSend })
   if (validation) {
     return { ok: false, mode: 'unavailable', sent: 0, failed: 0, errors: [validation] }
   }
 
-  const recipients = sanitizeRecipients(draft.recipients)
+  const sanitize = opts.testSend ? sanitizeTestRecipients : sanitizeRecipients
+  const recipients = sanitize(draft.recipients)
   if (opts.dryRun) {
     return {
       ok: true,

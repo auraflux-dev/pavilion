@@ -22,6 +22,12 @@ import {
 import { defaultUtmCampaign } from '@/lib/staff/newsletter-utm'
 import { prepareTrackedNewsletterSend } from '@/lib/staff/newsletter-tracking'
 import { buildNewsletterHtml } from '@/lib/staff/newsletter-html'
+import {
+  buildNewsletterTestGroups,
+  resolveTestGroupRecipients,
+  testSubject,
+  parseEmailList,
+} from '@/lib/staff/newsletter-test-groups'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -111,6 +117,17 @@ async function archiveNewsletter(opts: {
   }
 }
 
+async function loadSiteSetting(key: string): Promise<string> {
+  try {
+    const client = getWixClient()
+    const found = await client.items.query('SiteSettings').eq('key', key).limit(1).find()
+    const row = found.items?.[0] as { value?: string } | undefined
+    return String(row?.value ?? '').trim()
+  } catch {
+    return ''
+  }
+}
+
 async function loadWhatsAppLinks(): Promise<GradeWhatsAppLinks> {
   const client = getWixClient()
   const result = await client.items.query('SiteSettings').limit(200).find()
@@ -137,11 +154,26 @@ export async function GET(req: NextRequest) {
   try {
     const links = await loadWhatsAppLinks()
     const gmail = await gmailSendReady()
+    const staffRows = await loadAll('StaffRoles')
+    const siteTestEmails = await loadSiteSetting('newsletterTestEmails')
+    const testGroups = buildNewsletterTestGroups({
+      sessionEmail: gated.session!.email,
+      sessionPersonalEmail: gated.session!.staff.personalEmail,
+      staffRows: staffRows.map((row) => ({
+        email: String(row.email ?? ''),
+        personalEmail: String(row.personalEmail ?? ''),
+        name: String(row.name ?? ''),
+        boardTitle: String(row.boardTitle ?? ''),
+        active: row.active !== false,
+      })),
+      siteTestEmails,
+    })
     return NextResponse.json({
       emailConfigured: gmail.ok,
       gmailSender: gmail.senderEmail,
       gmailHint: gmail.hint,
       whatsapp: links,
+      testGroups,
     })
   } catch (err) {
     console.error('/api/staff/membership/outreach GET', err)
@@ -178,6 +210,14 @@ export async function POST(req: NextRequest) {
     const canvaViewUrl = String(body.canvaViewUrl ?? '').trim()
     const canvaThumbnailUrl = String(body.canvaThumbnailUrl ?? '').trim()
     const canvaTitle = String(body.canvaTitle ?? '').trim()
+    const sendAudience = String(body.sendAudience ?? 'members').trim() // members | test
+    const testGroup = String(body.testGroup ?? 'me').trim() as
+      | 'me'
+      | 'board'
+      | 'custom'
+      | 'board_and_custom'
+    const testEmailsRaw = String(body.testEmails ?? '').trim()
+    const isTestSend = sendAudience === 'test' || body.testSend === true
 
     if (channel === 'whatsapp') {
       const links = await loadWhatsAppLinks()
@@ -193,16 +233,54 @@ export async function POST(req: NextRequest) {
     }
 
     const roster = await loadRoster()
-    const filtered =
-      customEmails.length > 0
-        ? filterParentRoster(roster, { tier: 'all' }).filter((r) =>
-            sanitizeRecipients(customEmails).includes(r.parentEmail),
-          )
-        : filterParentRoster(roster, { tier, grade })
+    let recipients: string[] = []
+    let effectiveSubject = subject
+    let effectiveAlsoPortal = alsoPortal
+    let effectiveUtmCampaign = utmCampaign
+    let isTestAudience = false
 
-    const recipients = sanitizeRecipients(
-      customEmails.length ? customEmails : rosterEmails(filtered),
-    )
+    if (isTestSend) {
+      const staffRows = await loadAll('StaffRoles')
+      const siteTestEmails = await loadSiteSetting('newsletterTestEmails')
+      const testGroups = buildNewsletterTestGroups({
+        sessionEmail: session.email,
+        sessionPersonalEmail: session.staff.personalEmail,
+        staffRows: staffRows.map((row) => ({
+          email: String(row.email ?? ''),
+          personalEmail: String(row.personalEmail ?? ''),
+          name: String(row.name ?? ''),
+          boardTitle: String(row.boardTitle ?? ''),
+          active: row.active !== false,
+        })),
+        siteTestEmails,
+      })
+      const group =
+        testGroup === 'board' ||
+        testGroup === 'custom' ||
+        testGroup === 'board_and_custom'
+          ? testGroup
+          : 'me'
+      const extra = [
+        ...customEmails,
+        ...parseEmailList(testEmailsRaw),
+      ]
+      recipients = resolveTestGroupRecipients(group, testGroups, extra)
+      effectiveSubject = testSubject(subject)
+      effectiveAlsoPortal = false
+      effectiveUtmCampaign = `${utmCampaign}-test`.replace(/-test-test$/, '-test')
+      isTestAudience = true
+    } else {
+      const filtered =
+        customEmails.length > 0
+          ? filterParentRoster(roster, { tier: 'all' }).filter((r) =>
+              sanitizeRecipients(customEmails).includes(r.parentEmail),
+            )
+          : filterParentRoster(roster, { tier, grade })
+
+      recipients = sanitizeRecipients(
+        customEmails.length ? customEmails : rosterEmails(filtered),
+      )
+    }
 
     if (channel === 'email') {
       let outboundBody = message
@@ -210,20 +288,24 @@ export async function POST(req: NextRequest) {
       let newsletterSendId: string | null = null
 
       const draftBase = {
-        subject,
+        subject: effectiveSubject,
         fromName: session.staff.name || session.staff.boardTitle || session.email,
         replyTo: session.email,
         recipients,
       }
 
-      if (!dryRun) {
+      if (!dryRun && !isTestAudience) {
         try {
           const prepared = await prepareTrackedNewsletterSend({
             body: message,
-            utm: { campaign: utmCampaign, source: 'newsletter', medium: 'email' },
+            utm: {
+              campaign: effectiveUtmCampaign,
+              source: 'newsletter',
+              medium: 'email',
+            },
             trackClicks,
             sentByEmail: session.email,
-            subject,
+            subject: effectiveSubject,
             tier,
             grade,
             templateId: templateId || undefined,
@@ -234,6 +316,29 @@ export async function POST(req: NextRequest) {
           newsletterSendId = prepared.sendId
         } catch (err) {
           console.warn('[outreach] newsletter tracking setup failed', err)
+        }
+      } else if (!dryRun && isTestAudience && trackClicks) {
+        try {
+          const prepared = await prepareTrackedNewsletterSend({
+            body: message,
+            utm: {
+              campaign: effectiveUtmCampaign,
+              source: 'newsletter',
+              medium: 'email-test',
+            },
+            trackClicks: true,
+            sentByEmail: session.email,
+            subject: effectiveSubject,
+            tier: 'test',
+            grade: '',
+            templateId: templateId || undefined,
+            recipientCount: recipients.length,
+          })
+          outboundBody = prepared.bodyForSend
+          archiveBody = prepared.bodyForArchive
+          newsletterSendId = prepared.sendId
+        } catch (err) {
+          console.warn('[outreach] test send tracking failed', err)
         }
       }
 
@@ -253,17 +358,17 @@ export async function POST(req: NextRequest) {
         body: dryRun ? message : outboundBody,
         html,
       }
-      const validation = validateMassEmailDraft(draft)
+      const validation = validateMassEmailDraft(draft, { testSend: isTestAudience })
       if (validation) {
         return NextResponse.json({ error: validation }, { status: 400 })
       }
 
-      const mailto = buildMailtoBcc(draft)
-      const sendResult = await sendMassEmail(draft, { dryRun })
+      const mailto = buildMailtoBcc(draft, { testSend: isTestAudience })
+      const sendResult = await sendMassEmail(draft, { dryRun, testSend: isTestAudience })
 
       let portalInserted = false
       let newsletterArchived = false
-      if (alsoPortal && !dryRun) {
+      if (effectiveAlsoPortal && !dryRun && !isTestAudience) {
         try {
           const client = getWixClient()
           if (tier !== 'all' || grade || customEmails.length) {
@@ -276,7 +381,7 @@ export async function POST(req: NextRequest) {
                 studentName: null,
                 programName: null,
                 fromName: draft.fromName,
-                subject,
+                subject: effectiveSubject,
                 body: archiveBody,
                 sentAt: new Date().toISOString(),
                 active: true,
@@ -291,7 +396,7 @@ export async function POST(req: NextRequest) {
               studentName: null,
               programName: null,
               fromName: draft.fromName,
-              subject,
+              subject: effectiveSubject,
               body: archiveBody,
               sentAt: new Date().toISOString(),
               active: true,
@@ -302,12 +407,12 @@ export async function POST(req: NextRequest) {
           // ParentMessages optional
         }
         newsletterArchived = await archiveNewsletter({
-          title: subject,
+          title: effectiveSubject,
           body: archiveBody,
           fromName: draft.fromName,
           tier,
           grade,
-          customEmails,
+          customEmails: isTestAudience ? recipients : customEmails,
         })
       }
 
@@ -321,9 +426,10 @@ export async function POST(req: NextRequest) {
         send: sendResult,
         portalInserted,
         newsletterArchived,
-        utmCampaign,
+        utmCampaign: effectiveUtmCampaign,
         newsletterSendId,
         trackClicks: !dryRun && trackClicks,
+        testSend: isTestAudience,
       })
     }
 

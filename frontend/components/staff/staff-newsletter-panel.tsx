@@ -9,6 +9,13 @@ import {
   type NewsletterCanvaMeta,
 } from '@/components/staff/staff-newsletter-templates-panel'
 
+type TestGroupMember = { email: string; label: string }
+type TestGroups = {
+  me: TestGroupMember | null
+  board: TestGroupMember[]
+  custom: TestGroupMember[]
+}
+
 /**
  * Member newsletter: free and/or paid parents via Gmail + WhatsApp grade groups + optional portal.
  * Reuses /api/staff/membership/outreach (same roster + Gmail send as Memberships).
@@ -16,6 +23,9 @@ import {
 export function StaffNewsletterPanel() {
   const [emailConfigured, setEmailConfigured] = useState(false)
   const [waLinks, setWaLinks] = useState({ grade6: '', grade7: '', grade8: '' })
+  const [testGroups, setTestGroups] = useState<TestGroups | null>(null)
+  const [testGroup, setTestGroup] = useState<'me' | 'board' | 'board_and_custom'>('me')
+  const [testEmailsExtra, setTestEmailsExtra] = useState('')
   const [tier, setTier] = useState('all')
   const [grade, setGrade] = useState('')
   const [waGrade, setWaGrade] = useState('all')
@@ -36,6 +46,7 @@ export function StaffNewsletterPanel() {
     if (!r.ok) throw new Error(d.error ?? 'Load failed')
     setEmailConfigured(Boolean(d.emailConfigured))
     setWaLinks(d.whatsapp ?? { grade6: '', grade7: '', grade8: '' })
+    setTestGroups(d.testGroups ?? null)
   }, [])
 
   useEffect(() => {
@@ -63,6 +74,7 @@ export function StaffNewsletterPanel() {
       canvaViewUrl: canvaMeta.canvaViewUrl,
       canvaThumbnailUrl: canvaMeta.canvaThumbnailUrl,
       canvaTitle: canvaMeta.canvaTitle,
+      testEmails: testEmailsExtra,
       ...extra,
     }
   }
@@ -84,6 +96,76 @@ export function StaffNewsletterPanel() {
             ? `. E.g. ${d.recipientsPreview.slice(0, 5).join(', ')}`
             : '') +
           (trackClicks ? ' · links will get UTM + click tracking on send' : ''),
+      )
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Preview failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function sendTestEmail() {
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/membership/outreach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          outreachPayload({
+            dryRun: false,
+            alsoPortal: false,
+            sendAudience: 'test',
+            testGroup,
+            testEmails: testEmailsExtra,
+          }),
+        ),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Test send failed')
+      if (d.send?.mode === 'gmail') {
+        setStatus(
+          `[TEST] Sent via Gmail: ${d.send.sent} delivered, ${d.send.failed} failed` +
+            (d.recipientsPreview?.length
+              ? `\nTo: ${d.recipientsPreview.join(', ')}`
+              : '') +
+            (d.newsletterSendId ? `\nTracking id: ${d.newsletterSendId}` : ''),
+        )
+      } else if (d.mailto) {
+        window.location.href = d.mailto
+        setStatus(`[TEST] Opened mail app for ${d.recipientCount} recipients.`)
+      } else {
+        setStatus(d.send?.errors?.[0] ?? 'Test email prepared')
+      }
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Test send failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function previewTestRecipients() {
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/membership/outreach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          outreachPayload({
+            dryRun: true,
+            alsoPortal: false,
+            sendAudience: 'test',
+            testGroup,
+            testEmails: testEmailsExtra,
+          }),
+        ),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Preview failed')
+      setStatus(
+        `[TEST preview] ${d.recipientCount} recipient(s)` +
+          (d.recipientsPreview?.length ? `: ${d.recipientsPreview.join(', ')}` : ''),
       )
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Preview failed')
@@ -202,12 +284,77 @@ export function StaffNewsletterPanel() {
         <div>
           <h2 className="text-lg font-bold">Member newsletter</h2>
           <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
-            Send to free and/or paid member parents (Students roster). Email uses Gmail API
-            {emailConfigured ? '' : ' (or mailto BCC until Gmail is connected)'}.
+            No HTML coding required. Write plain text (like an email to a friend), paste links, and
+            optionally attach a Canva graphic up top.
             {'\n'}
-            Plain-text body + optional Canva hero. Links get UTM tags; enable click/open tracking below.
+            Parent sends use the Students roster. Use Test send first so board can preview in a real
+            inbox.
           </p>
         </div>
+
+        <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3">
+          <p className="text-sm font-semibold text-[#1A1A1A]">Test send (board preview)</p>
+          <p className="text-xs text-[#5A6070] whitespace-pre-line">
+            Subject is prefixed with [TEST]. Does not post to the parent portal or member archive.
+            {'\n'}
+            Add your personal Gmail under Staff → Home if “Just me” is empty.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-2">
+            <label className="text-xs text-[#5A6070]">
+              Test group
+              <select
+                value={testGroup}
+                onChange={(e) =>
+                  setTestGroup(e.target.value as 'me' | 'board' | 'board_and_custom')
+                }
+                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+              >
+                <option value="me">Just me</option>
+                <option value="board">Board test group (StaffRoles emails)</option>
+                <option value="board_and_custom">Board + Site Settings test list</option>
+              </select>
+            </label>
+            <label className="text-xs text-[#5A6070]">
+              Extra test emails (optional)
+              <input
+                value={testEmailsExtra}
+                onChange={(e) => setTestEmailsExtra(e.target.value)}
+                placeholder="you@gmail.com, colleague@…"
+                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+              />
+            </label>
+          </div>
+          {testGroups?.board.length ? (
+            <p className="text-[11px] text-[#5A6070]">
+              Board group:{' '}
+              {testGroups.board
+                .slice(0, 6)
+                .map((m) => m.label)
+                .join(' · ')}
+              {testGroups.board.length > 6 ? ` · +${testGroups.board.length - 6} more` : ''}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy || !subject || !body}
+              onClick={() => void previewTestRecipients()}
+            >
+              Preview test recipients
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy || !subject || !body}
+              onClick={() => void sendTestEmail()}
+            >
+              Send test email
+            </Button>
+          </div>
+        </div>
+
+        <p className="text-xs font-semibold text-[#1A1A1A]">Member send</p>
 
         <div className="grid sm:grid-cols-3 gap-2">
           <select

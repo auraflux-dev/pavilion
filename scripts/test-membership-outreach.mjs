@@ -27,6 +27,11 @@ import {
   tagUrlWithUtm,
   tagUrlsInText,
 } from '../frontend/lib/staff/newsletter-utm.ts'
+import {
+  buildNewsletterTestGroups,
+  resolveTestGroupRecipients,
+  testSubject,
+} from '../frontend/lib/staff/newsletter-test-groups.ts'
 
 let failures = 0
 function check(name, fn) {
@@ -198,6 +203,28 @@ check('utm campaign slug + link tagging', () => {
   })
   assert.ok(body.includes('utm_medium=email'))
   assert.ok(body.endsWith('now.'))
+})
+
+check('newsletter test groups + subject prefix', () => {
+  const groups = buildNewsletterTestGroups({
+    sessionEmail: 'vp-marketing@shmspto.org',
+    sessionPersonalEmail: 'diane@gmail.com',
+    staffRows: [
+      {
+        email: 'president@shmspto.org',
+        personalEmail: 'pres@gmail.com',
+        name: 'Pres',
+        boardTitle: 'President',
+        active: true,
+      },
+    ],
+    siteTestEmails: 'qa@gmail.com',
+  })
+  assert.equal(groups.me?.email, 'diane@gmail.com')
+  assert.equal(resolveTestGroupRecipients('me', groups).length, 1)
+  assert.ok(resolveTestGroupRecipients('board', groups).includes('president@shmspto.org'))
+  assert.ok(resolveTestGroupRecipients('board_and_custom', groups).includes('qa@gmail.com'))
+  assert.equal(testSubject('Hello'), '[TEST] Hello')
 })
 
 const dry = await sendMassEmail(
