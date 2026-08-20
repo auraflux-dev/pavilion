@@ -176,18 +176,18 @@ export async function getDesignExportJob(
   return mapExportJob(data)
 }
 
-/** Poll until PNG export succeeds or fails (or timeout). */
+/** Poll until PNG export succeeds or fails (or timeout). Multi-page designs return one URL per page. */
 export async function waitForDesignPngExport(
   accessToken: string,
   designId: string,
   opts?: { timeoutMs?: number; intervalMs?: number },
-): Promise<{ downloadUrl: string; jobId: string }> {
+): Promise<{ downloadUrl: string; downloadUrls: string[]; jobId: string }> {
   const timeoutMs = opts?.timeoutMs ?? 45_000
   const intervalMs = opts?.intervalMs ?? 1_200
   const started = await createDesignPngExport(accessToken, designId)
   if (!started.id) throw new Error('Canva did not return an export job id')
   if (started.status === 'success' && started.urls[0]) {
-    return { downloadUrl: started.urls[0], jobId: started.id }
+    return { downloadUrl: started.urls[0], downloadUrls: started.urls, jobId: started.id }
   }
   if (started.status === 'failed') {
     throw new Error(started.error || 'Canva PNG export failed')
@@ -198,7 +198,7 @@ export async function waitForDesignPngExport(
     await new Promise((r) => setTimeout(r, intervalMs))
     const job = await getDesignExportJob(accessToken, started.id)
     if (job.status === 'success' && job.urls[0]) {
-      return { downloadUrl: job.urls[0], jobId: job.id }
+      return { downloadUrl: job.urls[0], downloadUrls: job.urls, jobId: job.id }
     }
     if (job.status === 'failed') {
       throw new Error(job.error || 'Canva PNG export failed')

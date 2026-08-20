@@ -60,22 +60,30 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { downloadUrl, jobId } = await waitForDesignPngExport(tok.accessToken, designId)
-    const imgRes = await fetch(downloadUrl)
-    if (!imgRes.ok) {
-      throw new Error(`Could not download Canva PNG (${imgRes.status})`)
+    const { downloadUrls, jobId } = await waitForDesignPngExport(tok.accessToken, designId)
+    const pageImageUrls: string[] = []
+    const pageImageKeys: string[] = []
+    for (let i = 0; i < downloadUrls.length; i += 1) {
+      const imgRes = await fetch(downloadUrls[i])
+      if (!imgRes.ok) {
+        throw new Error(`Could not download Canva PNG page ${i + 1} (${imgRes.status})`)
+      }
+      const buf = Buffer.from(await imgRes.arrayBuffer())
+      if (buf.length < 100) throw new Error(`Canva returned an empty PNG for page ${i + 1}`)
+      if (buf.length > 12 * 1024 * 1024) {
+        throw new Error('Exported PNG is too large (max 12MB per page). Simplify the Canva design.')
+      }
+      const stored = await putNewsletterHeroPng(buf, { designId: `${designId}-p${i + 1}` })
+      pageImageUrls.push(stored.url)
+      pageImageKeys.push(stored.key)
     }
-    const buf = Buffer.from(await imgRes.arrayBuffer())
-    if (buf.length < 100) throw new Error('Canva returned an empty PNG')
-    if (buf.length > 12 * 1024 * 1024) {
-      throw new Error('Exported PNG is too large (max 12MB). Simplify the Canva design.')
-    }
-
-    const stored = await putNewsletterHeroPng(buf, { designId })
     return NextResponse.json({
       ok: true,
-      heroImageUrl: stored.url,
-      heroImageKey: stored.key,
+      heroImageUrl: pageImageUrls[0],
+      heroImageKey: pageImageKeys[0],
+      pageImageUrls,
+      pageImageKeys,
+      pageCount: pageImageUrls.length,
       designId,
       exportJobId: jobId,
       mode: tok.mode,

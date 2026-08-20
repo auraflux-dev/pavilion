@@ -13,6 +13,7 @@ export type NewsletterCanvaMeta = {
   canvaThumbnailUrl?: string
   heroImageUrl?: string
   heroImageKey?: string
+  pageImageUrls?: string[]
 }
 
 export type NewsletterTemplateRow = {
@@ -28,6 +29,8 @@ export type NewsletterTemplateRow = {
   canvaThumbnailUrl: string
   heroImageUrl: string
   heroImageKey: string
+  pageImageUrlsJson: string
+  beatsJson: string
   updatedAt: string
 }
 
@@ -35,6 +38,7 @@ type Props = {
   subject: string
   body: string
   utmCampaign: string
+  beatsJson?: string
   canvaMeta: NewsletterCanvaMeta
   onCanvaMetaChange: (meta: NewsletterCanvaMeta) => void
   onLoad: (tpl: {
@@ -48,6 +52,8 @@ type Props = {
     canvaEditUrl: string
     heroImageUrl: string
     heroImageKey: string
+    pageImageUrls: string[]
+    beatsJson: string
     templateId: string
   }) => void
 }
@@ -56,6 +62,7 @@ export function StaffNewsletterTemplatesPanel({
   subject,
   body,
   utmCampaign,
+  beatsJson = '',
   canvaMeta,
   onCanvaMetaChange,
   onLoad,
@@ -89,6 +96,8 @@ export function StaffNewsletterTemplatesPanel({
           canvaThumbnailUrl: String(row.canvaThumbnailUrl ?? ''),
           heroImageUrl: String(row.heroImageUrl ?? ''),
           heroImageKey: String(row.heroImageKey ?? ''),
+          pageImageUrlsJson: String(row.pageImageUrlsJson ?? ''),
+          beatsJson: String(row.beatsJson ?? ''),
           updatedAt: String(row.updatedAt ?? ''),
         }))
         .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
@@ -120,6 +129,7 @@ export function StaffNewsletterTemplatesPanel({
       canvaThumbnailUrl: meta.canvaThumbnailUrl ?? '',
       heroImageUrl: meta.heroImageUrl ?? canvaMeta.heroImageUrl ?? '',
       heroImageKey: meta.heroImageKey ?? canvaMeta.heroImageKey ?? '',
+      pageImageUrls: meta.pageImageUrls ?? canvaMeta.pageImageUrls ?? [],
     })
   }
 
@@ -171,8 +181,18 @@ export function StaffNewsletterTemplatesPanel({
         ...meta,
         heroImageUrl: String(d.heroImageUrl ?? ''),
         heroImageKey: String(d.heroImageKey ?? ''),
+        pageImageUrls: Array.isArray(d.pageImageUrls)
+          ? d.pageImageUrls.map((u: unknown) => String(u)).filter(Boolean)
+          : String(d.heroImageUrl ?? '')
+            ? [String(d.heroImageUrl)]
+            : [],
       })
-      setStatus('PNG exported for email. Preview below — then save template or send a test.')
+      const n = Number(d.pageCount ?? 1)
+      setStatus(
+        n > 1
+          ? `PNG exported (${n} pages). All pages go in the email. Preview below.`
+          : 'PNG exported for email. Preview below — then save template or send a test.',
+      )
     } catch (err) {
       setStatus(
         (err instanceof Error ? err.message : 'Export failed') +
@@ -200,6 +220,15 @@ export function StaffNewsletterTemplatesPanel({
       canvaEditUrl: tpl.canvaEditUrl,
       heroImageUrl: tpl.heroImageUrl,
       heroImageKey: tpl.heroImageKey,
+      pageImageUrls: (() => {
+        try {
+          const parsed = JSON.parse(tpl.pageImageUrlsJson || '[]') as unknown
+          return Array.isArray(parsed) ? parsed.map((u) => String(u)).filter(Boolean) : []
+        } catch {
+          return tpl.heroImageUrl ? [tpl.heroImageUrl] : []
+        }
+      })(),
+      beatsJson: tpl.beatsJson,
       templateId: tpl.id,
     })
     setStatus(`Loaded “${tpl.name}”.`)
@@ -228,6 +257,8 @@ export function StaffNewsletterTemplatesPanel({
         canvaThumbnailUrl: canvaMeta.canvaThumbnailUrl ?? '',
         heroImageUrl: canvaMeta.heroImageUrl ?? '',
         heroImageKey: canvaMeta.heroImageKey ?? '',
+        pageImageUrlsJson: JSON.stringify(canvaMeta.pageImageUrls ?? []),
+        beatsJson,
         updatedAt: new Date().toISOString(),
         active: true,
       }
@@ -258,7 +289,8 @@ export function StaffNewsletterTemplatesPanel({
       <div>
         <h2 className="text-lg font-bold">Templates (Canva + copy)</h2>
         <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
-          Design = Canva PNG + SHMS header/footer. Body stays plain text (no HTML coding).
+          Design = Canva PNG + SHMS header/footer. Multi-page Canva exports every page into the email.
+          Body stays plain text (no HTML coding). Optional beats: event, ask, CTA.
           {'\n'}
           Attach Canva → PNG exports automatically when Canva is connected → write copy → test send.
         </p>
@@ -364,12 +396,23 @@ export function StaffNewsletterTemplatesPanel({
           </p>
         ) : null}
         {previewSrc ? (
-          <div className="rounded-lg border border-[var(--border)] bg-white p-2">
-            <p className="text-[11px] font-semibold text-[#5A6070] mb-1">
-              {canvaMeta.heroImageUrl ? 'Email hero (exported PNG)' : 'Preview (thumbnail until export)'}
+          <div className="rounded-lg border border-[var(--border)] bg-white p-2 space-y-2">
+            <p className="text-[11px] font-semibold text-[#5A6070]">
+              {canvaMeta.heroImageUrl
+                ? canvaMeta.pageImageUrls && canvaMeta.pageImageUrls.length > 1
+                  ? `Email graphics (${canvaMeta.pageImageUrls.length} pages)`
+                  : 'Email hero (exported PNG)'
+                : 'Preview (thumbnail until export)'}
             </p>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={previewSrc} alt="" className="max-h-40 w-auto rounded" />
+            <div className="flex flex-wrap gap-2">
+              {(canvaMeta.pageImageUrls?.length
+                ? canvaMeta.pageImageUrls
+                : [previewSrc]
+              ).map((src) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={src} src={src} alt="" className="max-h-40 w-auto rounded" />
+              ))}
+            </div>
           </div>
         ) : null}
       </div>

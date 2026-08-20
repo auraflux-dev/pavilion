@@ -49,6 +49,7 @@ export type NewsletterExecuteInput = {
   canvaThumbnailUrl?: string
   canvaTitle?: string
   heroImageUrl?: string
+  extraImageUrls?: string[]
   sendAudience?: NewsletterSendAudience
   testGroup?: 'me' | 'board' | 'custom' | 'board_and_custom'
   testEmails?: string
@@ -348,6 +349,7 @@ export async function executeNewsletterEmail(
         textBody: outboundBody,
         sendId: trackOpens ? newsletterSendId || undefined : undefined,
         heroImageUrl: input.heroImageUrl || undefined,
+        extraImageUrls: input.extraImageUrls,
         canvaViewUrl: input.canvaViewUrl || undefined,
         canvaThumbnailUrl: input.canvaThumbnailUrl || undefined,
         canvaTitle: input.canvaTitle || undefined,
@@ -377,6 +379,7 @@ export async function executeNewsletterEmail(
   const htmlOpts = {
     sendId: trackOpens ? newsletterSendId || undefined : undefined,
     heroImageUrl: input.heroImageUrl || undefined,
+    extraImageUrls: input.extraImageUrls,
     canvaViewUrl: input.canvaViewUrl || undefined,
     canvaThumbnailUrl: input.canvaThumbnailUrl || undefined,
     canvaTitle: input.canvaTitle || undefined,

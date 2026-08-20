@@ -25,6 +25,7 @@ export function buildNewsletterHtml(opts: {
   textBody: string
   sendId?: string
   heroImageUrl?: string
+  extraImageUrls?: string[]
   canvaViewUrl?: string
   canvaThumbnailUrl?: string
   canvaTitle?: string
@@ -32,6 +33,9 @@ export function buildNewsletterHtml(opts: {
   const origin = newsletterSiteOrigin()
   const logoUrl = `${origin}/brand/cove-logo-640.png`
   const heroUrl = (opts.heroImageUrl || opts.canvaThumbnailUrl || '').trim()
+  const extra = (opts.extraImageUrls ?? [])
+    .map((u) => String(u ?? '').trim())
+    .filter((u) => u && u !== heroUrl)
   const linkHref = (opts.canvaViewUrl || origin).trim()
   const heroAlt = escapeHtml(opts.canvaTitle?.trim() || 'SHMS PTO newsletter')
   const bodyHtml = plainTextToEmailHtml(opts.textBody)
@@ -40,13 +44,17 @@ export function buildNewsletterHtml(opts: {
       ? `<img src="${escapeHtml(openPixelUrl(opts.sendId))}" width="1" height="1" alt="" style="display:block;border:0;outline:none;width:1px;height:1px" />`
       : ''
 
-  const heroBlock = heroUrl
-    ? `<tr><td style="padding:0 0 20px">
+  const imageBlock = (url: string, alt: string) =>
+    `<tr><td style="padding:0 0 20px">
         <a href="${escapeHtml(linkHref)}" style="text-decoration:none">
-          <img src="${escapeHtml(heroUrl)}" alt="${heroAlt}" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:8px" />
+          <img src="${escapeHtml(url)}" alt="${alt}" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:8px" />
         </a>
       </td></tr>`
-    : ''
+
+  const heroBlock = heroUrl ? imageBlock(heroUrl, heroAlt) : ''
+  const extraBlocks = extra
+    .map((url, i) => imageBlock(url, `${heroAlt} page ${i + 2}`))
+    .join('')
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -66,6 +74,7 @@ ${pixel}
       <tr><td style="padding:24px 20px">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           ${heroBlock}
+          ${extraBlocks}
           <tr><td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55;color:#1A1A1A">
             ${bodyHtml}
           </td></tr>

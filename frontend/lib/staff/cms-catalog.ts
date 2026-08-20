@@ -239,6 +239,8 @@ export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
       { key: 'canvaThumbnailUrl', label: 'Canva thumbnail URL', type: 'text' },
       { key: 'heroImageUrl', label: 'Hero PNG URL (exported)', type: 'text' },
       { key: 'heroImageKey', label: 'Hero PNG storage key', type: 'text' },
+      { key: 'pageImageUrlsJson', label: 'Extra page PNG URLs JSON', type: 'textarea' },
+      { key: 'beatsJson', label: 'Beats JSON (intro + event/ask/CTA)', type: 'textarea' },
       { key: 'updatedAt', label: 'Updated at (ISO)', type: 'text' },
       { key: 'createdByEmail', label: 'Created by', type: 'text' },
       { key: 'active', label: 'Active', type: 'boolean' },

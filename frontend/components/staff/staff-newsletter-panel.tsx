@@ -11,6 +11,15 @@ import {
   resolveScoopUrl,
 } from '@/lib/staff/newsletter-scoop'
 import {
+  NEWSLETTER_BEAT_LABELS,
+  composeNewsletterBody,
+  emptyNewsletterBeats,
+  parseBeatsJson,
+  stringifyBeatsJson,
+  type NewsletterBeat,
+} from '@/lib/staff/newsletter-sections'
+import { buildWhatsAppGraphicShare } from '@/lib/staff/whatsapp-compose'
+import {
   StaffNewsletterTemplatesPanel,
   type NewsletterCanvaMeta,
 } from '@/components/staff/staff-newsletter-templates-panel'
@@ -56,6 +65,10 @@ export function StaffNewsletterPanel() {
   const [waGrade, setWaGrade] = useState('all')
   const [subject, setSubject] = useState('')
   const [body, setBody] = useState('')
+  const [useBeats, setUseBeats] = useState(false)
+  const [intro, setIntro] = useState('')
+  const [beats, setBeats] = useState<NewsletterBeat[]>(emptyNewsletterBeats)
+  const [signoff, setSignoff] = useState('')
   const [utmCampaign, setUtmCampaign] = useState('')
   const [trackClicks, setTrackClicks] = useState(true)
   const [trackOpens, setTrackOpens] = useState(false)
@@ -96,6 +109,11 @@ export function StaffNewsletterPanel() {
     }
   }, [subject, utmCampaign])
 
+  useEffect(() => {
+    if (!useBeats) return
+    setBody(composeNewsletterBody({ intro, beats, signoff }))
+  }, [useBeats, intro, beats, signoff])
+
   function scoopLink() {
     return resolveScoopUrl(scoopUrl, canvaMeta.canvaViewUrl)
   }
@@ -128,6 +146,7 @@ export function StaffNewsletterPanel() {
       canvaThumbnailUrl: canvaMeta.canvaThumbnailUrl,
       canvaTitle: canvaMeta.canvaTitle,
       heroImageUrl: canvaMeta.heroImageUrl,
+      extraImageUrls: (canvaMeta.pageImageUrls ?? []).slice(1),
       testEmails: testEmailsExtra,
       ...extra,
     }
@@ -337,13 +356,22 @@ export function StaffNewsletterPanel() {
           // clipboard may be blocked
         }
       }
+      const graphic = buildWhatsAppGraphicShare({
+        message: plan.message,
+        imageUrl: canvaMeta.heroImageUrl || canvaMeta.canvaThumbnailUrl,
+      })
+      if (graphic.imageUrl) {
+        window.open(graphic.imageUrl, '_blank', 'noopener,noreferrer')
+      }
       for (const url of plan.openUrls) {
         window.open(url, '_blank', 'noopener,noreferrer')
       }
       if (!plan.openUrls.length && plan.waMeShare) {
         window.open(plan.waMeShare, '_blank', 'noopener,noreferrer')
       }
-      setStatus(`${plan.instructions} Message copied when clipboard allowed.`)
+      setStatus(
+        `${plan.instructions} ${graphic.instructions} Message copied when clipboard allowed.`,
+      )
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'WhatsApp failed')
     } finally {
@@ -449,6 +477,7 @@ export function StaffNewsletterPanel() {
         subject={subject}
         body={body}
         utmCampaign={utmCampaign}
+        beatsJson={stringifyBeatsJson({ intro, beats, signoff })}
         canvaMeta={canvaMeta}
         onCanvaMetaChange={setCanvaMeta}
         onLoad={(tpl) => {
@@ -464,7 +493,17 @@ export function StaffNewsletterPanel() {
             canvaEditUrl: tpl.canvaEditUrl,
             heroImageUrl: tpl.heroImageUrl,
             heroImageKey: tpl.heroImageKey,
+            pageImageUrls: tpl.pageImageUrls,
           })
+          const parsed = parseBeatsJson(tpl.beatsJson)
+          if (parsed && composeNewsletterBody(parsed).trim()) {
+            setUseBeats(true)
+            setIntro(parsed.intro)
+            setBeats(parsed.beats)
+            setSignoff(parsed.signoff)
+          } else {
+            setUseBeats(false)
+          }
           if (tpl.heroImageUrl || tpl.canvaThumbnailUrl) setTrackOpens(true)
         }}
       />
@@ -656,10 +695,72 @@ export function StaffNewsletterPanel() {
           }
           className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
+
+        <label className="flex items-center gap-2 text-xs text-[#5A6070]">
+          <input
+            type="checkbox"
+            checked={useBeats}
+            onChange={(e) => setUseBeats(e.target.checked)}
+          />
+          Write in beats (event, ask, CTA). Still plain text. We join them into the body.
+        </label>
+        {useBeats ? (
+          <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3">
+            <label className="text-xs text-[#5A6070] block">
+              Intro
+              <textarea
+                value={intro}
+                onChange={(e) => setIntro(e.target.value)}
+                rows={2}
+                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+              />
+            </label>
+            {beats.map((beat, i) => (
+              <div key={NEWSLETTER_BEAT_LABELS[i]} className="grid sm:grid-cols-3 gap-2">
+                <label className="text-xs text-[#5A6070] sm:col-span-1">
+                  {NEWSLETTER_BEAT_LABELS[i]} heading
+                  <input
+                    value={beat.heading}
+                    onChange={(e) => {
+                      const next = beats.slice()
+                      next[i] = { ...next[i], heading: e.target.value }
+                      setBeats(next)
+                    }}
+                    className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                  />
+                </label>
+                <label className="text-xs text-[#5A6070] sm:col-span-2">
+                  {NEWSLETTER_BEAT_LABELS[i]} copy
+                  <textarea
+                    value={beat.body}
+                    onChange={(e) => {
+                      const next = beats.slice()
+                      next[i] = { ...next[i], body: e.target.value }
+                      setBeats(next)
+                    }}
+                    rows={2}
+                    className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                  />
+                </label>
+              </div>
+            ))}
+            <label className="text-xs text-[#5A6070] block">
+              Sign-off
+              <textarea
+                value={signoff}
+                onChange={(e) => setSignoff(e.target.value)}
+                rows={2}
+                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+              />
+            </label>
+          </div>
+        ) : null}
+
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={8}
+          readOnly={useBeats}
           placeholder={
             sendAudience === 'scoop'
               ? 'Short note above the scoop link (plain text)'

@@ -1052,6 +1052,8 @@ async function ensureNewsletterTemplateHeroFields() {
     for (const field of [
       { key: 'heroImageUrl', displayName: 'Hero Image URL', type: 'TEXT' },
       { key: 'heroImageKey', displayName: 'Hero Image Key', type: 'TEXT' },
+      { key: 'pageImageUrlsJson', displayName: 'Page Image URLs JSON', type: 'TEXT' },
+      { key: 'beatsJson', displayName: 'Beats JSON', type: 'TEXT' },
     ]) {
       if (existing.has(field.key)) continue
       await wix('/wix-data/v2/collections/create-field', { dataCollectionId: 'NewsletterTemplates', field })

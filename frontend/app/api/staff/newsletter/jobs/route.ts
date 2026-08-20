@@ -45,6 +45,9 @@ function payloadFromBody(
     canvaThumbnailUrl: String(body.canvaThumbnailUrl ?? '').trim() || undefined,
     canvaTitle: String(body.canvaTitle ?? '').trim() || undefined,
     heroImageUrl: String(body.heroImageUrl ?? '').trim() || undefined,
+    extraImageUrls: Array.isArray(body.extraImageUrls)
+      ? body.extraImageUrls.map((u) => String(u)).filter(Boolean)
+      : undefined,
     sendAudience,
     includeSubscribers: body.includeSubscribers === true,
   }

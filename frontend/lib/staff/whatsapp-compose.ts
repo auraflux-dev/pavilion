@@ -80,3 +80,23 @@ export function buildWhatsAppGroupPlan(
     waMeShare: buildWaMeShareUrl(msg),
   }
 }
+
+/**
+ * WhatsApp cannot attach a file from a website. Staff opens the PNG, copies caption,
+ * then pastes the graphic into the grade group.
+ */
+export function buildWhatsAppGraphicShare(opts: {
+  message: string
+  imageUrl?: string
+}): {
+  caption: string
+  imageUrl: string | null
+  instructions: string
+} {
+  const imageUrl = String(opts.imageUrl ?? '').trim() || null
+  const caption = String(opts.message ?? '').trim()
+  const instructions = imageUrl
+    ? 'Caption is copied. A tab opened with the PNG. In WhatsApp, attach that image, then paste the caption.'
+    : 'Caption is copied. Export a Canva PNG first if you want the graphic in WhatsApp too.'
+  return { caption, imageUrl, instructions }
+}

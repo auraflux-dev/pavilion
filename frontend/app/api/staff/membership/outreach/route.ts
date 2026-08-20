@@ -290,6 +290,9 @@ export async function POST(req: NextRequest) {
         canvaThumbnailUrl: canvaThumbnailUrl || undefined,
         canvaTitle: canvaTitle || undefined,
         heroImageUrl: heroImageUrl || undefined,
+        extraImageUrls: Array.isArray(body.extraImageUrls)
+          ? body.extraImageUrls.map((u: unknown) => String(u)).filter(Boolean)
+          : undefined,
         sendAudience,
         testGroup,
         testEmails: testEmailsRaw,

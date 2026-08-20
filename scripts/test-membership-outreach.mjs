@@ -21,7 +21,7 @@ import {
   sendMassEmail,
   validateMassEmailDraft,
 } from '../frontend/lib/staff/mass-email.ts'
-import { buildWhatsAppGroupPlan } from '../frontend/lib/staff/whatsapp-compose.ts'
+import { buildWhatsAppGroupPlan, buildWhatsAppGraphicShare } from '../frontend/lib/staff/whatsapp-compose.ts'
 import {
   defaultUtmCampaign,
   tagUrlWithUtm,
@@ -50,6 +50,7 @@ import {
   defaultScoopPageUrl,
   resolveScoopUrl,
 } from '../frontend/lib/staff/newsletter-scoop.ts'
+import { composeNewsletterBody } from '../frontend/lib/staff/newsletter-sections.ts'
 import {
   canApproveNewsletter,
   jobIsDue,
@@ -288,6 +289,47 @@ check('branded newsletter HTML header hero footer', () => {
   assert.ok(html.includes('Hello<br'))
   assert.ok(html.includes('/api/o/send123'))
   assert.ok(!html.includes('<script'))
+})
+
+check('newsletter html stacks extra Canva pages', () => {
+  const html = buildNewsletterHtml({
+    textBody: 'Body',
+    heroImageUrl: 'https://www.shmspto.org/api/newsletter-assets/newsletter-heroes/p1.png',
+    extraImageUrls: [
+      'https://www.shmspto.org/api/newsletter-assets/newsletter-heroes/p2.png',
+      'https://www.shmspto.org/api/newsletter-assets/newsletter-heroes/p1.png',
+    ],
+  })
+  assert.ok(html.includes('p1.png'))
+  assert.ok(html.includes('p2.png'))
+  assert.equal((html.match(/p1\.png/g) || []).length, 1)
+})
+
+check('newsletter beats compose plain text', () => {
+  const body = composeNewsletterBody({
+    intro: 'Hi families.',
+    beats: [
+      { heading: 'Event', body: 'Dance Night Friday.' },
+      { heading: '', body: '' },
+      { heading: 'Join', body: 'https://www.shmspto.org/join' },
+    ],
+    signoff: 'See you there.\nSHMS PTO',
+  })
+  assert.ok(body.includes('Hi families.'))
+  assert.ok(body.includes('Event\nDance Night Friday.'))
+  assert.ok(body.includes('Join\nhttps://www.shmspto.org/join'))
+  assert.ok(body.includes('SHMS PTO'))
+  assert.ok(!body.includes('\n\n\n'))
+})
+
+check('whatsapp graphic share opens png + caption', () => {
+  const g = buildWhatsAppGraphicShare({
+    message: 'Scoop link',
+    imageUrl: 'https://www.shmspto.org/api/newsletter-assets/newsletter-heroes/x.png',
+  })
+  assert.equal(g.caption, 'Scoop link')
+  assert.ok(g.imageUrl?.includes('newsletter-heroes/x.png'))
+  assert.ok(g.instructions.includes('PNG'))
 })
 
 check('weekly scoop share text + url fallback', () => {
