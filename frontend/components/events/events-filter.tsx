@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { EventCard } from '@/components/events/event-card'
-import type { WixEvent } from '@/lib/api/events'
+import type { WixEvent } from '@/lib/api/event-model'
 import { PRIMARY_EVENT_CATEGORIES, sortEventCategoryNames } from '@/lib/events/categories'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'

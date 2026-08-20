@@ -10,7 +10,7 @@ import {
   earlyBirdCallout,
   eventPublicPath,
   type WixEvent,
-} from '@/lib/api/events'
+} from '@/lib/api/event-model'
 
 interface EventCardProps {
   event: WixEvent

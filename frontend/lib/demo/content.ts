@@ -1,7 +1,7 @@
 import { DEMO_BRAND } from '@/lib/demo/brand'
 import type { PageContentFields } from '@/lib/defaults/page-content'
 import type { NavLink } from '@/lib/api/nav'
-import type { WixEvent } from '@/lib/api/events'
+import type { WixEvent } from '@/lib/api/event-model'
 import type { Program } from '@/lib/api/programs'
 import type { MembershipTier } from '@/lib/api/membership'
 import type { BoardMember } from '@/lib/api/board'

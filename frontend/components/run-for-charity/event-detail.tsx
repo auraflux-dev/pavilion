@@ -8,7 +8,7 @@ import {
   earlyBirdCallout,
   eventPublicPath,
   type WixEvent,
-} from '@/lib/api/events'
+} from '@/lib/api/event-model'
 import {
   BEST_RUNNERS_SIGNUP_URL,
   RUN_FOR_CHARITY_FLYER_PDF_URL,

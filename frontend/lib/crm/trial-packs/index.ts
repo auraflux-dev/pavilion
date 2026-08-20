@@ -6,7 +6,7 @@ import type { PageContentFields } from '@/lib/defaults/page-content'
 import type { NavLink } from '@/lib/api/nav'
 import type { MembershipTier } from '@/lib/api/membership'
 import type { BoardMember } from '@/lib/api/board'
-import type { WixEvent } from '@/lib/api/events'
+import type { WixEvent } from '@/lib/api/event-model'
 
 export type TrialBrand = {
   school: string
