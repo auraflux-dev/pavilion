@@ -426,20 +426,29 @@ export function StaffDashboard() {
           <section className="space-y-4">
             <div>
               <h1 className="text-2xl font-bold text-[#1A1A1A]">Home</h1>
-              <p className="text-sm text-[#5A6070] mt-1">
-                Roles: {me.roles.join(', ')}. Staff login: {me.email}. Open a workspace from the top
-                nav. Only what you need for that job.
+              <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
+                {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
+                  ? `Private trial staff for your school.\nOpen a workspace from the top nav — start with Membership, Events, or Site.`
+                  : `Roles: ${me.roles.join(', ')}. Staff login: ${me.email}. Open a workspace from the top nav. Only what you need for that job.`}
               </p>
-              <div className="mt-3">
-                <StaffSyncFreshnessChip />
-              </div>
+              {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
+                <div className="mt-3">
+                  <StaffSyncFreshnessChip />
+                </div>
+              )}
             </div>
-            <StaffPersonalEmailPanel
-              initialEmail={me.personalEmail ?? ''}
-              onSaved={(email) => setMe((current) => (current ? { ...current, personalEmail: email } : current))}
-            />
-            <StaffWalkthroughNotice roles={me.roles} email={me.email} />
-            <StaffOnboardingPanel onOpenWorkspace={go} />
+            {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
+              <>
+                <StaffPersonalEmailPanel
+                  initialEmail={me.personalEmail ?? ''}
+                  onSaved={(email) =>
+                    setMe((current) => (current ? { ...current, personalEmail: email } : current))
+                  }
+                />
+                <StaffWalkthroughNotice roles={me.roles} email={me.email} />
+                <StaffOnboardingPanel onOpenWorkspace={go} />
+              </>
+            )}
             {activityItems.length > 0 ? (
               <div className="rounded-xl border border-[var(--brand-green)]/25 bg-[#E8F3E8] p-4 space-y-2">
                 <p className="text-sm font-bold text-[var(--brand-green)]">Needs your attention</p>

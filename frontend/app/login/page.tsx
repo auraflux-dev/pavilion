@@ -9,7 +9,8 @@ const AUTH_BASE_PATH = '/api/id'
 
 function CommonsLoginForm() {
   const search = useSearchParams()
-  const returnTo = search.get('returnTo') || '/staff'
+  // Private trials open on the school site first — Staff is a second step, not the lobby.
+  const returnTo = search.get('returnTo') || '/'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -30,7 +31,7 @@ function CommonsLoginForm() {
       if (!r.ok) {
         throw new Error(d.message || d.error || 'Could not sign in.\nCheck the email and password we sent you.')
       }
-      window.location.assign(returnTo.startsWith('/') ? returnTo : '/staff')
+      window.location.assign(returnTo.startsWith('/') ? returnTo : '/')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not sign in')
     } finally {
@@ -53,6 +54,8 @@ function CommonsLoginForm() {
         This trial site is private.
         {'\n'}
         Use the email and password Auraflux gave you.
+        {'\n'}
+        After sign-in you land on the school homepage — Staff is in the nav when you want it.
       </p>
 
       <form className="space-y-4" onSubmit={(e) => void onSubmit(e)}>

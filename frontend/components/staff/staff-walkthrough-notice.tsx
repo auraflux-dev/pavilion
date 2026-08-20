@@ -21,10 +21,15 @@ export function StaffWalkthroughNotice({
 }) {
   const [visible, setVisible] = useState(false)
 
+  const commons =
+    typeof process !== 'undefined' &&
+    process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
+
   const isAudience =
-    roles.includes('marketing') ||
-    roles.includes('admin') ||
-    email.toLowerCase() === 'vp-marketing@shmspto.org'
+    !commons &&
+    (roles.includes('marketing') ||
+      roles.includes('admin') ||
+      email.toLowerCase() === 'vp-marketing@shmspto.org')
 
   useEffect(() => {
     if (!isAudience) return
