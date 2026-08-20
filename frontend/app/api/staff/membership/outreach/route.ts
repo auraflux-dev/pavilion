@@ -210,6 +210,7 @@ export async function POST(req: NextRequest) {
     const canvaViewUrl = String(body.canvaViewUrl ?? '').trim()
     const canvaThumbnailUrl = String(body.canvaThumbnailUrl ?? '').trim()
     const canvaTitle = String(body.canvaTitle ?? '').trim()
+    const heroImageUrl = String(body.heroImageUrl ?? '').trim()
     const sendAudience = String(body.sendAudience ?? 'members').trim() // members | test
     const testGroup = String(body.testGroup ?? 'me').trim() as
       | 'me'
@@ -342,16 +343,16 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const html =
-        !dryRun && newsletterSendId
-          ? buildNewsletterHtml({
-              textBody: outboundBody,
-              sendId: trackOpens || canvaThumbnailUrl ? newsletterSendId : undefined,
-              canvaViewUrl: canvaViewUrl || undefined,
-              canvaThumbnailUrl: canvaThumbnailUrl || undefined,
-              canvaTitle: canvaTitle || undefined,
-            })
-          : undefined
+      const html = !dryRun
+        ? buildNewsletterHtml({
+            textBody: outboundBody,
+            sendId: trackOpens ? newsletterSendId || undefined : undefined,
+            heroImageUrl: heroImageUrl || undefined,
+            canvaViewUrl: canvaViewUrl || undefined,
+            canvaThumbnailUrl: canvaThumbnailUrl || undefined,
+            canvaTitle: canvaTitle || undefined,
+          })
+        : undefined
 
       const draft = {
         ...draftBase,

@@ -4,7 +4,7 @@
  * Fallback: preview + mailto BCC when Gmail is not configured.
  */
 
-import { sanitizeTestRecipients } from '@/lib/staff/newsletter-test-groups'
+import { sanitizeTestRecipients } from './newsletter-test-groups'
 
 export type EmailAudience =
   | 'all'
@@ -162,7 +162,7 @@ export async function sendMassEmail(
     }
   }
 
-  const { resolveGmailSendAuth } = await import('@/lib/staff/gmail-send-auth')
+  const { resolveGmailSendAuth } = await import('./gmail-send-auth')
   let auth: Awaited<ReturnType<typeof resolveGmailSendAuth>> = null
   try {
     auth = await resolveGmailSendAuth()

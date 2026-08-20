@@ -11,6 +11,8 @@ export type NewsletterCanvaMeta = {
   canvaEditUrl?: string
   canvaViewUrl?: string
   canvaThumbnailUrl?: string
+  heroImageUrl?: string
+  heroImageKey?: string
 }
 
 export type NewsletterTemplateRow = {
@@ -24,6 +26,8 @@ export type NewsletterTemplateRow = {
   canvaEditUrl: string
   canvaViewUrl: string
   canvaThumbnailUrl: string
+  heroImageUrl: string
+  heroImageKey: string
   updatedAt: string
 }
 
@@ -42,6 +46,8 @@ type Props = {
     canvaTitle: string
     canvaDesignId: string
     canvaEditUrl: string
+    heroImageUrl: string
+    heroImageKey: string
     templateId: string
   }) => void
 }
@@ -81,6 +87,8 @@ export function StaffNewsletterTemplatesPanel({
           canvaEditUrl: String(row.canvaEditUrl ?? ''),
           canvaViewUrl: String(row.canvaViewUrl ?? ''),
           canvaThumbnailUrl: String(row.canvaThumbnailUrl ?? ''),
+          heroImageUrl: String(row.heroImageUrl ?? ''),
+          heroImageKey: String(row.heroImageKey ?? ''),
           updatedAt: String(row.updatedAt ?? ''),
         }))
         .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
@@ -110,6 +118,8 @@ export function StaffNewsletterTemplatesPanel({
       canvaEditUrl: meta.canvaEditUrl ?? '',
       canvaViewUrl: meta.canvaViewUrl ?? '',
       canvaThumbnailUrl: meta.canvaThumbnailUrl ?? '',
+      heroImageUrl: meta.heroImageUrl ?? canvaMeta.heroImageUrl ?? '',
+      heroImageKey: meta.heroImageKey ?? canvaMeta.heroImageKey ?? '',
     })
   }
 
@@ -123,8 +133,39 @@ export function StaffNewsletterTemplatesPanel({
       canvaDesignId: parsed.designId,
       canvaEditUrl: parsed.editUrl,
       canvaViewUrl: parsed.viewUrl,
+      heroImageUrl: '',
+      heroImageKey: '',
     })
-    setStatus('Canva link attached. Save as template or load into the composer.')
+    setStatus('Canva link attached. Export PNG for email, then save as template.')
+  }
+
+  async function exportPng() {
+    const designId = canvaMeta.canvaDesignId?.trim()
+    if (!designId) {
+      setStatus('Attach a Canva design first, then Export PNG for email.')
+      return
+    }
+    setBusy(true)
+    setStatus('Exporting PNG from Canva…')
+    try {
+      const r = await fetch('/api/staff/canva/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ designId }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Export failed')
+      onCanvaMetaChange({
+        ...canvaMeta,
+        heroImageUrl: String(d.heroImageUrl ?? ''),
+        heroImageKey: String(d.heroImageKey ?? ''),
+      })
+      setStatus('PNG exported for email. Preview below — then save template or send a test.')
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Export failed')
+    } finally {
+      setBusy(false)
+    }
   }
 
   function loadSelected() {
@@ -142,6 +183,8 @@ export function StaffNewsletterTemplatesPanel({
       canvaTitle: tpl.canvaTitle,
       canvaDesignId: tpl.canvaDesignId,
       canvaEditUrl: tpl.canvaEditUrl,
+      heroImageUrl: tpl.heroImageUrl,
+      heroImageKey: tpl.heroImageKey,
       templateId: tpl.id,
     })
     setStatus(`Loaded “${tpl.name}”.`)
@@ -168,6 +211,8 @@ export function StaffNewsletterTemplatesPanel({
         canvaEditUrl: canvaMeta.canvaEditUrl ?? '',
         canvaViewUrl: canvaMeta.canvaViewUrl ?? '',
         canvaThumbnailUrl: canvaMeta.canvaThumbnailUrl ?? '',
+        heroImageUrl: canvaMeta.heroImageUrl ?? '',
+        heroImageKey: canvaMeta.heroImageKey ?? '',
         updatedAt: new Date().toISOString(),
         active: true,
       }
@@ -188,6 +233,8 @@ export function StaffNewsletterTemplatesPanel({
     }
   }
 
+  const previewSrc = canvaMeta.heroImageUrl || canvaMeta.canvaThumbnailUrl
+
   return (
     <section
       id="newsletter-templates"
@@ -196,9 +243,9 @@ export function StaffNewsletterTemplatesPanel({
       <div>
         <h2 className="text-lg font-bold">Templates (Canva + copy)</h2>
         <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
-          Design in Canva, paste links or pick a design below, then save subject + body here.
+          Design = Canva PNG + SHMS header/footer. Body stays plain text (no HTML coding).
           {'\n'}
-          Sends add UTM tags and optional click tracking automatically.
+          Attach Canva → Export PNG for email → write copy → test send.
         </p>
       </div>
 
@@ -243,6 +290,15 @@ export function StaffNewsletterTemplatesPanel({
           <Button type="button" variant="outline" disabled={busy} onClick={importCanvaUrl}>
             Attach link
           </Button>
+          <Button
+            type="button"
+            disabled={busy || !canvaMeta.canvaDesignId}
+            className="text-white"
+            style={{ backgroundColor: 'var(--brand-green)' }}
+            onClick={() => void exportPng()}
+          >
+            Export PNG for email
+          </Button>
         </div>
         {canvaConnected && canvaDesigns.length ? (
           <div className="grid gap-2 sm:grid-cols-3">
@@ -258,8 +314,10 @@ export function StaffNewsletterTemplatesPanel({
                     canvaEditUrl: d.editUrl,
                     canvaViewUrl: d.viewUrl,
                     canvaThumbnailUrl: d.thumbnailUrl,
+                    heroImageUrl: '',
+                    heroImageKey: '',
                   })
-                  setStatus(`Attached Canva: ${d.title}`)
+                  setStatus(`Attached Canva: ${d.title}. Click Export PNG for email.`)
                 }}
               >
                 {d.thumbnailUrl ? (
@@ -272,7 +330,7 @@ export function StaffNewsletterTemplatesPanel({
           </div>
         ) : (
           <p className="text-[11px] text-[#5A6070]">
-            Canva API not connected? Paste an edit/view link from the Marketing folder.
+            Canva API not connected? Paste an edit/view link, then Connect Canva to export PNG.
           </p>
         )}
         {canvaMeta.canvaViewUrl ? (
@@ -288,9 +346,18 @@ export function StaffNewsletterTemplatesPanel({
             </a>
           </p>
         ) : null}
+        {previewSrc ? (
+          <div className="rounded-lg border border-[var(--border)] bg-white p-2">
+            <p className="text-[11px] font-semibold text-[#5A6070] mb-1">
+              {canvaMeta.heroImageUrl ? 'Email hero (exported PNG)' : 'Preview (thumbnail until export)'}
+            </p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={previewSrc} alt="" className="max-h-40 w-auto rounded" />
+          </div>
+        ) : null}
       </div>
 
-      {status ? <p className="text-sm text-[#1A1A1A]">{status}</p> : null}
+      {status ? <p className="text-sm text-[#1A1A1A] whitespace-pre-line">{status}</p> : null}
     </section>
   )
 }

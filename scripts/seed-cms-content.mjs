@@ -1045,6 +1045,23 @@ async function upsertStaffRoles() {
   }
 }
 
+async function ensureNewsletterTemplateHeroFields() {
+  try {
+    const collection = await wix('/wix-data/v2/collections/NewsletterTemplates', undefined, 'GET')
+    const existing = new Set((collection.collection?.fields ?? []).map((f) => f.key))
+    for (const field of [
+      { key: 'heroImageUrl', displayName: 'Hero Image URL', type: 'TEXT' },
+      { key: 'heroImageKey', displayName: 'Hero Image Key', type: 'TEXT' },
+    ]) {
+      if (existing.has(field.key)) continue
+      await wix('/wix-data/v2/collections/create-field', { dataCollectionId: 'NewsletterTemplates', field })
+      console.log('Created NewsletterTemplates field', field.key)
+    }
+  } catch (err) {
+    console.warn("NewsletterTemplates hero fields:", String(err.message||err).slice(0,200))
+  }
+}
+
 async function ensureNewsletterTemplatesCollection() {
   try {
     await wix('/wix-data/v2/collections', {
@@ -1061,6 +1078,8 @@ async function ensureNewsletterTemplatesCollection() {
           { key: 'canvaEditUrl', displayName: 'Canva Edit URL', type: 'TEXT' },
           { key: 'canvaViewUrl', displayName: 'Canva View URL', type: 'TEXT' },
           { key: 'canvaThumbnailUrl', displayName: 'Canva Thumbnail URL', type: 'TEXT' },
+          { key: 'heroImageUrl', displayName: 'Hero Image URL', type: 'TEXT' },
+          { key: 'heroImageKey', displayName: 'Hero Image Key', type: 'TEXT' },
           { key: 'updatedAt', displayName: 'Updated At', type: 'DATETIME' },
           { key: 'createdByEmail', displayName: 'Created By Email', type: 'TEXT' },
           { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
@@ -1137,6 +1156,7 @@ async function main() {
   await ensureStaffTasksCollection()
   await ensureCommsCalendarItemsCollection()
   await ensureNewsletterTemplatesCollection()
+  await ensureNewsletterTemplateHeroFields()
   await ensureNewsletterSendsCollection()
   await upsertSiteSettings()
   await upsertPageContent()

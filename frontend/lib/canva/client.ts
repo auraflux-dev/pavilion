@@ -112,3 +112,97 @@ export async function createCanvaDesign(
   if (!mapped) throw new Error('Canva did not return a design')
   return mapped
 }
+
+export type CanvaExportJob = {
+  id: string
+  status: 'in_progress' | 'success' | 'failed'
+  urls: string[]
+  error?: string
+}
+
+type RawExportJob = {
+  job?: {
+    id?: string
+    status?: string
+    urls?: string[]
+    error?: { code?: string; message?: string }
+  }
+}
+
+function mapExportJob(data: RawExportJob): CanvaExportJob {
+  const job = data.job ?? {}
+  const statusRaw = String(job.status ?? 'failed')
+  const status =
+    statusRaw === 'success' || statusRaw === 'in_progress' ? statusRaw : 'failed'
+  return {
+    id: String(job.id ?? ''),
+    status,
+    urls: Array.isArray(job.urls) ? job.urls.map(String).filter(Boolean) : [],
+    error: job.error?.message || job.error?.code || undefined,
+  }
+}
+
+/** Start async PNG export for a Canva design. */
+export async function createDesignPngExport(
+  accessToken: string,
+  designId: string,
+): Promise<CanvaExportJob> {
+  const id = String(designId ?? '').trim()
+  if (!id) throw new Error('designId is required')
+  const data = await canvaFetch<RawExportJob>(accessToken, '/exports', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      design_id: id,
+      format: {
+        type: 'png',
+        export_quality: 'regular',
+      },
+    }),
+  })
+  return mapExportJob(data)
+}
+
+export async function getDesignExportJob(
+  accessToken: string,
+  exportId: string,
+): Promise<CanvaExportJob> {
+  const id = String(exportId ?? '').trim()
+  if (!id) throw new Error('exportId is required')
+  const data = await canvaFetch<RawExportJob>(
+    accessToken,
+    `/exports/${encodeURIComponent(id)}`,
+  )
+  return mapExportJob(data)
+}
+
+/** Poll until PNG export succeeds or fails (or timeout). */
+export async function waitForDesignPngExport(
+  accessToken: string,
+  designId: string,
+  opts?: { timeoutMs?: number; intervalMs?: number },
+): Promise<{ downloadUrl: string; jobId: string }> {
+  const timeoutMs = opts?.timeoutMs ?? 45_000
+  const intervalMs = opts?.intervalMs ?? 1_200
+  const started = await createDesignPngExport(accessToken, designId)
+  if (!started.id) throw new Error('Canva did not return an export job id')
+  if (started.status === 'success' && started.urls[0]) {
+    return { downloadUrl: started.urls[0], jobId: started.id }
+  }
+  if (started.status === 'failed') {
+    throw new Error(started.error || 'Canva PNG export failed')
+  }
+
+  const deadline = Date.now() + timeoutMs
+  while (Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, intervalMs))
+    const job = await getDesignExportJob(accessToken, started.id)
+    if (job.status === 'success' && job.urls[0]) {
+      return { downloadUrl: job.urls[0], jobId: job.id }
+    }
+    if (job.status === 'failed') {
+      throw new Error(job.error || 'Canva PNG export failed')
+    }
+  }
+  throw new Error('Canva PNG export timed out. Try again in a moment.')
+}

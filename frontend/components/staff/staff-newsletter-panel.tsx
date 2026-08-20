@@ -74,6 +74,7 @@ export function StaffNewsletterPanel() {
       canvaViewUrl: canvaMeta.canvaViewUrl,
       canvaThumbnailUrl: canvaMeta.canvaThumbnailUrl,
       canvaTitle: canvaMeta.canvaTitle,
+      heroImageUrl: canvaMeta.heroImageUrl,
       testEmails: testEmailsExtra,
       ...extra,
     }
@@ -272,8 +273,10 @@ export function StaffNewsletterPanel() {
             canvaTitle: tpl.canvaTitle,
             canvaDesignId: tpl.canvaDesignId,
             canvaEditUrl: tpl.canvaEditUrl,
+            heroImageUrl: tpl.heroImageUrl,
+            heroImageKey: tpl.heroImageKey,
           })
-          if (tpl.canvaThumbnailUrl) setTrackOpens(true)
+          if (tpl.heroImageUrl || tpl.canvaThumbnailUrl) setTrackOpens(true)
         }}
       />
 
@@ -284,8 +287,8 @@ export function StaffNewsletterPanel() {
         <div>
           <h2 className="text-lg font-bold">Member newsletter</h2>
           <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
-            No HTML coding required. Write plain text (like an email to a friend), paste links, and
-            optionally attach a Canva graphic up top.
+            No HTML coding required. Write plain text, attach a Canva design, Export PNG for email.
+            Sends include SHMS header/footer + your graphic + body.
             {'\n'}
             Parent sends use the Students roster. Use Test send first so board can preview in a real
             inbox.
