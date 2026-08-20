@@ -9,8 +9,6 @@ import { SocialFooterLinks } from '@/components/social-footer-links'
 import type { NavLink } from '@/lib/api/nav'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { trackGenerateLead } from '@/lib/ga'
-import { DEMO_BRAND } from '@/lib/demo/brand'
-import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { DemoMark } from '@/components/demo/demo-mark'
 
 interface Props {
@@ -24,9 +22,31 @@ interface Props {
   socialYoutube: string
   footerLinks: NavLink[]
   address: string
+  brand: {
+    school: string
+    short: string
+    pto: string
+    cheer: string
+    town: string
+    store: string
+  }
+  mode: 'demo' | 'commons' | 'stone-hill'
 }
 
-export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebook, socialInstagram, socialTwitter, socialYoutube, footerLinks, address }: Props) {
+export function FooterClient({
+  presidentEmail,
+  link6,
+  link7,
+  link8,
+  socialFacebook,
+  socialInstagram,
+  socialTwitter,
+  socialYoutube,
+  footerLinks,
+  address,
+  brand,
+  mode,
+}: Props) {
   const addressLines = address.split(',').map((part) => part.trim()).filter(Boolean)
   const street = addressLines[0] || address
   const cityLine = addressLines.slice(1).join(', ')
@@ -89,14 +109,27 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
             <a
               href="/"
               className="inline-flex items-center gap-3 mb-5 group"
-              aria-label={isPublicDemoInstance() ? `${DEMO_BRAND.pto} Home` : 'Stone Hill Middle School PTO Home'}
+              aria-label={`${brand.pto} Home`}
             >
-              {isPublicDemoInstance() ? (
+              {mode === 'demo' ? (
                 <DemoMark size={44} />
+              ) : mode === 'commons' ? (
+                <span
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                  style={{ backgroundColor: 'var(--brand-green)' }}
+                  aria-hidden="true"
+                >
+                  {brand.short
+                    .replace(/\s*PTO$/i, '')
+                    .split(/\s+/)
+                    .map((w) => w[0])
+                    .join('')
+                    .slice(0, 2)}
+                </span>
               ) : (
                 <Image
                   src="/shms-logo.png"
-                  alt="Stone Hill Middle School Stingrays logo"
+                  alt={`${brand.school} logo`}
                   width={44}
                   height={44}
                   className="shrink-0"
@@ -104,7 +137,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
               )}
               <div>
                 <div className="font-bold text-sm text-white leading-tight">
-                  {isPublicDemoInstance() ? DEMO_BRAND.school : 'Stone Hill Middle School'}
+                  {brand.school}
                 </div>
                 <div
                   className="text-xs font-semibold tracking-wider uppercase"
@@ -116,9 +149,9 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
             </a>
 
             <p className="text-sm leading-relaxed mb-6" style={{ color: '#C5CCD6' }}>
-              {isPublicDemoInstance()
-                ? `${DEMO_BRAND.school} in ${DEMO_BRAND.town}. Membership, ${DEMO_BRAND.store}, and the family portal.`
-                : 'Enriching the academic and social experience for all SHMS PTO students and families in Ashburn, Virginia.'}
+              {mode === 'stone-hill'
+                ? 'Enriching the academic and social experience for all SHMS PTO students and families in Ashburn, Virginia.'
+                : `${brand.school} in ${brand.town}. Membership, ${brand.store}, and the family portal.`}
             </p>
 
             <div className="flex items-center gap-2.5 flex-wrap">
@@ -317,7 +350,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-xs text-center sm:text-left space-y-1" style={{ color: '#C5CCD6' }}>
-            <p>&copy; 2026 {isPublicDemoInstance() ? DEMO_BRAND.pto : 'Stone Hill Middle School PTO'}. All rights reserved.</p>
+            <p>&copy; 2026 {brand.pto}. All rights reserved.</p>
             <p className="flex flex-wrap gap-x-3 gap-y-1 justify-center sm:justify-start">
               <a href="/privacy" className="hover:text-white transition-colors underline-offset-2 hover:underline">Privacy</a>
               <a href="/terms" className="hover:text-white transition-colors underline-offset-2 hover:underline">Terms</a>
@@ -329,7 +362,7 @@ export function FooterClient({ presidentEmail, link6, link7, link8, socialFacebo
             className="text-xs font-bold tracking-wider uppercase"
             style={{ color: 'var(--brand-gold)' }}
           >
-            {isPublicDemoInstance() ? DEMO_BRAND.cheer : 'Go Stingrays!'}
+            {brand.cheer}
           </p>
         </div>
       </div>
