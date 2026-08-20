@@ -1,7 +1,7 @@
 Product brand: **Pavilion** (locked 20 Aug 2026).
 Colors: ink + sea glass (`commons-site/app/globals.css`).
 Legal seller: HSKRG LLC Stripe.
-Target domain: **pavilionpto.com** (available ~$11.25/yr on Vercel; not purchased yet).
+Marketing domain: **onpavilion.com** (chosen; brand name Pavilion). Purchase must be done by Rob in Vercel dashboard or interactive CLI (agents cannot buy domains). Registrant prepared: Robert Gregory / HSKRG LLC, Ashburn VA.
 
 Marketing site: Vercel **commons-site**, root `commons-site/`.
 - Live: https://commons-site.vercel.app (PRODUCT_NAME = Pavilion)
