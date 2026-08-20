@@ -5,6 +5,7 @@ import { notifyStaffSubmission } from '@/lib/staff/submission-notify'
 import { clientIp, rateLimit } from '@/lib/security/rate-limit'
 import { reportError } from '@/lib/observability/error-reporting'
 import {
+  DEFAULT_PROGRAMS_INBOXES,
   DEFAULT_SPONSORSHIP_INBOXES,
   normalizeStaffInbox,
   parseStaffInboxes,
@@ -23,9 +24,10 @@ function resolveAssignedTo(
 
   const dept = String(department ?? '').trim().toLowerCase()
   if (dept === 'programs') {
-    return normalizeStaffInbox(
-      settings.get('contactEmailPrograms', STAFF_INBOX_FALLBACK),
+    const list = parseStaffInboxes(
+      settings.get('contactEmailPrograms', DEFAULT_PROGRAMS_INBOXES),
     )
+    return list.join(', ') || DEFAULT_PROGRAMS_INBOXES
   }
   if (dept === 'events') {
     return normalizeStaffInbox(

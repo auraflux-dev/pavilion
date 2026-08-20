@@ -575,7 +575,7 @@ Same for free and paid. The request is also logged for follow-up.
 | Form | Goes to |
 |------|--------|
 | Contact (/contact) | president@ (general) |
-| Programs (/programs) | vp-initiatives@ |
+| Programs (/programs) | vp-initiatives@ and president@ |
 | Event idea (/events) | vp-community-events@ |
 | Sponsorship (/fundraising) | vp-sponsorships@ and president@ |
 | Business owner (public) | vp-membershipexperience@ |

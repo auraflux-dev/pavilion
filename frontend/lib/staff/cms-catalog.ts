@@ -480,7 +480,8 @@ export const SITE_SETTING_GROUPS: {
       },
       {
         key: 'contactEmailPrograms',
-        label: 'VP Programs email (programs contact form)',
+        label:
+          'Programs form inboxes (vp-initiatives@ and president@, comma-separated)',
       },
       {
         key: 'contactEmailEvents',

@@ -37,7 +37,7 @@ export const DEMO_SETTINGS: Record<string, string> = {
   announcementEnabled: 'false',
   contactEmailGeneral: `president@${b.host}`,
   contactEmailTreasurer: `treasurer@${b.host}`,
-  contactEmailPrograms: `programs@${b.host}`,
+  contactEmailPrograms: `programs@${b.host}, president@${b.host}`,
   contactEmailEvents: `events@${b.host}`,
   contactEmailSponsorship: `sponsors@${b.host}`,
   contactAddress: `100 Riverside Drive, ${b.town}`,

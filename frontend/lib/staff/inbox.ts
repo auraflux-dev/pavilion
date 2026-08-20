@@ -23,6 +23,10 @@ export const STAFF_INBOX_FALLBACK = 'president@shmspto.org'
 export const DEFAULT_SPONSORSHIP_INBOXES =
   'vp-sponsorships@shmspto.org, president@shmspto.org'
 
+/** Default programs contact form inboxes (comma-separated in SiteSettings). */
+export const DEFAULT_PROGRAMS_INBOXES =
+  'vp-initiatives@shmspto.org, president@shmspto.org'
+
 /** Map missing board aliases to a live mailbox. */
 export function normalizeStaffInbox(email: string | null | undefined): string {
   const e = String(email ?? '')

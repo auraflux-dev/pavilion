@@ -203,8 +203,8 @@ export const CONTACT_DEFAULTS = {
  /** info@ is not provisioned yet. use president until aliases exist */
   contactEmailGeneral: 'president@shmspto.org',
   contactEmailTreasurer: 'treasurer@shmspto.org',
- /** Programs inbox shares Initiatives alias until vp-programs@ exists */
-  contactEmailPrograms: 'vp-initiatives@shmspto.org',
+ /** Programs form → VP Initiatives + president */
+  contactEmailPrograms: 'vp-initiatives@shmspto.org, president@shmspto.org',
   contactEmailEvents: 'vp-community-events@shmspto.org',
   contactEmailSponsorship: 'vp-sponsorships@shmspto.org, president@shmspto.org',
   contactAddress: '23415 Evergreen Ridge Drive, Ashburn, VA 20148',

@@ -3,12 +3,15 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { ProgramsFilter } from '@/components/programs/programs-filter'
 import { PageHero } from '@/components/page-hero'
-import { ProgramsContactForm } from '@/components/programs/programs-contact-form'
+import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
 import { getAllPrograms, type Program } from '@/lib/api/programs'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
-import { normalizeStaffInbox, STAFF_INBOX_FALLBACK } from '@/lib/staff/inbox'
+import {
+  DEFAULT_PROGRAMS_INBOXES,
+  parseStaffInboxes,
+} from '@/lib/staff/inbox'
 import { ProgramsSectionNav } from '@/components/jump-nav/public-section-navs'
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
 
@@ -19,9 +22,10 @@ export default async function ProgramsPage() {
   let error = false
 
   const [settings, page] = await Promise.all([getSiteSettings(), getPageContent('programs')])
-  const programsEmail = normalizeStaffInbox(
-    settings.get('contactEmailPrograms', STAFF_INBOX_FALLBACK),
-  )
+  const programsEmail =
+    parseStaffInboxes(
+      settings.get('contactEmailPrograms', DEFAULT_PROGRAMS_INBOXES),
+    ).join(', ') || DEFAULT_PROGRAMS_INBOXES
   const inSession = settings.getBool('schoolInSession', false)
 
   try {
@@ -117,7 +121,7 @@ export default async function ProgramsPage() {
                 Message the VP of Programs. Co-VPs Fundraising &amp; Programs will follow up.
               </p>
             </div>
-            <ProgramsContactForm toEmail={programsEmail} />
+            <DepartmentContactForm toEmail={programsEmail} variant="programs" />
           </div>
         </section>
       </main>

@@ -7,6 +7,7 @@ import { getSiteSettings } from '@/lib/api/site-settings'
 import { sendMassEmail, type SendMassEmailResult } from '@/lib/staff/mass-email'
 import { resolveGmailSendAuth } from '@/lib/staff/gmail-send-auth'
 import {
+  DEFAULT_PROGRAMS_INBOXES,
   DEFAULT_SPONSORSHIP_INBOXES,
   normalizeStaffInbox,
   parseStaffInboxes,
@@ -62,9 +63,10 @@ export async function resolveSubmissionInbox(
 
   const settings = await getSiteSettings()
   if (kind === 'programs') {
-    return normalizeStaffInbox(
-      settings.get('contactEmailPrograms', STAFF_INBOX_FALLBACK),
+    const list = parseStaffInboxes(
+      settings.get('contactEmailPrograms', DEFAULT_PROGRAMS_INBOXES),
     )
+    return list.join(', ') || DEFAULT_PROGRAMS_INBOXES
   }
   if (kind === 'events') {
     return normalizeStaffInbox(
