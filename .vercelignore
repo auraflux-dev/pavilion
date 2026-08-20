@@ -19,3 +19,4 @@ frontend/out
 *.pdf
 !frontend/public/flyers/**/*.pdf
 !frontend/public/events/**/*.pdf
+!frontend/public/fundraising/**/*.pdf

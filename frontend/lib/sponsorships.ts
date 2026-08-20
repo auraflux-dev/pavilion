@@ -1,4 +1,9 @@
 /** Public 2026-27 SHMS PTO sponsorship packages. Copy matches the 2026-27 table. */
+
+/** Letter flyer (Membership-style ocean layout). JPG for web; PDF for print. */
+export const SPONSORSHIP_FLYER_JPG_URL = '/fundraising/sponsorship-2026-27.jpg'
+export const SPONSORSHIP_FLYER_PDF_URL = '/fundraising/sponsorship-2026-27.pdf'
+
 export type SponsorshipPackageId = 'platinum' | 'gold' | 'silver'
 
 export type SponsorshipPerkGroup = {

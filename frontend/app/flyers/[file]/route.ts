@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server'
 import { RUN_FOR_CHARITY_FLYER_PDF_URL } from '@/lib/run-for-charity'
+import { SPONSORSHIP_FLYER_PDF_URL } from '@/lib/sponsorships'
 
 /**
- * Old /flyers/*.pdf links. PDFs are no longer bundled on Vercel (*.pdf in vercelignore).
- * Redirect known Run for Charity flyers to the hosted image flyer; 404 everything else.
+ * Old /flyers/*.pdf links. PDFs under /flyers hit this route (not public/).
+ * Redirect known aliases to hosted assets elsewhere.
  */
 const REDIRECTS: Record<string, string> = {
   'run-for-charity-lp-flyer.pdf': RUN_FOR_CHARITY_FLYER_PDF_URL,
   'run-for-charity-official.pdf': RUN_FOR_CHARITY_FLYER_PDF_URL,
   'run-for-charity-SHMS-flyer.pdf': RUN_FOR_CHARITY_FLYER_PDF_URL,
   'run-for-charity-official-flyer.pdf': RUN_FOR_CHARITY_FLYER_PDF_URL,
+  'sponsorship-2026-27.pdf': SPONSORSHIP_FLYER_PDF_URL,
+  'sponsorship.pdf': SPONSORSHIP_FLYER_PDF_URL,
 }
 
 export const runtime = 'nodejs'

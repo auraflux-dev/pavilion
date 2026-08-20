@@ -365,10 +365,22 @@ export default async function FundraisingPage() {
               <h2 id="sponsorship-heading" className="text-3xl font-bold text-[#1A1A1A]">
                 Sponsorships
               </h2>
-              <p className="text-[#5A6070] mt-3 max-w-2xl mx-auto">
+              <p className="text-[#5A6070] mt-3 max-w-2xl mx-auto whitespace-pre-line">
                 {vanillaizeIfDemo(
-                  'One payment for the 2026-27 school year. Choose Platinum, Gold, or Silver below.',
+                  'One payment for the 2026-27 school year.\nChoose Platinum, Gold, or Silver below.',
                 )}
+              </p>
+              <p className="mt-4">
+                <a
+                  href="/fundraising/sponsorship-2026-27.pdf"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold"
+                  style={{ color: 'var(--brand-green)' }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download the 2026-27 sponsorship flyer (PDF)
+                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </a>
               </p>
             </div>
 

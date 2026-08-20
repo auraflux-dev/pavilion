@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SHMS PTO Sponsorships 2026-27</title>
+    <style>
+      @page {
+        size: letter;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 8.5in;
+        height: 11in;
+        font-family: 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+        color: #0b3d2e;
+        background: #d8eef6;
+      }
+      .page {
+        position: relative;
+        width: 8.5in;
+        height: 11in;
+        padding: 0.42in 0.45in 0.38in;
+        overflow: hidden;
+        background:
+          radial-gradient(ellipse 120% 55% at 50% -5%, rgba(255, 255, 255, 0.55), transparent 55%),
+          linear-gradient(180deg, #c5e8f4 0%, #b7dff0 28%, #9fd0e6 62%, #88c4dc 100%);
+      }
+      .page::before {
+        content: '';
+        position: absolute;
+        left: -8%;
+        right: -8%;
+        bottom: -0.35in;
+        height: 1.6in;
+        background: radial-gradient(ellipse at 50% 0%, rgba(14, 90, 120, 0.22), transparent 70%);
+        border-radius: 50% 50% 0 0;
+        pointer-events: none;
+      }
+      .wave {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 0.85in;
+        background: repeating-linear-gradient(
+          100deg,
+          rgba(255, 255, 255, 0.18) 0 18px,
+          rgba(12, 90, 110, 0.08) 18px 36px
+        );
+        opacity: 0.55;
+        clip-path: ellipse(70% 100% at 50% 100%);
+        pointer-events: none;
+      }
+      .header {
+        display: grid;
+        grid-template-columns: 1.05in 1fr;
+        gap: 0.18in;
+        align-items: center;
+        margin-bottom: 0.22in;
+      }
+      .logo {
+        width: 1.05in;
+        height: 1.05in;
+        object-fit: contain;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
+      }
+      .titles {
+        text-align: center;
+        padding-right: 0.9in;
+      }
+      .kicker {
+        margin: 0 0 4px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #0a5c48;
+      }
+      h1 {
+        margin: 0;
+        font-size: 34px;
+        line-height: 1;
+        font-weight: 900;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: #0a5a3f;
+        text-shadow:
+          -1.5px -1.5px 0 #f5d76e,
+          1.5px -1.5px 0 #f5d76e,
+          -1.5px 1.5px 0 #f5d76e,
+          1.5px 1.5px 0 #f5d76e,
+          0 2px 0 rgba(245, 215, 110, 0.65);
+      }
+      .sub {
+        margin: 8px 0 0;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.35;
+        color: #1f4f5c;
+      }
+      .tiers {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.16in;
+        margin-top: 0.08in;
+      }
+      .tier {
+        position: relative;
+        background: rgba(56, 150, 168, 0.42);
+        border: 2px solid rgba(255, 255, 255, 0.55);
+        border-radius: 22px;
+        padding: 0.95in 0.14in 0.16in;
+        min-height: 6.55in;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 8px 18px rgba(20, 70, 90, 0.12);
+      }
+      .tier.featured {
+        background: rgba(48, 140, 160, 0.55);
+        border-color: #f0c94a;
+        box-shadow: 0 10px 22px rgba(20, 70, 90, 0.18);
+      }
+      .badge {
+        position: absolute;
+        top: 0.12in;
+        right: 0.1in;
+        z-index: 2;
+        background: #c9a800;
+        color: #fff;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 999px;
+      }
+      .orb {
+        position: absolute;
+        top: -0.1in;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1.05in;
+        height: 1.05in;
+        border-radius: 50%;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        z-index: 1;
+      }
+      .orb.platinum {
+        background: radial-gradient(circle at 30% 28%, #fff8d6, #e8c547 42%, #b8921a 100%);
+      }
+      .orb.gold {
+        background: radial-gradient(circle at 30% 28%, #e8f7e4, #6fbf5a 45%, #1f7a3a 100%);
+      }
+      .orb.silver {
+        background: radial-gradient(circle at 30% 28%, #f4f6f8, #b8c0c8 48%, #6e7780 100%);
+      }
+      .tier h2 {
+        margin: 0 0 0.12in;
+        text-align: center;
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #fff;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+      }
+      .tier ul {
+        list-style: none;
+        margin: 0;
+        padding: 0 0.04in;
+        flex: 1;
+      }
+      .tier li {
+        position: relative;
+        margin: 0 0 0.08in;
+        padding-left: 0.16in;
+        font-size: 11.5px;
+        line-height: 1.28;
+        font-weight: 700;
+        color: #073528;
+      }
+      .tier li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.28em;
+        width: 0.08in;
+        height: 0.08in;
+        border-radius: 50%;
+        background: #f5d76e;
+        box-shadow: 0 0 0 1.5px rgba(10, 90, 63, 0.35);
+      }
+      .price {
+        margin-top: auto;
+        display: block;
+        text-align: center;
+        background: #0a5a3f;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        padding: 0.11in 0.08in;
+        border-radius: 999px;
+        box-shadow: 0 3px 0 #063d2b;
+      }
+      .tier.featured .price {
+        background: #c9a800;
+        box-shadow: 0 3px 0 #8f7600;
+      }
+      .footer {
+        position: relative;
+        z-index: 1;
+        margin-top: 0.2in;
+        display: grid;
+        grid-template-columns: 1.05in 1fr;
+        gap: 0.18in;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.72);
+        border: 2px solid rgba(10, 90, 63, 0.18);
+        border-radius: 16px;
+        padding: 0.12in 0.16in;
+      }
+      .footer img {
+        width: 0.95in;
+        height: 0.95in;
+        object-fit: contain;
+        background: #fff;
+        border-radius: 10px;
+        padding: 4px;
+      }
+      .footer h3 {
+        margin: 0 0 4px;
+        font-size: 14px;
+        font-weight: 900;
+        color: #0a5a3f;
+      }
+      .footer p {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.35;
+        font-weight: 600;
+        color: #1f4f5c;
+        white-space: pre-line;
+      }
+      .footer .url {
+        margin-top: 4px;
+        font-size: 11px;
+        font-weight: 800;
+        color: #0a5a3f;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="wave" aria-hidden="true"></div>
+      <header class="header">
+        <img class="logo" src="../frontend/public/shms-logo.png" alt="Stone Hill Middle School Stingrays" />
+        <div class="titles">
+          <p class="kicker">Stone Hill Middle School PTO</p>
+          <h1>Sponsorships</h1>
+          <p class="sub">
+            Partner with SHMS PTO for the 2026-27 school year.
+            One payment. Three packages. Reach 1,000+ families.
+          </p>
+        </div>
+      </header>
+
+      <div class="tiers">
+        <article class="tier featured">
+          <span class="badge">Premier</span>
+          <div class="orb platinum" aria-hidden="true"></div>
+          <h2>Platinum</h2>
+          <ul>
+            <li>Logo on banner at all events</li>
+            <li>Announced at all events</li>
+            <li>Inclusion on all flyers</li>
+            <li>Full-year website and portal listing</li>
+            <li>Monthly WhatsApp + social posts</li>
+            <li>Mention in all PTO and school newsletters</li>
+            <li>In-person event flyers with QR</li>
+            <li>Frameable participation certificate</li>
+          </ul>
+          <span class="price">$2,500 one payment</span>
+        </article>
+
+        <article class="tier">
+          <div class="orb gold" aria-hidden="true"></div>
+          <h2>Gold</h2>
+          <ul>
+            <li>Logo on banner at 3 events</li>
+            <li>Announced at 3 events</li>
+            <li>Flyer distribution at events</li>
+            <li>Half-year website and portal listing</li>
+            <li>Monthly WhatsApp + social posts</li>
+            <li>Mention in 3 monthly newsletters</li>
+            <li>3 event flyers (Family Fun Fest, Fall Fest, Back to School Night)</li>
+            <li>Frameable participation certificate</li>
+          </ul>
+          <span class="price">$1,500 one payment</span>
+        </article>
+
+        <article class="tier">
+          <div class="orb silver" aria-hidden="true"></div>
+          <h2>Silver</h2>
+          <ul>
+            <li>Logo on banner at 1 event</li>
+            <li>Announced at 1 event</li>
+            <li>Flyer distribution at events</li>
+            <li>Quarter-year website and portal listing</li>
+            <li>Monthly WhatsApp + social posts</li>
+            <li>Mention in 2 monthly newsletters</li>
+            <li>1 event flyer (Family Fun Fest, Fall Fest, or Back to School Night)</li>
+            <li>Frameable participation certificate</li>
+          </ul>
+          <span class="price">$500 one payment</span>
+        </article>
+      </div>
+
+      <footer class="footer">
+        <img src="../frontend/public/fundraising/sponsorship-qr.png" alt="QR code to sponsorship packages" />
+        <div>
+          <h3>Become a sponsor</h3>
+          <p>Scan for packages and the interest form.
+Or email vp-sponsorships@shmspto.org.</p>
+          <p class="url">www.shmspto.org/fundraising#sponsorship</p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
