@@ -88,10 +88,10 @@ export function StartForm() {
         disabled={busy}
         className="rounded-md bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-[var(--paper)] hover:bg-[var(--accent)] disabled:opacity-60"
       >
-        {busy ? 'Opening Square…' : `Continue to Square · $${COMMONS_LIST_PRICE_USD}/mo`}
+        {busy ? 'Opening Stripe…' : `Continue to Stripe · $${COMMONS_LIST_PRICE_USD}/mo`}
       </button>
       <p className="whitespace-pre-line text-xs text-[var(--ink-muted)]">
-        {`You will pay on Square.\nWe email you next steps within one business day.\nTenant setup is still provisioned by Auraflux in v1.`}
+        {`You will pay on Stripe for Commons software.\nYour school still uses its own Square for parent cards and in-person sales.\nWe email you next steps within one business day.\nTenant setup is still provisioned by Auraflux in v1.`}
       </p>
     </form>
   )

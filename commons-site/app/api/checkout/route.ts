@@ -1,14 +1,7 @@
-import { randomUUID } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { insertCheckoutStarted } from '@/lib/db'
 import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
-import {
-  commonsPlanVariationId,
-  getSquareClient,
-  siteOrigin,
-  squareConfigured,
-  squareLocationId,
-} from '@/lib/square'
+import { commonsPriceId, getStripe, siteOrigin, stripeConfigured } from '@/lib/stripe'
 
 export const runtime = 'nodejs'
 
@@ -20,9 +13,9 @@ type Body = {
 }
 
 export async function POST(req: NextRequest) {
-  if (!squareConfigured()) {
+  if (!stripeConfigured()) {
     return NextResponse.json(
-      { error: 'Square checkout is not configured yet.' },
+      { error: 'Stripe checkout is not configured yet.' },
       { status: 503 },
     )
   }
@@ -43,42 +36,35 @@ export async function POST(req: NextRequest) {
   }
 
   const origin = siteOrigin()
-  const client = getSquareClient()
-  const idempotencyKey = randomUUID()
+  const stripe = getStripe()
 
   try {
-    const result = await client.checkout.paymentLinks.create({
-      idempotencyKey,
-      description: `Commons · ${schoolName}`,
-      checkoutOptions: {
-        redirectUrl: `${origin}/thanks`,
-        askForShippingAddress: false,
-        subscriptionPlanId: commonsPlanVariationId(),
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      customer_email: email,
+      line_items: [{ price: commonsPriceId(), quantity: 1 }],
+      success_url: `${origin}/thanks?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/start`,
+      allow_promotion_codes: true,
+      metadata: {
+        product: 'commons',
+        schoolName,
+        city,
+        role,
+        listPriceUsd: String(COMMONS_LIST_PRICE_USD),
       },
-      prePopulatedData: {
-        buyerEmail: email,
-      },
-      paymentNote: `Commons $${COMMONS_LIST_PRICE_USD}/mo · ${schoolName} · ${city} · ${role}`,
-      order: {
-        locationId: squareLocationId(),
-        lineItems: [
-          {
-            name: 'Commons PTO OS',
-            quantity: '1',
-            note: `${schoolName} (${city})`,
-            basePriceMoney: {
-              amount: BigInt(COMMONS_LIST_PRICE_USD * 100),
-              currency: 'USD',
-            },
-          },
-        ],
+      subscription_data: {
+        metadata: {
+          product: 'commons',
+          schoolName,
+          city,
+          role,
+        },
       },
     })
 
-    const link = result.paymentLink
-    const url = link?.url
-    if (!url) {
-      return NextResponse.json({ error: 'Square did not return a checkout URL.' }, { status: 502 })
+    if (!session.url) {
+      return NextResponse.json({ error: 'Stripe did not return a checkout URL.' }, { status: 502 })
     }
 
     try {
@@ -87,23 +73,22 @@ export async function POST(req: NextRequest) {
         schoolName,
         city,
         role,
-        paymentLinkId: link?.id || null,
+        checkoutSessionId: session.id,
         raw: {
           schoolName,
           city,
           role,
-          paymentLinkId: link?.id,
-          orderId: link?.orderId,
+          checkoutSessionId: session.id,
         },
       })
     } catch (dbErr) {
       console.error('commons_subscriptions insert failed', dbErr)
     }
 
-    return NextResponse.json({ url })
+    return NextResponse.json({ url: session.url })
   } catch (err) {
-    console.error('createPaymentLink failed', err)
-    const message = err instanceof Error ? err.message : 'Square error'
+    console.error('stripe checkout.sessions.create failed', err)
+    const message = err instanceof Error ? err.message : 'Stripe error'
     return NextResponse.json({ error: message }, { status: 502 })
   }
 }

@@ -30,18 +30,21 @@ create table if not exists commons_subscriptions (
   role                text not null default '',
   amount_cents        integer not null default 39900,
   status              text not null default 'checkout_started',
-  square_payment_link_id text,
-  square_order_id     text,
-  square_customer_id  text,
-  square_subscription_id text,
-  square_event_id     text,
+  stripe_checkout_session_id text,
+  stripe_customer_id  text,
+  stripe_subscription_id text,
+  stripe_event_id     text,
   raw                 jsonb not null default '{}'::jsonb,
   created_at          timestamptz not null default now(),
   updated_at          timestamptz not null default now()
 );
 create index if not exists commons_subscriptions_email_idx on commons_subscriptions (email);
-create unique index if not exists commons_subscriptions_event_uidx
-  on commons_subscriptions (square_event_id);
+create unique index if not exists commons_subscriptions_stripe_event_uidx
+  on commons_subscriptions (stripe_event_id);
+alter table commons_subscriptions add column if not exists stripe_checkout_session_id text;
+alter table commons_subscriptions add column if not exists stripe_customer_id text;
+alter table commons_subscriptions add column if not exists stripe_subscription_id text;
+alter table commons_subscriptions add column if not exists stripe_event_id text;
 `
 
 let pool: pg.Pool | null = null
@@ -68,7 +71,7 @@ export type SubscriptionLead = {
   schoolName: string
   city: string
   role: string
-  paymentLinkId?: string | null
+  checkoutSessionId?: string | null
   status?: string
   raw?: Record<string, unknown>
 }
@@ -78,7 +81,7 @@ export async function insertCheckoutStarted(lead: SubscriptionLead): Promise<num
   const p = getPool()
   const r = await p.query<{ id: string }>(
     `insert into commons_subscriptions (
-       email, school_name, city, role, status, square_payment_link_id, raw, updated_at
+       email, school_name, city, role, status, stripe_checkout_session_id, raw, updated_at
      ) values ($1,$2,$3,$4,$5,$6,$7::jsonb, now())
      returning id`,
     [
@@ -87,49 +90,56 @@ export async function insertCheckoutStarted(lead: SubscriptionLead): Promise<num
       lead.city,
       lead.role,
       lead.status || 'checkout_started',
-      lead.paymentLinkId || null,
+      lead.checkoutSessionId || null,
       JSON.stringify(lead.raw || {}),
     ],
   )
   return Number(r.rows[0].id)
 }
 
-export async function upsertFromSquareEvent(input: {
+export async function upsertFromStripeEvent(input: {
   eventId: string
   status: string
   email?: string | null
   customerId?: string | null
   subscriptionId?: string | null
-  orderId?: string | null
-  paymentLinkId?: string | null
+  checkoutSessionId?: string | null
+  schoolName?: string | null
+  city?: string | null
+  role?: string | null
   raw: unknown
 }): Promise<void> {
   await ensureSubscriptionsSchema()
   const p = getPool()
   await p.query(
     `insert into commons_subscriptions (
-       email, school_name, status, square_event_id, square_customer_id,
-       square_subscription_id, square_order_id, square_payment_link_id, raw, updated_at
+       email, school_name, city, role, status, stripe_event_id, stripe_customer_id,
+       stripe_subscription_id, stripe_checkout_session_id, raw, updated_at
      ) values (
-       coalesce($1, ''), '', $2, $3, $4, $5, $6, $7, $8::jsonb, now()
+       coalesce($1, ''), coalesce($2, ''), coalesce($3, ''), coalesce($4, ''),
+       $5, $6, $7, $8, $9, $10::jsonb, now()
      )
-     on conflict (square_event_id) do update set
+     on conflict (stripe_event_id) do update set
        status = excluded.status,
-       square_customer_id = coalesce(excluded.square_customer_id, commons_subscriptions.square_customer_id),
-       square_subscription_id = coalesce(excluded.square_subscription_id, commons_subscriptions.square_subscription_id),
-       square_order_id = coalesce(excluded.square_order_id, commons_subscriptions.square_order_id),
-       square_payment_link_id = coalesce(excluded.square_payment_link_id, commons_subscriptions.square_payment_link_id),
+       stripe_customer_id = coalesce(excluded.stripe_customer_id, commons_subscriptions.stripe_customer_id),
+       stripe_subscription_id = coalesce(excluded.stripe_subscription_id, commons_subscriptions.stripe_subscription_id),
+       stripe_checkout_session_id = coalesce(excluded.stripe_checkout_session_id, commons_subscriptions.stripe_checkout_session_id),
        email = case when excluded.email <> '' then excluded.email else commons_subscriptions.email end,
+       school_name = case when excluded.school_name <> '' then excluded.school_name else commons_subscriptions.school_name end,
+       city = case when excluded.city <> '' then excluded.city else commons_subscriptions.city end,
+       role = case when excluded.role <> '' then excluded.role else commons_subscriptions.role end,
        raw = excluded.raw,
        updated_at = now()`,
     [
       input.email || '',
+      input.schoolName || '',
+      input.city || '',
+      input.role || '',
       input.status,
       input.eventId,
       input.customerId || null,
       input.subscriptionId || null,
-      input.orderId || null,
-      input.paymentLinkId || null,
+      input.checkoutSessionId || null,
       JSON.stringify(input.raw ?? {}),
     ],
   )
