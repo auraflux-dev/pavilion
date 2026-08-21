@@ -83,7 +83,8 @@ export function isSameOriginRequest(req: Request): boolean {
     path.startsWith('/api/contact') ||
     path.startsWith('/api/volunteer') ||
     path.startsWith('/api/newsletter') ||
-    path.startsWith('/api/surveys/')
+    path.startsWith('/api/surveys/') ||
+    path === '/api/auth/preview-handoff'
   ) {
     return true
   }

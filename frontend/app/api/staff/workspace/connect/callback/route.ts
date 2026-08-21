@@ -8,6 +8,10 @@ import {
   googleMemberRedirectBase,
   safeReturnTo,
 } from '@/lib/auth-google-member'
+import {
+  isAllowedPreviewOrigin,
+  mintPreviewHandoff,
+} from '@/lib/auth-preview-handoff'
 import { getStaffSession } from '@/lib/staff/session'
 import { upsertStaffRefreshToken } from '@/lib/google/workspace-auth'
 
@@ -39,6 +43,8 @@ type MemberState = {
   u?: string
   n?: string
   t?: number
+  /** Preview origin to hand session back to after www OAuth. */
+  p?: string
 }
 
 /**
@@ -72,6 +78,10 @@ export async function GET(req: NextRequest) {
     const returnTo = safeReturnTo(memberState.r)
     const redirectUri =
       memberState.u || googleMemberCallbackUrl(memberBase)
+    const previewOrigin =
+      memberState.p && isAllowedPreviewOrigin(memberState.p)
+        ? memberState.p.replace(/\/$/, '')
+        : ''
 
     const clear = (res: NextResponse) => {
       res.cookies.set(GOOGLE_MEMBER_STATE_COOKIE, '', {
@@ -85,7 +95,7 @@ export async function GET(req: NextRequest) {
     }
 
     const fail = (reason: string) => {
-      const url = new URL('/auth/join', memberBase)
+      const url = new URL('/auth/join', previewOrigin || memberBase)
       url.searchParams.set('mode', 'login')
       url.searchParams.set('returnTo', returnTo)
       url.searchParams.set('error', reason)
@@ -108,6 +118,21 @@ export async function GET(req: NextRequest) {
 
     try {
       const { tokens } = await completeGoogleMemberLogin({ code, redirectUri })
+      if (previewOrigin) {
+        const handoff = mintPreviewHandoff({ tokens, returnTo })
+        const action = new URL('/api/auth/preview-handoff', previewOrigin).toString()
+        const html = `<!DOCTYPE html><html><body>
+<form id="f" method="POST" action="${action}">
+<input type="hidden" name="t" value="${handoff.replace(/"/g, '&quot;')}" />
+</form>
+<script>document.getElementById('f').submit()</script>
+</body></html>`
+        const res = new NextResponse(html, {
+          status: 200,
+          headers: { 'Content-Type': 'text/html; charset=utf-8' },
+        })
+        return clear(res)
+      }
       const res = NextResponse.redirect(new URL(returnTo, memberBase), 302)
       res.cookies.set(TOKENS_COOKIE, JSON.stringify(tokens), {
         httpOnly: true,

@@ -13,19 +13,45 @@ import {
   googleMemberRedirectBase,
   safeReturnTo,
 } from '@/lib/auth-google-member'
+import {
+  isAllowedPreviewOrigin,
+  isEphemeralVercelPreviewHost,
+  requestOriginFromHost,
+} from '@/lib/auth-preview-handoff'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+
+const PROD_ORIGIN = 'https://www.shmspto.org'
 
 export async function GET(req: NextRequest) {
   const returnTo = safeReturnTo(req.nextUrl.searchParams.get('returnTo'))
   const host =
     req.headers.get('x-forwarded-host') || req.headers.get('host') || ''
-  const base = googleMemberRedirectBase(host)
+  const requestOrigin = requestOriginFromHost(host)
+
+  // Ephemeral Preview hosts are not Google redirect URIs. Bounce to www,
+  // finish OAuth there, then hand the session back to this Preview origin.
+  if (isEphemeralVercelPreviewHost(host) && isAllowedPreviewOrigin(requestOrigin)) {
+    const bounce = new URL('/api/auth/google', PROD_ORIGIN)
+    bounce.searchParams.set('returnTo', returnTo)
+    bounce.searchParams.set('previewOrigin', requestOrigin)
+    return NextResponse.redirect(bounce, 302)
+  }
+
+  const previewOriginRaw = req.nextUrl.searchParams.get('previewOrigin') || ''
+  const previewOrigin = isAllowedPreviewOrigin(previewOriginRaw)
+    ? previewOriginRaw.replace(/\/$/, '')
+    : ''
+
+  // Always use the registered production redirect URI when handing back to Preview.
+  const base = previewOrigin
+    ? PROD_ORIGIN
+    : googleMemberRedirectBase(host)
   const origin = base
 
   if (!googleMemberOauthConfigured()) {
-    const fail = new URL('/auth/join', origin)
+    const fail = new URL('/auth/join', previewOrigin || origin)
     fail.searchParams.set('mode', 'login')
     fail.searchParams.set('returnTo', returnTo)
     fail.searchParams.set('error', 'google_not_configured')
@@ -40,6 +66,7 @@ export async function GET(req: NextRequest) {
     r: returnTo,
     t: Date.now(),
     u: redirectUri,
+    ...(previewOrigin ? { p: previewOrigin } : {}),
   }
   const state = Buffer.from(JSON.stringify(statePayload), 'utf8').toString(
     'base64url',
