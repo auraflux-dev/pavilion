@@ -130,13 +130,10 @@ export function StudentCard({
     enrollments: Enrollment[]
     pastEnrollments?: Enrollment[]
     payments: Payment[]
-    transferOptions?: { id: string; name: string }[]
   } | null>(null)
   const [attendance, setAttendance] = useState<AttendanceMark[]>([])
   const [loading, setLoading] = useState(false)
   const [showPast, setShowPast] = useState(false)
-  const [requestBusy, setRequestBusy] = useState(false)
-  const [requestMsg, setRequestMsg] = useState('')
   const [editOpen, setEditOpen] = useState(false)
 
   useEffect(() => {
@@ -153,9 +150,6 @@ export function StudentCard({
               ? hist.pastEnrollments
               : [],
             payments: Array.isArray(hist?.payments) ? hist.payments : [],
-            transferOptions: Array.isArray(hist?.transferOptions)
-              ? hist.transferOptions
-              : [],
           })
           const marks = (att.attendance ?? []) as AttendanceMark[]
           setAttendance(marks.filter((m) => !m.studentId || m.studentId === student.id))
@@ -164,60 +158,6 @@ export function StudentCard({
         .finally(() => setLoading(false))
     }
   }, [open, student.id, history])
-
-  async function requestEnrollmentChange(
-    enrollmentId: string,
-    action: 'refund' | 'transfer',
-    currentProgramId?: string,
-  ) {
-    setRequestBusy(true)
-    setRequestMsg('')
-    try {
-      let toProgramId = ''
-      let note = ''
-      if (action === 'transfer') {
-        const progRes = await fetch('/api/portal/programs/enrollment-request')
-        const progData = await progRes.json().catch(() => ({ programs: [] }))
-        const choices = ((progData.programs ?? []) as { id: string; name: string }[]).filter(
-          (p) => p.id && p.id !== currentProgramId,
-        )
-        if (!choices.length) {
-          setRequestMsg('No other open programs available to transfer into.')
-          setRequestBusy(false)
-          return
-        }
-        const label = choices.map((p, i) => `${i + 1}. ${p.name}`).join('\n')
-        const pick = window.prompt(`Transfer to program number:\n${label}`)
-        if (!pick) {
-          setRequestBusy(false)
-          return
-        }
-        const dest = choices[Number(pick) - 1]
-        if (!dest) {
-          setRequestMsg('Invalid program selection.')
-          setRequestBusy(false)
-          return
-        }
-        toProgramId = dest.id
-        note = window.prompt('Optional note for staff')?.trim() || ''
-      } else {
-        note = window.prompt('Optional note for your refund request')?.trim() || ''
-      }
-      const r = await fetch('/api/portal/programs/enrollment-request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enrollmentId, action, toProgramId: toProgramId || undefined, note }),
-      })
-      const d = await r.json()
-      if (!r.ok) throw new Error(d.error ?? 'Request failed')
-      setRequestMsg(action === 'refund' ? 'Refund request sent to staff.' : 'Transfer request sent to staff.')
-      setHistory(null)
-    } catch (err) {
-      setRequestMsg(err instanceof Error ? err.message : 'Request failed')
-    } finally {
-      setRequestBusy(false)
-    }
-  }
 
   return (
     <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden shadow-sm">
@@ -305,8 +245,6 @@ export function StudentCard({
                 ) : (
                   <div className="space-y-2">
                     {history.enrollments.map(e => {
-                      const canRequest =
-                        ['Enrolled', 'Paid', 'Waitlisted'].includes(e.status) && Boolean(e.id)
                       const programPosts = boardPosts.filter((p) => {
                         const pid = String(e.programId ?? '').trim()
                         const pname = String(e.programName ?? '').trim().toLowerCase()
@@ -324,28 +262,6 @@ export function StudentCard({
                               {formatDate(e.registrationDate)}
                               {e.waitlistPosition ? ` · Waitlist #${e.waitlistPosition}` : ''}
                             </p>
-                            {canRequest ? (
-                              <div className="flex flex-wrap gap-2 mt-1">
-                                <button
-                                  type="button"
-                                  disabled={requestBusy}
-                                  className="text-[11px] font-semibold underline"
-                                  style={{ color: 'var(--brand-green)' }}
-                                  onClick={() => void requestEnrollmentChange(e.id, 'refund')}
-                                >
-                                  Request refund
-                                </button>
-                                <button
-                                  type="button"
-                                  disabled={requestBusy}
-                                  className="text-[11px] font-semibold underline"
-                                  style={{ color: 'var(--brand-green)' }}
-                                  onClick={() => void requestEnrollmentChange(e.id, 'transfer', e.programId)}
-                                >
-                                  Request transfer
-                                </button>
-                              </div>
-                            ) : null}
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             {e.paymentAmount > 0 && (
@@ -413,7 +329,7 @@ export function StudentCard({
                     ) : null}
                   </div>
                 ) : null}
-                {requestMsg ? <p className="text-xs text-[#5A6070] mt-2">{requestMsg}</p> : null}
+
               </div>
 
               {/* Attendance */}

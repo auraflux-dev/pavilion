@@ -710,7 +710,7 @@ Square may keep a small processing fee on refunds. That is normal.
 - Store-card credit bundled with membership follows Cove Digital Card rules, not membership donation rules
 
 ### Enrichment programs
-- Parent can **Request refund** in the member portal
+- Parent emails Co-VP Fundraising & Programs (or uses the programs contact form). No self-serve refund/transfer buttons in the portal
 - Staff **Approve refund** in Programs (marks enrollment Refunded; may free a seat / promote waitlist)
 - Then Treasurer processes the Square/PayPal refund
 - Missed classes, weather, or dismissal for conduct are generally **not** refunded unless the board announces otherwise
