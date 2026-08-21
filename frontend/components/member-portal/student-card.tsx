@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp, BookOpen, Pencil, Loader2 } from 'lucide-react'
 import { EditStudentForm } from './edit-student-form'
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 interface Enrollment {
   id: string
