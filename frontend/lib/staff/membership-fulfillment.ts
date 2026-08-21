@@ -243,7 +243,16 @@ export async function getMembershipEntitlements(
     enrichmentCode,
   })
   const { appendBoardEntitlements } = await import('@/lib/staff/board-enrichment-discounts')
-  const entitlements = appendBoardEntitlements(row, mergePortalEntitlements(stored, fresh))
+  let entitlements = appendBoardEntitlements(row, mergePortalEntitlements(stored, fresh))
+
+  // Board seat already includes 75% off enrichment (Fall + Spring). Do not also
+  // show the paid-tier code (e.g. SHMSREEF10) for those accounts.
+  const hasBoardEnrichment = entitlements.some(
+    (e) => e.kind === 'board_enrichment_fall' || e.kind === 'board_enrichment_spring',
+  )
+  if (hasBoardEnrichment) {
+    entitlements = entitlements.filter((e) => e.kind !== 'enrichment_discount')
+  }
 
   let coveFamilyCode = ''
   let paidMemberCode = false
@@ -261,7 +270,7 @@ export async function getMembershipEntitlements(
     tier,
     shirtSize,
     entitlements,
-    discountCode: enrichmentCode || '',
+    discountCode: hasBoardEnrichment ? '' : enrichmentCode || '',
     coveFamilyCode,
     paidMemberCode,
   }
