@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Gift, Loader2 } from 'lucide-react'
 import type { MembershipEntitlement } from '@/lib/membership-entitlements'
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type Benefits = {
   tier: string
@@ -67,19 +66,6 @@ export function MembershipBenefitsCard() {
         Membership benefits
         {data.tier ? ` · ${data.tier}` : ''}
       </p>
-      {data.coveFamilyCode && data.paidMemberCode ? (
-        <p className="mt-2 text-sm text-[#1A1A1A]">
-          Event refreshments ID:{' '}
-          <span className="font-mono font-bold tracking-wider text-[var(--brand-green)]">
-            {data.coveFamilyCode}
-          </span>
-          <span className="block text-[11px] text-[#5A6070] mt-0.5">
-            {vanillaizeIfDemo(
-              'Show this 6-digit Family Cove code at food trucks / refreshment tables (Lagoon and Tide codes end in 9).',
-            )}
-          </span>
-        </p>
-      ) : null}
       <ul className="mt-2 space-y-2">
         {data.entitlements.map((e) => (
           <li key={e.kind} className="text-sm">
@@ -104,8 +90,9 @@ export function MembershipBenefitsCard() {
       </ul>
       {data.discountCode ? (
         <p className="text-xs mt-2 text-[#5A6070]">
-          Membership enrichment code (tier % also auto-applies):{' '}
+          Enrichment code:{' '}
           <span className="font-mono font-bold text-[var(--brand-green)]">{data.discountCode}</span>
+          <span className="block text-[11px] mt-0.5">Tier % also auto-applies at checkout.</span>
         </p>
       ) : null}
     </div>

@@ -277,8 +277,9 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
               </p>
               <p className="text-2xl font-bold font-mono tracking-[0.2em] text-[#1A1A1A]">{code}</p>
               {paidMemberCode ? (
-                <p className="text-[11px] font-bold text-[var(--brand-green)] mt-1">
-                  Lagoon/Tide member code (ends in 9). Show at event food tables for refreshment tickets
+                <p className="text-[11px] font-bold text-[var(--brand-green)] mt-1 whitespace-pre-line">
+                  Lagoon / Tide code (ends in 9).
+                  Show at event food tables.
                 </p>
               ) : codeHint ? (
                 <p className="text-[11px] text-[#5A6070] mt-1">{codeHint}</p>
@@ -326,24 +327,12 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
                   </Button>
                 ) : null}
               </div>
-              <p className="text-[11px] text-[#5A6070] mt-2 leading-relaxed">
-                {squareScanReady ? (
-                  <>
-                    Save this QR to <strong>Photos</strong> (or Wallet). Students open it at Cove /
-                    store / events. Square Stand and iPad scan it like a gift card.
-                  </>
-                ) : hasCard ? (
-                  <>Load or refresh the Cove Digital Card, then Save QR again.</>
-                ) : (
-                  <>
-                    <strong className="text-[#1A1A1A]">Load money</strong> to activate your phone QR
-                    for The Cove. Free accounts can use the card after a load. Paid membership is
-                    optional.{' '}
-                    <a href="/cove" className="font-bold underline" style={{ color: 'var(--brand-green)' }}>
-                      Load Cove Digital Card
-                    </a>
-                  </>
-                )}
+              <p className="text-[11px] text-[#5A6070] mt-2 leading-relaxed whitespace-pre-line">
+                {squareScanReady
+                  ? 'Save QR to Photos or Wallet.\nScan at Cove, store, or events.'
+                  : hasCard
+                    ? 'Load or refresh the card, then save QR again.'
+                    : 'Load money below to activate this QR for The Cove.'}
               </p>
             </div>
           </div>

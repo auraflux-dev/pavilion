@@ -14,10 +14,7 @@ import {
   ArrowRight,
   ShoppingBag,
   Star,
-  HelpCircle,
-  BookOpen,
 } from 'lucide-react'
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
 import {
@@ -43,7 +40,6 @@ import {
 } from './onboarding-checklist'
 import { ConfirmFamilyDetailsForm } from './confirm-family-details-form'
 import { PortalBusinessOwnerForm } from './portal-business-owner-form'
-import { PortalHelpForm } from '@/components/member-portal/portal-help-form'
 import { InviteCoParentPanel } from './invite-co-parent-panel'
 import {
   buildOnboardingChecklist,
@@ -177,7 +173,6 @@ export function MemberDashboard({
   const [status, setStatus] = useState<'loading' | 'error' | 'ok'>('loading')
   const [familyTab, setFamilyTab] = useState<'calendar' | 'messages'>('calendar')
   const [messagesSeenAt, setMessagesSeenAt] = useState(0)
-  const [dismissedActivity, setDismissedActivity] = useState(false)
   const [membershipSuccessNudge, setMembershipSuccessNudge] = useState(false)
   const { allowed: liveCommerce } = useLiveCommerceGate()
 
@@ -254,14 +249,6 @@ export function MemberDashboard({
     setMessagesSeenAt(Date.now())
   }, [messagesSeenAt, status])
 
-  function openMessages() {
-    setFamilyTab('messages')
-    markMessagesSeen()
-    setMessagesSeenAt(Date.now())
-    setDismissedActivity(true)
-    document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-
   useEffect(() => {
     if (familyTab !== 'messages') return
     markMessagesSeen()
@@ -335,16 +322,11 @@ export function MemberDashboard({
         : copy.freeTitle
   const accountBannerBody =
     accountType === 'paid' && householdTier === 'reef'
-      ? `Thanks for supporting SHMS PTO.
-You're on Reef. Benefits show on each student card below.
-Upgrade to Lagoon or Tide anytime for more perks.`
+      ? `You're on Reef.\nUpgrade anytime for more perks.`
       : accountType === 'paid' && householdTier === 'lagoon'
-        ? `Thanks for supporting SHMS PTO.
-You're on Lagoon. Benefits show on each student card below.
-Upgrade to Tide anytime for more perks.`
+        ? `You're on Lagoon.\nUpgrade to Tide anytime.`
         : accountType === 'paid' && householdTier === 'tide'
-          ? `Thanks for supporting SHMS PTO.
-You're on Tide. Benefits show on each student card below.`
+          ? `You're on Tide.\nBenefits apply to your students below.`
           : accountType === 'paid'
             ? copy.paidBody
             : copy.freeBody
@@ -366,21 +348,14 @@ You're on Tide. Benefits show on each student card below.`
   const showConfirmFamily = students.length > 0 && !coveGate.ok
 
   return (
-    <div className="space-y-4">
-      <PortalSectionNav />
+    <div className="space-y-3">
+      <PortalSectionNav setupIncomplete={!onboarding.complete || showConfirmFamily} />
 
       {membershipSuccessNudge ? (
-        <div className="rounded-xl border border-[var(--brand-line)] bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-start justify-between gap-3">
-          <div>
- <p className="text-sm font-bold text-[var(--brand-green)]">Membership confirmed. Thank you!</p>
-            <p className="text-xs text-[#1A1A1A]/80 mt-0.5 leading-relaxed">
-              {onboarding.complete
-                ? vanillaizeIfDemo('Your Cove Digital Card and perks are ready below.')
-                : vanillaizeIfDemo(
-                    'Finish confirming your family details so Cove Digital Card credit and your QR attach to your students.',
-                  )}
-            </p>
-          </div>
+        <div className="rounded-xl border border-[var(--brand-line)] bg-[#E8F3E8] px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm font-bold text-[var(--brand-green)]">
+            Membership confirmed. Thank you!
+          </p>
           <button
             type="button"
             className="text-xs font-semibold text-[#5A6070] underline shrink-0"
@@ -390,16 +365,6 @@ You're on Tide. Benefits show on each student card below.`
           </button>
         </div>
       ) : null}
-
-      <OnboardingChecklist
-        items={onboarding.items}
-        requiredDone={onboarding.requiredDone}
-        requiredTotal={onboarding.requiredTotal}
-        complete={onboarding.complete}
-        coveUnlocked={onboarding.coveUnlocked}
-        highlight={Boolean(highlightChecklist && !onboarding.complete)}
-        onJumpStudents={() => setMembershipSuccessNudge(false)}
-      />
 
       {showConfirmFamily ? (
         <ConfirmFamilyDetailsForm
@@ -419,45 +384,20 @@ You're on Tide. Benefits show on each student card below.`
             }
           }}
         />
-      ) : null}
-      {!dismissedActivity && newMessageCount > 0 ? (
-        <div className="rounded-xl border border-[var(--brand-green)]/30 bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-start gap-2 min-w-0">
-            <Mail className="w-4 h-4 mt-0.5 shrink-0 text-[var(--brand-green)]" aria-hidden />
-            <div>
-              <p className="text-sm font-bold text-[var(--brand-green)]">
-                {newMessageCount === 1
-                  ? 'You have a new message'
-                  : `You have ${newMessageCount} new messages`}
-              </p>
-              <p className="text-xs text-[#1A1A1A]/80 mt-0.5">
-                Purchase confirmations, class notes, and PTO updates land here.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Button
-              type="button"
-              size="sm"
-              className="text-white"
-              style={{ backgroundColor: 'var(--brand-green)' }}
-              onClick={openMessages}
-            >
-              View messages
-            </Button>
-            <button
-              type="button"
-              className="text-xs font-semibold text-[#5A6070] underline"
-              onClick={() => setDismissedActivity(true)}
-            >
-              Dismiss
-            </button>
-          </div>
-        </div>
-      ) : null}
+      ) : (
+        <OnboardingChecklist
+          items={onboarding.items}
+          requiredDone={onboarding.requiredDone}
+          requiredTotal={onboarding.requiredTotal}
+          complete={onboarding.complete}
+          coveUnlocked={onboarding.coveUnlocked}
+          highlight={Boolean(highlightChecklist && !onboarding.complete)}
+          onJumpStudents={() => setMembershipSuccessNudge(false)}
+        />
+      )}
 
       {/* 2×2 quadrants. D (calendar/messages) first on mobile */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* D. Calendar & Messages (priority) */}
         <PortalQuadrant
           id="calendar"
@@ -699,9 +639,14 @@ You're on Tide. Benefits show on each student card below.`
             </div>
           </dl>
 
-          <div className="rounded-xl px-4 py-3 border border-[var(--border)] mb-4 bg-[#FAFCF9]">
-            <p className="text-xs font-bold text-[#1A1A1A] mb-1">{copy.paymentMethodsTitle}</p>
-            <p className="text-[11px] text-[#5A6070] leading-relaxed">{copy.paymentMethodsBody}</p>
+          <div className="mb-3">
+            <a
+              href="/member-portal/payment-methods"
+              className="text-xs font-bold inline-flex items-center gap-1"
+              style={{ color: 'var(--brand-green)' }}
+            >
+              {copy.paymentMethodsTitle} <ArrowRight className="w-3 h-3" />
+            </a>
           </div>
 
           {gradeLinks.length > 0 && (
@@ -709,9 +654,6 @@ You're on Tide. Benefits show on each student card below.`
               <p className="text-[11px] font-bold text-[#1A1A1A] mb-1 flex items-center gap-1.5">
                 <MessageCircle className="w-3.5 h-3.5" style={{ color: '#25D366' }} />
                 {copy.whatsappHeading}
-              </p>
-              <p className="text-[11px] text-[#5A6070] mb-2 leading-relaxed">
-                Join your student’s grade group for reminders and PTO updates.
               </p>
               <div className="flex flex-wrap gap-2">
                 {gradeLinks.map(({ grade, href }) => (
@@ -765,7 +707,6 @@ You're on Tide. Benefits show on each student card below.`
                     key={s.id}
                     student={s}
                     defaultOpen={i === 0}
-                    upgradeBody={copy.upgradeBody}
                     grades={grades}
                     boardPosts={boardPosts}
                     onUpdated={handleStudentUpdated}
@@ -814,7 +755,7 @@ You're on Tide. Benefits show on each student card below.`
             <CoveFeatureLockBanner reason={coveGate.error ?? 'Complete family setup first.'} />
           )}
 
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-2 mb-3">
             {!commons && coveGate.ok ? (
               <StoreCardReload
                 students={students.map(({ id, firstName, lastName }) => ({ id, firstName, lastName }))}
@@ -839,21 +780,7 @@ You're on Tide. Benefits show on each student card below.`
               <ShoppingBag className="w-3.5 h-3.5" /> {copy.ctaSpiritWear}
             </a>
             ) : null}
-            <a
-              href={onboarding.complete ? '/programs' : '#portal-onboarding'}
-              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#1A1A1A]"
-              title={
-                onboarding.complete
-                  ? undefined
-                  : 'Complete student safety profiles before program registration'
-              }
-            >
-              {copy.ctaPrograms}
-              {!onboarding.complete ? ' (setup needed)' : ''}
-            </a>
           </div>
-
-          <p className="text-[11px] text-[#5A6070] leading-relaxed mb-4 px-1">{copy.loadCardHelp}</p>
 
           {purchases.length === 0 ? (
             <p className="text-xs text-[#5A6070] mt-auto">{copy.purchasesEmpty}</p>
@@ -890,43 +817,11 @@ You're on Tide. Benefits show on each student card below.`
         </PortalQuadrant>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <PortalBusinessOwnerForm memberName={member.name} memberEmail={member.email} />
       </div>
 
       <PortalSurveys />
-
-      <section
-        id="help"
-        className="mt-8 scroll-mt-28 rounded-2xl border border-[var(--border)] bg-white overflow-hidden shadow-sm"
-      >
-        <div className="px-5 py-5 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
-          <div className="flex items-start gap-3 min-w-0">
-            <HelpCircle className="w-5 h-5 mt-0.5 shrink-0" style={{ color: 'var(--brand-green)' }} />
-            <div>
-              <h2 className="font-bold text-[#1A1A1A] text-base flex items-center gap-2">
-                <BookOpen className="w-4 h-4" style={{ color: 'var(--brand-green)' }} aria-hidden />
-                Member Help
-              </h2>
-              <p className="text-sm text-[#5A6070] mt-1 leading-relaxed">
-                {vanillaizeIfDemo(
-                  'Full articles for account, students, membership, The Cove, and programs, organized by category. Signed in parents only.',
-                )}
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/member-portal/help"
-            className="shrink-0 inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white"
-            style={{ backgroundColor: 'var(--brand-green)' }}
-          >
-            Open knowledge base
-          </Link>
-        </div>
-        <div className="border-t border-[var(--border)] px-5 py-5">
-          <PortalHelpForm memberName={member.name} compact />
-        </div>
-      </section>
     </div>
   )
 }

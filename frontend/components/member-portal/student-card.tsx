@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChevronDown, ChevronUp, CreditCard, BookOpen, Receipt, ArrowRight, Star, Tag, Loader2, Plus } from 'lucide-react'
+import { ChevronDown, ChevronUp, CreditCard, BookOpen, Receipt, Star, Tag, Loader2 } from 'lucide-react'
 import { GiftCardSettings } from './gift-card-settings'
 import { EditStudentForm } from './edit-student-form'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
-import { normalizeMembershipTier, tierRank } from '@/lib/staff/members-roster'
+import { normalizeMembershipTier } from '@/lib/staff/members-roster'
 
 interface Enrollment {
   id: string
@@ -72,7 +72,6 @@ export type BoardPost = {
 interface Props {
   student: Student
   defaultOpen?: boolean
-  upgradeBody?: string
   grades?: string[]
   boardPosts?: BoardPost[]
   onUpdated?: (student: Student) => void
@@ -139,9 +138,6 @@ interface GiftCardData {
 export function StudentCard({
   student,
   defaultOpen = false,
-  upgradeBody = vanillaizeIfDemo(
-    'Paid members get Cove Digital Card credit and enrichment discounts. Lagoon and Tide also include free refreshments at PTO events.',
-  ),
   grades = ['6', '7', '8'],
   boardPosts = [],
   onUpdated,
@@ -166,13 +162,6 @@ export function StudentCard({
     student.membershipTier !== 'free'
   const normalizedTier = normalizeMembershipTier(student.membershipTier)
   const tierLabel = isPaid ? displayMembershipTier(normalizedTier) : 'Free'
-  const canUpgradePaid = isPaid && tierRank(normalizedTier) > 0 && tierRank(normalizedTier) < tierRank('tide')
-  const upgradeCtaLabel =
-    normalizedTier === 'reef'
-      ? 'Upgrade to Lagoon or Tide'
-      : normalizedTier === 'lagoon'
-        ? 'Upgrade to Tide'
-        : 'Upgrade'
 
   // Live gift card balance. Fetched on mount
   useEffect(() => {
@@ -330,15 +319,6 @@ export function StudentCard({
             <div className="min-w-0">
               <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Discount Code</p>
               <p className="text-sm font-bold font-mono text-[var(--brand-green)]">{student.discountCode}</p>
-              {canUpgradePaid ? (
-                <a
-                  href={`/membership?studentId=${student.id}`}
-                  className="text-xs font-bold flex items-center gap-1 mt-1 transition-opacity hover:opacity-70"
-                  style={{ color: 'var(--brand-green)' }}
-                >
-                  {upgradeCtaLabel} <ArrowRight className="w-3 h-3" />
-                </a>
-              ) : null}
             </div>
           </div>
         ) : (
@@ -346,17 +326,7 @@ export function StudentCard({
             <Star className="w-4 h-4 shrink-0 text-[#5A6070]" />
             <div>
               <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Membership</p>
-              {!isPaid || canUpgradePaid ? (
-                <a
-                  href={`/membership?studentId=${student.id}`}
-                  className="text-sm font-bold flex items-center gap-1 transition-opacity hover:opacity-70"
-                  style={{ color: 'var(--brand-green)' }}
-                >
-                  {isPaid ? upgradeCtaLabel : 'Upgrade'} <ArrowRight className="w-3 h-3" />
-                </a>
-              ) : (
-                <p className="text-sm font-bold text-[#1A1A1A]">{tierLabel}</p>
-              )}
+              <p className="text-sm font-bold text-[#1A1A1A]">{tierLabel}</p>
             </div>
           </div>
         )}
@@ -393,21 +363,11 @@ export function StudentCard({
                 </div>
 
                 {!giftCard?.hasCard ? (
-                  <div className="rounded-xl border-2 border-dashed border-[var(--border)] p-4 text-center">
-                    <p className="text-sm text-[#5A6070] mb-3">
-                      {vanillaizeIfDemo('Load money to begin using your Cove Digital Card (free accounts welcome).')}
-                    </p>
-                    <a
-                      href="/cove"
-                      className="inline-flex items-center gap-1.5 text-sm font-bold"
-                      style={{ color: 'var(--brand-green)' }}
-                    >
-                      <Plus className="w-3.5 h-3.5" /> Load money
-                    </a>
-                  </div>
+                  <p className="text-sm text-[#5A6070]">
+                    {vanillaizeIfDemo('No Cove balance yet. Load from Store & Cove below.')}
+                  </p>
                 ) : (
                   <div className="space-y-3">
-                    {/* Recent activity */}
                     {(giftCard.activities?.length ?? 0) > 0 && (
                       <div className="space-y-1.5">
                         {(giftCard.activities ?? []).slice(0, 5).map(a => (
@@ -432,15 +392,6 @@ export function StudentCard({
                       </div>
                     )}
 
-                    {/* Load more / top-off button */}
-                    <a
-                      href="/cove"
-                      className="flex items-center justify-center gap-2 w-full py-2 rounded-lg text-sm font-bold border-2 border-[var(--brand-green)] text-[var(--brand-green)] hover:bg-[var(--brand-soft)] transition-colors"
-                    >
-                      <Plus className="w-3.5 h-3.5" /> Load funds
-                    </a>
-
-                    {/* Auto top-off settings */}
                     <GiftCardSettings
                       studentId={student.id}
                       studentName={student.firstName}
@@ -654,31 +605,6 @@ export function StudentCard({
                   </div>
                 )}
               </div>
-
-              {/* Upgrade nudge for free or upgradeable paid tiers */}
-              {(!isPaid || canUpgradePaid) && (
-                <div
-                  className="rounded-xl p-4 flex items-start gap-3"
-                  style={{ backgroundColor: 'var(--brand-soft)' }}
-                >
-                  <Star className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'var(--brand-green)' }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-[#1A1A1A] mb-1">
-                      {isPaid ? upgradeCtaLabel : 'Upgrade to a paid membership'}
-                    </p>
-                    <p className="text-xs text-[#5A6070] leading-relaxed mb-3 whitespace-pre-line">
-                      {upgradeBody}
-                    </p>
-                    <a
-                      href={`/membership?studentId=${student.id}`}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold transition-opacity hover:opacity-80"
-                      style={{ color: 'var(--brand-green)' }}
-                    >
-                      See membership options <ArrowRight className="w-3 h-3" />
-                    </a>
-                  </div>
-                </div>
-              )}
             </>
           )}
         </div>

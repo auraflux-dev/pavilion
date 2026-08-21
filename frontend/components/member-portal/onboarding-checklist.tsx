@@ -24,22 +24,7 @@ export function OnboardingChecklist({
   onJumpStudents,
 }: Props) {
   if (complete && coveUnlocked) {
-    return (
-      <div
-        id="portal-onboarding"
-        className="rounded-xl border border-[var(--brand-line)] bg-[#FAFCF9] px-4 py-3 mb-6 flex items-start gap-3"
-      >
-        <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'var(--brand-green)' }} />
-        <div>
-          <p className="text-sm font-bold text-[#1A1A1A]">You&apos;re set up</p>
-          <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed">
-            {vanillaizeIfDemo(
-              'Student profiles are complete. Cove Digital Card and programs are unlocked.',
-            )}
-          </p>
-        </div>
-      </div>
-    )
+    return null
   }
 
   return (
@@ -64,9 +49,9 @@ export function OnboardingChecklist({
               · {requiredDone}/{requiredTotal} required
             </span>
           </p>
-          <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed">
+          <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed whitespace-pre-line">
             {vanillaizeIfDemo(
-              'You can browse anytime. Cove QR, card loads, and enrichment stay locked until you confirm family details (parent name, phone, emergency contact, pick-up).',
+              'Confirm family details below so Cove and programs unlock.',
             )}
           </p>
           {!coveUnlocked ? (
