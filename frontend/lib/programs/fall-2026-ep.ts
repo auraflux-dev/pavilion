@@ -87,7 +87,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
   },
   {
     id: 'mathcounts',
-    name: 'MATHCOUNTS',
+    name: 'Competitive Math Prep',
     publicSlug: 'mathcounts',
     cmsNameIncludes: ['mathcounts', 'mathnasium', 'competitive math', 'math prep'],
     dayOfWeek: 'Wednesday',

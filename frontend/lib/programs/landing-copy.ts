@@ -48,14 +48,14 @@ const FALL: Record<string, ProgramLandingCopy> = {
   mathcounts: {
     eyebrow: 'Fall 2026 · Competition',
     pitch:
-      'MATHCOUNTS and AMC 8 prep on campus.\nPre-algebra helps. No contest experience required.',
+      'Contest math on campus for grades 6 to 8.\nBuild toward MATHCOUNTS and AMC-style rounds.',
     why: [
       'Led by RSM Ashburn at Stone Hill. Not a center membership.',
-      'Contest formats: Sprint, Target, Team, and Countdown.',
-      'Counting, probability, number theory, algebra, and contest geometry.',
-      'Sprint time management and mental math. Target multi-step routines.',
-      'Weekly timed drills plus conceptual deep-dives.',
-      'Mock competitions built into the year plan.',
+      'Week 1 diagnostic, then number theory, algebra, counting, probability, and contest geometry.',
+      'Sprint, Target, Team, and Countdown practice in every arc.',
+      'Weekly problem sets, timed drills, and a Fall mock competition at week 12.',
+      'Pre-algebra helps. No contest experience required.',
+      'Cap 30. Spring continues the same year plan.',
     ],
     night:
       'Wednesdays, 5:30 to 6:45 p.m., in the SHMS library.\nTwelve sessions. 75 minutes each night.',
