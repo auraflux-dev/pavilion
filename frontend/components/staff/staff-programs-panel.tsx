@@ -59,18 +59,6 @@ type Program = {
   seatsRemaining?: number | null
 }
 
-type Session = {
-  id: string
-  programId: string
-  programName: string
-  title: string
-  startAt: string | null
-  endAt: string | null
-  location: string
-  instructorName: string
-  grades: string
-  active: boolean
-}
 
 type Enrollment = {
   id: string
@@ -121,9 +109,8 @@ function sortProgramsByDisplayOrder(list: Program[]): Program[] {
 
 export function StaffProgramsPanel() {
   const [programs, setPrograms] = useState<Program[]>([])
-  const [sessions, setSessions] = useState<Session[]>([])
   const [canManageAll, setCanManageAll] = useState(true)
-  const [tab, setTab] = useState<'programs' | 'sessions' | 'roster' | 'attendance' | 'calendar'>(
+  const [tab, setTab] = useState<'programs' | 'roster' | 'attendance' | 'calendar'>(
     'programs',
   )
   const [rosterProgramId, setRosterProgramId] = useState('')
@@ -148,23 +135,11 @@ export function StaffProgramsPanel() {
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({})
   const [advancedIds, setAdvancedIds] = useState<Record<string, boolean>>({})
-  const [showAddSession, setShowAddSession] = useState(false)
   const [showClassMessage, setShowClassMessage] = useState(false)
-  const [expandedSessionIds, setExpandedSessionIds] = useState<Record<string, boolean>>({})
   const [attProgramId, setAttProgramId] = useState('')
   const [attDate, setAttDate] = useState(todayYmd)
   const [attStudents, setAttStudents] = useState<AttendanceStudent[]>([])
   const [attDraft, setAttDraft] = useState<Record<string, { status: string; notes: string }>>({})
-  const [sessionForm, setSessionForm] = useState({
-    programName: '',
-    programId: '',
-    title: '',
-    startAt: '',
-    endAt: '',
-    location: '',
-    instructorName: '',
-    grades: '',
-  })
 
   const visiblePrograms = useMemo(() => {
     if (showOlderPrograms) return sortProgramsByDisplayOrder(programs)
@@ -175,27 +150,6 @@ export function StaffProgramsPanel() {
     return visibleIdOrder.map((id) => byId.get(id)).filter(Boolean) as Program[]
   }, [programs, showOlderPrograms, visibleIdOrder])
 
-  const visibleProgramIds = useMemo(
-    () => new Set(visiblePrograms.map((p) => p.id)),
-    [visiblePrograms],
-  )
-
-  const upcomingSessions = useMemo(() => {
-    const now = Date.now()
-    return [...sessions]
-      .filter((s) => s.active !== false)
-      .filter((s) => !s.programId || visibleProgramIds.has(s.programId))
-      .filter((s) => {
-        if (!s.startAt) return true
-        return new Date(s.startAt).getTime() >= now - 12 * 60 * 60 * 1000
-      })
-      .sort((a, b) => String(a.startAt ?? '').localeCompare(String(b.startAt ?? '')))
-  }, [sessions, visibleProgramIds])
-
-  const visibleSessions = useMemo(
-    () => sessions.filter((s) => !s.programId || visibleProgramIds.has(s.programId)),
-    [sessions, visibleProgramIds],
-  )
 
   const load = useCallback(async () => {
     try {
@@ -203,7 +157,6 @@ export function StaffProgramsPanel() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Load failed')
       let list = (d.programs ?? []) as Program[]
-      setSessions(d.sessions ?? [])
       setCanManageAll(d.canManageAll !== false)
       // Link + seed empty CMS fields from Fall packet so the public site reads CMS only.
       if (d.canManageAll !== false) {
@@ -307,12 +260,6 @@ export function StaffProgramsPanel() {
     setPrograms((list) =>
       list.map((p) => (p.id === id ? ({ ...p, ...body } as Program) : p)),
     )
-    if (typeof body.name === 'string') {
-      const nextName = body.name
-      setSessions((list) =>
-        list.map((s) => (s.programId === id ? { ...s, programName: nextName } : s)),
-      )
-    }
   }
 
   async function saveProgram(id: string, body: Record<string, unknown>) {
@@ -466,98 +413,14 @@ export function StaffProgramsPanel() {
     }
   }
 
-  async function deleteSession(id: string, title: string) {
-    if (
-      typeof window !== 'undefined' &&
-      !window.confirm(`Remove session “${title}”?`)
-    ) {
-      return
-    }
-    setBusy(true)
-    setStatus('')
-    try {
-      const r = await fetch('/api/staff/programs', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind: 'session', id }),
-      })
-      const d = await r.json()
-      if (!r.ok) throw new Error(d.error ?? 'Could not remove session')
-      setStatus('Session removed.')
-      await load()
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Could not remove session')
-    } finally {
-      setBusy(false)
-    }
-  }
 
   /** @deprecated alias kept for older call sites in this file */
   async function patchProgram(id: string, body: Record<string, unknown>) {
     await saveProgram(id, body)
   }
 
-  async function patchSession(id: string, body: Record<string, unknown>) {
-    setBusy(true)
-    setStatus('')
-    try {
-      const r = await fetch('/api/staff/programs', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind: 'session', id, ...body }),
-      })
-      const d = await r.json()
-      if (!r.ok) throw new Error(d.error ?? 'Update failed')
-      await load()
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Update failed')
-    } finally {
-      setBusy(false)
-    }
-  }
 
-  function toDatetimeLocal(iso: string | null): string {
-    if (!iso) return ''
-    const d = new Date(iso)
-    if (Number.isNaN(d.getTime())) return ''
-    const pad = (n: number) => String(n).padStart(2, '0')
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
-  }
 
-  async function addSession() {
-    setBusy(true)
-    setStatus('')
-    try {
-      const r = await fetch('/api/staff/programs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          kind: 'session',
-          ...sessionForm,
-          startAt: sessionForm.startAt ? new Date(sessionForm.startAt).toISOString() : null,
-          endAt: sessionForm.endAt ? new Date(sessionForm.endAt).toISOString() : null,
-        }),
-      })
-      const d = await r.json()
-      if (!r.ok) throw new Error(d.error ?? 'Could not add session')
-      setStatus('Session added.')
-      setSessionForm({
-        programName: '',
-        programId: '',
-        title: '',
-        startAt: '',
-        endAt: '',
-        location: '',
-        instructorName: '',
-        grades: '',
-      })
-      await load()
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Could not add session')
-    } finally {
-      setBusy(false)
-    }
-  }
 
   async function updateEnrollment(id: string, nextStatus: string) {
     setBusy(true)
@@ -728,7 +591,6 @@ export function StaffProgramsPanel() {
 
   const tabs = [
     ['programs', 'Programs'],
-    ['sessions', 'Sessions'],
     ['roster', 'Roster'],
     ['attendance', 'Attendance'],
     ['calendar', 'Calendar'],
@@ -739,7 +601,9 @@ export function StaffProgramsPanel() {
       <div>
         <h2 className="text-lg font-bold">Programs</h2>
         <p className="text-xs text-[#5A6070] whitespace-pre-line">
-          {`Programs = public catalog cards.\nCalendar = season schedule table.\nSessions = optional night-by-night CMS rows.\nRoster / Attendance = enrolled families.`}
+          {`Programs = public catalog cards.
+Calendar = season schedule table.
+Roster / Attendance = enrolled families.`}
         </p>
         <p className="text-[11px] text-[#5A6070] mt-1 min-h-[1.25rem]" aria-live="polite">
           {savingProgramId ? 'Saving…' : status || '\u00a0'}
@@ -1288,212 +1152,6 @@ Leave blank for normal in-app Square checkout.`}
         </div>
       ) : null}
 
-      {tab === 'sessions' ? (
-        <div className="space-y-4">
-          <p className="text-xs text-[#5A6070] whitespace-pre-line">
-            {`Optional night-by-night CMS rows (ProgramSessions).\nMost classes only need day/time on the Programs card.\nUse this if you track each meeting date separately.`}
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            className="text-sm"
-            onClick={() => setShowAddSession((v) => !v)}
-          >
-            {showAddSession ? 'Hide add form' : 'Add session'}
-          </Button>
-          {showAddSession ? (
-          <div className="rounded-lg border border-[var(--border)] p-3 space-y-2 bg-[#FAFAF8]">
-            <p className="text-xs font-bold text-[#5A6070]">New session</p>
-            <select
-              value={sessionForm.programId}
-              onChange={(e) => {
-                const p = visiblePrograms.find((x) => x.id === e.target.value)
-                setSessionForm((f) => ({
-                  ...f,
-                  programId: e.target.value,
-                  programName: p?.name ?? '',
-                  title: f.title || p?.name || '',
-                }))
-              }}
-              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-            >
-              <option value="">Program…</option>
-              {visiblePrograms.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <input
-              value={sessionForm.title}
-              onChange={(e) => setSessionForm((f) => ({ ...f, title: e.target.value }))}
-              placeholder="Session title"
-              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-            />
-            <div className="grid sm:grid-cols-2 gap-2">
-              <input
-                type="datetime-local"
-                value={sessionForm.startAt}
-                onChange={(e) => setSessionForm((f) => ({ ...f, startAt: e.target.value }))}
-                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-              />
-              <input
-                type="datetime-local"
-                value={sessionForm.endAt}
-                onChange={(e) => setSessionForm((f) => ({ ...f, endAt: e.target.value }))}
-                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-              />
-              <input
-                value={sessionForm.location}
-                onChange={(e) => setSessionForm((f) => ({ ...f, location: e.target.value }))}
-                placeholder="Location"
-                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-              />
-              <input
-                value={sessionForm.instructorName}
-                onChange={(e) => setSessionForm((f) => ({ ...f, instructorName: e.target.value }))}
-                placeholder="Instructor"
-                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-              />
-            </div>
-            <Button
-              disabled={busy || !sessionForm.programName || !sessionForm.title}
-              onClick={() => void addSession()}
-              className="text-white"
-              style={{ backgroundColor: 'var(--brand-green)' }}
-            >
-              Save session
-            </Button>
-          </div>
-          ) : null}
-          <div className="space-y-3">
-            {visibleSessions.length === 0 ? (
-              <p className="text-sm text-[#5A6070]">No CMS session rows yet.</p>
-            ) : null}
-            {visibleSessions.map((s) => (
-              <div key={s.id} className="border border-[var(--border)] rounded-lg p-3 space-y-2 text-sm">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="font-semibold">{s.title}</p>
-                    <p className="text-xs text-[#5A6070]">
-                      {s.programName}
-                      {s.startAt ? ` · ${new Date(s.startAt).toLocaleString()}` : ''}
-                      {s.active === false ? ' · inactive' : ''}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className="text-xs font-semibold"
-                    style={{ color: 'var(--brand-green)' }}
-                    onClick={() =>
-                      setExpandedSessionIds((prev) => ({ ...prev, [s.id]: !prev[s.id] }))
-                    }
-                  >
-                    {expandedSessionIds[s.id] ? 'Hide' : 'Edit'}
-                  </button>
-                </div>
-                {expandedSessionIds[s.id] ? (
-                <>
-                <input
-                  defaultValue={s.title}
-                  disabled={busy}
-                  aria-label="Session title"
-                  className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm font-semibold"
-                  onBlur={(e) => {
-                    const next = e.target.value.trim()
-                    if (next && next !== s.title) void patchSession(s.id, { title: next })
-                  }}
-                />
-                <div className="grid sm:grid-cols-2 gap-2">
-                  <input
-                    type="datetime-local"
-                    defaultValue={toDatetimeLocal(s.startAt)}
-                    disabled={busy}
-                    aria-label="Session start"
-                    className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                    onBlur={(e) => {
-                      const prev = toDatetimeLocal(s.startAt)
-                      if (e.target.value !== prev) {
-                        void patchSession(s.id, {
-                          startAt: e.target.value ? new Date(e.target.value).toISOString() : null,
-                        })
-                      }
-                    }}
-                  />
-                  <input
-                    type="datetime-local"
-                    defaultValue={toDatetimeLocal(s.endAt)}
-                    disabled={busy}
-                    aria-label="Session end"
-                    className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                    onBlur={(e) => {
-                      const prev = toDatetimeLocal(s.endAt)
-                      if (e.target.value !== prev) {
-                        void patchSession(s.id, {
-                          endAt: e.target.value ? new Date(e.target.value).toISOString() : null,
-                        })
-                      }
-                    }}
-                  />
-                  <input
-                    defaultValue={s.location}
-                    disabled={busy}
-                    placeholder="Location"
-                    className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                    onBlur={(e) => {
-                      if (e.target.value !== s.location) {
-                        void patchSession(s.id, { location: e.target.value })
-                      }
-                    }}
-                  />
-                  <input
-                    defaultValue={s.instructorName}
-                    disabled={busy}
-                    placeholder="Instructor"
-                    className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                    onBlur={(e) => {
-                      if (e.target.value !== s.instructorName) {
-                        void patchSession(s.id, { instructorName: e.target.value })
-                      }
-                    }}
-                  />
-                  <input
-                    defaultValue={s.grades}
-                    disabled={busy}
-                    placeholder="Grades"
-                    className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                    onBlur={(e) => {
-                      if (e.target.value !== s.grades) {
-                        void patchSession(s.id, { grades: e.target.value })
-                      }
-                    }}
-                  />
-                  <label className="inline-flex items-center gap-1 text-xs">
-                    <input
-                      type="checkbox"
-                      checked={s.active}
-                      disabled={busy}
-                      onChange={(e) => void patchSession(s.id, { active: e.target.checked })}
-                    />
-                    Active
-                  </label>
-                  <button
-                    type="button"
-                    className="text-xs font-semibold underline text-red-700"
-                    disabled={busy}
-                    onClick={() => void deleteSession(s.id, s.title)}
-                  >
-                    Remove session
-                  </button>
-                </div>
-                </>
-                ) : null}
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
       {tab === 'roster' ? (
         <div className="space-y-4">
           <p className="text-xs text-[#5A6070] whitespace-pre-line">
@@ -1837,28 +1495,6 @@ Edit cells here or on the Programs card. Click out to save.`}
               onRemoveProgram={(id, name) => void deleteProgram(id, name)}
             />
           </div>
-          {upcomingSessions.length > 0 ? (
-            <div className="space-y-2">
-              <p className="text-xs font-bold text-[#5A6070]">Upcoming CMS session rows</p>
-              {upcomingSessions.map((s) => (
-                <div key={s.id} className="border border-[var(--border)] rounded-lg p-3 text-sm">
-                  <p className="font-semibold">
-                    {s.title} · {s.programName}
-                  </p>
-                  <p className="text-xs text-[#5A6070]">
-                    {s.startAt ? new Date(s.startAt).toLocaleString() : 'TBD'}
-                    {s.endAt ? ` to ${new Date(s.endAt).toLocaleTimeString()}` : ''}
-                    {s.location ? ` · ${s.location}` : ''}
-                    {s.instructorName ? ` · ${s.instructorName}` : ''}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs text-[#5A6070]">
-              No optional CMS session rows. That is fine if the schedule table above is enough.
-            </p>
-          )}
         </div>
       ) : null}
     </section>
