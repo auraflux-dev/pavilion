@@ -37,6 +37,14 @@ export async function POST(req: NextRequest) {
       ...session.emails,
     ]
 
+    const { isPublicProgramsCatalogOpen } = await import('@/lib/programs/season')
+    if (!isPublicProgramsCatalogOpen()) {
+      return NextResponse.json(
+        { error: 'Enrichment registration opens Monday, August 24.' },
+        { status: 403 },
+      )
+    }
+
     const program = await getProgramById(programId)
     if (!program) return NextResponse.json({ error: 'Program not found' }, { status: 404 })
     if (!program.registrationOpen) {

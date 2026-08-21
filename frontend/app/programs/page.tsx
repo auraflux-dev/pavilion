@@ -14,6 +14,7 @@ import {
 } from '@/lib/staff/inbox'
 import { ProgramsSectionNav } from '@/components/jump-nav/public-section-navs'
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
+import { isPublicProgramsCatalogOpen } from '@/lib/programs/season'
 
 export const revalidate = 300 // revalidate every 5 minutes
 
@@ -27,9 +28,10 @@ export default async function ProgramsPage() {
       settings.get('contactEmailPrograms', DEFAULT_PROGRAMS_INBOXES),
     ).join(', ') || DEFAULT_PROGRAMS_INBOXES
   const inSession = settings.getBool('schoolInSession', false)
+  const catalogOpen = inSession && isPublicProgramsCatalogOpen()
 
   try {
-    programs = inSession ? await getAllPrograms() : []
+    programs = catalogOpen ? await getAllPrograms() : []
   } catch {
     error = true
   }
@@ -44,73 +46,83 @@ export default async function ProgramsPage() {
           content={{
             ...page,
             // Keep hero short. Class names live on the cards below, not in a duplicate list.
-            body: inSession
+            body: catalogOpen
               ? 'After-school classes for grades 6 to 8.'
-              : vanillaizeIfDemo(
-                  'Enrichment programs are paused while school is out of session. Check back in the fall, or visit The Cove and Membership anytime.',
-                ),
-            ...(inSession
+              : inSession
+                ? 'Fall enrichment listing opens Monday, August 24.\nCheck back then for classes, times, and registration.'
+                : vanillaizeIfDemo(
+                    'Enrichment programs are paused while school is out of session. Check back in the fall, or visit The Cove and Membership anytime.',
+                  ),
+            ...(catalogOpen
               ? {}
-              : {
-                  eyebrow: 'Off season',
-                  title: vanillaizeIfDemo('Programs resume with the school year'),
-                  ctaLabel: vanillaizeIfDemo('Shop The Cove'),
-                  ctaHref: '/cove',
-                }),
+              : inSession
+                ? {
+                    eyebrow: 'Opens Monday',
+                    title: 'Enrichment programs',
+                    ctaLabel: 'Shop The Cove',
+                    ctaHref: '/cove',
+                  }
+                : {
+                    eyebrow: 'Off season',
+                    title: vanillaizeIfDemo('Programs resume with the school year'),
+                    ctaLabel: vanillaizeIfDemo('Shop The Cove'),
+                    ctaHref: '/cove',
+                  }),
           }}
         />
-        <ProgramsSectionNav />
+        {catalogOpen ? <ProgramsSectionNav /> : null}
 
-        {/* Programs grid */}
-        <section
-          id="programs-list"
-          className="scroll-mt-28 relative overflow-hidden py-16 md:py-24"
-          style={{ backgroundColor: 'var(--brand-warm)' }}
-          aria-labelledby="programs-list-heading"
-        >
-          <BrandImageWash src="/home/hero-a.jpg" side="left" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 id="programs-list-heading" className="sr-only">
-              Enrichment by season
-            </h2>
+        {catalogOpen ? (
+          <section
+            id="programs-list"
+            className="scroll-mt-28 relative overflow-hidden py-16 md:py-24"
+            style={{ backgroundColor: 'var(--brand-warm)' }}
+            aria-labelledby="programs-list-heading"
+          >
+            <BrandImageWash src="/home/hero-a.jpg" side="left" />
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 id="programs-list-heading" className="sr-only">
+                Enrichment by season
+              </h2>
 
-            {error && (
-              <div className="text-center py-16">
-                <p className="text-[#5A6070] text-lg">
-                  Unable to load programs right now. Please try again later.
-                </p>
-              </div>
-            )}
-
-            {!error && programs.length === 0 && (
-              <div className="text-center py-16">
-                <p className="text-[#5A6070] text-lg">
-                  No programs are currently listed. Check back soon!
-                </p>
-              </div>
-            )}
-
-            {!error && programs.length > 0 && (
-              <>
-                {(page.sectionTitle || page.sectionBody) && (
-                  <p className="mb-8 text-center text-sm text-[#5A6070] whitespace-pre-line">
-                    {page.sectionTitle ? (
-                      <a
-                        href="/programs/fall-2026"
-                        className="font-semibold underline"
-                        style={{ color: 'var(--brand-green)' }}
-                      >
-                        {page.sectionTitle}
-                      </a>
-                    ) : null}
-                    {page.sectionBody ? `\n${page.sectionBody}` : ''}
+              {error && (
+                <div className="text-center py-16">
+                  <p className="text-[#5A6070] text-lg">
+                    Unable to load programs right now. Please try again later.
                   </p>
-                )}
-                <ProgramsFilter programs={programs} />
-              </>
-            )}
-          </div>
-        </section>
+                </div>
+              )}
+
+              {!error && programs.length === 0 && (
+                <div className="text-center py-16">
+                  <p className="text-[#5A6070] text-lg">
+                    No programs are currently listed. Check back soon!
+                  </p>
+                </div>
+              )}
+
+              {!error && programs.length > 0 && (
+                <>
+                  {(page.sectionTitle || page.sectionBody) && (
+                    <p className="mb-8 text-center text-sm text-[#5A6070] whitespace-pre-line">
+                      {page.sectionTitle ? (
+                        <a
+                          href="/programs/fall-2026"
+                          className="font-semibold underline"
+                          style={{ color: 'var(--brand-green)' }}
+                        >
+                          {page.sectionTitle}
+                        </a>
+                      ) : null}
+                      {page.sectionBody ? `\n${page.sectionBody}` : ''}
+                    </p>
+                  )}
+                  <ProgramsFilter programs={programs} />
+                </>
+              )}
+            </div>
+          </section>
+        ) : null}
 
         {/* Questions → Co-VP Fundraising & Programs */}
         <section

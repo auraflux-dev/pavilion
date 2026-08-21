@@ -49,7 +49,8 @@ export default async function ProgramLandingPage({ params }: Props) {
   const { slug } = await params
   const settings = await getSiteSettings()
   const inSession = settings.getBool('schoolInSession', false)
-  if (!inSession) notFound()
+  const { isPublicProgramsCatalogOpen } = await import('@/lib/programs/season')
+  if (!inSession || !isPublicProgramsCatalogOpen()) notFound()
 
   const programs = await getAllPrograms().catch(() => [])
   const program = findProgramBySlug(programs, slug)

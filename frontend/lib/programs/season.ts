@@ -17,6 +17,21 @@ export const SPRING_CATALOG_ENABLED = false
 /** Flip when full-year SKUs may appear / sell. Stay dark until then. */
 export const FULL_YEAR_CATALOG_ENABLED = false
 
+/**
+ * Public enrichment unlock (America/New_York).
+ * Hidden from visitors until Monday 2026-08-24 local midnight.
+ * Staff CMS and APIs stay available. Flip date or remove gate when no longer needed.
+ */
+export const PROGRAMS_PUBLIC_OPENS_AT_MS = Date.parse('2026-08-24T00:00:00-04:00')
+
+/** True when parents may see /programs catalog, landings, home preview, and nav link. */
+export function isPublicProgramsCatalogOpen(now: Date = new Date()): boolean {
+  // Keep demo / Commons catalog visible for product tours.
+  if (process.env.COMMONS_PLATFORM === 'true') return true
+  if (process.env.DEMO_INSTANCE === 'true' || process.env.NEXT_PUBLIC_DEMO_INSTANCE === 'true') return true
+  return now.getTime() >= PROGRAMS_PUBLIC_OPENS_AT_MS
+}
+
 export type PublicCatalogSeasonId = Exclude<CatalogSeasonId, 'full-year'>
 
 export const CURRENT_FALL_SEASON: PublicCatalogSeasonId = 'fall-2026'
@@ -99,8 +114,9 @@ export function isSeasonPubliclyListed(season: CatalogSeasonId): boolean {
   return true
 }
 
-/** Public /programs catalog: season gates + no full-year until enabled. */
+/** Public /programs catalog: date gate + season gates + no full-year until enabled. */
 export function filterProgramsForPublicCatalog<T extends SeasonAwareProgram>(programs: T[]): T[] {
+  if (!isPublicProgramsCatalogOpen()) return []
   return programs.filter((p) => isSeasonPubliclyListed(resolveProgramSeason(p)))
 }
 

@@ -13,9 +13,11 @@ import { HomeSectionNav } from '@/components/jump-nav/public-section-navs'
 import { isSchoolInSession } from '@/lib/api/visitor-season'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isPublicProgramsCatalogOpen } from '@/lib/programs/season'
 
 export default async function HomePage() {
   const inSession = await isSchoolInSession()
+  const programsPublic = inSession && isPublicProgramsCatalogOpen()
   const demo = isDemoInstance()
   const commons = process.env.COMMONS_PLATFORM === 'true'
 
@@ -40,8 +42,8 @@ export default async function HomePage() {
           }
           background="#FFFFFF"
         />
-        <HomeSectionNav showPrograms={inSession && !commons} showEvents={inSession} />
-        {inSession && !commons ? <ProgramsPreview /> : null}
+        <HomeSectionNav showPrograms={programsPublic && !commons} showEvents={inSession} />
+        {programsPublic && !commons ? <ProgramsPreview /> : null}
         <VolunteerSection />
         {inSession ? <UpcomingEvents /> : null}
         <DonateBlock
