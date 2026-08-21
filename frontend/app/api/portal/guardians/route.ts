@@ -35,7 +35,7 @@ async function notifyPrimaryOfInvite(opts: {
     `You invited ${opts.guardianEmail} to share your SHMS PTO family account.`,
     '',
     opts.emailedInvitee
-      ? `We emailed them that address. If it was mistyped, they will not get it. Remove them in Household adults and invite again.`
+      ? `We emailed them that address. If it was mistyped, they will not get it. Remove them under Share portal access and invite again.`
       : `We did not email ${opts.guardianEmail}. Share the link below instead.`,
     '',
     'Share this link (they must sign in as that email):',
@@ -100,8 +100,8 @@ export async function GET(req: NextRequest) {
         })),
       studentCount: students.length,
       note:       isPrimary
-        ? 'Invite another adult (spouse, co-parent, or guardian) to use their own login with the same students. Type their email twice so we catch typos. You get a copy of the invite and a share link. Cove Digital Card stays on this household account unless they buy separately.'
-        : 'You are linked as a household adult. Cove membership and family code belong to the primary account holder.',
+        ? 'Invite another adult so they get their own login for the same students. Type their email twice so we catch typos. You get a copy of the invite and a share link. Cove Digital Card stays on this account unless they buy separately.'
+        : 'You are linked with a shared portal login. Cove membership and family code belong to the primary account holder.',
     })
   } catch (err) {
     console.error('/api/portal/guardians GET', err)
@@ -213,7 +213,7 @@ export async function DELETE(req: NextRequest) {
     const primary = await resolvePrimaryParentEmail(session.email)
     if (primary !== session.email.trim().toLowerCase()) {
       return NextResponse.json(
-        { error: 'Only the primary account holder can remove household adults.' },
+        { error: 'Only the primary account holder can remove shared portal access.' },
         { status: 403 },
       )
     }

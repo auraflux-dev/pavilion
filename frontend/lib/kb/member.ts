@@ -92,7 +92,7 @@ Add every student in your household so programs, The Cove balance, and messages 
       categoryId: 'students',
       summary: 'Invite another adult to the same kids with their own login.',
       order: 2,
-      body: `On **My Students**, open **Household adults**.
+      body: `On **My Students**, open **Share portal access**.
 
 This is for **any** second adult. Married spouses, separated co-parents, or guardians with no parents on the account.
 
@@ -102,7 +102,7 @@ This is for **any** second adult. Married spouses, separated co-parents, or guar
 4. Both logins see the same students
 5. Cove Digital Card stays with the **primary account holder** (whoever signed up first) unless they ask for a separate card
 
-If they never get the email, use **Copy link** from Household adults instead of waiting. If the invite address bounces, you also get an email and a portal message so you can fix the spelling. You can remove an adult anytime.`,
+If they never get the email, use **Copy link** from Share portal access instead of waiting. If the invite address bounces, you also get an email and a portal message so you can fix the spelling. You can remove an adult anytime.`,
     },
     {
       slug: 'edit-student',
