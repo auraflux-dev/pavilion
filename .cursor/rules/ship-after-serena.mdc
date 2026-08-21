@@ -29,7 +29,7 @@ If Serena passes (diagnostics clean, scoped to the task), do this **exact** orde
 
 ## 3. STOP — wait for Rob
 
-**Hard stop.** Do not continue until Rob explicitly approves with clear go-ahead, for example: `looks good`, `ship it`, `promote`, `go live`, `prod`, or `push`.
+**Hard stop.** Do not continue until Rob explicitly approves with clear go-ahead, for example: `looks good`, `ship it`, `promote`, `go live`, `prod`, `push`, or `OK`.
 
 Until then:
 
@@ -46,6 +46,7 @@ Until then:
 ## Exceptions
 
 - **Rules / docs / memories only** (no application runtime): commit then push. Skip Preview and production.
+- **Staff-only** (Staff dashboard, `/staff`, `components/staff`, `app/api/staff`, staff permissions/roles with no public visitor UI change): after Serena QA, commit → **production** from a clean worktree of that SHA → then `git push`. **Skip Preview** and **do not wait** for Rob OK. If the same commit also changes public pages, membership, checkout, or visitor copy, use full Preview-first instead.
 - Never include unrelated WIP, secrets, Budget/Plaid/terminal/spirit-wear/`tmp` unless they are the task.
 - Never mix Stone Hill and Pavilion env (DATABASE_URL, Wix, Square, Stripe).
 
@@ -54,3 +55,4 @@ Until then:
 - Commit → `vercel --prod` → push in one turn without Preview + Rob OK.
 - Pushing to GitHub before production promote when this was an application ship.
 - Calling the task “shipped” or “live” when only Preview exists.
+- Skipping Preview for public visitor changes by labeling them “staff-related.”
