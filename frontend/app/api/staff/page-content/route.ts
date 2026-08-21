@@ -6,20 +6,20 @@ import {
   isCovePageContentKey,
   PAGE_CONTENT_DEFAULTS,
 } from '@/lib/defaults/page-content'
-import type { StaffProfile } from '@/lib/staff/roles'
+import { STAFF_ROLES, type StaffProfile } from '@/lib/staff/roles'
 import { vanillaizeCopy } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!requireStaffRole(session?.staff ?? null, ['marketing', 'secretary', 'admin', 'retail'])) {
+  if (!requireStaffRole(session?.staff ?? null, [...STAFF_ROLES])) {
     return null
   }
   return session
 }
 
 function canEditAllPageCopy(staff: StaffProfile | null) {
-  return requireStaffRole(staff, ['marketing', 'secretary', 'admin'])
+  return requireStaffRole(staff, [...STAFF_ROLES])
 }
 
 function canEditPageCopy(staff: StaffProfile | null, page: string) {

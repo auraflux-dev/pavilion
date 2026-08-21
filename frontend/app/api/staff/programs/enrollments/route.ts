@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
 import {
+  STAFF_ROLES,
   canAccessProgram,
   canManageAllPrograms,
   scopedProgramIds,
@@ -27,14 +28,7 @@ import { getProgramById } from '@/lib/api/programs'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (
-    !requireStaffRole(session?.staff ?? null, [
-      'programs',
-      'instructor',
-      'coordinator',
-      'admin',
-    ])
-  ) {
+  if (!requireStaffRole(session?.staff ?? null, [...STAFF_ROLES])) {
     return null
   }
   return session

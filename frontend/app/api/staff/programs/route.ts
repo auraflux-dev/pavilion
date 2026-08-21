@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
 import {
+  STAFF_ROLES,
   scopedProgramIds,
   canManageAllPrograms,
   canAccessProgram,
@@ -15,14 +16,7 @@ import {
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (
-    !requireStaffRole(session?.staff ?? null, [
-      'programs',
-      'instructor',
-      'coordinator',
-      'admin',
-    ])
-  ) {
+  if (!requireStaffRole(session?.staff ?? null, [...STAFF_ROLES])) {
     return null
   }
   return session
@@ -203,7 +197,7 @@ export async function POST(req: NextRequest) {
     if (kind === 'program') {
       if (!canManageAllPrograms(session.staff)) {
         return NextResponse.json(
-          { error: 'Only Programs VP / admin can create programs' },
+          { error: 'Staff access required to create programs' },
           { status: 403 },
         )
       }
@@ -423,7 +417,7 @@ export async function DELETE(req: NextRequest) {
 
     if (!canManageAllPrograms(session.staff)) {
       return NextResponse.json(
-        { error: 'Only Programs VP / admin can delete programs' },
+        { error: 'Staff access required to delete programs' },
         { status: 403 },
       )
     }

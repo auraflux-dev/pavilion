@@ -31,6 +31,8 @@ export const STAFF_BASE_WORKSPACES: StaffWorkspace[] = [
   'projects',
   'expenses',
   'help',
+  'programs',
+  'content',
 ]
 
 /** Admin-only. Not assignable as extras. */
@@ -109,7 +111,7 @@ export const WORKSPACE_ROLES: Record<StaffWorkspace, StaffRole[]> = {
   surveys: ['marketing', 'secretary', 'wellness', 'admin'],
   messages: ['membership', 'secretary', 'programs', 'instructor', 'coordinator', 'admin'],
   minutes: ['secretary', 'admin'],
-  programs: ['programs', 'instructor', 'coordinator', 'admin'],
+  programs: ALL_ROLES,
   timesheets: ['programs', 'instructor', 'coordinator', 'admin'],
   payments: ['treasurer', 'admin'],
   budget: ['treasurer', 'admin'],
@@ -118,7 +120,7 @@ export const WORKSPACE_ROLES: Record<StaffWorkspace, StaffRole[]> = {
   discounts: ['retail', 'membership', 'admin'],
   membership: ['membership', 'secretary', 'admin'],
   tiers: ['membership', 'secretary', 'admin'],
-  content: ['marketing', 'secretary', 'retail', 'admin'],
+  content: ALL_ROLES,
   site: [
     'marketing',
     'secretary',

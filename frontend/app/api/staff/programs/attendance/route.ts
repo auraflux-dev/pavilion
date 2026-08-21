@@ -4,7 +4,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
-import { canAccessProgram } from '@/lib/staff/roles'
+import { STAFF_ROLES, canAccessProgram } from '@/lib/staff/roles'
 import { getProgramById } from '@/lib/api/programs'
 import { getWixClient } from '@/lib/wix-client'
 import {
@@ -55,14 +55,7 @@ async function loadStudentSafety(studentId: string) {
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (
-    !requireStaffRole(session?.staff ?? null, [
-      'programs',
-      'instructor',
-      'coordinator',
-      'admin',
-    ])
-  ) {
+  if (!requireStaffRole(session?.staff ?? null, [...STAFF_ROLES])) {
     return null
   }
   return session

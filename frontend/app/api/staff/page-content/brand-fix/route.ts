@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
+import { STAFF_ROLES } from '@/lib/staff/roles'
 import { brandifyShmsPto } from '@/lib/copy/brandify-shms-pto'
 
 const TARGETS: { collection: string; fields: string[] }[] = [
@@ -19,7 +20,7 @@ const TARGETS: { collection: string; fields: string[] }[] = [
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!requireStaffRole(session?.staff ?? null, ['marketing', 'secretary', 'admin'])) return null
+  if (!requireStaffRole(session?.staff ?? null, [...STAFF_ROLES])) return null
   return session
 }
 
