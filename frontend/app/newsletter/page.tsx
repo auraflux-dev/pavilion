@@ -5,12 +5,15 @@ import { PageHero } from '@/components/page-hero'
 import { NewsletterSignup } from '@/components/newsletter/newsletter-signup'
 import { getPageContent } from '@/lib/api/page-content'
 import { Mail, Bell, Calendar, BookOpen } from 'lucide-react'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 const NEWSLETTER_PERKS = [
   {
     icon: Bell,
     title: 'Event Reminders',
-    description: 'Never miss Dance Night, NOVA Math, PTO meetings, or any school event.',
+    description: vanillaizeIfDemo(
+      'Never miss Dance Night, NOVA Math, PTO meetings, or any school event.',
+    ),
   },
   {
     icon: BookOpen,

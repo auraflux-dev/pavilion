@@ -258,7 +258,7 @@ export const DEMO_EVENTS: WixEvent[] = [
   {
     id: 'demo-fest',
     title: 'Fall Festival',
-    description: `Carnival games, food, and a ${b.store} window. Volunteers sign up from the family portal.`,
+    description: `Carnival games, food, and the ${b.store} window. Volunteers sign up from the family portal.`,
     slug: 'fall-festival',
     mainImage: { url: '/demo/hero-a.jpg' },
     location: { name: `${b.school} blacktop` },

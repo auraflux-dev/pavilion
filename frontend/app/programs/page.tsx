@@ -8,6 +8,7 @@ import { getAllPrograms, type Program } from '@/lib/api/programs'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isDemoInstance } from '@/lib/demo/instance'
 import {
   DEFAULT_PROGRAMS_INBOXES,
   parseStaffInboxes,
@@ -57,7 +58,9 @@ export default async function ProgramsPage({
             ...page,
             // Keep hero short. Class names live on the cards below, not in a duplicate list.
             body: catalogOpen
-              ? 'After-school classes for grades 6 to 8.'
+              ? isDemoInstance()
+                ? 'After-school clubs and classes for elementary grades.'
+                : 'After-school classes for grades 6 to 8.'
               : inSession
                 ? 'Check back here once you receive the announcement that registration is open.'
                 : vanillaizeIfDemo(

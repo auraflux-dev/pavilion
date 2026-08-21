@@ -18,7 +18,7 @@ export async function ProgramsPreview() {
   const display = programs.length > 0 ? programs : []
   const sectionBlurb =
     String(page?.sectionBody || page?.body || '').trim() ||
-    'After-school enrichment for grades 6 to 8.'
+    'After-school enrichment for students.'
 
   return (
     <section
