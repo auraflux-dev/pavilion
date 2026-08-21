@@ -8,10 +8,7 @@ import type { Program } from '@/lib/api/programs'
 import { displayProgramName } from '@/lib/programs/display-name'
 import { programPublicPath } from '@/lib/programs/public-path'
 import { formatShortDate, programDateBadge } from '@/lib/programs/schedule'
-import {
-  FALL_2026_EP_LOCATION,
-  matchFall2026EpClass,
-} from '@/lib/programs/fall-2026-ep'
+
 import {
   formatMemberPriorityUntil,
   getRegistrationPhase,
@@ -110,18 +107,26 @@ export function ProgramCard({ program }: ProgramCardProps) {
   const { lead, bullets } = programCopy(program.description || '')
   const feeLabel = feeTbd ? 'Tuition TBD' : program.fee === 0 ? 'Free' : program.fee != null ? `$${program.fee}` : null
 
-  const ep = matchFall2026EpClass(program.name)
-  const firstNight = ep ? ep.dates[0] : program.startDate
-  const lastNight = ep ? ep.dates[ep.dates.length - 1] : program.endDate
+  const meetingDates = String(program.meetingDates ?? '')
+    .split(/[,\n]+/)
+    .map((s) => s.trim().slice(0, 10))
+    .filter((s) => /^\d{4}-\d{2}-\d{2}$/.test(s))
+  const firstNight = meetingDates[0] || program.startDate
+  const lastNight = meetingDates[meetingDates.length - 1] || program.endDate
   const badge = programDateBadge(firstNight)
-  const day = (ep?.dayOfWeek ?? program.dayOfWeek ?? '').trim()
-  const time = (ep?.classTime ?? program.classTime ?? '').trim()
-  const sessionCount = ep?.dates.length ?? (Number(program.durationWeeks ?? 0) || 0)
+  const day = String(program.dayOfWeek ?? '').trim()
+  const time = String(program.classTime ?? '').trim()
+  const sessionCount =
+    meetingDates.length || Number(program.durationWeeks ?? 0) || 0
   const startLabel = formatShortDate(firstNight)
   const endLabel = formatShortDate(lastNight)
-  const location = ep ? FALL_2026_EP_LOCATION : ''
-  const skipLine = ep?.skips ? `No class: ${ep.skips}.` : ''
-  const sessionNote = ep?.sessionNote ?? ''
+  const location = String(program.location ?? '').trim()
+  const skipRaw = String(program.skipsNote ?? '').trim()
+  const skipLine = skipRaw
+    ? skipRaw.toLowerCase().startsWith('no class')
+      ? skipRaw
+      : `No class: ${skipRaw}`
+    : ''
   const rangeLines = [
     sessionCount > 0 && startLabel && endLabel
       ? `${sessionCount} sessions, ${startLabel} to ${endLabel}`
@@ -131,15 +136,14 @@ export function ProgramCard({ program }: ProgramCardProps) {
           ? `${startLabel} to ${endLabel}`
           : '',
     skipLine,
-    sessionNote,
   ]
     .filter(Boolean)
     .join('\n')
 
   const showCmsDetail =
-    !ep &&
     Boolean(String(program.detail ?? '').trim()) &&
     !SCHEDULE_NOISE.test(String(program.detail ?? ''))
+  const memberDiscountNote = String(program.memberDiscountNote ?? '').trim()
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col border border-[var(--border)]">
@@ -245,7 +249,7 @@ export function ProgramCard({ program }: ProgramCardProps) {
               <DollarSign className="w-3.5 h-3.5 shrink-0 mt-0.5" aria-hidden="true" />
               <span className="whitespace-pre-line min-w-0">
                 {feeLabel}
-                {!feeTbd && program.fee > 0 ? '\nMembers 10 / 15 / 30% off' : ''}
+                {memberDiscountNote ? `\n${memberDiscountNote}` : ''}
               </span>
             </div>
           ) : null}

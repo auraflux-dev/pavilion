@@ -95,6 +95,11 @@ export async function POST(req: NextRequest) {
         },
         { key: 'skipsNote', displayName: 'Skip / holiday note', type: 'TEXT' },
         {
+          key: 'memberDiscountNote',
+          displayName: 'Member discount note (under fee on cards)',
+          type: 'TEXT',
+        },
+        {
           key: 'memberPriorityUntil',
           displayName: 'Paid members only until (then open to all)',
           type: 'DATETIME',

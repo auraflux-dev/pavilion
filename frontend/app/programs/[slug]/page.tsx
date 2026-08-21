@@ -6,9 +6,8 @@ import { Footer } from '@/components/footer'
 import { ProgramLanding } from '@/components/programs/program-landing'
 import { getAllPrograms } from '@/lib/api/programs'
 import { displayProgramName } from '@/lib/programs/display-name'
-import { FALL_2026_EP_CLASSES, matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
+import { FALL_2026_EP_CLASSES } from '@/lib/programs/fall-2026-ep'
 import { findProgramBySlug } from '@/lib/programs/public-path'
-import { programLandingCopy } from '@/lib/programs/landing-copy'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { getSiteSettings } from '@/lib/api/site-settings'
 
@@ -28,10 +27,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const program = findProgramBySlug(programs, slug)
   if (!program) return { title: 'Program' }
   const title = displayProgramName(program.name)
-  const ep = matchFall2026EpClass(program.name)
-  const pitch = programLandingCopy(ep?.id)?.pitch.replace(/\n+/g, ' ')
+  const fromCms = String(program.description ?? '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
   const description =
-    pitch ||
+    fromCms ||
     vanillaizeIfDemo('SHMS PTO enrichment at Stone Hill Middle School')
   return {
     title,

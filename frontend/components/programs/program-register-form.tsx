@@ -177,8 +177,10 @@ export function ProgramRegisterForm({
             <p className="text-sm font-bold mt-1" style={{ color: 'var(--brand-green)' }}>
               {feeTbd ? 'Tuition TBD' : fee <= 0 ? 'Free' : `$${fee.toFixed(2)}`}
             </p>
-            {!feeTbd && fee > 0 ? (
-              <p className="text-xs text-[#5A6070] mt-1">Members 10 / 15 / 30% off at checkout.</p>
+            {!feeTbd && fee > 0 && String(program.memberDiscountNote ?? '').trim() ? (
+              <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
+                {String(program.memberDiscountNote).trim()}
+              </p>
             ) : null}
             {scheduleLine ? (
               <p className="text-xs text-[#5A6070] mt-2 leading-relaxed whitespace-pre-line">

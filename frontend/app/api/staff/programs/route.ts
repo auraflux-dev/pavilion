@@ -68,6 +68,7 @@ function mapProgram(item: Record<string, unknown>) {
     location: String(item.location ?? ''),
     meetingDates: String(item.meetingDates ?? ''),
     skipsNote: String(item.skipsNote ?? ''),
+    memberDiscountNote: String(item.memberDiscountNote ?? ''),
   }
 }
 
@@ -123,6 +124,10 @@ function schedulePatchFromBody(body: Record<string, unknown>, existing: Record<s
         : String(existing.meetingDates ?? ''),
     skipsNote:
       body.skipsNote != null ? String(body.skipsNote).trim() : String(existing.skipsNote ?? ''),
+    memberDiscountNote:
+      body.memberDiscountNote != null
+        ? String(body.memberDiscountNote).trim()
+        : String(existing.memberDiscountNote ?? ''),
   }
 }
 

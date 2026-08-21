@@ -1,17 +1,24 @@
 import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-react'
 import { getFeaturedPrograms } from '@/lib/api/programs'
+import { getPageContent } from '@/lib/api/page-content'
 import { displayProgramName } from '@/lib/programs/display-name'
 import { programPublicPath } from '@/lib/programs/public-path'
 import { programDateBadge } from '@/lib/programs/schedule'
-import { matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
+
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
 
 export async function ProgramsPreview() {
-  const programs = await getFeaturedPrograms()
+  const [programs, page] = await Promise.all([
+    getFeaturedPrograms(),
+    getPageContent('programs').catch(() => null),
+  ])
 
   // Fallback if CMS is empty. show placeholder cards
   const display = programs.length > 0 ? programs : []
+  const sectionBlurb =
+    String(page?.sectionBody || page?.body || '').trim() ||
+    'After-school enrichment for grades 6 to 8.'
 
   return (
     <section
@@ -38,10 +45,10 @@ export async function ProgramsPreview() {
             Enrichment programs
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#5A6070] max-w-2xl mx-auto leading-relaxed whitespace-pre-line">
-            {`After-school classes for grades 6 to 8.\nTuesdays and Wednesdays in the library.`}
+            {sectionBlurb}
             {'\n'}
             <a href="/programs/fall-2026" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
-              Fall 2026 schedule
+              Full schedule
             </a>
           </p>
         </div>
@@ -55,9 +62,8 @@ export async function ProgramsPreview() {
               .replace(/&amp;/g, '&')
               .replace(/\s+/g, ' ')
               .trim()
-            const ep = matchFall2026EpClass(program.name)
-            const badge = programDateBadge(ep ? ep.dates[0] : program.startDate)
-            const whenShort = [ep?.dayOfWeek ?? program.dayOfWeek, ep?.classTime ?? program.classTime]
+            const badge = programDateBadge(program.startDate)
+            const whenShort = [program.dayOfWeek, program.classTime]
               .map((s) => String(s ?? '').trim())
               .filter(Boolean)
               .join(' · ')

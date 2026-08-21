@@ -7,13 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ProgramLandingCheckout } from '@/components/programs/program-register-form'
 import type { Program } from '@/lib/api/programs'
 import { displayProgramName } from '@/lib/programs/display-name'
-import {
-  FALL_2026_EP_LOCATION,
-  formatFall2026EpDate,
-  matchFall2026EpClass,
-} from '@/lib/programs/fall-2026-ep'
-import { programLandingCopy } from '@/lib/programs/landing-copy'
-import { programDateBadge, formatShortDate } from '@/lib/programs/schedule'
+import { formatShortDate, programDateBadge } from '@/lib/programs/schedule'
 import {
   formatMemberPriorityUntil,
   getRegistrationPhase,
@@ -27,17 +21,32 @@ function hasTag(program: Program, tag: string) {
     .includes(tag.toLowerCase())
 }
 
+function plainLines(html: string): string[] {
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '\n• ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+}
+
 export function ProgramLanding({ program }: { program: Program }) {
   const [copied, setCopied] = useState(false)
-  const ep = matchFall2026EpClass(program.name)
-  const copy = programLandingCopy(ep?.id)
   const title = displayProgramName(program.name)
   const feeTbd = hasTag(program, 'fee-tbd')
   const phase = getRegistrationPhase(program)
   const priorityUntilLabel =
     phase === 'member_priority' ? formatMemberPriorityUntil(program.memberPriorityUntil) : ''
-  const firstNight = ep ? ep.dates[0] : program.startDate
-  const lastNight = ep ? ep.dates[ep.dates.length - 1] : program.endDate
+  const meetingDates = String(program.meetingDates ?? '')
+    .split(/[,\n]+/)
+    .map((s) => s.trim().slice(0, 10))
+    .filter((s) => /^\d{4}-\d{2}-\d{2}$/.test(s))
+  const firstNight = meetingDates[0] || program.startDate
+  const lastNight = meetingDates[meetingDates.length - 1] || program.endDate
   const badge = programDateBadge(firstNight)
   const feeLabel = feeTbd
     ? 'Tuition TBD'
@@ -46,9 +55,21 @@ export function ProgramLanding({ program }: { program: Program }) {
       : program.fee != null
         ? `$${program.fee}`
         : null
-  const photo = program.image || copy?.photo || '/home/hero-a.jpg'
+  const photo = program.image || '/home/hero-a.jpg'
   const isFlyer = Boolean(program.image)
-  const why = copy?.why?.length ? copy.why : []
+  const descLines = plainLines(program.description || '')
+  const pitch = descLines.filter((l) => !l.startsWith('•') && !l.startsWith('- ')).join('\n')
+  const why = descLines
+    .filter((l) => l.startsWith('•') || l.startsWith('- '))
+    .map((l) => l.replace(/^[•-]\s*/, ''))
+  const day = String(program.dayOfWeek ?? '').trim()
+  const time = String(program.classTime ?? '').trim()
+  const location = String(program.location ?? '').trim()
+  const skips = String(program.skipsNote ?? '').trim()
+  const instructor = String(program.instructorName ?? '').trim()
+  const sessionCount = meetingDates.length || Number(program.durationWeeks ?? 0) || 0
+  const memberDiscountNote = String(program.memberDiscountNote ?? '').trim()
+  const detail = String(program.detail ?? '').trim()
 
   async function copyShareLink() {
     if (typeof window === 'undefined') return
@@ -82,7 +103,7 @@ export function ProgramLanding({ program }: { program: Program }) {
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             <header className="lg:col-span-5 space-y-5">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--brand-green)]">
-                {copy?.eyebrow ?? program.category ?? 'Enrichment'}
+                {program.category || 'Enrichment'}
               </p>
 
               {badge ? (
@@ -98,9 +119,7 @@ export function ProgramLanding({ program }: { program: Program }) {
                     <span className="text-white text-2xl font-bold leading-tight">{badge.day}</span>
                   </div>
                   <div className="text-sm text-[#5A6070] whitespace-pre-line">
-                    {ep
-                      ? `${ep.dayOfWeek}s\n${ep.classTime}`
-                      : [program.dayOfWeek, program.classTime].filter(Boolean).join('\n')}
+                    {[day, time].filter(Boolean).join('\n')}
                   </div>
                 </div>
               ) : null}
@@ -109,9 +128,9 @@ export function ProgramLanding({ program }: { program: Program }) {
                 {title}
               </h1>
 
-              {copy?.pitch ? (
+              {pitch ? (
                 <p className="text-base sm:text-lg text-[#3D4450] leading-relaxed whitespace-pre-line">
-                  {copy.pitch}
+                  {pitch}
                 </p>
               ) : null}
 
@@ -123,25 +142,31 @@ export function ProgramLanding({ program }: { program: Program }) {
                 </ul>
               ) : null}
 
+              {detail ? (
+                <p className="text-sm text-[#5A6070] whitespace-pre-line">{detail}</p>
+              ) : null}
+
               <div className="space-y-2 text-sm text-[#5A6070]">
-                {copy?.night ? (
+                {day || time ? (
                   <p className="flex items-start gap-2 whitespace-pre-line">
                     <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5" aria-hidden="true" />
-                    <span>{copy.night}</span>
+                    <span>{[day, time].filter(Boolean).join('\n')}</span>
                   </p>
                 ) : null}
-                {ep ? (
+                {location ? (
                   <p className="flex items-center gap-2">
                     <MapPin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                    <span>{FALL_2026_EP_LOCATION}</span>
+                    <span>{location}</span>
                   </p>
                 ) : null}
-                {ep ? (
+                {sessionCount > 0 && firstNight && lastNight ? (
                   <p className="flex items-start gap-2 whitespace-pre-line">
                     <Calendar className="w-3.5 h-3.5 shrink-0 mt-0.5" aria-hidden="true" />
                     <span>
-                      {`${ep.dates.length} sessions, ${formatFall2026EpDate(ep.dates[0])} to ${formatFall2026EpDate(ep.dates[ep.dates.length - 1])}\nNo class: ${ep.skips}.`}
-                      {ep.sessionNote ? `\n${ep.sessionNote}` : ''}
+                      {`${sessionCount} sessions, ${formatShortDate(firstNight)} to ${formatShortDate(lastNight)}`}
+                      {skips
+                        ? `\n${skips.toLowerCase().startsWith('no class') ? skips : `No class: ${skips}`}`
+                        : ''}
                     </span>
                   </p>
                 ) : firstNight && lastNight ? (
@@ -153,11 +178,11 @@ export function ProgramLanding({ program }: { program: Program }) {
                   </p>
                 ) : null}
                 {program.grades ? <p>Grades {program.grades}</p> : null}
-                {ep?.vendor ? <p>Instructor: {ep.vendor}</p> : null}
+                {instructor ? <p>Instructor: {instructor}</p> : null}
                 {feeLabel ? (
                   <p className="whitespace-pre-line">
                     {feeLabel}
-                    {!feeTbd && program.fee > 0 ? '\nMembers 10 / 15 / 30% off' : ''}
+                    {memberDiscountNote ? `\n${memberDiscountNote}` : ''}
                   </p>
                 ) : null}
                 {program.capacity > 0 ? (

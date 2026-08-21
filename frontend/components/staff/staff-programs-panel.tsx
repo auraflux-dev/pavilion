@@ -9,7 +9,10 @@ import {
 } from '@/lib/programs/registration-access'
 import { Fall2026EpSchedule } from '@/components/programs/fall-2026-ep-schedule'
 import {
+  fall2026PacketCmsDefaults,
+  fallEpClassById,
   matchFall2026EpClass,
+  mergeEmptyProgramFields,
   selectCurrentFall2026Programs,
 } from '@/lib/programs/fall-2026-ep'
 
@@ -43,6 +46,7 @@ type Program = {
   location: string
   meetingDates: string
   skipsNote: string
+  memberDiscountNote: string
   seatsTaken?: number
   seatsRemaining?: number | null
 }
@@ -170,21 +174,25 @@ export function StaffProgramsPanel() {
       let list = (d.programs ?? []) as Program[]
       setSessions(d.sessions ?? [])
       setCanManageAll(d.canManageAll !== false)
-      // Pin only the winning Fall 2026 row per class (do not link prior-season duplicates).
+      // Link + seed empty CMS fields from Fall packet so the public site reads CMS only.
       if (d.canManageAll !== false) {
         for (const p of selectCurrentFall2026Programs(list)) {
-          if (p.fallEpClassId) continue
-          const matched = matchFall2026EpClass(p.name)
+          const matched =
+            fallEpClassById(String(p.fallEpClassId ?? '').trim()) ||
+            matchFall2026EpClass(p.name)
           if (!matched) continue
+          const defaults = fall2026PacketCmsDefaults(matched)
+          const patch = mergeEmptyProgramFields(p as unknown as Record<string, unknown>, defaults)
+          if (Object.keys(patch).length === 0) continue
           try {
             const linkRes = await fetch('/api/staff/programs', {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ kind: 'program', id: p.id, fallEpClassId: matched.id }),
+              body: JSON.stringify({ kind: 'program', id: p.id, ...patch }),
             })
             if (linkRes.ok) {
               list = list.map((row) =>
-                row.id === p.id ? { ...row, fallEpClassId: matched.id } : row,
+                row.id === p.id ? ({ ...row, ...patch } as Program) : row,
               )
             }
           } catch {
@@ -541,7 +549,7 @@ export function StaffProgramsPanel() {
       <div>
         <h2 className="text-lg font-bold">Programs & sessions</h2>
         <p className="text-xs text-[#5A6070] whitespace-pre-line">
-          {`Every field on this page is editable.\nClick out of a field to save (no Save button).\nFall schedule and Programs list stay in sync.\nRoster, waitlist, attendance, sessions, and class messages below.`}
+          {`Everything parents see on /programs comes from these CMS fields.\nClick out of a field to save. Fall schedule and cards stay in sync.\nEmpty schedule fields auto-fill once from the Fall packet, then you own the copy.`}
         </p>
         {canManageAll ? (
           <button
@@ -573,7 +581,7 @@ export function StaffProgramsPanel() {
       <div className="rounded-lg border border-[var(--border)] bg-[var(--brand-warm)] p-4">
         <Fall2026EpSchedule
           variant="staff"
-          programs={programs}
+          programs={visiblePrograms}
           canEdit
           onProgramChange={changeProgramLocal}
           onProgramSave={(id, patch) => void saveProgram(id, patch)}
@@ -893,6 +901,13 @@ export function StaffProgramsPanel() {
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
                   onChange={(e) => changeProgramLocal(p.id, { skipsNote: e.target.value })}
                   onBlur={(e) => void saveProgram(p.id, { skipsNote: e.target.value })}
+                />
+                <input
+                  value={p.memberDiscountNote}
+                  placeholder="Member discount note (under fee on /programs cards)"
+                  className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
+                  onChange={(e) => changeProgramLocal(p.id, { memberDiscountNote: e.target.value })}
+                  onBlur={(e) => void saveProgram(p.id, { memberDiscountNote: e.target.value })}
                 />
               </div>
               <p className="text-[11px] text-[#5A6070]">

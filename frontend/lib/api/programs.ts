@@ -39,6 +39,16 @@ export interface Program {
   startDate?: string;
   /** Last meeting date */
   endDate?: string;
+  /** Room / location (e.g. SHMS Library) */
+  location?: string;
+  /** Comma-separated YYYY-MM-DD meeting nights */
+  meetingDates?: string;
+  /** Skip / holiday note shown on cards */
+  skipsNote?: string;
+  instructorName?: string;
+  /** Fee footnote, e.g. Members 10 / 15 / 30% off */
+  memberDiscountNote?: string;
+  fallEpClassId?: string;
 }
 
 function normalizeImage(raw: unknown): string | undefined {
@@ -97,6 +107,12 @@ function mapProgramItem(item: Record<string, unknown>): Program {
     durationWeeks,
     startDate,
     endDate,
+    location: String(item.location ?? '').trim() || undefined,
+    meetingDates: String(item.meetingDates ?? '').trim() || undefined,
+    skipsNote: String(item.skipsNote ?? '').trim() || undefined,
+    instructorName: String(item.instructorName ?? '').trim() || undefined,
+    memberDiscountNote: String(item.memberDiscountNote ?? '').trim() || undefined,
+    fallEpClassId: String(item.fallEpClassId ?? '').trim() || undefined,
   }
 }
 

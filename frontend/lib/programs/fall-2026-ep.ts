@@ -236,3 +236,37 @@ export function resolveMeetingDates(
 export function serializeMeetingDates(dates: string[]): string {
   return dates.map((d) => d.slice(0, 10)).filter(Boolean).join(',')
 }
+
+/** CMS field defaults from the Fall 2026 packet (staff seed only; public reads CMS). */
+export function fall2026PacketCmsDefaults(klass: Fall2026EpClass): Record<string, string | number> {
+  return {
+    fallEpClassId: klass.id,
+    dayOfWeek: klass.dayOfWeek,
+    classTime: klass.classTime,
+    location: FALL_2026_EP_LOCATION,
+    instructorName: klass.vendor,
+    startDate: klass.dates[0],
+    endDate: klass.dates[klass.dates.length - 1],
+    durationWeeks: klass.dates.length,
+    meetingDates: serializeMeetingDates([...klass.dates]),
+    skipsNote: klass.skips,
+    memberDiscountNote: 'Members 10 / 15 / 30% off',
+  }
+}
+
+/** Fill only empty CMS fields from packet defaults. */
+export function mergeEmptyProgramFields<
+  T extends Record<string, unknown>,
+>(current: T, defaults: Record<string, string | number>): Record<string, string | number> {
+  const patch: Record<string, string | number> = {}
+  for (const [key, value] of Object.entries(defaults)) {
+    const existing = current[key]
+    const empty =
+      existing == null ||
+      existing === '' ||
+      existing === 0 ||
+      (typeof existing === 'string' && !existing.trim())
+    if (empty) patch[key] = value
+  }
+  return patch
+}
