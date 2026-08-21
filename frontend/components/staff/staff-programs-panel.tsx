@@ -9,8 +9,8 @@ import {
 } from '@/lib/programs/registration-access'
 import { Fall2026EpSchedule } from '@/components/programs/fall-2026-ep-schedule'
 import {
-  isCurrentFall2026EpProgram,
   matchFall2026EpClass,
+  selectCurrentFall2026Programs,
 } from '@/lib/programs/fall-2026-ep'
 
 type Program = {
@@ -137,7 +137,7 @@ export function StaffProgramsPanel() {
 
   const visiblePrograms = useMemo(() => {
     if (showOlderPrograms) return programs
-    return programs.filter((p) => isCurrentFall2026EpProgram(p))
+    return selectCurrentFall2026Programs(programs)
   }, [programs, showOlderPrograms])
 
   const visibleProgramIds = useMemo(
@@ -170,9 +170,9 @@ export function StaffProgramsPanel() {
       let list = (d.programs ?? []) as Program[]
       setSessions(d.sessions ?? [])
       setCanManageAll(d.canManageAll !== false)
-      // Pin Fall EP rows to CMS by id so title renames still sync across this page.
+      // Pin only the winning Fall 2026 row per class (do not link prior-season duplicates).
       if (d.canManageAll !== false) {
-        for (const p of list) {
+        for (const p of selectCurrentFall2026Programs(list)) {
           if (p.fallEpClassId) continue
           const matched = matchFall2026EpClass(p.name)
           if (!matched) continue
@@ -612,7 +612,7 @@ export function StaffProgramsPanel() {
             <p className="text-sm text-[#5A6070] whitespace-pre-line">
               {showOlderPrograms
                 ? 'No programs in your scope. Ask an admin to assign program IDs on your StaffRoles row.'
-                : 'No Fall 2026 enrichment programs linked yet.\nTurn on “Show older programs” if you need prior seasons, or ensure CMS names match Young Entrepreneurs / Essay / MATHCOUNTS / Robotics.'}
+                : 'No Fall 2026 enrichment programs in this list yet.\nTurn on “Show older programs” for prior seasons.\nCurrent season needs a 2026 start date (or open/featured) and a name match for Young Entrepreneurs / Essay / MATHCOUNTS / Robotics.'}
             </p>
           ) : null}
           {visiblePrograms.map((p) => (

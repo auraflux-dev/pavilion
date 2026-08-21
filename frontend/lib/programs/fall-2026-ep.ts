@@ -162,6 +162,65 @@ export function isCurrentFall2026EpProgram(program: {
   return Boolean(matchFall2026EpClass(program.name))
 }
 
+function fall2026CandidateScore(program: {
+  name: string
+  fallEpClassId?: string
+  startDate?: string
+  endDate?: string
+  registrationOpen?: boolean
+  featured?: boolean
+}): number {
+  let score = 0
+  const start = String(program.startDate ?? '').slice(0, 10)
+  const end = String(program.endDate ?? '').slice(0, 10)
+  if (String(program.fallEpClassId ?? '').trim()) score += 40
+  if (program.registrationOpen) score += 25
+  if (program.featured) score += 15
+  if (start >= '2026-08-01' && start < '2027-01-01') score += 100
+  else if (start.startsWith('2026')) score += 50
+  if (end >= '2026-08-01' && end < '2027-01-01') score += 30
+  // Prior seasons / spring leftovers
+  if (start && start < '2026-08-01') score -= 200
+  if (end && end < '2026-08-01') score -= 200
+  return score
+}
+
+/**
+ * Staff default list: at most one CMS Programs row per Fall 2026 EP class.
+ * Drops prior-season duplicates that share names like Essay / Robotics.
+ */
+export function selectCurrentFall2026Programs<
+  T extends {
+    id: string
+    name: string
+    fallEpClassId?: string
+    startDate?: string
+    endDate?: string
+    registrationOpen?: boolean
+    featured?: boolean
+  },
+>(programs: T[]): T[] {
+  const picked: T[] = []
+  const used = new Set<string>()
+  for (const klass of FALL_2026_EP_CLASSES) {
+    const candidates = programs.filter((p) => {
+      if (used.has(p.id)) return false
+      const byId = String(p.fallEpClassId ?? '').trim() === klass.id
+      const byName = matchFall2026EpClass(p.name)?.id === klass.id
+      return byId || byName
+    })
+    if (!candidates.length) continue
+    candidates.sort((a, b) => fall2026CandidateScore(b) - fall2026CandidateScore(a))
+    const winner = candidates[0]
+    // Need Fall 2026 dates, or linked id plus open/featured (not id alone on an old row).
+    const score = fall2026CandidateScore(winner)
+    if (score < 50) continue
+    picked.push(winner)
+    used.add(winner.id)
+  }
+  return picked
+}
+
 /** Parse CMS meetingDates; fall back to packet dates. */
 export function resolveMeetingDates(
   meetingDates: string | undefined,
