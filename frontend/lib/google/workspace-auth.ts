@@ -15,12 +15,15 @@ export const GOOGLE_SCOPES = {
   ],
   calendar: ['https://www.googleapis.com/auth/calendar.readonly'],
   drive: ['https://www.googleapis.com/auth/drive.readonly'],
+  /** List Workspace users into Staff → Access (Google Admin / GAM create). */
+  directory: ['https://www.googleapis.com/auth/admin.directory.user.readonly'],
 } as const
 
 export const ALL_WORKSPACE_SCOPES = [
   ...GOOGLE_SCOPES.gmail,
   ...GOOGLE_SCOPES.calendar,
   ...GOOGLE_SCOPES.drive,
+  ...GOOGLE_SCOPES.directory,
 ]
 
 export type WorkspaceCapability = 'mail' | 'calendar' | 'docs' | 'reply'

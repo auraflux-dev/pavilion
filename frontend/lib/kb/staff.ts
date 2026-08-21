@@ -80,7 +80,9 @@ Day-to-day tools open inside Staff. The only intentional exits for money ops are
 - After a role change, sign out and back in so permissions refresh
 - **Admin** is only **president@shmspto.org** (Staff access UI and server enforce this)
 
-If tools are missing that your role should have, President (\`president@\`) can update StaffRoles.`,
+If tools are missing that your role should have, President (\`president@\`) can update StaffRoles.
+
+After creating users in Google Admin, open **Staff → Access → Sync from Google Workspace** so seats appear before first login. Assign roles there.`,
     },
     {
       slug: 'year-project-board',

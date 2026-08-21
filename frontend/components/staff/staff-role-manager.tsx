@@ -62,6 +62,7 @@ export function StaffRoleManager() {
   const [active, setActive] = useState(true)
   const [permissionQuery, setPermissionQuery] = useState('')
   const [busy, setBusy] = useState(false)
+  const [syncBusy, setSyncBusy] = useState(false)
   const [status, setStatus] = useState('')
 
   const implied = useMemo(() => workspacesFromRoles(roles), [roles])
@@ -167,6 +168,28 @@ export function StaffRoleManager() {
     }
   }
 
+  async function syncFromGoogle() {
+    setSyncBusy(true)
+    setStatus('')
+    try {
+      const response = await fetch('/api/staff/roles/sync-google', { method: 'POST' })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.error ?? 'Google sync failed')
+      await load()
+      const created = Number(data.created ?? 0)
+      const scanned = Number(data.scanned ?? 0)
+      setStatus(
+        created > 0
+          ? `Synced from Google. Added ${created} new seat${created === 1 ? '' : 's'} (${scanned} Workspace users scanned). Assign roles below.`
+          : `Synced from Google. No new seats (${scanned} Workspace users already listed or suspended).`,
+      )
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Google sync failed')
+    } finally {
+      setSyncBusy(false)
+    }
+  }
+
   const moneyExtra = extras.includes('payments') || extras.includes('budget')
   const canSave = Boolean(email && (roles.length > 0 || extras.length > 0))
 
@@ -181,8 +204,25 @@ export function StaffRoleManager() {
             ? 'Pick an EP mailbox from the Google list (math, robotics, business plan).\nSet Instructor and tick their class.\nEssay has no EP mailbox yet. Add one in Workspace for Lumi first.'
             : 'Pick a role for the usual toolkit, then tick any extra permissions below.\nStaff tools stay on official @' +
               (isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org') +
-              ' accounts.\nLink a personal email for the parent portal.'}
+              ' accounts.\nLink a personal email for the parent portal.\nSync from Google after you create users in Admin so seats appear before first login.'}
         </p>
+        {scope === 'all' ? (
+          <div className="mt-3">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={syncBusy || busy}
+              onClick={() => void syncFromGoogle()}
+            >
+              {syncBusy ? 'Syncing…' : 'Sync from Google Workspace'}
+            </Button>
+            <p className="text-[11px] text-[#5A6070] mt-1.5 whitespace-pre-line">
+              Pulls active @shmspto.org users into this list.
+              New seats start with no roles. Assign role and programs here.
+              Requires Connect Google as a Workspace admin (Staff → Inbox).
+            </p>
+          </div>
+        ) : null}
       </div>
 
       <div className="grid sm:grid-cols-3 gap-2">

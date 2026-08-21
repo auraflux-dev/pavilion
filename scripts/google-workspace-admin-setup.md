@@ -32,7 +32,10 @@ APIs must already be enabled (you did A): Gmail, Calendar, Drive.
    - `https://www.googleapis.com/auth/gmail.modify`
    - `https://www.googleapis.com/auth/calendar.readonly`
    - `https://www.googleapis.com/auth/drive.readonly`
+   - `https://www.googleapis.com/auth/admin.directory.user.readonly` (Staff → Access sync from Google)
 6. Save and continue → Back to dashboard
+
+Enable **Admin SDK API** in the same GCP project (APIs & Services → Library → Admin SDK API).
 
 ---
 
