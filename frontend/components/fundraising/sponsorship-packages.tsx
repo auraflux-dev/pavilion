@@ -1,8 +1,8 @@
 import { CheckCircle2, Star } from 'lucide-react'
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import {
-  SPONSORSHIP_COMPARE,
-  SPONSORSHIP_PACKAGES,
+  getSponsorshipCompare,
+  getSponsorshipPackages,
+  sponsorshipFooterCopy,
   type SponsorshipPackage,
 } from '@/lib/sponsorships'
 
@@ -58,7 +58,7 @@ function PackageCard({ pkg }: { pkg: SponsorshipPackage }) {
                       style={{ color: pkg.accent }}
                       aria-hidden="true"
                     />
-                    <span className="text-sm text-[#1A1A1A]">{vanillaizeIfDemo(item)}</span>
+                    <span className="text-sm text-[#1A1A1A]">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -79,10 +79,16 @@ function PackageCard({ pkg }: { pkg: SponsorshipPackage }) {
 }
 
 export function SponsorshipPackages() {
+  const packages = getSponsorshipPackages()
+  const compare = getSponsorshipCompare()
+  const featured = packages.find((p) => p.id === 'platinum')
+  const mid = packages.find((p) => p.id === 'gold')
+  const entry = packages.find((p) => p.id === 'silver')
+
   return (
     <div className="mb-14">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-7 max-w-6xl mx-auto">
-        {SPONSORSHIP_PACKAGES.map((pkg) => (
+        {packages.map((pkg) => (
           <PackageCard key={pkg.id} pkg={pkg} />
         ))}
       </div>
@@ -94,16 +100,18 @@ export function SponsorshipPackages() {
             <tr className="border-b border-[var(--border)] bg-[#FAFCF9]">
               <th className="text-left font-semibold px-4 py-3 text-[#5A6070]">Compare</th>
               <th className="text-left font-bold px-4 py-3" style={{ color: '#C9A800' }}>
-                Platinum
+                {featured?.name ?? 'Platinum'}
               </th>
               <th className="text-left font-bold px-4 py-3" style={{ color: 'var(--brand-green)' }}>
-                Gold
+                {mid?.name ?? 'Gold'}
               </th>
-              <th className="text-left font-bold px-4 py-3 text-[#6B7280]">Silver</th>
+              <th className="text-left font-bold px-4 py-3 text-[#6B7280]">
+                {entry?.name ?? 'Silver'}
+              </th>
             </tr>
           </thead>
           <tbody>
-            {SPONSORSHIP_COMPARE.map((row) => (
+            {compare.map((row) => (
               <tr key={row.label} className="border-t border-[#F0EBE3]">
                 <td className="px-4 py-2.5 text-[#5A6070]">{row.label}</td>
                 <td className="px-4 py-2.5 text-[#1A1A1A]">{row.platinum}</td>
@@ -116,9 +124,7 @@ export function SponsorshipPackages() {
       </div>
 
       <p className="text-center text-xs text-[#5A6070] mt-4 max-w-2xl mx-auto">
-        {vanillaizeIfDemo(
-          'Each package is one payment for the 2026-27 school year. Full Year, Half Year, and Quarter of Year Promotion is how long your logo is listed on the website and portal. Gifts support SHMS PTO (501(c)(3)), not Loudoun County Public Schools.',
-        )}
+        {sponsorshipFooterCopy()}
       </p>
     </div>
   )

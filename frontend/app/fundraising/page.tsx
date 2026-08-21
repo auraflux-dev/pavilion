@@ -15,6 +15,11 @@ import { DonateBlock } from '@/components/donate/donate-block'
 import { SponsorshipPackages } from '@/components/fundraising/sponsorship-packages'
 import { FundraisingSectionNav } from '@/components/jump-nav/public-section-navs'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import {
+  showSponsorshipFlyerDownload,
+  sponsorshipEmptySponsorsCopy,
+  sponsorshipIntroCopy,
+} from '@/lib/sponsorships'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Star, ShoppingBag, Users, Heart, TrendingUp, Ticket, ArrowRight, RefreshCw,
@@ -367,22 +372,22 @@ export default async function FundraisingPage() {
                 Sponsorships
               </h2>
               <p className="text-[#5A6070] mt-3 max-w-2xl mx-auto whitespace-pre-line">
-                {vanillaizeIfDemo(
-                  'One payment for the 2026-27 school year.\nChoose Platinum, Gold, or Silver below.',
-                )}
+                {sponsorshipIntroCopy()}
               </p>
-              <p className="mt-4">
-                <a
-                  href="/fundraising/sponsorship-packages-2026-27.pdf"
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold"
-                  style={{ color: 'var(--brand-green)' }}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Download the 2026-27 sponsorship flyer (PDF)
-                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                </a>
-              </p>
+              {showSponsorshipFlyerDownload() ? (
+                <p className="mt-4">
+                  <a
+                    href="/fundraising/sponsorship-packages-2026-27.pdf"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold"
+                    style={{ color: 'var(--brand-green)' }}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Download the 2026-27 sponsorship flyer (PDF)
+                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                  </a>
+                </p>
+              ) : null}
             </div>
 
             <SponsorshipPackages />
@@ -420,9 +425,7 @@ export default async function FundraisingPage() {
               </ul>
             ) : (
               <p className="text-center text-sm text-[#5A6070] mb-10">
-                {vanillaizeIfDemo(
-                  'Future sponsors will appear here. Be the first to partner with SHMS PTO.',
-                )}
+                {sponsorshipEmptySponsorsCopy()}
               </p>
             )}
 
