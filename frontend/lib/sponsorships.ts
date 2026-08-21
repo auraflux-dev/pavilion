@@ -314,3 +314,33 @@ export function sponsorshipEmptySponsorsCopy(): string {
   }
   return 'Future sponsors will appear here. Be the first to partner with SHMS PTO.'
 }
+
+export function sponsorshipInitiativeBlurb(): string {
+  if (isDemoInstance()) {
+    return (
+      `Campus Partner $2,000, Neighborhood Partner $750, or Friend of the PTO $250. ` +
+      'One payment for the 2026-27 school year.'
+    )
+  }
+  return 'Platinum $2,500, Gold $1,500, or Silver $500. One payment for the 2026-27 school year.'
+}
+
+export type SponsorshipPackageOption = { value: string; label: string }
+
+/** Client-safe when `forDemo` matches `isPublicDemoInstance()`. */
+export function sponsorshipPackageSelectOptions(
+  forDemo = false,
+): SponsorshipPackageOption[] {
+  if (forDemo) {
+    return [
+      { value: 'Campus Partner: $2,000', label: 'Campus Partner: $2,000' },
+      { value: 'Neighborhood Partner: $750', label: 'Neighborhood Partner: $750' },
+      { value: 'Friend of the PTO: $250', label: 'Friend of the PTO: $250' },
+    ]
+  }
+  return [
+    { value: 'Platinum: $2,500', label: 'Platinum: $2,500' },
+    { value: 'Gold: $1,500', label: 'Gold: $1,500' },
+    { value: 'Silver: $500', label: 'Silver: $500' },
+  ]
+}

@@ -18,6 +18,7 @@ import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import {
   showSponsorshipFlyerDownload,
   sponsorshipEmptySponsorsCopy,
+  sponsorshipInitiativeBlurb,
   sponsorshipIntroCopy,
 } from '@/lib/sponsorships'
 
@@ -137,7 +138,7 @@ export default async function FundraisingPage() {
       id: 'sponsorship',
       icon: Handshake,
       label: 'Sponsorships',
-      description: 'Platinum $2,500, Gold $1,500, or Silver $500. One payment for the 2026-27 school year.',
+      description: sponsorshipInitiativeBlurb(),
       raised: sponsorshipRaised,
       goal: sponsorshipGoal,
       href: '/fundraising#sponsorship',
