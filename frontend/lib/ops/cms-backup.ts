@@ -16,6 +16,7 @@ export const BACKUP_COLLECTIONS = [
   'Enrollments',
   'ProgramEnrollments',
   'ProgramAttendance',
+  'ProgramBoardPosts',
   'EventTicketOffers',
   'EventTicketOrders',
   'Programs',

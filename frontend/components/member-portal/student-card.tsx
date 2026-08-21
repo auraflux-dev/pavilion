@@ -59,11 +59,22 @@ interface Student {
   pickupAuthorized?: string
 }
 
+export type BoardPost = {
+  id: string
+  programId: string
+  programName: string
+  subject: string
+  body: string
+  fromName: string
+  sentAt: string | null
+}
+
 interface Props {
   student: Student
   defaultOpen?: boolean
   upgradeBody?: string
   grades?: string[]
+  boardPosts?: BoardPost[]
   onUpdated?: (student: Student) => void
 }
 
@@ -132,6 +143,7 @@ export function StudentCard({
     'Paid members get Cove Digital Card credit and enrichment discounts. Lagoon and Tide also include free refreshments at PTO events.',
   ),
   grades = ['6', '7', '8'],
+  boardPosts = [],
   onUpdated,
 }: Props) {
   const [open, setOpen] = useState(defaultOpen)
@@ -464,45 +476,74 @@ export function StudentCard({
                     {history.enrollments.map(e => {
                       const canRequest =
                         ['Enrolled', 'Paid', 'Waitlisted'].includes(e.status) && Boolean(e.id)
+                      const programPosts = boardPosts.filter((p) => {
+                        const pid = String(e.programId ?? '').trim()
+                        const pname = String(e.programName ?? '').trim().toLowerCase()
+                        return (
+                          (pid && p.programId === pid) ||
+                          (pname && p.programName.trim().toLowerCase() === pname)
+                        )
+                      }).slice(0, 5)
                       return (
-                      <div key={e.id} className="flex items-start justify-between gap-3 py-2.5 border-b border-[var(--brand-warm)] last:border-0">
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-[#1A1A1A] truncate">{e.programName}</p>
-                          <p className="text-xs text-[#5A6070]">
-                            {formatDate(e.registrationDate)}
-                            {e.waitlistPosition ? ` · Waitlist #${e.waitlistPosition}` : ''}
-                          </p>
-                          {canRequest ? (
-                            <div className="flex flex-wrap gap-2 mt-1">
-                              <button
-                                type="button"
-                                disabled={requestBusy}
-                                className="text-[11px] font-semibold underline"
-                                style={{ color: 'var(--brand-green)' }}
-                                onClick={() => void requestEnrollmentChange(e.id, 'refund')}
-                              >
-                                Request refund
-                              </button>
-                              <button
-                                type="button"
-                                disabled={requestBusy}
-                                className="text-[11px] font-semibold underline"
-                                style={{ color: 'var(--brand-green)' }}
-                                onClick={() => void requestEnrollmentChange(e.id, 'transfer', e.programId)}
-                              >
-                                Request transfer
-                              </button>
-                            </div>
-                          ) : null}
+                      <div key={e.id} className="py-2.5 border-b border-[var(--brand-warm)] last:border-0 space-y-2">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-[#1A1A1A] truncate">{e.programName}</p>
+                            <p className="text-xs text-[#5A6070]">
+                              {formatDate(e.registrationDate)}
+                              {e.waitlistPosition ? ` · Waitlist #${e.waitlistPosition}` : ''}
+                            </p>
+                            {canRequest ? (
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                <button
+                                  type="button"
+                                  disabled={requestBusy}
+                                  className="text-[11px] font-semibold underline"
+                                  style={{ color: 'var(--brand-green)' }}
+                                  onClick={() => void requestEnrollmentChange(e.id, 'refund')}
+                                >
+                                  Request refund
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={requestBusy}
+                                  className="text-[11px] font-semibold underline"
+                                  style={{ color: 'var(--brand-green)' }}
+                                  onClick={() => void requestEnrollmentChange(e.id, 'transfer', e.programId)}
+                                >
+                                  Request transfer
+                                </button>
+                              </div>
+                            ) : null}
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {e.paymentAmount > 0 && (
+                              <span className="text-sm font-bold text-[#1A1A1A]">{formatMoney(e.paymentAmount)}</span>
+                            )}
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusClass(e.status)}`}>
+                              {e.status}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          {e.paymentAmount > 0 && (
-                            <span className="text-sm font-bold text-[#1A1A1A]">{formatMoney(e.paymentAmount)}</span>
-                          )}
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusClass(e.status)}`}>
-                            {e.status}
-                          </span>
-                        </div>
+                        {programPosts.length > 0 ? (
+                          <div className="rounded-lg px-2.5 py-2 space-y-1.5" style={{ backgroundColor: '#f3f7f3' }}>
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
+                              Class board
+                            </p>
+                            {programPosts.map((p) => (
+                              <div key={p.id} className="space-y-0.5">
+                                <p className="text-[11px] text-[#5A6070]">
+                                  {formatDate(p.sentAt)}
+                                  {p.fromName ? ` · ${p.fromName}` : ''}
+                                </p>
+                                <p className="text-xs font-semibold text-[#1A1A1A]">{p.subject}</p>
+                                <p className="text-[11px] text-[#5A6070] whitespace-pre-line line-clamp-2">
+                                  {p.body}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
                       </div>
                       )
                     })}

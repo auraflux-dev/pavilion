@@ -124,6 +124,15 @@ export function StaffProgramsPanel() {
   } | null>(null)
   const [msgSubject, setMsgSubject] = useState('')
   const [msgBody, setMsgBody] = useState('')
+  const [boardPosts, setBoardPosts] = useState<
+    {
+      id: string
+      subject: string
+      body: string
+      fromName: string
+      sentAt: string | null
+    }[]
+  >([])
   const [status, setStatus] = useState('')
   const [busy, setBusy] = useState(false)
   const [savingProgramId, setSavingProgramId] = useState<string | null>(null)
@@ -135,7 +144,6 @@ export function StaffProgramsPanel() {
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({})
   const [advancedIds, setAdvancedIds] = useState<Record<string, boolean>>({})
-  const [showClassMessage, setShowClassMessage] = useState(false)
   const [attProgramId, setAttProgramId] = useState('')
   const [attDate, setAttDate] = useState(todayYmd)
   const [attStudents, setAttStudents] = useState<AttendanceStudent[]>([])
@@ -220,6 +228,36 @@ export function StaffProgramsPanel() {
     }
   }, [])
 
+  const loadBoard = useCallback(async (programId: string) => {
+    if (!programId) {
+      setBoardPosts([])
+      return
+    }
+    try {
+      const r = await fetch(`/api/staff/programs/board?programId=${encodeURIComponent(programId)}`)
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Board failed')
+      setBoardPosts(
+        ((d.posts ?? []) as {
+          id: string
+          subject: string
+          body: string
+          fromName: string
+          sentAt: string | null
+        }[]).map((p) => ({
+          id: p.id,
+          subject: p.subject,
+          body: p.body,
+          fromName: p.fromName,
+          sentAt: p.sentAt,
+        })),
+      )
+    } catch (err) {
+      setBoardPosts([])
+      setStatus(err instanceof Error ? err.message : 'Board failed')
+    }
+  }, [])
+
   const loadAttendance = useCallback(async (programId: string, date: string) => {
     if (!programId) {
       setAttStudents([])
@@ -249,8 +287,11 @@ export function StaffProgramsPanel() {
   }, [load])
 
   useEffect(() => {
-    if (tab === 'roster') void loadRoster(rosterProgramId)
-  }, [tab, rosterProgramId, loadRoster])
+    if (tab === 'roster') {
+      void loadRoster(rosterProgramId)
+      void loadBoard(rosterProgramId)
+    }
+  }, [tab, rosterProgramId, loadRoster, loadBoard])
 
   useEffect(() => {
     if (tab === 'attendance') void loadAttendance(attProgramId, attDate)
@@ -505,27 +546,29 @@ export function StaffProgramsPanel() {
     }
   }
 
-  async function messageClass() {
+  async function postToClassBoard() {
     setBusy(true)
     setStatus('')
     try {
-      const r = await fetch('/api/staff/programs/enrollments', {
+      const r = await fetch('/api/staff/programs/board', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'message-class',
           programId: rosterProgramId,
           subject: msgSubject,
           body: msgBody,
         }),
       })
       const d = await r.json()
-      if (!r.ok) throw new Error(d.error ?? 'Send failed')
-      setStatus(`Message sent to ${d.recipients} parent${d.recipients === 1 ? '' : 's'}.`)
+      if (!r.ok) throw new Error(d.error ?? 'Post failed')
+      setStatus(
+        `Posted to class board and sent to ${d.recipients} parent${d.recipients === 1 ? '' : 's'}.`,
+      )
       setMsgSubject('')
       setMsgBody('')
+      await loadBoard(rosterProgramId)
     } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Send failed')
+      setStatus(err instanceof Error ? err.message : 'Post failed')
     } finally {
       setBusy(false)
     }
@@ -1354,41 +1397,93 @@ Leave blank for normal in-app Square checkout.`}
             ) : null}
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="text-sm"
-            disabled={!rosterProgramId}
-            onClick={() => setShowClassMessage((v) => !v)}
+          <div
+            className="rounded-xl border p-4 space-y-3"
+            style={{
+              backgroundColor: '#0f3d1f',
+              borderColor: '#1a5c2e',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+            }}
           >
-            {showClassMessage ? 'Hide message form' : 'Message this class'}
-          </Button>
-          {showClassMessage ? (
-          <div className="rounded-lg border border-[var(--border)] p-3 space-y-2 bg-[#FAFAF8]">
-            <p className="text-xs font-bold text-[#5A6070]">Message enrolled + waitlisted parents</p>
+            <div>
+              <p
+                className="text-base font-semibold tracking-wide"
+                style={{ color: '#e8f5e9', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}
+              >
+                Class chalkboard
+              </p>
+              <p
+                className="text-xs mt-1 whitespace-pre-line"
+                style={{ color: '#a8c9b0' }}
+              >
+                {`Post a short class summary.
+Parents see it in their portal Messages and on the class board.`}
+              </p>
+            </div>
             <input
               value={msgSubject}
               onChange={(e) => setMsgSubject(e.target.value)}
               placeholder="Subject"
-              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+              disabled={!rosterProgramId}
+              className="w-full rounded-lg px-3 py-2 text-sm border border-[#2d6b3f] bg-[#0b3319] text-[#f1f8f2] placeholder:text-[#7fa88a]"
             />
             <textarea
               value={msgBody}
               onChange={(e) => setMsgBody(e.target.value)}
-              placeholder="Message to enrolled + waitlisted parents (portal inbox)"
+              placeholder="What happened in class today?"
               rows={4}
-              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+              disabled={!rosterProgramId}
+              className="w-full rounded-lg px-3 py-2 text-sm border border-[#2d6b3f] bg-[#0b3319] text-[#f1f8f2] placeholder:text-[#7fa88a] whitespace-pre-line"
             />
             <Button
               disabled={busy || !rosterProgramId || !msgSubject.trim() || !msgBody.trim()}
-              onClick={() => void messageClass()}
+              onClick={() => void postToClassBoard()}
               className="text-white"
               style={{ backgroundColor: 'var(--brand-green)' }}
             >
-              Send to class
+              Post to class
             </Button>
+            {rosterProgramId ? (
+              <div className="pt-2 space-y-2 border-t border-[#2d6b3f]">
+                <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#a8c9b0' }}>
+                  Recent posts
+                </p>
+                {boardPosts.length === 0 ? (
+                  <p className="text-xs" style={{ color: '#7fa88a' }}>
+                    No chalkboard posts yet.
+                  </p>
+                ) : (
+                  boardPosts.map((p) => (
+                    <div
+                      key={p.id}
+                      className="rounded-lg px-3 py-2 space-y-0.5"
+                      style={{ backgroundColor: 'rgba(11,51,25,0.7)' }}
+                    >
+                      <p className="text-xs" style={{ color: '#7fa88a' }}>
+                        {p.sentAt
+                          ? new Date(p.sentAt).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })
+                          : 'Date TBA'}
+                        {p.fromName ? ` · ${p.fromName}` : ''}
+                      </p>
+                      <p
+                        className="text-sm font-semibold"
+                        style={{ color: '#e8f5e9', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}
+                      >
+                        {p.subject}
+                      </p>
+                      <p className="text-xs whitespace-pre-line line-clamp-3" style={{ color: '#c5e0cb' }}>
+                        {p.body}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            ) : null}
           </div>
-          ) : null}
         </div>
       ) : null}
 

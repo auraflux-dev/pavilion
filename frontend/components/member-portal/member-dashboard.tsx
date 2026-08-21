@@ -162,6 +162,17 @@ export function MemberDashboard({
   const [students, setStudents] = useState<Student[]>([])
   const [calendar, setCalendar] = useState<CalendarItem[]>([])
   const [messages, setMessages] = useState<MessageItem[]>([])
+  const [boardPosts, setBoardPosts] = useState<
+    {
+      id: string
+      programId: string
+      programName: string
+      subject: string
+      body: string
+      fromName: string
+      sentAt: string | null
+    }[]
+  >([])
   const [purchases, setPurchases] = useState<PurchaseItem[]>([])
   const [status, setStatus] = useState<'loading' | 'error' | 'ok'>('loading')
   const [familyTab, setFamilyTab] = useState<'calendar' | 'messages'>('calendar')
@@ -183,7 +194,7 @@ export function MemberDashboard({
       const studentsData = studentsRes.ok ? await studentsRes.json() : { students: [] }
       const familyData = familyRes.ok
         ? await familyRes.json()
-        : { calendar: [], messages: [], purchases: [] }
+        : { calendar: [], messages: [], purchases: [], boardPosts: [] }
 
       setMember(meData.member)
       setAccountType(meData.accountType === 'paid' ? 'paid' : 'free')
@@ -191,6 +202,7 @@ export function MemberDashboard({
       setCalendar(familyData.calendar ?? [])
       setMessages(familyData.messages ?? [])
       setPurchases(familyData.purchases ?? [])
+      setBoardPosts(familyData.boardPosts ?? [])
       setStatus('ok')
     } catch {
       setStatus('error')
@@ -755,6 +767,7 @@ You're on Tide. Benefits show on each student card below.`
                     defaultOpen={i === 0}
                     upgradeBody={copy.upgradeBody}
                     grades={grades}
+                    boardPosts={boardPosts}
                     onUpdated={handleStudentUpdated}
                   />
                 ))}

@@ -204,6 +204,61 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Create ProgramBoardPosts if missing, else ensure fields
+    const boardGet = await fetch('https://www.wixapis.com/wix-data/v2/collections/ProgramBoardPosts', {
+      method: 'GET',
+      headers,
+    })
+    if (boardGet.status === 404 || !boardGet.ok) {
+      const createBoard = await fetch('https://www.wixapis.com/wix-data/v2/collections', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          collection: {
+            id: 'ProgramBoardPosts',
+            displayName: 'Program Board Posts',
+            fields: [
+              { key: 'programId', displayName: 'Program ID', type: 'TEXT' },
+              { key: 'programName', displayName: 'Program Name', type: 'TEXT' },
+              { key: 'subject', displayName: 'Subject', type: 'TEXT' },
+              { key: 'body', displayName: 'Body', type: 'TEXT' },
+              { key: 'fromName', displayName: 'From Name', type: 'TEXT' },
+              { key: 'fromEmail', displayName: 'From Email', type: 'TEXT' },
+              { key: 'sentAt', displayName: 'Sent At', type: 'DATETIME' },
+              { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+            ],
+            permissions: {
+              insert: 'ADMIN',
+              update: 'ADMIN',
+              remove: 'ADMIN',
+              read: 'ADMIN',
+            },
+          },
+        }),
+      })
+      const createBoardBody = await createBoard.json().catch(() => ({}))
+      results.push({
+        collectionId: 'ProgramBoardPosts',
+        ok: createBoard.ok,
+        created: createBoard.ok ? ['(collection)'] : [],
+        existing: [],
+        error: createBoard.ok ? undefined : JSON.stringify(createBoardBody).slice(0, 200),
+      })
+    } else {
+      results.push(
+        await ensureFields('ProgramBoardPosts', [
+          { key: 'programId', displayName: 'Program ID', type: 'TEXT' },
+          { key: 'programName', displayName: 'Program Name', type: 'TEXT' },
+          { key: 'subject', displayName: 'Subject', type: 'TEXT' },
+          { key: 'body', displayName: 'Body', type: 'TEXT' },
+          { key: 'fromName', displayName: 'From Name', type: 'TEXT' },
+          { key: 'fromEmail', displayName: 'From Email', type: 'TEXT' },
+          { key: 'sentAt', displayName: 'Sent At', type: 'DATETIME' },
+          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
+        ]),
+      )
+    }
+
     // Create ContractorTimesheets if missing
     const tsGet = await fetch('https://www.wixapis.com/wix-data/v2/collections/ContractorTimesheets', {
       method: 'GET',

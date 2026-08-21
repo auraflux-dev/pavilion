@@ -104,8 +104,17 @@ export async function GET(req: NextRequest) {
         .catch(() => ({ items: [] })),
     ]
 
-    const [programs, sessions, enrollResults, payResults, msgRes, newsletterRes, portalEventRes, membershipRes] =
-      await Promise.all([
+    const [
+      programs,
+      sessions,
+      enrollResults,
+      payResults,
+      msgRes,
+      newsletterRes,
+      portalEventRes,
+      membershipRes,
+      boardRes,
+    ] = await Promise.all([
         getAllPrograms().catch(() => []),
         getUpcomingProgramSessions(50).catch(() => []),
         Promise.all(enrollQueries),
@@ -138,6 +147,14 @@ export async function GET(req: NextRequest) {
           .query('Memberships')
           .eq('email', householdEmail)
           .limit(1)
+          .find()
+          .catch(() => ({ items: [] })),
+        // Class chalkboard posts for enrolled programs
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (admin.items.query('ProgramBoardPosts') as any)
+          .eq('active', true)
+          .descending('sentAt')
+          .limit(40)
           .find()
           .catch(() => ({ items: [] })),
       ])
@@ -409,10 +426,39 @@ export async function GET(req: NextRequest) {
       return new Date(b.date).getTime() - new Date(a.date).getTime()
     })
 
+    const familyProgramIds = new Set<string>()
+    const familyProgramNames = new Set<string>()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    for (const item of enrollRes.items ?? []) {
+      const e = item as any
+      const pid = String(e.programId ?? '').trim()
+      const pname = String(e.programName ?? '').trim().toLowerCase()
+      if (pid) familyProgramIds.add(pid)
+      if (pname) familyProgramNames.add(pname)
+    }
+
+    const boardPosts = ((boardRes.items ?? []) as Record<string, unknown>[])
+      .filter((row) => {
+        const pid = String(row.programId ?? '').trim()
+        const pname = String(row.programName ?? '').trim().toLowerCase()
+        return (pid && familyProgramIds.has(pid)) || (pname && familyProgramNames.has(pname))
+      })
+      .slice(0, 20)
+      .map((row) => ({
+        id: String(row._id ?? ''),
+        programId: String(row.programId ?? ''),
+        programName: String(row.programName ?? ''),
+        subject: String(row.subject ?? ''),
+        body: String(row.body ?? ''),
+        fromName: String(row.fromName ?? ''),
+        sentAt: row.sentAt ? String(row.sentAt) : null,
+      }))
+
     return NextResponse.json({
       calendar: calendarOut.slice(0, 20),
       messages: messages.slice(0, 15),
       purchases: purchases.slice(0, 12),
+      boardPosts,
       studentCount: students.length,
       actingAs,
       parentEmail: email,
