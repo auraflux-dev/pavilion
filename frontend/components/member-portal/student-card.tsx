@@ -108,16 +108,6 @@ function formatMoney(n: number) {
   return `$${Number(n).toFixed(2)}`
 }
 
-function safetySummary(student: Student): { complete: boolean; allergyLine: string } {
-  const complete = Boolean(
-    String(student.parentPhone ?? '').trim() &&
-      String(student.emergencyContact ?? '').trim() &&
-      String(student.emergencyPhone ?? '').trim() &&
-      String(student.pickupAuthorized ?? '').trim(),
-  )
-  return { complete, allergyLine: String(student.allergies ?? '').trim() }
-}
-
 export function StudentCard({
   student,
   defaultOpen = false,
@@ -197,33 +187,16 @@ export function StudentCard({
       {/* Expanded: edit, enrollments, attendance. Store owns Cove balance + Load. */}
       {open && (
         <div className="border-t border-[#F0EDE8] px-5 py-5 space-y-6">
-          <div className="space-y-2">
-            {onUpdated ? (
-              <EditStudentForm
-                student={student}
-                grades={grades}
-                onUpdated={onUpdated}
-                open={editOpen}
-                onOpenChange={setEditOpen}
-                hideTrigger
-              />
-            ) : null}
-            {(() => {
-              const safety = safetySummary(student)
-              return (
-                <p className="text-xs text-[#5A6070]">
-                  {safety.complete ? (
-                    <span className="font-semibold text-[var(--brand-green)]">Safety profile complete</span>
-                  ) : (
-                    <span className="font-semibold text-amber-800">
-                      Safety profile incomplete. Use Edit student.
-                    </span>
-                  )}
-                  {safety.allergyLine ? ` · Allergy: ${safety.allergyLine}` : ' · No allergies listed'}
-                </p>
-              )
-            })()}
-          </div>
+          {onUpdated ? (
+            <EditStudentForm
+              student={student}
+              grades={grades}
+              onUpdated={onUpdated}
+              open={editOpen}
+              onOpenChange={setEditOpen}
+              hideTrigger
+            />
+          ) : null}
           {loading && (
             <div className="flex items-center justify-center py-6">
               <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'var(--brand-green)' }} />

@@ -155,6 +155,13 @@ export function EditStudentForm({
       <p className="text-[11px] font-semibold uppercase tracking-wide text-[#5A6070] pt-1">
         Safety & pick-up (required for enrichment)
       </p>
+      {!(parentPhone.trim() && emergencyContact.trim() && emergencyPhone.trim() && pickupAuthorized.trim()) ? (
+        <p className="text-xs font-semibold text-amber-800">
+          Safety profile incomplete. Fill the fields below.
+        </p>
+      ) : allergies.trim() ? (
+        <p className="text-xs text-[#5A6070]">Allergy: {allergies.trim()}</p>
+      ) : null}
       <input
         value={parentPhone}
         onChange={(e) => setParentPhone(e.target.value)}
