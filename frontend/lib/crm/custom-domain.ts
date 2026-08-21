@@ -24,10 +24,11 @@ export function recommendedRecords(domain: string): DnsRecord[] {
 
 function vercelAuth(): { token: string; teamId: string; projectId: string } | null {
   const token = process.env.VERCEL_TOKEN?.trim() || process.env.COMMONS_VERCEL_TOKEN?.trim()
-  const teamId = process.env.COMMONS_VERCEL_TEAM_ID?.trim() || 'team_RXhJ9wjn7h5OcGCE86ILmftT'
-  const projectId =
-    process.env.COMMONS_VERCEL_PROJECT_ID?.trim() || 'prj_kEgcls4K0JjeAL3kBHWwobIhKEco'
-  if (!token) return null
+  const teamId = process.env.COMMONS_VERCEL_TEAM_ID?.trim()
+  // Require an explicit project id. Never default to a hard-coded Vercel project
+  // (avoids SHMS / wrong-target deploys attaching domains to the wrong app).
+  const projectId = process.env.COMMONS_VERCEL_PROJECT_ID?.trim()
+  if (!token || !teamId || !projectId) return null
   return { token, teamId, projectId }
 }
 

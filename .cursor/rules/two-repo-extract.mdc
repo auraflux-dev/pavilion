@@ -12,3 +12,7 @@ alwaysApply: true
 Build Pavilion as if SHMS never existed. After an SHMS ship, **ask** before also deploying Pavilion when it helps.
 
 Never mix env across the wall. See `EXTRACT.md`, `mem:hskrg-org`, `mem:hskrg-tools-inventory`.
+
+## Vercel allowlist only
+Deploy only to: `frontend` (SHMS), `commons-site`, `commons-pto-demo`, `commons-pto`.  
+Never create one-off `wix-shmspto-*` ship projects. Never deploy monorepo code to `frontend` with Pavilion env, or SHMS extract to demo/trial.
