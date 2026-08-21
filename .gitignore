@@ -42,3 +42,8 @@ tmp/
 # Local Commons sales exports (ProPublica prospects)
 scripts/sales/out/
 
+
+# Voice archives (keep README only in git)
+promo-videos/voices/**/*.mp3
+promo-videos/voices/**/*.m4a
+promo-videos/voices/**/*.wav
