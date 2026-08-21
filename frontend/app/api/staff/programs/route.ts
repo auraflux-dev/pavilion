@@ -63,6 +63,7 @@ function mapProgram(item: Record<string, unknown>) {
     durationWeeks: Number(item.durationWeeks ?? 0) || 0,
     startDate: dateField(item.startDate),
     endDate: dateField(item.endDate),
+    instructorName: String(item.instructorName ?? ''),
   }
 }
 
@@ -102,6 +103,10 @@ function schedulePatchFromBody(body: Record<string, unknown>, existing: Record<s
         ? String(body.schedule).trim()
         : composed || String(existing.schedule ?? ''),
     image: body.image != null ? String(body.image).trim() : String(existing.image ?? ''),
+    instructorName:
+      body.instructorName != null
+        ? String(body.instructorName).trim()
+        : String(existing.instructorName ?? ''),
   }
 }
 

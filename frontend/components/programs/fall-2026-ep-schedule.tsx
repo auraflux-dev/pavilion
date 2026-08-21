@@ -5,12 +5,49 @@ import {
   FALL_2026_EP_LOCATION,
   FALL_2026_EP_SALES,
   formatFall2026EpDate,
+  matchFall2026EpClass,
+  type Fall2026EpClass,
 } from '@/lib/programs/fall-2026-ep'
 
-export function Fall2026EpSchedule({ variant = 'public' }: { variant?: 'public' | 'staff' }) {
+type LinkedProgram = {
+  id: string
+  name: string
+  dayOfWeek: string
+  classTime: string
+  startDate: string
+  endDate: string
+  instructorName: string
+}
+
+type Props = {
+  variant?: 'public' | 'staff'
+  /** When set (staff), rows edit the matched CMS Programs item. */
+  programs?: LinkedProgram[]
+  canEdit?: boolean
+  busy?: boolean
+  onPatchProgram?: (id: string, patch: Record<string, unknown>) => void
+}
+
+function linkedProgram(
+  klass: Fall2026EpClass,
+  programs: LinkedProgram[] | undefined,
+): LinkedProgram | undefined {
+  if (!programs?.length) return undefined
+  return programs.find((p) => matchFall2026EpClass(p.name)?.id === klass.id)
+}
+
+export function Fall2026EpSchedule({
+  variant = 'public',
+  programs,
+  canEdit = false,
+  busy = false,
+  onPatchProgram,
+}: Props) {
   const printHint =
     variant === 'staff'
-      ? 'Share https://www.shmspto.org/programs/fall-2026 with instructors, or print this page.'
+      ? canEdit
+        ? 'Edit class, night, time, instructor, and first/last dates here.\nThey save to the matching Programs CMS row.\nRoom stays Library (principal packet).'
+        : 'Share https://www.shmspto.org/programs/fall-2026 with instructors, or print this page.'
       : 'Print this page or save as PDF to share with instructors.'
 
   return (
@@ -59,18 +96,128 @@ export function Fall2026EpSchedule({ variant = 'public' }: { variant?: 'public' 
             </tr>
           </thead>
           <tbody>
-            {FALL_2026_EP_CLASSES.map((c) => (
-              <tr key={c.id} className="border-b border-[var(--border)] last:border-0">
-                <td className="px-3 py-2 font-semibold">{c.name}</td>
-                <td className="px-3 py-2">{c.dayOfWeek}</td>
-                <td className="px-3 py-2">{c.classTime}</td>
-                <td className="px-3 py-2">{FALL_2026_EP_LOCATION}</td>
-                <td className="px-3 py-2">{c.vendor}</td>
-                <td className="px-3 py-2">
-                  {formatFall2026EpDate(c.dates[0])} → {formatFall2026EpDate(c.dates[c.dates.length - 1])}
-                </td>
-              </tr>
-            ))}
+            {FALL_2026_EP_CLASSES.map((c) => {
+              const linked = linkedProgram(c, programs)
+              const editable = Boolean(canEdit && linked && onPatchProgram)
+              const day = linked?.dayOfWeek || c.dayOfWeek
+              const time = linked?.classTime || c.classTime
+              const first = linked?.startDate || c.dates[0]
+              const last = linked?.endDate || c.dates[c.dates.length - 1]
+              const displayName = linked?.name || c.name
+              const instructor = linked?.instructorName?.trim() || c.vendor
+
+              return (
+                <tr key={c.id} className="border-b border-[var(--border)] last:border-0 align-top">
+                  <td className="px-3 py-2 font-semibold">
+                    {editable && linked ? (
+                      <input
+                        defaultValue={displayName}
+                        disabled={busy}
+                        aria-label={`${c.name} class name`}
+                        className="w-full min-w-[8rem] border border-[var(--border)] rounded px-2 py-1 text-sm font-semibold"
+                        onBlur={(e) => {
+                          const next = e.target.value.trim()
+                          if (next && next !== linked.name) onPatchProgram?.(linked.id, { name: next })
+                        }}
+                      />
+                    ) : (
+                      displayName
+                    )}
+                    {canEdit && !linked ? (
+                      <p className="text-[10px] font-normal text-[#5A6070] mt-0.5">
+                        No CMS program match yet
+                      </p>
+                    ) : null}
+                  </td>
+                  <td className="px-3 py-2">
+                    {editable && linked ? (
+                      <input
+                        defaultValue={day}
+                        disabled={busy}
+                        aria-label={`${c.name} night`}
+                        className="w-full min-w-[5rem] border border-[var(--border)] rounded px-2 py-1 text-sm"
+                        onBlur={(e) => {
+                          if (e.target.value !== day) {
+                            onPatchProgram?.(linked.id, { dayOfWeek: e.target.value })
+                          }
+                        }}
+                      />
+                    ) : (
+                      day
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    {editable && linked ? (
+                      <input
+                        defaultValue={time}
+                        disabled={busy}
+                        aria-label={`${c.name} time`}
+                        className="w-full min-w-[7rem] border border-[var(--border)] rounded px-2 py-1 text-sm"
+                        onBlur={(e) => {
+                          if (e.target.value !== time) {
+                            onPatchProgram?.(linked.id, { classTime: e.target.value })
+                          }
+                        }}
+                      />
+                    ) : (
+                      time
+                    )}
+                  </td>
+                  <td className="px-3 py-2">{FALL_2026_EP_LOCATION}</td>
+                  <td className="px-3 py-2">
+                    {editable && linked ? (
+                      <input
+                        defaultValue={instructor}
+                        disabled={busy}
+                        aria-label={`${c.name} instructor`}
+                        className="w-full min-w-[7rem] border border-[var(--border)] rounded px-2 py-1 text-sm"
+                        onBlur={(e) => {
+                          if (e.target.value !== instructor) {
+                            onPatchProgram?.(linked.id, { instructorName: e.target.value })
+                          }
+                        }}
+                      />
+                    ) : (
+                      instructor
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    {editable && linked ? (
+                      <div className="flex flex-col gap-1">
+                        <input
+                          type="date"
+                          defaultValue={first.slice(0, 10)}
+                          disabled={busy}
+                          aria-label={`${c.name} first date`}
+                          className="border border-[var(--border)] rounded px-2 py-1 text-xs"
+                          onBlur={(e) => {
+                            if (e.target.value !== first.slice(0, 10)) {
+                              onPatchProgram?.(linked.id, { startDate: e.target.value })
+                            }
+                          }}
+                        />
+                        <input
+                          type="date"
+                          defaultValue={last.slice(0, 10)}
+                          disabled={busy}
+                          aria-label={`${c.name} last date`}
+                          className="border border-[var(--border)] rounded px-2 py-1 text-xs"
+                          onBlur={(e) => {
+                            if (e.target.value !== last.slice(0, 10)) {
+                              onPatchProgram?.(linked.id, { endDate: e.target.value })
+                            }
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        {formatFall2026EpDate(first)} → {formatFall2026EpDate(last)}
+                      </>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
