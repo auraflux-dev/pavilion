@@ -4,6 +4,7 @@ import { isDemoInstance } from '@/lib/demo/instance'
 import { getWixClient } from "@/lib/wix-client";
 import { formatProgramSchedule } from "@/lib/programs/schedule";
 import { memberPriorityUntilIso } from '@/lib/programs/registration-access'
+import { filterProgramsForPublicCatalog } from '@/lib/programs/season'
 
 export interface Program {
   _id: string;
@@ -49,6 +50,8 @@ export interface Program {
   /** Fee footnote, e.g. Members 10 / 15 / 30% off */
   memberDiscountNote?: string;
   fallEpClassId?: string;
+  /** Catalog season: fall-2026 | spring-2027 | full-year */
+  season?: string;
 }
 
 function normalizeImage(raw: unknown): string | undefined {
@@ -113,6 +116,7 @@ function mapProgramItem(item: Record<string, unknown>): Program {
     instructorName: String(item.instructorName ?? '').trim() || undefined,
     memberDiscountNote: String(item.memberDiscountNote ?? '').trim() || undefined,
     fallEpClassId: String(item.fallEpClassId ?? '').trim() || undefined,
+    season: String(item.season ?? '').trim() || undefined,
   }
 }
 
@@ -158,11 +162,13 @@ export async function getFeaturedPrograms(): Promise<Program[]> {
 }
 
 function publicPrograms(items: Record<string, unknown>[]): Program[] {
-  return items
-    .map(mapProgramItem)
-    .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags))
-    // Public catalog: open registration and/or featured (keeps legacy closed CMS rows off the site).
-    .filter((p) => p.registrationOpen || p.featured)
+  return filterProgramsForPublicCatalog(
+    items
+      .map(mapProgramItem)
+      .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags))
+      // Public catalog: open registration and/or featured (keeps legacy closed CMS rows off the site).
+      .filter((p) => p.registrationOpen || p.featured),
+  )
 }
 
 export async function getProgramById(id: string): Promise<Program | null> {

@@ -204,7 +204,7 @@ export function ProgramsSectionNav() {
     <BandNav
       ariaLabel="Programs page sections"
       items={[
-        { href: '#programs-list', label: 'All programs', hint: 'Browse & filter', icon: Sparkles },
+        { href: '#programs-list', label: 'This season', hint: 'Fall catalog', icon: Sparkles },
         { href: '/programs/fall-2026', label: 'Fall 2026 schedule', hint: 'Times and dates', icon: CalendarDays },
         { href: '#programs-contact', label: 'Ask a question', hint: 'VP of Programs', icon: HelpCircle },
       ]}

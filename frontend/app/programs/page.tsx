@@ -118,7 +118,7 @@ export default async function ProgramsPage() {
           <BrandImageWash src="/home/hero-a.jpg" side="left" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 id="programs-list-heading" className="sr-only">
-              All Programs
+              Enrichment by season
             </h2>
 
             {error && (

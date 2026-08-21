@@ -264,6 +264,7 @@ export function serializeMeetingDates(dates: string[]): string {
 export function fall2026PacketCmsDefaults(klass: Fall2026EpClass): Record<string, string | number> {
   return {
     fallEpClassId: klass.id,
+    season: 'fall-2026',
     dayOfWeek: klass.dayOfWeek,
     classTime: klass.classTime,
     location: FALL_2026_EP_LOCATION,

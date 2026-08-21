@@ -15,6 +15,12 @@ import {
   mergeEmptyProgramFields,
   selectCurrentFall2026Programs,
 } from '@/lib/programs/fall-2026-ep'
+import {
+  CATALOG_SEASON_LABELS,
+  resolveProgramSeason,
+  STAFF_SEASON_OPTIONS,
+  type CatalogSeasonId,
+} from '@/lib/programs/season'
 
 type Program = {
   id: string
@@ -43,6 +49,7 @@ type Program = {
   endDate: string
   instructorName: string
   fallEpClassId: string
+  season: string
   location: string
   meetingDates: string
   skipsNote: string
@@ -329,6 +336,7 @@ export function StaffProgramsPanel() {
           location: seed?.location || 'SHMS Library',
           grades: seed?.grades || '6-8',
           category: seed?.category || 'Enrichment',
+          season: seed?.season || 'fall-2026',
           memberDiscountNote: seed?.memberDiscountNote || 'Members 10 / 15 / 30% off',
           description: seed?.description || '',
           fee: seed?.fee ?? 0,
@@ -913,6 +921,29 @@ export function StaffProgramsPanel() {
                     onBlur={(e) => void saveProgram(p.id, { paymentType: e.target.value })}
                   />
                 </label>
+                <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
+                  <span>Catalog season</span>
+                  <select
+                    value={resolveProgramSeason(p)}
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A] bg-white"
+                    onChange={(e) => {
+                      const season = e.target.value as CatalogSeasonId
+                      changeProgramLocal(p.id, { season })
+                      void saveProgram(p.id, { season })
+                    }}
+                  >
+                    {STAFF_SEASON_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                        {opt.note ? ` (${opt.note})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="block text-[10px] text-[#5A6070] mt-0.5">
+                    Public catalog: Fall / Spring only. Spring and Full year stay hidden until turned on in code.
+                    Showing as {CATALOG_SEASON_LABELS[resolveProgramSeason(p)]}.
+                  </span>
+                </label>
                 <label className="text-[11px] text-[#5A6070] space-y-0.5">
                   <span>Sort order</span>
                   <input
@@ -960,7 +991,7 @@ export function StaffProgramsPanel() {
                     checked={p.requiresWaiver}
                     onChange={(e) => void saveProgram(p.id, { requiresWaiver: e.target.checked })}
                   />
-                  Requires waiver
+                  Requires waiver (CMS flag). Checkout still always asks enrichment waiver, medical, and photo.
                 </label>
               </div>
               <div className="grid sm:grid-cols-2 gap-2 pt-1">

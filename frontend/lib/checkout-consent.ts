@@ -37,6 +37,11 @@ const MEMBERSHIP_ITEMS: ConsentItem[] = [
   },
 ]
 
+/**
+ * Enrichment checkout stack (every program registration).
+ * Keep waiver + medical + photo. Do not replace with site /terms alone.
+ * CMS flag `requiresWaiver` on a program card is separate from this consent stack.
+ */
 const PROGRAM_ITEMS: ConsentItem[] = [
   {
     id: 'enrichment-waiver',

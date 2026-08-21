@@ -69,6 +69,7 @@ function mapProgram(item: Record<string, unknown>) {
     meetingDates: String(item.meetingDates ?? ''),
     skipsNote: String(item.skipsNote ?? ''),
     memberDiscountNote: String(item.memberDiscountNote ?? ''),
+    season: String(item.season ?? ''),
   }
 }
 
@@ -116,6 +117,8 @@ function schedulePatchFromBody(body: Record<string, unknown>, existing: Record<s
       body.fallEpClassId != null
         ? String(body.fallEpClassId).trim()
         : String(existing.fallEpClassId ?? ''),
+    season:
+      body.season != null ? String(body.season).trim() : String(existing.season ?? ''),
     location:
       body.location != null ? String(body.location).trim() : String(existing.location ?? ''),
     meetingDates:
@@ -243,6 +246,7 @@ export async function POST(req: NextRequest) {
         skipsNote: String(body.skipsNote ?? '').trim(),
         memberDiscountNote: String(body.memberDiscountNote ?? '').trim(),
         fallEpClassId: String(body.fallEpClassId ?? '').trim(),
+        season: String(body.season ?? 'fall-2026').trim() || 'fall-2026',
       }
       const inserted = await client.items.insert('Programs', row)
       return NextResponse.json({ ok: true, id: (inserted as { _id?: string })._id })

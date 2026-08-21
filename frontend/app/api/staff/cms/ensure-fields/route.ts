@@ -104,6 +104,11 @@ export async function POST(req: NextRequest) {
           displayName: 'Paid members only until (then open to all)',
           type: 'DATETIME',
         },
+        {
+          key: 'season',
+          displayName: 'Catalog season (fall-2026 | spring-2027 | full-year)',
+          type: 'TEXT',
+        },
       ]),
     )
     results.push(
