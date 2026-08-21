@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChevronDown, ChevronUp, CreditCard, BookOpen, Pencil, Loader2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, BookOpen, Pencil, Loader2 } from 'lucide-react'
 import { EditStudentForm } from './edit-student-form'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
@@ -119,20 +119,6 @@ function safetySummary(student: Student): { complete: boolean; allergyLine: stri
   return { complete, allergyLine: String(student.allergies ?? '').trim() }
 }
 
-interface GiftCardData {
-  hasCard: boolean
-  gan?: string
-  balance: number
-  activities: {
-    id: string
-    type: string
-    createdAt: string
-    balanceMoney: number | null
-    loadMoney: number | null
-    redeemMoney: number | null
-  }[]
-}
-
 export function StudentCard({
   student,
   defaultOpen = false,
@@ -152,30 +138,7 @@ export function StudentCard({
   const [showPast, setShowPast] = useState(false)
   const [requestBusy, setRequestBusy] = useState(false)
   const [requestMsg, setRequestMsg] = useState('')
-  const [giftCard, setGiftCard] = useState<GiftCardData | null>(null)
-  const [giftCardLoading, setGiftCardLoading] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
-
-  // Live gift card balance. Fetched on mount
-  useEffect(() => {
-    setGiftCardLoading(true)
-    fetch(`/api/gift-card/balance?studentId=${student.id}`)
-      .then(async (r) => {
-        const d = await r.json().catch(() => null)
-        if (!r.ok || !d || d.hasCard == null) {
-          setGiftCard({ hasCard: false, balance: 0, activities: [] })
-          return
-        }
-        setGiftCard({
-          hasCard: Boolean(d.hasCard),
-          gan: d.gan,
-          balance: Number(d.balance) || 0,
-          activities: Array.isArray(d.activities) ? d.activities : [],
-        })
-      })
-      .catch(() => setGiftCard({ hasCard: false, balance: 0, activities: [] }))
-      .finally(() => setGiftCardLoading(false))
-  }, [student.id])
 
   useEffect(() => {
     if (open && !history) {
@@ -297,22 +260,7 @@ export function StudentCard({
         </div>
       </div>
 
-      {/* Collapsed: Cove balance only. Membership tier lives on Account / Store benefits. */}
-      <div className="flex items-center gap-2 px-5 py-3 border-t border-[#F0EDE8]">
-        <CreditCard className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
-        <div>
-          <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">{vanillaizeIfDemo('Cove balance')}</p>
-          {giftCardLoading ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin mt-0.5" style={{ color: 'var(--brand-green)' }} />
-          ) : (
-            <p className="text-sm font-bold text-[#1A1A1A]">
-              {giftCard?.hasCard ? formatMoney(giftCard.balance) : 'n/a'}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Expanded: edit form, enrollments, attendance. Store owns Load + purchases. Auto Top-Off on Payment methods. */}
+      {/* Expanded: edit, enrollments, attendance. Store owns Cove balance + Load. */}
       {open && (
         <div className="border-t border-[#F0EDE8] px-5 py-5 space-y-6">
           {onUpdated ? (
@@ -324,11 +272,6 @@ export function StudentCard({
               onOpenChange={setEditOpen}
               hideTrigger
             />
-          ) : null}
-          {!giftCard?.hasCard ? (
-            <p className="text-sm text-[#5A6070]">
-              {vanillaizeIfDemo('No Cove balance yet. Load from Store & Cove below.')}
-            </p>
           ) : null}
           {loading && (
             <div className="flex items-center justify-center py-6">
