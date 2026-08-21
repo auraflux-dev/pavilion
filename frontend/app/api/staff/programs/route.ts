@@ -237,6 +237,12 @@ export async function POST(req: NextRequest) {
         durationWeeks,
         startDate,
         endDate,
+        location: String(body.location ?? '').trim(),
+        instructorName: String(body.instructorName ?? '').trim(),
+        meetingDates: String(body.meetingDates ?? '').trim(),
+        skipsNote: String(body.skipsNote ?? '').trim(),
+        memberDiscountNote: String(body.memberDiscountNote ?? '').trim(),
+        fallEpClassId: String(body.fallEpClassId ?? '').trim(),
       }
       const inserted = await client.items.insert('Programs', row)
       return NextResponse.json({ ok: true, id: (inserted as { _id?: string })._id })
@@ -387,5 +393,43 @@ export async function PATCH(req: NextRequest) {
   } catch (err) {
     console.error('/api/staff/programs PATCH', err)
     return NextResponse.json({ error: 'Could not update' }, { status: 500 })
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await gate(req)
+  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  try {
+    const body = await req.json()
+    const kind = String(body.kind ?? 'program')
+    const id = String(body.id ?? '').trim()
+    if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+    const client = getWixClient()
+
+    if (kind === 'session') {
+      const existing = (await client.items.get('ProgramSessions', id)) as Record<string, unknown>
+      if (!existing?._id) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+      const programId = String(existing.programId ?? '')
+      if (!canAccessProgram(session.staff, programId)) {
+        return NextResponse.json({ error: 'Not assigned to this program' }, { status: 403 })
+      }
+      await client.items.remove('ProgramSessions', id)
+      return NextResponse.json({ ok: true })
+    }
+
+    if (!canManageAllPrograms(session.staff)) {
+      return NextResponse.json(
+        { error: 'Only Programs VP / admin can delete programs' },
+        { status: 403 },
+      )
+    }
+    if (!canAccessProgram(session.staff, id)) {
+      return NextResponse.json({ error: 'Not assigned to this program' }, { status: 403 })
+    }
+    await client.items.remove('Programs', id)
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('/api/staff/programs DELETE', err)
+    return NextResponse.json({ error: 'Could not delete' }, { status: 500 })
   }
 }

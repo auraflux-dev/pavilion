@@ -27,6 +27,8 @@ type Props = {
   canEdit?: boolean
   onProgramChange?: (id: string, patch: Record<string, unknown>) => void
   onProgramSave?: (id: string, patch: Record<string, unknown>) => void
+  onAddProgram?: () => void
+  onRemoveProgram?: (id: string, name: string) => void
   /** Optional footnote from CMS / staff (registration windows). */
   footnote?: string
 }
@@ -37,12 +39,14 @@ export function Fall2026EpSchedule({
   canEdit = false,
   onProgramChange,
   onProgramSave,
+  onAddProgram,
+  onRemoveProgram,
   footnote,
 }: Props) {
   const staffEdit = variant === 'staff' && canEdit && Boolean(onProgramChange && onProgramSave)
   const rows = programs
   const printHint = staffEdit
-    ? 'Every cell below is editable.\nClick out of a field to save.\nCopy lives in Programs CMS (same as /programs cards).'
+    ? 'Every cell below is editable.\nAdd or remove classes and meeting dates here.\nClick out of a field to save.'
     : variant === 'staff'
       ? 'Share https://www.shmspto.org/programs/fall-2026 with instructors, or print this page.'
       : 'Print this page or save as PDF to share with instructors.'
@@ -56,6 +60,16 @@ export function Fall2026EpSchedule({
           </p>
           <h2 className="text-2xl font-bold text-[#1A1A1A]">Class nights</h2>
           <p className="mt-1 text-sm text-[#5A6070] whitespace-pre-line">{printHint}</p>
+          {staffEdit && onAddProgram ? (
+            <button
+              type="button"
+              className="mt-2 text-sm font-semibold underline"
+              style={{ color: 'var(--brand-green)' }}
+              onClick={() => onAddProgram()}
+            >
+              Add class row
+            </button>
+          ) : null}
         </div>
         {variant === 'public' ? (
           <button
@@ -93,6 +107,7 @@ export function Fall2026EpSchedule({
                 <th className="px-3 py-2 font-semibold">Room</th>
                 <th className="px-3 py-2 font-semibold">Instructor</th>
                 <th className="px-3 py-2 font-semibold">First / last</th>
+                {staffEdit ? <th className="px-3 py-2 font-semibold print:hidden"> </th> : null}
               </tr>
             </thead>
             <tbody>
@@ -211,6 +226,19 @@ export function Fall2026EpSchedule({
                         '—'
                       )}
                     </td>
+                    {staffEdit ? (
+                      <td className="px-3 py-2">
+                        {onRemoveProgram ? (
+                          <button
+                            type="button"
+                            className="text-xs font-semibold underline text-red-700"
+                            onClick={() => onRemoveProgram(row.id, row.name)}
+                          >
+                            Remove
+                          </button>
+                        ) : null}
+                      </td>
+                    ) : null}
                   </tr>
                 )
               })}
@@ -252,7 +280,7 @@ export function Fall2026EpSchedule({
                     className="rounded-md border border-[var(--border)] bg-white px-2 py-1"
                   >
                     {staffEdit ? (
-                      <label className="flex items-center gap-1 text-xs">
+                      <div className="flex items-center gap-1 text-xs">
                         <span className="text-[#5A6070]">{i + 1}.</span>
                         <input
                           type="date"
@@ -271,7 +299,25 @@ export function Fall2026EpSchedule({
                             onProgramSave?.(row.id, patch)
                           }}
                         />
-                      </label>
+                        <button
+                          type="button"
+                          className="text-red-700 underline shrink-0"
+                          aria-label={`Remove meeting ${i + 1}`}
+                          onClick={() => {
+                            const next = dates.filter((_, idx) => idx !== i)
+                            const patch = {
+                              meetingDates: serializeMeetingDates(next),
+                              startDate: next[0] || '',
+                              endDate: next[next.length - 1] || '',
+                              durationWeeks: next.length,
+                            }
+                            onProgramChange?.(row.id, patch)
+                            onProgramSave?.(row.id, patch)
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
                     ) : (
                       <>
                         {i + 1}. {formatFall2026EpDate(iso)}
@@ -280,11 +326,34 @@ export function Fall2026EpSchedule({
                   </li>
                 ))}
               </ol>
-            ) : staffEdit ? (
-              <p className="text-xs text-[#5A6070]">
-                No meeting dates yet. Use “Seed Fall 2026 packet into empty fields” on the Programs
-                list, or add dates here after seeding.
-              </p>
+            ) : null}
+            {staffEdit ? (
+              <button
+                type="button"
+                className="mt-2 text-xs font-semibold underline"
+                style={{ color: 'var(--brand-green)' }}
+                onClick={() => {
+                  const last = dates[dates.length - 1]
+                  const nextDate = last
+                    ? (() => {
+                        const d = new Date(`${last}T12:00:00`)
+                        d.setDate(d.getDate() + 7)
+                        return d.toISOString().slice(0, 10)
+                      })()
+                    : row.startDate || '2026-09-15'
+                  const next = [...dates, nextDate]
+                  const patch = {
+                    meetingDates: serializeMeetingDates(next),
+                    startDate: next[0],
+                    endDate: next[next.length - 1],
+                    durationWeeks: next.length,
+                  }
+                  onProgramChange?.(row.id, patch)
+                  onProgramSave?.(row.id, patch)
+                }}
+              >
+                Add meeting date
+              </button>
             ) : null}
           </div>
         )

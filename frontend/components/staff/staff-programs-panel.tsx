@@ -302,6 +302,100 @@ export function StaffProgramsPanel() {
     }
   }
 
+  async function createProgram(seed?: Partial<Program>) {
+    const name =
+      seed?.name?.trim() ||
+      (typeof window !== 'undefined' ? window.prompt('New program name') : null)
+    if (!name?.trim()) return
+    setStatus('')
+    setBusy(true)
+    try {
+      const r = await fetch('/api/staff/programs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'program',
+          name: name.trim(),
+          featured: true,
+          registrationOpen: false,
+          startDate: seed?.startDate || '2026-09-15',
+          endDate: seed?.endDate || '2026-12-08',
+          dayOfWeek: seed?.dayOfWeek || '',
+          classTime: seed?.classTime || '',
+          location: seed?.location || 'SHMS Library',
+          grades: seed?.grades || '6-8',
+          category: seed?.category || 'Enrichment',
+          memberDiscountNote: seed?.memberDiscountNote || 'Members 10 / 15 / 30% off',
+          description: seed?.description || '',
+          fee: seed?.fee ?? 0,
+          capacity: seed?.capacity ?? 0,
+        }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not create program')
+      setStatus(`Added “${name.trim()}”.`)
+      setShowOlderPrograms(false)
+      await load()
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Could not create program')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function deleteProgram(id: string, name: string) {
+    if (
+      typeof window !== 'undefined' &&
+      !window.confirm(`Remove “${name}” from Programs CMS?\nThis cannot be undone.`)
+    ) {
+      return
+    }
+    setStatus('')
+    setBusy(true)
+    try {
+      const r = await fetch('/api/staff/programs', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: 'program', id }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not remove program')
+      setPrograms((list) => list.filter((p) => p.id !== id))
+      setStatus(`Removed “${name}”.`)
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Could not remove program')
+      await load()
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function deleteSession(id: string, title: string) {
+    if (
+      typeof window !== 'undefined' &&
+      !window.confirm(`Remove session “${title}”?`)
+    ) {
+      return
+    }
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/programs', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: 'session', id }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not remove session')
+      setStatus('Session removed.')
+      await load()
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Could not remove session')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   /** @deprecated alias kept for older call sites in this file */
   async function patchProgram(id: string, body: Record<string, unknown>) {
     await saveProgram(id, body)
@@ -585,6 +679,8 @@ export function StaffProgramsPanel() {
           canEdit
           onProgramChange={changeProgramLocal}
           onProgramSave={(id, patch) => void saveProgram(id, patch)}
+          onAddProgram={() => void createProgram()}
+          onRemoveProgram={(id, name) => void deleteProgram(id, name)}
         />
         {savingProgramId ? (
           <p className="text-[11px] text-[#5A6070] mt-2">Saving…</p>
@@ -616,6 +712,17 @@ export function StaffProgramsPanel() {
 
       {tab === 'programs' ? (
         <div className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              disabled={busy}
+              onClick={() => void createProgram()}
+              className="text-white text-sm"
+              style={{ backgroundColor: 'var(--brand-green)' }}
+            >
+              Add program
+            </Button>
+          </div>
           {visiblePrograms.length === 0 ? (
             <p className="text-sm text-[#5A6070] whitespace-pre-line">
               {showOlderPrograms
@@ -716,6 +823,14 @@ export function StaffProgramsPanel() {
                     }}
                   >
                     Attendance
+                  </button>
+                  <button
+                    type="button"
+                    className="underline font-semibold text-red-700"
+                    disabled={busy}
+                    onClick={() => void deleteProgram(p.id, p.name)}
+                  >
+                    Remove
                   </button>
                 </div>
               </div>
@@ -1076,6 +1191,14 @@ export function StaffProgramsPanel() {
                     />
                     Active
                   </label>
+                  <button
+                    type="button"
+                    className="text-xs font-semibold underline text-red-700"
+                    disabled={busy}
+                    onClick={() => void deleteSession(s.id, s.title)}
+                  >
+                    Remove session
+                  </button>
                 </div>
               </div>
             ))}
