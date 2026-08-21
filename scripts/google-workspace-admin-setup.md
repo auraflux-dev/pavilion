@@ -114,6 +114,19 @@ They must connect with the same email they use for Staff login.
 
 ---
 
+## Staging host (stable review)
+
+Stone Hill staging is always **https://shmspto.vercel.app** (agents alias Preview deploys here). Do not use one-off `frontend-*.vercel.app` links for review.
+
+Keep these on the Google Web OAuth client:
+
+- Origin: `https://shmspto.vercel.app`
+- Redirect: `https://shmspto.vercel.app/api/staff/workspace/connect/callback`
+
+Parent Google login on staging bounces through www and hands the session back. Connect Google from staging still needs the redirect URI above.
+
+---
+
 ## Step 6 — Verify
 
 - Inbox lists messages  
