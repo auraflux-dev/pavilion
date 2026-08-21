@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChevronDown, ChevronUp, CreditCard, BookOpen, Receipt, Star, Tag, Loader2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, CreditCard, BookOpen, Star, Loader2 } from 'lucide-react'
 import { GiftCardSettings } from './gift-card-settings'
 import { EditStudentForm } from './edit-student-form'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
@@ -298,41 +298,22 @@ export function StudentCard({
         </div>
       </div>
 
-      {/* Quick stats bar */}
-      <div className="grid grid-cols-2 divide-x divide-[#F0EDE8] border-t border-[#F0EDE8]">
-        <div className="flex items-center gap-2 px-5 py-3">
-          <CreditCard className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
-          <div>
-            <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">{vanillaizeIfDemo('Cove Digital Card')}</p>
-            {giftCardLoading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin mt-0.5" style={{ color: 'var(--brand-green)' }} />
-            ) : (
-              <p className="text-sm font-bold text-[#1A1A1A]">
-                {giftCard?.hasCard ? formatMoney(giftCard.balance) : 'n/a'}
-              </p>
-            )}
-          </div>
+      {/* Collapsed: Cove balance only. Tier is on the badge above. */}
+      <div className="flex items-center gap-2 px-5 py-3 border-t border-[#F0EDE8]">
+        <CreditCard className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
+        <div>
+          <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">{vanillaizeIfDemo('Cove balance')}</p>
+          {giftCardLoading ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin mt-0.5" style={{ color: 'var(--brand-green)' }} />
+          ) : (
+            <p className="text-sm font-bold text-[#1A1A1A]">
+              {giftCard?.hasCard ? formatMoney(giftCard.balance) : 'n/a'}
+            </p>
+          )}
         </div>
-        {isPaid && student.discountCode ? (
-          <div className="flex items-center gap-2 px-5 py-3">
-            <Tag className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
-            <div className="min-w-0">
-              <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Discount Code</p>
-              <p className="text-sm font-bold font-mono text-[var(--brand-green)]">{student.discountCode}</p>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 px-5 py-3">
-            <Star className="w-4 h-4 shrink-0 text-[#5A6070]" />
-            <div>
-              <p className="text-[10px] text-[#5A6070] uppercase tracking-wider font-semibold">Membership</p>
-              <p className="text-sm font-bold text-[#1A1A1A]">{tierLabel}</p>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Expanded history */}
+      {/* Expanded: edit, enrollments, attendance, Auto Top-Off. Store owns purchases + Load. */}
       {open && (
         <div className="border-t border-[#F0EDE8] px-5 py-5 space-y-6">
           {onUpdated ? (
@@ -350,54 +331,17 @@ export function StudentCard({
 
           {!loading && history && (
             <>
-              {/* Gift Card */}
+              {/* Auto Top-Off only. Balance is in the bar above. Purchases live under Store. */}
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">{vanillaizeIfDemo('Cove Digital Card')}</h4>
-                  </div>
-                  {giftCard?.hasCard && (
-                    <span className="text-lg font-bold text-[#1A1A1A]">{formatMoney(giftCard.balance)}</span>
-                  )}
-                </div>
-
                 {!giftCard?.hasCard ? (
-                  <p className="text-sm text-[#5A6070]">
+                  <p className="text-sm text-[#5A6070] mb-3">
                     {vanillaizeIfDemo('No Cove balance yet. Load from Store & Cove below.')}
                   </p>
-                ) : (
-                  <div className="space-y-3">
-                    {(giftCard.activities?.length ?? 0) > 0 && (
-                      <div className="space-y-1.5">
-                        {(giftCard.activities ?? []).slice(0, 5).map(a => (
-                          <div key={a.id} className="flex items-center justify-between text-sm py-1.5 border-b border-[var(--brand-warm)] last:border-0">
-                            <div>
-                              <span className={`text-xs font-bold px-2 py-0.5 rounded-full mr-2 ${
-                                a.type === 'LOAD' ? 'bg-green-50 text-green-700' :
-                                a.type === 'REDEEM' ? 'bg-blue-50 text-blue-700' :
-                                'bg-gray-100 text-gray-500'
-                              }`}>{a.type === 'LOAD' ? 'Loaded' : a.type === 'REDEEM' ? 'Used' : a.type}</span>
-                              <span className="text-xs text-[#5A6070]">
-                                {a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
-                              </span>
-                            </div>
-                            <div className="text-right">
-                              {a.loadMoney != null && <span className="font-bold text-green-700">+{formatMoney(a.loadMoney)}</span>}
-                              {a.redeemMoney != null && <span className="font-bold text-[#1A1A1A]">−{formatMoney(a.redeemMoney)}</span>}
-                              {a.balanceMoney != null && <span className="text-xs text-[#5A6070] ml-1">→ {formatMoney(a.balanceMoney)}</span>}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    <GiftCardSettings
-                      studentId={student.id}
-                      studentName={student.firstName}
-                    />
-                  </div>
-                )}
+                ) : null}
+                <GiftCardSettings
+                  studentId={student.id}
+                  studentName={student.firstName}
+                />
               </div>
 
               {(() => {
@@ -562,44 +506,6 @@ export function StudentCard({
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusClass(m.status)}`}>
                           {m.status}
                         </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Payments */}
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Receipt className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Payment History</h4>
-                </div>
-                {(history.payments?.length ?? 0) === 0 ? (
-                  <p className="text-sm text-[#5A6070]">No payments yet.</p>
-                ) : (
-                  <div className="space-y-2">
-                    {history.payments.map(p => (
-                      <div key={p.id} className="flex items-start justify-between gap-3 py-2.5 border-b border-[var(--brand-warm)] last:border-0">
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-[#1A1A1A] truncate">{p.programName}</p>
-                          <p className="text-xs text-[#5A6070]">
-                            {[
-                              formatDate(p.paymentDate) !== 'n/a' ? formatDate(p.paymentDate) : null,
-                              p.paymentMethod || null,
-                            ]
-                              .filter(Boolean)
- .join(' · ') || '-'}
-                          </p>
-                          {p.detail ? (
-                            <p className="text-[11px] text-[#5A6070] mt-0.5 leading-snug">{p.detail}</p>
-                          ) : null}
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-sm font-bold text-[#1A1A1A]">{formatMoney(p.amount)}</span>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusClass(p.status)}`}>
-                            {p.status}
-                          </span>
-                        </div>
                       </div>
                     ))}
                   </div>

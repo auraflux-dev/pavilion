@@ -366,10 +366,9 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
                       Word passcode. Easier at The Cove
                     </span>
                   </p>
-                  <p className="text-[12px] text-[#5A6070] mt-1 leading-relaxed">
-                    Students can say a short word instead of six digits. We suggest your{' '}
-                    <strong>last name + first letters of your first name</strong>. Set it below once,
-                    then teach them the word.
+                  <p className="text-[12px] text-[#5A6070] mt-1 leading-relaxed whitespace-pre-line">
+                    Say a short word instead of six digits.
+                    Set it below once.
                   </p>
                   <button
                     type="button"

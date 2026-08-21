@@ -444,9 +444,9 @@ export function StoreCardReload({
         />
       ) : null}
 
-      <p className="text-[10px] text-[#5A6070] text-center">
+      <p className="text-[10px] text-[#5A6070] text-center whitespace-pre-line">
         {vanillaizeIfDemo(
-          `Pay with credit/debit card or PayPal. One family Cove Digital Card and balance. ${bonusPercent}% on first load or membership credit only. Reloads are 1:1. Saving a payment card is optional.`,
+          `Pay with card or PayPal.\n${bonusPercent}% bonus on first load only. Reloads are 1:1.`,
         )}
       </p>
     </div>

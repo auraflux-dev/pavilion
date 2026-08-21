@@ -99,7 +99,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   storeCardsLabel: 'Family Cove Digital Card',
   storeCardsHint: 'Current Balance',
   recentBuysLabel: 'Recent buys',
-  recentBuysHint: 'Payment History',
+  recentBuysHint: 'Purchases',
   ctaLoadCard: 'Load Cove Digital Card',
   ctaSpiritWear: 'Spirit wear',
   ctaPrograms: 'Programs',
