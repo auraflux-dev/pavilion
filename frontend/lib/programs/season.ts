@@ -19,10 +19,11 @@ export const FULL_YEAR_CATALOG_ENABLED = false
 
 /**
  * Public enrichment unlock (America/New_York).
- * Hidden from visitors until Monday 2026-08-24 local midnight.
+ * Hidden from visitors until Sunday 2026-08-23 at 4:00 PM Eastern
+ * (after the school newsletter goes out Sunday evening).
  * Staff CMS and APIs stay available. Flip date or remove gate when no longer needed.
  */
-export const PROGRAMS_PUBLIC_OPENS_AT_MS = Date.parse('2026-08-24T00:00:00-04:00')
+export const PROGRAMS_PUBLIC_OPENS_AT_MS = Date.parse('2026-08-23T16:00:00-04:00')
 
 /** True when parents may see /programs catalog, landings, home preview, and nav link. */
 export function isPublicProgramsCatalogOpen(now: Date = new Date()): boolean {

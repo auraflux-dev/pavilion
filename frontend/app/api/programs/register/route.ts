@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     const { isPublicProgramsCatalogOpen } = await import('@/lib/programs/season')
     if (!isPublicProgramsCatalogOpen()) {
       return NextResponse.json(
-        { error: 'Enrichment registration opens Monday, August 24.' },
+        { error: 'Enrichment registration opens Sunday, August 23 at 4:00 PM.' },
         { status: 403 },
       )
     }

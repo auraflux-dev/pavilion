@@ -49,7 +49,7 @@ export default async function ProgramsPage() {
             body: catalogOpen
               ? 'After-school classes for grades 6 to 8.'
               : inSession
-                ? 'Fall enrichment listing opens Monday, August 24.\nCheck back then for classes, times, and registration.'
+                ? 'Fall enrichment listing opens Sunday, August 23 at 4:00 PM.\nCheck back then for classes, times, and registration.'
                 : vanillaizeIfDemo(
                     'Enrichment programs are paused while school is out of session. Check back in the fall, or visit The Cove and Membership anytime.',
                   ),
@@ -57,7 +57,7 @@ export default async function ProgramsPage() {
               ? {}
               : inSession
                 ? {
-                    eyebrow: 'Opens Monday',
+                    eyebrow: 'Opens Sunday 4 PM',
                     title: 'Enrichment programs',
                     ctaLabel: 'Shop The Cove',
                     ctaHref: '/cove',
