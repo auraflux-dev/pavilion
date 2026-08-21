@@ -91,19 +91,10 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     eyebrow: 'Fall 2026 Enrichment',
     title: 'Enrichment Programs',
     body: 'After-school classes for grades 6 to 8.',
-    bullets: [
-      'Robotics Foundations & Coding Mechanics',
-      'Competitive Math Prep',
-      'Young Entrepreneurs: From Passion to Pitch',
-      'Essay Writing & Academic Composition',
-      'Tuesdays and Wednesdays in the library. 12 sessions each.',
-      'Paid members register first and save 10%, 15%, or 30% by tier.',
-    ],
+    bullets: [],
     sectionTitle: 'Fall 2026 schedule',
     sectionBody:
       'Tuesdays and Wednesdays in the library.\n12 sessions each. Share with instructors.',
-    ctaLabel: 'Browse classes',
-    ctaHref: '#programs-list',
   }),
   volunteer: empty('volunteer', {
     eyebrow: 'Get Involved',

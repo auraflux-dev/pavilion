@@ -159,13 +159,13 @@ export function StaffPageContentPanel() {
           <label className="sm:col-span-2 text-[11px] text-[#5A6070] space-y-0.5">
             <span>
               {form.page === 'programs'
-                ? 'Hero line (first line only shows in the green banner). Extra lines become bullets below.'
+                ? 'Hero body (short pitch only). Class names belong on the program cards, not here.'
                 : 'Body'}
             </span>
             <textarea
               value={form.body}
               onChange={(e) => setForm({ ...form, body: e.target.value })}
-              rows={form.page === 'programs' ? 5 : 3}
+              rows={form.page === 'programs' ? 3 : 3}
               placeholder="Body"
               className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#1A1A1A]"
             />
@@ -192,7 +192,7 @@ export function StaffPageContentPanel() {
           <label className="sm:col-span-2 text-[11px] text-[#5A6070] space-y-0.5">
             <span>
               {form.page === 'programs'
-                ? 'Overview bullets under the hero (one per line). Class names and how registration works.'
+                ? 'Bullets (unused on /programs catalog. leave blank.)'
                 : 'Bullets (one per line)'}
             </span>
             <textarea

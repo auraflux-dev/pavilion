@@ -21,7 +21,12 @@ export function ProgramsFilter({ programs }: ProgramsFilterProps) {
   )
   const [activeCategory, setActiveCategory] = useState<string>('All')
 
-  const seasonPrograms = filterProgramsBySeason(programs, activeSeason)
+  const seasonPrograms = filterProgramsBySeason(programs, activeSeason).slice().sort((a, b) => {
+    const ao = Number(a.sortOrder ?? 0) || 0
+    const bo = Number(b.sortOrder ?? 0) || 0
+    if (ao !== bo) return ao - bo
+    return String(a.name).localeCompare(String(b.name))
+  })
 
   const categories = [
     'All',
