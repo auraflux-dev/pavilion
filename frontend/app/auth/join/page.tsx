@@ -286,18 +286,6 @@ function JoinInner() {
                 , not Member Portal.
               </p>
             ) : null}
-            {isStaffReturn ? (
-              <p className="text-xs text-[#5A6070] text-center pt-1">
-                Looking for family portal?{' '}
-                <a
-                  href="/auth/join?mode=login&returnTo=%2Fmember-portal"
-                  className="font-semibold underline"
-                  style={{ color: 'var(--brand-green)' }}
-                >
-                  Member Portal login
-                </a>
-              </p>
-            ) : null}
           </div>
         ) : (
           <form onSubmit={onEmailSubmit} className="space-y-3">
@@ -413,7 +401,18 @@ function JoinInner() {
         )}
 
         <p className="mt-6 text-sm text-center text-[#5A6070]">
-          {isSignup ? (
+          {isStaffReturn ? (
+            <>
+              Looking for family portal?{' '}
+              <a
+                href="/auth/join?mode=login&returnTo=%2Fmember-portal"
+                className="font-semibold underline"
+                style={{ color: 'var(--brand-green)' }}
+              >
+                Member Portal login
+              </a>
+            </>
+          ) : isSignup ? (
             <>
               Already have an account?{' '}
               <button
@@ -434,7 +433,7 @@ function JoinInner() {
                 style={{ color: 'var(--brand-green)' }}
                 onClick={() => switchMode('signup', { keepEmailPanel: panel === 'email' })}
               >
-                Sign Up
+                Sign Up free
               </button>
             </>
           )}

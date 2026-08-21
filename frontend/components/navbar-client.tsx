@@ -294,13 +294,13 @@ export function NavbarClient({ links, brand, mode }: Props) {
                     Log in
                   </Button>
                 </Link>
-                <Link href="/auth/join?returnTo=%2Fmembership">
+                <Link href="/auth/join?mode=signup&returnTo=%2Fmember-portal">
                   <Button
                     size="sm"
                     className="text-white font-semibold"
                     style={{ backgroundColor: 'var(--brand-green)' }}
                   >
-                    Join
+                    Join free
                   </Button>
                 </Link>
               </>
@@ -395,10 +395,10 @@ export function NavbarClient({ links, brand, mode }: Props) {
                   <Button
                     className="w-full text-white font-semibold"
                     style={{ backgroundColor: 'var(--brand-green)' }}
-                    onClick={() => navigate('/auth/join?returnTo=%2Fmembership')}
+                    onClick={() => navigate('/auth/join?mode=signup&returnTo=%2Fmember-portal')}
                     disabled={Boolean(pendingHref)}
                   >
-                    Join
+                    Join free
                   </Button>
                   <Button
                     variant="outline"
