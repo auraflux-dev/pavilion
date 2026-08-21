@@ -226,7 +226,7 @@ export function ProgramLanding({ program }: { program: Program }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={photo}
-                  alt={isFlyer ? `${title} flyer` : 'Stone Hill campus'}
+                  alt={isFlyer ? `${title} flyer` : vanillaizeIfDemo('School campus')}
                   className={`w-full ${isFlyer ? 'h-auto object-contain' : 'aspect-[16/10] object-cover'}`}
                 />
                 {!isFlyer ? (

@@ -48,8 +48,9 @@ const COPY: Record<
     title: 'Ask about a program',
     intro: 'Questions go to',
     optionalLabel: 'Program name',
-    optionalPlaceholder:
-      'e.g. Robotics Foundations & Coding Mechanics, Competitive Math Prep, Young Entrepreneurs, Essay Writing',
+    optionalPlaceholder: isPublicDemoInstance()
+      ? 'e.g. Chess, Science Lab, Creative Writing'
+      : 'e.g. Robotics Foundations & Coding Mechanics, Competitive Math Prep, Young Entrepreneurs, Essay Writing',
     messagePlaceholder: 'What would you like to know?',
     submitLabel: 'Send question',
     successBody:
@@ -62,7 +63,9 @@ const COPY: Record<
     title: 'Share an event idea',
     intro: 'Ideas go to',
     optionalLabel: 'Event name or theme',
-    optionalPlaceholder: 'e.g. Family Fun Night, Dance Night theme',
+    optionalPlaceholder: isPublicDemoInstance()
+      ? 'e.g. Spring Carnival, Book Fair Night, Field Day'
+      : 'e.g. Family Fun Night, Dance Night theme',
     messagePlaceholder: 'Tell us your idea, preferred timing, and how you might help.',
     submitLabel: 'Send to VP of Events',
     successBody:

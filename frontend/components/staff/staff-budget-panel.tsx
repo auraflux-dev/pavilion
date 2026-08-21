@@ -317,7 +317,8 @@ export function StaffBudgetPanel() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `shms-pto-budget-${year}.xlsx`
+      const excelFilename = isPublicDemoInstance() ? `budget-${year}.xlsx` : `shms-pto-budget-${year}.xlsx`
+      a.download = excelFilename
       a.click()
       URL.revokeObjectURL(url)
       setStatusKind('ok')

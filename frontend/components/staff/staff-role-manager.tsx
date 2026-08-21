@@ -158,7 +158,7 @@ export function StaffRoleManager() {
         | undefined
       setStatus(
         perks?.fallCode
-          ? `Staff access saved. Board Reef + 75% codes: ${perks.fallCode} / ${perks.springCode}${perks.enrichmentCode ? ` · ${perks.enrichmentCode}` : ''}.`
+          ? vanillaizeIfDemo(`Staff access saved. Board Reef + 75% codes: ${perks.fallCode} / ${perks.springCode}${perks.enrichmentCode ? ` · ${perks.enrichmentCode}` : ''}.`)
           : 'Staff access saved.',
       )
     } catch (err) {
@@ -217,9 +217,9 @@ export function StaffRoleManager() {
               {syncBusy ? 'Syncing…' : 'Sync from Google Workspace'}
             </Button>
             <p className="text-[11px] text-[#5A6070] mt-1.5 whitespace-pre-line">
-              Pulls active @shmspto.org users into this list.
-              New seats start with no roles. Assign role and programs here.
-              Requires Connect Google as a Workspace admin (Staff → Inbox).
+              {vanillaizeIfDemo(`Pulls active @${isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org'} users into this list.
+New seats start with no roles. Assign role and programs here.
+Requires Connect Google as a Workspace admin (Staff → Inbox).`)}
             </p>
           </div>
         ) : null}
@@ -312,7 +312,7 @@ export function StaffRoleManager() {
                   type="checkbox"
                   checked={roles.includes(role)}
                   disabled={adminLocked}
-                  title={adminLocked ? 'Admin is only for president@shmspto.org' : undefined}
+                  title={adminLocked ? vanillaizeIfDemo('Admin is only for president@shmspto.org') : undefined}
                   onChange={(event) =>
                     setRoles((current) =>
                       event.target.checked ? [...current, role] : current.filter((item) => item !== role),
@@ -436,9 +436,9 @@ export function StaffRoleManager() {
           <span>
             <span className="font-medium">Grant board seat perks</span>
             <span className="block text-[11px] text-[#5A6070] whitespace-pre-line">
-              Complimentary Reef on the personal email above.
-              Plus 75% off 1 enrichment program for Fall and 1 for Spring.
-              Magnet fulfillment stays on Membership → Fulfillments.
+              {vanillaizeIfDemo(`Complimentary Reef on the personal email above.
+Plus 75% off 1 enrichment program for Fall and 1 for Spring.
+Magnet fulfillment stays on Membership → Fulfillments.`)}
             </span>
           </span>
         </label>

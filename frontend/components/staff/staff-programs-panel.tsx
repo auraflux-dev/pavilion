@@ -406,7 +406,7 @@ export function StaffProgramsPanel() {
           endDate: seed?.endDate || '2026-12-08',
           dayOfWeek: seed?.dayOfWeek || '',
           classTime: seed?.classTime || '',
-          location: seed?.location || 'SHMS Library',
+          location: seed?.location || vanillaizeIfDemo('School library'),
           grades: seed?.grades || '6-8',
           category: seed?.category || 'Enrichment',
           season: seed?.season || 'fall-2026',

@@ -234,7 +234,7 @@ export function SurveyResultsPanel() {
   function shareDetails(channel: 'email' | 'sms' | 'whatsapp') {
     if (!selectedSurvey) return null
     const url = `${window.location.origin}/survey/${selectedSurvey.slug}?from=${channel}`
-    const message = `${selectedSurvey.title}\n\n${selectedSurvey.description || 'Please share your feedback with SHMS PTO.'}\n\n${url}`
+    const message = `${selectedSurvey.title}\n\n${selectedSurvey.description || vanillaizeIfDemo(`Please share your feedback with ${publicBrandFace().short}.`)}\n\n${url}`
     return { url, message }
   }
 

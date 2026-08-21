@@ -95,9 +95,17 @@ function brandFaceFromTrial(b: TrialBrand): PublicBrandFace {
 /** Active visitor chrome brand: demo, private trial pack, or Stone Hill. */
 export function publicBrandFace(): PublicBrandFace {
   if (isDemoInstance()) return DEMO_BRAND
-  const trial = getActiveTrialBrand()
-  if (trial) return brandFaceFromTrial(trial)
+  if (isCommonsPlatform()) {
+    const trial = getActiveTrialBrand()
+    // Pavilion never falls through to Stone Hill branding.
+    return trial ? brandFaceFromTrial(trial) : DEMO_BRAND
+  }
   return STONE_HILL_BRAND
+}
+
+/** Demo or any Commons/Pavilion surface (trial or pre-trial). */
+export function isPavilionSurface(): boolean {
+  return isDemoInstance() || isCommonsPlatform()
 }
 
 export function demoStorePath(): string {
@@ -186,11 +194,8 @@ export function vanillaizeCopy(input: string, brand: PublicBrandFace = DEMO_BRAN
 }
 
 export function vanillaizeIfDemo(input: string): string {
-  if (isDemoInstance()) return vanillaizeCopy(input)
-  if (isCommonsPlatform() && getActiveTrialBrand()) {
-    return vanillaizeCopy(input, publicBrandFace())
-  }
-  return input
+  if (!isPavilionSurface()) return input
+  return vanillaizeCopy(input, publicBrandFace())
 }
 
 export function vanillaizeRecord(raw: Record<string, string>): Record<string, string> {
@@ -202,9 +207,7 @@ export function vanillaizeRecord(raw: Record<string, string>): Record<string, st
 }
 
 export function vanillaizeDeep<T>(input: T): T {
-  const active =
-    isDemoInstance() || (isCommonsPlatform() && Boolean(getActiveTrialBrand()))
-  if (!active) return input
+  if (!isPavilionSurface()) return input
   const face = publicBrandFace()
   if (typeof input === 'string') return vanillaizeCopy(input, face) as T
   if (Array.isArray(input)) return input.map((v) => vanillaizeDeep(v)) as T
@@ -222,7 +225,7 @@ export function vanillaizeDeep<T>(input: T): T {
 export function displayMembershipTier(tier: string): string {
   const key = String(tier || '').trim().toLowerCase()
   if (!key || key === 'free') return 'Free'
-  if (isDemoInstance() || (isCommonsPlatform() && getActiveTrialBrand())) {
+  if (isPavilionSurface()) {
     const face = publicBrandFace()
     const mapped = face.tiers[key as keyof typeof face.tiers]
     return mapped || vanillaizeCopy(tier, face)

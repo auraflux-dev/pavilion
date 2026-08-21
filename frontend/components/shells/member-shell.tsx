@@ -53,7 +53,7 @@ export function MemberShell({ children }: Props) {
     ? boardTitle || staffName || member?.name || 'Board member'
     : member?.name || 'Member portal'
 
-  // Cove / SHMS videos stay on Stone Hill only.
+  // Store / videos stay on Stone Hill only.
   const links = [
     { href: '/member-portal', label: 'My Portal' },
     { href: '/membership', label: status === 'loading' || isPaid ? 'Membership' : 'Upgrade' },
@@ -199,8 +199,7 @@ export function MemberShell({ children }: Props) {
         <div className="border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-950">
           <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <p>
-              Link your personal email in Staff → Home so Member view shows your family (students,
-              Cove). Right now this board login has no household linked.
+              {vanillaizeIfDemo('Link your personal email in Staff → Home so Member view shows your family (students, store). Right now this board login has no household linked.')}
             </p>
             <Link href="/staff" className="font-semibold underline shrink-0">
               Open Staff to link

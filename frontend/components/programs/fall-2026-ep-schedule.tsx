@@ -5,6 +5,7 @@ import {
   resolveMeetingDates,
   serializeMeetingDates,
 } from '@/lib/programs/fall-2026-ep'
+import { publicSiteUrl } from '@/lib/urls'
 
 type LinkedProgram = {
   id: string
@@ -48,7 +49,7 @@ export function Fall2026EpSchedule({
   const printHint = staffEdit
     ? 'Every cell below is editable.\nAdd or remove classes and meeting dates here.\nClick out of a field to save.'
     : variant === 'staff'
-      ? 'Share https://www.shmspto.org/programs/fall-2026 with instructors, or print this page.'
+      ? `Share ${publicSiteUrl()}/programs/fall-2026 with instructors, or print this page.`
       : 'Print this page or save as PDF to share with instructors.'
 
   return (

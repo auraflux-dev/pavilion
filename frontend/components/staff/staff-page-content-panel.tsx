@@ -116,17 +116,17 @@ export function StaffPageContentPanel() {
           <h2 className="text-lg font-bold">Page copy</h2>
           <p className="text-xs text-[#5A6070]">
             {scope === 'cove'
-              ? 'Edit The Cove public page copy (store / how / CTA / spirit wear). Changes show after refresh / ~5 minutes.'
+              ? vanillaizeIfDemo('Edit The Cove public page copy (Cove / how / CTA / spirit wear). Changes show after refresh / ~5 minutes.')
               : 'Edit heroes and section copy without Wix CMS. Changes show after refresh / ~5 minutes.'}
           </p>
         </div>
         {canBrandFix ? (
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="outline" disabled={busy} onClick={() => void brandFix(false)}>
-              Preview SHMS → SHMS PTO
+              {vanillaizeIfDemo(`Preview fix to ${publicBrandFace().short}`)}
             </Button>
             <Button type="button" variant="outline" disabled={busy} onClick={() => void brandFix(true)}>
-              Apply SHMS → SHMS PTO
+              {vanillaizeIfDemo(`Apply fix to ${publicBrandFace().short}`)}
             </Button>
           </div>
         ) : null}

@@ -15,6 +15,7 @@ import {
   resolvePrimaryParentEmail,
   revokeGuardianLink,
 } from '@/lib/family-guardians'
+import { vanillaizeIfDemo, publicBrandFace } from '@/lib/demo/brand'
 
 function siteBase(req: NextRequest) {
   const host = (req.headers.get('x-forwarded-host') || req.headers.get('host') || '')
@@ -32,7 +33,7 @@ async function notifyPrimaryOfInvite(opts: {
   emailedInvitee: boolean
 }) {
   const body = [
-    `You invited ${opts.guardianEmail} to share your SHMS PTO family account.`,
+    vanillaizeIfDemo(`You invited ${opts.guardianEmail} to share your ${publicBrandFace().short} family account.`),
     '',
     opts.emailedInvitee
       ? `We emailed them that address. If it was mistyped, they will not get it. Remove them under Share portal access and invite again.`
@@ -41,14 +42,14 @@ async function notifyPrimaryOfInvite(opts: {
     'Share this link (they must sign in as that email):',
     opts.acceptUrl,
     '',
-    'Cove Digital Card stays on your household account unless they buy separately.',
+    vanillaizeIfDemo('Cove Digital Card stays on your household account unless they buy separately.'),
   ].join('\n')
 
   try {
     await sendMassEmail({
       subject: `You invited ${opts.guardianEmail} to your family portal`,
       body,
-      fromName: 'SHMS PTO',
+      fromName: publicBrandFace(),
       replyTo: opts.primaryEmail,
       recipients: [opts.primaryEmail],
     })
@@ -65,7 +66,7 @@ async function notifyPrimaryOfInvite(opts: {
       studentId: null,
       studentName: null,
       programName: '',
-      fromName: 'SHMS PTO',
+      fromName: publicBrandFace(),
       subject: `Invite sent to ${opts.guardianEmail}`,
       body,
       sentAt: new Date().toISOString(),
@@ -100,8 +101,8 @@ export async function GET(req: NextRequest) {
         })),
       studentCount: students.length,
       note:       isPrimary
-        ? 'Invite another adult so they get their own login for the same students. Type their email twice so we catch typos. You get a copy of the invite and a share link. Cove Digital Card stays on this account unless they buy separately.'
-        : 'You are linked with a shared portal login. Cove membership and family code belong to the primary account holder.',
+        ? vanillaizeIfDemo('Invite another adult so they get their own login for the same students. Type their email twice so we catch typos. You get a copy of the invite and a share link. Cove Digital Card stays on this account unless they buy separately.')
+        : vanillaizeIfDemo('You are linked with a shared portal login. Membership and family code belong to the primary account holder.'),
     })
   } catch (err) {
     console.error('/api/portal/guardians GET', err)
@@ -162,19 +163,19 @@ export async function POST(req: NextRequest) {
       .join(', ')
 
     const mail = await sendMassEmail({
-      subject: 'You’re invited to the SHMS PTO family portal',
+      subject: vanillaizeIfDemo(`You're invited to the ${publicBrandFace().short} family portal`),
       body: [
-        `You’ve been invited to share a Stone Hill Middle School PTO family account${
+        vanillaizeIfDemo(`You've been invited to share a ${publicBrandFace().short} family account${
           kidNames ? ` for: ${kidNames}` : ''
-        }.`,
+        }.`),
         '',
         `Accept invite (sign in or create an account as ${guardianEmail}):`,
         acceptUrl,
         '',
-        'You’ll see the same students. Cove Digital Card stays with the primary household account unless you purchase separately.',
+        vanillaizeIfDemo('You'll see the same students. Cove Digital Card stays with the primary household account unless you purchase separately.'),
         `Link expires ${new Date(expiresAt).toLocaleDateString()}.`,
       ].join('\n'),
-      fromName: 'SHMS PTO',
+      fromName: publicBrandFace(),
       replyTo: primary,
       recipients: [guardianEmail],
     })

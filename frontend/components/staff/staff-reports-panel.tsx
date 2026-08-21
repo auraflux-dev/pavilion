@@ -3,13 +3,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
+
 type Focus = 'programs' | 'cove' | 'payments' | 'membership' | 'events'
 
 type ReportRow = Record<string, string | number>
 
 const FOCUS_OPTIONS: { id: Focus; label: string; rolesHint: string }[] = [
   { id: 'programs', label: 'Programs', rolesHint: 'Enrollments' },
-  { id: 'cove', label: 'Cove', rolesHint: 'Store card + Cove sales' },
+  { id: 'cove', label: vanillaizeIfDemo('Store'), rolesHint: vanillaizeIfDemo('Store card + store sales') },
   { id: 'payments', label: 'Payments', rolesHint: 'All transactions' },
   { id: 'membership', label: 'Membership', rolesHint: 'Membership payments' },
   { id: 'events', label: 'Events', rolesHint: 'Ticket orders' },

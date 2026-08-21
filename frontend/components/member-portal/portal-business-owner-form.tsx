@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { Briefcase, CheckCircle2, Loader2, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { trackGenerateLead } from '@/lib/ga'
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { vanillaizeIfDemo, DEMO_BRAND } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 type Props = {
   memberName?: string
@@ -65,7 +66,9 @@ export function PortalBusinessOwnerForm({
             topic: 'Business owner · membership experience',
             message: messageParts.join('\n'),
             department: 'membership-experience',
-            assignedTo: 'vp-membershipexperience@shmspto.org',
+            assignedTo: isPublicDemoInstance()
+              ? `vp-membershipexperience@${DEMO_BRAND.host}`
+              : 'vp-membershipexperience@shmspto.org',
           }),
         })
         const data = await res.json().catch(() => ({}))

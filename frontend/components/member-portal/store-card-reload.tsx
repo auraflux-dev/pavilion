@@ -341,7 +341,7 @@ export function StoreCardReload({
         ) : bonusPercent > 0 ? (
           <p className="mt-2 text-[11px] text-[#5A6070]">
             Reloads are dollar-for-dollar. The {bonusPercent}% bonus applies only on your family&apos;s
-            first load (or membership Cove credit).
+            first load (or membership credit).
           </p>
         ) : null}
       </div>
@@ -388,7 +388,7 @@ export function StoreCardReload({
             {storedCard
               ? 'Save this card securely for future reloads and optional auto top-off.'
               : 'Save this card to Payment methods (checked by default on first save). Optional auto top-off uses the same card.'}
-            {vanillaizeIfDemo(' SHMS PTO never stores the card number.')}
+            {vanillaizeIfDemo(' We never store the card number.')}
           </label>
         </>
       ) : null}

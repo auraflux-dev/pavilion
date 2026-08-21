@@ -91,7 +91,7 @@ export function GiftCardSettings({ studentId }: Props) {
               <a href="/member-portal/payment-methods" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
                 Payment methods
               </a>{' '}
-              (or during a Cove reload) before enabling auto top-off.
+              {vanillaizeIfDemo('(or during a Cove Digital reload) before enabling auto top-off.')}
             </p>
           )}
 

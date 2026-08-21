@@ -6,6 +6,8 @@ import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
 import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
 import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
+
 type EventRow = {
   id: string
   title: string
@@ -20,7 +22,7 @@ type EventRow = {
 const emptyForm = {
   title: '',
   description: '',
-  location: 'SHMS PTO',
+  location: vanillaizeIfDemo('School building'),
   startDate: '',
   endDate: '',
   registrationType: 'RSVP',
@@ -63,7 +65,7 @@ export function StaffEventsPanel() {
     setForm({
       title: e.title,
       description: e.description,
-      location: e.location || 'SHMS PTO',
+      location: e.location || vanillaizeIfDemo('School building'),
       startDate: e.startDate ? e.startDate.slice(0, 16) : '',
       endDate: e.endDate ? e.endDate.slice(0, 16) : '',
       registrationType: 'RSVP',

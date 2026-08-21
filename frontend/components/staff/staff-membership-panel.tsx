@@ -302,7 +302,8 @@ export function StaffMembershipPanel() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `shmspto-members-${tier}.csv`
+    const csvFilename = isPublicDemoInstance() ? `members-${tier}.csv` : `shmspto-members-${tier}.csv`
+    a.download = csvFilename
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -442,8 +443,8 @@ export function StaffMembershipPanel() {
           <div>
             <h1 className="text-xl font-bold">Membership roster</h1>
             <p className="text-xs text-[#5A6070] mt-1">
-              Parents from Students + Memberships. Email, phone, and paid tier (Reef / Lagoon /
-              Tide). Paid count follows Memberships after checkout.
+              Parents from Students + Memberships. Email, phone, and paid tier ({displayMembershipTier('reef', 'short')} / {displayMembershipTier('lagoon', 'short')} /
+              {' '}{displayMembershipTier('tide', 'short')}). Paid count follows Memberships after checkout.
             </p>
           </div>
           <Button
@@ -472,9 +473,9 @@ export function StaffMembershipPanel() {
             <option value="all">All parents</option>
             <option value="free">Free only</option>
             <option value="paid">Paid only</option>
-            <option value="reef">Reef</option>
-            <option value="lagoon">Lagoon</option>
-            <option value="tide">Tide</option>
+            <option value="reef">{displayMembershipTier('reef', 'short')}</option>
+            <option value="lagoon">{displayMembershipTier('lagoon', 'short')}</option>
+            <option value="tide">{displayMembershipTier('tide', 'short')}</option>
           </select>
           <select
             value={grade}

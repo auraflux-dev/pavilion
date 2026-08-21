@@ -9,7 +9,7 @@ import { SocialFooterLinks } from '@/components/social-footer-links'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 import { groupStaffNavItems } from '@/lib/staff/workspace-groups'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
-import { publicBrandFace } from '@/lib/demo/brand'
+import { vanillaizeIfDemo, publicBrandFace } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { DemoMark } from '@/components/demo/demo-mark'
 
@@ -113,7 +113,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                     : 'text-white/85 hover:bg-white/10'
                 }`}
               >
-                {item.label}
+                {vanillaizeIfDemo(item.label)}
               </button>
             ))}
             {overflow.length > 0 ? (
@@ -140,7 +140,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                     {groupStaffNavItems(overflow).map(({ group, items: groupItems }) => (
                       <div key={group.id} className="py-1">
                         <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
-                          {group.label}
+                          {vanillaizeIfDemo(group.label)}
                         </p>
                         {groupItems.map((item) => (
                           <button
@@ -157,7 +157,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                                 : ''
                             }`}
                           >
-                            {item.label}
+                            {vanillaizeIfDemo(item.label)}
                           </button>
                         ))}
                       </div>
@@ -223,13 +223,13 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                   setMenuOpen(false)
                 }}
               >
-                {STAFF_WORKSPACE_LABEL.home}
+                {vanillaizeIfDemo(STAFF_WORKSPACE_LABEL.home)}
               </button>
             ) : null}
             {groupStaffNavItems(items).map(({ group, items: groupItems }) => (
               <div key={group.id} className="space-y-0.5">
                 <p className="px-3 pt-1 text-[10px] font-bold uppercase tracking-wider text-[var(--brand-gold)]">
-                  {group.label}
+                  {vanillaizeIfDemo(group.label)}
                 </p>
                 {groupItems.map((item) => (
                   <button
@@ -245,7 +245,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                       setMenuOpen(false)
                     }}
                   >
-                    {item.label}
+                    {vanillaizeIfDemo(item.label)}
                   </button>
                 ))}
               </div>

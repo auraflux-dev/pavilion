@@ -6,8 +6,7 @@ import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 import { MEMBER_KB } from '@/lib/kb/member'
 import { STAFF_KB } from '@/lib/kb/staff'
-import { vanillaizeCopy } from '@/lib/demo/brand'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isPavilionSurface, publicBrandFace, vanillaizeCopy } from '@/lib/demo/brand'
 import type { KbArticle, KbAudience, KbCategory, StaffKbNeed } from '@/lib/kb/types'
 
 type CmsRow = {
@@ -102,19 +101,20 @@ function defaultsFor(audience: KbAudience) {
 }
 
 function vanillaizeArticles(articles: KbArticle[]): KbArticle[] {
-  if (!isDemoInstance()) return articles
+  if (!isPavilionSurface()) return articles
+  const face = publicBrandFace()
   return articles.map((article) => ({
     ...article,
-    title: vanillaizeCopy(article.title),
-    summary: vanillaizeCopy(article.summary),
-    body: vanillaizeCopy(article.body),
+    title: vanillaizeCopy(article.title, face),
+    summary: vanillaizeCopy(article.summary, face),
+    body: vanillaizeCopy(article.body, face),
   }))
 }
 
 /** Merge CMS overrides onto code defaults (CMS wins by slug). CMS-only articles append. */
 export async function getMergedKbArticles(audience: KbAudience): Promise<KbArticle[]> {
   const base = defaultsFor(audience).articles
-  if (isDemoInstance()) return vanillaizeArticles([...base])
+  if (isPavilionSurface()) return vanillaizeArticles([...base])
   const cms = await fetchCmsArticles(audience)
   if (!cms.length) return [...base]
 
@@ -129,11 +129,12 @@ export async function getMergedKbArticles(audience: KbAudience): Promise<KbArtic
 
 export async function getMergedKbCategories(audience: KbAudience): Promise<KbCategory[]> {
   const categories = [...defaultsFor(audience).categories].sort((a, b) => a.order - b.order)
-  if (!isDemoInstance()) return categories
+  if (!isPavilionSurface()) return categories
+  const face = publicBrandFace()
   return categories.map((category) => ({
     ...category,
-    title: vanillaizeCopy(category.title),
-    summary: vanillaizeCopy(category.summary),
+    title: vanillaizeCopy(category.title, face),
+    summary: vanillaizeCopy(category.summary, face),
   }))
 }
 

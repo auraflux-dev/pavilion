@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { MemberShell } from '@/components/shells/member-shell'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
 import { isCommonsPlatform } from '@/lib/crm/active-trial'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export const metadata = {
   title: 'Parent Videos',
@@ -19,7 +20,7 @@ export default function MemberPortalVideosPage() {
           id="parent-videos"
           eyebrow="Parent videos"
           title="Watch these short guides"
-          body="Made for SHMS families (not staff training). Start with the website tour, then dig into the portal, membership tiers, or board volunteering."
+          body={vanillaizeIfDemo("Made for school families (not staff training). Start with the website tour, then dig into the portal, membership tiers, or board volunteering.")}
           background="transparent"
           className="!py-8 md:!py-10"
         />

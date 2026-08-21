@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { Check, Loader2, Package, Truck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
+
 type Item = {
   membershipId: string
   parentEmail: string
@@ -43,7 +45,7 @@ function matchesLookup(item: Item, q: string) {
 }
 
 type Props = {
-  /** Compact copy for The Cove on-site handoff */
+  /** Compact copy for on-site handoff */
   variant?: 'membership' | 'cove'
 }
 

@@ -502,8 +502,8 @@ export function StaffDashboard() {
               {groupStaffNavItems(navItems).map(({ group, items }) => (
                 <div key={group.id} className="space-y-2">
                   <div>
-                    <h2 className="text-sm font-bold text-[#1A1A1A]">{group.label}</h2>
-                    <p className="text-xs text-[#5A6070] mt-0.5 whitespace-pre-line">{group.blurb}</p>
+                    <h2 className="text-sm font-bold text-[#1A1A1A]">{vanillaizeIfDemo(group.label)}</h2>
+                    <p className="text-xs text-[#5A6070] mt-0.5 whitespace-pre-line">{vanillaizeIfDemo(group.blurb)}</p>
                   </div>
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {items.map((item) => (

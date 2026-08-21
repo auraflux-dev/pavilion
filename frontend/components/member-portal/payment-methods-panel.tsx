@@ -325,9 +325,9 @@ export function PaymentMethodsPanel() {
         <div className="min-w-0">
           <h2 className="text-base font-bold text-[#1A1A1A]">Cards and PayPal on file</h2>
           <p className="mt-1 text-sm text-[#5A6070] whitespace-pre-line">
-            {`Square stores your card securely for Cove reloads, membership, spirit wear, and enrichment.
+            {vanillaizeIfDemo(`Square stores your card securely for Cove Digital reloads, membership, spirit wear, and enrichment.
 Save a card or PayPal here for one-tap checkout.
-SHMS PTO never keeps the full card number.`}
+SHMS PTO never keeps the full card number.`)}
           </p>
         </div>
       </div>

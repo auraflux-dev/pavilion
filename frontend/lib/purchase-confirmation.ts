@@ -8,6 +8,7 @@ import {
   buildMembershipEntitlements,
   PHYSICAL_PERK_PICKUP_NOTE,
 } from '@/lib/membership-entitlements'
+import { publicBrandFace, vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export type PurchaseConfirmKind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation'
 
@@ -35,14 +36,26 @@ function money(n: number) {
   return `$${Number(n).toFixed(2)}`
 }
 
+function paintConfirm(
+  out: Omit<PurchaseConfirmation, 'emailed'>,
+): Omit<PurchaseConfirmation, 'emailed'> {
+  return {
+    subject: vanillaizeIfDemo(out.subject),
+    body: vanillaizeIfDemo(out.body),
+    nextSteps: out.nextSteps.map((s) => vanillaizeIfDemo(s)),
+    portalHref: vanillaizeIfDemo(out.portalHref),
+  }
+}
+
 export function buildPurchaseConfirmationCopy(
   input: PurchaseConfirmationInput,
 ): Omit<PurchaseConfirmation, 'emailed'> {
-  const name = (input.parentName || 'SHMS PTO family').trim()
+  const brand = publicBrandFace()
+  const name = (input.parentName || `${brand.short} family`).trim()
   const baseReceipt = [
     `Hi ${name.split(' ')[0] || 'there'},`,
     '',
-    `Thanks for your SHMS PTO purchase.`,
+    `Thanks for your ${brand.short} purchase.`,
     '',
     `Order: ${input.description}`,
     `Amount: ${money(input.amount)}`,
@@ -64,16 +77,16 @@ export function buildPurchaseConfirmationCopy(
           'Watch Messages for instructor updates and flyers.',
           'Keep allergies and emergency contacts up to date on your student profile.',
         ]
-    return {
+    return paintConfirm({
       subject: waitlisted
- ? `Waitlisted: ${input.meta?.programName || 'enrichment program'}`
- : `Enrolled: ${input.meta?.programName || 'enrichment program'}`,
- body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', 'SHMS PTO Programs'].join(
+        ? `Waitlisted: ${input.meta?.programName || 'enrichment program'}`
+        : `Enrolled: ${input.meta?.programName || 'enrichment program'}`,
+      body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', `${brand.short} Programs`].join(
         '\n',
       ),
       nextSteps,
       portalHref: '/member-portal#calendar',
-    }
+    })
   }
 
   if (input.kind === 'membership') {
@@ -88,89 +101,88 @@ export function buildPurchaseConfirmationCopy(
     const hasPhysical = ents.some((e) => e.kind === 'spirit_shirt' || e.kind === 'magnet')
     const nextSteps = [
       `Your ${tier} membership is active.`,
-      'Open Member Portal for your Cove Digital Card credit and member perks.',
+      `Open Member Portal for your ${brand.card} credit and member perks.`,
       ...perkLines.map((label) => `Perk: ${label}.`),
       ...(hasPhysical ? [PHYSICAL_PERK_PICKUP_NOTE] : []),
       'Add or update students so enrichment discounts apply correctly.',
     ]
-    return {
+    return paintConfirm({
       subject: `Welcome: ${tier} membership confirmed`,
-      body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', 'SHMS PTO Membership'].join(
+      body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', `${brand.short} Membership`].join(
         '\n',
       ),
       nextSteps,
       portalHref: '/member-portal',
-    }
+    })
   }
 
   if (input.kind === 'store-card') {
     const bal =
       input.extras?.newBalance != null ? money(Number(input.extras.newBalance)) : null
     const nextSteps = [
-      bal ? `Family Cove Digital Card balance is now ${bal}.` : 'Your Cove Digital Card load is complete.',
-      'Students can use the 6-digit Family Cove code (or QR) at The Cove window.',
-      'Reload anytime from Member Portal → Store & Cove Digital Card.',
+      bal ? `Family ${brand.card} balance is now ${bal}.` : `Your ${brand.card} load is complete.`,
+      `Students can use the 6-digit family code (or QR) at the ${brand.store} window.`,
+      `Reload anytime from Member Portal → Store & ${brand.card}.`,
     ]
-    return {
-      subject: 'Cove Digital Card load confirmed',
- body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', 'The Cove'].join('\n'),
+    return paintConfirm({
+      subject: `${brand.card} load confirmed`,
+      body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', brand.store].join('\n'),
       nextSteps,
       portalHref: '/member-portal#store',
-    }
+    })
   }
 
   if (input.kind === 'event') {
     const title = input.meta?.eventTitle || 'event'
     const qty = input.meta?.quantity || '1'
     const nextSteps = [
- `${qty} ticket${qty === '1' ? '' : 's'} for ${title} is confirmed.`,
+      `${qty} ticket${qty === '1' ? '' : 's'} for ${title} is confirmed.`,
       'Add the event to your calendar from the Events page or Member Portal.',
       'Bring this confirmation (email or portal Messages) to check in.',
     ]
-    return {
- subject: `Tickets confirmed: ${title}`,
- body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', 'SHMS PTO Events'].join(
+    return paintConfirm({
+      subject: `Tickets confirmed: ${title}`,
+      body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', `${brand.short} Events`].join(
         '\n',
       ),
       nextSteps,
       portalHref: '/events',
-    }
+    })
   }
 
   if (input.kind === 'donation') {
     const nextSteps = [
- 'Thank you. Your gift supports SHMS PTO enrichment, The Cove, and events.',
+      `Thank you. Your gift supports ${brand.short} enrichment, ${brand.store}, and events.`,
       'A receipt is in Member Portal → Messages (and email when mail is connected).',
-      'SHMS PTO is a 501(c)(3); consult your tax advisor about deductibility.',
+      `${brand.short} is a 501(c)(3); consult your tax advisor about deductibility.`,
     ]
-    return {
-      subject: 'Thank you for your SHMS PTO donation',
+    return paintConfirm({
+      subject: `Thank you for your ${brand.short} donation`,
       body: [
         ...baseReceipt,
-        'Your donation goes to SHMS PTO (not the school district) to support Stone Hill students.',
+        `Your donation goes to ${brand.short} (not the school district) to support ${brand.school} students.`,
         '',
         'Next steps:',
         ...nextSteps.map((s) => `• ${s}`),
         '',
- 'SHMS PTO',
+        brand.short,
       ].join('\n'),
       nextSteps,
       portalHref: '/fundraising#donate',
-    }
+    })
   }
 
-  // product / Cove online
   const nextSteps = [
-    `Order received for ${input.meta?.productName || 'your Cove item'}.`,
-    'Spirit wear and online Cove orders are fulfilled per the product notes (pickup or window).',
+    `Order received for ${input.meta?.productName || `your ${brand.store} item`}.`,
+    `Spirit wear and online ${brand.store} orders are fulfilled per the product notes (pickup or window).`,
     'Questions? Reply to this email or use Member Portal → Help.',
   ]
-  return {
- subject: `Order confirmed: ${input.meta?.productName || 'The Cove'}`,
- body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', 'The Cove'].join('\n'),
+  return paintConfirm({
+    subject: `Order confirmed: ${input.meta?.productName || brand.store}`,
+    body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', brand.store].join('\n'),
     nextSteps,
     portalHref: '/cove',
-  }
+  })
 }
 
 async function insertPortalMessage(input: PurchaseConfirmationInput, copy: Omit<PurchaseConfirmation, 'emailed'>) {
@@ -183,7 +195,7 @@ async function insertPortalMessage(input: PurchaseConfirmationInput, copy: Omit<
       studentId: input.meta?.studentId || null,
       studentName: null,
       programName: input.meta?.programName || input.meta?.eventTitle || input.meta?.productName || '',
-      fromName: 'SHMS PTO',
+      fromName: publicBrandFace().short,
       subject: copy.subject,
       body: copy.body,
       sentAt: new Date().toISOString(),
@@ -205,7 +217,7 @@ export async function sendPurchaseConfirmation(
     const result = await sendMassEmail({
       subject: copy.subject,
       body: copy.body,
-      fromName: 'SHMS PTO',
+      fromName: publicBrandFace().short,
       recipients: [input.parentEmail],
     })
     emailed = result.ok && result.sent > 0
