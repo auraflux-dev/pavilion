@@ -37,6 +37,8 @@ export async function POST(req: NextRequest) {
   const origin = siteOrigin()
 
   try {
+    const automaticTax = process.env.STRIPE_AUTOMATIC_TAX === '1'
+
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: sub?.stripe_customer_id || undefined,
@@ -45,6 +47,9 @@ export async function POST(req: NextRequest) {
       success_url: `${origin}/account?addon=ok`,
       cancel_url: `${origin}/account`,
       allow_promotion_codes: true,
+      billing_address_collection: 'required',
+      tax_id_collection: { enabled: true },
+      ...(automaticTax ? { automatic_tax: { enabled: true } } : {}),
       metadata: {
         product: 'pavilion-addon',
         addonId: addon.id,

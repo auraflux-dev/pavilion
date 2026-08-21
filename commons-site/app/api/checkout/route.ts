@@ -39,6 +39,8 @@ export async function POST(req: NextRequest) {
   const stripe = getStripe()
 
   try {
+    const automaticTax = process.env.STRIPE_AUTOMATIC_TAX === '1'
+
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer_email: email,
@@ -46,6 +48,10 @@ export async function POST(req: NextRequest) {
       success_url: `${origin}/thanks?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/start`,
       allow_promotion_codes: true,
+      // Required for Stripe Tax once STRIPE_AUTOMATIC_TAX=1 and Tax registrations exist.
+      billing_address_collection: 'required',
+      tax_id_collection: { enabled: true },
+      ...(automaticTax ? { automatic_tax: { enabled: true } } : {}),
       metadata: {
         product: 'pavilion',
         schoolName,
@@ -61,6 +67,7 @@ export async function POST(req: NextRequest) {
           role,
         },
       },
+      // Do not set payment_method_types — use Dashboard dynamic payment methods.
     })
 
     if (!session.url) {

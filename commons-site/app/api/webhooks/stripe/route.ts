@@ -27,8 +27,14 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    if (event.type === 'checkout.session.completed') {
+    if (
+      event.type === 'checkout.session.completed' ||
+      event.type === 'checkout.session.async_payment_succeeded'
+    ) {
       const session = event.data.object as Stripe.Checkout.Session
+      if (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required') {
+        return NextResponse.json({ ok: true, skipped: session.payment_status })
+      }
       const meta = session.metadata || {}
       await upsertFromStripeEvent({
         eventId: event.id,
@@ -58,6 +64,18 @@ export async function POST(req: NextRequest) {
         schoolName: meta.schoolName || null,
         city: meta.city || null,
         role: meta.role || null,
+        raw: event,
+      })
+    } else if (event.type === 'invoice.paid' || event.type === 'invoice.payment_failed') {
+      const invoice = event.data.object as Stripe.Invoice
+      const parentSub = invoice.parent?.subscription_details?.subscription
+      const subId = typeof parentSub === 'string' ? parentSub : parentSub?.id || null
+      await upsertFromStripeEvent({
+        eventId: event.id,
+        status: event.type === 'invoice.paid' ? 'invoice_paid' : 'invoice_payment_failed',
+        email: invoice.customer_email,
+        customerId: typeof invoice.customer === 'string' ? invoice.customer : null,
+        subscriptionId: subId,
         raw: event,
       })
     }
