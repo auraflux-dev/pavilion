@@ -3,21 +3,8 @@
  * GET  /api/students. return all students for the logged-in parent
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { getWixClient } from '@/lib/wix-client'
-import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
-
-function getMemberEmail(req: NextRequest): { tokens: any; email: string } | null {
-  const tokensCookie = req.cookies.get(TOKENS_COOKIE)?.value
-  if (!tokensCookie) return null
-  try {
-    const tokens = JSON.parse(tokensCookie)
-    return { tokens, email: '' }
-  } catch {
-    return null
-  }
-}
 
 export async function GET(req: NextRequest) {
   const effective = await getEffectiveParentEmail(req)
@@ -71,18 +58,21 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const tokensCookie = req.cookies.get(TOKENS_COOKIE)?.value
-  if (!tokensCookie) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Must match GET: staff with personalEmail linked save into that household,
+  // not the @shmspto.org login (otherwise adds never appear in My Students).
+  const effective = await getEffectiveParentEmail(req)
+  if (!effective) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const tokens = JSON.parse(tokensCookie)
-    const oauthClient = createOAuthClient(tokens)
-    const { member } = await oauthClient.members.getCurrentMember({ fieldsets: ['FULL'] })
-    const email = member?.loginEmail ?? ''
-    if (!email) return NextResponse.json({ error: 'No email on account' }, { status: 400 })
-
     const { resolvePrimaryParentEmail } = await import('@/lib/family-guardians')
-    const primaryEmail = await resolvePrimaryParentEmail(email)
+    const primaryEmail = await resolvePrimaryParentEmail(effective.parentEmail)
+    if (!primaryEmail) {
+      return NextResponse.json({ error: 'No email on account' }, { status: 400 })
+    }
+
+    const member = effective.session.member as {
+      contact?: { firstName?: string; lastName?: string }
+    } | null
 
     const body = await req.json()
     const { firstName, lastName, grade } = body
