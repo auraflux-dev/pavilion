@@ -48,16 +48,17 @@ function JoinInner() {
   }, [initialMode])
 
   /** Show Google when enabled in env (OAuth client must be External, not Internal).
-   * Ephemeral Previews always show it: OAuth bounces through www (see /api/auth/google). */
-  const [onEphemeralPreview, setOnEphemeralPreview] = useState(false)
+   * Stable staging (shmspto.vercel.app) and ephemeral Previews show it too. */ 
+  const [onReviewHost, setOnReviewHost] = useState(false)
   useEffect(() => {
     const host = window.location.hostname.toLowerCase()
-    setOnEphemeralPreview(
-      host.endsWith('-treasurer-4353s-projects.vercel.app'),
+    setOnReviewHost(
+      host === 'shmspto.vercel.app' ||
+        host.endsWith('-treasurer-4353s-projects.vercel.app'),
     )
   }, [])
   const googleParentEnabled =
-    process.env.NEXT_PUBLIC_GOOGLE_PARENT_SIGNIN === 'true' || onEphemeralPreview
+    process.env.NEXT_PUBLIC_GOOGLE_PARENT_SIGNIN === 'true' || onReviewHost
 
   useEffect(() => {
     const code = searchParams.get('error')

@@ -1,5 +1,5 @@
 ---
-description: Pavilion deploy is opt-in after SHMS ships; never mix env; Preview-first
+description: Pavilion deploy is opt-in after SHMS ships; never mix env; Staging-first
 alwaysApply: true
 ---
 
@@ -9,16 +9,17 @@ Build **Pavilion** as if SHMS never existed (product, tenants, `onpavilion.com`,
 
 Stone Hill (`frontend` / www.shmspto.org) and Pavilion apps (`commons-pto-demo`, `commons-pto`, `commons-site`) share this monorepo for now but are **separate products**.
 
-Application ships follow **Preview-first** in `ship-after-serena.mdc` (critical, every agent):
+Application ships follow **Staging-first** in `ship-after-serena.mdc` (critical, every agent):
 
 1. Serena QA → commit task files only (no push yet).
-2. **Preview** deploy of the **target product(s) for that task** from a **clean worktree of that SHA**. Never `--prod` yet. Never deploy from a dirty tree.
-3. **STOP.** Give Rob the Preview URL. Wait for explicit OK.
+2. **Staging** deploy of the **target product(s) for that task** from a **clean worktree of that SHA**. Never `--prod` yet. Never deploy from a dirty tree.
+   Stone Hill → alias to **https://shmspto.vercel.app** (not ephemeral Preview URLs). Prefer `node scripts/deploy-staging.mjs --cwd <worktree>`.
+3. **STOP.** Give Rob https://shmspto.vercel.app. Wait for explicit OK.
 4. After OK: promote / `--prod`, **then** push GitHub.
 
-Staff-only exception (Staff UI / `/api/staff` / staff permissions with no visitor UI change): skip Preview; commit → prod → push. Details in `ship-after-serena.mdc`.
-5. **If you shipped Stone Hill** and the change could improve the Pavilion platform: **ask Rob** whether to also Preview (then prod) Pavilion (`commons-pto-demo` and/or `commons-pto`) from the same SHA. Do **not** auto-deploy Pavilion on every SHMS ship.
-6. If the task is Pavilion-only (`commons-site`, demo vanillaize, trial packs), ship Pavilion projects only (same Preview → OK → prod → push). Do not require a Stone Hill deploy.
+Staff-only exception (Staff UI / `/api/staff` / staff permissions with no visitor UI change): skip staging; commit → prod → push. Details in `ship-after-serena.mdc`.
+5. **If you shipped Stone Hill** and the change could improve the Pavilion platform: **ask Rob** whether to also stage (then prod) Pavilion (`commons-pto-demo` and/or `commons-pto`) from the same SHA. Do **not** auto-deploy Pavilion on every SHMS ship.
+6. If the task is Pavilion-only (`commons-site`, demo vanillaize, trial packs), ship Pavilion projects only (same staging → OK → prod → push). Do not require a Stone Hill deploy.
 
 Never put Stone Hill `DATABASE_URL` / Wix / Square env on Pavilion projects, or Pavilion `DATABASE_URL` / Stripe on Stone Hill.
 

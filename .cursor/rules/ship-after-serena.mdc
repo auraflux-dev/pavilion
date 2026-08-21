@@ -1,9 +1,9 @@
 ---
-description: Serena QA → commit → Preview → STOP for Rob → prod → push. Critical for every agent.
+description: Serena QA → staging (shmspto.vercel.app) → STOP for Rob → prod → push. Critical for every agent.
 alwaysApply: true
 ---
 
-# Serena QA then ship (Preview-first — critical)
+# Serena QA then ship (Staging-first — critical)
 
 This rule is **mandatory** for every agent on `wix-shmspto`. It overrides “only commit/push when asked” and overrides any habit of going straight to production.
 
@@ -18,14 +18,17 @@ If Serena passes (diagnostics clean, scoped to the task), do this **exact** orde
 - Commit **only** the files for that change.
 - Do **not** `git push` yet.
 
-## 2. Preview deploy (required hard gate)
+## 2. Staging deploy (required hard gate)
 
-- From a **clean worktree of that commit SHA**, deploy **Preview** (never `--prod` yet).
-  - Stone Hill task → Vercel project `frontend`.
-  - Pavilion marketing → `commons-site`.
+- From a **clean worktree of that commit SHA**, deploy to the **stable staging host** (never `--prod` yet).
+  - Stone Hill → Vercel project `frontend`, then **alias** the deployment to `shmspto.vercel.app`.
+    Prefer: `node scripts/deploy-staging.mjs --cwd <clean-worktree>`.
+  - Pavilion marketing → `commons-site` (use that project’s stable review URL if one exists; otherwise Preview URL).
   - Pavilion demo/trial → `commons-pto-demo` / `commons-pto` as relevant.
 - Never deploy from a dirty working tree.
-- In the reply to Rob, paste the **Preview URL** clearly and say production + GitHub are waiting on his OK.
+- **Do not** give Rob ephemeral `frontend-xxxxx.vercel.app` links for Stone Hill review. Always:
+  **https://shmspto.vercel.app**
+- In the reply, paste that staging URL and say production + GitHub are waiting on his OK.
 
 ## 3. STOP — wait for Rob
 
@@ -35,24 +38,31 @@ Until then:
 
 - Do **not** `vercel --prod` / `vercel promote … --prod`.
 - Do **not** `git push`.
-- Do **not** treat “done” as production. Done means **Preview is up and the link was delivered**.
+- Do **not** treat “done” as production. Done means **staging is up at shmspto.vercel.app and the link was delivered**.
 
 ## 4. After Rob approves: production, then GitHub
 
-1. Promote that same Preview deployment to production, or `vercel --prod` from the **same clean worktree SHA**.
+1. Promote that same staging deployment to production, or `vercel --prod` from the **same clean worktree SHA**.
 2. **Then** `git push` that commit to GitHub.
 3. After a **Stone Hill** application ship: **ask** whether to also deploy Pavilion from the same SHA when it makes sense. Do not auto-deploy both on every SHMS change.
 
 ## Exceptions
 
-- **Rules / docs / memories only** (no application runtime): commit then push. Skip Preview and production.
-- **Staff-only** (Staff dashboard, `/staff`, `components/staff`, `app/api/staff`, staff permissions/roles with no public visitor UI change): after Serena QA, commit → **production** from a clean worktree of that SHA → then `git push`. **Skip Preview** and **do not wait** for Rob OK. If the same commit also changes public pages, membership, checkout, or visitor copy, use full Preview-first instead.
+- **Rules / docs / memories only** (no application runtime): commit then push. Skip staging and production.
+- **Staff-only** (Staff dashboard, `/staff`, `components/staff`, `app/api/staff`, staff permissions/roles with no public visitor UI change): after Serena QA, commit → **production** from a clean worktree of that SHA → then `git push`. **Skip staging** and **do not wait** for Rob OK. If the same commit also changes public pages, membership, checkout, or visitor copy, use full Staging-first instead.
 - Never include unrelated WIP, secrets, Budget/Plaid/terminal/spirit-wear/`tmp` unless they are the task.
 - Never mix Stone Hill and Pavilion env (DATABASE_URL, Wix, Square, Stripe).
 
 ## Anti-patterns (forbidden)
 
-- Commit → `vercel --prod` → push in one turn without Preview + Rob OK.
+- Commit → `vercel --prod` → push in one turn without staging + Rob OK.
 - Pushing to GitHub before production promote when this was an application ship.
-- Calling the task “shipped” or “live” when only Preview exists.
-- Skipping Preview for public visitor changes by labeling them “staff-related.”
+- Calling the task “shipped” or “live” when only staging exists.
+- Asking Rob to review on a one-off `frontend-*.vercel.app` Preview URL.
+- Skipping staging for public visitor changes by labeling them “staff-related.”
+
+## Staging URL (Stone Hill)
+
+https://shmspto.vercel.app
+
+Google / Wix OAuth redirect URIs must include this host (see `scripts/google-workspace-admin-setup.md`).

@@ -15,7 +15,6 @@ import {
 } from '@/lib/auth-google-member'
 import {
   isAllowedPreviewOrigin,
-  isEphemeralVercelPreviewHost,
   requestOriginFromHost,
 } from '@/lib/auth-preview-handoff'
 
@@ -30,12 +29,16 @@ export async function GET(req: NextRequest) {
     req.headers.get('x-forwarded-host') || req.headers.get('host') || ''
   const requestOrigin = requestOriginFromHost(host)
 
-  // Ephemeral Preview hosts are not Google redirect URIs. Bounce to www,
-  // finish OAuth there, then hand the session back to this Preview origin.
-  if (isEphemeralVercelPreviewHost(host) && isAllowedPreviewOrigin(requestOrigin)) {
+  // Staging + ephemeral Preview hosts: run Google OAuth on www (registered
+  // redirect URI), then hand the session back so review hosts stay usable.
+  const reviewOrigin =
+    isAllowedPreviewOrigin(requestOrigin) && requestOrigin !== PROD_ORIGIN
+      ? requestOrigin
+      : ''
+  if (reviewOrigin) {
     const bounce = new URL('/api/auth/google', PROD_ORIGIN)
     bounce.searchParams.set('returnTo', returnTo)
-    bounce.searchParams.set('previewOrigin', requestOrigin)
+    bounce.searchParams.set('previewOrigin', reviewOrigin)
     return NextResponse.redirect(bounce, 302)
   }
 
