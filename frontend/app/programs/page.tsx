@@ -40,20 +40,72 @@ export default async function ProgramsPage() {
       <Navbar />
 
       <main id="main-content">
-        <PageHero
-          content={{
-            ...page,
-            ...(inSession
-              ? {}
-              : {
-                  eyebrow: 'Off season',
-                  title: vanillaizeIfDemo('Programs resume with the school year'),
-                  body: vanillaizeIfDemo('Enrichment programs are paused while school is out of session. Check back in the fall, or visit The Cove and Membership anytime.'),
-                  ctaLabel: vanillaizeIfDemo('Shop The Cove'),
-                  ctaHref: '/cove',
-                }),
-          }}
-        />
+        {(() => {
+          const bodyLines = String(page.body ?? '')
+            .split('\n')
+            .map((l) => l.trim())
+            .filter(Boolean)
+          const bulletLines = (page.bullets ?? [])
+            .map((b) => String(b).trim())
+            .filter(Boolean)
+          let heroBody = inSession
+            ? bodyLines[0] || 'After-school classes for grades 6 to 8.'
+            : vanillaizeIfDemo(
+                'Enrichment programs are paused while school is out of session. Check back in the fall, or visit The Cove and Membership anytime.',
+              )
+          let detailBeats = inSession ? [...bodyLines.slice(1), ...bulletLines] : []
+          // Long CMS hero blobs become scannable beats, not a centered wall of text.
+          if (inSession && heroBody.length > 90) {
+            detailBeats = [...bodyLines, ...bulletLines]
+            heroBody = 'After-school classes for grades 6 to 8.'
+          }
+          return (
+            <>
+              <PageHero
+                content={{
+                  ...page,
+                  body: heroBody,
+                  ...(inSession
+                    ? {}
+                    : {
+                        eyebrow: 'Off season',
+                        title: vanillaizeIfDemo('Programs resume with the school year'),
+                        ctaLabel: vanillaizeIfDemo('Shop The Cove'),
+                        ctaHref: '/cove',
+                      }),
+                }}
+              />
+              {inSession && detailBeats.length > 0 ? (
+                <section
+                  className="border-b border-[var(--border)] bg-white py-10 md:py-12"
+                  aria-label="Program overview"
+                >
+                  <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+                    <ul className="space-y-3 text-left text-base text-[#5A6070] leading-snug">
+                      {detailBeats.map((beat) => (
+                        <li key={beat} className="flex gap-3">
+                          <span
+                            className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                            style={{ backgroundColor: 'var(--brand-green)' }}
+                            aria-hidden
+                          />
+                          <span className="whitespace-pre-line">{beat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <a
+                      href={page.ctaHref?.startsWith('#') ? page.ctaHref : '#programs-list'}
+                      className="mt-8 inline-block text-sm font-semibold underline underline-offset-2"
+                      style={{ color: 'var(--brand-green)' }}
+                    >
+                      {page.ctaLabel?.trim() || 'Browse classes'}
+                    </a>
+                  </div>
+                </section>
+              ) : null}
+            </>
+          )
+        })()}
         <ProgramsSectionNav />
 
         {/* Programs grid */}

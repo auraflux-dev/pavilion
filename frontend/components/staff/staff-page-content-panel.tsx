@@ -156,13 +156,20 @@ export function StaffPageContentPanel() {
             placeholder="Title"
             className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
-          <textarea
-            value={form.body}
-            onChange={(e) => setForm({ ...form, body: e.target.value })}
-            rows={3}
-            placeholder="Body"
-            className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-          />
+          <label className="sm:col-span-2 text-[11px] text-[#5A6070] space-y-0.5">
+            <span>
+              {form.page === 'programs'
+                ? 'Hero line (first line only shows in the green banner). Extra lines become bullets below.'
+                : 'Body'}
+            </span>
+            <textarea
+              value={form.body}
+              onChange={(e) => setForm({ ...form, body: e.target.value })}
+              rows={form.page === 'programs' ? 5 : 3}
+              placeholder="Body"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#1A1A1A]"
+            />
+          </label>
           <input
             value={form.sectionTitle}
             onChange={(e) => setForm({ ...form, sectionTitle: e.target.value })}
@@ -182,13 +189,20 @@ export function StaffPageContentPanel() {
             placeholder="Section body"
             className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
-          <textarea
-            value={form.bullets}
-            onChange={(e) => setForm({ ...form, bullets: e.target.value })}
-            rows={4}
-            placeholder="Bullets (one per line)"
-            className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-          />
+          <label className="sm:col-span-2 text-[11px] text-[#5A6070] space-y-0.5">
+            <span>
+              {form.page === 'programs'
+                ? 'Overview bullets under the hero (one per line). Class names and how registration works.'
+                : 'Bullets (one per line)'}
+            </span>
+            <textarea
+              value={form.bullets}
+              onChange={(e) => setForm({ ...form, bullets: e.target.value })}
+              rows={6}
+              placeholder="Bullets (one per line)"
+              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#1A1A1A]"
+            />
+          </label>
           <div className="sm:col-span-2">
             <StaffFlyerUpload
               label="Page flyer / hero image"
