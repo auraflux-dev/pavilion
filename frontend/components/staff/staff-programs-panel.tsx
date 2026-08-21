@@ -8,7 +8,10 @@ import {
   toDatetimeLocalValue,
 } from '@/lib/programs/registration-access'
 import { Fall2026EpSchedule } from '@/components/programs/fall-2026-ep-schedule'
-import { matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
+import {
+  isCurrentFall2026EpProgram,
+  matchFall2026EpClass,
+} from '@/lib/programs/fall-2026-ep'
 
 type Program = {
   id: string
@@ -116,6 +119,7 @@ export function StaffProgramsPanel() {
   const [status, setStatus] = useState('')
   const [busy, setBusy] = useState(false)
   const [savingProgramId, setSavingProgramId] = useState<string | null>(null)
+  const [showOlderPrograms, setShowOlderPrograms] = useState(false)
   const [attProgramId, setAttProgramId] = useState('')
   const [attDate, setAttDate] = useState(todayYmd)
   const [attStudents, setAttStudents] = useState<AttendanceStudent[]>([])
@@ -131,16 +135,32 @@ export function StaffProgramsPanel() {
     grades: '',
   })
 
+  const visiblePrograms = useMemo(() => {
+    if (showOlderPrograms) return programs
+    return programs.filter((p) => isCurrentFall2026EpProgram(p))
+  }, [programs, showOlderPrograms])
+
+  const visibleProgramIds = useMemo(
+    () => new Set(visiblePrograms.map((p) => p.id)),
+    [visiblePrograms],
+  )
+
   const upcomingSessions = useMemo(() => {
     const now = Date.now()
     return [...sessions]
       .filter((s) => s.active !== false)
+      .filter((s) => !s.programId || visibleProgramIds.has(s.programId))
       .filter((s) => {
         if (!s.startAt) return true
         return new Date(s.startAt).getTime() >= now - 12 * 60 * 60 * 1000
       })
       .sort((a, b) => String(a.startAt ?? '').localeCompare(String(b.startAt ?? '')))
-  }, [sessions])
+  }, [sessions, visibleProgramIds])
+
+  const visibleSessions = useMemo(
+    () => sessions.filter((s) => !s.programId || visibleProgramIds.has(s.programId)),
+    [sessions, visibleProgramIds],
+  )
 
   const load = useCallback(async () => {
     try {
@@ -563,27 +583,39 @@ export function StaffProgramsPanel() {
         ) : null}
         {status ? <p className="text-[11px] text-[#5A6070] mt-1 whitespace-pre-line">{status}</p> : null}
       </div>
-      <div className="inline-flex flex-wrap rounded-lg border border-[var(--border)] overflow-hidden text-sm">
-        {tabs.map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            className={`px-3 py-1.5 ${tab === id ? 'bg-[var(--brand-green)] text-white' : 'bg-white'}`}
-            onClick={() => setTab(id)}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="inline-flex flex-wrap rounded-lg border border-[var(--border)] overflow-hidden text-sm">
+          {tabs.map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              className={`px-3 py-1.5 ${tab === id ? 'bg-[var(--brand-green)] text-white' : 'bg-white'}`}
+              onClick={() => setTab(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <label className="inline-flex items-center gap-1.5 text-[11px] text-[#5A6070]">
+          <input
+            type="checkbox"
+            checked={showOlderPrograms}
+            onChange={(e) => setShowOlderPrograms(e.target.checked)}
+          />
+          Show older programs
+        </label>
       </div>
 
       {tab === 'programs' ? (
         <div className="space-y-3">
-          {programs.length === 0 ? (
-            <p className="text-sm text-[#5A6070]">
-              No programs in your scope. Ask an admin to assign program IDs on your StaffRoles row.
+          {visiblePrograms.length === 0 ? (
+            <p className="text-sm text-[#5A6070] whitespace-pre-line">
+              {showOlderPrograms
+                ? 'No programs in your scope. Ask an admin to assign program IDs on your StaffRoles row.'
+                : 'No Fall 2026 enrichment programs linked yet.\nTurn on “Show older programs” if you need prior seasons, or ensure CMS names match Young Entrepreneurs / Essay / MATHCOUNTS / Robotics.'}
             </p>
           ) : null}
-          {programs.map((p) => (
+          {visiblePrograms.map((p) => (
             <div key={p.id} className="border border-[var(--border)] rounded-lg p-3 space-y-2">
               <div className="flex flex-wrap justify-between gap-2">
                 <div className="min-w-0 flex-1">
@@ -884,7 +916,7 @@ export function StaffProgramsPanel() {
             <select
               value={sessionForm.programId}
               onChange={(e) => {
-                const p = programs.find((x) => x.id === e.target.value)
+                const p = visiblePrograms.find((x) => x.id === e.target.value)
                 setSessionForm((f) => ({
                   ...f,
                   programId: e.target.value,
@@ -895,7 +927,7 @@ export function StaffProgramsPanel() {
               className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             >
               <option value="">Program…</option>
-              {programs.map((p) => (
+              {visiblePrograms.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
                 </option>
@@ -943,7 +975,7 @@ export function StaffProgramsPanel() {
             </Button>
           </div>
           <div className="space-y-3">
-            {sessions.map((s) => (
+            {visibleSessions.map((s) => (
               <div key={s.id} className="border border-[var(--border)] rounded-lg p-3 space-y-2 text-sm">
                 <input
                   defaultValue={s.title}
@@ -1044,7 +1076,7 @@ export function StaffProgramsPanel() {
             className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           >
             <option value="">Select program…</option>
-            {programs.map((p) => (
+            {visiblePrograms.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
               </option>
@@ -1271,7 +1303,7 @@ export function StaffProgramsPanel() {
               className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             >
               <option value="">Select program…</option>
-              {programs.map((p) => (
+              {visiblePrograms.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
                 </option>

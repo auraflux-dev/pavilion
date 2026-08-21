@@ -152,6 +152,16 @@ export function findProgramForFallEpClass<T extends { name: string; fallEpClassI
   return programs.find((p) => matchFall2026EpClass(p.name)?.id === klass.id)
 }
 
+/** Current Fall 2026 enrichment rows (hide older CMS programs on staff). */
+export function isCurrentFall2026EpProgram(program: {
+  name: string
+  fallEpClassId?: string
+}): boolean {
+  const id = String(program.fallEpClassId ?? '').trim()
+  if (id && FALL_2026_EP_CLASSES.some((c) => c.id === id)) return true
+  return Boolean(matchFall2026EpClass(program.name))
+}
+
 /** Parse CMS meetingDates; fall back to packet dates. */
 export function resolveMeetingDates(
   meetingDates: string | undefined,
