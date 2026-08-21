@@ -120,9 +120,26 @@ export async function POST(req: NextRequest) {
             : null,
     })
 
+    const inserted = result as {
+      _id?: string
+      id?: string
+      dataItem?: { id?: string; data?: { _id?: string } }
+    }
+    const studentId = String(
+      inserted._id ??
+        inserted.id ??
+        inserted.dataItem?.id ??
+        inserted.dataItem?.data?._id ??
+        '',
+    )
+    if (!studentId) {
+      console.error('/api/students POST: insert returned no id', result)
+      return NextResponse.json({ error: 'Student created but id missing' }, { status: 500 })
+    }
+
     return NextResponse.json({
       student: {
-        id: (result as any)._id,
+        id: studentId,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         grade: grade.trim(),

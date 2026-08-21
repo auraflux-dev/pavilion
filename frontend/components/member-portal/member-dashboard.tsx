@@ -273,9 +273,35 @@ export function MemberDashboard({
   }
 
   function handleStudentAdded(student: Student) {
-    setStudents((prev) => [...prev, student])
+    // Keep the dashboard mounted. Full load() sets status=loading and can
+    // overwrite this with a stale Wix GET before the insert is visible.
+    setStudents((prev) => {
+      if (student.id && prev.some((s) => s.id === student.id)) return prev
+      return [...prev, student]
+    })
     setAddStudentOpen(false)
-    load()
+    void (async () => {
+      try {
+        const r = await fetch('/api/students')
+        if (!r.ok) return
+        const data = await r.json()
+        const next = Array.isArray(data.students) ? (data.students as Student[]) : []
+        setStudents((prev) => {
+          const byId = new Map<string, Student>()
+          for (const s of next) {
+            if (s?.id) byId.set(s.id, s)
+          }
+          for (const s of prev) {
+            if (s?.id && !byId.has(s.id)) byId.set(s.id, s)
+          }
+          if (student.id && !byId.has(student.id)) byId.set(student.id, student)
+          if (byId.size > 0) return Array.from(byId.values())
+          return prev.length ? prev : next
+        })
+      } catch {
+        /* keep optimistic row */
+      }
+    })()
   }
 
   function handleStudentUpdated(student: Student) {
