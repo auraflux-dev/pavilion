@@ -18,7 +18,7 @@ Application ships follow **Staging-first** in `ship-after-serena.mdc` (critical,
 4. After OK: promote / `--prod`, **then** push GitHub.
 
 Staff-only exception (Staff UI / `/api/staff` / staff permissions with no visitor UI change): commit → staging **and** prod from the same SHA (no Rob wait) → push. Details in `ship-after-serena.mdc`.
-5. **If you shipped Stone Hill** and the change could improve the Pavilion platform: **ask Rob** whether to also stage (then prod) Pavilion (`commons-pto-demo` and/or `commons-pto`) from the same SHA. Do **not** auto-deploy Pavilion on every SHMS ship.
+5. **Default after a Stone Hill application ship:** also deploy Pavilion app code from the **same SHA** (`commons-pto-demo` and `commons-pto` as relevant). Almost every SHMS product change belongs on Pavilion too. **Hard rule:** Pavilion stays vanilla. No Stone Hill / SHMS branding, school PII, or SHMS-specific copy on Pavilion surfaces (demo gates + `vanillaizeIfDemo` / Commons surface still apply). Skip Pavilion only when the change is clearly SHMS-only (school CMS content, SHMS-only env, one-off school ops) or Rob says skip.
 6. If the task is Pavilion-only (`commons-site`, demo vanillaize, trial packs), ship Pavilion projects only (same staging → OK → prod → push). Do not require a Stone Hill deploy.
 
 Never put Stone Hill `DATABASE_URL` / Wix / Square env on Pavilion projects, or Pavilion `DATABASE_URL` / Stripe on Stone Hill.

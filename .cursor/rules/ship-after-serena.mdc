@@ -44,7 +44,7 @@ Until then:
 
 1. Promote that same staging deployment to production, or `vercel --prod` from the **same clean worktree SHA**.
 2. **Then** `git push` that commit to GitHub.
-3. After a **Stone Hill** application ship: **ask** whether to also deploy Pavilion from the same SHA when it makes sense. Do not auto-deploy both on every SHMS change.
+3. After a **Stone Hill** application ship: **default to also deploying Pavilion** (`commons-pto-demo` / `commons-pto`) from the same SHA. Pavilion must stay vanilla (no SHMS branding or school-specific copy). Skip only for clearly SHMS-only work or if Rob says skip.
 
 ## Exceptions
 
