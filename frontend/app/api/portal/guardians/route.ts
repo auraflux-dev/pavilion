@@ -49,7 +49,7 @@ async function notifyPrimaryOfInvite(opts: {
     await sendMassEmail({
       subject: `You invited ${opts.guardianEmail} to your family portal`,
       body,
-      fromName: publicBrandFace(),
+      fromName: publicBrandFace().short,
       replyTo: opts.primaryEmail,
       recipients: [opts.primaryEmail],
     })
@@ -66,7 +66,7 @@ async function notifyPrimaryOfInvite(opts: {
       studentId: null,
       studentName: null,
       programName: '',
-      fromName: publicBrandFace(),
+      fromName: publicBrandFace().short,
       subject: `Invite sent to ${opts.guardianEmail}`,
       body,
       sentAt: new Date().toISOString(),
@@ -172,10 +172,10 @@ export async function POST(req: NextRequest) {
         `Accept invite (sign in or create an account as ${guardianEmail}):`,
         acceptUrl,
         '',
-        vanillaizeIfDemo('You'll see the same students. Cove Digital Card stays with the primary household account unless you purchase separately.'),
+        vanillaizeIfDemo("You'll see the same students. Cove Digital Card stays with the primary household account unless you purchase separately."),
         `Link expires ${new Date(expiresAt).toLocaleDateString()}.`,
       ].join('\n'),
-      fromName: publicBrandFace(),
+      fromName: publicBrandFace().short,
       replyTo: primary,
       recipients: [guardianEmail],
     })

@@ -5,7 +5,7 @@ import {
   resolveMeetingDates,
   serializeMeetingDates,
 } from '@/lib/programs/fall-2026-ep'
-import { publicSiteUrl } from '@/lib/urls'
+import { publicSiteUrl } from '@/lib/demo/instance'
 
 type LinkedProgram = {
   id: string
