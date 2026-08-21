@@ -176,10 +176,32 @@ export function MemberDashboard({
   const [messagesSeenAt, setMessagesSeenAt] = useState(0)
   const [membershipSuccessNudge, setMembershipSuccessNudge] = useState(false)
   const [addStudentOpen, setAddStudentOpen] = useState(false)
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null)
+
+  const sortedStudents = useMemo(
+    () =>
+      [...students].sort((a, b) => {
+        const g = Number(a.grade) - Number(b.grade)
+        if (g !== 0) return g
+        return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)
+      }),
+    [students],
+  )
 
   useEffect(() => {
     if (status === 'ok' && students.length === 0) setAddStudentOpen(true)
   }, [status, students.length])
+
+  useEffect(() => {
+    if (!sortedStudents.length) {
+      setSelectedStudentId(null)
+      return
+    }
+    setSelectedStudentId((current) => {
+      if (current && sortedStudents.some((s) => s.id === current)) return current
+      return sortedStudents[0]!.id
+    })
+  }, [sortedStudents])
   const { allowed: liveCommerce } = useLiveCommerceGate()
 
   async function load() {
@@ -279,6 +301,7 @@ export function MemberDashboard({
       if (student.id && prev.some((s) => s.id === student.id)) return prev
       return [...prev, student]
     })
+    if (student.id) setSelectedStudentId(student.id)
     setAddStudentOpen(false)
     void (async () => {
       try {
@@ -758,18 +781,57 @@ export function MemberDashboard({
                 grades={grades}
                 labels={copy}
               />
-              {students
-                .sort((a, b) => Number(a.grade) - Number(b.grade))
-                .map((s, i) => (
+              {sortedStudents.length > 1 ? (
+                <div
+                  className="flex flex-wrap gap-1.5"
+                  role="tablist"
+                  aria-label="Students in this household"
+                >
+                  {sortedStudents.map((s) => {
+                    const active = s.id === selectedStudentId
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={active}
+                        onClick={() => setSelectedStudentId(s.id)}
+                        className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
+                          active
+                            ? 'text-white border-transparent'
+                            : 'bg-white text-[#5A6070] border-[var(--border)] hover:border-[var(--brand-green)]'
+                        }`}
+                        style={
+                          active
+                            ? {
+                                backgroundColor: 'var(--brand-green)',
+                                borderColor: 'var(--brand-green)',
+                              }
+                            : undefined
+                        }
+                      >
+                        {s.firstName}
+                        <span className="font-normal opacity-80"> · G{s.grade}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : null}
+              {(() => {
+                const selected =
+                  sortedStudents.find((s) => s.id === selectedStudentId) ?? sortedStudents[0]
+                if (!selected) return null
+                return (
                   <StudentCard
-                    key={s.id}
-                    student={s}
-                    defaultOpen={i === 0}
+                    key={selected.id}
+                    student={selected}
+                    defaultOpen
                     grades={grades}
                     boardPosts={boardPosts}
                     onUpdated={handleStudentUpdated}
                   />
-                ))}
+                )
+              })()}
               <InviteCoParentPanel />
             </div>
           )}
