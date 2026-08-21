@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
+import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
+import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 
 type EventRow = {
   id: string
@@ -85,7 +87,7 @@ export function StaffEventsPanel() {
           body: JSON.stringify({
             id: editingId,
             title: form.title,
-            description: form.description,
+            description: normalizePlainCopy(form.description),
             location: form.location,
             startDate: form.startDate,
             endDate: form.endDate || form.startDate,
@@ -100,7 +102,7 @@ export function StaffEventsPanel() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             title: form.title,
-            description: form.description,
+            description: normalizePlainCopy(form.description),
             location: form.location,
             startDate: form.startDate,
             endDate: form.endDate || form.startDate,
@@ -201,12 +203,15 @@ export function StaffEventsPanel() {
             placeholder="Title"
             className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
           />
-          <textarea
+          <StaffPlainCopyField
+            label="Description"
             value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            placeholder="Description"
             rows={3}
-            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
+            textareaClassName="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
+            onChange={(next) => setForm({ ...form, description: next })}
+            onCommit={(next) =>
+              setForm((f) => ({ ...f, description: normalizePlainCopy(next) }))
+            }
           />
           <input
             value={form.location}

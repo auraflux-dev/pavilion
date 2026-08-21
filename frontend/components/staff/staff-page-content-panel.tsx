@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
+import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
+import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 
 type PageRow = {
   id: string
@@ -65,10 +67,16 @@ export function StaffPageContentPanel() {
     setBusy(true)
     setStatus('')
     try {
+      const payload = {
+        ...form,
+        body: normalizePlainCopy(form.body),
+        sectionBody: normalizePlainCopy(form.sectionBody),
+        bullets: normalizePlainCopy(form.bullets),
+      }
       const r = await fetch('/api/staff/page-content', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Save failed')
@@ -156,20 +164,19 @@ export function StaffPageContentPanel() {
             placeholder="Title"
             className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
-          <label className="sm:col-span-2 text-[11px] text-[#5A6070] space-y-0.5">
-            <span>
-              {form.page === 'programs'
-                ? 'Hero body (short pitch only). Class names belong on the program cards, not here.'
-                : 'Body'}
-            </span>
-            <textarea
+          <div className="sm:col-span-2">
+            <StaffPlainCopyField
+              label={
+                form.page === 'programs'
+                  ? 'Hero body (short pitch only). Class names belong on the program cards, not here.'
+                  : 'Body'
+              }
               value={form.body}
-              onChange={(e) => setForm({ ...form, body: e.target.value })}
-              rows={form.page === 'programs' ? 3 : 3}
-              placeholder="Body"
-              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#1A1A1A]"
+              rows={3}
+              onChange={(next) => setForm({ ...form, body: next })}
+              onCommit={(next) => setForm((f) => (f ? { ...f, body: normalizePlainCopy(next) } : f))}
             />
-          </label>
+          </div>
           <input
             value={form.sectionTitle}
             onChange={(e) => setForm({ ...form, sectionTitle: e.target.value })}
@@ -182,27 +189,32 @@ export function StaffPageContentPanel() {
             placeholder="CTA href"
             className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
-          <textarea
-            value={form.sectionBody}
-            onChange={(e) => setForm({ ...form, sectionBody: e.target.value })}
-            rows={2}
-            placeholder="Section body"
-            className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-          />
-          <label className="sm:col-span-2 text-[11px] text-[#5A6070] space-y-0.5">
-            <span>
-              {form.page === 'programs'
-                ? 'Bullets (unused on /programs catalog. leave blank.)'
-                : 'Bullets (one per line)'}
-            </span>
-            <textarea
-              value={form.bullets}
-              onChange={(e) => setForm({ ...form, bullets: e.target.value })}
-              rows={6}
-              placeholder="Bullets (one per line)"
-              className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#1A1A1A]"
+          <div className="sm:col-span-2">
+            <StaffPlainCopyField
+              label="Section body"
+              value={form.sectionBody}
+              rows={2}
+              onChange={(next) => setForm({ ...form, sectionBody: next })}
+              onCommit={(next) =>
+                setForm((f) => (f ? { ...f, sectionBody: normalizePlainCopy(next) } : f))
+              }
             />
-          </label>
+          </div>
+          <div className="sm:col-span-2">
+            <StaffPlainCopyField
+              label={
+                form.page === 'programs'
+                  ? 'Bullets (unused on /programs catalog. leave blank.)'
+                  : 'Bullets (one per line)'
+              }
+              value={form.bullets}
+              rows={6}
+              hint="One bullet per line. Press Enter between items. No HTML."
+              placeholder="One idea per line"
+              onChange={(next) => setForm({ ...form, bullets: next })}
+              onCommit={(next) => setForm((f) => (f ? { ...f, bullets: normalizePlainCopy(next) } : f))}
+            />
+          </div>
           <div className="sm:col-span-2">
             <StaffFlyerUpload
               label="Page flyer / hero image"

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowRight, Calendar, Clock, DollarSign, GraduationCap, MapPin, Users } from 'lucide-react'
 import type { Program } from '@/lib/api/programs'
 import { displayProgramName } from '@/lib/programs/display-name'
+import { toPublicPlainCopy } from '@/lib/copy/plain-staff-copy'
 import { programPublicPath } from '@/lib/programs/public-path'
 import { formatShortDate, programDateBadge } from '@/lib/programs/schedule'
 
@@ -47,17 +48,7 @@ function hasTag(program: Program, tag: string) {
 }
 
 function plainText(html: string) {
-  return html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n')
-    .replace(/<li[^>]*>/gi, '\n• ')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&amp;/g, '&')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/[ \t]+\n/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .replace(/[ \t]{2,}/g, ' ')
-    .trim()
+  return toPublicPlainCopy(html)
 }
 
 function weekdayLabel(day: string) {

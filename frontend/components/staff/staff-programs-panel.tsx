@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight, GripVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
+import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
+import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 import {
   formatMemberPriorityUntil,
   toDatetimeLocalValue,
@@ -915,16 +917,16 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
               {expandedIds[p.id] ? (
               <>
               <div className="grid sm:grid-cols-2 gap-2 pt-1 border-t border-[var(--border)]">
-                <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
-                  <span>Description</span>
-                  <textarea
+                <div className="sm:col-span-2">
+                  <StaffPlainCopyField
+                    label="Description"
                     value={p.description}
-                    rows={2}
-                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                    onChange={(e) => changeProgramLocal(p.id, { description: e.target.value })}
-                    onBlur={(e) => void saveProgram(p.id, { description: e.target.value })}
+                    rows={5}
+                    textareaClassName="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                    onChange={(next) => changeProgramLocal(p.id, { description: next })}
+                    onCommit={(next) => void saveProgram(p.id, { description: normalizePlainCopy(next) })}
                   />
-                </label>
+                </div>
                 <label className="text-[11px] text-[#5A6070] space-y-0.5">
                   <span>Fee ($)</span>
                   <input
@@ -1134,16 +1136,16 @@ Leave blank for normal in-app Square checkout.`}
                         onBlur={(e) => void saveProgram(p.id, { tags: e.target.value })}
                       />
                     </label>
-                    <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
-                      <span>Detail (extra copy)</span>
-                      <textarea
+                    <div className="sm:col-span-2">
+                      <StaffPlainCopyField
+                        label="Detail (extra copy)"
                         value={p.detail}
-                        rows={2}
-                        className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                        onChange={(e) => changeProgramLocal(p.id, { detail: e.target.value })}
-                        onBlur={(e) => void saveProgram(p.id, { detail: e.target.value })}
+                        rows={4}
+                        textareaClassName="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                        onChange={(next) => changeProgramLocal(p.id, { detail: next })}
+                        onCommit={(next) => void saveProgram(p.id, { detail: normalizePlainCopy(next) })}
                       />
-                    </label>
+                    </div>
                     <label className="inline-flex items-center gap-1 text-xs sm:col-span-2">
                       <input
                         type="checkbox"

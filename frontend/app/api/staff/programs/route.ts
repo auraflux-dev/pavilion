@@ -13,6 +13,7 @@ import {
   memberPriorityUntilIso,
   normalizeMemberPriorityUntilInput,
 } from '@/lib/programs/registration-access'
+import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -36,7 +37,7 @@ function mapProgram(item: Record<string, unknown>) {
   return {
     id: String(item._id ?? ''),
     name: String(item.name ?? ''),
-    description: String(item.description ?? ''),
+    description: normalizePlainCopy(String(item.description ?? '')),
     fee: Number(item.fee ?? 0) || 0,
     capacity: Number(item.capacity ?? 0) || 0,
     registrationOpen: item.registrationOpen === true,
@@ -47,7 +48,7 @@ function mapProgram(item: Record<string, unknown>) {
     category: String(item.category ?? ''),
     paymentType: String(item.paymentType ?? ''),
     schedule: String(item.schedule ?? ''),
-    detail: String(item.detail ?? ''),
+    detail: normalizePlainCopy(String(item.detail ?? '')),
     tags: String(item.tags ?? ''),
     featured: item.featured === true,
     sortOrder: Number(item.sortOrder ?? 0) || 0,
@@ -213,7 +214,7 @@ export async function POST(req: NextRequest) {
         composeScheduleField({ dayOfWeek, classTime, durationWeeks, startDate, endDate })
       const row = {
         name,
-        description: String(body.description ?? '').trim(),
+        description: normalizePlainCopy(String(body.description ?? '')),
         fee: Number(body.fee ?? 0) || 0,
         capacity: Number(body.capacity ?? 0) || 0,
         registrationOpen: body.registrationOpen === true,
@@ -224,7 +225,7 @@ export async function POST(req: NextRequest) {
         category: String(body.category ?? '').trim(),
         paymentType: String(body.paymentType ?? 'wix').trim(),
         schedule,
-        detail: String(body.detail ?? '').trim(),
+        detail: normalizePlainCopy(String(body.detail ?? '')),
         tags: String(body.tags ?? '').trim(),
         featured: body.featured === true,
         sortOrder: Number(body.sortOrder ?? 0) || 0,
@@ -335,7 +336,10 @@ export async function PATCH(req: NextRequest) {
       ...existing,
       _id: id,
       name: body.name != null ? String(body.name).trim() : existing.name,
-      description: body.description != null ? String(body.description).trim() : existing.description,
+      description:
+        body.description != null
+          ? normalizePlainCopy(String(body.description))
+          : existing.description,
       fee: body.fee != null ? Number(body.fee) || 0 : existing.fee,
       capacity: body.capacity != null ? Number(body.capacity) || 0 : existing.capacity,
       registrationOpen:
@@ -355,7 +359,8 @@ export async function PATCH(req: NextRequest) {
       grades: body.grades != null ? String(body.grades).trim() : existing.grades,
       category: body.category != null ? String(body.category).trim() : existing.category,
       paymentType: body.paymentType != null ? String(body.paymentType).trim() : existing.paymentType,
-      detail: body.detail != null ? String(body.detail).trim() : existing.detail,
+      detail:
+        body.detail != null ? normalizePlainCopy(String(body.detail)) : existing.detail,
       tags: body.tags != null ? String(body.tags).trim() : existing.tags,
       featured: body.featured != null ? body.featured === true : existing.featured === true,
       sortOrder: body.sortOrder != null ? Number(body.sortOrder) || 0 : existing.sortOrder,

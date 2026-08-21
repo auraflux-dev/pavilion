@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
+import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 
 type SettingKey = { key: string; label: string; multiline?: boolean }
 type Group = { id: string; label: string; keys: SettingKey[] }
@@ -45,7 +47,10 @@ export function StaffSiteSettingsPanel({
       const r = await fetch('/api/staff/site-settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key, value: settings[key] ?? '' }),
+        body: JSON.stringify({
+          key,
+          value: normalizePlainCopy(settings[key] ?? ''),
+        }),
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Save failed')
@@ -95,11 +100,13 @@ export function StaffSiteSettingsPanel({
             <div key={k.key} className="space-y-1">
               <label className="text-xs text-[#5A6070]">{k.label}</label>
               {k.multiline ? (
-                <textarea
+                <StaffPlainCopyField
                   value={settings[k.key] ?? ''}
-                  onChange={(e) => setSettings((s) => ({ ...s, [k.key]: e.target.value }))}
                   rows={4}
-                  className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                  onChange={(next) => setSettings((s) => ({ ...s, [k.key]: next }))}
+                  onCommit={(next) =>
+                    setSettings((s) => ({ ...s, [k.key]: normalizePlainCopy(next) }))
+                  }
                 />
               ) : (
                 <input

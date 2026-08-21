@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
+import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 
 type Minute = {
   id: string
@@ -90,6 +92,9 @@ export function StaffMinutesPanel() {
     try {
       const body = {
         ...form,
+        summary: normalizePlainCopy(form.summary),
+        minutesContent: normalizePlainCopy(form.minutesContent),
+        takeaways: normalizePlainCopy(form.takeaways),
         meetingDate: form.meetingDate ? new Date(form.meetingDate).toISOString() : '',
         id: editing?.id,
       }
@@ -153,20 +158,26 @@ export function StaffMinutesPanel() {
           placeholder="Short summary"
           className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
-        <textarea
-          value={form.minutesContent}
-          onChange={(e) => setForm((f) => ({ ...f, minutesContent: e.target.value }))}
-          rows={5}
-          placeholder="Full minutes"
-          className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-        />
-        <textarea
-          value={form.takeaways}
-          onChange={(e) => setForm((f) => ({ ...f, takeaways: e.target.value }))}
-          rows={2}
-          placeholder="Takeaways"
-          className="sm:col-span-2 border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-        />
+        <div className="sm:col-span-2">
+          <StaffPlainCopyField
+            label="Full minutes"
+            value={form.minutesContent}
+            rows={8}
+            onChange={(next) => setForm((f) => ({ ...f, minutesContent: next }))}
+            onCommit={(next) =>
+              setForm((f) => ({ ...f, minutesContent: normalizePlainCopy(next) }))
+            }
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <StaffPlainCopyField
+            label="Takeaways"
+            value={form.takeaways}
+            rows={3}
+            onChange={(next) => setForm((f) => ({ ...f, takeaways: next }))}
+            onCommit={(next) => setForm((f) => ({ ...f, takeaways: normalizePlainCopy(next) }))}
+          />
+        </div>
         <input
           value={form.callToAction}
           onChange={(e) => setForm((f) => ({ ...f, callToAction: e.target.value }))}

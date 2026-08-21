@@ -133,7 +133,7 @@ export default async function MembershipPage() {
               {faqItems.map((item) => (
                 <div key={item.id} className="border-b border-[var(--border)] pb-6 last:border-0">
                   <h3 className="font-bold text-[#1A1A1A] mb-2">{item.question}</h3>
-                  <p className="text-[#5A6070] text-sm leading-relaxed">{item.answer}</p>
+                  <p className="text-[#5A6070] text-sm leading-relaxed whitespace-pre-line">{item.answer}</p>
                 </div>
               ))}
             </div>

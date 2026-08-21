@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ProgramLandingCheckout } from '@/components/programs/program-register-form'
 import type { Program } from '@/lib/api/programs'
 import { displayProgramName } from '@/lib/programs/display-name'
+import { toPublicPlainCopy } from '@/lib/copy/plain-staff-copy'
 import { formatShortDate, programDateBadge } from '@/lib/programs/schedule'
 import {
   formatMemberPriorityUntil,
@@ -22,13 +23,7 @@ function hasTag(program: Program, tag: string) {
 }
 
 function plainLines(html: string): string[] {
-  return html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n')
-    .replace(/<li[^>]*>/gi, '\n• ')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&amp;/g, '&')
-    .replace(/&nbsp;/g, ' ')
+  return toPublicPlainCopy(html)
     .split('\n')
     .map((l) => l.trim())
     .filter(Boolean)

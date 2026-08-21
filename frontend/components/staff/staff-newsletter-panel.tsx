@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
+import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { defaultUtmCampaign } from '@/lib/staff/newsletter-utm'
 import { NEWSLETTER_MERGE_HINT } from '@/lib/staff/newsletter-merge'
@@ -735,15 +737,14 @@ export function StaffNewsletterPanel() {
             data-help-shot="beats"
             className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3"
           >
-            <label className="text-xs text-[#5A6070] block">
-              Intro
-              <textarea
-                value={intro}
-                onChange={(e) => setIntro(e.target.value)}
-                rows={2}
-                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-              />
-            </label>
+            <StaffPlainCopyField
+              label="Intro"
+              value={intro}
+              rows={2}
+              showPreview={false}
+              onChange={setIntro}
+              onCommit={(next) => setIntro(normalizePlainCopy(next))}
+            />
             {beats.map((beat, i) => (
               <div key={NEWSLETTER_BEAT_LABELS[i]} className="grid sm:grid-cols-3 gap-2">
                 <label className="text-xs text-[#5A6070] sm:col-span-1">
@@ -758,45 +759,59 @@ export function StaffNewsletterPanel() {
                     className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                   />
                 </label>
-                <label className="text-xs text-[#5A6070] sm:col-span-2">
-                  {NEWSLETTER_BEAT_LABELS[i]} copy
-                  <textarea
+                <div className="sm:col-span-2">
+                  <StaffPlainCopyField
+                    label={`${NEWSLETTER_BEAT_LABELS[i]} copy`}
                     value={beat.body}
-                    onChange={(e) => {
+                    rows={2}
+                    showPreview={false}
+                    onChange={(val) => {
                       const next = beats.slice()
-                      next[i] = { ...next[i], body: e.target.value }
+                      next[i] = { ...next[i], body: val }
                       setBeats(next)
                     }}
-                    rows={2}
-                    className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                    onCommit={(val) => {
+                      const next = beats.slice()
+                      next[i] = { ...next[i], body: normalizePlainCopy(val) }
+                      setBeats(next)
+                    }}
                   />
-                </label>
+                </div>
               </div>
             ))}
-            <label className="text-xs text-[#5A6070] block">
-              Sign-off
-              <textarea
-                value={signoff}
-                onChange={(e) => setSignoff(e.target.value)}
-                rows={2}
-                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-              />
-            </label>
+            <StaffPlainCopyField
+              label="Sign-off"
+              value={signoff}
+              rows={2}
+              showPreview={false}
+              onChange={setSignoff}
+              onCommit={(next) => setSignoff(normalizePlainCopy(next))}
+            />
           </div>
         ) : null}
 
-        <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          rows={8}
-          readOnly={useBeats}
-          placeholder={
-            sendAudience === 'scoop'
-              ? 'Short note above the scoop link (plain text)'
-              : 'Newsletter body (plain text; paste links. UTM + tracking added on send)'
-          }
-          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-        />
+        {useBeats ? (
+          <textarea
+            value={body}
+            readOnly
+            rows={8}
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[#F5F5F3] text-[#5A6070]"
+          />
+        ) : (
+          <StaffPlainCopyField
+            label="Newsletter body"
+            value={body}
+            rows={8}
+            hint="Press Enter for a new line. Paste links as plain text. No HTML."
+            placeholder={
+              sendAudience === 'scoop'
+                ? 'Short note above the scoop link'
+                : 'Newsletter body (paste links; UTM + tracking added on send)'
+            }
+            onChange={setBody}
+            onCommit={(next) => setBody(normalizePlainCopy(next))}
+          />
+        )}
         <p className="text-[11px] text-[#5A6070]">{NEWSLETTER_MERGE_HINT}</p>
 
         <div className="grid sm:grid-cols-2 gap-2">

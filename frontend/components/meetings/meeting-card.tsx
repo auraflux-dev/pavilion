@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, ExternalLink, Calendar } from 'lucide-react'
 import type { MeetingMinute } from '@/lib/api/meetings'
+import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
+import { toPublicPlainCopy } from '@/lib/copy/plain-staff-copy'
 
 interface Props {
   meeting: MeetingMinute
@@ -75,34 +77,33 @@ export function MeetingCard({ meeting, showJoinLink, defaultOpen = false }: Prop
           {meeting.minutesContent && (
             <div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--brand-green)] mb-2">Minutes</h4>
-              <div
-                className="prose prose-sm max-w-none text-[#3A3A3A]"
-                dangerouslySetInnerHTML={{ __html: meeting.minutesContent }}
-              />
+              <p className="text-sm text-[#3A3A3A] whitespace-pre-line leading-relaxed">
+                {humanizePublicCopy(toPublicPlainCopy(meeting.minutesContent))}
+              </p>
             </div>
           )}
           {meeting.summary && (
             <div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--brand-green)] mb-2">Summary</h4>
-              <div
-                className="prose prose-sm max-w-none text-[#3A3A3A]"
-                dangerouslySetInnerHTML={{ __html: meeting.summary }}
-              />
+              <p className="text-sm text-[#3A3A3A] whitespace-pre-line leading-relaxed">
+                {humanizePublicCopy(toPublicPlainCopy(meeting.summary))}
+              </p>
             </div>
           )}
           {meeting.takeaways && (
             <div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--brand-green)] mb-2">Key Takeaways</h4>
-              <div
-                className="prose prose-sm max-w-none text-[#3A3A3A]"
-                dangerouslySetInnerHTML={{ __html: meeting.takeaways }}
-              />
+              <p className="text-sm text-[#3A3A3A] whitespace-pre-line leading-relaxed">
+                {humanizePublicCopy(toPublicPlainCopy(meeting.takeaways))}
+              </p>
             </div>
           )}
           {meeting.callToAction && (
             <div className="rounded-lg px-4 py-3" style={{ backgroundColor: 'var(--brand-soft)' }}>
               <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--brand-green)] mb-1">Action for Parents</h4>
-              <p className="text-sm text-[#1A1A1A]">{meeting.callToAction}</p>
+              <p className="text-sm text-[#1A1A1A] whitespace-pre-line">
+                {humanizePublicCopy(toPublicPlainCopy(meeting.callToAction))}
+              </p>
             </div>
           )}
         </div>

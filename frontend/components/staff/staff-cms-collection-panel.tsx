@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
+import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 
 type Field = {
   key: string
@@ -71,10 +73,16 @@ export function StaffCmsCollectionPanel({
     setStatus('')
     try {
       const isNew = !form.id
+      const payload: Row = { ...form }
+      for (const f of fields) {
+        if (f.type === 'textarea') {
+          payload[f.key] = normalizePlainCopy(String(payload[f.key] ?? ''))
+        }
+      }
       const r = await fetch(`/api/staff/cms/${encodeURIComponent(collection)}`, {
         method: isNew ? 'POST' : 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Save failed')
@@ -187,11 +195,13 @@ export function StaffCmsCollectionPanel({
                     ))}
                   </select>
                 ) : f.type === 'textarea' ? (
-                  <textarea
+                  <StaffPlainCopyField
                     value={String(form[f.key] ?? '')}
-                    onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
                     rows={4}
-                    className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                    onChange={(next) => setForm({ ...form, [f.key]: next })}
+                    onCommit={(next) =>
+                      setForm((prev) => (prev ? { ...prev, [f.key]: normalizePlainCopy(next) } : prev))
+                    }
                   />
                 ) : (
                   <input

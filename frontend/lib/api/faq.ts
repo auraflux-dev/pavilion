@@ -8,6 +8,7 @@
 
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
+import { toPublicPlainCopy } from '@/lib/copy/plain-staff-copy'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
 
@@ -68,7 +69,7 @@ export async function getFAQItems(page?: string): Promise<FAQItem[]> {
       .map((item: WixDataItem) => ({
       id:        item.id ?? '',
       question:  vanillaizeIfDemo(humanizePublicCopy(item.data?.question  ?? '')),
-      answer:    vanillaizeIfDemo(humanizePublicCopy(item.data?.answer    ?? '')),
+      answer:    vanillaizeIfDemo(humanizePublicCopy(toPublicPlainCopy(item.data?.answer    ?? ''))),
       page:      item.data?.page      ?? 'general',
       sortOrder: item.data?.sortOrder ?? 99,
       active:    item.data?.active    ?? true,
