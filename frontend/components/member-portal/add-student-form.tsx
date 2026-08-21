@@ -31,10 +31,28 @@ interface Props {
   }) => void
   grades?: string[]
   labels: FormLabels
+  /** Controlled open (header CTA). When set, no dashed trigger is rendered. */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  /** header = compact bar button; card = dashed full-width (default). */
+  variant?: 'card' | 'header'
 }
 
-export function AddStudentForm({ onAdded, grades = ['6', '7', '8'], labels }: Props) {
-  const [open, setOpen] = useState(false)
+export function AddStudentForm({
+  onAdded,
+  grades = ['6', '7', '8'],
+  labels,
+  open: openProp,
+  onOpenChange,
+  variant = 'card',
+}: Props) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const controlled = openProp !== undefined
+  const open = controlled ? openProp : uncontrolledOpen
+  function setOpen(next: boolean) {
+    if (!controlled) setUncontrolledOpen(next)
+    onOpenChange?.(next)
+  }
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [grade, setGrade] = useState('')
@@ -68,8 +86,11 @@ export function AddStudentForm({ onAdded, grades = ['6', '7', '8'], labels }: Pr
   }
 
   if (!open) {
+    // Header CTA lives in the quadrant bar; form only mounts when open.
+    if (controlled || variant === 'header') return null
     return (
       <button
+        type="button"
         onClick={() => setOpen(true)}
         className="flex items-center gap-2 w-full px-4 py-3.5 rounded-xl border-2 border-dashed transition-colors hover:border-[var(--brand-green)] hover:bg-[var(--brand-soft)] text-[#5A6070] hover:text-[var(--brand-green)]"
         style={{ borderColor: '#D4D4D4' }}

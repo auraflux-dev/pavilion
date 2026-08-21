@@ -8,6 +8,7 @@ import {
   MessageCircle,
   User,
   Users,
+  UserPlus,
   CreditCard,
   CalendarDays,
   Mail,
@@ -174,6 +175,11 @@ export function MemberDashboard({
   const [familyTab, setFamilyTab] = useState<'calendar' | 'messages'>('calendar')
   const [messagesSeenAt, setMessagesSeenAt] = useState(0)
   const [membershipSuccessNudge, setMembershipSuccessNudge] = useState(false)
+  const [addStudentOpen, setAddStudentOpen] = useState(false)
+
+  useEffect(() => {
+    if (status === 'ok' && students.length === 0) setAddStudentOpen(true)
+  }, [status, students.length])
   const { allowed: liveCommerce } = useLiveCommerceGate()
 
   async function load() {
@@ -268,6 +274,7 @@ export function MemberDashboard({
 
   function handleStudentAdded(student: Student) {
     setStudents((prev) => [...prev, student])
+    setAddStudentOpen(false)
     load()
   }
 
@@ -679,27 +686,52 @@ export function MemberDashboard({
           icon={Users}
           className="order-3 lg:order-2 lg:col-start-2 lg:row-start-1"
           action={
-            <button
-              type="button"
-              onClick={load}
-              className="text-xs font-semibold text-[#5A6070] hover:text-[var(--brand-green)] inline-flex items-center gap-1"
-            >
-              <RefreshCw className="w-3.5 h-3.5" /> {copy.refresh}
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setAddStudentOpen(true)}
+                className="text-xs font-semibold inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[var(--border)] hover:border-[var(--brand-green)] hover:bg-[var(--brand-soft)] text-[var(--brand-green)]"
+              >
+                <UserPlus className="w-3.5 h-3.5" aria-hidden />
+                {copy.addStudentCta}
+              </button>
+              <button
+                type="button"
+                onClick={load}
+                className="text-xs font-semibold text-[#5A6070] hover:text-[var(--brand-green)] inline-flex items-center gap-1"
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> {copy.refresh}
+              </button>
+            </div>
           }
         >
           {students.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-center py-2">
-              <p className="font-bold text-[#1A1A1A] mb-1">{copy.emptyTitle}</p>
-              <p className="text-xs text-[#5A6070] mb-4 max-w-sm">{copy.emptyBody}</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-center py-2 space-y-3">
+              <div>
+                <p className="font-bold text-[#1A1A1A] mb-1">{copy.emptyTitle}</p>
+                <p className="text-xs text-[#5A6070] max-w-sm">{copy.emptyBody}</p>
+              </div>
+              <div className="w-full text-left">
+                <AddStudentForm
+                  open={addStudentOpen}
+                  onOpenChange={setAddStudentOpen}
+                  variant="header"
+                  onAdded={handleStudentAdded}
+                  grades={grades}
+                  labels={copy}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3 flex-1 overflow-y-auto max-h-[420px] pr-1">
               <AddStudentForm
+                open={addStudentOpen}
+                onOpenChange={setAddStudentOpen}
+                variant="header"
                 onAdded={handleStudentAdded}
                 grades={grades}
                 labels={copy}
               />
-            </div>
-          ) : (
-            <div className="space-y-3 flex-1 overflow-y-auto max-h-[420px] pr-1">
               {students
                 .sort((a, b) => Number(a.grade) - Number(b.grade))
                 .map((s, i) => (
@@ -712,11 +744,6 @@ export function MemberDashboard({
                     onUpdated={handleStudentUpdated}
                   />
                 ))}
-              <AddStudentForm
-                onAdded={handleStudentAdded}
-                grades={grades}
-                labels={copy}
-              />
               <InviteCoParentPanel />
             </div>
           )}
