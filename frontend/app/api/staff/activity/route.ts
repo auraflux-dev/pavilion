@@ -8,6 +8,8 @@ import {
   getStaffGoogleAccess,
   workspaceServiceAccountConfigured,
 } from '@/lib/google/workspace-auth'
+import { isDemoInstance } from '@/lib/demo/instance'
+import { DEMO_SEED_ACTIVITY } from '@/lib/demo/seed'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,6 +38,7 @@ async function gmailInboxUnread(email: string): Promise<number | null> {
 }
 
 async function countNeedsReconcile(): Promise<number> {
+  if (isDemoInstance()) return 0
   try {
     const client = getWixClient()
     const found = await client.items
@@ -50,6 +53,7 @@ async function countNeedsReconcile(): Promise<number> {
 }
 
 async function countRecentContacts(days: number): Promise<number> {
+  if (isDemoInstance()) return 0
   try {
     const since = new Date(Date.now() - days * 86400000).toISOString()
     const client = getWixClient()
@@ -67,6 +71,15 @@ export async function GET(req: NextRequest) {
   const session = await getStaffSession(req)
   if (!session) {
     return NextResponse.json({ error: 'Sign in to continue.' }, { status: 401 })
+  }
+
+  if (isDemoInstance()) {
+    return NextResponse.json({
+      googleConnected: false,
+      mailUnread: null,
+      items: DEMO_SEED_ACTIVITY,
+      demo: true,
+    })
   }
 
   const items: StaffActivityItem[] = []
