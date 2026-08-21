@@ -29,13 +29,30 @@ interface Props {
   student: Student
   grades: string[]
   onUpdated: (student: Student) => void
+  /** When true, only the form (no trigger button). Parent owns the Edit control. */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  /** Hide the built-in Edit trigger (use when parent renders it in the card header). */
+  hideTrigger?: boolean
 }
 
 const inputCls =
   'w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/30'
 
-export function EditStudentForm({ student, grades, onUpdated }: Props) {
-  const [open, setOpen] = useState(false)
+export function EditStudentForm({
+  student,
+  grades,
+  onUpdated,
+  open: openProp,
+  onOpenChange,
+  hideTrigger = false,
+}: Props) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const open = openProp ?? uncontrolledOpen
+  const setOpen = (next: boolean) => {
+    onOpenChange?.(next)
+    if (openProp === undefined) setUncontrolledOpen(next)
+  }
   const [firstName, setFirstName] = useState(student.firstName)
   const [lastName, setLastName] = useState(student.lastName)
   const [grade, setGrade] = useState(student.grade)
@@ -86,6 +103,7 @@ export function EditStudentForm({ student, grades, onUpdated }: Props) {
   }
 
   if (!open) {
+    if (hideTrigger) return null
     return (
       <button
         type="button"

@@ -1,11 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChevronDown, ChevronUp, CreditCard, BookOpen, Star, Loader2 } from 'lucide-react'
-import { GiftCardSettings } from './gift-card-settings'
+import { ChevronDown, ChevronUp, CreditCard, BookOpen, Pencil, Loader2 } from 'lucide-react'
 import { EditStudentForm } from './edit-student-form'
-import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
-import { normalizeMembershipTier } from '@/lib/staff/members-roster'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 interface Enrollment {
   id: string
@@ -156,12 +154,7 @@ export function StudentCard({
   const [requestMsg, setRequestMsg] = useState('')
   const [giftCard, setGiftCard] = useState<GiftCardData | null>(null)
   const [giftCardLoading, setGiftCardLoading] = useState(false)
-  const isPaid =
-    student.membershipStatus?.toLowerCase() !== 'historical' &&
-    Boolean(student.membershipTier) &&
-    student.membershipTier !== 'free'
-  const normalizedTier = normalizeMembershipTier(student.membershipTier)
-  const tierLabel = isPaid ? displayMembershipTier(normalizedTier) : 'Free'
+  const [editOpen, setEditOpen] = useState(false)
 
   // Live gift card balance. Fetched on mount
   useEffect(() => {
@@ -282,23 +275,29 @@ export function StudentCard({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Tier badge */}
-          <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 ${
-            isPaid ? 'bg-[var(--brand-soft)] text-[var(--brand-green)]' : 'bg-gray-100 text-gray-500'
-          }`}>
-            {isPaid && <Star className="w-3 h-3" />}
-            {tierLabel}
-          </span>
+          {onUpdated ? (
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(true)
+                setEditOpen(true)
+              }}
+              className="text-xs font-semibold text-[var(--brand-green)] hover:underline inline-flex items-center gap-1"
+            >
+              <Pencil className="w-3 h-3" /> Edit student
+            </button>
+          ) : null}
           <button
             onClick={() => setOpen(o => !o)}
             className="p-1 text-[#5A6070] hover:text-[var(--brand-green)] transition-colors"
+            aria-label={open ? 'Collapse student' : 'Expand student'}
           >
             {open ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
-      {/* Collapsed: Cove balance only. Tier is on the badge above. */}
+      {/* Collapsed: Cove balance only. Membership tier lives on Account / Store benefits. */}
       <div className="flex items-center gap-2 px-5 py-3 border-t border-[#F0EDE8]">
         <CreditCard className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
         <div>
@@ -313,7 +312,7 @@ export function StudentCard({
         </div>
       </div>
 
-      {/* Expanded: edit, enrollments, attendance, Auto Top-Off. Store owns purchases + Load. */}
+      {/* Expanded: edit form, enrollments, attendance. Store owns Load + purchases. Auto Top-Off on Payment methods. */}
       {open && (
         <div className="border-t border-[#F0EDE8] px-5 py-5 space-y-6">
           {onUpdated ? (
@@ -321,7 +320,15 @@ export function StudentCard({
               student={student}
               grades={grades}
               onUpdated={onUpdated}
+              open={editOpen}
+              onOpenChange={setEditOpen}
+              hideTrigger
             />
+          ) : null}
+          {!giftCard?.hasCard ? (
+            <p className="text-sm text-[#5A6070]">
+              {vanillaizeIfDemo('No Cove balance yet. Load from Store & Cove below.')}
+            </p>
           ) : null}
           {loading && (
             <div className="flex items-center justify-center py-6">
@@ -331,18 +338,6 @@ export function StudentCard({
 
           {!loading && history && (
             <>
-              {/* Auto Top-Off only. Balance is in the bar above. Purchases live under Store. */}
-              <div>
-                {!giftCard?.hasCard ? (
-                  <p className="text-sm text-[#5A6070] mb-3">
-                    {vanillaizeIfDemo('No Cove balance yet. Load from Store & Cove below.')}
-                  </p>
-                ) : null}
-                <GiftCardSettings
-                  studentId={student.id}
-                />
-              </div>
-
               {(() => {
                 const safety = safetySummary(student)
                 return (
