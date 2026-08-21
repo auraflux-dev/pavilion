@@ -64,6 +64,7 @@ function mapProgram(item: Record<string, unknown>) {
     startDate: dateField(item.startDate),
     endDate: dateField(item.endDate),
     instructorName: String(item.instructorName ?? ''),
+    fallEpClassId: String(item.fallEpClassId ?? ''),
   }
 }
 
@@ -107,6 +108,10 @@ function schedulePatchFromBody(body: Record<string, unknown>, existing: Record<s
       body.instructorName != null
         ? String(body.instructorName).trim()
         : String(existing.instructorName ?? ''),
+    fallEpClassId:
+      body.fallEpClassId != null
+        ? String(body.fallEpClassId).trim()
+        : String(existing.fallEpClassId ?? ''),
   }
 }
 
@@ -340,6 +345,31 @@ export async function PATCH(req: NextRequest) {
       ...scheduleFields,
     }
     await client.items.update(collection, updates as Parameters<typeof client.items.update>[1])
+
+    const nextName = String(updates.name ?? '')
+    const prevName = String(existing.name ?? '')
+    if (nextName && nextName !== prevName) {
+      try {
+        const sessionQuery = await client.items
+          .query('ProgramSessions')
+          .eq('programId', id)
+          .limit(100)
+          .find()
+        for (const row of sessionQuery.items as Record<string, unknown>[]) {
+          const sid = String(row._id ?? '')
+          if (!sid) continue
+          if (String(row.programName ?? '') === nextName) continue
+          await client.items.update('ProgramSessions', {
+            ...row,
+            _id: sid,
+            programName: nextName,
+          } as Parameters<typeof client.items.update>[1])
+        }
+      } catch (syncErr) {
+        console.error('/api/staff/programs PATCH session name sync', syncErr)
+      }
+    }
+
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('/api/staff/programs PATCH', err)

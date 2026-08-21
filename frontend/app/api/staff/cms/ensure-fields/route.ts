@@ -83,6 +83,11 @@ export async function POST(req: NextRequest) {
         { key: 'detail', displayName: 'Detail', type: 'TEXT' },
         { key: 'instructorName', displayName: 'Instructor / Vendor', type: 'TEXT' },
         {
+          key: 'fallEpClassId',
+          displayName: 'Fall EP class id (ye/essay/mathcounts/robotics)',
+          type: 'TEXT',
+        },
+        {
           key: 'memberPriorityUntil',
           displayName: 'Paid members only until (then open to all)',
           type: 'DATETIME',

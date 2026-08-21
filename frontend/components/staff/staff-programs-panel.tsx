@@ -8,6 +8,7 @@ import {
   toDatetimeLocalValue,
 } from '@/lib/programs/registration-access'
 import { Fall2026EpSchedule } from '@/components/programs/fall-2026-ep-schedule'
+import { matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
 
 type Program = {
   id: string
@@ -35,6 +36,7 @@ type Program = {
   startDate: string
   endDate: string
   instructorName: string
+  fallEpClassId: string
   seatsTaken?: number
   seatsRemaining?: number | null
 }
@@ -110,6 +112,8 @@ export function StaffProgramsPanel() {
   const [msgBody, setMsgBody] = useState('')
   const [status, setStatus] = useState('')
   const [busy, setBusy] = useState(false)
+  /** Bumps when CMS fields change so uncontrolled inputs remount with fresh values. */
+  const [fieldsEpoch, setFieldsEpoch] = useState(0)
   const [attProgramId, setAttProgramId] = useState('')
   const [attDate, setAttDate] = useState(todayYmd)
   const [attStudents, setAttStudents] = useState<AttendanceStudent[]>([])
@@ -141,10 +145,34 @@ export function StaffProgramsPanel() {
       const r = await fetch('/api/staff/programs')
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Load failed')
-      setPrograms(d.programs ?? [])
+      let list = (d.programs ?? []) as Program[]
       setSessions(d.sessions ?? [])
       setCanManageAll(d.canManageAll !== false)
-      const firstId = (d.programs ?? [])[0]?.id as string | undefined
+      // Pin Fall EP rows to CMS by id so title renames still sync across this page.
+      if (d.canManageAll !== false) {
+        for (const p of list) {
+          if (p.fallEpClassId) continue
+          const matched = matchFall2026EpClass(p.name)
+          if (!matched) continue
+          try {
+            const linkRes = await fetch('/api/staff/programs', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ kind: 'program', id: p.id, fallEpClassId: matched.id }),
+            })
+            if (linkRes.ok) {
+              list = list.map((row) =>
+                row.id === p.id ? { ...row, fallEpClassId: matched.id } : row,
+              )
+            }
+          } catch {
+            /* non-blocking */
+          }
+        }
+      }
+      setPrograms(list)
+      setFieldsEpoch((n) => n + 1)
+      const firstId = list[0]?.id as string | undefined
       if (firstId) {
         setRosterProgramId((prev) => prev || firstId)
         setAttProgramId((prev) => prev || firstId)
@@ -215,6 +243,19 @@ export function StaffProgramsPanel() {
   async function patchProgram(id: string, body: Record<string, unknown>) {
     setBusy(true)
     setStatus('')
+    const prevPrograms = programs
+    const prevSessions = sessions
+    // Optimistic: Fall schedule, cards, and session labels update together before reload.
+    setPrograms((list) =>
+      list.map((p) => (p.id === id ? ({ ...p, ...body } as Program) : p)),
+    )
+    if (typeof body.name === 'string' && body.name.trim()) {
+      const nextName = body.name.trim()
+      setSessions((list) =>
+        list.map((s) => (s.programId === id ? { ...s, programName: nextName } : s)),
+      )
+    }
+    setFieldsEpoch((n) => n + 1)
     try {
       const r = await fetch('/api/staff/programs', {
         method: 'PATCH',
@@ -225,6 +266,9 @@ export function StaffProgramsPanel() {
       if (!r.ok) throw new Error(d.error ?? 'Update failed')
       await load()
     } catch (err) {
+      setPrograms(prevPrograms)
+      setSessions(prevSessions)
+      setFieldsEpoch((n) => n + 1)
       setStatus(err instanceof Error ? err.message : 'Update failed')
     } finally {
       setBusy(false)
@@ -474,7 +518,7 @@ export function StaffProgramsPanel() {
         <h2 className="text-lg font-bold">Programs & sessions</h2>
         <p className="text-xs text-[#5A6070] whitespace-pre-line">
           {canManageAll
-            ? 'Edit every program field below (name, fee, seats, copy, schedule, flyer).\nOpen or close registration.\nManage roster, waitlist, attendance, sessions, and class messages.\nAdd instructors under Access.'
+            ? 'Edit classes in the Programs list below.\nThe Fall schedule and meeting headings above update from the same CMS row.\nBlur a field to save. No separate Save button.\nOpen or close registration, roster, waitlist, attendance, sessions, and class messages.\nAdd instructors under Access.'
             : 'Start here for your class.\nRoster (who is in).\nMessages (parents).\nAttendance (class night).\nThen Timesheets (hours).'}
         </p>
         {canManageAll ? (
@@ -509,8 +553,6 @@ export function StaffProgramsPanel() {
           variant="staff"
           programs={programs}
           canEdit={canManageAll}
-          busy={busy}
-          onPatchProgram={(id, patch) => void patchProgram(id, patch)}
         />
       </div>
       <div className="inline-flex flex-wrap rounded-lg border border-[var(--border)] overflow-hidden text-sm">
@@ -534,7 +576,10 @@ export function StaffProgramsPanel() {
             </p>
           ) : null}
           {programs.map((p) => (
-            <div key={p.id} className="border border-[var(--border)] rounded-lg p-3 space-y-2">
+            <div
+              key={`${p.id}-${fieldsEpoch}`}
+              className="border border-[var(--border)] rounded-lg p-3 space-y-2"
+            >
               <div className="flex flex-wrap justify-between gap-2">
                 <div className="min-w-0 flex-1">
                   {canManageAll ? (
@@ -1347,12 +1392,14 @@ export function StaffProgramsPanel() {
 
       {tab === 'calendar' ? (
         <div className="space-y-2">
-          <p className="text-xs text-[#5A6070]">
-            Meeting nights below are CMS ProgramSessions (optional).
-            Class name, night, time, and first/last dates edit on the Fall 2026 schedule above when a Programs row matches.
+          <p className="text-xs text-[#5A6070] whitespace-pre-line">
+            {`CMS session rows below are optional night-by-night entries.
+Class title and schedule live on the Programs card; the Fall table above mirrors them.`}
           </p>
           {upcomingSessions.length === 0 ? (
-            <p className="text-sm text-[#5A6070]">No CMS session rows yet. Use the Fall 2026 schedule above with instructors.</p>
+            <p className="text-sm text-[#5A6070]">
+              No CMS session rows yet. Edit class details on the Programs tab.
+            </p>
           ) : (
             upcomingSessions.map((s) => (
               <div key={s.id} className="border border-[var(--border)] rounded-lg p-3 text-sm">

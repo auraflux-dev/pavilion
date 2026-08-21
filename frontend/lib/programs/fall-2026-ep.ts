@@ -137,3 +137,17 @@ export function matchFall2026EpClass(programName: string): Fall2026EpClass | und
   const n = programName.toLowerCase()
   return FALL_2026_EP_CLASSES.find((c) => c.cmsNameIncludes.some((part) => n.includes(part)))
 }
+
+export function fallEpClassById(id: string): Fall2026EpClass | undefined {
+  return FALL_2026_EP_CLASSES.find((c) => c.id === id)
+}
+
+/** Prefer stable CMS fallEpClassId; fall back to name keywords. */
+export function findProgramForFallEpClass<T extends { name: string; fallEpClassId?: string }>(
+  klass: Fall2026EpClass,
+  programs: T[],
+): T | undefined {
+  const byId = programs.find((p) => String(p.fallEpClassId ?? '').trim() === klass.id)
+  if (byId) return byId
+  return programs.find((p) => matchFall2026EpClass(p.name)?.id === klass.id)
+}
