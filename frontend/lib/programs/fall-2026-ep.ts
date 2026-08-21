@@ -236,7 +236,12 @@ export function selectCurrentFall2026Programs<
     used.add(p.id)
   }
 
-  return picked.sort((a, b) => a.name.localeCompare(b.name))
+  // Keep source order so typing a name in staff does not jump the focused card.
+  return picked.sort((a, b) => {
+    const ai = programs.findIndex((p) => p.id === a.id)
+    const bi = programs.findIndex((p) => p.id === b.id)
+    return ai - bi
+  })
 }
 
 /** Parse CMS meetingDates; fall back to packet dates. */

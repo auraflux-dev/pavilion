@@ -124,6 +124,8 @@ export function StaffProgramsPanel() {
   const [busy, setBusy] = useState(false)
   const [savingProgramId, setSavingProgramId] = useState<string | null>(null)
   const [showOlderPrograms, setShowOlderPrograms] = useState(false)
+  /** Frozen while editing so filter/sort cannot yank the focused field away. */
+  const [visibleIdOrder, setVisibleIdOrder] = useState<string[]>([])
   const [attProgramId, setAttProgramId] = useState('')
   const [attDate, setAttDate] = useState(todayYmd)
   const [attStudents, setAttStudents] = useState<AttendanceStudent[]>([])
@@ -141,8 +143,10 @@ export function StaffProgramsPanel() {
 
   const visiblePrograms = useMemo(() => {
     if (showOlderPrograms) return programs
-    return selectCurrentFall2026Programs(programs)
-  }, [programs, showOlderPrograms])
+    if (visibleIdOrder.length === 0) return selectCurrentFall2026Programs(programs)
+    const byId = new Map(programs.map((p) => [p.id, p]))
+    return visibleIdOrder.map((id) => byId.get(id)).filter(Boolean) as Program[]
+  }, [programs, showOlderPrograms, visibleIdOrder])
 
   const visibleProgramIds = useMemo(
     () => new Set(visiblePrograms.map((p) => p.id)),
@@ -201,6 +205,7 @@ export function StaffProgramsPanel() {
         }
       }
       setPrograms(list)
+      setVisibleIdOrder(selectCurrentFall2026Programs(list).map((p) => p.id))
       const firstId = list[0]?.id as string | undefined
       if (firstId) {
         setRosterProgramId((prev) => prev || firstId)
@@ -282,7 +287,6 @@ export function StaffProgramsPanel() {
   }
 
   async function saveProgram(id: string, body: Record<string, unknown>) {
-    setStatus('')
     changeProgramLocal(id, body)
     setSavingProgramId(id)
     try {
@@ -361,6 +365,7 @@ export function StaffProgramsPanel() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Could not remove program')
       setPrograms((list) => list.filter((p) => p.id !== id))
+      setVisibleIdOrder((ids) => ids.filter((x) => x !== id))
       setStatus(`Removed “${name}”.`)
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Could not remove program')
@@ -682,10 +687,12 @@ export function StaffProgramsPanel() {
           onAddProgram={() => void createProgram()}
           onRemoveProgram={(id, name) => void deleteProgram(id, name)}
         />
-        {savingProgramId ? (
-          <p className="text-[11px] text-[#5A6070] mt-2">Saving…</p>
-        ) : null}
-        {status ? <p className="text-[11px] text-[#5A6070] mt-1 whitespace-pre-line">{status}</p> : null}
+        <p
+          className="text-[11px] text-[#5A6070] mt-2 min-h-[2.5rem] whitespace-pre-line"
+          aria-live="polite"
+        >
+          {savingProgramId ? 'Saving…' : status || '\u00a0'}
+        </p>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="inline-flex flex-wrap rounded-lg border border-[var(--border)] overflow-hidden text-sm">
@@ -704,7 +711,13 @@ export function StaffProgramsPanel() {
           <input
             type="checkbox"
             checked={showOlderPrograms}
-            onChange={(e) => setShowOlderPrograms(e.target.checked)}
+            onChange={(e) => {
+              const next = e.target.checked
+              setShowOlderPrograms(next)
+              if (!next) {
+                setVisibleIdOrder(selectCurrentFall2026Programs(programs).map((p) => p.id))
+              }
+            }}
           />
           Show older programs
         </label>
