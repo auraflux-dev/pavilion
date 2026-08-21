@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const catalogAccess = await canViewProgramsCatalogNow()
     if (!catalogAccess.allowed) {
       return NextResponse.json(
-        { error: 'Enrichment registration opens Sunday, August 23 at 4:00 PM.' },
+        { error: 'Registration is not open yet. Check back after the announcement.' },
         { status: 403 },
       )
     }
