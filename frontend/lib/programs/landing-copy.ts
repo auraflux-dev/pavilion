@@ -40,7 +40,8 @@ const FALL: Record<string, ProgramLandingCopy> = {
     pitch:
       'MATHCOUNTS and AMC 8.\nPre-algebra helps. No contest experience required.',
     why: [
-      'An after-school contest math night at Stone Hill, not a Mathnasium center membership.',
+      'Contest formats: Sprint, Target, Team, and Countdown.',
+      'Led by RSM Ashburn on campus. Not a center membership.',
     ],
     night:
       'Wednesdays, 5:30 to 6:45 p.m., in the SHMS library.\nTwelve sessions. 75 minutes each night.',
