@@ -112,7 +112,7 @@ export default async function ProgramsPage() {
           </div>
         </section>
 
-        {/* Questions → VP of Programs */}
+        {/* Questions → Co-VP Fundraising & Programs */}
         <section
           id="programs-contact"
           className="scroll-mt-28 border-t border-[var(--border)] bg-white py-14 md:py-20"
@@ -126,8 +126,9 @@ export default async function ProgramsPage() {
               >
                 Questions about a program?
               </h2>
-              <p className="mx-auto max-w-xl text-[#5A6070]">
-                Message the VP of Programs. Co-VPs Fundraising &amp; Programs will follow up.
+              <p className="mx-auto max-w-xl text-[#5A6070] whitespace-pre-line">
+                {`Message Co-VP Fundraising & Programs.
+The president is copied so your note is not sitting in one inbox alone.`}
               </p>
             </div>
             <DepartmentContactForm toEmail={programsEmail} variant="programs" />

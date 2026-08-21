@@ -42,15 +42,16 @@ const COPY: Record<
   programs: {
     department: 'programs',
     topic: 'Programs & Registration',
-    eyebrow: 'VP of Programs',
+    eyebrow: 'Co-VP Fundraising & Programs',
     title: 'Ask about a program',
     intro: 'Questions go to',
     optionalLabel: 'Program name',
-    optionalPlaceholder: 'e.g. Robotics, MATHCOUNTS, Young Entrepreneurs, Essay Writing',
+    optionalPlaceholder:
+      'e.g. Robotics Foundations & Coding Mechanics, Competitive Math Prep, Young Entrepreneurs, Essay Writing',
     messagePlaceholder: 'What would you like to know?',
-    submitLabel: 'Send to VP of Programs',
+    submitLabel: 'Send question',
     successBody:
-      'Thanks. Our VP of Programs will get back to you within one business day during the school year.',
+      'Thanks. Co-VP Fundraising & Programs will follow up within one business day during the school year.',
   },
   events: {
     department: 'events',
