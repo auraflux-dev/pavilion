@@ -148,6 +148,9 @@ export function StaffProgramsPanel() {
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({})
   const [advancedIds, setAdvancedIds] = useState<Record<string, boolean>>({})
+  const [showAddSession, setShowAddSession] = useState(false)
+  const [showClassMessage, setShowClassMessage] = useState(false)
+  const [expandedSessionIds, setExpandedSessionIds] = useState<Record<string, boolean>>({})
   const [attProgramId, setAttProgramId] = useState('')
   const [attDate, setAttDate] = useState(todayYmd)
   const [attStudents, setAttStudents] = useState<AttendanceStudent[]>([])
@@ -734,9 +737,12 @@ export function StaffProgramsPanel() {
   return (
     <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
       <div>
-        <h2 className="text-lg font-bold">Programs & sessions</h2>
+        <h2 className="text-lg font-bold">Programs</h2>
         <p className="text-xs text-[#5A6070] whitespace-pre-line">
-          {`Everything parents see on /programs comes from these CMS fields.\nClick out of a field to save. Fall schedule and cards stay in sync.\nEmpty schedule fields auto-fill once from the Fall packet, then you own the copy.`}
+          {`Programs = public catalog cards.\nCalendar = season schedule table.\nSessions = optional night-by-night CMS rows.\nRoster / Attendance = enrolled families.`}
+        </p>
+        <p className="text-[11px] text-[#5A6070] mt-1 min-h-[1.25rem]" aria-live="polite">
+          {savingProgramId ? 'Saving…' : status || '\u00a0'}
         </p>
         {canManageAll ? (
           <button
@@ -761,26 +767,9 @@ export function StaffProgramsPanel() {
               })()
             }}
           >
-            Ensure schedule fields (day/time/dates/flyer/attendance)
+            Ensure CMS schedule fields
           </button>
         ) : null}
-      </div>
-      <div className="rounded-lg border border-[var(--border)] bg-[var(--brand-warm)] p-4">
-        <Fall2026EpSchedule
-          variant="staff"
-          programs={visiblePrograms}
-          canEdit
-          onProgramChange={changeProgramLocal}
-          onProgramSave={(id, patch) => void saveProgram(id, patch)}
-          onAddProgram={() => void createProgram()}
-          onRemoveProgram={(id, name) => void deleteProgram(id, name)}
-        />
-        <p
-          className="text-[11px] text-[#5A6070] mt-2 min-h-[2.5rem] whitespace-pre-line"
-          aria-live="polite"
-        >
-          {savingProgramId ? 'Saving…' : status || '\u00a0'}
-        </p>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="inline-flex flex-wrap rounded-lg border border-[var(--border)] overflow-hidden text-sm">
@@ -1301,8 +1290,20 @@ Leave blank for normal in-app Square checkout.`}
 
       {tab === 'sessions' ? (
         <div className="space-y-4">
+          <p className="text-xs text-[#5A6070] whitespace-pre-line">
+            {`Optional night-by-night CMS rows (ProgramSessions).\nMost classes only need day/time on the Programs card.\nUse this if you track each meeting date separately.`}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="text-sm"
+            onClick={() => setShowAddSession((v) => !v)}
+          >
+            {showAddSession ? 'Hide add form' : 'Add session'}
+          </Button>
+          {showAddSession ? (
           <div className="rounded-lg border border-[var(--border)] p-3 space-y-2 bg-[#FAFAF8]">
-            <p className="text-xs font-bold text-[#5A6070]">Add session</p>
+            <p className="text-xs font-bold text-[#5A6070]">New session</p>
             <select
               value={sessionForm.programId}
               onChange={(e) => {
@@ -1361,12 +1362,38 @@ Leave blank for normal in-app Square checkout.`}
               className="text-white"
               style={{ backgroundColor: 'var(--brand-green)' }}
             >
-              Add session
+              Save session
             </Button>
           </div>
+          ) : null}
           <div className="space-y-3">
+            {visibleSessions.length === 0 ? (
+              <p className="text-sm text-[#5A6070]">No CMS session rows yet.</p>
+            ) : null}
             {visibleSessions.map((s) => (
               <div key={s.id} className="border border-[var(--border)] rounded-lg p-3 space-y-2 text-sm">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-semibold">{s.title}</p>
+                    <p className="text-xs text-[#5A6070]">
+                      {s.programName}
+                      {s.startAt ? ` · ${new Date(s.startAt).toLocaleString()}` : ''}
+                      {s.active === false ? ' · inactive' : ''}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="text-xs font-semibold"
+                    style={{ color: 'var(--brand-green)' }}
+                    onClick={() =>
+                      setExpandedSessionIds((prev) => ({ ...prev, [s.id]: !prev[s.id] }))
+                    }
+                  >
+                    {expandedSessionIds[s.id] ? 'Hide' : 'Edit'}
+                  </button>
+                </div>
+                {expandedSessionIds[s.id] ? (
+                <>
                 <input
                   defaultValue={s.title}
                   disabled={busy}
@@ -1377,7 +1404,6 @@ Leave blank for normal in-app Square checkout.`}
                     if (next && next !== s.title) void patchSession(s.id, { title: next })
                   }}
                 />
-                <p className="text-xs text-[#5A6070]">{s.programName}</p>
                 <div className="grid sm:grid-cols-2 gap-2">
                   <input
                     type="datetime-local"
@@ -1460,6 +1486,8 @@ Leave blank for normal in-app Square checkout.`}
                     Remove session
                   </button>
                 </div>
+                </>
+                ) : null}
               </div>
             ))}
           </div>
@@ -1468,6 +1496,9 @@ Leave blank for normal in-app Square checkout.`}
 
       {tab === 'roster' ? (
         <div className="space-y-4">
+          <p className="text-xs text-[#5A6070] whitespace-pre-line">
+            {`Who is enrolled or waitlisted.\nEdit actions: promote, transfer, refund, cancel.\nSafety details stay collapsed until you open them.`}
+          </p>
           <select
             value={rosterProgramId}
             onChange={(e) => setRosterProgramId(e.target.value)}
@@ -1665,8 +1696,18 @@ Leave blank for normal in-app Square checkout.`}
             ) : null}
           </div>
 
+          <Button
+            type="button"
+            variant="outline"
+            className="text-sm"
+            disabled={!rosterProgramId}
+            onClick={() => setShowClassMessage((v) => !v)}
+          >
+            {showClassMessage ? 'Hide message form' : 'Message this class'}
+          </Button>
+          {showClassMessage ? (
           <div className="rounded-lg border border-[var(--border)] p-3 space-y-2 bg-[#FAFAF8]">
-            <p className="text-xs font-bold text-[#5A6070]">Message this class</p>
+            <p className="text-xs font-bold text-[#5A6070]">Message enrolled + waitlisted parents</p>
             <input
               value={msgSubject}
               onChange={(e) => setMsgSubject(e.target.value)}
@@ -1689,11 +1730,15 @@ Leave blank for normal in-app Square checkout.`}
               Send to class
             </Button>
           </div>
+          ) : null}
         </div>
       ) : null}
 
       {tab === 'attendance' ? (
         <div className="space-y-4">
+          <p className="text-xs text-[#5A6070] whitespace-pre-line">
+            {`Mark Present / Absent / Late / CheckedOut for one program and date.\nSaves to CMS. Does not change enrollment status.`}
+          </p>
           <div className="grid sm:grid-cols-2 gap-2">
             <select
               value={attProgramId}
@@ -1776,34 +1821,46 @@ Leave blank for normal in-app Square checkout.`}
       ) : null}
 
       {tab === 'calendar' ? (
-        <div className="space-y-2">
+        <div className="space-y-4">
           <p className="text-xs text-[#5A6070] whitespace-pre-line">
-            {`CMS session rows below are optional night-by-night entries.
-Class title and schedule live on the Programs card; the Fall table above mirrors them.`}
+            {`Season schedule table (what instructors share).
+Edit cells here or on the Programs card. Click out to save.`}
           </p>
-          {upcomingSessions.length === 0 ? (
-            <p className="text-sm text-[#5A6070]">
-              No CMS session rows yet. Edit class details on the Programs tab.
-            </p>
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--brand-warm)] p-4">
+            <Fall2026EpSchedule
+              variant="staff"
+              programs={visiblePrograms}
+              canEdit
+              onProgramChange={changeProgramLocal}
+              onProgramSave={(id, patch) => void saveProgram(id, patch)}
+              onAddProgram={() => void createProgram()}
+              onRemoveProgram={(id, name) => void deleteProgram(id, name)}
+            />
+          </div>
+          {upcomingSessions.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-[#5A6070]">Upcoming CMS session rows</p>
+              {upcomingSessions.map((s) => (
+                <div key={s.id} className="border border-[var(--border)] rounded-lg p-3 text-sm">
+                  <p className="font-semibold">
+                    {s.title} · {s.programName}
+                  </p>
+                  <p className="text-xs text-[#5A6070]">
+                    {s.startAt ? new Date(s.startAt).toLocaleString() : 'TBD'}
+                    {s.endAt ? ` to ${new Date(s.endAt).toLocaleTimeString()}` : ''}
+                    {s.location ? ` · ${s.location}` : ''}
+                    {s.instructorName ? ` · ${s.instructorName}` : ''}
+                  </p>
+                </div>
+              ))}
+            </div>
           ) : (
-            upcomingSessions.map((s) => (
-              <div key={s.id} className="border border-[var(--border)] rounded-lg p-3 text-sm">
-                <p className="font-semibold">
-                  {s.title} · {s.programName}
-                </p>
-                <p className="text-xs text-[#5A6070]">
-                  {s.startAt ? new Date(s.startAt).toLocaleString() : 'TBD'}
-                  {s.endAt ? ` to ${new Date(s.endAt).toLocaleTimeString()}` : ''}
-                  {s.location ? ` · ${s.location}` : ''}
-                  {s.instructorName ? ` · ${s.instructorName}` : ''}
-                </p>
-              </div>
-            ))
+            <p className="text-xs text-[#5A6070]">
+              No optional CMS session rows. That is fine if the schedule table above is enough.
+            </p>
           )}
         </div>
       ) : null}
-
-      {status ? <p className="text-xs text-[#5A6070]">{status}</p> : null}
     </section>
   )
 }
