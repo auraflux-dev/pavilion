@@ -128,12 +128,10 @@ export function StudentCard({
   const [open, setOpen] = useState(defaultOpen)
   const [history, setHistory] = useState<{
     enrollments: Enrollment[]
-    pastEnrollments?: Enrollment[]
     payments: Payment[]
   } | null>(null)
   const [attendance, setAttendance] = useState<AttendanceMark[]>([])
   const [loading, setLoading] = useState(false)
-  const [showPast, setShowPast] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
 
   useEffect(() => {
@@ -146,9 +144,6 @@ export function StudentCard({
         .then(([hist, att]) => {
           setHistory({
             enrollments: Array.isArray(hist?.enrollments) ? hist.enrollments : [],
-            pastEnrollments: Array.isArray(hist?.pastEnrollments)
-              ? hist.pastEnrollments
-              : [],
             payments: Array.isArray(hist?.payments) ? hist.payments : [],
           })
           const marks = (att.attendance ?? []) as AttendanceMark[]
@@ -202,16 +197,33 @@ export function StudentCard({
       {/* Expanded: edit, enrollments, attendance. Store owns Cove balance + Load. */}
       {open && (
         <div className="border-t border-[#F0EDE8] px-5 py-5 space-y-6">
-          {onUpdated ? (
-            <EditStudentForm
-              student={student}
-              grades={grades}
-              onUpdated={onUpdated}
-              open={editOpen}
-              onOpenChange={setEditOpen}
-              hideTrigger
-            />
-          ) : null}
+          <div className="space-y-2">
+            {onUpdated ? (
+              <EditStudentForm
+                student={student}
+                grades={grades}
+                onUpdated={onUpdated}
+                open={editOpen}
+                onOpenChange={setEditOpen}
+                hideTrigger
+              />
+            ) : null}
+            {(() => {
+              const safety = safetySummary(student)
+              return (
+                <p className="text-xs text-[#5A6070]">
+                  {safety.complete ? (
+                    <span className="font-semibold text-[var(--brand-green)]">Safety profile complete</span>
+                  ) : (
+                    <span className="font-semibold text-amber-800">
+                      Safety profile incomplete. Use Edit student.
+                    </span>
+                  )}
+                  {safety.allergyLine ? ` · Allergy: ${safety.allergyLine}` : ' · No allergies listed'}
+                </p>
+              )
+            })()}
+          </div>
           {loading && (
             <div className="flex items-center justify-center py-6">
               <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'var(--brand-green)' }} />
@@ -220,20 +232,6 @@ export function StudentCard({
 
           {!loading && history && (
             <>
-              {(() => {
-                const safety = safetySummary(student)
-                return (
-                  <p className="text-xs text-[#5A6070] -mt-2">
-                    {safety.complete ? (
-                      <span className="font-semibold text-[var(--brand-green)]">Safety profile complete</span>
-                    ) : (
-                      <span className="font-semibold text-amber-800">Safety profile incomplete. Edit student details above</span>
-                    )}
-                    {safety.allergyLine ? ` · Allergy: ${safety.allergyLine}` : ' · No allergies listed'}
-                  </p>
-                )
-              })()}
-
               {/* Enrollments */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -296,39 +294,6 @@ export function StudentCard({
                     })}
                   </div>
                 )}
-                {(history.pastEnrollments?.length ?? 0) > 0 ? (
-                  <div className="mt-3">
-                    <button
-                      type="button"
-                      className="text-xs font-semibold text-[#5A6070] underline-offset-2 hover:underline"
-                      onClick={() => setShowPast((v) => !v)}
-                    >
-                      {showPast ? 'Hide' : 'Show'} prior years / imported history (
-                      {history.pastEnrollments!.length})
-                    </button>
-                    {showPast ? (
-                      <div className="mt-2 space-y-2 rounded-lg border border-[var(--border)] bg-[#FAFAF8] px-3 py-2">
-                        <p className="text-[11px] text-[#5A6070]">
-                          Past Jumbula / prior-season records. not current programs.
-                        </p>
-                        {history.pastEnrollments!.map((e) => (
-                          <div
-                            key={e.id}
-                            className="flex items-start justify-between gap-3 py-2 border-b border-[#F0EDE8] last:border-0"
-                          >
-                            <div className="min-w-0">
-                              <p className="text-sm text-[#1A1A1A] truncate">{e.programName}</p>
-                              <p className="text-xs text-[#5A6070]">{formatDate(e.registrationDate)}</p>
-                            </div>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusClass(e.status)}`}>
-                              {e.status}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
 
               </div>
 
