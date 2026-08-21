@@ -87,16 +87,20 @@ export default async function ProgramsPage() {
 
             {!error && programs.length > 0 && (
               <>
-                <p className="mb-8 text-center text-sm text-[#5A6070] whitespace-pre-line">
-                  <a
-                    href="/programs/fall-2026"
-                    className="font-semibold underline"
-                    style={{ color: 'var(--brand-green)' }}
-                  >
-                    Fall 2026 schedule
-                  </a>
-                  {`\nTuesdays and Wednesdays in the library.\n12 sessions each. Share with instructors.`}
-                </p>
+                {(page.sectionTitle || page.sectionBody) && (
+                  <p className="mb-8 text-center text-sm text-[#5A6070] whitespace-pre-line">
+                    {page.sectionTitle ? (
+                      <a
+                        href="/programs/fall-2026"
+                        className="font-semibold underline"
+                        style={{ color: 'var(--brand-green)' }}
+                      >
+                        {page.sectionTitle}
+                      </a>
+                    ) : null}
+                    {page.sectionBody ? `\n${page.sectionBody}` : ''}
+                  </p>
+                )}
                 <ProgramsFilter programs={programs} />
               </>
             )}
