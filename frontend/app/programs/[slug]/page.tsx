@@ -4,6 +4,7 @@ import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { ProgramLanding } from '@/components/programs/program-landing'
+import { ProgramsPreviewBanner } from '@/components/programs/programs-preview-banner'
 import { getAllPrograms } from '@/lib/api/programs'
 import { displayProgramName } from '@/lib/programs/display-name'
 import { FALL_2026_EP_CLASSES } from '@/lib/programs/fall-2026-ep'
@@ -45,12 +46,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function ProgramLandingPage({ params }: Props) {
+export default async function ProgramLandingPage({
+  params,
+  searchParams,
+}: Props & { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
   const { slug } = await params
+  const sp = searchParams ? await searchParams : {}
+  const previewToken = typeof sp.programsPreview === 'string' ? sp.programsPreview : null
+  const { canViewProgramsCatalogNow } = await import('@/lib/programs/public-access')
+  const access = await canViewProgramsCatalogNow({ previewToken })
   const settings = await getSiteSettings()
   const inSession = settings.getBool('schoolInSession', false)
-  const { isPublicProgramsCatalogOpen } = await import('@/lib/programs/season')
-  if (!inSession || !isPublicProgramsCatalogOpen()) notFound()
+  if (!inSession || !access.allowed) notFound()
 
   const programs = await getAllPrograms().catch(() => [])
   const program = findProgramBySlug(programs, slug)
@@ -60,6 +67,7 @@ export default async function ProgramLandingPage({ params }: Props) {
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
+      {access.previewMode ? <ProgramsPreviewBanner /> : null}
       <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
         <ProgramLanding program={program} />
       </main>

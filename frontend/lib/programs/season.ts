@@ -19,15 +19,16 @@ export const FULL_YEAR_CATALOG_ENABLED = false
 
 /**
  * Public enrichment unlock (America/New_York).
- * Hidden from visitors until Sunday 2026-08-23 at 4:00 PM Eastern
- * (after the school newsletter goes out Sunday evening).
- * Staff CMS and APIs stay available. Flip date or remove gate when no longer needed.
+ * Visitors stay dark until Sunday 2026-08-23 at 4:00 PM Eastern
+ * (school newsletter goes out Sunday evening).
+ * Staff + preview-secret bypass: see `canViewProgramsCatalogNow`.
  */
 export const PROGRAMS_PUBLIC_OPENS_AT_MS = Date.parse('2026-08-23T16:00:00-04:00')
 
-/** True when parents may see /programs catalog, landings, home preview, and nav link. */
+export const PROGRAMS_PREVIEW_COOKIE = 'shms_programs_preview'
+
+/** Calendar / demo gate only. Does not include staff bypass. */
 export function isPublicProgramsCatalogOpen(now: Date = new Date()): boolean {
-  // Keep demo / Commons catalog visible for product tours.
   if (process.env.COMMONS_PLATFORM === 'true') return true
   if (process.env.DEMO_INSTANCE === 'true' || process.env.NEXT_PUBLIC_DEMO_INSTANCE === 'true') return true
   return now.getTime() >= PROGRAMS_PUBLIC_OPENS_AT_MS
@@ -115,9 +116,8 @@ export function isSeasonPubliclyListed(season: CatalogSeasonId): boolean {
   return true
 }
 
-/** Public /programs catalog: date gate + season gates + no full-year until enabled. */
+/** Season gates only (no date gate). Date/staff visibility is page-level. */
 export function filterProgramsForPublicCatalog<T extends SeasonAwareProgram>(programs: T[]): T[] {
-  if (!isPublicProgramsCatalogOpen()) return []
   return programs.filter((p) => isSeasonPubliclyListed(resolveProgramSeason(p)))
 }
 

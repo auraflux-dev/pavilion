@@ -13,11 +13,13 @@ import { HomeSectionNav } from '@/components/jump-nav/public-section-navs'
 import { isSchoolInSession } from '@/lib/api/visitor-season'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { DEMO_BRAND } from '@/lib/demo/brand'
-import { isPublicProgramsCatalogOpen } from '@/lib/programs/season'
+import { canViewProgramsCatalogNow } from '@/lib/programs/public-access'
 
 export default async function HomePage() {
   const inSession = await isSchoolInSession()
-  const programsPublic = inSession && isPublicProgramsCatalogOpen()
+  const programsAccess = await canViewProgramsCatalogNow()
+  // Home preview is parent-facing only. Staff dry-runs use /programs directly.
+  const programsPublic = inSession && programsAccess.allowed && !programsAccess.previewMode
   const demo = isDemoInstance()
   const commons = process.env.COMMONS_PLATFORM === 'true'
 

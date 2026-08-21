@@ -37,8 +37,9 @@ export async function POST(req: NextRequest) {
       ...session.emails,
     ]
 
-    const { isPublicProgramsCatalogOpen } = await import('@/lib/programs/season')
-    if (!isPublicProgramsCatalogOpen()) {
+    const { canViewProgramsCatalogNow } = await import('@/lib/programs/public-access')
+    const catalogAccess = await canViewProgramsCatalogNow()
+    if (!catalogAccess.allowed) {
       return NextResponse.json(
         { error: 'Enrichment registration opens Sunday, August 23 at 4:00 PM.' },
         { status: 403 },

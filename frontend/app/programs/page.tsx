@@ -14,13 +14,22 @@ import {
 } from '@/lib/staff/inbox'
 import { ProgramsSectionNav } from '@/components/jump-nav/public-section-navs'
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
-import { isPublicProgramsCatalogOpen } from '@/lib/programs/season'
+import { canViewProgramsCatalogNow } from '@/lib/programs/public-access'
+import { ProgramsPreviewBanner } from '@/components/programs/programs-preview-banner'
 
 export const revalidate = 300 // revalidate every 5 minutes
 
-export default async function ProgramsPage() {
+export default async function ProgramsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}) {
   let programs: Program[] = []
   let error = false
+
+  const sp = searchParams ? await searchParams : {}
+  const previewToken = typeof sp.programsPreview === 'string' ? sp.programsPreview : null
+  const access = await canViewProgramsCatalogNow({ previewToken })
 
   const [settings, page] = await Promise.all([getSiteSettings(), getPageContent('programs')])
   const programsEmail =
@@ -28,7 +37,7 @@ export default async function ProgramsPage() {
       settings.get('contactEmailPrograms', DEFAULT_PROGRAMS_INBOXES),
     ).join(', ') || DEFAULT_PROGRAMS_INBOXES
   const inSession = settings.getBool('schoolInSession', false)
-  const catalogOpen = inSession && isPublicProgramsCatalogOpen()
+  const catalogOpen = inSession && access.allowed
 
   try {
     programs = catalogOpen ? await getAllPrograms() : []
@@ -40,6 +49,7 @@ export default async function ProgramsPage() {
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
+      {access.previewMode ? <ProgramsPreviewBanner /> : null}
 
       <main id="main-content">
         <PageHero

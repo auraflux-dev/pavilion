@@ -11,7 +11,7 @@ import { demoStorePath, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { DEMO_BRAND } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { fetchWithRetry } from '@/lib/fetch-with-retry'
-import { isPublicProgramsCatalogOpen } from '@/lib/programs/season'
+import { canViewProgramsCatalogNow } from '@/lib/programs/public-access'
 
 export interface NavLink {
  id: string
@@ -152,8 +152,10 @@ export async function getNavLinks(): Promise<NavLink[]> {
  return links.map((l) => ({ ...l, label: vanillaizeIfDemo(l.label) }))
 }
 
-function hideProgramsNavWhileDark(links: NavLink[]): NavLink[] {
-  if (isPublicProgramsCatalogOpen()) return links
+async function hideProgramsNavWhileDark(links: NavLink[]): Promise<NavLink[]> {
+  const access = await canViewProgramsCatalogNow()
+  // Parents: hide until unlock. Staff/preview: keep Programs in nav for dry runs.
+  if (access.allowed) return links
   return links.filter((l) => {
     const href = String(l.href ?? '').split('?')[0].replace(/\/$/, '') || '/'
     return href !== '/programs' && !href.startsWith('/programs/')

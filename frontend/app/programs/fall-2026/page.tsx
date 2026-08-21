@@ -3,9 +3,9 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { notFound } from 'next/navigation'
 import { Fall2026EpSchedule } from '@/components/programs/fall-2026-ep-schedule'
+import { ProgramsPreviewBanner } from '@/components/programs/programs-preview-banner'
 import { getAllPrograms } from '@/lib/api/programs'
 import { selectCurrentFall2026Programs } from '@/lib/programs/fall-2026-ep'
-import { isPublicProgramsCatalogOpen } from '@/lib/programs/season'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -16,8 +16,16 @@ export const metadata: Metadata = {
 
 export const revalidate = 300
 
-export default async function Fall2026EpSchedulePage() {
-  if (!isPublicProgramsCatalogOpen()) notFound()
+export default async function Fall2026EpSchedulePage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const sp = searchParams ? await searchParams : {}
+  const previewToken = typeof sp.programsPreview === 'string' ? sp.programsPreview : null
+  const { canViewProgramsCatalogNow } = await import('@/lib/programs/public-access')
+  const access = await canViewProgramsCatalogNow({ previewToken })
+  if (!access.allowed) notFound()
   const all = await getAllPrograms().catch(() => [])
   const current = selectCurrentFall2026Programs(
     all.map((p) => ({
@@ -42,6 +50,7 @@ export default async function Fall2026EpSchedulePage() {
       <div className="print:hidden">
         <AnnouncementBar />
         <Navbar />
+        {access.previewMode ? <ProgramsPreviewBanner /> : null}
       </div>
       <main id="main-content" className="flex-1 bg-[var(--brand-warm)] py-10 md:py-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
