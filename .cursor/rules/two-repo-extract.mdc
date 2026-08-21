@@ -1,0 +1,14 @@
+---
+description: Two-repo world: SHMS vs Pavilion deploy targets
+alwaysApply: true
+---
+
+# Two repos
+
+- **SHMS school:** `auraflux-dev/shmspto` → Vercel `frontend` → www.shmspto.org  
+  Do school work and ships in that repo (or ask to clone it). Forbids Commons/Pavilion env.
+- **Pavilion platform:** `auraflux-dev/wix-shmspto` (this workspace) → `commons-site`, `commons-pto-demo`, `commons-pto`  
+
+Build Pavilion as if SHMS never existed. After an SHMS ship, **ask** before also deploying Pavilion when it helps.
+
+Never mix env across the wall. See `EXTRACT.md`, `mem:hskrg-org`, `mem:hskrg-tools-inventory`.
