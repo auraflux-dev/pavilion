@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { GripVertical } from 'lucide-react'
+import { ChevronDown, ChevronRight, GripVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
 import {
@@ -146,6 +146,8 @@ export function StaffProgramsPanel() {
   const [dragId, setDragId] = useState<string | null>(null)
   /** Insertion index while dragging: 0 = first, length = last. */
   const [dropIndex, setDropIndex] = useState<number | null>(null)
+  const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({})
+  const [advancedIds, setAdvancedIds] = useState<Record<string, boolean>>({})
   const [attProgramId, setAttProgramId] = useState('')
   const [attDate, setAttDate] = useState(todayYmd)
   const [attStudents, setAttStudents] = useState<AttendanceStudent[]>([])
@@ -922,20 +924,6 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                         }`
                       : 'unlimited'}
                   </p>
-                  <p className="text-[11px] text-[#5A6070] mt-0.5 font-mono">
-                    ID{' '}
-                    <button
-                      type="button"
-                      className="underline"
-                      style={{ color: 'var(--brand-green)' }}
-                      onClick={() => {
-                        void navigator.clipboard.writeText(p.id)
-                        setStatus(`Copied program ID for ${p.name}`)
-                      }}
-                    >
-                      {p.id}
-                    </button>
-                  </p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs">
@@ -1005,6 +993,31 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                   </button>
                 </div>
               </div>
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-2">
+                <p className="text-xs text-[#5A6070]">
+                  {[p.dayOfWeek, p.classTime, p.fee > 0 ? `$${p.fee}` : null, CATALOG_SEASON_LABELS[resolveProgramSeason(p)]]
+                    .filter(Boolean)
+                    .join(' · ') || 'No schedule yet'}
+                </p>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs font-semibold"
+                  style={{ color: 'var(--brand-green)' }}
+                  aria-expanded={Boolean(expandedIds[p.id])}
+                  onClick={() =>
+                    setExpandedIds((prev) => ({ ...prev, [p.id]: !prev[p.id] }))
+                  }
+                >
+                  {expandedIds[p.id] ? (
+                    <ChevronDown className="h-3.5 w-3.5" aria-hidden />
+                  ) : (
+                    <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                  )}
+                  {expandedIds[p.id] ? 'Hide details' : 'Edit details'}
+                </button>
+              </div>
+              {expandedIds[p.id] ? (
+              <>
               <div className="grid sm:grid-cols-2 gap-2 pt-1 border-t border-[var(--border)]">
                 <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
                   <span>Description</span>
@@ -1061,16 +1074,6 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                     onBlur={(e) => void saveProgram(p.id, { category: e.target.value })}
                   />
                 </label>
-                <label className="text-[11px] text-[#5A6070] space-y-0.5">
-                  <span>Payment type</span>
-                  <input
-                    value={p.paymentType}
-                    placeholder="e.g. Square"
-                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                    onChange={(e) => changeProgramLocal(p.id, { paymentType: e.target.value })}
-                    onBlur={(e) => void saveProgram(p.id, { paymentType: e.target.value })}
-                  />
-                </label>
                 <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
                   <span>Catalog season</span>
                   <select
@@ -1089,80 +1092,6 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                       </option>
                     ))}
                   </select>
-                  <span className="block text-[10px] text-[#5A6070] mt-0.5">
-                    Public catalog: Fall / Spring only. Spring and Full year stay hidden until turned on in code.
-                    Showing as {CATALOG_SEASON_LABELS[resolveProgramSeason(p)]}.
-                  </span>
-                </label>
-                <label className="text-[11px] text-[#5A6070] space-y-0.5">
-                  <span>Sort order (drag preferred)</span>
-                  <input
-                    type="number"
-                    value={p.sortOrder}
-                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                    onChange={(e) =>
-                      changeProgramLocal(p.id, { sortOrder: Number(e.target.value) || 0 })
-                    }
-                    onBlur={(e) => {
-                      const sortOrder = Number(e.target.value) || 0
-                      void saveProgram(p.id, { sortOrder }).then(() => {
-                        setVisibleIdOrder(
-                          sortProgramsByDisplayOrder(
-                            showOlderPrograms
-                              ? programs.map((row) =>
-                                  row.id === p.id ? { ...row, sortOrder } : row,
-                                )
-                              : selectCurrentFall2026Programs(
-                                  programs.map((row) =>
-                                    row.id === p.id ? { ...row, sortOrder } : row,
-                                  ),
-                                ),
-                          ).map((row) => row.id),
-                        )
-                      })
-                    }}
-                  />
-                  <span className="block text-[10px] mt-0.5">
-                    Public page shows lower numbers first. Drag uses 1 to{' '}
-                    {visiblePrograms.length}.
-                  </span>
-                </label>
-                <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
-                  <span>Cheddar Up / external checkout URL</span>
-                  <input
-                    value={p.cheddarupUrl}
-                    placeholder="https://…"
-                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                    onChange={(e) => changeProgramLocal(p.id, { cheddarupUrl: e.target.value })}
-                    onBlur={(e) => void saveProgram(p.id, { cheddarupUrl: e.target.value })}
-                  />
-                </label>
-                <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
-                  <span>Tags (comma-separated)</span>
-                  <input
-                    value={p.tags}
-                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                    onChange={(e) => changeProgramLocal(p.id, { tags: e.target.value })}
-                    onBlur={(e) => void saveProgram(p.id, { tags: e.target.value })}
-                  />
-                </label>
-                <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
-                  <span>Detail (extra copy)</span>
-                  <textarea
-                    value={p.detail}
-                    rows={2}
-                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                    onChange={(e) => changeProgramLocal(p.id, { detail: e.target.value })}
-                    onBlur={(e) => void saveProgram(p.id, { detail: e.target.value })}
-                  />
-                </label>
-                <label className="inline-flex items-center gap-1 text-xs sm:col-span-2">
-                  <input
-                    type="checkbox"
-                    checked={p.requiresWaiver}
-                    onChange={(e) => void saveProgram(p.id, { requiresWaiver: e.target.checked })}
-                  />
-                  Requires waiver (CMS flag). Checkout still always asks enrichment waiver, medical, and photo.
                 </label>
               </div>
               <div className="grid sm:grid-cols-2 gap-2 pt-1">
@@ -1240,15 +1169,112 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                   onBlur={(e) => void saveProgram(p.id, { memberDiscountNote: e.target.value })}
                 />
               </div>
-              <p className="text-[11px] text-[#5A6070]">
-                Parents see day, time, weeks, and date range on the program card before they register.
-              </p>
               <StaffFlyerUpload
                 label="Program flyer"
                 currentUrl={p.image}
                 disabled={false}
                 onUploaded={(url) => void saveProgram(p.id, { image: url })}
               />
+              <div className="border-t border-[var(--border)] pt-2">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#5A6070]"
+                  aria-expanded={Boolean(advancedIds[p.id])}
+                  onClick={() =>
+                    setAdvancedIds((prev) => ({ ...prev, [p.id]: !prev[p.id] }))
+                  }
+                >
+                  {advancedIds[p.id] ? (
+                    <ChevronDown className="h-3.5 w-3.5" aria-hidden />
+                  ) : (
+                    <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                  )}
+                  Advanced / legacy
+                </button>
+                {advancedIds[p.id] ? (
+                  <div className="mt-2 grid sm:grid-cols-2 gap-2">
+                    <p className="text-[10px] text-[#5A6070] sm:col-span-2 whitespace-pre-line">
+                      {`Cheddar Up is legacy (installments / peer fundraising).
+Leave blank for normal in-app Square checkout.`}
+                    </p>
+                    <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
+                      <span>Cheddar Up / external checkout URL</span>
+                      <input
+                        value={p.cheddarupUrl}
+                        placeholder="Leave blank unless using Cheddar Up"
+                        className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                        onChange={(e) => changeProgramLocal(p.id, { cheddarupUrl: e.target.value })}
+                        onBlur={(e) => void saveProgram(p.id, { cheddarupUrl: e.target.value })}
+                      />
+                    </label>
+                    <label className="text-[11px] text-[#5A6070] space-y-0.5">
+                      <span>Payment type</span>
+                      <input
+                        value={p.paymentType}
+                        placeholder="wix / cheddarup_installment / cheddarup_p2p"
+                        className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                        onChange={(e) => changeProgramLocal(p.id, { paymentType: e.target.value })}
+                        onBlur={(e) => void saveProgram(p.id, { paymentType: e.target.value })}
+                      />
+                    </label>
+                    <label className="text-[11px] text-[#5A6070] space-y-0.5">
+                      <span>Sort order number</span>
+                      <input
+                        type="number"
+                        value={p.sortOrder}
+                        className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                        onChange={(e) =>
+                          changeProgramLocal(p.id, { sortOrder: Number(e.target.value) || 0 })
+                        }
+                        onBlur={(e) => void saveProgram(p.id, { sortOrder: Number(e.target.value) || 0 })}
+                      />
+                    </label>
+                    <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
+                      <span>Tags (comma-separated)</span>
+                      <input
+                        value={p.tags}
+                        className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                        onChange={(e) => changeProgramLocal(p.id, { tags: e.target.value })}
+                        onBlur={(e) => void saveProgram(p.id, { tags: e.target.value })}
+                      />
+                    </label>
+                    <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
+                      <span>Detail (extra copy)</span>
+                      <textarea
+                        value={p.detail}
+                        rows={2}
+                        className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                        onChange={(e) => changeProgramLocal(p.id, { detail: e.target.value })}
+                        onBlur={(e) => void saveProgram(p.id, { detail: e.target.value })}
+                      />
+                    </label>
+                    <label className="inline-flex items-center gap-1 text-xs sm:col-span-2">
+                      <input
+                        type="checkbox"
+                        checked={p.requiresWaiver}
+                        onChange={(e) => void saveProgram(p.id, { requiresWaiver: e.target.checked })}
+                      />
+                      Requires waiver CMS flag (checkout still always asks waiver, medical, photo)
+                    </label>
+                    <p className="text-[11px] text-[#5A6070] font-mono sm:col-span-2">
+                      ID{' '}
+                      <button
+                        type="button"
+                        className="underline"
+                        style={{ color: 'var(--brand-green)' }}
+                        onClick={() => {
+                          void navigator.clipboard.writeText(p.id)
+                          setStatus(`Copied program ID for ${p.name}`)
+                        }}
+                      >
+                        {p.id}
+                      </button>
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+              </>
+              ) : null}
             </div>
           ))}
           {dragId && visiblePrograms.length > 0 ? (
