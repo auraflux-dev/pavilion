@@ -83,7 +83,7 @@ function programCopy(html: string): { lead: string; bullets: string[] } {
     }
   }
   return {
-    lead: lead.join(' '),
+    lead: lead.join('\n'),
     bullets: bullets.filter((item) => !SCHEDULE_NOISE.test(item)),
   }
 }
@@ -201,7 +201,9 @@ export function ProgramCard({ program }: ProgramCardProps) {
         </h3>
 
         {lead ? (
-          <p className={`text-sm text-[#5A6070] leading-relaxed ${bullets.length ? 'mb-2' : 'mb-5'}`}>
+          <p
+            className={`text-sm text-[#5A6070] leading-relaxed whitespace-pre-line ${bullets.length ? 'mb-2' : 'mb-5'}`}
+          >
             {lead}
           </p>
         ) : null}
