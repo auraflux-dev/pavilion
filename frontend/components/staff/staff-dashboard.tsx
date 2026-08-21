@@ -53,6 +53,11 @@ import { StaffCustomDomainPanel } from '@/components/staff/staff-custom-domain-p
 import { filterCommonsDemoWorkspaces, filterHiddenStaffWorkspaces } from '@/lib/demo/commons-surface'
 import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
+import {
+  STAFF_WORKSPACE_BLURB,
+  STAFF_WORKSPACE_GROUPS,
+  groupStaffNavItems,
+} from '@/lib/staff/workspace-groups'
 import { trackLogin } from '@/lib/ga'
 
 type StaffHome = {
@@ -246,7 +251,18 @@ export function StaffDashboard() {
     items.push({ id: 'help', label: STAFF_WORKSPACE_LABEL.help })
     const demoFiltered = filterCommonsDemoWorkspaces(items.map((i) => i.id))
     const allowed = new Set(filterHiddenStaffWorkspaces(demoFiltered, hiddenStaffWorkspaces))
-    return items.filter((i) => allowed.has(i.id))
+    const filtered = items.filter((i) => allowed.has(i.id))
+    const order = new Map<StaffWorkspace, number>()
+    let rank = 0
+    order.set('home', rank++)
+    for (const group of STAFF_WORKSPACE_GROUPS) {
+      for (const id of group.workspaces) {
+        if (!order.has(id)) order.set(id, rank++)
+      }
+    }
+    return filtered.sort(
+      (a, b) => (order.get(a.id) ?? 999) - (order.get(b.id) ?? 999),
+    )
   }, [
     me,
     hiddenStaffWorkspaces,
@@ -428,8 +444,8 @@ export function StaffDashboard() {
               <h1 className="text-2xl font-bold text-[#1A1A1A]">Home</h1>
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
                 {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
-                  ? `Private trial staff for your school.\nOpen a workspace from the top nav.\nStart with Membership, Events, or Site.`
-                  : `Roles: ${me.roles.join(', ')}.\nStaff login: ${me.email}.\nOpen a workspace from the top nav.\nOnly what you need for that job.`}
+                  ? `Private trial staff for your school.\nPick an area below, or use the top nav.\nStart with Membership, Events, or Site.`
+                  : `Roles: ${me.roles.join(', ')}.\nStaff login: ${me.email}.\nPick an area below, or use the top nav.\nOnly what you need for that job.`}
               </p>
               {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
                 <div className="mt-3">
@@ -482,58 +498,32 @@ export function StaffDashboard() {
                 </ul>
               </div>
             ) : null}
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {navItems
-                .filter((i) => i.id !== 'home')
-                .map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => go(item.id)}
-                    className="text-left rounded-xl border border-[var(--border)] bg-white p-4 hover:border-[var(--brand-green)] transition-colors"
-                  >
-                    <p className="text-sm font-bold text-[#1A1A1A]">{vanillaizeIfDemo(item.label)}</p>
-                    <p className="text-xs text-[#5A6070] mt-1">
-                      {vanillaizeIfDemo((
-                        {
-                          inbox: 'Workspace mail + reply',
-                          calendar: 'Google Calendar',
-                          docs: 'Drive Docs to read/edit',
-                          projects: 'Year board, tasks & calendar',
-                          members: 'Lookup, act-as, archive',
-                          access: 'Instructors and @shmspto.org roles',
-                          social: 'Facebook from Staff',
-                          surveys: 'Create, share, review, CSV',
-                          messages: 'Parent portal inbox',
-                          minutes: 'Publish meeting minutes',
-                          programs: 'Your class: roster, attendance, nights',
-                          timesheets: 'Submit or approve teaching hours',
-                          payments: 'Needs Reconciliation',
-                          budget: 'BoA CSV · Staff sales · Excel',
-                          events: 'Create, edit, cancel events',
-                          retail: 'The Cove product lists',
-                          discounts: 'Named & member discount codes',
-                          membership: 'Roster, email, WhatsApp groups',
-                          tiers: 'Tier map & Catalog product IDs',
-                          content: 'Page heroes & Cove / marketing copy',
-                          site: 'Announcement, contact, goals…',
-                          board: 'Public /board roster',
-                          nav: 'Top nav & footer links',
-                          faq: 'Membership & volunteer FAQs',
-                          volunteers: 'Volunteer opportunity cards',
-                          fundraising: 'CTAs & fundraising goals',
-                          wellness: 'Wish list & appreciation',
-                          comms: 'Month grid · communications & content',
-                          canva: 'Marketing folder · optional API',
-                          newsletter: 'Member email & WhatsApp',
-                          expenses: 'Submit & track reimbursements',
-                          help: 'Staff knowledge base',
-                        } as Partial<Record<StaffWorkspace, string>>
-                      )[item.id] ?? 'Open workspace',
-                    )}
-                    </p>
-                  </button>
-                ))}
+            <div className="space-y-6">
+              {groupStaffNavItems(navItems).map(({ group, items }) => (
+                <div key={group.id} className="space-y-2">
+                  <div>
+                    <h2 className="text-sm font-bold text-[#1A1A1A]">{group.label}</h2>
+                    <p className="text-xs text-[#5A6070] mt-0.5 whitespace-pre-line">{group.blurb}</p>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {items.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => go(item.id)}
+                        className="text-left rounded-xl border border-[var(--border)] bg-white px-3.5 py-3 hover:border-[var(--brand-green)] transition-colors"
+                      >
+                        <p className="text-sm font-bold text-[#1A1A1A]">
+                          {vanillaizeIfDemo(item.label)}
+                        </p>
+                        <p className="text-xs text-[#5A6070] mt-0.5">
+                          {vanillaizeIfDemo(STAFF_WORKSPACE_BLURB[item.id] ?? 'Open workspace')}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {me.homes.map((home) => (

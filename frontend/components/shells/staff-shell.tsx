@@ -7,6 +7,7 @@ import { ChevronDown, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SocialFooterLinks } from '@/components/social-footer-links'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
+import { groupStaffNavItems } from '@/lib/staff/workspace-groups'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
 import { publicBrandFace } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
@@ -134,23 +135,32 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                 {moreOpen ? (
                   <div
                     role="menu"
-                    className="absolute right-0 top-full mt-1 min-w-[11rem] rounded-lg border border-[var(--border)] bg-white py-1 shadow-lg text-[#1A1A1A]"
+                    className="absolute right-0 top-full mt-1 min-w-[14rem] max-h-[70vh] overflow-y-auto rounded-lg border border-[var(--border)] bg-white py-1 shadow-lg text-[#1A1A1A]"
                   >
-                    {overflow.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        role="menuitem"
-                        onClick={() => {
-                          onNavigate(item.id)
-                          setMoreOpen(false)
-                        }}
-                        className={`block w-full text-left px-3 py-2 text-xs font-semibold hover:bg-[var(--brand-soft)] ${
-                          active === item.id ? 'bg-[var(--brand-soft)] text-[var(--brand-green)]' : ''
-                        }`}
-                      >
-                        {item.label}
-                      </button>
+                    {groupStaffNavItems(overflow).map(({ group, items: groupItems }) => (
+                      <div key={group.id} className="py-1">
+                        <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
+                          {group.label}
+                        </p>
+                        {groupItems.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              onNavigate(item.id)
+                              setMoreOpen(false)
+                            }}
+                            className={`block w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-[var(--brand-soft)] ${
+                              active === item.id
+                                ? 'bg-[var(--brand-soft)] text-[var(--brand-green)]'
+                                : ''
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
                     ))}
                   </div>
                 ) : null}
@@ -199,21 +209,46 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
         </div>
 
         {menuOpen ? (
-          <div className="lg:hidden border-t border-white/15 bg-[var(--brand-dark)] px-4 py-3 space-y-1 max-h-[70vh] overflow-y-auto">
-            {items.map((item) => (
+          <div className="lg:hidden border-t border-white/15 bg-[var(--brand-dark)] px-4 py-3 space-y-3 max-h-[70vh] overflow-y-auto">
+            {items.some((i) => i.id === 'home') ? (
               <button
-                key={item.id}
                 type="button"
-                className={`block w-full text-left px-3 py-2.5 rounded-md text-sm font-semibold ${
-                  active === item.id ? 'bg-white text-[var(--brand-dark)]' : 'text-white hover:bg-white/10'
+                className={`block w-full text-left px-3 py-2 rounded-md text-sm font-semibold ${
+                  active === 'home'
+                    ? 'bg-white text-[var(--brand-dark)]'
+                    : 'text-white hover:bg-white/10'
                 }`}
                 onClick={() => {
-                  onNavigate(item.id)
+                  onNavigate('home')
                   setMenuOpen(false)
                 }}
               >
-                {item.label}
+                {STAFF_WORKSPACE_LABEL.home}
               </button>
+            ) : null}
+            {groupStaffNavItems(items).map(({ group, items: groupItems }) => (
+              <div key={group.id} className="space-y-0.5">
+                <p className="px-3 pt-1 text-[10px] font-bold uppercase tracking-wider text-[var(--brand-gold)]">
+                  {group.label}
+                </p>
+                {groupItems.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`block w-full text-left px-3 py-2 rounded-md text-sm font-semibold ${
+                      active === item.id
+                        ? 'bg-white text-[var(--brand-dark)]'
+                        : 'text-white hover:bg-white/10'
+                    }`}
+                    onClick={() => {
+                      onNavigate(item.id)
+                      setMenuOpen(false)
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             ))}
             <div className="pt-2 mt-2 border-t border-white/15 space-y-2">
               <p className="text-[11px] text-white/60 px-1 truncate">{email}</p>
