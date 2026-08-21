@@ -49,7 +49,7 @@ Until then:
 ## Exceptions
 
 - **Rules / docs / memories only** (no application runtime): commit then push. Skip staging and production.
-- **Staff-only** (Staff dashboard, `/staff`, `components/staff`, `app/api/staff`, staff permissions/roles with no public visitor UI change): after Serena QA, commit → **production** from a clean worktree of that SHA → then `git push`. **Skip staging** and **do not wait** for Rob OK. If the same commit also changes public pages, membership, checkout, or visitor copy, use full Staging-first instead.
+- **Staff-only** (Staff dashboard, `/staff`, `components/staff`, `app/api/staff`, staff permissions/roles with no public visitor UI change): after Serena QA, commit from a **clean worktree of that SHA** → **staging** (`node scripts/deploy-staging.mjs --cwd <worktree>`, alias `shmspto.vercel.app`) **and** **production** (`vercel --prod` or promote that same SHA) → then `git push`. **Do not wait** for Rob OK. Staging must stay current with prod so staff review hosts do not go stale. If the same commit also changes public pages, membership, checkout, or visitor copy, use full Staging-first instead (staging only, then wait for OK).
 - Never include unrelated WIP, secrets, Budget/Plaid/terminal/spirit-wear/`tmp` unless they are the task.
 - Never mix Stone Hill and Pavilion env (DATABASE_URL, Wix, Square, Stripe).
 
@@ -60,6 +60,7 @@ Until then:
 - Calling the task “shipped” or “live” when only staging exists.
 - Asking Rob to review on a one-off `frontend-*.vercel.app` Preview URL.
 - Skipping staging for public visitor changes by labeling them “staff-related.”
+- Staff-only prod deploy that leaves `shmspto.vercel.app` on an older SHA.
 
 ## Staging URL (Stone Hill)
 

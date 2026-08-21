@@ -11,7 +11,7 @@ alwaysApply: true
 
 Build Pavilion as if SHMS never existed. After an SHMS ship, **ask** before also deploying Pavilion when it helps.
 
-Application ships are **Staging-first** (see `ship-after-serena.mdc`): https://shmspto.vercel.app → Rob OK → production → GitHub. Exception: staff-only changes skip staging (same rule file).
+Application ships are **Staging-first** (see `ship-after-serena.mdc`): https://shmspto.vercel.app → Rob OK → production → GitHub. Exception: staff-only changes update staging and prod together without waiting (same rule file).
 
 Never mix env across the wall. See `EXTRACT.md`, `mem:hskrg-org`, `mem:hskrg-tools-inventory`.
 
