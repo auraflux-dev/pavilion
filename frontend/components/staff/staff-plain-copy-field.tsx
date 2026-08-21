@@ -1,6 +1,5 @@
 'use client'
 
-import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 
 type StaffPlainCopyFieldProps = {
@@ -14,12 +13,12 @@ type StaffPlainCopyFieldProps = {
   hint?: string
   className?: string
   textareaClassName?: string
-  showPreview?: boolean
   id?: string
 }
 
 /**
  * WordPress-like staff body field: type with Enter for breaks. No HTML tags.
+ * The textarea is the preview (same newlines the site shows).
  */
 export function StaffPlainCopyField({
   label,
@@ -31,11 +30,8 @@ export function StaffPlainCopyField({
   hint,
   className = '',
   textareaClassName = '',
-  showPreview = true,
   id,
 }: StaffPlainCopyFieldProps) {
-  const preview = humanizePublicCopy(normalizePlainCopy(value))
-
   function commit() {
     const next = normalizePlainCopy(value)
     if (next !== value) onChange(next)
@@ -59,19 +55,11 @@ export function StaffPlainCopyField({
         placeholder={placeholder}
         className={
           textareaClassName ||
-          'w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#1A1A1A]'
+          'w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#1A1A1A] whitespace-pre-wrap'
         }
         onChange={(e) => onChange(e.target.value)}
         onBlur={commit}
       />
-      {showPreview && preview ? (
-        <div className="rounded-lg border border-dashed border-[var(--border)] bg-[#FAFAF8] px-3 py-2">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-[#8A8F9C] mb-1">
-            Preview
-          </p>
-          <p className="text-sm text-[#3D4450] whitespace-pre-line leading-snug">{preview}</p>
-        </div>
-      ) : null}
     </div>
   )
 }

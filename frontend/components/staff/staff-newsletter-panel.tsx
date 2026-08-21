@@ -741,7 +741,6 @@ export function StaffNewsletterPanel() {
               label="Intro"
               value={intro}
               rows={2}
-              showPreview={false}
               onChange={setIntro}
               onCommit={(next) => setIntro(normalizePlainCopy(next))}
             />
@@ -764,7 +763,6 @@ export function StaffNewsletterPanel() {
                     label={`${NEWSLETTER_BEAT_LABELS[i]} copy`}
                     value={beat.body}
                     rows={2}
-                    showPreview={false}
                     onChange={(val) => {
                       const next = beats.slice()
                       next[i] = { ...next[i], body: val }
@@ -783,7 +781,6 @@ export function StaffNewsletterPanel() {
               label="Sign-off"
               value={signoff}
               rows={2}
-              showPreview={false}
               onChange={setSignoff}
               onCommit={(next) => setSignoff(normalizePlainCopy(next))}
             />
