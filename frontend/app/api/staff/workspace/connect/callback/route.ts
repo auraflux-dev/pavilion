@@ -17,23 +17,25 @@ import { upsertStaffRefreshToken } from '@/lib/google/workspace-auth'
 
 /** Must match the redirect_uri used when starting OAuth (and Google Console). */
 function redirectBase(req: NextRequest) {
-  const fixed = process.env.GOOGLE_OAUTH_REDIRECT_BASE?.replace(/\/$/, '')
-  if (fixed) return fixed
-
   const host = (req.headers.get('x-forwarded-host') || req.headers.get('host') || '')
     .split(',')[0]
     .trim()
     .toLowerCase()
+    .split(':')[0]
   if (host.includes('localhost') || host.startsWith('127.0.0.1')) {
     return `http://${host}`
   }
-  if (
-    host === 'www.shmspto.org' ||
-    host === 'shmspto.org' ||
-    host.endsWith('.vercel.app')
-  ) {
-    return host === 'shmspto.org' ? 'https://www.shmspto.org' : `https://${host}`
+  if (host === 'shmspto.vercel.app') {
+    return 'https://shmspto.vercel.app'
   }
+  if (host === 'www.shmspto.org' || host === 'shmspto.org') {
+    return 'https://www.shmspto.org'
+  }
+  if (host.endsWith('-treasurer-4353s-projects.vercel.app')) {
+    return `https://${host}`
+  }
+  const fixed = process.env.GOOGLE_OAUTH_REDIRECT_BASE?.replace(/\/$/, '')
+  if (fixed) return fixed
   return 'https://www.shmspto.org'
 }
 

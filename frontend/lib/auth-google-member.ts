@@ -51,24 +51,29 @@ export function safeReturnTo(raw: unknown): string {
 
 /** Canonical site origin for OAuth redirect_uri registration. */
 export function googleMemberRedirectBase(hostHeader?: string | null): string {
-  const fixed = process.env.GOOGLE_OAUTH_REDIRECT_BASE?.replace(/\/$/, '')
-  if (fixed) return fixed
-
   const host = (hostHeader || '')
     .split(',')[0]
     .trim()
     .toLowerCase()
     .split(':')[0]
+
+  // Prefer the host the browser is on so staging login cookies stay on staging.
+  // Do not let GOOGLE_OAUTH_REDIRECT_BASE (often www) steal staging sessions.
   if (host.includes('localhost') || host.startsWith('127.0.0.1')) {
     return `http://${host}`
   }
-  if (
-    host === 'www.shmspto.org' ||
-    host === 'shmspto.org' ||
-    host.endsWith('.vercel.app')
-  ) {
-    return host === 'shmspto.org' ? 'https://www.shmspto.org' : `https://${host}`
+  if (host === 'shmspto.vercel.app') {
+    return 'https://shmspto.vercel.app'
   }
+  if (host === 'www.shmspto.org' || host === 'shmspto.org') {
+    return 'https://www.shmspto.org'
+  }
+  if (host.endsWith('-treasurer-4353s-projects.vercel.app')) {
+    return `https://${host}`
+  }
+
+  const fixed = process.env.GOOGLE_OAUTH_REDIRECT_BASE?.replace(/\/$/, '')
+  if (fixed) return fixed
   return 'https://www.shmspto.org'
 }
 

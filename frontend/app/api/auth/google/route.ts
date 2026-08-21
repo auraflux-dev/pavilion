@@ -15,6 +15,7 @@ import {
 } from '@/lib/auth-google-member'
 import {
   isAllowedPreviewOrigin,
+  isEphemeralVercelPreviewHost,
   requestOriginFromHost,
 } from '@/lib/auth-preview-handoff'
 
@@ -29,16 +30,17 @@ export async function GET(req: NextRequest) {
     req.headers.get('x-forwarded-host') || req.headers.get('host') || ''
   const requestOrigin = requestOriginFromHost(host)
 
-  // Staging + ephemeral Preview hosts: run Google OAuth on www (registered
-  // redirect URI), then hand the session back so review hosts stay usable.
-  const reviewOrigin =
-    isAllowedPreviewOrigin(requestOrigin) && requestOrigin !== PROD_ORIGIN
-      ? requestOrigin
-      : ''
-  if (reviewOrigin) {
+  // Ephemeral Preview hosts are not Google redirect URIs: bounce through www,
+  // then hand the session back. Stable staging (shmspto.vercel.app) runs OAuth
+  // on itself so staff/parent login stays on staging (www may lack handoff).
+  if (
+    isEphemeralVercelPreviewHost(host) &&
+    isAllowedPreviewOrigin(requestOrigin) &&
+    requestOrigin !== PROD_ORIGIN
+  ) {
     const bounce = new URL('/api/auth/google', PROD_ORIGIN)
     bounce.searchParams.set('returnTo', returnTo)
-    bounce.searchParams.set('previewOrigin', reviewOrigin)
+    bounce.searchParams.set('previewOrigin', requestOrigin)
     return NextResponse.redirect(bounce, 302)
   }
 
