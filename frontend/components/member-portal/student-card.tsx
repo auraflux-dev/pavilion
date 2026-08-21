@@ -340,7 +340,6 @@ export function StudentCard({
                 ) : null}
                 <GiftCardSettings
                   studentId={student.id}
-                  studentName={student.firstName}
                 />
               </div>
 

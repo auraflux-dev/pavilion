@@ -2,17 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { Zap, ChevronDown, ChevronUp, Loader2, CheckCircle2 } from 'lucide-react'
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 interface Props {
   studentId: string
-  studentName: string
 }
 
 const THRESHOLD_OPTIONS = [5, 10, 15, 20]
 const RELOAD_OPTIONS = [20, 40, 75]
 
-export function GiftCardSettings({ studentId, studentName }: Props) {
+export function GiftCardSettings({ studentId }: Props) {
   const [open, setOpen] = useState(false)
   const [enabled, setEnabled] = useState(false)
   const [threshold, setThreshold] = useState(10)
