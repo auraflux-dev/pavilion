@@ -208,9 +208,15 @@ export function hasStaffRole(profile: StaffProfile | null, role: StaffRole | Sta
  return needed.some((r) => effective.includes(r))
 }
 
-/** Full programs catalog for any staff seat. Instructors no longer stay scoped-only. */
+/**
+ * Full catalog for board/admin.
+ * Instructor and coordinator seats stay scoped to StaffRoles.assignedProgramIds.
+ */
 export function canManageAllPrograms(profile: StaffProfile | null): boolean {
- return hasStaffRole(profile, [...STAFF_ROLES])
+  if (!profile) return false
+  if (hasStaffRole(profile, ['admin', 'programs'])) return true
+  if (isInstructorStaffOnly(profile.roles)) return false
+  return profile.roles.length > 0
 }
 
 /** Create/edit instructor and class-coordinator StaffRoles (not other board seats). */
