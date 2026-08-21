@@ -171,6 +171,7 @@ export function vanillaizeCopy(input: string, brand: PublicBrandFace = DEMO_BRAN
     .replace(/your school district/gi, brand.district)
     .replace(/\bNorthern Virginia\b/gi, brand.town)
     .replace(/\bNOVA Math Tournament\b/gi, 'Fairhaven Math Tournament')
+    .replace(/\bNOVA Math\b/gi, 'Fairhaven Math')
     .replace(/\bMath meet\b/gi, 'Fairhaven Math Tournament')
     .replace(/\bMoneyMinder\b/gi, 'the budget books')
     .replace(/\bBank of America\b/gi, 'the operating bank')
