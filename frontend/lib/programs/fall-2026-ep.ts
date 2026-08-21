@@ -151,3 +151,19 @@ export function findProgramForFallEpClass<T extends { name: string; fallEpClassI
   if (byId) return byId
   return programs.find((p) => matchFall2026EpClass(p.name)?.id === klass.id)
 }
+
+/** Parse CMS meetingDates; fall back to packet dates. */
+export function resolveMeetingDates(
+  meetingDates: string | undefined,
+  fallback: readonly string[],
+): string[] {
+  const parsed = String(meetingDates ?? '')
+    .split(/[,\n]+/)
+    .map((s) => s.trim().slice(0, 10))
+    .filter((s) => /^\d{4}-\d{2}-\d{2}$/.test(s))
+  return parsed.length > 0 ? parsed : [...fallback]
+}
+
+export function serializeMeetingDates(dates: string[]): string {
+  return dates.map((d) => d.slice(0, 10)).filter(Boolean).join(',')
+}

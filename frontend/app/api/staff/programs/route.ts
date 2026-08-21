@@ -65,6 +65,9 @@ function mapProgram(item: Record<string, unknown>) {
     endDate: dateField(item.endDate),
     instructorName: String(item.instructorName ?? ''),
     fallEpClassId: String(item.fallEpClassId ?? ''),
+    location: String(item.location ?? ''),
+    meetingDates: String(item.meetingDates ?? ''),
+    skipsNote: String(item.skipsNote ?? ''),
   }
 }
 
@@ -112,6 +115,14 @@ function schedulePatchFromBody(body: Record<string, unknown>, existing: Record<s
       body.fallEpClassId != null
         ? String(body.fallEpClassId).trim()
         : String(existing.fallEpClassId ?? ''),
+    location:
+      body.location != null ? String(body.location).trim() : String(existing.location ?? ''),
+    meetingDates:
+      body.meetingDates != null
+        ? String(body.meetingDates).trim()
+        : String(existing.meetingDates ?? ''),
+    skipsNote:
+      body.skipsNote != null ? String(body.skipsNote).trim() : String(existing.skipsNote ?? ''),
   }
 }
 
@@ -309,39 +320,36 @@ export async function PATCH(req: NextRequest) {
     if (!canAccessProgram(session.staff, id)) {
       return NextResponse.json({ error: 'Not assigned to this program' }, { status: 403 })
     }
-    const all = canManageAllPrograms(session.staff)
     const scheduleFields = schedulePatchFromBody(body, existing)
-    // Instructors/coordinators may update schedule + flyer only; catalog/registration stays with Programs VP.
+    // Anyone with access to this program can edit every listed field (staff Programs page).
     const updates = {
       ...existing,
       _id: id,
-      name: all && body.name != null ? String(body.name).trim() : existing.name,
-      description: all && body.description != null ? String(body.description).trim() : existing.description,
-      fee: all && body.fee != null ? Number(body.fee) || 0 : existing.fee,
-      capacity: all && body.capacity != null ? Number(body.capacity) || 0 : existing.capacity,
-      registrationOpen: all
-        ? body.registrationOpen != null
+      name: body.name != null ? String(body.name).trim() : existing.name,
+      description: body.description != null ? String(body.description).trim() : existing.description,
+      fee: body.fee != null ? Number(body.fee) || 0 : existing.fee,
+      capacity: body.capacity != null ? Number(body.capacity) || 0 : existing.capacity,
+      registrationOpen:
+        body.registrationOpen != null
           ? body.registrationOpen === true
-          : existing.registrationOpen === true
-        : existing.registrationOpen === true,
-      memberPriorityUntil: all
-        ? body.memberPriorityUntil !== undefined
+          : existing.registrationOpen === true,
+      memberPriorityUntil:
+        body.memberPriorityUntil !== undefined
           ? normalizeMemberPriorityUntilInput(body.memberPriorityUntil)
-          : existing.memberPriorityUntil ?? null
-        : existing.memberPriorityUntil ?? null,
-      cheddarupUrl: all && body.cheddarupUrl != null ? String(body.cheddarupUrl).trim() : existing.cheddarupUrl,
-      requiresWaiver: all
-        ? body.requiresWaiver != null
+          : existing.memberPriorityUntil ?? null,
+      cheddarupUrl:
+        body.cheddarupUrl != null ? String(body.cheddarupUrl).trim() : existing.cheddarupUrl,
+      requiresWaiver:
+        body.requiresWaiver != null
           ? body.requiresWaiver === true
-          : existing.requiresWaiver === true
-        : existing.requiresWaiver === true,
-      grades: all && body.grades != null ? String(body.grades).trim() : existing.grades,
-      category: all && body.category != null ? String(body.category).trim() : existing.category,
-      paymentType: all && body.paymentType != null ? String(body.paymentType).trim() : existing.paymentType,
-      detail: all && body.detail != null ? String(body.detail).trim() : existing.detail,
-      tags: all && body.tags != null ? String(body.tags).trim() : existing.tags,
-      featured: all && body.featured != null ? body.featured === true : existing.featured === true,
-      sortOrder: all && body.sortOrder != null ? Number(body.sortOrder) || 0 : existing.sortOrder,
+          : existing.requiresWaiver === true,
+      grades: body.grades != null ? String(body.grades).trim() : existing.grades,
+      category: body.category != null ? String(body.category).trim() : existing.category,
+      paymentType: body.paymentType != null ? String(body.paymentType).trim() : existing.paymentType,
+      detail: body.detail != null ? String(body.detail).trim() : existing.detail,
+      tags: body.tags != null ? String(body.tags).trim() : existing.tags,
+      featured: body.featured != null ? body.featured === true : existing.featured === true,
+      sortOrder: body.sortOrder != null ? Number(body.sortOrder) || 0 : existing.sortOrder,
       ...scheduleFields,
     }
     await client.items.update(collection, updates as Parameters<typeof client.items.update>[1])

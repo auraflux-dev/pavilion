@@ -87,6 +87,13 @@ export async function POST(req: NextRequest) {
           displayName: 'Fall EP class id (ye/essay/mathcounts/robotics)',
           type: 'TEXT',
         },
+        { key: 'location', displayName: 'Room / Location', type: 'TEXT' },
+        {
+          key: 'meetingDates',
+          displayName: 'Meeting dates (YYYY-MM-DD, comma-separated)',
+          type: 'TEXT',
+        },
+        { key: 'skipsNote', displayName: 'Skip / holiday note', type: 'TEXT' },
         {
           key: 'memberPriorityUntil',
           displayName: 'Paid members only until (then open to all)',

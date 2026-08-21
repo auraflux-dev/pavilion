@@ -37,6 +37,9 @@ type Program = {
   endDate: string
   instructorName: string
   fallEpClassId: string
+  location: string
+  meetingDates: string
+  skipsNote: string
   seatsTaken?: number
   seatsRemaining?: number | null
 }
@@ -112,8 +115,7 @@ export function StaffProgramsPanel() {
   const [msgBody, setMsgBody] = useState('')
   const [status, setStatus] = useState('')
   const [busy, setBusy] = useState(false)
-  /** Bumps when CMS fields change so uncontrolled inputs remount with fresh values. */
-  const [fieldsEpoch, setFieldsEpoch] = useState(0)
+  const [savingProgramId, setSavingProgramId] = useState<string | null>(null)
   const [attProgramId, setAttProgramId] = useState('')
   const [attDate, setAttDate] = useState(todayYmd)
   const [attStudents, setAttStudents] = useState<AttendanceStudent[]>([])
@@ -171,7 +173,6 @@ export function StaffProgramsPanel() {
         }
       }
       setPrograms(list)
-      setFieldsEpoch((n) => n + 1)
       const firstId = list[0]?.id as string | undefined
       if (firstId) {
         setRosterProgramId((prev) => prev || firstId)
@@ -240,22 +241,22 @@ export function StaffProgramsPanel() {
     if (tab === 'attendance') void loadAttendance(attProgramId, attDate)
   }, [tab, attProgramId, attDate, loadAttendance])
 
-  async function patchProgram(id: string, body: Record<string, unknown>) {
-    setBusy(true)
-    setStatus('')
-    const prevPrograms = programs
-    const prevSessions = sessions
-    // Optimistic: Fall schedule, cards, and session labels update together before reload.
+  function changeProgramLocal(id: string, body: Record<string, unknown>) {
     setPrograms((list) =>
       list.map((p) => (p.id === id ? ({ ...p, ...body } as Program) : p)),
     )
-    if (typeof body.name === 'string' && body.name.trim()) {
-      const nextName = body.name.trim()
+    if (typeof body.name === 'string') {
+      const nextName = body.name
       setSessions((list) =>
         list.map((s) => (s.programId === id ? { ...s, programName: nextName } : s)),
       )
     }
-    setFieldsEpoch((n) => n + 1)
+  }
+
+  async function saveProgram(id: string, body: Record<string, unknown>) {
+    setStatus('')
+    changeProgramLocal(id, body)
+    setSavingProgramId(id)
     try {
       const r = await fetch('/api/staff/programs', {
         method: 'PATCH',
@@ -264,15 +265,18 @@ export function StaffProgramsPanel() {
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Update failed')
-      await load()
+      setStatus('Saved.')
     } catch (err) {
-      setPrograms(prevPrograms)
-      setSessions(prevSessions)
-      setFieldsEpoch((n) => n + 1)
       setStatus(err instanceof Error ? err.message : 'Update failed')
+      await load()
     } finally {
-      setBusy(false)
+      setSavingProgramId(null)
     }
+  }
+
+  /** @deprecated alias kept for older call sites in this file */
+  async function patchProgram(id: string, body: Record<string, unknown>) {
+    await saveProgram(id, body)
   }
 
   async function patchSession(id: string, body: Record<string, unknown>) {
@@ -517,9 +521,7 @@ export function StaffProgramsPanel() {
       <div>
         <h2 className="text-lg font-bold">Programs & sessions</h2>
         <p className="text-xs text-[#5A6070] whitespace-pre-line">
-          {canManageAll
-            ? 'Edit classes in the Programs list below.\nThe Fall schedule and meeting headings above update from the same CMS row.\nBlur a field to save. No separate Save button.\nOpen or close registration, roster, waitlist, attendance, sessions, and class messages.\nAdd instructors under Access.'
-            : 'Start here for your class.\nRoster (who is in).\nMessages (parents).\nAttendance (class night).\nThen Timesheets (hours).'}
+          {`Every field on this page is editable.\nClick out of a field to save (no Save button).\nFall schedule and Programs list stay in sync.\nRoster, waitlist, attendance, sessions, and class messages below.`}
         </p>
         {canManageAll ? (
           <button
@@ -552,8 +554,14 @@ export function StaffProgramsPanel() {
         <Fall2026EpSchedule
           variant="staff"
           programs={programs}
-          canEdit={canManageAll}
+          canEdit
+          onProgramChange={changeProgramLocal}
+          onProgramSave={(id, patch) => void saveProgram(id, patch)}
         />
+        {savingProgramId ? (
+          <p className="text-[11px] text-[#5A6070] mt-2">Saving…</p>
+        ) : null}
+        {status ? <p className="text-[11px] text-[#5A6070] mt-1 whitespace-pre-line">{status}</p> : null}
       </div>
       <div className="inline-flex flex-wrap rounded-lg border border-[var(--border)] overflow-hidden text-sm">
         {tabs.map(([id, label]) => (
@@ -576,25 +584,19 @@ export function StaffProgramsPanel() {
             </p>
           ) : null}
           {programs.map((p) => (
-            <div
-              key={`${p.id}-${fieldsEpoch}`}
-              className="border border-[var(--border)] rounded-lg p-3 space-y-2"
-            >
+            <div key={p.id} className="border border-[var(--border)] rounded-lg p-3 space-y-2">
               <div className="flex flex-wrap justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  {canManageAll ? (
-                    <input
-                      defaultValue={p.name}
-                      aria-label="Program name"
-                      className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm font-bold"
-                      onBlur={(e) => {
-                        const next = e.target.value.trim()
-                        if (next && next !== p.name) void patchProgram(p.id, { name: next })
-                      }}
-                    />
-                  ) : (
-                    <p className="text-sm font-bold">{p.name}</p>
-                  )}
+                  <input
+                    value={p.name}
+                    aria-label="Program name"
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm font-bold"
+                    onChange={(e) => changeProgramLocal(p.id, { name: e.target.value })}
+                    onBlur={(e) => {
+                      const next = e.target.value.trim()
+                      if (next) void saveProgram(p.id, { name: next })
+                    }}
+                  />
                   <p className="text-xs text-[#5A6070] mt-1">
                     Seats{' '}
                     {p.capacity
@@ -603,75 +605,56 @@ export function StaffProgramsPanel() {
                         }`
                       : 'unlimited'}
                   </p>
-                  {canManageAll ? (
-                    <p className="text-[11px] text-[#5A6070] mt-0.5 font-mono">
-                      ID{' '}
-                      <button
-                        type="button"
-                        className="underline"
-                        style={{ color: 'var(--brand-green)' }}
-                        onClick={() => {
-                          void navigator.clipboard.writeText(p.id)
-                          setStatus(`Copied program ID for ${p.name}`)
-                        }}
-                      >
-                        {p.id}
-                      </button>
-                    </p>
-                  ) : null}
+                  <p className="text-[11px] text-[#5A6070] mt-0.5 font-mono">
+                    ID{' '}
+                    <button
+                      type="button"
+                      className="underline"
+                      style={{ color: 'var(--brand-green)' }}
+                      onClick={() => {
+                        void navigator.clipboard.writeText(p.id)
+                        setStatus(`Copied program ID for ${p.name}`)
+                      }}
+                    >
+                      {p.id}
+                    </button>
+                  </p>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs">
-                  {canManageAll ? (
-                    <label className="inline-flex items-center gap-1">
-                      <input
-                        type="checkbox"
-                        checked={p.registrationOpen}
-                        disabled={busy}
-                        onChange={(e) => void patchProgram(p.id, { registrationOpen: e.target.checked })}
-                      />
-                      Registration open
-                    </label>
-                  ) : (
-                    <span className="text-[#5A6070]">
-                      Registration {p.registrationOpen ? 'open' : 'closed'}
+                  <label className="inline-flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      checked={p.registrationOpen}
+                      onChange={(e) => void saveProgram(p.id, { registrationOpen: e.target.checked })}
+                    />
+                    Registration open
+                  </label>
+                  <label className="inline-flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      checked={p.featured}
+                      onChange={(e) => void saveProgram(p.id, { featured: e.target.checked })}
+                    />
+                    Featured
+                  </label>
+                  <label className="inline-flex flex-col gap-0.5 text-[11px] text-[#5A6070] w-full sm:w-auto">
+                    <span>Paid members only until</span>
+                    <input
+                      type="datetime-local"
+                      className="border border-[var(--border)] rounded px-1.5 py-1 text-xs text-[#1A1A1A]"
+                      value={toDatetimeLocalValue(p.memberPriorityUntil)}
+                      onChange={(e) =>
+                        void saveProgram(p.id, {
+                          memberPriorityUntil: e.target.value || null,
+                        })
+                      }
+                    />
+                    <span className="text-[10px] leading-snug max-w-xs">
+                      {p.memberPriorityUntil
+                        ? `Opens to all after ${formatMemberPriorityUntil(p.memberPriorityUntil)}`
+                        : 'Leave blank = open to all signed-in parents when registration is on'}
                     </span>
-                  )}
-                  {canManageAll ? (
-                    <label className="inline-flex items-center gap-1">
-                      <input
-                        type="checkbox"
-                        checked={p.featured}
-                        disabled={busy}
-                        onChange={(e) => void patchProgram(p.id, { featured: e.target.checked })}
-                      />
-                      Featured
-                    </label>
-                  ) : null}
-                  {canManageAll ? (
-                    <label className="inline-flex flex-col gap-0.5 text-[11px] text-[#5A6070] w-full sm:w-auto">
-                      <span>Paid members only until</span>
-                      <input
-                        type="datetime-local"
-                        className="border border-[var(--border)] rounded px-1.5 py-1 text-xs text-[#1A1A1A]"
-                        value={toDatetimeLocalValue(p.memberPriorityUntil)}
-                        disabled={busy}
-                        onChange={(e) =>
-                          void patchProgram(p.id, {
-                            memberPriorityUntil: e.target.value || null,
-                          })
-                        }
-                      />
-                      <span className="text-[10px] leading-snug max-w-xs">
-                        {p.memberPriorityUntil
-                          ? `Opens to all after ${formatMemberPriorityUntil(p.memberPriorityUntil)}`
-                          : 'Leave blank = open to all signed-in parents when registration is on'}
-                      </span>
-                    </label>
-                  ) : p.memberPriorityUntil ? (
-                    <span className="text-[11px] text-[#5A6070]">
-                      Paid members until {formatMemberPriorityUntil(p.memberPriorityUntil)}
-                    </span>
-                  ) : null}
+                  </label>
                   <button
                     type="button"
                     className="underline font-semibold"
@@ -696,216 +679,188 @@ export function StaffProgramsPanel() {
                   </button>
                 </div>
               </div>
-              {canManageAll ? (
-                <div className="grid sm:grid-cols-2 gap-2 pt-1 border-t border-[var(--border)]">
-                  <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
-                    <span>Description</span>
-                    <textarea
-                      defaultValue={p.description}
-                      rows={2}
-                      className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                      onBlur={(e) => {
-                        if (e.target.value !== p.description) {
-                          void patchProgram(p.id, { description: e.target.value })
-                        }
-                      }}
-                    />
-                  </label>
-                  <label className="text-[11px] text-[#5A6070] space-y-0.5">
-                    <span>Fee ($)</span>
-                    <input
-                      type="number"
-                      min={0}
-                      step={1}
-                      defaultValue={p.fee}
-                      className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                      onBlur={(e) => {
-                        const next = Number(e.target.value) || 0
-                        if (next !== p.fee) void patchProgram(p.id, { fee: next })
-                      }}
-                    />
-                  </label>
-                  <label className="text-[11px] text-[#5A6070] space-y-0.5">
-                    <span>Capacity (0 = unlimited)</span>
-                    <input
-                      type="number"
-                      min={0}
-                      defaultValue={p.capacity}
-                      className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                      onBlur={(e) => {
-                        const next = Number(e.target.value) || 0
-                        if (next !== p.capacity) void patchProgram(p.id, { capacity: next })
-                      }}
-                    />
-                  </label>
-                  <label className="text-[11px] text-[#5A6070] space-y-0.5">
-                    <span>Grades</span>
-                    <input
-                      defaultValue={p.grades}
-                      placeholder="e.g. 6-8"
-                      className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                      onBlur={(e) => {
-                        if (e.target.value !== p.grades) {
-                          void patchProgram(p.id, { grades: e.target.value })
-                        }
-                      }}
-                    />
-                  </label>
-                  <label className="text-[11px] text-[#5A6070] space-y-0.5">
-                    <span>Category</span>
-                    <input
-                      defaultValue={p.category}
-                      placeholder="e.g. Enrichment"
-                      className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                      onBlur={(e) => {
-                        if (e.target.value !== p.category) {
-                          void patchProgram(p.id, { category: e.target.value })
-                        }
-                      }}
-                    />
-                  </label>
-                  <label className="text-[11px] text-[#5A6070] space-y-0.5">
-                    <span>Payment type</span>
-                    <input
-                      defaultValue={p.paymentType}
-                      placeholder="e.g. Square"
-                      className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                      onBlur={(e) => {
-                        if (e.target.value !== p.paymentType) {
-                          void patchProgram(p.id, { paymentType: e.target.value })
-                        }
-                      }}
-                    />
-                  </label>
-                  <label className="text-[11px] text-[#5A6070] space-y-0.5">
-                    <span>Sort order</span>
-                    <input
-                      type="number"
-                      defaultValue={p.sortOrder}
-                      className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                      onBlur={(e) => {
-                        const next = Number(e.target.value) || 0
-                        if (next !== p.sortOrder) void patchProgram(p.id, { sortOrder: next })
-                      }}
-                    />
-                  </label>
-                  <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
-                    <span>Cheddar Up / external checkout URL</span>
-                    <input
-                      defaultValue={p.cheddarupUrl}
-                      placeholder="https://…"
-                      className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                      onBlur={(e) => {
-                        if (e.target.value !== p.cheddarupUrl) {
-                          void patchProgram(p.id, { cheddarupUrl: e.target.value })
-                        }
-                      }}
-                    />
-                  </label>
-                  <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
-                    <span>Tags (comma-separated)</span>
-                    <input
-                      defaultValue={p.tags}
-                      className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                      onBlur={(e) => {
-                        if (e.target.value !== p.tags) {
-                          void patchProgram(p.id, { tags: e.target.value })
-                        }
-                      }}
-                    />
-                  </label>
-                  <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
-                    <span>Detail (extra copy)</span>
-                    <textarea
-                      defaultValue={p.detail}
-                      rows={2}
-                      className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                      onBlur={(e) => {
-                        if (e.target.value !== p.detail) {
-                          void patchProgram(p.id, { detail: e.target.value })
-                        }
-                      }}
-                    />
-                  </label>
-                  <label className="inline-flex items-center gap-1 text-xs sm:col-span-2">
-                    <input
-                      type="checkbox"
-                      defaultChecked={p.requiresWaiver}
-                      disabled={busy}
-                      onChange={(e) => void patchProgram(p.id, { requiresWaiver: e.target.checked })}
-                    />
-                    Requires waiver
-                  </label>
-                </div>
-              ) : (
-                <p className="text-xs text-[#5A6070]">
-                  ${p.fee} · grades {p.grades || 'n/a'}
-                  {p.category ? ` · ${p.category}` : ''}
-                </p>
-              )}
+              <div className="grid sm:grid-cols-2 gap-2 pt-1 border-t border-[var(--border)]">
+                <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
+                  <span>Description</span>
+                  <textarea
+                    value={p.description}
+                    rows={2}
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                    onChange={(e) => changeProgramLocal(p.id, { description: e.target.value })}
+                    onBlur={(e) => void saveProgram(p.id, { description: e.target.value })}
+                  />
+                </label>
+                <label className="text-[11px] text-[#5A6070] space-y-0.5">
+                  <span>Fee ($)</span>
+                  <input
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={p.fee}
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                    onChange={(e) => changeProgramLocal(p.id, { fee: Number(e.target.value) || 0 })}
+                    onBlur={(e) => void saveProgram(p.id, { fee: Number(e.target.value) || 0 })}
+                  />
+                </label>
+                <label className="text-[11px] text-[#5A6070] space-y-0.5">
+                  <span>Capacity (0 = unlimited)</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={p.capacity}
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                    onChange={(e) =>
+                      changeProgramLocal(p.id, { capacity: Number(e.target.value) || 0 })
+                    }
+                    onBlur={(e) => void saveProgram(p.id, { capacity: Number(e.target.value) || 0 })}
+                  />
+                </label>
+                <label className="text-[11px] text-[#5A6070] space-y-0.5">
+                  <span>Grades</span>
+                  <input
+                    value={p.grades}
+                    placeholder="e.g. 6-8"
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                    onChange={(e) => changeProgramLocal(p.id, { grades: e.target.value })}
+                    onBlur={(e) => void saveProgram(p.id, { grades: e.target.value })}
+                  />
+                </label>
+                <label className="text-[11px] text-[#5A6070] space-y-0.5">
+                  <span>Category</span>
+                  <input
+                    value={p.category}
+                    placeholder="e.g. Enrichment"
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                    onChange={(e) => changeProgramLocal(p.id, { category: e.target.value })}
+                    onBlur={(e) => void saveProgram(p.id, { category: e.target.value })}
+                  />
+                </label>
+                <label className="text-[11px] text-[#5A6070] space-y-0.5">
+                  <span>Payment type</span>
+                  <input
+                    value={p.paymentType}
+                    placeholder="e.g. Square"
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                    onChange={(e) => changeProgramLocal(p.id, { paymentType: e.target.value })}
+                    onBlur={(e) => void saveProgram(p.id, { paymentType: e.target.value })}
+                  />
+                </label>
+                <label className="text-[11px] text-[#5A6070] space-y-0.5">
+                  <span>Sort order</span>
+                  <input
+                    type="number"
+                    value={p.sortOrder}
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                    onChange={(e) =>
+                      changeProgramLocal(p.id, { sortOrder: Number(e.target.value) || 0 })
+                    }
+                    onBlur={(e) => void saveProgram(p.id, { sortOrder: Number(e.target.value) || 0 })}
+                  />
+                </label>
+                <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
+                  <span>Cheddar Up / external checkout URL</span>
+                  <input
+                    value={p.cheddarupUrl}
+                    placeholder="https://…"
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                    onChange={(e) => changeProgramLocal(p.id, { cheddarupUrl: e.target.value })}
+                    onBlur={(e) => void saveProgram(p.id, { cheddarupUrl: e.target.value })}
+                  />
+                </label>
+                <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
+                  <span>Tags (comma-separated)</span>
+                  <input
+                    value={p.tags}
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                    onChange={(e) => changeProgramLocal(p.id, { tags: e.target.value })}
+                    onBlur={(e) => void saveProgram(p.id, { tags: e.target.value })}
+                  />
+                </label>
+                <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
+                  <span>Detail (extra copy)</span>
+                  <textarea
+                    value={p.detail}
+                    rows={2}
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
+                    onChange={(e) => changeProgramLocal(p.id, { detail: e.target.value })}
+                    onBlur={(e) => void saveProgram(p.id, { detail: e.target.value })}
+                  />
+                </label>
+                <label className="inline-flex items-center gap-1 text-xs sm:col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={p.requiresWaiver}
+                    onChange={(e) => void saveProgram(p.id, { requiresWaiver: e.target.checked })}
+                  />
+                  Requires waiver
+                </label>
+              </div>
               <div className="grid sm:grid-cols-2 gap-2 pt-1">
                 <input
-                  defaultValue={p.instructorName}
+                  value={p.instructorName}
                   placeholder="Instructor / vendor"
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
-                  onBlur={(e) => {
-                    if (e.target.value !== p.instructorName) {
-                      void patchProgram(p.id, { instructorName: e.target.value })
-                    }
-                  }}
+                  onChange={(e) => changeProgramLocal(p.id, { instructorName: e.target.value })}
+                  onBlur={(e) => void saveProgram(p.id, { instructorName: e.target.value })}
                 />
                 <input
-                  defaultValue={p.dayOfWeek}
+                  value={p.location}
+                  placeholder="Room / location"
+                  className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
+                  onChange={(e) => changeProgramLocal(p.id, { location: e.target.value })}
+                  onBlur={(e) => void saveProgram(p.id, { location: e.target.value })}
+                />
+                <input
+                  value={p.dayOfWeek}
                   placeholder="Day of week (e.g. Tuesdays)"
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                  onBlur={(e) => {
-                    if (e.target.value !== p.dayOfWeek) {
-                      void patchProgram(p.id, { dayOfWeek: e.target.value })
-                    }
-                  }}
+                  onChange={(e) => changeProgramLocal(p.id, { dayOfWeek: e.target.value })}
+                  onBlur={(e) => void saveProgram(p.id, { dayOfWeek: e.target.value })}
                 />
                 <input
-                  defaultValue={p.classTime}
+                  value={p.classTime}
                   placeholder="Class time (e.g. 3:30 to 4:30 PM)"
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                  onBlur={(e) => {
-                    if (e.target.value !== p.classTime) {
-                      void patchProgram(p.id, { classTime: e.target.value })
-                    }
-                  }}
+                  onChange={(e) => changeProgramLocal(p.id, { classTime: e.target.value })}
+                  onBlur={(e) => void saveProgram(p.id, { classTime: e.target.value })}
                 />
                 <input
                   type="number"
                   min={0}
-                  defaultValue={p.durationWeeks || ''}
+                  value={p.durationWeeks || ''}
                   placeholder="Weeks"
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                  onBlur={(e) => {
-                    const next = Number(e.target.value) || 0
-                    if (next !== (p.durationWeeks || 0)) {
-                      void patchProgram(p.id, { durationWeeks: next })
-                    }
-                  }}
+                  onChange={(e) =>
+                    changeProgramLocal(p.id, { durationWeeks: Number(e.target.value) || 0 })
+                  }
+                  onBlur={(e) =>
+                    void saveProgram(p.id, { durationWeeks: Number(e.target.value) || 0 })
+                  }
                 />
                 <input
                   type="date"
-                  defaultValue={p.startDate || ''}
+                  value={p.startDate || ''}
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                  onBlur={(e) => {
-                    if (e.target.value !== (p.startDate || '')) {
-                      void patchProgram(p.id, { startDate: e.target.value })
-                    }
+                  onChange={(e) => {
+                    changeProgramLocal(p.id, { startDate: e.target.value })
+                    void saveProgram(p.id, { startDate: e.target.value })
                   }}
                 />
                 <input
                   type="date"
-                  defaultValue={p.endDate || ''}
-                  className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
-                  onBlur={(e) => {
-                    if (e.target.value !== (p.endDate || '')) {
-                      void patchProgram(p.id, { endDate: e.target.value })
-                    }
+                  value={p.endDate || ''}
+                  className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
+                  onChange={(e) => {
+                    changeProgramLocal(p.id, { endDate: e.target.value })
+                    void saveProgram(p.id, { endDate: e.target.value })
                   }}
+                />
+                <input
+                  value={p.skipsNote}
+                  placeholder="Skip / holiday note"
+                  className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
+                  onChange={(e) => changeProgramLocal(p.id, { skipsNote: e.target.value })}
+                  onBlur={(e) => void saveProgram(p.id, { skipsNote: e.target.value })}
                 />
               </div>
               <p className="text-[11px] text-[#5A6070]">
@@ -914,8 +869,8 @@ export function StaffProgramsPanel() {
               <StaffFlyerUpload
                 label="Program flyer"
                 currentUrl={p.image}
-                disabled={busy}
-                onUploaded={(url) => void patchProgram(p.id, { image: url })}
+                disabled={false}
+                onUploaded={(url) => void saveProgram(p.id, { image: url })}
               />
             </div>
           ))}
