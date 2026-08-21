@@ -9,25 +9,26 @@ import {
 
 /** Must match Authorized redirect URIs on the Google Web OAuth client exactly. */
 function redirectBase(req: NextRequest) {
-  const fixed = process.env.GOOGLE_OAUTH_REDIRECT_BASE?.replace(/\/$/, '')
-  if (fixed) return fixed
-
   const host = (req.headers.get('x-forwarded-host') || req.headers.get('host') || '')
     .split(',')[0]
     .trim()
     .toLowerCase()
+    .split(':')[0]
   if (host.includes('localhost') || host.startsWith('127.0.0.1')) {
     return `http://${host}`
   }
-  // Prefer the host the staffer is actually on when it's one of our hosts
-  if (
-    host === 'www.shmspto.org' ||
-    host === 'shmspto.org' ||
-    host.endsWith('.vercel.app')
-  ) {
+  // Prefer the host the staffer is on so staging Connect stays on staging.
+  if (host === 'shmspto.vercel.app') {
+    return 'https://shmspto.vercel.app'
+  }
+  if (host === 'www.shmspto.org' || host === 'shmspto.org') {
+    return 'https://www.shmspto.org'
+  }
+  if (host.endsWith('-treasurer-4353s-projects.vercel.app')) {
     return `https://${host}`
   }
-  // Canonical fallback
+  const fixed = process.env.GOOGLE_OAUTH_REDIRECT_BASE?.replace(/\/$/, '')
+  if (fixed) return fixed
   return 'https://www.shmspto.org'
 }
 
