@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Zap, ChevronDown, ChevronUp, Loader2, CheckCircle2 } from 'lucide-react'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 interface Props {
   studentId: string

@@ -4,6 +4,7 @@ import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { StaffPlaidConnect } from '@/components/staff/staff-plaid-connect'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 const DEFAULT_FISCAL_YEAR = '2026-27'
 const FISCAL_YEAR_LABEL = 'Jul 1, 2026 to Jun 30, 2027'

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { displayMembershipTier } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
 
 type StudentRow = {
@@ -443,8 +444,8 @@ export function StaffMembershipPanel() {
           <div>
             <h1 className="text-xl font-bold">Membership roster</h1>
             <p className="text-xs text-[#5A6070] mt-1">
-              Parents from Students + Memberships. Email, phone, and paid tier ({displayMembershipTier('reef', 'short')} / {displayMembershipTier('lagoon', 'short')} /
-              {' '}{displayMembershipTier('tide', 'short')}). Paid count follows Memberships after checkout.
+              Parents from Students + Memberships. Email, phone, and paid tier ({displayMembershipTier('reef')} / {displayMembershipTier('lagoon')} /
+              {' '}{displayMembershipTier('tide')}). Paid count follows Memberships after checkout.
             </p>
           </div>
           <Button
@@ -473,9 +474,9 @@ export function StaffMembershipPanel() {
             <option value="all">All parents</option>
             <option value="free">Free only</option>
             <option value="paid">Paid only</option>
-            <option value="reef">{displayMembershipTier('reef', 'short')}</option>
-            <option value="lagoon">{displayMembershipTier('lagoon', 'short')}</option>
-            <option value="tide">{displayMembershipTier('tide', 'short')}</option>
+            <option value="reef">{displayMembershipTier('reef')}</option>
+            <option value="lagoon">{displayMembershipTier('lagoon')}</option>
+            <option value="tide">{displayMembershipTier('tide')}</option>
           </select>
           <select
             value={grade}

@@ -13,6 +13,7 @@ import {
   formatMemberPriorityUntil,
   getRegistrationPhase,
 } from '@/lib/programs/registration-access'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 function hasTag(program: Program, tag: string) {
   return String(program.tags ?? '')

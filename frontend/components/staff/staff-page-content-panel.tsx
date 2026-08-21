@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
 import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
 import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
+import { vanillaizeIfDemo, publicBrandFace } from '@/lib/demo/brand'
 
 type PageRow = {
   id: string

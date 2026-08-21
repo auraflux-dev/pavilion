@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import type { SurveyBranding, SurveyField, SurveyFieldType } from '@/lib/surveys/types'
+import { vanillaizeIfDemo, publicBrandFace } from '@/lib/demo/brand'
 
 type SurveySummary = {
   id: string

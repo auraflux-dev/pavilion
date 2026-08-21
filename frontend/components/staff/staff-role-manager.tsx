@@ -13,7 +13,7 @@ import {
   workspacesFromRoles,
 } from '@/lib/staff/permissions'
 import type { StaffRole } from '@/lib/staff/roles'
-import { DEMO_BRAND } from '@/lib/demo/brand'
+import { DEMO_BRAND, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { FALL_2026_EP_CLASSES } from '@/lib/programs/fall-2026-ep'
 import {

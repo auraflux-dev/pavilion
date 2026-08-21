@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
 import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
 import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import {
   formatMemberPriorityUntil,
   toDatetimeLocalValue,
