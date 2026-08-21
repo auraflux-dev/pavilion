@@ -114,7 +114,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   cancel: 'Cancel',
   addStudentError: 'Could not add student. Please try again.',
   loadCardHelp: 'Load $20, $40, $75, or any whole dollar amount.',
-  paymentMethodsTitle: 'Manage payment methods',
+  paymentMethodsTitle: 'Saved Payment Methods',
   paymentMethodsBody: 'Optional card on file for Cove reloads and auto top-off.',
 }
 

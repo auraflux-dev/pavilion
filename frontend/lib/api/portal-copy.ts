@@ -117,7 +117,11 @@ export async function getPortalCopy(): Promise<PortalCopy> {
       /choose a student/i,
       /—|–/,
     ]),
-    paymentMethodsTitle: pick('paymentMethodsTitle'),
+    paymentMethodsTitle: preferDefault('paymentMethodsTitle', pick('paymentMethodsTitle'), [
+      /how you pay/i,
+      /manage payment methods/i,
+      /—|–/,
+    ]),
     paymentMethodsBody: preferDefault('paymentMethodsBody', pick('paymentMethodsBody'), [
       /—|–/,
       /Square-secured/i,

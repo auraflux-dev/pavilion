@@ -328,7 +328,7 @@ const PAGE_ROWS = [
       'cancel|Cancel',
       'addStudentError|Could not add student. Please try again.',
       'loadCardHelp|One family Cove Digital Card and balance. Choose $20 / $40 / $75, or enter any whole dollar amount. Pay with card or PayPal. Saving a card with Square is optional for faster reloads and auto top off.',
-      'paymentMethodsTitle|How you pay',
+      'paymentMethodsTitle|Saved Payment Methods',
       'paymentMethodsBody|Snack window: prepaid family Cove Digital Card. Online: pay with credit/debit card or PayPal in this portal (membership, The Cove, and Cove Digital Card reloads). Saving a card is optional.',
     ].join('\n'),
     active: true,

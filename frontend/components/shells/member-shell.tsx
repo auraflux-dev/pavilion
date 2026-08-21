@@ -59,7 +59,7 @@ export function MemberShell({ children }: Props) {
     { href: '/membership', label: status === 'loading' || isPaid ? 'Membership' : 'Upgrade' },
     ...(commons ? [] : [{ href: '/cove', label: vanillaizeIfDemo('The Cove') }]),
     ...(commons ? [] : [{ href: '/programs', label: 'Programs' }]),
-    { href: '/member-portal/payment-methods', label: 'Payment methods' },
+    { href: '/member-portal/payment-methods', label: 'Saved Payment Methods' },
     ...(isPublicDemoInstance() || commons
       ? []
       : [{ href: '/member-portal/videos', label: 'Videos' }]),
