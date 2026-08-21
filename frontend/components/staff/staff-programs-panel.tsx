@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { GripVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
 import {
@@ -109,6 +110,15 @@ function todayYmd() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+function sortProgramsByDisplayOrder(list: Program[]): Program[] {
+  return [...list].sort((a, b) => {
+    const ao = Number(a.sortOrder ?? 0) || 0
+    const bo = Number(b.sortOrder ?? 0) || 0
+    if (ao !== bo) return ao - bo
+    return a.name.localeCompare(b.name)
+  })
+}
+
 export function StaffProgramsPanel() {
   const [programs, setPrograms] = useState<Program[]>([])
   const [sessions, setSessions] = useState<Session[]>([])
@@ -133,6 +143,9 @@ export function StaffProgramsPanel() {
   const [showOlderPrograms, setShowOlderPrograms] = useState(false)
   /** Frozen while editing so filter/sort cannot yank the focused field away. */
   const [visibleIdOrder, setVisibleIdOrder] = useState<string[]>([])
+  const [dragId, setDragId] = useState<string | null>(null)
+  /** Insertion index while dragging: 0 = first, length = last. */
+  const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [attProgramId, setAttProgramId] = useState('')
   const [attDate, setAttDate] = useState(todayYmd)
   const [attStudents, setAttStudents] = useState<AttendanceStudent[]>([])
@@ -149,8 +162,10 @@ export function StaffProgramsPanel() {
   })
 
   const visiblePrograms = useMemo(() => {
-    if (showOlderPrograms) return programs
-    if (visibleIdOrder.length === 0) return selectCurrentFall2026Programs(programs)
+    if (showOlderPrograms) return sortProgramsByDisplayOrder(programs)
+    if (visibleIdOrder.length === 0) {
+      return sortProgramsByDisplayOrder(selectCurrentFall2026Programs(programs))
+    }
     const byId = new Map(programs.map((p) => [p.id, p]))
     return visibleIdOrder.map((id) => byId.get(id)).filter(Boolean) as Program[]
   }, [programs, showOlderPrograms, visibleIdOrder])
@@ -212,7 +227,9 @@ export function StaffProgramsPanel() {
         }
       }
       setPrograms(list)
-      setVisibleIdOrder(selectCurrentFall2026Programs(list).map((p) => p.id))
+      setVisibleIdOrder(
+        sortProgramsByDisplayOrder(selectCurrentFall2026Programs(list)).map((p) => p.id),
+      )
       const firstId = list[0]?.id as string | undefined
       if (firstId) {
         setRosterProgramId((prev) => prev || firstId)
@@ -311,6 +328,67 @@ export function StaffProgramsPanel() {
     } finally {
       setSavingProgramId(null)
     }
+  }
+
+  async function applyDisplayOrder(orderedIds: string[]) {
+    const total = orderedIds.length
+    setVisibleIdOrder(orderedIds)
+    setPrograms((list) =>
+      list.map((p) => {
+        const idx = orderedIds.indexOf(p.id)
+        return idx >= 0 ? { ...p, sortOrder: idx + 1 } : p
+      }),
+    )
+    setBusy(true)
+    try {
+      for (let i = 0; i < orderedIds.length; i++) {
+        const id = orderedIds[i]
+        const sortOrder = i + 1
+        const r = await fetch('/api/staff/programs', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kind: 'program', id, sortOrder }),
+        })
+        const d = await r.json()
+        if (!r.ok) throw new Error(d.error ?? 'Could not save display order')
+      }
+      setStatus(`Saved display order. Positions 1 to ${total}.`)
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Could not save display order')
+      await load()
+    } finally {
+      setBusy(false)
+      setDragId(null)
+      setDropIndex(null)
+    }
+  }
+
+  function clearDrag() {
+    setDragId(null)
+    setDropIndex(null)
+  }
+
+  function commitDragToIndex(insertBefore: number) {
+    if (!dragId) {
+      clearDrag()
+      return
+    }
+    const ids = visiblePrograms.map((p) => p.id)
+    const from = ids.indexOf(dragId)
+    if (from < 0) {
+      clearDrag()
+      return
+    }
+    let to = insertBefore
+    if (from < insertBefore) to = insertBefore - 1
+    if (to === from) {
+      clearDrag()
+      return
+    }
+    const next = [...ids]
+    next.splice(from, 1)
+    next.splice(to, 0, dragId)
+    void applyDisplayOrder(next)
   }
 
   async function createProgram(seed?: Partial<Program>) {
@@ -723,7 +801,13 @@ export function StaffProgramsPanel() {
               const next = e.target.checked
               setShowOlderPrograms(next)
               if (!next) {
-                setVisibleIdOrder(selectCurrentFall2026Programs(programs).map((p) => p.id))
+                setVisibleIdOrder(
+                  sortProgramsByDisplayOrder(selectCurrentFall2026Programs(programs)).map(
+                    (p) => p.id,
+                  ),
+                )
+              } else {
+                setVisibleIdOrder(sortProgramsByDisplayOrder(programs).map((p) => p.id))
               }
             }}
           />
@@ -744,6 +828,27 @@ export function StaffProgramsPanel() {
               Add program
             </Button>
           </div>
+          {visiblePrograms.length > 0 ? (
+            <p className="text-xs text-[#5A6070] whitespace-pre-line">
+              {`Drag the grip to set public catalog order.
+There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' : 's'} in this list.`}
+            </p>
+          ) : null}
+          {dragId && dropIndex != null ? (
+            <div
+              className="sticky top-2 z-10 rounded-lg border px-3 py-2 text-sm font-semibold shadow-sm"
+              style={{
+                backgroundColor: 'var(--brand-warm)',
+                borderColor: 'var(--brand-green)',
+                color: 'var(--brand-green)',
+              }}
+              aria-live="polite"
+            >
+              {dropIndex >= visiblePrograms.length
+                ? `Drop as position ${visiblePrograms.length} of ${visiblePrograms.length}`
+                : `Drop as position ${dropIndex + 1} of ${visiblePrograms.length}`}
+            </div>
+          ) : null}
           {visiblePrograms.length === 0 ? (
             <p className="text-sm text-[#5A6070] whitespace-pre-line">
               {showOlderPrograms
@@ -751,10 +856,54 @@ export function StaffProgramsPanel() {
                 : 'No Fall 2026 programs in this list yet.\nTurn on “Show older programs” for prior seasons.\nCurrent season: Fall 2026 start date, plus featured and/or registration open.'}
             </p>
           ) : null}
-          {visiblePrograms.map((p) => (
-            <div key={p.id} className="border border-[var(--border)] rounded-lg p-3 space-y-2">
+          {visiblePrograms.map((p, index) => (
+            <div
+              key={p.id}
+              className={`border border-[var(--border)] rounded-lg p-3 space-y-2 ${
+                dragId === p.id ? 'opacity-60' : ''
+              } ${
+                dragId && dropIndex === index
+                  ? 'ring-2 ring-[var(--brand-green)] ring-offset-1'
+                  : ''
+              }`}
+              onDragOver={(e) => {
+                if (!dragId) return
+                e.preventDefault()
+                const rect = e.currentTarget.getBoundingClientRect()
+                const before = e.clientY < rect.top + rect.height / 2
+                setDropIndex(before ? index : index + 1)
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                if (dropIndex == null) {
+                  clearDrag()
+                  return
+                }
+                commitDragToIndex(dropIndex)
+              }}
+            >
               <div className="flex flex-wrap justify-between gap-2">
-                <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 flex-1 items-start gap-2">
+                  <button
+                    type="button"
+                    draggable
+                    aria-label={`Drag to reorder ${p.name}. Currently position ${index + 1} of ${visiblePrograms.length}.`}
+                    title={`Drag to reorder. Currently ${index + 1} of ${visiblePrograms.length}`}
+                    className="mt-1 shrink-0 cursor-grab touch-none rounded border border-[var(--border)] bg-white p-1 text-[#5A6070] active:cursor-grabbing"
+                    onDragStart={(e) => {
+                      setDragId(p.id)
+                      setDropIndex(index)
+                      e.dataTransfer.effectAllowed = 'move'
+                      e.dataTransfer.setData('text/plain', p.id)
+                    }}
+                    onDragEnd={() => clearDrag()}
+                  >
+                    <GripVertical className="h-4 w-4" aria-hidden />
+                  </button>
+                  <div className="min-w-0 flex-1">
+                  <p className="mb-1 text-[11px] font-semibold text-[#5A6070]">
+                    Position {index + 1} of {visiblePrograms.length}
+                  </p>
                   <input
                     value={p.name}
                     aria-label="Program name"
@@ -787,6 +936,7 @@ export function StaffProgramsPanel() {
                       {p.id}
                     </button>
                   </p>
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs">
                   <label className="inline-flex items-center gap-1">
@@ -945,7 +1095,7 @@ export function StaffProgramsPanel() {
                   </span>
                 </label>
                 <label className="text-[11px] text-[#5A6070] space-y-0.5">
-                  <span>Sort order</span>
+                  <span>Sort order (drag preferred)</span>
                   <input
                     type="number"
                     value={p.sortOrder}
@@ -953,8 +1103,29 @@ export function StaffProgramsPanel() {
                     onChange={(e) =>
                       changeProgramLocal(p.id, { sortOrder: Number(e.target.value) || 0 })
                     }
-                    onBlur={(e) => void saveProgram(p.id, { sortOrder: Number(e.target.value) || 0 })}
+                    onBlur={(e) => {
+                      const sortOrder = Number(e.target.value) || 0
+                      void saveProgram(p.id, { sortOrder }).then(() => {
+                        setVisibleIdOrder(
+                          sortProgramsByDisplayOrder(
+                            showOlderPrograms
+                              ? programs.map((row) =>
+                                  row.id === p.id ? { ...row, sortOrder } : row,
+                                )
+                              : selectCurrentFall2026Programs(
+                                  programs.map((row) =>
+                                    row.id === p.id ? { ...row, sortOrder } : row,
+                                  ),
+                                ),
+                          ).map((row) => row.id),
+                        )
+                      })
+                    }}
                   />
+                  <span className="block text-[10px] mt-0.5">
+                    Public page shows lower numbers first. Drag uses 1 to{' '}
+                    {visiblePrograms.length}.
+                  </span>
                 </label>
                 <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
                   <span>Cheddar Up / external checkout URL</span>
@@ -1080,6 +1251,25 @@ export function StaffProgramsPanel() {
               />
             </div>
           ))}
+          {dragId && visiblePrograms.length > 0 ? (
+            <div
+              className={`h-10 rounded-lg border border-dashed text-center text-xs leading-10 ${
+                dropIndex === visiblePrograms.length
+                  ? 'border-[var(--brand-green)] text-[var(--brand-green)]'
+                  : 'border-[var(--border)] text-[#5A6070]'
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setDropIndex(visiblePrograms.length)
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                commitDragToIndex(visiblePrograms.length)
+              }}
+            >
+              Drop here for last (position {visiblePrograms.length} of {visiblePrograms.length})
+            </div>
+          ) : null}
         </div>
       ) : null}
 
