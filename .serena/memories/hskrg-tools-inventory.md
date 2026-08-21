@@ -1,35 +1,20 @@
-# Tools inventory (evidence-based, pair-down)
+# HSKRG tools inventory (pair-down)
 
-## SHMS only (school cost wall)
-| Tool | Action |
-|------|--------|
-| Wix CMS / Members / Stores | Stay school account |
-| School Square | Stay |
-| Google Workspace @shmspto.org | Stay |
-| MoneyMinder / PayPal / Cheddar Up / Litecard | Stay |
-| UptimeRobot (president@shmspto.org) | Stay |
-| GA4 / Vercel Analytics on frontend | Stay on SHMS project |
+See also file `.serena/memories/hskrg-tools-inventory.md` in wix-shmspto.
 
-## Pavilion / HSKRG only (never on SHMS Vercel)
-| Tool | Action |
-|------|--------|
-| Pavilion Stripe (onpavilion.com) | Rob owns keys |
-| Render commons-prod / commons-crm | Pavilion |
-| Better Auth / Resend | Pavilion |
-| commons-site / commons-pto / commons-pto-demo | HSKRG |
+## SHMS only
+Wix, school Square, Google Workspace @shmspto.org, MoneyMinder, PayPal, Cheddar Up, Litecard, UptimeRobot, SHMS Vercel `frontend`.
 
-## Entanglements to break in extract
-| Tool | Fix |
-|------|-----|
-| GitHub auraflux-dev hosting SHMS app | New repo `shmspto` (this extract) |
-| R2 auraflux-backups for SHMS CMS | Move to school-billed R2 prefix/bucket (document; Rob/ops) |
-| ElevenLabs / Gemini via cwn-c0 for SHMS promos | Stop using CWN env for SHMS; school/HSKRG-separated keys |
-| Canva | Rob owns |
-| Same Vercel team for SHMS + Pavilion | Prefer separate teams later; projects stay env-isolated now |
+## Pavilion / HSKRG only
+Pavilion Stripe (Rob), Render commons-prod/crm, Better Auth/Resend, commons-site / commons-pto / commons-pto-demo.
 
-## Shared HSKRG commercial only (pair down by focus)
-Jira, Confluence, GitHub (Auraflux/HSKRG), Render, Vercel (Pavilion projects), Cursor/Serena, Cloudflare (non-SHMS), YouTube (CWN/BTM/streamers).
+## Entanglements
+- GitHub: SHMS → `auraflux-dev/shmspto`; Pavilion → `auraflux-dev/wix-shmspto`
+- R2: move SHMS backups off shared auraflux-backups without school-paid split
+- CWN ElevenLabs/Gemini: do not use for SHMS promos
+- Canva: Rob
+- Vercel Git App: grant access to `shmspto` for auto-deploy (CLI deploy already proven)
 
-Rule: if unused this quarter for the active product, freeze or drop the seat.
-
-No in-repo evidence for Telnyx, Apify, RunPod, Neon-in-use, Sentry. Do not buy for extract.
+## Shared HSKRG commercial
+Jira, Confluence, GitHub, Render, Cursor/Serena, Cloudflare (non-SHMS), YouTube CWN/BTM.
+Pair down by focus each quarter.
