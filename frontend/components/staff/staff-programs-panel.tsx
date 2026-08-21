@@ -620,7 +620,7 @@ export function StaffProgramsPanel() {
             <p className="text-sm text-[#5A6070] whitespace-pre-line">
               {showOlderPrograms
                 ? 'No programs in your scope. Ask an admin to assign program IDs on your StaffRoles row.'
-                : 'No Fall 2026 enrichment programs in this list yet.\nTurn on “Show older programs” for prior seasons.\nCurrent season needs a 2026 start date (or open/featured) and a name match for Young Entrepreneurs / Essay / MATHCOUNTS / Robotics.'}
+                : 'No Fall 2026 programs in this list yet.\nTurn on “Show older programs” for prior seasons.\nCurrent season: Fall 2026 start date, plus featured and/or registration open.'}
             </p>
           ) : null}
           {visiblePrograms.map((p) => (

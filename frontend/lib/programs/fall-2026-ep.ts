@@ -89,7 +89,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
     id: 'mathcounts',
     name: 'MATHCOUNTS',
     publicSlug: 'mathcounts',
-    cmsNameIncludes: ['mathcounts', 'mathnasium'],
+    cmsNameIncludes: ['mathcounts', 'mathnasium', 'competitive math', 'math prep'],
     dayOfWeek: 'Wednesday',
     classTime: '5:30 to 6:45 PM',
     startClock: '17:30',
@@ -185,9 +185,15 @@ function fall2026CandidateScore(program: {
   return score
 }
 
+function hasFall2026SeasonStart(program: { startDate?: string }): boolean {
+  const start = String(program.startDate ?? '').slice(0, 10)
+  return Boolean(start && start >= '2026-08-01' && start < '2027-01-01')
+}
+
 /**
- * Staff default list: at most one CMS Programs row per Fall 2026 EP class.
- * Drops prior-season duplicates that share names like Essay / Robotics.
+ * Staff default list: current Fall 2026 season programs.
+ * Keeps at most one row per packet class when names collide, and also keeps
+ * other Fall 2026 featured/open rows (e.g. Competitive Math Prep).
  */
 export function selectCurrentFall2026Programs<
   T extends {
@@ -218,7 +224,19 @@ export function selectCurrentFall2026Programs<
     picked.push(winner)
     used.add(winner.id)
   }
-  return picked
+
+  // Current-season rows that are not one of the four packet name matches.
+  for (const p of programs) {
+    if (used.has(p.id)) continue
+    if (matchFall2026EpClass(p.name)) continue
+    if (String(p.fallEpClassId ?? '').trim()) continue
+    if (!hasFall2026SeasonStart(p)) continue
+    if (fall2026CandidateScore(p) < 50) continue
+    picked.push(p)
+    used.add(p.id)
+  }
+
+  return picked.sort((a, b) => a.name.localeCompare(b.name))
 }
 
 /** Parse CMS meetingDates; fall back to packet dates. */
