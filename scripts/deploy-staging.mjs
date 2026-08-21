@@ -61,7 +61,7 @@ if (!deploymentUrl) {
 
 const hostOnly = deploymentUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
 console.log(`Aliasing ${hostOnly} → ${STAGING_HOST} …`)
-run('npx', ['vercel', 'alias', hostOnly, STAGING_HOST, '--yes'], {
+run('npx', ['vercel', 'alias', hostOnly, STAGING_HOST], {
   cwd: root,
   capture: false,
 })
