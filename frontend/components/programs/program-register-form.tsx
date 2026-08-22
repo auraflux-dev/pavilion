@@ -76,6 +76,11 @@ export function ProgramRegisterForm({
     .map((t) => t.trim())
     .includes('fee-tbd')
   const scheduleLine = formatProgramSchedule(program)
+  const springAddon =
+    addCompanion && companion && resolveProgramSeason(companion) === 'spring-2027'
+      ? companion
+      : null
+  const checkoutTotal = fee + (springAddon ? Number(springAddon.fee ?? 0) : 0)
 
   const onConsentChange = useCallback((acks: ConsentAck[] | null, complete: boolean) => {
     setConsents(acks)
@@ -113,8 +118,7 @@ export function ProgramRegisterForm({
         throw new Error('Please review and accept the required terms')
       }
 
-      const addonProgramIds =
-        addCompanion && companion?._id ? [companion._id] : undefined
+      const addonProgramIds = springAddon?._id ? [springAddon._id] : undefined
       const res = await fetch('/api/programs/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -135,7 +139,7 @@ export function ProgramRegisterForm({
         const pct = Number(data.memberDiscountPercent ?? 0)
         if (pct > 0) {
           setSuccess(
-            `${pct}% membership discount applied (list $${Number(data.listFee).toFixed(2)} → $${amount.toFixed(2)}). Complete payment to enroll.`,
+            `${pct}% membership discount applied.\nList $${Number(data.listFee).toFixed(2)} → $${amount.toFixed(2)}.\nComplete payment to enroll.`,
           )
         }
         setPayOpen(true)
@@ -188,13 +192,16 @@ export function ProgramRegisterForm({
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-base font-bold text-[#1A1A1A]">{title}</p>
-            <p className="text-sm font-bold mt-1" style={{ color: 'var(--brand-green)' }}>
+            <p
+              className="text-sm font-bold mt-1 whitespace-pre-line"
+              style={{ color: 'var(--brand-green)' }}
+            >
               {feeTbd
                 ? 'Tuition TBD'
                 : fee <= 0
                   ? 'Free'
-                  : addCompanion && companion
-                    ? `$${(fee + Number(companion.fee ?? 0)).toFixed(2)} (Fall + Spring)`
+                  : springAddon
+                    ? `$${checkoutTotal.toFixed(2)}\nFall + Spring`
                     : `$${fee.toFixed(2)}`}
             </p>
             {!feeTbd && fee > 0 && String(program.memberDiscountNote ?? '').trim() ? (
@@ -283,8 +290,8 @@ export function ProgramRegisterForm({
               <SpringCompanionOffer
                 companion={companion}
                 variant="checkout"
-                selectable
-                selected={addCompanion}
+                selectable={resolveProgramSeason(companion) === 'spring-2027'}
+                selected={Boolean(springAddon)}
                 onSelectedChange={setAddCompanion}
               />
             ) : null}
@@ -312,7 +319,7 @@ Only paste a code here if you need to override.`}
 
             {error ? <p className="text-xs text-red-600">{error}</p> : null}
             {success ? (
-              <p className="text-xs font-semibold text-green-700">{success}</p>
+              <p className="text-xs font-semibold text-green-700 whitespace-pre-line">{success}</p>
             ) : null}
 
             <div className="space-y-2">
@@ -322,29 +329,25 @@ Only paste a code here if you need to override.`}
                 disabled={!studentId || feeTbd}
                 className="w-full font-bold"
                 onClick={() => {
-                  const companionFee =
-                    addCompanion && companion ? Number(companion.fee ?? 0) : 0
-                  const title =
-                    addCompanion && companion
-                      ? `${displayProgramName(program.name)} + ${displayProgramName(companion.name)}`
-                      : displayProgramName(program.name)
+                  const title = springAddon
+                    ? `${displayProgramName(program.name)} + ${displayProgramName(springAddon.name)}`
+                    : displayProgramName(program.name)
                   cart.add({
                     kind: 'program',
                     title,
-                    amount: fee + companionFee,
+                    amount: checkoutTotal,
                     href: programPublicPath(program),
                     programId: program._id,
-                    addonProgramIds:
-                      addCompanion && companion?._id ? [companion._id] : undefined,
+                    addonProgramIds: springAddon?._id ? [springAddon._id] : undefined,
                     studentId: studentId || undefined,
                   })
-                  setCartNote('Added to cart. Check out anytime from the bag icon.')
+                  setCartNote(
+                    'Added to cart.\nCheck out anytime from the bag icon.',
+                  )
                   onClose?.()
                 }}
               >
-                {`Add to cart · $${(
-                  fee + (addCompanion && companion ? Number(companion.fee ?? 0) : 0)
-                ).toFixed(2)}`}
+                {`Add to cart · $${checkoutTotal.toFixed(2)}`}
               </Button>
               <Button
                 type="button"
@@ -356,15 +359,13 @@ Only paste a code here if you need to override.`}
                 {busy ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : fee > 0 && !feeTbd ? (
-                  `Pay now · $${(
-                    fee + (addCompanion && companion ? Number(companion.fee ?? 0) : 0)
-                  ).toFixed(2)}`
+                  `Pay now · $${checkoutTotal.toFixed(2)}`
                 ) : (
                   'Complete registration'
                 )}
               </Button>
               {cartNote ? (
-                <p className="text-xs font-semibold text-green-700">{cartNote}</p>
+                <p className="text-xs font-semibold text-green-700 whitespace-pre-line">{cartNote}</p>
               ) : null}
             </div>
           </>
@@ -385,8 +386,7 @@ Only paste a code here if you need to override.`}
           kind: 'program',
           programId: program._id,
           studentId,
-          addonProgramIds:
-            addCompanion && companion?._id ? [companion._id] : undefined,
+          addonProgramIds: springAddon?._id ? [springAddon._id] : undefined,
           couponCode: couponCode.trim() || undefined,
           consents: consents ?? undefined,
         }}

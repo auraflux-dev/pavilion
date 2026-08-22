@@ -15,6 +15,11 @@ import {
 import { fallEpClassById, matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
 import { programLandingCopy } from '@/lib/programs/landing-copy'
 import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
+import {
+  CATALOG_SEASON_LABELS,
+  resolveProgramSeason,
+  type CatalogSeasonId,
+} from '@/lib/programs/season'
 function hasTag(program: Program, tag: string) {
   return String(program.tags ?? '')
     .toLowerCase()
@@ -58,7 +63,13 @@ export function ProgramLanding({
   const ep =
     fallEpClassById(String(program.fallEpClassId ?? '').trim()) ||
     matchFall2026EpClass(program.name)
-  const copy = programLandingCopy(ep?.id)
+  const season = resolveProgramSeason(program)
+  const copy = programLandingCopy(ep?.id, season)
+  const seasonLabel =
+    CATALOG_SEASON_LABELS[season as CatalogSeasonId] ||
+    (season === 'spring-2027' ? 'Spring 2027' : 'Fall 2026')
+  const scheduleHref =
+    season === 'spring-2027' ? '/programs/spring-2027' : '/programs/fall-2026'
   const feeTbd = hasTag(program, 'fee-tbd')
   const phase = getRegistrationPhase(program)
   const priorityUntilLabel =
@@ -123,7 +134,8 @@ export function ProgramLanding({
             <div className="lg:col-span-5 space-y-5">
               <header className="space-y-3">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--brand-green)]">
-                  {copy?.eyebrow || program.category || 'Enrichment'}
+                  {copy?.eyebrow ||
+                    `${seasonLabel}${program.category ? ` · ${program.category}` : ''}`}
                 </p>
                 <h1 className="text-3xl sm:text-4xl font-bold text-[#1A1A1A] tracking-tight text-balance leading-[1.15]">
                   {title}
@@ -262,10 +274,10 @@ export function ProgramLanding({
                 </Button>
                 <p className="text-center">
                   <Link
-                    href="/programs/fall-2026"
+                    href={scheduleHref}
                     className="text-sm font-semibold text-[var(--brand-green)] hover:underline underline-offset-2"
                   >
-                    Fall 2026 schedule
+                    {season === 'spring-2027' ? 'Spring 2027 schedule' : 'Fall 2026 schedule'}
                   </Link>
                 </p>
               </div>

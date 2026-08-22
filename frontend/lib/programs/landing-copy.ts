@@ -171,8 +171,115 @@ const FALL: Record<string, ProgramLandingCopy> = {
   },
 }
 
-export function programLandingCopy(epId: string | undefined): ProgramLandingCopy | null {
+const SPRING: Record<string, ProgramLandingCopy> = {
+  ye: {
+    eyebrow: 'Spring 2027 · Business',
+    pitch:
+      'Young Entrepreneurs II.\nCapital, investor practice, and Stingray Tank pitch night.',
+    highlights: [
+      'Continues Missy Spears from Fall. Same Tuesday night.',
+      'Startup costs, pricing, elevator pitches, and public speaking.',
+      'Twelve Tuesday nights. Cap 30. Culminating Stingray Tank.',
+    ],
+    curriculumTitle: 'Spring curriculum (Part II outline)',
+    curriculum: [
+      { week: 1, title: 'Fall review & spring goals' },
+      { week: 2, title: 'Startup costs & basic financials' },
+      { week: 3, title: 'Pricing & value' },
+      { week: 4, title: 'Customer discovery refresh' },
+      { week: 5, title: 'Investor questions' },
+      { week: 6, title: 'Elevator pitch craft' },
+      { week: 7, title: 'Public speaking drills' },
+      { week: 8, title: 'Pitch deck structure' },
+      { week: 9, title: 'Practice rounds' },
+      { week: 10, title: 'Stingray Tank rehearsal' },
+      { week: 11, title: 'Final polish' },
+      { week: 12, title: 'Stingray Tank showcase' },
+    ],
+  },
+  essay: {
+    eyebrow: 'Spring 2027 · Academic',
+    pitch:
+      'Analytical and high-school ready writing.\nEvidence, MLA basics, and persuasive essays.',
+    highlights: [
+      'Lumi. Andrew Martineau. Cap 10 to 14.',
+      'Research habits, comparative essays, and editing.',
+      'Twelve Tuesday nights. Continues Fall composition.',
+    ],
+    curriculumTitle: 'Spring curriculum (Lumi Part II)',
+    curriculum: [
+      { week: 1, title: 'Fall portfolio warm-up' },
+      { week: 2, title: 'Claims with evidence' },
+      { week: 3, title: 'MLA basics' },
+      { week: 4, title: 'Research notes that stick' },
+      { week: 5, title: 'Persuasive essay structure' },
+      { week: 6, title: 'Comparative analysis' },
+      { week: 7, title: 'Counterarguments' },
+      { week: 8, title: 'High-school prompt practice' },
+      { week: 9, title: 'Revision loops' },
+      { week: 10, title: 'Voice under pressure' },
+      { week: 11, title: 'Peer edit clinic' },
+      { week: 12, title: 'Spring portfolio review' },
+    ],
+  },
+  mathcounts: {
+    eyebrow: 'Spring 2027 · Competition',
+    pitch:
+      'RSM Ashburn Part II.\nAdvanced systems, team tactics, and full mocks.',
+    highlights: [
+      'Same Wednesday night. Cap 30.',
+      'Sprint, Target, Team, and Countdown under time.',
+      'Mock competitions late in the semester.',
+    ],
+    curriculumTitle: 'Spring curriculum (RSM Part II)',
+    curriculum: [
+      { week: 1, title: 'Fall skills check' },
+      { week: 2, title: 'Mixed strategy selection' },
+      { week: 3, title: 'Sprint focus' },
+      { week: 4, title: 'Target focus' },
+      { week: 5, title: 'Team round tactics' },
+      { week: 6, title: 'Countdown under pressure' },
+      { week: 7, title: 'Timed mixed sets' },
+      { week: 8, title: 'Error analysis clinic' },
+      { week: 9, title: 'Mock competition I' },
+      { week: 10, title: 'Mock competition II' },
+      { week: 11, title: 'Weak-spot workshops' },
+      { week: 12, title: 'Spring finals review' },
+    ],
+  },
+  robotics: {
+    eyebrow: 'Spring 2027 · STEM',
+    pitch:
+      'Blocks to Python and advanced autonomy.\nSame team kit model. Nothing to buy.',
+    highlights: [
+      'Loudoun Robotics Part II. Teams of 3.',
+      'Functions, gyro, line following, and attachments.',
+      'Engineering notebook and Spring showcase.',
+    ],
+    curriculumTitle: 'Spring curriculum (Loudoun Part II)',
+    curriculum: [
+      { week: 1, title: 'Fall hardware refresh' },
+      { week: 2, title: 'Functions in Blocks' },
+      { week: 3, title: 'Gyro turns' },
+      { week: 4, title: 'Line following' },
+      { week: 5, title: 'Python intro on SPIKE' },
+      { week: 6, title: 'Sensors in Python' },
+      { week: 7, title: 'Attachment design' },
+      { week: 8, title: 'Mission course planning' },
+      { week: 9, title: 'Notebook standards' },
+      { week: 10, title: 'Full mission runs' },
+      { week: 11, title: 'Troubleshooting clinic' },
+      { week: 12, title: 'Spring family showcase' },
+    ],
+  },
+}
+
+export function programLandingCopy(
+  epId: string | undefined,
+  season?: 'fall-2026' | 'spring-2027' | string,
+): ProgramLandingCopy | null {
   if (!epId) return null
+  if (season === 'spring-2027') return SPRING[epId] ?? null
   return FALL[epId] ?? null
 }
 
