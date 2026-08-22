@@ -1,0 +1,40 @@
+---
+description: Never access parent, staff, student, or financial data in this repo
+alwaysApply: true
+---
+
+# No PII / financial data (mandatory)
+
+Agents must **not** read, query, export, paste, or modify live **parent, staff, student, or financial** data.
+
+## Never read or open
+
+- `.env`, `.env.local`, `.env.*` (except `.env.development.example`)
+- `.vercel/` or output of `vercel env pull`
+- `tmp/`, `data/`, `migration/data/`, `scripts/sales/out/`
+- Any CSV/SQL/backup/roster/export file
+- Downloaded CMS backups or Plaid/budget dumps
+
+## Never run (unless Rob explicitly says **ops on prod data** in that message)
+
+- `vercel env pull`, `vercel env ls`, or any command whose purpose is loading production secrets
+- HTTP/scripts that query Wix **Students**, **Memberships**, **Payments**, **StaffRoles**, **StaffPlaidItems**, **PtoBudgetLines**, **PtoBudgetEntries**, **ExpenseReimbursements**, **ContactSubmissions**, **FamilyGuardians**, **StaffGoogleTokens**, **StaffCanvaTokens**, **NewsletterSubscribers** (live rows)
+- Ops scripts: `sanitize-students-directory.mjs`, `rollover-import-grades.mjs`, `check-newsletter-roster.mjs`, `backfill-cove-square-customers.mjs`, CMS backup restore, Plaid exchange against prod
+- Direct DB access (`psql`, Neon prod URL, `query_render_postgres` on production)
+
+## Allowed without asking
+
+- Edit **code, types, schemas, UI, tests** that describe data shapes (no live values)
+- Use **fixtures/mocks** with fake names (`parent@example.com`, `Jane Example`)
+- Deploy from clean worktree when ship rules say so (do not pull env into the workspace to “inspect”)
+- Read **public** site content and staff **help** copy (no roster APIs)
+
+## When debugging data issues
+
+- Ask Rob for **counts, error text, or redacted snippets** (no emails, student names, grades, dollar amounts, tokens)
+- Do not request full API responses or CSVs in chat
+
+## Pavilion vs Stone Hill
+
+- **Pavilion** (`commons-*`): no Stone Hill Wix/Plaid/Square prod credentials. Vanilla demo only.
+- **Stone Hill** live data lives in Wix CMS and Vercel env, not in git. Agents work on code paths only.

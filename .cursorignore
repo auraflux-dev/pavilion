@@ -1,0 +1,31 @@
+# Secrets and deploy artifacts (agents must not read)
+.env
+.env.*
+!.env.development.example
+frontend/.env.local
+frontend/.env
+.vercel/
+**/.vercel/
+
+# Local exports, roster dumps, finance scratch
+tmp/
+data/
+migration/data/
+scripts/sales/out/
+**/*roster*
+**/*export*
+**/*backup*
+**/*.csv
+**/*.sql
+**/*.sqlite
+**/*.db
+
+# CMS / finance ops outputs
+**/cms-backup-*/
+**/plaid-*/
+**/budget-import*/
+
+# Promo captures that may show portal PII
+promo-videos/.pw-portal-profile/
+promo-videos/assets/portal-walkthrough/
+promo-videos/assets/_pw_scroll_tmp/

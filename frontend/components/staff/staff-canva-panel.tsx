@@ -294,7 +294,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
             <div className="space-y-3 pt-1">
               <p className="text-xs text-[#5A6070] leading-relaxed">
                 Optional later. Day-to-day Marketing only needs the folder link above. API Connect
-                can wait until a PTO-owned Canva app exists. See{' '}
+                uses a Public Canva integration (draft mode). See{' '}
                 <code className="text-[11px]">docs/CANVA-SETUP.md</code>.
               </p>
               {!status?.clientConfigured ? (

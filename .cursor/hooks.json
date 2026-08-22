@@ -1,10 +1,10 @@
 {
   "version": 1,
   "hooks": {
-    "sessionStart": [
+    "beforeShellExecution": [
       {
-        "command": ".cursor/hooks/commons-parity-session.py",
-        "timeout": 45
+        "command": ".cursor/hooks/block-pii-shell.sh",
+        "failClosed": false
       }
     ]
   }
