@@ -158,6 +158,7 @@ export async function sendMassEmail(
       subject?: string
       body?: string
       html?: string
+      listUnsubscribeUrl?: string
     }
   } = {},
 ): Promise<SendMassEmailResult> {
@@ -225,6 +226,7 @@ export async function sendMassEmail(
         subject: (personalized?.subject ?? draft.subject).trim(),
         text: (personalized?.body ?? draft.body).trim(),
         html: (personalized?.html ?? draft.html)?.trim(),
+        listUnsubscribeUrl: personalized?.listUnsubscribeUrl?.trim(),
       })
       const res = await fetch(GMAIL_SEND_URL, {
         method: 'POST',
@@ -306,6 +308,7 @@ export function buildRawMimeMessage(opts: {
   subject: string
   text: string
   html?: string
+  listUnsubscribeUrl?: string
 }): string {
   const subject = encodeRfc2047(opts.subject)
   const text = opts.text.replace(/\r?\n/g, '\r\n')
@@ -315,6 +318,12 @@ export function buildRawMimeMessage(opts: {
     ...(opts.replyTo ? [`Reply-To: ${opts.replyTo}`] : []),
     `Subject: ${subject}`,
     'MIME-Version: 1.0',
+    ...(opts.listUnsubscribeUrl
+      ? [
+          `List-Unsubscribe: <${opts.listUnsubscribeUrl}>`,
+          'List-Unsubscribe-Post: List-Unsubscribe=One-Click',
+        ]
+      : []),
   ]
 
   if (opts.html?.trim()) {

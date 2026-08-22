@@ -769,11 +769,11 @@ export function StaffNewsletterPanel() {
           Write in sections (intro, beats, sign-off). Email shows labeled blocks with dividers.
         </label>
         <p className="text-[11px] text-[#5A6070]">
-          Header title and footer:{' '}
+          Header title and footer are one-time defaults in{' '}
           <Link href="/staff?view=site" className="underline text-[var(--brand-green)]">
             Staff → Site settings
-          </Link>{' '}
-          (Newsletter email header title / footer).
+          </Link>
+          . Every email also gets the school address and an unsubscribe link automatically (CAN-SPAM).
         </p>
         {useBeats ? (
           <div

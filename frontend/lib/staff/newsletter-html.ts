@@ -27,27 +27,46 @@ export function plainTextToEmailHtml(text: string): string {
   return escapeHtml(text).replace(/\r\n/g, '\n').replace(/\n/g, '<br />\n')
 }
 
-function footerHtml(origin: string, branding: NewsletterBranding): string {
+const FOOTER_TEXT_STYLE =
+  "margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;line-height:1.5;color:#5A6070;text-align:center"
+
+function footerLineHtml(line: string, marginTop: string): string {
+  const trimmed = line.trim()
+  if (!trimmed) return ''
+  const withLink = trimmed.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/gi, (url) => {
+    const href = url.startsWith('http') ? url : `https://${url}`
+    const label = url.replace(/^https?:\/\//, '')
+    return `<a href="${escapeHtml(href)}" style="color:#1B6B45">${escapeHtml(label)}</a>`
+  })
+  return `<p style="margin:${marginTop};${FOOTER_TEXT_STYLE}">${withLink}</p>`
+}
+
+function footerHtml(
+  origin: string,
+  branding: NewsletterBranding,
+  compliance?: { physicalAddress?: string; unsubscribeUrl?: string },
+): string {
+  const blocks: string[] = []
   const lines = branding.footerLines.length
     ? branding.footerLines
     : NEWSLETTER_BRANDING_DEFAULTS.newsletterFooterText.split('\n')
-  return lines
-    .map((line, i) => {
-      const trimmed = line.trim()
-      if (!trimmed) return ''
-      const withLink = trimmed.replace(
-        /(https?:\/\/[^\s]+|www\.[^\s]+)/gi,
-        (url) => {
-          const href = url.startsWith('http') ? url : `https://${url}`
-          const label = url.replace(/^https?:\/\//, '')
-          return `<a href="${escapeHtml(href)}" style="color:#1B6B45">${escapeHtml(label)}</a>`
-        },
-      )
-      const margin = i === 0 ? '0' : '6px 0 0'
-      return `<p style="margin:${margin};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;line-height:1.5;color:#5A6070;text-align:center">${withLink}</p>`
-    })
-    .filter(Boolean)
-    .join('\n')
+  lines.forEach((line, i) => {
+    const html = footerLineHtml(line, i === 0 ? '0' : '6px 0 0')
+    if (html) blocks.push(html)
+  })
+  const address = String(compliance?.physicalAddress ?? '').trim()
+  if (address) {
+    blocks.push(
+      `<p style="margin:10px 0 0;${FOOTER_TEXT_STYLE}">${escapeHtml(address)}</p>`,
+    )
+  }
+  const unsub = String(compliance?.unsubscribeUrl ?? '').trim()
+  if (unsub) {
+    blocks.push(
+      `<p style="margin:10px 0 0;${FOOTER_TEXT_STYLE}"><a href="${escapeHtml(unsub)}" style="color:#1B6B45">Unsubscribe</a> from SHMS PTO emails</p>`,
+    )
+  }
+  return blocks.join('\n')
 }
 
 function beatBlock(beat: NewsletterBeat, isFirst: boolean): string {
@@ -111,6 +130,8 @@ export function buildNewsletterHtml(opts: {
   canvaViewUrl?: string
   canvaThumbnailUrl?: string
   canvaTitle?: string
+  physicalAddress?: string
+  unsubscribeUrl?: string
   merge?: NewsletterMergeVars
 }): string {
   const origin = newsletterSiteOrigin()
@@ -176,7 +197,10 @@ ${pixel}
         </table>
       </td></tr>
       <tr><td style="padding:16px 20px 20px;border-top:1px solid #E2E8E4">
-        ${footerHtml(origin, branding)}
+        ${footerHtml(origin, branding, {
+          physicalAddress: opts.physicalAddress,
+          unsubscribeUrl: opts.unsubscribeUrl,
+        })}
       </td></tr>
     </table>
   </td></tr>

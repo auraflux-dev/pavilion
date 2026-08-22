@@ -23,9 +23,16 @@ import { buildNewsletterHtml } from '@/lib/staff/newsletter-html'
 import { parseBeatsJson } from '@/lib/staff/newsletter-sections'
 import {
   applyMergeFields,
-  hasMergeFields,
   mergeVarsFromParent,
 } from '@/lib/staff/newsletter-merge'
+import {
+  appendNewsletterComplianceText,
+  filterNewsletterOptOuts,
+  isNewsletterOptedOut,
+  loadNewsletterOptOutEmails,
+  newsletterUnsubscribeApiUrl,
+  newsletterUnsubscribePageUrl,
+} from '@/lib/staff/newsletter-unsubscribe'
 import {
   buildNewsletterTestGroups,
   parseEmailList,
@@ -145,7 +152,9 @@ export async function countNewsletterSubscribers(): Promise<number> {
 export async function loadSubscriberEmails(): Promise<string[]> {
   const rows = await loadAll('NewsletterSubscribers')
   return sanitizeRecipients(
-    rows.map((item) => String(item.email ?? item.parentEmail ?? '')),
+    rows
+      .filter((item) => !isNewsletterOptedOut(item))
+      .map((item) => String(item.email ?? item.parentEmail ?? '')),
   )
 }
 
@@ -282,6 +291,12 @@ export async function executeNewsletterEmail(
     }
   }
 
+  const optOuts = await loadNewsletterOptOutEmails()
+  recipients = filterNewsletterOptOuts(recipients, optOuts)
+  const physicalAddress =
+    (await loadSiteSetting('contactAddress')) ||
+    '23415 Evergreen Ridge Drive, Ashburn, VA 20148'
+
   let outboundBody = message
   let archiveBody = message
   let newsletterSendId: string | null = null
@@ -350,24 +365,60 @@ export async function executeNewsletterEmail(
 
   const branding = await loadNewsletterBrandingFromKeys(loadSiteSetting)
   const sections = input.beatsJson ? parseBeatsJson(input.beatsJson) : null
-  const html = !dryRun
-    ? buildNewsletterHtml({
-        textBody: outboundBody,
-        sections,
-        branding,
-        sendId: trackOpens ? newsletterSendId || undefined : undefined,
-        heroImageUrl: input.heroImageUrl || undefined,
-        extraImageUrls: input.extraImageUrls,
-        canvaViewUrl: input.canvaViewUrl || undefined,
-        canvaThumbnailUrl: input.canvaThumbnailUrl || undefined,
-        canvaTitle: input.canvaTitle || undefined,
-      })
-    : undefined
+  const byEmail = new Map(filteredRoster.map((r) => [r.parentEmail.toLowerCase(), r]))
+  const htmlOptsBase = {
+    sections,
+    branding,
+    sendId: trackOpens ? newsletterSendId || undefined : undefined,
+    heroImageUrl: input.heroImageUrl || undefined,
+    extraImageUrls: input.extraImageUrls,
+    canvaViewUrl: input.canvaViewUrl || undefined,
+    canvaThumbnailUrl: input.canvaThumbnailUrl || undefined,
+    canvaTitle: input.canvaTitle || undefined,
+    physicalAddress,
+  }
+
+  function personalizeForRecipient(to: string) {
+    const row = byEmail.get(to.toLowerCase())
+    const vars = row
+      ? mergeVarsFromParent(row)
+      : {
+          firstName: fromName.split(/\s+/)[0] || 'there',
+          lastName: '',
+          email: to,
+          tier: isTestAudience ? 'board' : isSubscribers ? 'signup' : 'member',
+          grade: '',
+        }
+    const unsubPage = newsletterUnsubscribePageUrl(to)
+    const subj = applyMergeFields(effectiveSubject, vars)
+    const coreText = applyMergeFields(outboundBody, vars)
+    const text = appendNewsletterComplianceText(coreText, {
+      physicalAddress,
+      unsubscribeUrl: unsubPage,
+    })
+    return {
+      subject: subj,
+      body: text,
+      html: buildNewsletterHtml({
+        ...htmlOptsBase,
+        textBody: coreText,
+        merge: vars,
+        unsubscribeUrl: unsubPage,
+      }),
+      listUnsubscribeUrl: newsletterUnsubscribeApiUrl(to),
+    }
+  }
 
   const draft = {
     ...draftBase,
     body: dryRun ? message : outboundBody,
-    html,
+    html: !dryRun
+      ? buildNewsletterHtml({
+          ...htmlOptsBase,
+          textBody: outboundBody,
+          unsubscribeUrl: newsletterUnsubscribePageUrl(recipients[0] || input.actorEmail),
+        })
+      : undefined,
   }
   const validation = validateMassEmailDraft(draft, { testSend: isTestAudience })
   if (validation) {
@@ -382,42 +433,10 @@ export async function executeNewsletterEmail(
   }
 
   const mailto = buildMailtoBcc(draft, { testSend: isTestAudience })
-  const wantsMerge = hasMergeFields(effectiveSubject) || hasMergeFields(outboundBody)
-  const byEmail = new Map(filteredRoster.map((r) => [r.parentEmail.toLowerCase(), r]))
-  const htmlOpts = {
-    sections,
-    branding,
-    sendId: trackOpens ? newsletterSendId || undefined : undefined,
-    heroImageUrl: input.heroImageUrl || undefined,
-    extraImageUrls: input.extraImageUrls,
-    canvaViewUrl: input.canvaViewUrl || undefined,
-    canvaThumbnailUrl: input.canvaThumbnailUrl || undefined,
-    canvaTitle: input.canvaTitle || undefined,
-  }
   const sendResult = await sendMassEmail(draft, {
     dryRun,
     testSend: isTestAudience,
-    personalize: wantsMerge
-      ? (to) => {
-          const row = byEmail.get(to.toLowerCase())
-          const vars = row
-            ? mergeVarsFromParent(row)
-            : {
-                firstName: fromName.split(/\s+/)[0] || 'there',
-                lastName: '',
-                email: to,
-                tier: isTestAudience ? 'board' : isSubscribers ? 'signup' : 'member',
-                grade: '',
-              }
-          const subj = applyMergeFields(effectiveSubject, vars)
-          const text = applyMergeFields(outboundBody, vars)
-          return {
-            subject: subj,
-            body: text,
-            html: buildNewsletterHtml({ ...htmlOpts, textBody: text, merge: vars }),
-          }
-        }
-      : undefined,
+    personalize: !dryRun ? personalizeForRecipient : undefined,
   })
 
   if (!dryRun && newsletterSendId) {

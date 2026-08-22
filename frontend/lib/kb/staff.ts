@@ -403,9 +403,9 @@ Do not paste HTML from Canva. Do not edit the design inside Staff. Use **Edit in
 ## Write the copy
 Type in the subject and body like a normal email.
 
-Optional: check **Write in sections**: intro, Event, Question (poll or reply prompt), CTA, sign-off. Add up to 8 sections. Email shows labeled blocks with dividers; headings are bold.
+Optional: check **Write in sections**: intro, Event, Question (reply prompt or poll link), CTA, sign-off. Add up to 8 sections. Email shows labeled blocks with dividers; headings are bold.
 
-Edit **Newsletter email header title** and **footer** under Staff → Site settings.
+Header title and footer are **one-time** defaults under Staff → Site settings (you do not edit them each send). Every email also includes the school postal address and an **Unsubscribe** link automatically (CAN-SPAM).
 
 Personal bits you can type in subject or body:
 - {{firstName}} or {{first name}} · {{name}} · {{tier}} · {{grade}} · {{email}}

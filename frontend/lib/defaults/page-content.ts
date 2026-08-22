@@ -215,6 +215,5 @@ export const CONTACT_DEFAULTS = {
   contactStoreHours: 'Mon. Fri · lunch periods (in person only)',
   portalGrades: '6,7,8',
   newsletterHeaderTitle: 'SHMS PTO',
-  newsletterFooterText:
-    'Stone Hill Middle School PTO\nwww.shmspto.org · Reply to this email with questions',
+  newsletterFooterText: 'Stone Hill Middle School PTO\nwww.shmspto.org',
 }

@@ -538,11 +538,11 @@ export const SITE_SETTING_GROUPS: {
       },
       {
         key: 'newsletterHeaderTitle',
-        label: 'Newsletter email header title (under logo)',
+        label: 'Newsletter email header title (under logo, one-time default)',
       },
       {
         key: 'newsletterFooterText',
-        label: 'Newsletter email footer (one line per row)',
+        label: 'Newsletter email footer lines (one-time default; unsubscribe is automatic)',
         multiline: true,
       },
       { key: 'contactAddress', label: 'Address', multiline: true },

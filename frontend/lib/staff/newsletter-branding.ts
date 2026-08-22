@@ -4,8 +4,8 @@
 
 export const NEWSLETTER_BRANDING_DEFAULTS = {
   newsletterHeaderTitle: 'SHMS PTO',
-  newsletterFooterText:
-    'Stone Hill Middle School PTO\nwww.shmspto.org · Reply to this email with questions',
+  /** Editable once in Site settings. Unsubscribe + postal address are added automatically. */
+  newsletterFooterText: 'Stone Hill Middle School PTO\nwww.shmspto.org',
 } as const
 
 export type NewsletterBranding = {

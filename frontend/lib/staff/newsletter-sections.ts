@@ -11,7 +11,7 @@ export const NEWSLETTER_BEAT_PRESETS = [
   {
     id: 'question',
     label: 'Question',
-    hint: 'Poll, parent Q, or “reply with your thoughts” (not portal Ask the PTO)',
+    hint: 'Reply prompt or link to a poll form (plain text only, not portal Ask the PTO)',
   },
   {
     id: 'cta',

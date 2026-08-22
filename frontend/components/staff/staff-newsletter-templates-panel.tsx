@@ -289,10 +289,12 @@ export function StaffNewsletterTemplatesPanel({
       <div>
         <h2 className="text-lg font-bold">Templates (Canva + copy)</h2>
         <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
-          Design = Canva PNG + editable header/footer (Site settings). Multi-page Canva exports every page into the email.
-          Use sections for intro, events, questions, CTAs, and sign-off. Body stays plain text (no HTML coding).
+          Design = Canva PNG + fixed SHMS header (logo + title). Multi-page Canva exports every page into the email.
+          Use sections for intro, events, reply prompts, CTAs, and sign-off. Body stays plain text (no HTML coding).
           {'\n'}
           Attach Canva → Export PNG for email (required for paid sends) → write copy → test send.
+          {'\n'}
+          Unsubscribe link and postal address are added to every send automatically.
         </p>
       </div>
 
