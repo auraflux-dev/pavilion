@@ -47,9 +47,14 @@ export default async function Spring2027EpSchedulePage({
           <Spring2027EpSchedule
             rows={rows}
             footnote={
-              reviewHost && !SPRING_CATALOG_ENABLED
-                ? 'Staging / Preview only.\nwww parents do not see Spring until SPRING_CATALOG_ENABLED is flipped.'
-                : undefined
+              [
+                reviewHost && !SPRING_CATALOG_ENABLED
+                  ? 'Staging / Preview only.\nwww parents do not see Spring until SPRING_CATALOG_ENABLED is flipped.'
+                  : '',
+                'Snow-day buffer (not sold as meetings): Tue May 11, 18, 25, Jun 1. Wed May 5, 12, 19, 26.\nLast day of school Jun 11.',
+              ]
+                .filter(Boolean)
+                .join('\n')
             }
           />
         </div>
