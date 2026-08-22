@@ -42,7 +42,7 @@ export default async function ProgramsPage({
   const catalogOpen = inSession && access.allowed
 
   try {
-    programs = catalogOpen ? await getAllPrograms() : []
+    programs = catalogOpen ? await getAllPrograms({ reviewHost }) : []
   } catch {
     error = true
   }

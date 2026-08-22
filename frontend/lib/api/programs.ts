@@ -132,24 +132,31 @@ export async function getPrograms(): Promise<Program[]> {
     .eq("registrationOpen", true)
     .find();
 
-  return await publicPrograms(result.items as Record<string, unknown>[]);
+  return publicPrograms(result.items as Record<string, unknown>[]);
 }
 
-export async function getAllPrograms(): Promise<Program[]> {
+export async function getAllPrograms(opts?: {
+  reviewHost?: boolean
+}): Promise<Program[]> {
   if (isDemoInstance()) {
     const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
-    return [...DEMO_PROGRAMS]
+    return filterProgramsForPublicCatalog([...DEMO_PROGRAMS], opts)
   }
   if (process.env.COMMONS_PLATFORM === 'true') return []
   const client = getWixClient();
   const result = await client.items.query("Programs").find();
-  return await publicPrograms(result.items as Record<string, unknown>[]);
+  return publicPrograms(result.items as Record<string, unknown>[], opts);
 }
 
-export async function getFeaturedPrograms(): Promise<Program[]> {
+export async function getFeaturedPrograms(opts?: {
+  reviewHost?: boolean
+}): Promise<Program[]> {
   if (isDemoInstance()) {
     const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
-    return DEMO_PROGRAMS.filter((p) => p.featured)
+    return filterProgramsForPublicCatalog(
+      DEMO_PROGRAMS.filter((p) => p.featured),
+      opts,
+    )
   }
   if (process.env.COMMONS_PLATFORM === 'true') return []
   const client = getWixClient();
@@ -158,19 +165,20 @@ export async function getFeaturedPrograms(): Promise<Program[]> {
     .eq("featured", true)
     .ascending("sortOrder")
     .find();
-  return await publicPrograms(result.items as Record<string, unknown>[]);
+  return publicPrograms(result.items as Record<string, unknown>[], opts);
 }
 
-async function publicPrograms(items: Record<string, unknown>[]): Promise<Program[]> {
-  const { isProgramsReviewHost } = await import('@/lib/programs/public-access')
-  const reviewHost = await isProgramsReviewHost()
+function publicPrograms(
+  items: Record<string, unknown>[],
+  opts?: { reviewHost?: boolean },
+): Program[] {
   return filterProgramsForPublicCatalog(
     items
       .map(mapProgramItem)
       .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags))
       // Public catalog: open registration and/or featured (keeps legacy closed CMS rows off the site).
       .filter((p) => p.registrationOpen || p.featured),
-    { reviewHost },
+    opts,
   )
 }
 

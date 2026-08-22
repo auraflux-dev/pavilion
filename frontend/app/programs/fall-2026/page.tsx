@@ -26,7 +26,9 @@ export default async function Fall2026EpSchedulePage({
   const { canViewProgramsCatalogNow } = await import('@/lib/programs/public-access')
   const access = await canViewProgramsCatalogNow({ previewToken })
   if (!access.allowed) notFound()
-  const all = await getAllPrograms().catch(() => [])
+  const { isProgramsReviewHost } = await import('@/lib/programs/public-access')
+  const reviewHost = await isProgramsReviewHost()
+  const all = await getAllPrograms({ reviewHost }).catch(() => [])
   const current = selectCurrentFall2026Programs(
     all.map((p) => ({
       id: p._id,

@@ -11,6 +11,7 @@ import { FALL_2026_EP_CLASSES } from '@/lib/programs/fall-2026-ep'
 import { findProgramBySlug } from '@/lib/programs/public-path'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { getSiteSettings } from '@/lib/api/site-settings'
+import { isProgramsReviewHost } from '@/lib/programs/public-access'
 
 export const revalidate = 300
 
@@ -59,7 +60,8 @@ export default async function ProgramLandingPage({
   const inSession = settings.getBool('schoolInSession', false)
   if (!inSession || !access.allowed) notFound()
 
-  const programs = await getAllPrograms().catch(() => [])
+  const reviewHost = await isProgramsReviewHost()
+  const programs = await getAllPrograms({ reviewHost }).catch(() => [])
   const program = findProgramBySlug(programs, slug)
   if (!program) notFound()
 
