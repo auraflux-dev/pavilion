@@ -38,6 +38,8 @@ export async function generateMetadata() {
 }
 
 function pct(raised: number, goal: number) {
+  if (!goal || !Number.isFinite(goal) || goal <= 0) return 0
+  if (!Number.isFinite(raised)) return 0
   return Math.min(100, Math.round((raised / goal) * 100))
 }
 

@@ -1,6 +1,7 @@
 /** Public sponsorship packages. Stone Hill table + Pavilion demo catalog. */
 
-import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isCommonsPlatform } from '@/lib/crm/active-trial'
+import { DEMO_BRAND, publicBrandFace } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
 
 /** Letter flyer (Membership-style ocean layout). JPG for web; PDF for print. SHMS only. */
@@ -283,7 +284,8 @@ export function getSponsorshipCompare(): SponsorshipCompareRow[] {
 }
 
 export function showSponsorshipFlyerDownload(): boolean {
-  return !isDemoInstance()
+  // SHMS flyer PDF only. Never on Pavilion demo or trial.
+  return !isDemoInstance() && !isCommonsPlatform()
 }
 
 export function sponsorshipIntroCopy(): string {
@@ -303,14 +305,22 @@ export function sponsorshipFooterCopy(): string {
       `Gifts support ${DEMO_BRAND.pto} (sample 501(c)(3) for this demo), not ${DEMO_BRAND.district}.`
     )
   }
+  if (isCommonsPlatform()) {
+    const b = publicBrandFace()
+    return (
+      'Each package is one payment for the 2026-27 school year. Full Year, Half Year, and Quarter of Year Promotion is how long your logo is listed on the website and portal. ' +
+      `Gifts support ${b.pto} (501(c)(3)), not ${b.district}.`
+    )
+  }
   return (
     'Each package is one payment for the 2026-27 school year. Full Year, Half Year, and Quarter of Year Promotion is how long your logo is listed on the website and portal. Gifts support SHMS PTO (501(c)(3)), not Loudoun County Public Schools.'
   )
 }
 
 export function sponsorshipEmptySponsorsCopy(): string {
-  if (isDemoInstance()) {
-    return `Future partners will appear here. Be the first to sponsor ${DEMO_BRAND.short}.`
+  if (isDemoInstance() || isCommonsPlatform()) {
+    const b = publicBrandFace()
+    return `Future partners will appear here. Be the first to sponsor ${b.short}.`
   }
   return 'Future sponsors will appear here. Be the first to partner with SHMS PTO.'
 }

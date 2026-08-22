@@ -5,7 +5,8 @@
 
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
-import { DEMO_BRAND } from '@/lib/demo/brand'
+import { isCommonsPlatform } from '@/lib/crm/active-trial'
+import { publicBrandFace } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
 
 export interface FundraisingCTA {
@@ -89,62 +90,65 @@ const FALLBACK_CTAS: FundraisingCTA[] = [
   },
 ]
 
-/** Pavilion demo: Riverside-native cards. Not a string-replaced SHMS list. */
-const DEMO_CTAS: FundraisingCTA[] = [
-  {
-    id: 'd1',
-    title: 'Become a Member',
-    description: `Join for $40 or $75. Membership keeps ${DEMO_BRAND.school} programs and events funded.`,
-    ctaLabel: 'Join',
-    href: '/membership',
-    icon: 'Star',
-    sortOrder: 1,
-    active: true,
-  },
-  {
-    id: 'd2',
-    title: `Load a ${DEMO_BRAND.card}`,
-    description: `Add $20 to $50 to your family ${DEMO_BRAND.card}. Kids spend at ${DEMO_BRAND.store}. The PTO keeps the margin.`,
-    ctaLabel: 'Load Card',
-    href: '/perch',
-    icon: 'ShoppingBag',
-    sortOrder: 2,
-    active: true,
-  },
-  {
-    id: 'd3',
-    title: 'Volunteer',
-    description: `Take a shift at ${DEMO_BRAND.store} or help at a school night.`,
-    ctaLabel: 'Sign Up',
-    href: '/volunteer',
-    icon: 'Users',
-    sortOrder: 3,
-    active: true,
-  },
-  {
-    id: 'd4',
-    title: 'Spread the Word',
-    description: `Invite another ${DEMO_BRAND.short} family. More members means more enrichment.`,
-    ctaLabel: 'Share',
-    href: '/membership',
-    icon: 'Heart',
-    sortOrder: 4,
-    active: true,
-  },
-  {
-    id: 'd5',
-    title: 'Make a Gift',
-    description: `One-time gifts fund classroom extras and community nights at ${DEMO_BRAND.school}.`,
-    ctaLabel: 'Donate',
-    href: '/fundraising#donate',
-    icon: 'Ticket',
-    sortOrder: 5,
-    active: true,
-  },
-]
+/** Pavilion / trial: brand-native cards. No Run for Charity (SHMS-only). */
+function pavilionCtas(): FundraisingCTA[] {
+  const b = publicBrandFace()
+  return [
+    {
+      id: 'd1',
+      title: 'Become a Member',
+      description: `Join for $40 or $75. Membership keeps ${b.school} programs and events funded.`,
+      ctaLabel: 'Join',
+      href: '/membership',
+      icon: 'Star',
+      sortOrder: 1,
+      active: true,
+    },
+    {
+      id: 'd2',
+      title: `Load a ${b.card}`,
+      description: `Add $20 to $50 to your family ${b.card}. Kids spend at ${b.store}. The PTO keeps the margin.`,
+      ctaLabel: 'Load Card',
+      href: b.store === 'The Perch' ? '/perch' : '/membership',
+      icon: 'ShoppingBag',
+      sortOrder: 2,
+      active: true,
+    },
+    {
+      id: 'd3',
+      title: 'Volunteer',
+      description: `Take a shift at ${b.store} or help at a school night.`,
+      ctaLabel: 'Sign Up',
+      href: '/volunteer',
+      icon: 'Users',
+      sortOrder: 3,
+      active: true,
+    },
+    {
+      id: 'd4',
+      title: 'Spread the Word',
+      description: `Invite another ${b.short} family. More members means more enrichment.`,
+      ctaLabel: 'Share',
+      href: '/membership',
+      icon: 'Heart',
+      sortOrder: 4,
+      active: true,
+    },
+    {
+      id: 'd5',
+      title: 'Make a Gift',
+      description: `One-time gifts fund classroom extras and community nights at ${b.school}.`,
+      ctaLabel: 'Donate',
+      href: '/fundraising#donate',
+      icon: 'Ticket',
+      sortOrder: 5,
+      active: true,
+    },
+  ]
+}
 
 export async function getFundraisingCTAs(): Promise<FundraisingCTA[]> {
-  if (isDemoInstance()) return DEMO_CTAS
+  if (isDemoInstance() || isCommonsPlatform()) return pavilionCtas()
 
   const apiKey = process.env.WIX_API_KEY
   const siteId = process.env.WIX_SITE_ID
