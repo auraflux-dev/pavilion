@@ -71,6 +71,39 @@ export function tierRank(tier: string | undefined | null): number {
   return TIER_RANK[n] ?? (isPaidTier(n) ? 10 : 0)
 }
 
+export type MembershipTierTotals = {
+  reef: number
+  lagoon: number
+  tide: number
+  free: number
+  other: number
+  paid: number
+  parents: number
+}
+
+/** Parent-level membership counts by canonical tier (Staff Membership source of truth). */
+export function membershipTierTotals(rows: ParentRosterRow[]): MembershipTierTotals {
+  const out: MembershipTierTotals = {
+    reef: 0,
+    lagoon: 0,
+    tide: 0,
+    free: 0,
+    other: 0,
+    paid: 0,
+    parents: rows.length,
+  }
+  for (const row of rows) {
+    const n = normalizeMembershipTier(row.membershipTier)
+    if (n === 'reef') out.reef += 1
+    else if (n === 'lagoon') out.lagoon += 1
+    else if (n === 'tide') out.tide += 1
+    else if (!isPaidTier(n)) out.free += 1
+    else out.other += 1
+    if (row.accountType === 'paid' || isPaidTier(n)) out.paid += 1
+  }
+  return out
+}
+
 export function pickHighestTier(tiers: string[]): string {
   let best = 'free'
   let bestRank = -1

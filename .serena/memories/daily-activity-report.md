@@ -1,0 +1,3 @@
+Monday 6am activity email includes weekly traffic (prior 7 Eastern days): website vs member portal vs staff pageviews, unique-browser days, top paths. Counters: TrafficBeacon → POST /api/ops/pageview → SiteTrafficDaily. Unique = once per browser per day per surface via cookie shms_td. Vercel Web Analytics is enabled on project frontend; the email uses first-party counts.
+
+Also includes current membership totals by type (Reef / Lagoon / Tide / Free) from the Students+Memberships roster, plus a by-type line for yesterday’s membership creates/updates. Staff links in the email: /staff?view=membership (roster) and /staff?view=site (dailyActivityReportEmails under Contact).

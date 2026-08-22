@@ -29,6 +29,7 @@ type ParentRow = {
 
 type Summary = {
   parents: number
+  byTier?: { reef: number; lagoon: number; tide: number; free: number; other?: number }
   paid: number
   free: number
   withPhone: number
@@ -524,11 +525,36 @@ export function StaffMembershipPanel() {
         </div>
 
         {summary ? (
-          <p className="text-xs text-[#5A6070]">
-            {summary.parents} parents · {summary.paid} paid · {summary.free} free ·{' '}
-            {summary.withPhone} with phone
-            {busy ? ' · Loading…' : ''}
-          </p>
+          <div className="text-xs text-[#5A6070] space-y-1">
+            <p>
+              {summary.parents} parents · {summary.paid} paid · {summary.free} free ·{' '}
+              {summary.withPhone} with phone
+              {busy ? ' · Loading…' : ''}
+            </p>
+            {summary.byTier ? (
+              <p className="whitespace-pre-line">
+                By type: {displayMembershipTier('reef')} {summary.byTier.reef}
+                {' · '}
+                {displayMembershipTier('lagoon')} {summary.byTier.lagoon}
+                {' · '}
+                {displayMembershipTier('tide')} {summary.byTier.tide}
+                {' · '}Free {summary.byTier.free}
+                {summary.byTier.other ? ` · Other ${summary.byTier.other}` : ''}
+              </p>
+            ) : null}
+            <p>
+              Daily activity report (6am Eastern) includes these totals.
+              {' '}
+              <a
+                href="/staff?view=site"
+                className="font-semibold underline"
+                style={{ color: 'var(--brand-green)' }}
+              >
+                Site settings → Contact
+              </a>
+              {' '}for extra report emails.
+            </p>
+          </div>
         ) : null}
 
         <div className="max-h-[420px] overflow-auto divide-y divide-[var(--border)] border border-[var(--border)] rounded-lg">

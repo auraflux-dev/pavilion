@@ -533,7 +533,8 @@ export const SITE_SETTING_GROUPS: {
       },
       {
         key: 'dailyActivityReportEmails',
-        label: 'Daily activity report extra emails (comma-separated, 6am Eastern)',
+        label:
+          'Daily activity report extra emails (comma-separated, 6am Eastern; report includes membership totals by type)',
       },
       { key: 'contactAddress', label: 'Address', multiline: true },
       { key: 'contactStoreHours', label: 'The Cove in-person snack window hours' },

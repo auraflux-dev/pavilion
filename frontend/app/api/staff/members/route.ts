@@ -5,6 +5,7 @@ import {
   applyMembershipsToRoster,
   buildParentRoster,
   filterParentRoster,
+  membershipTierTotals,
   type ParentRosterRow,
 } from '@/lib/staff/members-roster'
 
@@ -104,15 +105,21 @@ export async function GET(req: NextRequest) {
           includeArchived,
         }),
       )
-      const paid = filtered.filter((r) => r.accountType === 'paid').length
-      const free = filtered.filter((r) => r.accountType !== 'paid').length
+      const byTier = membershipTierTotals(filtered)
       return NextResponse.json({
         members: filtered,
         summary: {
           parents: filtered.length,
-          paid,
-          free,
+          paid: byTier.paid,
+          free: byTier.free,
           withPhone: filtered.filter((r) => Boolean(r.parentPhone)).length,
+          byTier: {
+            reef: byTier.reef,
+            lagoon: byTier.lagoon,
+            tide: byTier.tide,
+            free: byTier.free,
+            other: byTier.other,
+          },
         },
       })
     }

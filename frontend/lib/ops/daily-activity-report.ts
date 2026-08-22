@@ -8,6 +8,13 @@ import { listMessages } from '@/lib/google/gmail'
 import { sendMassEmail } from '@/lib/staff/mass-email'
 import { preferredGmailSender } from '@/lib/staff/gmail-send-auth'
 import { formatWeeklyTraffic, summarizeTrafficWeek } from '@/lib/ops/site-traffic'
+import {
+  applyMembershipsToRoster,
+  buildParentRoster,
+  membershipTierTotals,
+  normalizeMembershipTier,
+} from '@/lib/staff/members-roster'
+import { formatTierLabel } from '@/lib/membership-pricing'
 
 const TZ = 'America/New_York'
 const LIST_CAP = 12
@@ -135,6 +142,80 @@ async function queryCollection(collection: string): Promise<CmsRow[]> {
       return []
     }
   }
+}
+
+/** Full collection page-through for current membership totals (not just the daily slice). */
+async function queryCollectionAll(collection: string): Promise<CmsRow[]> {
+  const client = getWixClient()
+  const items: CmsRow[] = []
+  let skip = 0
+  try {
+    for (let i = 0; i < 50; i += 1) {
+      const found = await client.items.query(collection).limit(100).skip(skip).find()
+      const batch = (found.items ?? []) as CmsRow[]
+      items.push(...batch)
+      if (batch.length < 100) break
+      skip += 100
+    }
+  } catch {
+    return items
+  }
+  return items
+}
+
+function rosterFromCms(students: CmsRow[], memberships: CmsRow[]) {
+  const fromStudents = buildParentRoster(
+    students.map((item) => ({
+      _id: String(item._id ?? ''),
+      parentEmail: String(item.parentEmail ?? ''),
+      parentFirstName: String(item.parentFirstName ?? ''),
+      parentLastName: String(item.parentLastName ?? ''),
+      parentPhone: String(item.parentPhone ?? ''),
+      firstName: String(item.firstName ?? ''),
+      lastName: String(item.lastName ?? ''),
+      grade: String(item.grade ?? ''),
+      membershipTier: String(item.membershipTier ?? 'free'),
+      membershipStatus: String(item.membershipStatus ?? 'active'),
+      archived: item.archived === true,
+    })),
+  )
+  return applyMembershipsToRoster(
+    fromStudents,
+    memberships.map((item) => ({
+      email: String(item.email ?? item.parentEmail ?? ''),
+      tier: String(item.tier ?? item.membershipTier ?? 'free'),
+      status: String(item.status ?? 'active'),
+      parentFirstName: String(item.parentFirstName ?? item.firstName ?? ''),
+      parentLastName: String(item.parentLastName ?? item.lastName ?? ''),
+      parentPhone: String(item.parentPhone ?? item.phone ?? ''),
+    })),
+  )
+}
+
+function membershipTotalsSection(totals: ReturnType<typeof membershipTierTotals>): string[] {
+  const lines = [
+    `  Reef: ${totals.reef}`,
+    `  Lagoon: ${totals.lagoon}`,
+    `  Tide: ${totals.tide}`,
+    `  Free: ${totals.free}`,
+  ]
+  if (totals.other > 0) lines.push(`  Other paid: ${totals.other}`)
+  lines.push(`  Paid total: ${totals.paid}`)
+  lines.push(`  Parents: ${totals.parents}`)
+  return ['MEMBERSHIP TOTALS (current)', ...lines, '']
+}
+
+function countYesterdayMembershipsByTier(rows: CmsRow[]): string[] {
+  const counts: Record<string, number> = { reef: 0, lagoon: 0, tide: 0, free: 0, other: 0 }
+  for (const row of rows) {
+    const n = normalizeMembershipTier(str(row, 'tier') || str(row, 'membershipTier') || 'free')
+    if (n === 'reef' || n === 'lagoon' || n === 'tide' || n === 'free') counts[n] = (counts[n] ?? 0) + 1
+    else counts.other = (counts.other ?? 0) + 1
+  }
+  return [
+    `  By type: Reef ${counts.reef} · Lagoon ${counts.lagoon} · Tide ${counts.tide} · Free ${counts.free}` +
+      (counts.other ? ` · Other ${counts.other}` : ''),
+  ]
 }
 
 function filterRows(rows: CmsRow[], fields: string[], win: DailyActivityWindow): CmsRow[] {
@@ -269,6 +350,20 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
     trafficLines = ['WEEKLY TRAFFIC', '  Could not load pageview counters.', '']
   }
 
+  let membershipTotalsLines: string[] = []
+  let membershipTotalsCounts: ReturnType<typeof membershipTierTotals> | null = null
+  try {
+    const [allStudents, allMemberships] = await Promise.all([
+      queryCollectionAll('Students'),
+      queryCollectionAll('Memberships'),
+    ])
+    membershipTotalsCounts = membershipTierTotals(rosterFromCms(allStudents, allMemberships))
+    membershipTotalsLines = membershipTotalsSection(membershipTotalsCounts)
+  } catch (err) {
+    console.warn('[daily-activity] membership totals skipped', err)
+    membershipTotalsLines = ['MEMBERSHIP TOTALS (current)', '  Could not load roster totals.', '']
+  }
+
   const paidTotal = payRows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
   const ticketTotal = ticketRows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
 
@@ -277,6 +372,7 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
     `Window: ${win.startIso} → ${win.endIso}`,
     'This is recorded actions (forms, checkouts, enrollments, staff work), then weekly pageviews for the last 7 Eastern days.',
     '',
+    ...membershipTotalsLines,
     ...trafficLines,
     'WEBSITE',
     ...section(
@@ -311,11 +407,16 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
     ),
     'MEMBER PORTAL',
     ...section('Students added', studentRows.length, studentRows.map(studentLabel)),
-    ...section(
-      'Memberships created or updated',
+    `Memberships created or updated (${membershipRows.length})`,
+    ...(membershipRows.length ? countYesterdayMembershipsByTier(membershipRows) : []),
+    ...bullets(
+      membershipRows.map(
+        (r) =>
+          `${str(r, 'email')} · ${formatTierLabel(str(r, 'tier') || str(r, 'membershipTier') || 'membership')}`,
+      ),
       membershipRows.length,
-      membershipRows.map((r) => `${str(r, 'email')} · ${str(r, 'tier') || str(r, 'status') || 'membership'}`),
     ),
+    '',
     ...section(
       'Program enrollments',
       enrollRows.length,
@@ -371,8 +472,11 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
       errorRows.length,
       errorRows.map((r) => `${str(r, 'route') || 'app'} · ${str(r, 'message').slice(0, 120)}`),
     ),
-    'Staff Home: https://shmspto.org/staff',
-    'Member portal: https://shmspto.org/member-portal',
+    'Staff links',
+    '  Membership roster (totals by type): https://www.shmspto.org/staff?view=membership',
+    '  Daily report emails (Site settings → Contact): https://www.shmspto.org/staff?view=site',
+    '  Staff Home: https://www.shmspto.org/staff',
+    '  Member portal: https://www.shmspto.org/member-portal',
     'Cron is 10:00 UTC (6:00am Eastern during daylight time, 5:00am during standard time).',
   ]
 
@@ -393,6 +497,11 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
     newsletters: newsletterRows.length,
     inbox: inbox.length,
     errors: errorRows.length,
+    membershipReef: membershipTotalsCounts?.reef ?? 0,
+    membershipLagoon: membershipTotalsCounts?.lagoon ?? 0,
+    membershipTide: membershipTotalsCounts?.tide ?? 0,
+    membershipFree: membershipTotalsCounts?.free ?? 0,
+    membershipPaid: membershipTotalsCounts?.paid ?? 0,
   }
 
   return {
