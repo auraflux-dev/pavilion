@@ -18,14 +18,14 @@ export async function getVolunteerOpportunities(): Promise<VolunteerOpportunity[
     return [...DEMO_VOLUNTEER]
   }
   if (process.env.COMMONS_PLATFORM === 'true') return []
-  const client = getWixClient();
+  if (!process.env.WIX_SITE_ID || !process.env.WIX_API_KEY) return []
   try {
+    const client = getWixClient()
     const result = await client.items
       .query("VolunteerOpportunities")
       .eq("active", true)
       .ascending("sortOrder")
       .find();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (result.items as VolunteerOpportunity[]).filter(
       (item) =>
         item?.title &&
