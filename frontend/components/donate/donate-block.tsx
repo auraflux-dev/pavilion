@@ -15,6 +15,7 @@ import {
   DONATION_PRESETS,
   isAllowedDonationAmount,
 } from '@/lib/donation'
+import { useCart } from '@/lib/cart/store'
 
 type Props = {
   /** Page section id for deep links (#donate) */
@@ -43,6 +44,7 @@ export function DonateBlock({
   const [open, setOpen] = useState(false)
   const [error, setError] = useState('')
   const [thanks, setThanks] = useState('')
+  const cart = useCart()
 
   const effectiveAmount = useMemo(() => {
     if (other) {
@@ -183,6 +185,26 @@ export function DonateBlock({
           {error ? <p className="text-sm text-red-700 mb-3">{error}</p> : null}
           {thanks ? <p className="text-sm font-semibold mb-3" style={{ color: 'var(--brand-green)' }}>{thanks}</p> : null}
 
+          <button
+            type="button"
+            onClick={() => {
+              if (!isAllowedDonationAmount(effectiveAmount)) {
+                setError('Enter a donation between $1 and $10,000')
+                return
+              }
+              cart.add({
+                kind: 'donation',
+                title: 'PTO Donation',
+                amount: effectiveAmount,
+                href: '/donate',
+                amountCents: Math.round(effectiveAmount * 100),
+              })
+            }}
+            className="w-full inline-flex items-center justify-center font-bold text-sm px-4 py-3 rounded-lg border-2 mb-2"
+            style={{ borderColor: 'var(--brand-green)', color: 'var(--brand-green)' }}
+          >
+            {`Add to cart · $${effectiveAmount > 0 ? effectiveAmount.toFixed(effectiveAmount % 1 ? 2 : 0) : '-'}`}
+          </button>
           <MemberGate label="Sign in to donate" returnToQuery={`${id}=1`}>
             <button
               type="button"
@@ -190,7 +212,9 @@ export function DonateBlock({
               className="w-full inline-flex items-center justify-center font-bold text-sm px-4 py-3 rounded-lg text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: 'var(--brand-green)' }}
             >
- Donate ${effectiveAmount > 0 ? effectiveAmount.toFixed(effectiveAmount % 1 ? 2 : 0) : '-'}
+              Donate ${
+                effectiveAmount > 0 ? effectiveAmount.toFixed(effectiveAmount % 1 ? 2 : 0) : '-'
+              }
             </button>
           </MemberGate>
 

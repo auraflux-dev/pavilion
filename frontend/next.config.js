@@ -62,6 +62,13 @@ const nextConfig = {
       { source: '/store/:path*', destination: '/cove', permanent: true },
       { source: '/spirit-wear', destination: '/cove', permanent: true },
       { source: '/spirit-wear/:path*', destination: '/cove', permanent: true },
+      // Competitive Math LP slug rename
+      { source: '/programs/mathcounts', destination: '/programs/competitive-math', permanent: true },
+      {
+        source: '/programs/mathcounts-spring',
+        destination: '/programs/competitive-math-spring',
+        permanent: true,
+      },
     ]
   },
   async rewrites() {

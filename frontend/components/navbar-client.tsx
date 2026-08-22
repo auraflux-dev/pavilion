@@ -10,6 +10,8 @@ import type { NavLink } from '@/lib/api/nav'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { PortalReturnBar } from '@/components/portal-return-bar'
 import { DemoMark } from '@/components/demo/demo-mark'
+import { CartButton } from '@/components/cart/cart-button'
+import { CartDrawer } from '@/components/cart/cart-drawer'
 
 interface Props {
   links: NavLink[]
@@ -264,6 +266,7 @@ export function NavbarClient({ links, brand, mode }: Props) {
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
+          <CartButton />
           {/* Auth stays visible from sm; page links show from lg instead of hamburger-only */}
           <div className="hidden sm:flex items-center gap-2">
             {status === 'loading' ? (
@@ -416,6 +419,7 @@ export function NavbarClient({ links, brand, mode }: Props) {
       )}
 
       <PortalReturnBar />
+      <CartDrawer />
     </header>
   )
 }

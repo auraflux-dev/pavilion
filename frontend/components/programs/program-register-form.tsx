@@ -21,6 +21,8 @@ import { useAuth } from '@/lib/hooks/use-auth'
 import { gaSurface, trackEvent } from '@/lib/ga'
 import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
 import { resolveProgramSeason } from '@/lib/programs/season'
+import { programPublicPath } from '@/lib/programs/public-path'
+import { useCart } from '@/lib/cart/store'
 
 type Student = {
   id: string
@@ -61,6 +63,8 @@ export function ProgramRegisterForm({
   const [payAmount, setPayAmount] = useState(0)
   const [couponCode, setCouponCode] = useState('')
   const [addCompanion, setAddCompanion] = useState(false)
+  const [cartNote, setCartNote] = useState('')
+  const cart = useCart()
   const phase = getRegistrationPhase(program)
   const priorityUntilLabel =
     phase === 'member_priority' ? formatMemberPriorityUntil(program.memberPriorityUntil) : ''
@@ -311,21 +315,58 @@ Only paste a code here if you need to override.`}
               <p className="text-xs font-semibold text-green-700">{success}</p>
             ) : null}
 
-            <Button
-              type="button"
-              onClick={submit}
-              disabled={busy || !studentId || !consentComplete || feeTbd}
-              className="w-full text-white font-bold"
-              style={{ backgroundColor: 'var(--brand-green)' }}
-            >
-              {busy ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : fee > 0 && !feeTbd ? (
-                `Continue to payment · $${fee.toFixed(2)}`
-              ) : (
-                'Complete registration'
-              )}
-            </Button>
+            <div className="space-y-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!studentId || feeTbd}
+                className="w-full font-bold"
+                onClick={() => {
+                  const companionFee =
+                    addCompanion && companion ? Number(companion.fee ?? 0) : 0
+                  const title =
+                    addCompanion && companion
+                      ? `${displayProgramName(program.name)} + ${displayProgramName(companion.name)}`
+                      : displayProgramName(program.name)
+                  cart.add({
+                    kind: 'program',
+                    title,
+                    amount: fee + companionFee,
+                    href: programPublicPath(program),
+                    programId: program._id,
+                    addonProgramIds:
+                      addCompanion && companion?._id ? [companion._id] : undefined,
+                    studentId: studentId || undefined,
+                  })
+                  setCartNote('Added to cart. Check out anytime from the bag icon.')
+                  onClose?.()
+                }}
+              >
+                {`Add to cart · $${(
+                  fee + (addCompanion && companion ? Number(companion.fee ?? 0) : 0)
+                ).toFixed(2)}`}
+              </Button>
+              <Button
+                type="button"
+                onClick={submit}
+                disabled={busy || !studentId || !consentComplete || feeTbd}
+                className="w-full text-white font-bold"
+                style={{ backgroundColor: 'var(--brand-green)' }}
+              >
+                {busy ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : fee > 0 && !feeTbd ? (
+                  `Pay now · $${(
+                    fee + (addCompanion && companion ? Number(companion.fee ?? 0) : 0)
+                  ).toFixed(2)}`
+                ) : (
+                  'Complete registration'
+                )}
+              </Button>
+              {cartNote ? (
+                <p className="text-xs font-semibold text-green-700">{cartNote}</p>
+              ) : null}
+            </div>
           </>
         ) : null}
 

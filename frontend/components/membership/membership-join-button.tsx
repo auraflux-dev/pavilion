@@ -17,6 +17,7 @@ import { tierNeedsShirtSize } from '@/lib/membership-entitlements'
 import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useCart } from '@/lib/cart/store'
 
 interface Props {
   tierId: string
@@ -35,6 +36,7 @@ function JoinInner({ tierId, tierName, price }: Props) {
   const [shirt, setShirt] = useState<MembershipShirtSelection | null>(null)
   const needsShirt = tierNeedsShirtSize(tierId)
   const { allowed, loading: commerceLoading, note } = useLiveCommerceGate()
+  const cart = useCart()
 
   useEffect(() => {
     let cancelled = false
@@ -153,6 +155,30 @@ function JoinInner({ tierId, tierName, price }: Props) {
     >
       <div className="space-y-2">
         <MembershipShirtPicker required={needsShirt} value={shirt} onChange={setShirt} />
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full font-bold"
+          disabled={relation === 'loading' || (needsShirt && !shirt)}
+          onClick={() => {
+            if (needsShirt && !shirt) return
+            cart.add({
+              kind: 'membership',
+              title: tierName,
+              amount: chargeAmount,
+              href: '/membership',
+              tier: tierId,
+              studentId: studentId || undefined,
+              shirtSize: shirt?.size ?? null,
+              shirtDesign: shirt?.design ?? null,
+              shirtProductId: shirt?.productId ?? null,
+              shirtVariantId: shirt?.variantId ?? null,
+              physicalPerk: shirt ? 'spirit_shirt' : null,
+            })
+          }}
+        >
+          {`Add to cart · $${chargeAmount.toFixed(0)}`}
+        </Button>
         <Button
           className="w-full font-bold text-white group"
           style={{ backgroundColor: 'var(--brand-green)' }}

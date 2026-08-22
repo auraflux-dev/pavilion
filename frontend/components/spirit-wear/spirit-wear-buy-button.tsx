@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Lock, Loader2, X } from 'lucide-react'
 import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { useCart } from '@/lib/cart/store'
 
 type CatalogVariant = {
   id: string
@@ -40,6 +41,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
   const [detail, setDetail] = useState<CatalogDetail | null>(null)
   const [selectedVariantId, setSelectedVariantId] = useState('')
   const [error, setError] = useState('')
+  const cart = useCart()
 
   const selected =
     detail?.variants.find((v) => v.id === selectedVariantId) ??
@@ -204,11 +206,28 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
 
             <button
               type="button"
+              onClick={() => {
+                cart.add({
+                  kind: 'product',
+                  title: chargeTitle,
+                  amount: chargeAmount,
+                  href: pathname || '/cove',
+                  productId,
+                  variantId: selectedVariantId || undefined,
+                })
+                setPickerOpen(false)
+              }}
+              className="w-full text-sm font-bold py-2.5 rounded-full border-2 border-[var(--brand-green)] text-[var(--brand-green)] bg-white mb-2"
+            >
+              Add to cart · ${chargeAmount.toFixed(2)}
+            </button>
+            <button
+              type="button"
               onClick={continueToPay}
               className="w-full text-sm font-bold py-2.5 rounded-full text-white"
               style={{ backgroundColor: 'var(--brand-green)' }}
             >
-              Continue · ${chargeAmount.toFixed(2)}
+              Pay now · ${chargeAmount.toFixed(2)}
             </button>
           </div>
         </div>

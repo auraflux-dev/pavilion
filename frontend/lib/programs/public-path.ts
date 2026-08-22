@@ -36,7 +36,17 @@ export function programPublicPath(
   return `/programs/${programPublicSlug(program)}`
 }
 
-export function findProgramBySlug(programs: Program[], slug: string): Program | undefined {
+const PROGRAM_SLUG_ALIASES: Record<string, string> = {
+  mathcounts: 'competitive-math',
+  'mathcounts-spring': 'competitive-math-spring',
+}
+
+export function normalizeProgramSlug(slug: string): string {
   const want = String(slug ?? '').trim().toLowerCase()
+  return PROGRAM_SLUG_ALIASES[want] ?? want
+}
+
+export function findProgramBySlug(programs: Program[], slug: string): Program | undefined {
+  const want = normalizeProgramSlug(slug)
   return programs.find((p) => programPublicSlug(p) === want)
 }

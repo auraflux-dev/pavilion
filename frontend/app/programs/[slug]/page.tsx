@@ -23,6 +23,9 @@ export function generateStaticParams() {
   return [
     ...FALL_2026_EP_CLASSES.map((c) => ({ slug: c.publicSlug })),
     ...FALL_2026_EP_CLASSES.map((c) => ({ slug: `${c.publicSlug}-spring` })),
+    // Legacy Competitive Math slug (redirect also in next.config)
+    { slug: 'mathcounts' },
+    { slug: 'mathcounts-spring' },
   ]
 }
 

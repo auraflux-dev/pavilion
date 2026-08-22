@@ -11,6 +11,7 @@ import {
   eventPublicPath,
   type WixEvent,
 } from '@/lib/api/event-model'
+import { useCart } from '@/lib/cart/store'
 
 interface EventCardProps {
   event: WixEvent
@@ -82,6 +83,7 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
   const endTime = formatDate(event.dateAndTimeSettings?.endDate).time
   const ticket = event.ticket
   const [qty, setQty] = useState(1)
+  const cart = useCart()
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const remaining =
@@ -258,6 +260,23 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
                   ))}
                 </select>
               </label>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full font-semibold"
+                onClick={() => {
+                  cart.add({
+                    kind: 'event',
+                    title: (event.title || 'Event tickets').replace(/\n+/g, ' '),
+                    amount: total,
+                    href: '/events',
+                    eventId: event.id!,
+                    quantity: qty,
+                  })
+                }}
+              >
+                {`Add to cart · $${total.toFixed(2)}`}
+              </Button>
               <MemberGate label={`Buy tickets · $${total.toFixed(2)}`}>
                 <Button
                   className="w-full text-white font-semibold"

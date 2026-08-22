@@ -113,7 +113,7 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
   {
     id: 'mathcounts',
     name: 'Competitive Math Prep',
-    publicSlug: 'mathcounts',
+    publicSlug: 'competitive-math',
     cmsNameIncludes: ['mathcounts', 'mathnasium', 'competitive math', 'math prep'],
     dayOfWeek: 'Wednesday',
     classTime: '5:30 to 6:45 PM',

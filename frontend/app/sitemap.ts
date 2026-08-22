@@ -11,7 +11,7 @@ const PUBLIC_PATHS = [
   // Spring schedule is staging-only until SPRING_CATALOG_ENABLED; omit from public sitemap.
   '/programs/essay',
   '/programs/young-entrepreneurs',
-  '/programs/mathcounts',
+  '/programs/competitive-math',
   '/programs/robotics',
   '/events',
   '/membership',
