@@ -1,5 +1,5 @@
 /**
- * Auraflux cost envelope for Commons ($399/mo list).
+ * Pavilion cost envelope for the platform ($399/mo list).
  * Plaid Transactions is billed per Item. Stay on Trial until paying Commons clients.
  * Set PLAID_TRANSACTIONS_ITEM_USD_MONTH from Billing when leaving Trial.
  */

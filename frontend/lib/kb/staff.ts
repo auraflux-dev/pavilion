@@ -625,7 +625,7 @@ Change one list at a time, save, then **View site** to confirm. Leave deep Wix E
       summary: 'CNAME and A records when you leave the trial URL.',
       order: 3,
       need: 'site',
-      body: `Your trial is private. Sign in at your temp host /login with the email and password Auraflux sent you (yourpto.commons-pto.org).
+      body: `Your trial is private. Sign in at your temp host /login with the email and password Pavilion sent you (yourpto.commons-pto.org).
 The public Riverside demo is not your school.
 
 When you want pto.yourschool.org (or yourpto.org):
@@ -640,7 +640,7 @@ When you want pto.yourschool.org (or yourpto.org):
 
 Wait for DNS (often under an hour). Tap Check DNS. HTTPS finishes after Vercel sees the records.
 
-If Add domain says Vercel is not connected, still create those records and send the hostname to Auraflux. We attach it when the token is on the Commons project.
+If Add domain says Vercel is not connected, still create those records and send the hostname to Pavilion support. We attach it when the token is on the project.
 
 Do not point Stone Hill (shmspto.org) here.`,
     },

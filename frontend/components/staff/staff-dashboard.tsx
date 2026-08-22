@@ -38,6 +38,7 @@ import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
 import { StaffNewsletterSendReportPanel } from '@/components/staff/staff-newsletter-send-report'
 import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
 import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
+import { StaffCoachTour } from '@/components/staff/staff-coach-tour'
 import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-notice'
 import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
@@ -337,6 +338,8 @@ export function StaffDashboard() {
   }, [me?.isAdmin, active, memberSort, memberTier])
 
   async function actAs(parentEmail: string) {
+    const { tooltipCopy } = await import('@/lib/copy/tooltips')
+    if (!window.confirm(tooltipCopy('staff.actas.confirm'))) return
     setActAsStatus('')
     const r = await fetch('/api/staff/act-as', {
       method: 'POST',
@@ -452,6 +455,11 @@ export function StaffDashboard() {
               </div>
             </div>
             <>
+              <StaffCoachTour
+                showMoneyBeat={me.roles.some((r) =>
+                  ['admin', 'treasurer', 'retail', 'membership'].includes(r),
+                )}
+              />
               <StaffPersonalEmailPanel
                 initialEmail={me.personalEmail ?? ''}
                 onSaved={(email) =>

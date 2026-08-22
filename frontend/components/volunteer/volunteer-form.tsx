@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
+import { HelpTip } from '@/components/ui/help-tip'
 import { trackGenerateLead } from '@/lib/ga'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { useAuth } from '@/lib/hooks/use-auth'
@@ -111,7 +112,10 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 lg:p-8 shadow-sm space-y-5">
-      <h3 className="text-xl font-bold text-[#1A1A1A]">Sign Up to Volunteer</h3>
+      <h3 className="text-xl font-bold text-[#1A1A1A] inline-flex items-center gap-2">
+        Sign Up to Volunteer
+        <HelpTip tipKey="volunteer.account.required" label="About volunteer signup" />
+      </h3>
       {authStatus === 'visitor' ? (
         <p className="text-sm text-[#5A6070] whitespace-pre-line rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-3">
           {vanillaizeIfDemo(

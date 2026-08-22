@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { displayMembershipTier } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
+import { HelpTip } from '@/components/ui/help-tip'
 
 type StudentRow = {
   id: string
@@ -614,7 +615,7 @@ export function StaffMembershipPanel() {
           />
           Also post to parent portal inbox when sending email
         </label>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
             variant="outline"
@@ -623,6 +624,7 @@ export function StaffMembershipPanel() {
           >
             Preview audience
           </Button>
+          <HelpTip tipKey="staff.send.preview" label="About preview audience" />
           <Button
             type="button"
             disabled={busy || !subject || !body}
@@ -641,6 +643,9 @@ export function StaffMembershipPanel() {
           >
             {emailConfigured ? 'Send via Gmail' : 'Email via mail app (BCC)'}
           </Button>
+          {emailConfigured ? (
+            <HelpTip tipKey="staff.send.gmail" label="About Gmail send" />
+          ) : null}
         </div>
 
         <div className="border-t border-[var(--border)] pt-4 space-y-3">

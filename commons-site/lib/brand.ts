@@ -1,7 +1,7 @@
 /**
  * Product brand shell for commons-site (Vercel project / infra name).
  * Product name: Pavilion. Colors: ink + sea glass (locked).
- * Legal seller is always HSKRG LLC (Stripe). Not Auraflux.
+ * Legal seller is always HSKRG LLC (Stripe).
  * Marketing domain: onpavilion.com (brand name stays Pavilion).
  */
 export const PRODUCT_NAME = 'Pavilion'

@@ -74,7 +74,7 @@ function TrialForm() {
       <p className="text-sm text-[#5A6070] mb-6 whitespace-pre-line leading-relaxed">
         {demo
           ? 'This public demo is Riverside sample data.\nProvisioning stays on the Commons host.\nTrials are private.\nThe school only sees the site after the login we send them.'
-          : 'Auraflux only. Requires the provision key.\nCreates a private school: URL + treasurer login.\nThey sign in at /login.\nNo public visitor site until you say so.\nWrites on 30 days. $399/month if they stay.'}
+          : 'Pavilion ops only. Requires the provision key.\nCreates a private school: URL + treasurer login.\nThey sign in at /login.\nNo public visitor site until you say so.\nWrites on 30 days. $399/month if they stay.'}
       </p>
 
       {done ? (

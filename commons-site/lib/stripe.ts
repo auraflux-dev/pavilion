@@ -1,4 +1,4 @@
-/** HSKRG LLC Stripe for Pavilion SaaS. Not school Square. Not Auraflux branding. */
+/** HSKRG LLC Stripe for Pavilion SaaS. Not school Square. */
 import 'server-only'
 import Stripe from 'stripe'
 

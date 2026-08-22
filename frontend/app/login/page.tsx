@@ -53,7 +53,7 @@ function CommonsLoginForm() {
       <p className="text-sm text-[#5A6070] mb-6 whitespace-pre-line leading-relaxed">
         This trial site is private.
         {'\n'}
-        Use the email and password Auraflux gave you.
+        Use the email and password Pavilion sent you.
         {'\n'}
         After sign-in you land on the school homepage.
         {'\n'}

@@ -32,7 +32,7 @@ async function notifyTreasurerBeforeOffboard(org: OrgBilling): Promise<string> {
     holdEndsAt: hold?.toISOString() ?? null,
     message:
       'Your Commons trial data is being exported and deleted.\n' +
-      'Contact Auraflux if you need the export sooner.',
+      'Contact Pavilion support if you need the export sooner.',
   }
   const webhook = process.env.COMMONS_LIFECYCLE_NOTIFY_URL?.trim()
   if (webhook) {

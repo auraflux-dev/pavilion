@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         ok: false,
         preview: true,
         error:
-          'This sample school stays preview-only.\nAuraflux starts a private trial on the Commons host and sends you the URL plus login.',
+          'This sample school stays preview-only.\nPavilion starts a private trial on the host and sends you the URL plus login.',
       },
       { status: 409 },
     )
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       {
         ok: false,
         error:
-          'Trial signup runs on the Commons app, not Stone Hill.\nAsk Auraflux for a private trial login.',
+          'Trial signup runs on the Pavilion app, not Stone Hill.\nAsk Pavilion for a private trial login.',
       },
       { status: 503 },
     )
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       {
         ok: false,
         error:
-          'Trial sites are private.\nAuraflux provisions accounts.\nOpen /trial with your provision key.',
+          'Trial sites are private.\nPavilion provisions accounts.\nOpen /trial with your provision key.',
       },
       { status: 401 },
     )
