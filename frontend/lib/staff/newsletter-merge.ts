@@ -4,7 +4,7 @@
  */
 
 export const NEWSLETTER_MERGE_HINT =
-  'Merge fields: {{firstName}} {{lastName}} {{name}} {{tier}} {{grade}} {{email}}'
+  'Merge fields: {{firstName}} or {{first name}} · {{name}} · {{tier}} · {{grade}} · {{email}}'
 
 export type NewsletterMergeVars = {
   firstName?: string
@@ -15,7 +15,7 @@ export type NewsletterMergeVars = {
   email?: string
 }
 
-const TOKEN_RE = /\{\{\s*([a-zA-Z][a-zA-Z0-9_]*)\s*\}\}/g
+const TOKEN_RE = /\{\{\s*([a-zA-Z][a-zA-Z0-9_\s]*?)\s*\}\}/g
 
 export function hasMergeFields(text: string): boolean {
   TOKEN_RE.lastIndex = 0
