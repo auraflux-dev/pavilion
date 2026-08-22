@@ -15,7 +15,7 @@ import {
 } from '@/lib/staff/inbox'
 import { ProgramsSectionNav } from '@/components/jump-nav/public-section-navs'
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
-import { canViewProgramsCatalogNow } from '@/lib/programs/public-access'
+import { canViewProgramsCatalogNow, isProgramsReviewHost } from '@/lib/programs/public-access'
 import { ProgramsPreviewBanner } from '@/components/programs/programs-preview-banner'
 
 export const revalidate = 300 // revalidate every 5 minutes
@@ -31,6 +31,7 @@ export default async function ProgramsPage({
   const sp = searchParams ? await searchParams : {}
   const previewToken = typeof sp.programsPreview === 'string' ? sp.programsPreview : null
   const access = await canViewProgramsCatalogNow({ previewToken })
+  const reviewHost = await isProgramsReviewHost()
 
   const [settings, page] = await Promise.all([getSiteSettings(), getPageContent('programs')])
   const programsEmail =
@@ -83,7 +84,7 @@ export default async function ProgramsPage({
                   }),
           }}
         />
-        {catalogOpen ? <ProgramsSectionNav /> : null}
+        {catalogOpen ? <ProgramsSectionNav springCatalogVisible={reviewHost} /> : null}
 
         {catalogOpen ? (
           <section
@@ -130,7 +131,7 @@ export default async function ProgramsPage({
                       {page.sectionBody ? `\n${page.sectionBody}` : ''}
                     </p>
                   )}
-                  <ProgramsFilter programs={programs} />
+                  <ProgramsFilter programs={programs} springCatalogVisible={reviewHost} />
                 </>
               )}
             </div>

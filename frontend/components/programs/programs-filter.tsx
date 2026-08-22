@@ -12,10 +12,12 @@ import {
 
 interface ProgramsFilterProps {
   programs: Program[]
+  /** Staging / Preview: show Spring tab before www unlock. */
+  springCatalogVisible?: boolean
 }
 
-export function ProgramsFilter({ programs }: ProgramsFilterProps) {
-  const seasonTabs = visibleCatalogSeasonTabs()
+export function ProgramsFilter({ programs, springCatalogVisible }: ProgramsFilterProps) {
+  const seasonTabs = visibleCatalogSeasonTabs({ reviewHost: springCatalogVisible })
   const [activeSeason, setActiveSeason] = useState<PublicCatalogSeasonId>(
     seasonTabs[0] ?? 'fall-2026',
   )

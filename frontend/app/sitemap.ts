@@ -8,6 +8,7 @@ const PUBLIC_PATHS = [
   '/',
   '/programs',
   '/programs/fall-2026',
+  // Spring schedule is staging-only until SPRING_CATALOG_ENABLED; omit from public sitemap.
   '/programs/essay',
   '/programs/young-entrepreneurs',
   '/programs/mathcounts',

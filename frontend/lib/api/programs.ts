@@ -132,7 +132,7 @@ export async function getPrograms(): Promise<Program[]> {
     .eq("registrationOpen", true)
     .find();
 
-  return publicPrograms(result.items as Record<string, unknown>[]);
+  return await publicPrograms(result.items as Record<string, unknown>[]);
 }
 
 export async function getAllPrograms(): Promise<Program[]> {
@@ -143,7 +143,7 @@ export async function getAllPrograms(): Promise<Program[]> {
   if (process.env.COMMONS_PLATFORM === 'true') return []
   const client = getWixClient();
   const result = await client.items.query("Programs").find();
-  return publicPrograms(result.items as Record<string, unknown>[]);
+  return await publicPrograms(result.items as Record<string, unknown>[]);
 }
 
 export async function getFeaturedPrograms(): Promise<Program[]> {
@@ -158,16 +158,19 @@ export async function getFeaturedPrograms(): Promise<Program[]> {
     .eq("featured", true)
     .ascending("sortOrder")
     .find();
-  return publicPrograms(result.items as Record<string, unknown>[]);
+  return await publicPrograms(result.items as Record<string, unknown>[]);
 }
 
-function publicPrograms(items: Record<string, unknown>[]): Program[] {
+async function publicPrograms(items: Record<string, unknown>[]): Promise<Program[]> {
+  const { isProgramsReviewHost } = await import('@/lib/programs/public-access')
+  const reviewHost = await isProgramsReviewHost()
   return filterProgramsForPublicCatalog(
     items
       .map(mapProgramItem)
       .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags))
       // Public catalog: open registration and/or featured (keeps legacy closed CMS rows off the site).
       .filter((p) => p.registrationOpen || p.featured),
+    { reviewHost },
   )
 }
 

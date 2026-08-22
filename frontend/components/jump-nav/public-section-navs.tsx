@@ -199,13 +199,23 @@ export function EventsSectionNav() {
   )
 }
 
-export function ProgramsSectionNav() {
+export function ProgramsSectionNav({ springCatalogVisible = false }: { springCatalogVisible?: boolean }) {
   return (
     <BandNav
       ariaLabel="Programs page sections"
       items={[
-        { href: '#programs-list', label: 'This season', hint: 'Fall catalog', icon: Sparkles },
+        { href: '#programs-list', label: 'This season', hint: 'Catalog by season', icon: Sparkles },
         { href: '/programs/fall-2026', label: 'Fall 2026 schedule', hint: 'Times and dates', icon: CalendarDays },
+        ...(springCatalogVisible
+          ? [
+              {
+                href: '/programs/spring-2027',
+                label: 'Spring 2027 schedule',
+                hint: 'Placeholder nights',
+                icon: CalendarDays,
+              },
+            ]
+          : []),
         { href: '#programs-contact', label: 'Ask a question', hint: 'Co-VP Fundraising & Programs', icon: HelpCircle },
       ]}
     />

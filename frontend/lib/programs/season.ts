@@ -3,7 +3,8 @@
  *
  * Locked product rules:
  * - Public catalog is Fall / Spring (no Full year tab).
- * - Spring stays hidden until SPRING_CATALOG_ENABLED is flipped.
+ * - Spring stays hidden on www until SPRING_CATALOG_ENABLED is flipped.
+ *   Staging / Preview review hosts can list Spring earlier for dry runs.
  * - Full-year buy stays dark until RFPs clear (FULL_YEAR_CATALOG_ENABLED).
  * - Checkout consents for programs stay enrichment-waiver + medical + photo
  *   (see checkout-consent.ts). requiresWaiver on a CMS row is separate.
@@ -11,8 +12,21 @@
 
 export type CatalogSeasonId = 'fall-2026' | 'spring-2027' | 'full-year'
 
-/** Flip when Spring RFPs are clear and Spring classes should list publicly. */
+/**
+ * Flip when Spring classes should list on www (production).
+ * Staging / Preview review hosts can show Spring earlier via `reviewHost`.
+ */
 export const SPRING_CATALOG_ENABLED = false
+
+export type SeasonCatalogVisibilityOpts = {
+  /** True on shmspto.vercel.app and Vercel Preview hosts. */
+  reviewHost?: boolean
+}
+
+/** Spring tab + Spring CMS rows on the public catalog. */
+export function isSpringCatalogListed(opts?: SeasonCatalogVisibilityOpts): boolean {
+  return SPRING_CATALOG_ENABLED || Boolean(opts?.reviewHost)
+}
 
 /** Flip when full-year SKUs may appear / sell. Stay dark until then. */
 export const FULL_YEAR_CATALOG_ENABLED = false
@@ -104,21 +118,28 @@ export function resolveProgramSeason(program: SeasonAwareProgram): CatalogSeason
 }
 
 /** Seasons parents can switch between on /programs (no Full year tab). */
-export function visibleCatalogSeasonTabs(): PublicCatalogSeasonId[] {
+export function visibleCatalogSeasonTabs(
+  opts?: SeasonCatalogVisibilityOpts,
+): PublicCatalogSeasonId[] {
   const tabs: PublicCatalogSeasonId[] = [CURRENT_FALL_SEASON]
-  if (SPRING_CATALOG_ENABLED) tabs.push(CURRENT_SPRING_SEASON)
+  if (isSpringCatalogListed(opts)) tabs.push(CURRENT_SPRING_SEASON)
   return tabs
 }
 
-export function isSeasonPubliclyListed(season: CatalogSeasonId): boolean {
+export function isSeasonPubliclyListed(
+  season: CatalogSeasonId,
+  opts?: SeasonCatalogVisibilityOpts,
+): boolean {
   if (season === 'full-year') return FULL_YEAR_CATALOG_ENABLED
-  if (season === 'spring-2027') return SPRING_CATALOG_ENABLED
+  if (season === 'spring-2027') return isSpringCatalogListed(opts)
   return true
 }
 
 /** Season gates only (no date gate). Date/staff visibility is page-level. */
-export function filterProgramsForPublicCatalog<T extends SeasonAwareProgram>(programs: T[]): T[] {
-  return programs.filter((p) => isSeasonPubliclyListed(resolveProgramSeason(p)))
+export function filterProgramsForPublicCatalog<
+  T extends SeasonAwareProgram,
+>(programs: T[], opts?: SeasonCatalogVisibilityOpts): T[] {
+  return programs.filter((p) => isSeasonPubliclyListed(resolveProgramSeason(p), opts))
 }
 
 export function filterProgramsBySeason<T extends SeasonAwareProgram>(
@@ -134,7 +155,9 @@ export const STAFF_SEASON_OPTIONS: Array<{ value: CatalogSeasonId; label: string
   {
     value: 'spring-2027',
     label: 'Spring 2027',
-    note: SPRING_CATALOG_ENABLED ? undefined : 'Hidden on public catalog until Spring is turned on in code',
+    note: SPRING_CATALOG_ENABLED
+      ? undefined
+      : 'Hidden on www until SPRING_CATALOG_ENABLED. Staging / Preview can preview Spring now.',
   },
   {
     value: 'full-year',
