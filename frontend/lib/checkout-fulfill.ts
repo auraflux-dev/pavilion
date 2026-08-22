@@ -488,6 +488,32 @@ export async function fulfillPaidCheckout(opts: {
       throw new Error('Bag checkout data was invalid')
     }
     if (!Array.isArray(parts) || parts.length === 0) throw new Error('Bag checkout data was empty')
+
+    const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+    const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
+    const gan = String(resolved.meta.gan ?? '').trim()
+    let coveNewBalance = ''
+    if (coveCents > 0) {
+      if (!gan) throw new Error('Cove Digital Card is missing for this split payment')
+      const activity = await redeemGiftCard(gan, coveCents, `${transactionId}-cove`)
+      const newBalance = activity?.giftCardBalanceMoney
+        ? Number(activity.giftCardBalanceMoney.amount) / 100
+        : 0
+      coveNewBalance = newBalance.toFixed(2)
+      await syncFamilyStoreCard({
+        parentEmail,
+        gan,
+        giftCardId: resolved.meta.giftCardId,
+        balanceDollars: newBalance,
+      })
+    }
+    const methodNote =
+      coveCents > 0 && cardCents > 0
+        ? `${paymentMethod} + Cove Digital Card`
+        : coveCents > 0 && cardCents <= 0
+          ? 'Cove Digital Card'
+          : paymentMethod
+
     const results: Record<string, unknown>[] = []
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i]
@@ -496,18 +522,41 @@ export async function fulfillPaidCheckout(opts: {
         parentEmail,
         parentName,
         transactionId: `${transactionId}:bag${i + 1}`,
-        paymentMethod,
+        paymentMethod: methodNote,
         sourcePrefix,
         consents,
       })
       results.push(partResult)
     }
+
+    await client.items.insert('Payments', {
+      programName: resolved.description || `Bag · ${parts.length} items`,
+      amount: resolved.amount,
+      status: 'Paid',
+      paymentDate: new Date().toISOString(),
+      paymentMethod: methodNote,
+      transactionId,
+      source: `${sourcePrefix}_cart`,
+      parentEmail,
+      notes: [
+        `${parts.length} items`,
+        coveCents > 0 ? `Cove $${(coveCents / 100).toFixed(2)}` : '',
+        cardCents > 0 ? `card $${(cardCents / 100).toFixed(2)}` : '',
+        coveNewBalance ? `Cove balance $${coveNewBalance}` : '',
+        String(resolved.meta.cartTitles ?? ''),
+      ]
+        .filter(Boolean)
+        .join(' · '),
+    })
+
     return attachPurchaseConfirmation(
       {
         kind: 'cart',
         count: parts.length,
         lines: results,
         paymentId: transactionId,
+        coveCents,
+        cardCents,
       },
       {
         kind: 'program',
@@ -517,7 +566,7 @@ export async function fulfillPaidCheckout(opts: {
         description: resolved.description,
         transactionId,
         meta: resolved.meta,
-        extras: { lines: results } as Record<string, unknown>,
+        extras: { lines: results, coveCents, cardCents } as Record<string, unknown>,
       },
     )
   }

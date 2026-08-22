@@ -111,13 +111,18 @@ export async function POST(req: NextRequest) {
         ...effective.session.emails,
       ]
       const { resolveCheckoutIntent } = await import('@/lib/checkout-fulfill')
+      const { withCoveSplit } = await import('@/lib/checkout-cove-split')
       const couponCode = String(body.couponCode ?? '').trim() || null
       const cartLines = Array.isArray(body.cartLines) ? body.cartLines : []
-      const resolved = await resolveCheckoutIntent(
-        { kind: 'cart', cartLines, couponCode },
+      const useCoveBalance = body.useCoveBalance !== false
+      let resolved = await resolveCheckoutIntent(
+        { kind: 'cart', cartLines, couponCode, useCoveBalance },
         parentEmail,
         accountEmails,
       )
+      resolved = await withCoveSplit(resolved, parentEmail, useCoveBalance)
+      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
       return NextResponse.json({
         kind,
         name: resolved.description,
@@ -126,6 +131,9 @@ export async function POST(req: NextRequest) {
         discountCode: resolved.meta.discountCode || '',
         discountPercent: 0,
         cartCount: Number(resolved.meta.cartCount ?? cartLines.length) || 0,
+        coveDollars: coveCents / 100,
+        cardDollars: cardCents / 100,
+        coveBalance: Number(resolved.meta.coveBalance ?? 0) || 0,
       })
     }
 

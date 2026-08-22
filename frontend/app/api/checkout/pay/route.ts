@@ -173,39 +173,87 @@ export async function POST(req: NextRequest) {
         ...session.emails,
       ]
       const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
+      const { withCoveSplit } = await import('@/lib/checkout-cove-split')
       const couponCode = String(body.couponCode ?? '').trim() || null
       const cartLines = Array.isArray(body.cartLines) ? body.cartLines : []
-      const resolved = await resolveCheckoutIntent(
-        { kind: 'cart', cartLines, couponCode },
+      const useCoveBalance = body.useCoveBalance !== false
+      let resolved = await resolveCheckoutIntent(
+        { kind: 'cart', cartLines, couponCode, useCoveBalance },
         parentEmail,
         accountEmails,
       )
-      if (!paymentSource) {
+      resolved = await withCoveSplit(resolved, parentEmail, useCoveBalance)
+      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
+      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+      if (cardCents > 0 && cardCents < 100) {
         return NextResponse.json(
-          { error: 'Enter your credit or debit card to pay' },
+          {
+            error:
+              'Remaining card amount is under $1. Pay the full amount by card, or load more on your Cove Digital Card.',
+          },
+          { status: 400 },
+        )
+      }
+      if (cardCents >= 100 && !paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card for the remaining balance.' },
           { status: 400 },
         )
       }
       const paymentKey = randomUUID()
-      const payment = await chargePayment({
-        sourceId: paymentSource,
-        amountCents: resolved.amountCents,
-        idempotencyKey: paymentKey,
-        customerId,
-        referenceId: resolved.customId,
-        buyerEmailAddress: session.email,
-        note: resolved.description,
-      })
-      const result = await fulfillPaidCheckout({
-        resolved,
-        parentEmail,
-        parentName: name,
-        transactionId: payment.id ?? paymentKey,
-        paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
-        sourcePrefix: 'square',
-        consents: consentCheck.acks,
-      })
-      return NextResponse.json({ ok: true, ...result })
+      let paymentId = paymentKey
+      if (cardCents >= 100 && paymentSource) {
+        try {
+          const payment = await chargePayment({
+            sourceId: paymentSource,
+            amountCents: cardCents,
+            idempotencyKey: paymentKey,
+            customerId,
+            referenceId: resolved.customId,
+            buyerEmailAddress: session.email,
+            note: resolved.description,
+          })
+          paymentId = payment.id ?? paymentKey
+        } catch (err) {
+          return NextResponse.json(
+            { error: err instanceof Error ? err.message : 'Card payment failed' },
+            { status: 400 },
+          )
+        }
+      }
+      try {
+        const result = await fulfillPaidCheckout({
+          resolved,
+          parentEmail,
+          parentName: name,
+          transactionId: paymentId,
+          paymentMethod:
+            cardCents <= 0
+              ? 'Cove Digital Card'
+              : useStoredCard || saveCard
+                ? 'Square Card on File'
+                : 'Square Card',
+          sourcePrefix: 'square',
+          consents: consentCheck.acks,
+        })
+        return NextResponse.json({
+          ok: true,
+          ...result,
+          coveCents,
+          cardCents,
+        })
+      } catch (err) {
+        if (cardCents >= 100) {
+          await refundPayment({
+            paymentId,
+            amountCents: cardCents,
+            idempotencyKey: `${paymentKey}-refund`.slice(0, 45),
+          }).catch((refundErr) => {
+            console.error('checkout/pay cart refund after fulfill fail', refundErr)
+          })
+        }
+        throw err
+      }
     }
 
     // ── Enrichment program ──────────────────────────────────────

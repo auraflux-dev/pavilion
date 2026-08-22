@@ -1,5 +1,5 @@
 /**
- * Live Cove Digital Card split on a resolved product quote.
+ * Live Cove Digital Card split on a resolved product or bag quote.
  */
 import { getGiftCardBalance } from '@/lib/square'
 import { listFamilyStudents, resolveFamilyGiftCard } from '@/lib/family-store-card'
@@ -11,7 +11,7 @@ export async function withCoveSplit(
   parentEmail: string,
   useCove: boolean,
 ): Promise<ResolvedCheckout> {
-  if (resolved.kind !== 'product') {
+  if (resolved.kind !== 'product' && resolved.kind !== 'cart') {
     return resolved
   }
 

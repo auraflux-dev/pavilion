@@ -61,7 +61,8 @@ export async function POST(req: NextRequest) {
     ]
     const resolved = await resolveCheckoutIntent(intent, parentEmail, accountEmails)
     const { withCoveSplit } = await import('@/lib/checkout-cove-split')
-    const useCove = intent.kind === 'product' && intent.useCoveBalance !== false
+    const useCove =
+      (intent.kind === 'product' || intent.kind === 'cart') && intent.useCoveBalance !== false
     const split = await withCoveSplit(resolved, parentEmail, useCove)
     const cardCents = Math.round(Number(split.meta.cardCents ?? split.amountCents) || 0)
     if (cardCents <= 0) {
