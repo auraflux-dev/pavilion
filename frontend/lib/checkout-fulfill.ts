@@ -221,9 +221,18 @@ export async function resolveCheckoutIntent(
     const studentId = String(intent.studentId ?? '').trim()
     if (!programId || !studentId) throw new Error('Program and student required')
     const program = await getProgramById(programId)
-    if (!program || !program.registrationOpen) throw new Error('Program not open for registration')
+    if (!program) throw new Error('Program not open for registration')
+    if (!program.registrationOpen) {
+      const { isProgramsReviewHost } = await import('@/lib/programs/public-access')
+      if (!(await isProgramsReviewHost())) {
+        throw new Error('Program not open for registration')
+      }
+    }
     const { assertCanRegisterForProgram } = await import('@/lib/programs/registration-access')
-    const access = await assertCanRegisterForProgram(program, parentEmail)
+    const access = await assertCanRegisterForProgram(
+      { ...program, registrationOpen: true },
+      parentEmail,
+    )
     if (!access.ok) throw new Error(access.error || 'Registration not available')
     const fee = Number(program.fee ?? 0)
  if (fee <= 0) throw new Error('This program does not require payment. Use free registration')

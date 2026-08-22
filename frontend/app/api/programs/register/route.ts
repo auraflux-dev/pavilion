@@ -49,11 +49,17 @@ export async function POST(req: NextRequest) {
     const program = await getProgramById(programId)
     if (!program) return NextResponse.json({ error: 'Program not found' }, { status: 404 })
     if (!program.registrationOpen) {
-      return NextResponse.json({ error: 'Registration is closed' }, { status: 400 })
+      const { isProgramsReviewHost } = await import('@/lib/programs/public-access')
+      if (!(await isProgramsReviewHost())) {
+        return NextResponse.json({ error: 'Registration is closed' }, { status: 400 })
+      }
     }
 
     const { assertCanRegisterForProgram } = await import('@/lib/programs/registration-access')
-    const access = await assertCanRegisterForProgram(program, parentEmail)
+    const access = await assertCanRegisterForProgram(
+      { ...program, registrationOpen: true },
+      parentEmail,
+    )
     if (!access.ok) {
       return NextResponse.json(
         {

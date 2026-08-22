@@ -94,10 +94,18 @@ export async function enrollInProgram(opts: {
 }> {
   const program = await getProgramById(opts.programId)
   if (!program) throw new Error('Program not found')
-  if (!program.registrationOpen) throw new Error('Registration is closed for this program')
+  if (!program.registrationOpen) {
+    const { isProgramsReviewHost } = await import('@/lib/programs/public-access')
+    if (!(await isProgramsReviewHost())) {
+      throw new Error('Registration is closed for this program')
+    }
+  }
 
   const { assertCanRegisterForProgram } = await import('@/lib/programs/registration-access')
-  const access = await assertCanRegisterForProgram(program, opts.parentEmail)
+  const access = await assertCanRegisterForProgram(
+    { ...program, registrationOpen: true },
+    opts.parentEmail,
+  )
   if (!access.ok) throw new Error(access.error || 'Registration not available')
 
   const student = await getOwnedStudent(opts.parentEmail, opts.studentId)

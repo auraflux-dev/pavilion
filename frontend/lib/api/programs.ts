@@ -213,10 +213,7 @@ export async function getProgramById(id: string): Promise<Program | null> {
   const client = getWixClient();
   try {
     const item = await client.items.get("Programs", id);
-    const program = mapProgramItem(item as Record<string, unknown>)
-    const { isProgramsReviewHost } = await import('@/lib/programs/public-access')
-    const reviewHost = await isProgramsReviewHost()
-    return withReviewHostCheckout(program, reviewHost)
+    return mapProgramItem(item as Record<string, unknown>);
   } catch {
     return null;
   }
