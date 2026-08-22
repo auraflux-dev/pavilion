@@ -6,9 +6,11 @@ import type { Program } from '@/lib/api/programs'
 import {
   CATALOG_SEASON_LABELS,
   filterProgramsBySeason,
+  resolveProgramSeason,
   visibleCatalogSeasonTabs,
   type PublicCatalogSeasonId,
 } from '@/lib/programs/season'
+import { findFallCompanion, findSpringCompanion } from '@/lib/programs/season-companion'
 
 interface ProgramsFilterProps {
   programs: Program[]
@@ -108,7 +110,17 @@ export function ProgramsFilter({ programs, springCatalogVisible }: ProgramsFilte
           </h3>
           <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:gap-8 mb-14">
             {open.map((program) => (
-              <ProgramCard key={program._id} program={program} />
+              <ProgramCard
+                key={program._id}
+                program={program}
+                companion={
+                  resolveProgramSeason(program) === 'fall-2026'
+                    ? findSpringCompanion(program, programs)
+                    : resolveProgramSeason(program) === 'spring-2027'
+                      ? findFallCompanion(program, programs)
+                      : null
+                }
+              />
             ))}
           </div>
         </>
@@ -122,7 +134,17 @@ export function ProgramsFilter({ programs, springCatalogVisible }: ProgramsFilte
           </h3>
           <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:gap-8">
             {closed.map((program) => (
-              <ProgramCard key={program._id} program={program} />
+              <ProgramCard
+                key={program._id}
+                program={program}
+                companion={
+                  resolveProgramSeason(program) === 'fall-2026'
+                    ? findSpringCompanion(program, programs)
+                    : resolveProgramSeason(program) === 'spring-2027'
+                      ? findFallCompanion(program, programs)
+                      : null
+                }
+              />
             ))}
           </div>
         </>

@@ -157,8 +157,11 @@ export async function POST(req: NextRequest) {
       const programId = String(body.programId ?? '').trim()
       const studentId = String(body.studentId ?? '').trim()
       const couponCode = String(body.couponCode ?? '').trim() || null
+      const addonProgramIds = Array.isArray(body.addonProgramIds)
+        ? body.addonProgramIds.map((id: unknown) => String(id ?? '').trim()).filter(Boolean)
+        : []
       const resolved = await resolveCheckoutIntent(
-        { kind: 'program', programId, studentId, couponCode },
+        { kind: 'program', programId, studentId, couponCode, addonProgramIds },
         parentEmail,
         accountEmails,
       )

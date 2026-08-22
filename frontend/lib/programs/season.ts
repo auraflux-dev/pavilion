@@ -131,7 +131,9 @@ export function isSeasonPubliclyListed(
   opts?: SeasonCatalogVisibilityOpts,
 ): boolean {
   if (season === 'full-year') return FULL_YEAR_CATALOG_ENABLED
-  if (season === 'spring-2027') return isSpringCatalogListed(opts)
+  // Spring CMS rows stay in the catalog payload for Fall→Spring companion upsell.
+  // The Spring tab itself still uses isSpringCatalogListed.
+  if (season === 'spring-2027') return true
   return true
 }
 

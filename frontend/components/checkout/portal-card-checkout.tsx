@@ -52,6 +52,7 @@ export type PortalPayBody =
       kind: 'program'
       programId: string
       studentId: string
+      addonProgramIds?: string[]
       couponCode?: string | null
       consents?: ConsentAck[]
     }

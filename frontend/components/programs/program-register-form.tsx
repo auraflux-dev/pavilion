@@ -19,6 +19,8 @@ import {
 } from '@/lib/programs/registration-access'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { gaSurface, trackEvent } from '@/lib/ga'
+import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
+import { resolveProgramSeason } from '@/lib/programs/season'
 
 type Student = {
   id: string
@@ -29,6 +31,8 @@ type Student = {
 
 interface FormProps {
   program: Program
+  /** Matching Spring (or Fall) twin for add-to-cart. */
+  companion?: Program | null
   onClose?: () => void
   onRegistered?: () => void
   /** Unique Square mount id when both modal and page can exist. */
@@ -38,6 +42,7 @@ interface FormProps {
 
 export function ProgramRegisterForm({
   program,
+  companion = null,
   onClose,
   onRegistered,
   checkoutId,
@@ -55,6 +60,7 @@ export function ProgramRegisterForm({
   const [payOpen, setPayOpen] = useState(false)
   const [payAmount, setPayAmount] = useState(0)
   const [couponCode, setCouponCode] = useState('')
+  const [addCompanion, setAddCompanion] = useState(false)
   const phase = getRegistrationPhase(program)
   const priorityUntilLabel =
     phase === 'member_priority' ? formatMemberPriorityUntil(program.memberPriorityUntil) : ''
@@ -103,6 +109,8 @@ export function ProgramRegisterForm({
         throw new Error('Please review and accept the required terms')
       }
 
+      const addonProgramIds =
+        addCompanion && companion?._id ? [companion._id] : undefined
       const res = await fetch('/api/programs/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -111,6 +119,7 @@ export function ProgramRegisterForm({
           studentId,
           consents,
           couponCode: couponCode.trim() || undefined,
+          addonProgramIds,
         }),
       })
       const data = await res.json()
@@ -176,7 +185,13 @@ export function ProgramRegisterForm({
           <div>
             <p className="text-base font-bold text-[#1A1A1A]">{title}</p>
             <p className="text-sm font-bold mt-1" style={{ color: 'var(--brand-green)' }}>
-              {feeTbd ? 'Tuition TBD' : fee <= 0 ? 'Free' : `$${fee.toFixed(2)}`}
+              {feeTbd
+                ? 'Tuition TBD'
+                : fee <= 0
+                  ? 'Free'
+                  : addCompanion && companion
+                    ? `$${(fee + Number(companion.fee ?? 0)).toFixed(2)} (Fall + Spring)`
+                    : `$${fee.toFixed(2)}`}
             </p>
             {!feeTbd && fee > 0 && String(program.memberDiscountNote ?? '').trim() ? (
               <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
@@ -258,6 +273,18 @@ export function ProgramRegisterForm({
               </p>
             </div>
 
+            {companion &&
+            (resolveProgramSeason(program) === 'fall-2026' ||
+              resolveProgramSeason(program) === 'spring-2027') ? (
+              <SpringCompanionOffer
+                companion={companion}
+                variant="checkout"
+                selectable
+                selected={addCompanion}
+                onSelectedChange={setAddCompanion}
+              />
+            ) : null}
+
             {fee > 0 && !feeTbd ? (
               <label className="block text-xs font-semibold text-[#5A6070]">
                 Discount code
@@ -317,6 +344,8 @@ Only paste a code here if you need to override.`}
           kind: 'program',
           programId: program._id,
           studentId,
+          addonProgramIds:
+            addCompanion && companion?._id ? [companion._id] : undefined,
           couponCode: couponCode.trim() || undefined,
           consents: consents ?? undefined,
         }}
@@ -344,7 +373,13 @@ Only paste a code here if you need to override.`}
 }
 
 /** Landing-page checkout card. Visitors log in, then the same pay flow as the catalog. */
-export function ProgramLandingCheckout({ program }: { program: Program }) {
+export function ProgramLandingCheckout({
+  program,
+  companion = null,
+}: {
+  program: Program
+  companion?: Program | null
+}) {
   const comingSoon = !program.registrationOpen
   return (
     <div
@@ -355,6 +390,7 @@ export function ProgramLandingCheckout({ program }: { program: Program }) {
         <>
           <ProgramRegisterForm
             program={program}
+            companion={companion}
             checkoutId={`program-square-page-${program._id}`}
             heading="Checkout"
           />
@@ -370,6 +406,7 @@ export function ProgramLandingCheckout({ program }: { program: Program }) {
         <MemberGate label="Log in to register">
           <ProgramRegisterForm
             program={program}
+            companion={companion}
             checkoutId={`program-square-page-${program._id}`}
             heading="Checkout"
           />

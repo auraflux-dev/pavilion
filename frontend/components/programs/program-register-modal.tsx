@@ -5,12 +5,19 @@ import type { Program } from '@/lib/api/programs'
 
 interface Props {
   program: Program
+  companion?: Program | null
   open: boolean
   onClose: () => void
   onRegistered?: () => void
 }
 
-export function ProgramRegisterModal({ program, open, onClose, onRegistered }: Props) {
+export function ProgramRegisterModal({
+  program,
+  companion = null,
+  open,
+  onClose,
+  onRegistered,
+}: Props) {
   if (!open) return null
 
   return (
@@ -26,6 +33,7 @@ export function ProgramRegisterModal({ program, open, onClose, onRegistered }: P
         </div>
         <ProgramRegisterForm
           program={program}
+          companion={companion}
           onClose={onClose}
           onRegistered={onRegistered}
           checkoutId={`program-square-modal-${program._id}`}

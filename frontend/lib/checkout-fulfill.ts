@@ -50,6 +50,8 @@ export type CheckoutIntent = {
   /** Wix Catalog variant when the product has Color/Size options */
   variantId?: string
   programId?: string
+  /** Optional Spring (or Fall) twin purchased in the same checkout. */
+  addonProgramIds?: string[]
   eventId?: string
   quantity?: number
   amountCents?: number
@@ -217,8 +219,16 @@ export async function resolveCheckoutIntent(
     const { getProgramById } = await import('@/lib/api/programs')
     const { enrichmentDiscountPercent } = await import('@/lib/membership-entitlements')
     const { normalizeMembershipTier } = await import('@/lib/staff/members-roster')
+    const { isValidSeasonAddon } = await import('@/lib/programs/season-companion')
     const programId = String(intent.programId ?? '').trim()
     const studentId = String(intent.studentId ?? '').trim()
+    const addonIds = Array.from(
+      new Set(
+        (intent.addonProgramIds ?? [])
+          .map((id) => String(id ?? '').trim())
+          .filter((id) => id && id !== programId),
+      ),
+    ).slice(0, 1)
     if (!programId || !studentId) throw new Error('Program and student required')
     const program = await getProgramById(programId)
     if (!program) throw new Error('Program not open for registration')
@@ -234,7 +244,27 @@ export async function resolveCheckoutIntent(
     )
     if (!access.ok) throw new Error(access.error || 'Registration not available')
     const fee = Number(program.fee ?? 0)
- if (fee <= 0) throw new Error('This program does not require payment. Use free registration')
+    if (fee <= 0) throw new Error('This program does not require payment. Use free registration')
+
+    const addons: Array<{ id: string; name: string; fee: number }> = []
+    for (const addonId of addonIds) {
+      const addon = await getProgramById(addonId)
+      if (!addon) throw new Error('Spring companion class not found')
+      if (!isValidSeasonAddon(program, addon)) {
+        throw new Error('That add-on is not the matching Spring or Fall class')
+      }
+      if (!addon.registrationOpen && !stagingCheckout) {
+        throw new Error('The companion class is not open for registration yet')
+      }
+      const addonAccess = await assertCanRegisterForProgram(
+        stagingCheckout ? { ...addon, registrationOpen: true } : addon,
+        parentEmail,
+      )
+      if (!addonAccess.ok) throw new Error(addonAccess.error || 'Companion class not available')
+      const addonFee = Number(addon.fee ?? 0)
+      if (addonFee <= 0) throw new Error('Companion class fee is not set')
+      addons.push({ id: addon._id, name: addon.name, fee: addonFee })
+    }
 
     const client = getWixClient()
     const student = (await client.items.get('Students', studentId).catch(() => null)) as {
@@ -244,7 +274,8 @@ export async function resolveCheckoutIntent(
     } | null
     const tier = normalizeMembershipTier(String(student?.membershipTier ?? 'free'))
     const percent = enrichmentDiscountPercent(tier)
-    const applied = await applyCheckoutDiscount({
+    // Board season codes apply to the primary class only. Add-ons get membership %.
+    const primaryApplied = await applyCheckoutDiscount({
       scope: 'program',
       listAmount: fee,
       couponCode: intent.couponCode,
@@ -252,29 +283,50 @@ export async function resolveCheckoutIntent(
       accountEmails,
       tierPercent: percent,
     })
-    if (applied.error) throw new Error(applied.error)
-    const discount = applied.discount
-    const amount = applied.amount
+    if (primaryApplied.error) throw new Error(primaryApplied.error)
+    let addonAmount = 0
+    let addonList = 0
+    for (const addon of addons) {
+      addonList += addon.fee
+      const addonApplied = await applyCheckoutDiscount({
+        scope: 'program',
+        listAmount: addon.fee,
+        couponCode: null,
+        parentEmail,
+        accountEmails,
+        tierPercent: percent,
+      })
+      if (addonApplied.error) throw new Error(addonApplied.error)
+      addonAmount += addonApplied.amount
+    }
+    const discount = primaryApplied.discount
+    const amount = primaryApplied.amount + addonAmount
+    const listFee = fee + addonList
     const discountDollars = discount?.dollars ?? 0
     const appliedPercent = discount?.percent ?? 0
+    const names = [program.name, ...addons.map((a) => a.name)].join(' + ')
 
     return {
       kind,
       amount,
       amountCents: Math.round(amount * 100),
       description:
-        appliedPercent > 0
-          ? `Enrichment: ${program.name} (${appliedPercent}% discount)`
-          : `Enrichment: ${program.name}`,
+        addons.length > 0
+          ? `Enrichment: ${names}`
+          : appliedPercent > 0
+            ? `Enrichment: ${program.name} (${appliedPercent}% discount)`
+            : `Enrichment: ${program.name}`,
       customId: `pg:${programId.replace(/-/g, '').slice(0, 37)}`,
       meta: {
         programId,
         programName: program.name,
         studentId,
-        listFee: String(fee),
+        listFee: String(listFee),
         memberDiscountPercent: String(appliedPercent || 0),
         memberDiscountDollars: String(discountDollars || 0),
         discountCode: discount?.code || String(student?.discountCode ?? ''),
+        addonProgramIds: addons.map((a) => a.id).join(','),
+        addonProgramNames: addons.map((a) => a.name).join(' · '),
         ...(discount?.consumeId ? { consumeDiscountId: discount.consumeId } : {}),
       },
     }
@@ -389,8 +441,26 @@ export async function fulfillPaidCheckout(opts: {
       transactionId,
       feePaid: resolved.amount,
     })
+    const addonIds = String(resolved.meta.addonProgramIds ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+    const addonEnrollments = []
+    for (const addonId of addonIds) {
+      const addonEnrolled = await enrollInProgram({
+        parentEmail,
+        programId: addonId,
+        studentId: resolved.meta.studentId,
+        consents: consents ?? [],
+        transactionId: `${transactionId}:addon:${addonId.slice(0, 8)}`,
+        feePaid: 0,
+      })
+      addonEnrollments.push(addonEnrolled)
+    }
     await client.items.insert('Payments', {
- programName: `Enrichment: ${resolved.meta.programName}`,
+      programName: `Enrichment: ${resolved.meta.programName}${
+        resolved.meta.addonProgramNames ? ` + ${resolved.meta.addonProgramNames}` : ''
+      }`,
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
@@ -399,9 +469,13 @@ export async function fulfillPaidCheckout(opts: {
       source: `${sourcePrefix}_program`,
       parentEmail,
       studentId: resolved.meta.studentId,
-      notes: resolved.meta.discountCode
-        ? `${resolved.meta.programId} · ${resolved.meta.discountCode}`
-        : resolved.meta.programId,
+      notes: [
+        resolved.meta.programId,
+        resolved.meta.addonProgramIds,
+        resolved.meta.discountCode,
+      ]
+        .filter(Boolean)
+        .join(' · '),
     })
     if (resolved.meta.consumeDiscountId) {
       await consumeDiscountCode(resolved.meta.consumeDiscountId)
@@ -410,6 +484,7 @@ export async function fulfillPaidCheckout(opts: {
       {
         kind: 'program',
         ...enrolled,
+        addonEnrollments,
         paymentId: transactionId,
       },
       {
@@ -420,7 +495,7 @@ export async function fulfillPaidCheckout(opts: {
         description: resolved.description,
         transactionId,
         meta: resolved.meta,
-        extras: enrolled as Record<string, unknown>,
+        extras: { ...enrolled, addonEnrollments } as Record<string, unknown>,
       },
     )
   }

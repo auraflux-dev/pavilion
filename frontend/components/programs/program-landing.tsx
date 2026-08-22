@@ -14,6 +14,7 @@ import {
 } from '@/lib/programs/registration-access'
 import { fallEpClassById, matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
 import { programLandingCopy } from '@/lib/programs/landing-copy'
+import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
 function hasTag(program: Program, tag: string) {
   return String(program.tags ?? '')
     .toLowerCase()
@@ -44,7 +45,13 @@ function youtubeEmbedSrc(url: string): string | null {
   return null
 }
 
-export function ProgramLanding({ program }: { program: Program }) {
+export function ProgramLanding({
+  program,
+  companion = null,
+}: {
+  program: Program
+  companion?: Program | null
+}) {
   const [copied, setCopied] = useState(false)
   const [curriculumOpen, setCurriculumOpen] = useState(false)
   const title = displayProgramName(program.name)
@@ -333,7 +340,10 @@ Until then, use the summary and curriculum on the left.`}
                   </div>
                 ) : null}
               </div>
-              <ProgramLandingCheckout program={program} />
+              {companion ? (
+                <SpringCompanionOffer companion={companion} variant="landing" />
+              ) : null}
+              <ProgramLandingCheckout program={program} companion={companion} />
             </div>
           </div>
         </div>

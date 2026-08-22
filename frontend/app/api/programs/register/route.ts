@@ -82,35 +82,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }
 
+    const addonProgramIds = Array.isArray(body.addonProgramIds)
+      ? body.addonProgramIds.map((id: unknown) => String(id ?? '').trim()).filter(Boolean)
+      : []
     const fee = Number(program.fee ?? 0)
-    if (fee > 0) {
-      const { enrichmentDiscountPercent } = await import('@/lib/membership-entitlements')
-      const { normalizeMembershipTier } = await import('@/lib/staff/members-roster')
-      const { applyCheckoutDiscount } = await import('@/lib/checkout-discounts')
+    if (fee > 0 || addonProgramIds.length > 0) {
       const couponCode = String(body.couponCode ?? '').trim() || null
-      const tier = normalizeMembershipTier(String(student.membershipTier ?? 'free'))
-      const percent = enrichmentDiscountPercent(tier)
-      const applied = await applyCheckoutDiscount({
-        scope: 'program',
-        listAmount: fee,
-        couponCode,
+      const { resolveCheckoutIntent } = await import('@/lib/checkout-fulfill')
+      const resolved = await resolveCheckoutIntent(
+        { kind: 'program', programId, studentId, couponCode, addonProgramIds },
         parentEmail,
         accountEmails,
-        tierPercent: percent,
-      })
-      if (applied.error) {
-        return NextResponse.json({ error: applied.error }, { status: 400 })
-      }
-      const discount = applied.discount
+      )
       return NextResponse.json({
         requiresPayment: true,
-        fee: applied.amount,
-        listFee: fee,
-        memberDiscountPercent: discount?.percent ?? 0,
-        memberDiscountDollars: discount?.dollars ?? 0,
-        discountCode: discount?.code || '',
-        programName: program.name,
+        fee: resolved.amount,
+        listFee: Number(resolved.meta.listFee ?? resolved.amount),
+        memberDiscountPercent: Number(resolved.meta.memberDiscountPercent ?? 0) || 0,
+        memberDiscountDollars: Number(resolved.meta.memberDiscountDollars ?? 0) || 0,
+        discountCode: resolved.meta.discountCode || '',
+        programName: resolved.meta.addonProgramNames
+          ? `${resolved.meta.programName} + ${resolved.meta.addonProgramNames}`
+          : resolved.meta.programName,
         programId,
+        addonProgramIds,
         studentId,
       })
     }

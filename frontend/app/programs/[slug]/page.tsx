@@ -20,7 +20,10 @@ interface Props {
 }
 
 export function generateStaticParams() {
-  return FALL_2026_EP_CLASSES.map((c) => ({ slug: c.publicSlug }))
+  return [
+    ...FALL_2026_EP_CLASSES.map((c) => ({ slug: c.publicSlug })),
+    ...FALL_2026_EP_CLASSES.map((c) => ({ slug: `${c.publicSlug}-spring` })),
+  ]
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -64,6 +67,14 @@ export default async function ProgramLandingPage({
   const programs = await getAllPrograms({ reviewHost }).catch(() => [])
   const program = findProgramBySlug(programs, slug)
   if (!program) notFound()
+  const { findSpringCompanion, findFallCompanion } = await import('@/lib/programs/season-companion')
+  const { resolveProgramSeason } = await import('@/lib/programs/season')
+  const companion =
+    resolveProgramSeason(program) === 'fall-2026'
+      ? findSpringCompanion(program, programs)
+      : resolveProgramSeason(program) === 'spring-2027'
+        ? findFallCompanion(program, programs)
+        : null
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -71,7 +82,7 @@ export default async function ProgramLandingPage({
       <Navbar />
       {access.previewMode ? <ProgramsPreviewBanner /> : null}
       <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
-        <ProgramLanding program={program} />
+        <ProgramLanding program={program} companion={companion} />
       </main>
       <Footer />
     </div>

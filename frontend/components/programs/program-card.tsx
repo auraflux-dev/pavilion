@@ -16,9 +16,11 @@ import {
 } from '@/lib/programs/registration-access'
 import { MemberGate } from '@/components/member-gate'
 import { ProgramRegisterModal } from '@/components/programs/program-register-modal'
+import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
 
 interface ProgramCardProps {
   program: Program
+  companion?: Program | null
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; accent: string }> = {
@@ -79,7 +81,7 @@ function programCopy(html: string): { lead: string; bullets: string[] } {
   }
 }
 
-export function ProgramCard({ program }: ProgramCardProps) {
+export function ProgramCard({ program, companion = null }: ProgramCardProps) {
   const colors = getColors(program.category)
   const [registerOpen, setRegisterOpen] = useState(false)
   const comingSoon = !program.registrationOpen && (program.featured || hasTag(program, 'coming-soon'))
@@ -278,6 +280,8 @@ export function ProgramCard({ program }: ProgramCardProps) {
           </p>
         ) : null}
 
+        {companion ? <SpringCompanionOffer companion={companion} variant="card" /> : null}
+
         {program.registrationOpen ? (
           <>
             <MemberGate label="Register for this program">
@@ -318,6 +322,7 @@ export function ProgramCard({ program }: ProgramCardProps) {
 
       <ProgramRegisterModal
         program={program}
+        companion={companion}
         open={registerOpen}
         onClose={() => setRegisterOpen(false)}
       />
