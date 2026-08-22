@@ -289,10 +289,10 @@ export function StaffNewsletterTemplatesPanel({
       <div>
         <h2 className="text-lg font-bold">Templates (Canva + copy)</h2>
         <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
-          Design = Canva PNG + SHMS header/footer. Multi-page Canva exports every page into the email.
-          Body stays plain text (no HTML coding). Optional beats: event, ask, CTA.
+          Design = Canva PNG + editable header/footer (Site settings). Multi-page Canva exports every page into the email.
+          Use sections for intro, events, questions, CTAs, and sign-off. Body stays plain text (no HTML coding).
           {'\n'}
-          Attach Canva → PNG exports automatically when Canva is connected → write copy → test send.
+          Attach Canva → Export PNG for email (required for paid sends) → write copy → test send.
         </p>
       </div>
 
@@ -382,6 +382,13 @@ export function StaffNewsletterTemplatesPanel({
             Canva API not connected? Paste an edit/view link, then Connect Canva to export PNG.
           </p>
         )}
+        {canvaMeta.canvaDesignId && !canvaMeta.heroImageUrl ? (
+          <p className="text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 whitespace-pre-line">
+            Canva is attached but PNG is not exported yet.
+            {'\n'}
+            Click Export PNG for email and wait for the preview before you test or send a paid newsletter.
+          </p>
+        ) : null}
         {canvaMeta.canvaViewUrl ? (
           <p className="text-[11px] text-[#5A6070] break-all">
             Attached: {canvaMeta.canvaTitle || canvaMeta.canvaDesignId}{' '}

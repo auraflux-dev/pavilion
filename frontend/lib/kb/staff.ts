@@ -403,11 +403,12 @@ Do not paste HTML from Canva. Do not edit the design inside Staff. Use **Edit in
 ## Write the copy
 Type in the subject and body like a normal email.
 
-Optional: check **Write in beats**: Fill intro, Event, Ask, CTA, sign-off. Staff joins those into the body. You can still read the combined text.
+Optional: check **Write in sections**: intro, Event, Question (poll or reply prompt), CTA, sign-off. Add up to 8 sections. Email shows labeled blocks with dividers; headings are bold.
+
+Edit **Newsletter email header title** and **footer** under Staff → Site settings.
 
 Personal bits you can type in subject or body:
-- {{firstName}} {{lastName}} {{name}}
-- {{tier}} {{grade}} {{email}}
+- {{firstName}} or {{first name}} · {{name}} · {{tier}} · {{grade}} · {{email}}
 
 Example: Hi {{firstName}}, your {{tier}} membership…
 
@@ -432,7 +433,7 @@ If a name is missing, it becomes “there”.
 
 ![Weekly Scoop. Link field and optional footer signups](/help/staff-newsletter/04-weekly-scoop.png)
 
-![Write in beats. Intro, Event, Ask, CTA, sign-off](/help/staff-newsletter/05-beats.png)
+![Write in sections. Intro, Event, Question, CTA, sign-off](/help/staff-newsletter/05-beats.png)
 
 ## Send paid email
 1. Confirm type is **Paid members**

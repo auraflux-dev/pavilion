@@ -1,3 +1,13 @@
+import { applyMergeFields, type NewsletterMergeVars } from '@/lib/staff/newsletter-merge'
+import {
+  presetLabel,
+  type NewsletterBeat,
+  type NewsletterSections,
+} from '@/lib/staff/newsletter-sections'
+import {
+  NEWSLETTER_BRANDING_DEFAULTS,
+  type NewsletterBranding,
+} from '@/lib/staff/newsletter-branding'
 import { newsletterSiteOrigin } from './newsletter-site'
 
 function escapeHtml(s: string): string {
@@ -17,20 +27,97 @@ export function plainTextToEmailHtml(text: string): string {
   return escapeHtml(text).replace(/\r\n/g, '\n').replace(/\n/g, '<br />\n')
 }
 
+function footerHtml(origin: string, branding: NewsletterBranding): string {
+  const lines = branding.footerLines.length
+    ? branding.footerLines
+    : NEWSLETTER_BRANDING_DEFAULTS.newsletterFooterText.split('\n')
+  return lines
+    .map((line, i) => {
+      const trimmed = line.trim()
+      if (!trimmed) return ''
+      const withLink = trimmed.replace(
+        /(https?:\/\/[^\s]+|www\.[^\s]+)/gi,
+        (url) => {
+          const href = url.startsWith('http') ? url : `https://${url}`
+          const label = url.replace(/^https?:\/\//, '')
+          return `<a href="${escapeHtml(href)}" style="color:#1B6B45">${escapeHtml(label)}</a>`
+        },
+      )
+      const margin = i === 0 ? '0' : '6px 0 0'
+      return `<p style="margin:${margin};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;line-height:1.5;color:#5A6070;text-align:center">${withLink}</p>`
+    })
+    .filter(Boolean)
+    .join('\n')
+}
+
+function beatBlock(beat: NewsletterBeat, isFirst: boolean): string {
+  const heading = beat.heading.trim()
+  const body = beat.body.trim()
+  if (!heading && !body) return ''
+  const label = presetLabel(beat.preset)
+  const border = isFirst ? '' : 'border-top:1px solid #E2E8E4;'
+  const title = heading || label
+  const bodyHtml = body ? plainTextToEmailHtml(body) : ''
+  return `<tr><td style="padding:18px 0 0;${border}">
+    <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#1B6B45">${escapeHtml(label)}</p>
+    <p style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:700;line-height:1.3;color:#1A1A1A">${escapeHtml(title)}</p>
+    ${bodyHtml ? `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55;color:#1A1A1A">${bodyHtml}</div>` : ''}
+  </td></tr>`
+}
+
+export function buildNewsletterSectionsHtml(
+  sections: NewsletterSections,
+  merge?: NewsletterMergeVars,
+): string {
+  const apply = (t: string) => (merge ? applyMergeFields(t, merge) : t)
+  const rows: string[] = []
+  const intro = apply(sections.intro).trim()
+  if (intro) {
+    rows.push(`<tr><td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55;color:#1A1A1A">
+      ${plainTextToEmailHtml(intro)}
+    </td></tr>`)
+  }
+  const activeBeats = sections.beats.filter((b) => b.heading.trim() || b.body.trim())
+  activeBeats.forEach((beat, i) => {
+    const block = beatBlock(
+      {
+        ...beat,
+        heading: apply(beat.heading),
+        body: apply(beat.body),
+      },
+      i === 0 && !intro,
+    )
+    if (block) rows.push(block)
+  })
+  const signoff = apply(sections.signoff).trim()
+  if (signoff) {
+    rows.push(`<tr><td style="padding:18px 0 0;border-top:1px solid #E2E8E4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55;color:#1A1A1A">
+      ${plainTextToEmailHtml(signoff)}
+    </td></tr>`)
+  }
+  return rows.join('\n')
+}
+
 /**
- * Branded HTML newsletter: SHMS header | optional Canva PNG hero | plain body | footer.
- * Always returns HTML for Gmail sends (multipart with text fallback elsewhere).
+ * Branded HTML newsletter: SHMS header | optional Canva PNG hero | body | footer.
  */
 export function buildNewsletterHtml(opts: {
   textBody: string
+  sections?: NewsletterSections | null
+  branding?: NewsletterBranding
   sendId?: string
   heroImageUrl?: string
   extraImageUrls?: string[]
   canvaViewUrl?: string
   canvaThumbnailUrl?: string
   canvaTitle?: string
+  merge?: NewsletterMergeVars
 }): string {
   const origin = newsletterSiteOrigin()
+  const branding = opts.branding ?? {
+    headerTitle: NEWSLETTER_BRANDING_DEFAULTS.newsletterHeaderTitle,
+    footerLines: NEWSLETTER_BRANDING_DEFAULTS.newsletterFooterText.split('\n'),
+  }
   const logoUrl = `${origin}/brand/cove-logo-640.png`
   const heroUrl = (opts.heroImageUrl || opts.canvaThumbnailUrl || '').trim()
   const extra = (opts.extraImageUrls ?? [])
@@ -38,7 +125,17 @@ export function buildNewsletterHtml(opts: {
     .filter((u) => u && u !== heroUrl)
   const linkHref = (opts.canvaViewUrl || origin).trim()
   const heroAlt = escapeHtml(opts.canvaTitle?.trim() || 'SHMS PTO newsletter')
-  const bodyHtml = plainTextToEmailHtml(opts.textBody)
+  const apply = (t: string) => (opts.merge ? applyMergeFields(t, opts.merge) : t)
+  const useSections =
+    opts.sections &&
+    (opts.sections.intro.trim() ||
+      opts.sections.beats.some((b) => b.heading.trim() || b.body.trim()) ||
+      opts.sections.signoff.trim())
+  const bodyHtml = useSections
+    ? buildNewsletterSectionsHtml(opts.sections!, opts.merge)
+    : `<tr><td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55;color:#1A1A1A">
+            ${plainTextToEmailHtml(apply(opts.textBody))}
+          </td></tr>`
   const pixel =
     opts.sendId
       ? `<img src="${escapeHtml(openPixelUrl(opts.sendId))}" width="1" height="1" alt="" style="display:block;border:0;outline:none;width:1px;height:1px" />`
@@ -69,21 +166,17 @@ ${pixel}
         <a href="${escapeHtml(origin)}" style="text-decoration:none">
           <img src="${escapeHtml(logoUrl)}" alt="SHMS PTO" width="120" style="display:inline-block;height:auto;border:0;max-width:120px" />
         </a>
-        <p style="margin:10px 0 0;font-family:Georgia,serif;font-size:16px;color:#ffffff;letter-spacing:0.02em">SHMS PTO</p>
+        <p style="margin:10px 0 0;font-family:Georgia,serif;font-size:16px;color:#ffffff;letter-spacing:0.02em">${escapeHtml(branding.headerTitle)}</p>
       </td></tr>
       <tr><td style="padding:24px 20px">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           ${heroBlock}
           ${extraBlocks}
-          <tr><td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55;color:#1A1A1A">
-            ${bodyHtml}
-          </td></tr>
+          ${bodyHtml}
         </table>
       </td></tr>
-      <tr><td style="padding:16px 20px 20px;border-top:1px solid #E2E8E4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;line-height:1.5;color:#5A6070;text-align:center">
-        Stone Hill Middle School PTO<br />
-        <a href="${escapeHtml(origin)}" style="color:#1B6B45">${escapeHtml(origin.replace(/^https?:\/\//, ''))}</a>
-        · Reply to this email with questions
+      <tr><td style="padding:16px 20px 20px;border-top:1px solid #E2E8E4">
+        ${footerHtml(origin, branding)}
       </td></tr>
     </table>
   </td></tr>

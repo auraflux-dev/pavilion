@@ -48,6 +48,8 @@ function payloadFromBody(
     extraImageUrls: Array.isArray(body.extraImageUrls)
       ? body.extraImageUrls.map((u) => String(u)).filter(Boolean)
       : undefined,
+    beatsJson: String(body.beatsJson ?? '').trim() || undefined,
+    canvaDesignId: String(body.canvaDesignId ?? '').trim() || undefined,
     sendAudience,
     includeSubscribers: body.includeSubscribers === true,
   }

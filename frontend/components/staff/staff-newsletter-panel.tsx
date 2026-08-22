@@ -14,12 +14,16 @@ import {
   resolveScoopUrl,
 } from '@/lib/staff/newsletter-scoop'
 import {
-  NEWSLETTER_BEAT_LABELS,
+  NEWSLETTER_BEAT_PRESETS,
+  NEWSLETTER_MAX_BEATS,
   composeNewsletterBody,
-  emptyNewsletterBeats,
+  defaultNewsletterBeats,
+  emptyNewsletterBeat,
   parseBeatsJson,
+  presetLabel,
   stringifyBeatsJson,
   type NewsletterBeat,
+  type NewsletterBeatPreset,
 } from '@/lib/staff/newsletter-sections'
 import { buildWhatsAppGraphicShare } from '@/lib/staff/whatsapp-compose'
 import {
@@ -70,7 +74,7 @@ export function StaffNewsletterPanel() {
   const [body, setBody] = useState('')
   const [useBeats, setUseBeats] = useState(false)
   const [intro, setIntro] = useState('')
-  const [beats, setBeats] = useState<NewsletterBeat[]>(emptyNewsletterBeats)
+  const [beats, setBeats] = useState<NewsletterBeat[]>(defaultNewsletterBeats)
   const [signoff, setSignoff] = useState('')
   const [utmCampaign, setUtmCampaign] = useState('')
   const [trackClicks, setTrackClicks] = useState(true)
@@ -129,6 +133,21 @@ export function StaffNewsletterPanel() {
     })
   }
 
+  function beatsPayload() {
+    return useBeats ? stringifyBeatsJson({ intro, beats, signoff }) : undefined
+  }
+
+  function canvaPngBlock(): string | null {
+    if (sendAudience !== 'paid') return null
+    if (!canvaMeta.canvaDesignId?.trim()) return null
+    if (canvaMeta.heroImageUrl?.trim()) return null
+    return [
+      'Canva is attached but the PNG is not exported yet.',
+      'In Templates above: click Export PNG for email and wait for the preview.',
+      'Paid emails need the graphic above your text.',
+    ].join('\n')
+  }
+
   function outreachPayload(extra: Record<string, unknown> = {}) {
     const kind = sendAudience
     const emailBody = kind === 'scoop' ? scoopShareText() : body
@@ -148,8 +167,10 @@ export function StaffNewsletterPanel() {
       canvaViewUrl: canvaMeta.canvaViewUrl,
       canvaThumbnailUrl: canvaMeta.canvaThumbnailUrl,
       canvaTitle: canvaMeta.canvaTitle,
+      canvaDesignId: canvaMeta.canvaDesignId,
       heroImageUrl: canvaMeta.heroImageUrl,
       extraImageUrls: (canvaMeta.pageImageUrls ?? []).slice(1),
+      beatsJson: beatsPayload(),
       testEmails: testEmailsExtra,
       ...extra,
     }
@@ -189,6 +210,11 @@ export function StaffNewsletterPanel() {
   }
 
   async function sendTestEmail() {
+    const pngBlock = canvaPngBlock()
+    if (pngBlock) {
+      setStatus(pngBlock)
+      return
+    }
     setBusy(true)
     setStatus('')
     try {
@@ -259,6 +285,11 @@ export function StaffNewsletterPanel() {
   }
 
   async function sendEmail() {
+    const pngBlock = canvaPngBlock()
+    if (pngBlock) {
+      setStatus(pngBlock)
+      return
+    }
     setBusy(true)
     setStatus('')
     try {
@@ -412,6 +443,11 @@ export function StaffNewsletterPanel() {
   async function queueSend() {
     if (!sendAtLocal.trim()) {
       setStatus('Pick a send date and time first.')
+      return
+    }
+    const pngBlock = canvaPngBlock()
+    if (pngBlock) {
+      setStatus(pngBlock)
       return
     }
     setBusy(true)
@@ -730,8 +766,15 @@ export function StaffNewsletterPanel() {
             checked={useBeats}
             onChange={(e) => setUseBeats(e.target.checked)}
           />
-          Write in beats (event, ask, CTA). Still plain text. We join them into the body.
+          Write in sections (intro, beats, sign-off). Email shows labeled blocks with dividers.
         </label>
+        <p className="text-[11px] text-[#5A6070]">
+          Header title and footer:{' '}
+          <Link href="/staff?view=site" className="underline text-[var(--brand-green)]">
+            Staff → Site settings
+          </Link>{' '}
+          (Newsletter email header title / footer).
+        </p>
         {useBeats ? (
           <div
             data-help-shot="beats"
@@ -744,25 +787,69 @@ export function StaffNewsletterPanel() {
               onChange={setIntro}
               onCommit={(next) => setIntro(normalizePlainCopy(next))}
             />
-            {beats.map((beat, i) => (
-              <div key={NEWSLETTER_BEAT_LABELS[i]} className="grid sm:grid-cols-3 gap-2">
-                <label className="text-xs text-[#5A6070] sm:col-span-1">
-                  {NEWSLETTER_BEAT_LABELS[i]} heading
-                  <input
-                    value={beat.heading}
-                    onChange={(e) => {
-                      const next = beats.slice()
-                      next[i] = { ...next[i], heading: e.target.value }
-                      setBeats(next)
-                    }}
-                    className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-                  />
-                </label>
-                <div className="sm:col-span-2">
+            {beats.map((beat, i) => {
+              const preset = NEWSLETTER_BEAT_PRESETS.find((p) => p.id === beat.preset)
+              return (
+                <div
+                  key={`beat-${i}`}
+                  className="rounded-lg border border-[var(--border)] bg-white p-3 space-y-2"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs font-semibold text-[#1A1A1A]">
+                      Section {i + 1}
+                      {preset ? ` · ${preset.label}` : ''}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={beats.length <= 1}
+                      onClick={() => setBeats(beats.filter((_, idx) => idx !== i))}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                  {preset?.hint ? (
+                    <p className="text-[11px] text-[#5A6070]">{preset.hint}</p>
+                  ) : null}
+                  <label className="text-xs text-[#5A6070] block">
+                    Section type
+                    <select
+                      value={beat.preset}
+                      onChange={(e) => {
+                        const next = beats.slice()
+                        next[i] = {
+                          ...next[i],
+                          preset: e.target.value as NewsletterBeatPreset,
+                        }
+                        setBeats(next)
+                      }}
+                      className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                    >
+                      {NEWSLETTER_BEAT_PRESETS.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="text-xs text-[#5A6070] block">
+                    Heading (bold in email)
+                    <input
+                      value={beat.heading}
+                      onChange={(e) => {
+                        const next = beats.slice()
+                        next[i] = { ...next[i], heading: e.target.value }
+                        setBeats(next)
+                      }}
+                      placeholder={presetLabel(beat.preset)}
+                      className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                    />
+                  </label>
                   <StaffPlainCopyField
-                    label={`${NEWSLETTER_BEAT_LABELS[i]} copy`}
+                    label="Body"
                     value={beat.body}
-                    rows={2}
+                    rows={3}
                     onChange={(val) => {
                       const next = beats.slice()
                       next[i] = { ...next[i], body: val }
@@ -775,8 +862,16 @@ export function StaffNewsletterPanel() {
                     }}
                   />
                 </div>
-              </div>
-            ))}
+              )
+            })}
+            <Button
+              type="button"
+              variant="outline"
+              disabled={beats.length >= NEWSLETTER_MAX_BEATS}
+              onClick={() => setBeats([...beats, emptyNewsletterBeat('custom')])}
+            >
+              Add section ({beats.length}/{NEWSLETTER_MAX_BEATS})
+            </Button>
             <StaffPlainCopyField
               label="Sign-off"
               value={signoff}

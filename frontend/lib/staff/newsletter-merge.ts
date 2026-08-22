@@ -4,7 +4,7 @@
  */
 
 export const NEWSLETTER_MERGE_HINT =
-  'Optional merge fields (plain text): {{firstName}} {{lastName}} {{name}} {{tier}} {{grade}} {{email}}'
+  'Merge fields: {{firstName}} {{lastName}} {{name}} {{tier}} {{grade}} {{email}}'
 
 export type NewsletterMergeVars = {
   firstName?: string
@@ -38,7 +38,7 @@ export function applyMergeFields(text: string, vars: NewsletterMergeVars): strin
   }
 
   return String(text ?? '').replace(TOKEN_RE, (_full, rawKey: string) => {
-    const key = String(rawKey).toLowerCase()
+    const key = String(rawKey).toLowerCase().replace(/\s+/g, '')
     return map[key] ?? ''
   })
 }

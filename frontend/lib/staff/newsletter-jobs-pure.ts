@@ -29,6 +29,8 @@ export type NewsletterJobPayload = {
   canvaTitle?: string
   heroImageUrl?: string
   extraImageUrls?: string[]
+  beatsJson?: string
+  canvaDesignId?: string
   sendAudience?: NewsletterSendAudience
   includeSubscribers?: boolean
   testGroup?: 'me' | 'board' | 'custom' | 'board_and_custom'

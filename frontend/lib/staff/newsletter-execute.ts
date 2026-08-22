@@ -18,7 +18,9 @@ import {
 } from '@/lib/staff/mass-email'
 import { defaultUtmCampaign } from '@/lib/staff/newsletter-utm'
 import { prepareTrackedNewsletterSend } from '@/lib/staff/newsletter-tracking'
+import { loadNewsletterBrandingFromKeys } from '@/lib/staff/newsletter-branding'
 import { buildNewsletterHtml } from '@/lib/staff/newsletter-html'
+import { parseBeatsJson } from '@/lib/staff/newsletter-sections'
 import {
   applyMergeFields,
   hasMergeFields,
@@ -50,6 +52,8 @@ export type NewsletterExecuteInput = {
   canvaTitle?: string
   heroImageUrl?: string
   extraImageUrls?: string[]
+  beatsJson?: string
+  canvaDesignId?: string
   sendAudience?: NewsletterSendAudience
   testGroup?: 'me' | 'board' | 'custom' | 'board_and_custom'
   testEmails?: string
@@ -344,9 +348,13 @@ export async function executeNewsletterEmail(
     }
   }
 
+  const branding = await loadNewsletterBrandingFromKeys(loadSiteSetting)
+  const sections = input.beatsJson ? parseBeatsJson(input.beatsJson) : null
   const html = !dryRun
     ? buildNewsletterHtml({
         textBody: outboundBody,
+        sections,
+        branding,
         sendId: trackOpens ? newsletterSendId || undefined : undefined,
         heroImageUrl: input.heroImageUrl || undefined,
         extraImageUrls: input.extraImageUrls,
@@ -377,6 +385,8 @@ export async function executeNewsletterEmail(
   const wantsMerge = hasMergeFields(effectiveSubject) || hasMergeFields(outboundBody)
   const byEmail = new Map(filteredRoster.map((r) => [r.parentEmail.toLowerCase(), r]))
   const htmlOpts = {
+    sections,
+    branding,
     sendId: trackOpens ? newsletterSendId || undefined : undefined,
     heroImageUrl: input.heroImageUrl || undefined,
     extraImageUrls: input.extraImageUrls,
@@ -404,7 +414,7 @@ export async function executeNewsletterEmail(
           return {
             subject: subj,
             body: text,
-            html: buildNewsletterHtml({ ...htmlOpts, textBody: text }),
+            html: buildNewsletterHtml({ ...htmlOpts, textBody: text, merge: vars }),
           }
         }
       : undefined,

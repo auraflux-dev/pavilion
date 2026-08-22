@@ -240,7 +240,7 @@ export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
       { key: 'heroImageUrl', label: 'Hero PNG URL (exported)', type: 'text' },
       { key: 'heroImageKey', label: 'Hero PNG storage key', type: 'text' },
       { key: 'pageImageUrlsJson', label: 'Extra page PNG URLs JSON', type: 'textarea' },
-      { key: 'beatsJson', label: 'Beats JSON (intro + event/ask/CTA)', type: 'textarea' },
+      { key: 'beatsJson', label: 'Beats JSON (intro + sections + sign-off)', type: 'textarea' },
       { key: 'updatedAt', label: 'Updated at (ISO)', type: 'text' },
       { key: 'createdByEmail', label: 'Created by', type: 'text' },
       { key: 'active', label: 'Active', type: 'boolean' },
@@ -535,6 +535,15 @@ export const SITE_SETTING_GROUPS: {
         key: 'dailyActivityReportEmails',
         label:
           'Daily activity report extra emails (comma-separated, 6am Eastern; report includes membership totals by type)',
+      },
+      {
+        key: 'newsletterHeaderTitle',
+        label: 'Newsletter email header title (under logo)',
+      },
+      {
+        key: 'newsletterFooterText',
+        label: 'Newsletter email footer (one line per row)',
+        multiline: true,
       },
       { key: 'contactAddress', label: 'Address', multiline: true },
       { key: 'contactStoreHours', label: 'The Cove in-person snack window hours' },

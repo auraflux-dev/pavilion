@@ -293,6 +293,8 @@ export async function POST(req: NextRequest) {
         extraImageUrls: Array.isArray(body.extraImageUrls)
           ? body.extraImageUrls.map((u: unknown) => String(u)).filter(Boolean)
           : undefined,
+        beatsJson: String(body.beatsJson ?? '').trim() || undefined,
+        canvaDesignId: String(body.canvaDesignId ?? '').trim() || undefined,
         sendAudience,
         testGroup,
         testEmails: testEmailsRaw,
