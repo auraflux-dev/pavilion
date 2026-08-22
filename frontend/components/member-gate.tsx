@@ -24,14 +24,6 @@ function MemberGateInner({
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  if (status === 'loading') {
-    return (
-      <div className="opacity-50 pointer-events-none select-none">
-        {children}
-      </div>
-    )
-  }
-
   if (status === 'visitor') {
     const params = new URLSearchParams(searchParams?.toString() ?? '')
     if (returnToQuery) {
@@ -54,7 +46,17 @@ function MemberGateInner({
     )
   }
 
-  return <>{children}</>
+  // Keep one stable wrapper so checkout / Square hosts are not remounted when
+  // auth flips loading → member (that remount triggers Square container errors).
+  return (
+    <div
+      className={
+        status === 'loading' ? 'opacity-50 pointer-events-none select-none' : undefined
+      }
+    >
+      {children}
+    </div>
+  )
 }
 
 /**
