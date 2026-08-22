@@ -298,8 +298,11 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
                 <code className="text-[11px]">docs/CANVA-SETUP.md</code>.
               </p>
               {!status?.clientConfigured ? (
-                <p className="text-xs text-[#5A6070]">
-                  Client id/secret not configured yet. Folder workflow still works.
+                <p className="text-xs text-amber-900 whitespace-pre-line">
+                  Canva API credentials are not set on the server yet.
+                  {'\n'}
+                  Folder workflow still works. Rob must add CANVA_CLIENT_ID on Vercel and register
+                  https://www.shmspto.org/api/staff/canva/connect/callback in the Canva Developer Portal.
                 </p>
               ) : (
                 <Button

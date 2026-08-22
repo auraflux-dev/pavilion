@@ -27,7 +27,8 @@ export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code') || ''
   const state = req.nextUrl.searchParams.get('state') || ''
   const oauthError = req.nextUrl.searchParams.get('error') || ''
-  if (oauthError) return fail(oauthError)
+  const oauthDesc = req.nextUrl.searchParams.get('error_description') || ''
+  if (oauthError) return fail(oauthDesc || oauthError)
   if (!code || !state) return fail('missing_code')
 
   const cookie = req.cookies.get(COOKIE)?.value || ''
