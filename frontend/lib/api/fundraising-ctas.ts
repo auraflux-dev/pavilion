@@ -107,7 +107,7 @@ function pavilionCtas(): FundraisingCTA[] {
     {
       id: 'd2',
       title: `Load a ${b.card}`,
-      description: `Add $20 to $50 to your family ${b.card}. Kids spend at ${b.store}. The PTO keeps the margin.`,
+      description: `Add $20 to $50 onto a ${b.card}. Kids spend at ${b.store}. The PTO keeps the margin.`,
       ctaLabel: 'Load Card',
       href: b.store === 'The Perch' ? '/perch' : '/membership',
       icon: 'ShoppingBag',
