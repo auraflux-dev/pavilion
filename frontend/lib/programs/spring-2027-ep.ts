@@ -194,28 +194,28 @@ const SPRING_STAGING_CATALOG: Record<
     capacity: 30,
     category: 'Strategy',
     description:
-      'Startup basics: brand, audience, and founding a business.\n\nContinue with Missy Spears from Fall.\n\n• Ideation, market research, and target audiences.\n\n• Brand identity, mission, and marketing basics.',
+      'Young Entrepreneurs II: capital, investor practice, and Stingray Tank pitch prep.\nContinue with Missy Spears from Fall.\n\n• Startup costs, pricing, and basic financials\n• Elevator pitches and public speaking\n• Culminating Stingray Tank showcase\n\nCap 30. Grades 6 to 8.',
   },
   essay: {
     fee: 375,
     capacity: 14,
     category: 'Creative Arts',
     description:
-      'Middle school essay craft with Lumi.\n\nAndrew Martineau leads twelve Spring nights.\n\n• Structure, thesis, and revision.\n\n• Cap 14 so every student gets coaching time.',
+      'Spring analytical writing with Lumi.\nAndrew Martineau. Cap 10 to 14.\n\n• Evidence, MLA basics, and research habits\n• Persuasive and comparative essays\n• High-school readiness editing\n\nTwelve Tuesday nights.',
   },
   mathcounts: {
     fee: 375,
     capacity: 30,
     category: 'Competition',
     description:
-      'Competitive math prep with RSM Ashburn.\n\nProblem-solving nights for grades 6 to 8.\n\n• Contests and challenge sets.\n\n• Same Wednesday early slot as Fall.',
+      'RSM Ashburn Part II: advanced systems, team tactics, and mocks.\n\n• Mixed strategy selection and timed rounds\n• Sprint, Target, Team, and Countdown focus\n• Full mock competitions late in the semester\n\nCap 30. Continues the Fall year plan.',
   },
   robotics: {
     fee: 450,
     capacity: 30,
     category: 'STEM',
     description:
-      'Robotics with Loudoun Robotics.\n\nBuild, code, and compete skills in the library.\n\n• Wednesday evening stack after math.\n\n• List $450 for Spring.',
+      'Loudoun Robotics Part II: Blocks to Python and advanced autonomy.\n\n• Functions, gyro, and line following\n• Attachment design and mission course\n• Engineering notebook and Spring showcase\n\nTeams of 3. Kits and laptops included.',
   },
 }
 

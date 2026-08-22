@@ -1,86 +1,182 @@
 /**
  * Parent-facing marketing for program landing pages.
- * Logistics stay on the catalog card. This is the story, not vendor worksheets.
- * Keep in sync with live Programs.description until full curricula / videos land.
+ * Catalog cards stay short. LPs use pitch + highlights + curriculum, not a second essay.
+ * YE Fall copy is RFP Part I placeholder until Melissa Spears sends an updated packet.
  */
+
+export type ProgramCurriculumWeek = {
+  week: number
+  title: string
+  focus?: string
+}
 
 export type ProgramLandingCopy = {
   eyebrow: string
+  /** One or two short beats. Not the full catalog blurb. */
   pitch: string
-  why: string[]
-  night: string
-  photo: string
+  /** Max three conversion highlights. */
+  highlights: string[]
+  /** Optional YouTube / Vimeo embed URL. Empty = video placeholder. */
+  videoUrl?: string
+  curriculumTitle: string
+  curriculum: ProgramCurriculumWeek[]
+}
+
+/**
+ * Short Programs-card descriptions (CMS / catalog).
+ * Keep bullets light. Landing pages own the curriculum detail.
+ */
+export const FALL_2026_CATALOG_DESCRIPTIONS: Record<string, string> = {
+  ye: `Startup fundamentals, branding, and founding execution.
+Part I of Young Entrepreneurs for grades 6 to 8.
+
+• Ideation, market research, and target audiences
+• Brand identity, mission, and marketing basics
+• Founding requirements, business structures, and ethics
+• Safe, simulated digital presence strategy
+
+Cap 30. Instructor packet pending from Missy Spears.`,
+
+  essay: `From free writing to full essays with weekly draft feedback.
+Lumi Education. Andrew Martineau leads.
+
+• Cap 10 to 14 so every paper gets real notes
+• Voice, structure, thesis, and paragraph craft
+• Grammar that sticks: active voice and sentence variety
+• Fall portfolio review at week 12
+
+Spring analytical writing sold separately.`,
+
+  mathcounts: `Contest math on campus with RSM Ashburn.
+MATHCOUNTS and AMC-style rounds for grades 6 to 8.
+
+• Week 1 diagnostic, then number theory through geometry
+• Sprint, Target, Team, and Countdown practice
+• Weekly problem sets and a Fall mock at week 12
+• Not a center membership. Cap 30.
+
+Pre-algebra helps. No contest experience required.`,
+
+  robotics: `Teams of 3. Robot and laptop included. Nothing to buy or bring.
+Loudoun Robotics at Stone Hill.
+
+• Four adults every night, including an LCPS-sub lead
+• SPIKE Prime kits and vendor laptops
+• Engineering notebook students keep
+• Fall family showcase at week 12
+
+Cap 30. Spring continues Blocks to Python.`,
 }
 
 const FALL: Record<string, ProgramLandingCopy> = {
-  essay: {
-    eyebrow: 'Fall 2026 · Academic',
-    pitch:
-      'From paragraphs to high-school essays.\nWeekly comments on every draft.',
-    why: [
-      'Led by Andrew Martineau of Lumi Education (NOVA; decades of writing instruction).',
-      'Cap 10 to 14 so every paper gets real feedback.',
-      'Free writing, personal voice, and sensory narrative craft.',
-      'Grammar that sticks: active voice, sentence variety, punctuation.',
-      'Brain-mapping, outlining, thesis, and full essay construction.',
-      'Spring analytical writing sold separately.',
-    ],
-    night:
-      'Tuesdays, 7:00 to 8:00 p.m., in the SHMS library.\nTwelve sessions. One hour each night.',
-    photo: '/home/hero-a.jpg',
-  },
   ye: {
     eyebrow: 'Fall 2026 · Business',
     pitch:
-      'Startup basics: brand, audience, and founding a business.\nA first look at how a company is built.',
-    why: [
-      'Led by Missy Spears from the Academies of Loudoun.',
-      'Ideation, market research, and target audiences.',
-      'Brand identity, mission, and marketing basics.',
-      'Founding requirements, business structures, and ethics.',
-      'Safe, simulated social and digital presence strategy.',
-      'Exploring support with Young Entrepreneur Academy (YEA!).',
+      'Turn a business idea into a brand and a founding plan.\nHands-on Young Entrepreneurs nights in the library.',
+    highlights: [
+      'Missy Spears, Academies of Loudoun (packet update coming soon).',
+      'Ideation, branding, founding basics, and safe digital practice.',
+      'Twelve Tuesday nights. Cap 30. Grades 6 to 8.',
     ],
-    night:
-      'Tuesdays, 5:30 to 6:45 p.m., in the SHMS library.\nTwelve sessions. 75 minutes each night.',
-    photo: '/home/community.jpg',
+    curriculumTitle: 'Fall curriculum (RFP Part I placeholder)',
+    curriculum: [
+      { week: 1, title: 'Ideation & opportunity spotting' },
+      { week: 2, title: 'Market research basics' },
+      { week: 3, title: 'Target audiences' },
+      { week: 4, title: 'Business structures & founding' },
+      { week: 5, title: 'Ethics & responsibility' },
+      { week: 6, title: 'Brand identity' },
+      { week: 7, title: 'Mission & messaging' },
+      { week: 8, title: 'Marketing basics' },
+      { week: 9, title: 'Safe, simulated digital presence' },
+      { week: 10, title: 'Pitch foundations' },
+      { week: 11, title: 'Practice presentations' },
+      { week: 12, title: 'Fall wrap & showcase prep' },
+    ],
+  },
+  essay: {
+    eyebrow: 'Fall 2026 · Academic',
+    pitch:
+      'From paragraphs to real essays.\nWeekly comments on every draft.',
+    highlights: [
+      'Andrew Martineau of Lumi Education (NOVA; 30+ years teaching writing).',
+      'Cap 10 to 14 so feedback stays personal.',
+      'Twelve Tuesday nights. One hour each.',
+    ],
+    curriculumTitle: 'Fall curriculum (Lumi proposal)',
+    curriculum: [
+      { week: 1, title: 'Free writing & overcoming writer’s block' },
+      { week: 2, title: 'Descriptive & sensory writing' },
+      { week: 3, title: 'Mechanics & grammar foundations' },
+      { week: 4, title: 'Narrative writing & personal voice' },
+      { week: 5, title: 'Outlining & graphic organizers' },
+      { week: 6, title: 'Prompt analysis & brainstorming' },
+      { week: 7, title: 'Thesis statements & main claims' },
+      { week: 8, title: 'Topic sentences & paragraph structure' },
+      { week: 9, title: 'Building body paragraphs' },
+      { week: 10, title: 'Introduction & conclusion strategies' },
+      { week: 11, title: 'Editing & self-proofreading' },
+      { week: 12, title: 'Fall portfolio review & feedback' },
+    ],
   },
   mathcounts: {
     eyebrow: 'Fall 2026 · Competition',
     pitch:
-      'Contest math on campus for grades 6 to 8.\nBuild toward MATHCOUNTS and AMC-style rounds.',
-    why: [
-      'Led by RSM Ashburn at Stone Hill. Not a center membership.',
-      'Week 1 diagnostic, then number theory, algebra, counting, probability, and contest geometry.',
-      'Sprint, Target, Team, and Countdown practice in every arc.',
-      'Weekly problem sets, timed drills, and a Fall mock competition at week 12.',
-      'Pre-algebra helps. No contest experience required.',
-      'Cap 30. Spring continues the same year plan.',
+      'Contest math on campus.\nBuild toward MATHCOUNTS and AMC-style rounds.',
+    highlights: [
+      'RSM Ashburn at Stone Hill. Not a center membership.',
+      'Sprint, Target, Team, and Countdown practice every arc.',
+      'Twelve Wednesday nights. Cap 30.',
     ],
-    night:
-      'Wednesdays, 5:30 to 6:45 p.m., in the SHMS library.\nTwelve sessions. 75 minutes each night.',
-    photo: '/home/hero-b.jpg',
+    curriculumTitle: 'Fall curriculum (RSM Ashburn proposal)',
+    curriculum: [
+      { week: 1, title: 'Diagnostic & competition mindset' },
+      { week: 2, title: 'Number theory I' },
+      { week: 3, title: 'Number theory II' },
+      { week: 4, title: 'Ratios, rates, proportions & percents' },
+      { week: 5, title: 'Algebraic expressions & equations' },
+      { week: 6, title: 'Advanced word problems' },
+      { week: 7, title: 'Sequences & patterns' },
+      { week: 8, title: 'Counting principles' },
+      { week: 9, title: 'Probability & combinatorics' },
+      { week: 10, title: 'Geometry I' },
+      { week: 11, title: 'Geometry II' },
+      { week: 12, title: 'Fall mock competition & review' },
+    ],
   },
   robotics: {
     eyebrow: 'Fall 2026 · STEM',
     pitch:
-      'Teams of 3. Nothing to buy or bring.\nRobot and laptop for each team.',
-    why: [
-      'Four adults every night, including an LCPS substitute as lead.',
-      'SPIKE Prime kits and vendor laptops included.',
-      'Engineering notebook students keep.',
-      'Two family showcases at Stone Hill (Fall and Spring).',
-      'Blocks to Python in Spring.',
-      'Path onto FTC: Circuit Breakers 13353 and BeaverBots 26073.',
-      '24-week year arc. Fall and Spring sold together when registration opens.',
+      'Teams of 3. Robot and laptop included.\nNothing to buy or bring.',
+    highlights: [
+      'Loudoun Robotics. Four adults every night, including an LCPS-sub lead.',
+      'SPIKE Prime kits and vendor laptops. Engineering notebook you keep.',
+      'Twelve Wednesday nights. Fall showcase at week 12.',
     ],
-    night:
-      'Wednesdays, 7:00 to 8:00 p.m., in the SHMS library.\nTwelve sessions. One hour each night.',
-    photo: '/home/volunteer.jpg',
+    curriculumTitle: 'Fall curriculum (Loudoun Robotics proposal)',
+    curriculum: [
+      { week: 1, title: 'Hardware assembly', focus: 'Kit orientation and driving base' },
+      { week: 2, title: 'Structural integrity', focus: 'Bracing and load paths' },
+      { week: 3, title: 'Gear ratios', focus: 'Speed vs pulling power' },
+      { week: 4, title: 'Programming motors', focus: 'Sequence and exact distance' },
+      { week: 5, title: 'Programming loops', focus: 'Repeatable paths and turns' },
+      { week: 6, title: 'Force / touch sensors', focus: 'Stop on contact' },
+      { week: 7, title: 'Color / light sensors', focus: 'Line detection' },
+      { week: 8, title: 'Distance sensors', focus: 'Stop before an obstacle' },
+      { week: 9, title: 'Logic pathways', focus: 'If/else with two sensors' },
+      { week: 10, title: 'Driver vs autonomous', focus: 'Remote then pre-programmed' },
+      { week: 11, title: 'Team design challenge', focus: 'Simple attachment on a mat task' },
+      { week: 12, title: 'Troubleshooting & Fall showcase', focus: 'Final runs for families' },
+    ],
   },
 }
 
 export function programLandingCopy(epId: string | undefined): ProgramLandingCopy | null {
   if (!epId) return null
   return FALL[epId] ?? null
+}
+
+export function fallCatalogDescription(epId: string | undefined): string | null {
+  if (!epId) return null
+  return FALL_2026_CATALOG_DESCRIPTIONS[epId] ?? null
 }
