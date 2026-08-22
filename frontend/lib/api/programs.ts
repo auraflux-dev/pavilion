@@ -189,13 +189,14 @@ function publicPrograms(
   items: Record<string, unknown>[],
   opts?: { reviewHost?: boolean },
 ): Program[] {
+  // Featured/open filter MUST run before review-host checkout open.
+  // Staging used to force-open every CMS row first, which flooded /programs with old seasons.
   const listed = filterProgramsForPublicCatalog(
     items
       .map(mapProgramItem)
-      .map((p) => withReviewHostCheckout(p, opts?.reviewHost))
       .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags))
-      // Public catalog: open registration and/or featured (keeps legacy closed CMS rows off the site).
-      .filter((p) => p.registrationOpen || p.featured),
+      .filter((p) => p.registrationOpen || p.featured)
+      .map((p) => withReviewHostCheckout(p, opts?.reviewHost)),
     opts,
   )
   // Staging / Preview only: fill Spring tab from the EP packet when CMS has no Spring rows.

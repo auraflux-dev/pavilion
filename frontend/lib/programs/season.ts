@@ -102,15 +102,26 @@ function seasonFromDates(program: SeasonAwareProgram): CatalogSeasonId | null {
   return null
 }
 
+/** True when CMS dates are clearly outside Fall 2026 / Spring 2027. */
+export function isLegacyEnrichmentProgram(program: SeasonAwareProgram): boolean {
+  const start = String(program.startDate ?? '').slice(0, 10)
+  if (!start) return false
+  if (start < '2026-08-01') return true
+  if (start >= '2027-07-01') return true
+  return false
+}
+
 /** Resolve which catalog season a program belongs to. */
 export function resolveProgramSeason(program: SeasonAwareProgram): CatalogSeasonId {
   const explicit = normalizeSeason(String(program.season ?? ''))
   if (explicit) return explicit
   const fromTags = seasonFromTags(program.tags)
   if (fromTags) return fromTags
-  if (String(program.fallEpClassId ?? '').trim()) return 'fall-2026'
   const fromDates = seasonFromDates(program)
   if (fromDates) return fromDates
+  // Old rows often still have fallEpClassId; do not promote them to Fall 2026.
+  if (isLegacyEnrichmentProgram(program)) return 'full-year'
+  if (String(program.fallEpClassId ?? '').trim()) return 'fall-2026'
   const name = String(program.name ?? '').toLowerCase()
   if (/\bspring\b/.test(name) && !/\bfall\b/.test(name)) return 'spring-2027'
   // Default current catalog season for undated featured/open rows.
@@ -141,7 +152,10 @@ export function isSeasonPubliclyListed(
 export function filterProgramsForPublicCatalog<
   T extends SeasonAwareProgram,
 >(programs: T[], opts?: SeasonCatalogVisibilityOpts): T[] {
-  return programs.filter((p) => isSeasonPubliclyListed(resolveProgramSeason(p), opts))
+  return programs.filter((p) => {
+    if (isLegacyEnrichmentProgram(p)) return false
+    return isSeasonPubliclyListed(resolveProgramSeason(p), opts)
+  })
 }
 
 export function filterProgramsBySeason<T extends SeasonAwareProgram>(
