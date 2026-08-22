@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Users } from 'lucide-react'
 import { trackEvent } from '@/lib/ga'
+import { HelpTip } from '@/components/ui/help-tip'
 
 type Guardian = {
   email: string
@@ -125,7 +126,10 @@ export function InviteCoParentPanel() {
     <div className="rounded-xl border border-[var(--border)] bg-white p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Users className="h-4 w-4 text-[var(--brand-green)]" />
-        <h3 className="text-sm font-semibold text-[#1A1A1A]">Share portal access</h3>
+        <h3 className="text-sm font-semibold text-[#1A1A1A] inline-flex items-center gap-2">
+          Share portal access
+          <HelpTip tipKey="portal.coparent.invite" label="About co-parent invite" />
+        </h3>
       </div>
       <p className="text-xs text-[#5A6070] leading-relaxed whitespace-pre-line">{note}</p>
 

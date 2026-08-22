@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { Loader2, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { HelpTip } from '@/components/ui/help-tip'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type StudentSeed = {
@@ -103,7 +104,10 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed }: Prop
       <div className="flex items-start gap-3">
         <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5 text-[#8A6400]" aria-hidden />
         <div>
-          <p className="text-sm font-bold text-[#1A1A1A]">Confirm your family details</p>
+          <p className="text-sm font-bold text-[#1A1A1A] inline-flex items-center gap-1">
+            Confirm your family details
+            <HelpTip tipKey="portal.household.confirm" label="About family confirm" />
+          </p>
           <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed">
             {students.length > 0
               ? vanillaizeIfDemo(

@@ -3,9 +3,10 @@
 /**
  * Required legal checkboxes for checkout. each has a Read link that opens the full text.
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ExternalLink, Loader2, X } from 'lucide-react'
 import type { ConsentAck, CheckoutConsentKind } from '@/lib/checkout-consent'
+import { useDialogA11y } from '@/lib/hooks/use-dialog-a11y'
 
 type ConsentDocPayload = {
   id: string
@@ -35,6 +36,8 @@ export function CheckoutConsent({ kind, kinds, onChange }: Props) {
   const [accepted, setAccepted] = useState<Record<string, boolean>>({})
   const [choices, setChoices] = useState<Record<string, boolean | null>>({})
   const [reading, setReading] = useState<ConsentDocPayload | null>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  useDialogA11y(Boolean(reading), () => setReading(null), panelRef)
 
   useEffect(() => {
     let cancelled = false
@@ -209,7 +212,10 @@ export function CheckoutConsent({ kind, kinds, onChange }: Props) {
           aria-modal="true"
           aria-labelledby="consent-read-title"
         >
-          <div className="w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl bg-white shadow-xl border border-[var(--border)] p-5 space-y-4">
+          <div
+            ref={panelRef}
+            className="w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl bg-white shadow-xl border border-[var(--border)] p-5 space-y-4"
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p

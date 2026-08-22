@@ -180,6 +180,12 @@ export async function POST(req: NextRequest) {
     }
     const email = String(body.email || '').trim()
     const password = String(body.password || '')
+    if (password.length > 0 && password.length < 8) {
+      return NextResponse.json(
+        { error: 'Password must be at least 8 characters.' },
+        { status: 400 },
+      )
+    }
     const signupFirstName = String(body.firstName || '').trim()
     const signupLastName = String(body.lastName || '').trim()
     const returnTo = safeReturnTo(body.returnTo)

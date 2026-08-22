@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { usePathname } from 'next/navigation'
 import { Lock, Loader2, X } from 'lucide-react'
 import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { useCart } from '@/lib/cart/store'
+import { useDialogA11y } from '@/lib/hooks/use-dialog-a11y'
 
 type CatalogVariant = {
   id: string
@@ -42,6 +43,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
   const [selectedVariantId, setSelectedVariantId] = useState('')
   const [error, setError] = useState('')
   const cart = useCart()
+  const panelRef = useRef<HTMLDivElement>(null)
 
   const selected =
     detail?.variants.find((v) => v.id === selectedVariantId) ??
@@ -94,6 +96,8 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
     setCheckoutOpen(false)
     setError('')
   }
+
+  useDialogA11y(pickerOpen, closeAll, panelRef)
 
   if (disabled) {
     return (
@@ -155,7 +159,10 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
             if (e.target === e.currentTarget) closeAll()
           }}
         >
-          <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl border border-[var(--border)] p-5">
+          <div
+            ref={panelRef}
+            className="w-full max-w-sm rounded-2xl bg-white shadow-xl border border-[var(--border)] p-5"
+          >
             <div className="flex items-start justify-between gap-3 mb-3">
               <div>
                 <h2

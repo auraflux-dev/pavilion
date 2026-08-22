@@ -1,16 +1,16 @@
 'use client'
 
 /**
- * First-run Staff coach. Five beats, then hand off to role onboarding.
+ * First-run Staff coach. Core beats, then optional deep beats.
  * Shown once per browser (localStorage). Pavilion trials included.
  */
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 
 const STORAGE_KEY = 'staff-coach-tour-v1'
 
-const BEATS = [
+const CORE_BEATS = [
   'You are in Staff. Staff is the board side. The member portal is the parent side. Switch with Member and Staff in the top right.',
   'Your workspaces. You only see what your job needs. Groups on Home match jobs, not menus.',
   'Nothing here is public until you say so. Page copy and Site settings publish live. Everything else stays internal.',
@@ -18,28 +18,58 @@ const BEATS = [
   'Getting unstuck. Help has how-tos for your seat. Your checklist on Home is the short version.',
 ] as const
 
-export function StaffCoachTour({ showMoneyBeat = true }: { showMoneyBeat?: boolean }) {
+const DEEP_BEATS = [
+  'Membership roster is who paid and who still needs a nudge.',
+  'Events and Programs are where signups and tickets live.',
+  'Comms and Newsletter are how the board talks to parents.',
+  'Site settings and Page copy change what visitors see.',
+  'Profile / personal email is for your own mailbox, not the PTO inbox.',
+] as const
+
+export function StaffCoachTour({
+  showMoneyBeat = true,
+  deep = false,
+  onDone,
+}: {
+  showMoneyBeat?: boolean
+  deep?: boolean
+  onDone?: () => void
+}) {
   const [step, setStep] = useState<number | null>(null)
 
-  useEffect(() => {
-    try {
-      if (window.localStorage.getItem(STORAGE_KEY) === 'done') return
-    } catch {
-      /* private mode: still show */
-    }
-    setStep(0)
-  }, [])
-
-  const beats = showMoneyBeat ? [...BEATS] : BEATS.filter((_, i) => i !== 3)
-
-  function finish() {
+  const finish = useCallback(() => {
     try {
       window.localStorage.setItem(STORAGE_KEY, 'done')
     } catch {
       /* ignore */
     }
     setStep(null)
-  }
+    onDone?.()
+  }, [onDone])
+
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(STORAGE_KEY) === 'done') {
+        onDone?.()
+        return
+      }
+    } catch {
+      /* private mode: still show */
+    }
+    setStep(0)
+  }, [onDone])
+
+  useEffect(() => {
+    if (step == null) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') finish()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [step, finish])
+
+  const core = showMoneyBeat ? [...CORE_BEATS] : CORE_BEATS.filter((_, i) => i !== 3)
+  const beats = deep ? [...core, ...DEEP_BEATS] : core
 
   if (step == null || step < 0 || step >= beats.length) return null
 

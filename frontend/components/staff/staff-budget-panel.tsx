@@ -4,6 +4,7 @@ import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { StaffPlaidConnect } from '@/components/staff/staff-plaid-connect'
+import { HelpTip } from '@/components/ui/help-tip'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 const DEFAULT_FISCAL_YEAR = '2026-27'
@@ -429,7 +430,10 @@ export function StaffBudgetPanel() {
       ) : null}
 
       <div className="rounded-lg border border-[var(--border)] bg-[#F7F4EE] px-3 py-3 space-y-2">
-        <p className="text-sm font-bold">Import Bank of America CSV</p>
+        <p className="text-sm font-bold inline-flex items-center gap-1">
+          Import Bank of America CSV
+          <HelpTip tipKey="staff.budget.bank" label="About bank import" />
+        </p>
         <p className="text-xs text-[#5A6070]">
           Only CSV this page accepts. Bank of America checking → Activity → Download CSV. Only{' '}
           <strong>August 1 to July 31</strong> of this school year is used. Square and PayPal{' '}

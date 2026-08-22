@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { PortalPayPalButtons } from '@/components/checkout/portal-paypal-buttons'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
+import { HelpTip } from '@/components/ui/help-tip'
 
 type Student = {
   id: string
@@ -313,7 +314,10 @@ export function StoreCardReload({
       ) : null}
 
       <div>
-        <p className="text-xs font-semibold text-[#5A6070] mb-1.5">Amount you pay</p>
+        <p className="text-xs font-semibold text-[#5A6070] mb-1.5 inline-flex items-center gap-1.5">
+          Amount you pay
+          <HelpTip tipKey="cove.card.what" label="About Cove Digital Card" />
+        </p>
         <div className="flex flex-wrap gap-2">
           {amounts.map((value) => (
             <button

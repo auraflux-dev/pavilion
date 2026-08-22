@@ -222,7 +222,11 @@ function JoinInner() {
     'w-full inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60'
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: 'var(--brand-warm)' }}>
+    <div
+      id="main-content"
+      className="min-h-screen flex items-center justify-center px-4 py-12"
+      style={{ backgroundColor: 'var(--brand-warm)' }}
+    >
       <div className="w-full max-w-md bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6 sm:p-8">
         <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: 'var(--brand-green)' }}>
           <a href="/" className="hover:underline" style={{ color: 'var(--brand-green)' }}>
@@ -353,7 +357,7 @@ function JoinInner() {
                   <input
                     type="password"
                     required
-                    minLength={6}
+                    minLength={8}
                     autoComplete={isSignup ? 'new-password' : 'current-password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}

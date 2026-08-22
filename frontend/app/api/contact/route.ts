@@ -79,8 +79,11 @@ export async function POST(req: NextRequest) {
     const message = String(body.message ?? '').trim()
     const department = String(body.department ?? '').trim().toLowerCase() || 'general'
 
-    if (!name || !email || !EMAIL_RE.test(email) || !message) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    if (!name || !email || !EMAIL_RE.test(email) || !message || message.length < 10) {
+      return NextResponse.json(
+        { error: message && message.length < 10 ? 'Message must be at least 10 characters' : 'Missing required fields' },
+        { status: 400 },
+      )
     }
 
     const settings = await getSiteSettings()

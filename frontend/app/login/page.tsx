@@ -40,7 +40,7 @@ function CommonsLoginForm() {
   }
 
   return (
-    <main className="max-w-md mx-auto px-4 py-12 md:py-16">
+    <main id="main-content" className="max-w-md mx-auto px-4 py-12 md:py-16">
       <p
         className="text-xs font-semibold uppercase tracking-wide mb-2"
         style={{ color: 'var(--brand-green)' }}
@@ -97,7 +97,7 @@ export default function CommonsLoginPage() {
   return (
     <Suspense
       fallback={
-        <main className="max-w-md mx-auto px-4 py-12">
+        <main id="main-content" className="max-w-md mx-auto px-4 py-12">
           <p className="text-sm text-[#5A6070]">Loading…</p>
         </main>
       }

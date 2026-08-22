@@ -93,9 +93,20 @@ export async function Hero() {
                 style={{ backgroundColor: 'var(--brand-dark)' }}
                 asChild
               >
-                <a href={content.ctaHref || '/membership'}>
+                <a href={content.ctaHref || '/auth/join?mode=signup&returnTo=%2Fmember-portal'}>
                   <Users className="w-4 h-4 mr-2" aria-hidden="true" />
-                  {content.ctaLabel || 'Become a member'}
+                  {content.ctaLabel || 'Create free account'}
+                </a>
+              </Button>
+
+              <Button
+                size="lg"
+                variant="outline"
+                className="font-bold px-6 sm:px-8 border-2 border-white text-white bg-transparent hover:bg-white hover:text-[var(--brand-green)] transition-colors"
+                asChild
+              >
+                <a href="/membership">
+                  See membership tiers
                 </a>
               </Button>
 

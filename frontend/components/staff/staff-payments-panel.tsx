@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { HelpTip } from '@/components/ui/help-tip'
 
 type Payment = {
   id: string
@@ -62,7 +63,10 @@ export function StaffPaymentsPanel() {
     <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
       <div className="flex flex-wrap justify-between gap-2">
         <div>
-          <h2 className="text-lg font-bold">Payments</h2>
+          <h2 className="text-lg font-bold inline-flex items-center gap-1">
+            Payments
+            <HelpTip tipKey="staff.payments.needs" label="About Needs Reconciliation" />
+          </h2>
           <p className="text-xs text-[#5A6070]">
             Needs Reconciliation = Square charged but gift-card load failed. Do not ask the parent to
             pay again.

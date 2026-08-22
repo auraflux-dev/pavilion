@@ -22,7 +22,7 @@ function ReviewJoinInner() {
 
   if (!isPublicDemoInstance()) {
     return (
-      <main className="max-w-lg mx-auto px-4 py-16">
+      <main id="main-content" className="max-w-lg mx-auto px-4 py-16">
         <h1 className="text-2xl font-bold mb-3" style={{ color: 'var(--brand-green)' }}>
           Review join is on the demo site
         </h1>
@@ -76,7 +76,7 @@ function ReviewJoinInner() {
   }
 
   return (
-    <main className="max-w-lg mx-auto px-4 py-12 md:py-16">
+    <main id="main-content" className="max-w-lg mx-auto px-4 py-12 md:py-16">
       <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--brand-green)' }}>
         PTO operating system demo
       </p>

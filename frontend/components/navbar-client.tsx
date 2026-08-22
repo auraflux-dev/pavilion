@@ -267,8 +267,8 @@ export function NavbarClient({ links, brand, mode }: Props) {
 
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
           <CartButton />
-          {/* Auth stays visible from sm; page links show from lg instead of hamburger-only */}
-          <div className="hidden sm:flex items-center gap-2">
+          {/* Auth visible on all sizes; page links stay lg+. On xs show Join only to save space. */}
+          <div className="flex items-center gap-2">
             {status === 'loading' ? (
               <div className="h-9 w-24 rounded-md bg-[var(--brand-soft)] animate-pulse" />
             ) : isMember ? (
@@ -292,7 +292,10 @@ export function NavbarClient({ links, brand, mode }: Props) {
               </>
             ) : (
               <>
-                <Link href="/auth/join?mode=login&returnTo=%2Fmember-portal">
+                <Link
+                  href="/auth/join?mode=login&returnTo=%2Fmember-portal"
+                  className="hidden sm:inline-flex"
+                >
                   <Button size="sm" variant="outline" className="font-semibold">
                     Log in
                   </Button>

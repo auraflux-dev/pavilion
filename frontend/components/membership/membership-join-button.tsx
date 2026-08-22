@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { MemberGate } from '@/components/member-gate'
 import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
+import { HelpTip } from '@/components/ui/help-tip'
 import {
   normalizeMembershipTier,
   pickHighestTier,
@@ -154,6 +155,15 @@ function JoinInner({ tierId, tierName, price }: Props) {
       returnToQuery={`checkout=${tierId}${studentId ? `&studentId=${studentId}` : ''}`}
     >
       <div className="space-y-2">
+        <p className="text-[11px] text-[#5A6070] flex items-center gap-1">
+          {relation === 'upgrade' || isUpgrade
+            ? 'You pay the difference, not the full price again.'
+            : 'Free accounts can upgrade here anytime.'}
+          <HelpTip
+            tipKey={relation === 'upgrade' || isUpgrade ? 'membership.tier.upgrade' : 'membership.free.vs.paid'}
+            label="About membership"
+          />
+        </p>
         <MembershipShirtPicker required={needsShirt} value={shirt} onChange={setShirt} />
         <Button
           type="button"
@@ -214,12 +224,21 @@ function JoinInner({ tierId, tierName, price }: Props) {
             shirtVariantId: needsShirt ? shirt?.variantId : undefined,
           }}
           containerId={`membership-pay-${tierId}`}
-          onPaid={() => {
+          onPaid={(data) => {
             sessionStorage.removeItem('pendingMembership')
-            // Let the checkout confirmation panel show before leaving.
-            window.setTimeout(() => {
-              window.location.href = '/member-portal?membership=success'
-            }, 1800)
+            try {
+              sessionStorage.setItem(
+                'membershipReceipt',
+                JSON.stringify({
+                  tier: title,
+                  amount: typeof data?.amount === 'number' ? data.amount : chargeAmount,
+                  at: new Date().toISOString(),
+                }),
+              )
+            } catch {
+              /* ignore */
+            }
+            // Stay on the receipt. Parent taps Continue in portal when ready.
           }}
         />
       </div>

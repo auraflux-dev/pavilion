@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,7 @@ import { PortalCardCheckout, type PortalPayBody } from '@/components/checkout/po
 import { MemberGate } from '@/components/member-gate'
 import { useCart } from '@/lib/cart/store'
 import type { CartLine } from '@/lib/cart/types'
+import { useDialogA11y } from '@/lib/hooks/use-dialog-a11y'
 
 type Student = { id: string; firstName: string; lastName: string; grade: string }
 
@@ -107,6 +108,9 @@ export function CartDrawer() {
   const studentReady = !needsStudent || Boolean(studentId)
   const canCheckout = lines.length > 0 && studentReady && cartLinesPay != null && cartLinesPay.length === lines.length
 
+  const panelRef = useRef<HTMLElement>(null)
+  useDialogA11y(open, () => setOpen(false), panelRef)
+
   if (!open) return null
 
   return (
@@ -117,7 +121,10 @@ export function CartDrawer() {
         aria-label="Close bag"
         onClick={() => setOpen(false)}
       />
-      <aside className="relative w-full max-w-md bg-white shadow-xl border-l border-[var(--border)] h-full flex flex-col">
+      <aside
+        ref={panelRef}
+        className="relative w-full max-w-md bg-white shadow-xl border-l border-[var(--border)] h-full flex flex-col"
+      >
         <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[var(--border)]">
           <div>
             <p className="text-base font-bold text-[#1A1A1A]">Bag</p>

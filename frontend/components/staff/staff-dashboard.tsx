@@ -39,6 +39,8 @@ import { StaffNewsletterSendReportPanel } from '@/components/staff/staff-newslet
 import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
 import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
 import { StaffCoachTour } from '@/components/staff/staff-coach-tour'
+import { StaffDemoBanner } from '@/components/staff/staff-demo-banner'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-notice'
 import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
@@ -148,6 +150,14 @@ export function StaffDashboard() {
   const [members, setMembers] = useState<MemberHit[]>([])
   const [lookupBusy, setLookupBusy] = useState(false)
   const [actAsStatus, setActAsStatus] = useState('')
+  const [coachDone, setCoachDone] = useState(false)
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem('staff-coach-tour-v1') === 'done') setCoachDone(true)
+    } catch {
+      /* ignore */
+    }
+  }, [])
 
   const [msgSubject, setMsgSubject] = useState('')
   const [msgBody, setMsgBody] = useState('')
@@ -440,6 +450,7 @@ export function StaffDashboard() {
       onNavigate={go}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <StaffDemoBanner />
         <StaffTrialBanner />
         {active === 'home' ? (
           <section className="space-y-4">
@@ -459,16 +470,32 @@ export function StaffDashboard() {
                 showMoneyBeat={me.roles.some((r) =>
                   ['admin', 'treasurer', 'retail', 'membership'].includes(r),
                 )}
+                deep={me.roles.some((r) => ['admin', 'treasurer', 'membership', 'marketing'].includes(r))}
+                onDone={() => setCoachDone(true)}
               />
-              <StaffPersonalEmailPanel
-                initialEmail={me.personalEmail ?? ''}
-                onSaved={(email) =>
-                  setMe((current) => (current ? { ...current, personalEmail: email } : current))
-                }
-              />
-              <StaffWalkthroughNotice roles={me.roles} email={me.email} />
-              <StaffOnboardingPanel onOpenWorkspace={go} />
+              {coachDone ? (
+                <>
+                  <StaffPersonalEmailPanel
+                    initialEmail={me.personalEmail ?? ''}
+                    onSaved={(email) =>
+                      setMe((current) => (current ? { ...current, personalEmail: email } : current))
+                    }
+                  />
+                  <StaffWalkthroughNotice roles={me.roles} email={me.email} />
+                  <StaffOnboardingPanel onOpenWorkspace={go} />
+                </>
+              ) : null}
             </>
+            {activityItems.length === 0 && active === 'home' ? (
+              <div className="rounded-xl border border-[var(--border)] bg-[#FAFCF9] p-4">
+                <p className="text-sm font-bold text-[#1A1A1A]">You are caught up</p>
+                <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
+                  Nothing needs attention right now.
+                  {'\n'}
+                  Open Membership, Events, or Help from the top nav when you are ready.
+                </p>
+              </div>
+            ) : null}
             {activityItems.length > 0 ? (
               <div className="rounded-xl border border-[var(--brand-green)]/25 bg-[#E8F3E8] p-4 space-y-2">
                 <p className="text-sm font-bold text-[var(--brand-green)]">Needs your attention</p>
@@ -669,19 +696,25 @@ export function StaffDashboard() {
                         ))}
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => void actAs(m.parentEmail)}
-                      className="text-xs font-bold px-3 py-1.5 rounded-lg text-white shrink-0"
-                      style={{ backgroundColor: 'var(--brand-green)' }}
-                    >
-                      Act as
-                    </button>
+                    {!isPublicDemoInstance() ? (
+                      <button
+                        type="button"
+                        onClick={() => void actAs(m.parentEmail)}
+                        className="text-xs font-bold px-3 py-1.5 rounded-lg text-white shrink-0"
+                        style={{ backgroundColor: 'var(--brand-green)' }}
+                      >
+                        Act as
+                      </button>
+                    ) : null}
                   </div>
                 )
               })}
               {!lookupBusy && members.length === 0 ? (
-                <p className="text-sm text-[#5A6070] py-4">No members match.</p>
+                <p className="text-sm text-[#5A6070] py-4 whitespace-pre-line">
+                  No members match.
+                  {'\n'}
+                  Clear the search or tier filter, or try another sort.
+                </p>
               ) : null}
             </div>
           </section>

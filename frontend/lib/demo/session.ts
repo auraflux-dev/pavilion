@@ -87,10 +87,11 @@ export function getDemoReviewSession(req: NextRequest): DemoReviewSession | null
 
 export function demoStaffProfile(session: DemoReviewSession): StaffProfile {
   const name = `${session.firstName} ${session.lastName}`.trim()
+  // Demo Staff is a full board seat for the tour, not a silent super-admin claim.
   return {
     email: session.email,
-    roles: ['admin'] as StaffRole[],
-    boardTitle: 'President (demo)',
+    roles: ['admin', 'membership', 'marketing', 'events', 'retail', 'treasurer'] as StaffRole[],
+    boardTitle: 'Board (demo)',
     name,
     emailSignature: `${name}\n${session.school}`,
     assignedProgramIds: [],

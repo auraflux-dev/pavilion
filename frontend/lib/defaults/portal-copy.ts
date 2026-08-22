@@ -69,8 +69,8 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   paidBody: 'Thanks for supporting SHMS PTO.\nBenefits show on each student below.',
   freeTitle: 'Free parent account',
   freeBody: 'Add students below.\nUpgrade to Reef, Lagoon, or Tide anytime.',
-  emptyTitle: 'Welcome',
-  emptyBody: 'Add a student to track programs, Cove balance, and membership.',
+  emptyTitle: 'Add your first student',
+  emptyBody: 'Programs, the store card, and membership unlock after you add a student.\nUse Add student below. It takes about a minute.',
   upgradeBody:
     'Paid members get Cove credit and enrichment discounts.\nLagoon and Tide include event refreshments.',
   viewMemberships: 'View paid memberships',
@@ -89,7 +89,7 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   calendarEmptyBody: 'Session times and school events show here after you enroll.',
   calendarEmptyCta: 'Browse programs',
   messagesEmptyTitle: 'Inbox empty',
-  messagesEmptyBody: 'Class notes and PTO updates land here.',
+  messagesEmptyBody: 'Class notes and PTO updates land here.\nNeed help now? Open Portal Help from the top of this page.',
 
   memberSince: 'Member since',
   studentsLabel: 'Students',

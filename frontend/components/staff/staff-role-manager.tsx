@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { HelpTip } from '@/components/ui/help-tip'
 import type { StaffWorkspace } from '@/lib/audience'
 import {
   STAFF_ADMIN_WORKSPACES,
@@ -406,8 +407,12 @@ Requires Connect Google as a Workspace admin (Staff → Inbox).`)}
         })}
 
         {moneyExtra ? (
-          <p className="text-[11px] text-[#8A4B00]">
-            Payments and Budget extras also unlock treasurer tools, including bank connections.
+          <p className="text-[11px] text-[#8A4B00] inline-flex items-start gap-1">
+            <span>
+              Payments and Budget are workspace grants only. They do not grant the full Treasurer
+              role. Only tick for someone who handles money.
+            </span>
+            <HelpTip tipKey="staff.roles.money.extra" label="About money extras" />
           </p>
         ) : null}
       </div>

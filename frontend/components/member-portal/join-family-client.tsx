@@ -90,6 +90,11 @@ export function JoinFamilyClient() {
             )}
           </p>
           <p className="text-[11px] text-[#5A6070]">Status: {preview.status}</p>
+          <p className="text-xs text-[#5A6070] whitespace-pre-line border border-[var(--border)] rounded-lg bg-white p-2">
+            Use the invited email above when you log in.
+            {'\n'}
+            Accepting links your session to this household.
+          </p>
         </div>
       ) : (
         <p className="text-sm text-[#5A6070]">Loading invite…</p>
@@ -103,7 +108,16 @@ export function JoinFamilyClient() {
           disabled={busy || Boolean(preview?.error) || !token}
           className="text-white"
           style={{ backgroundColor: 'var(--brand-green)' }}
-          onClick={() => void accept()}
+          onClick={() => {
+            if (
+              !window.confirm(
+                `Accept this invite and join the household${preview?.primaryParentEmail ? ` of ${preview.primaryParentEmail}` : ''}?`,
+              )
+            ) {
+              return
+            }
+            void accept()
+          }}
         >
           Accept invite
         </Button>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react'
+import { HelpTip } from '@/components/ui/help-tip'
 import { trackGenerateLead } from '@/lib/ga'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
@@ -131,17 +132,21 @@ export function ContactForm() {
       {/* Message */}
       <div>
         <label htmlFor="contact-message" className="block text-sm font-medium text-[#1A1A1A] mb-1.5">
-          Message <span className="text-red-500">*</span>
+          Message <span className="text-red-500">*</span>{' '}
+          <HelpTip tipKey="contact.response.time" label="Response time" />
         </label>
         <textarea
           id="contact-message"
           required
+          minLength={10}
+          maxLength={4000}
           rows={5}
           value={form.message}
           onChange={update('message')}
           placeholder="How can we help?"
           className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20 focus:border-[var(--brand-green)] transition-colors resize-none"
         />
+        <p className="mt-1 text-[11px] text-[#5A6070]">At least 10 characters.</p>
       </div>
 
       {status === 'error' && (

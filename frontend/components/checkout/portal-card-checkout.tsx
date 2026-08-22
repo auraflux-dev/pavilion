@@ -9,7 +9,10 @@ import { CreditCard, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PortalPayPalButtons } from '@/components/checkout/portal-paypal-buttons'
 import { CheckoutConsent } from '@/components/checkout/checkout-consent'
+import { HelpTip } from '@/components/ui/help-tip'
 import type { ConsentAck, CheckoutConsentKind } from '@/lib/checkout-consent'
+import { tooltipCopy } from '@/lib/copy/tooltips'
+import { useDialogA11y } from '@/lib/hooks/use-dialog-a11y'
 import { itemsFromPayBody, trackBeginCheckout, trackCheckoutPurchase } from '@/lib/ga'
 import { getStoredCouponCode, setStoredCouponCode } from '@/lib/start-checkout'
 
@@ -62,6 +65,7 @@ export type PortalPayBody =
       kind: 'cart'
       cartLines: Exclude<PortalPayBody, { kind: 'cart' | 'store-card' }>[]
       couponCode?: string | null
+      useCoveBalance?: boolean
       consents?: ConsentAck[]
     }
 
@@ -116,6 +120,11 @@ export function PortalCardCheckout({
   const [showCoupon, setShowCoupon] = useState(false)
   const [showPayPal, setShowPayPal] = useState(false)
   const [useCove, setUseCove] = useState(true)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const closeSafe = useCallback(() => {
+    if (!busy) onClose()
+  }, [busy, onClose])
+  useDialogA11y(open, closeSafe, panelRef)
   const [quote, setQuote] = useState<{
     amount: number
     listAmount?: number
@@ -152,7 +161,8 @@ export function PortalCardCheckout({
         body: JSON.stringify({
           ...payBody,
           couponCode: couponCode.trim() || undefined,
-          useCoveBalance: payBody.kind === 'product' ? useCove : false,
+          useCoveBalance:
+            payBody.kind === 'product' || payBody.kind === 'cart' ? useCove : false,
         }),
       })
         .then(async (r) => {
@@ -218,14 +228,18 @@ export function PortalCardCheckout({
     (payBody.kind === 'cart' && cartConsentKinds.length > 0)
   const showConsentUi = needsConsent && !prefilledConsents?.length
   const due = quote?.amount ?? amount
-  /** Wait for product quote before mounting Square; otherwise cardDue falls back to list price and attach races the DOM. */
-  const productAwaitingQuote = payBody.kind === 'product' && quote == null
+  /** Wait for product/bag quote before mounting Square; otherwise cardDue falls back to list price and attach races the DOM. */
+  const splitAwaitingQuote =
+    (payBody.kind === 'product' || payBody.kind === 'cart') && quote == null
   const cardDue =
-    payBody.kind === 'product'
-      ? Number(quote?.cardDollars ?? (productAwaitingQuote ? 0 : due))
+    payBody.kind === 'product' || payBody.kind === 'cart'
+      ? Number(quote?.cardDollars ?? (splitAwaitingQuote ? 0 : due))
       : due
-  const coveDue = payBody.kind === 'product' ? Number(quote?.coveDollars ?? 0) : 0
-  const needsCard = !productAwaitingQuote && cardDue >= 1
+  const coveDue =
+    payBody.kind === 'product' || payBody.kind === 'cart'
+      ? Number(quote?.coveDollars ?? 0)
+      : 0
+  const needsCard = !splitAwaitingQuote && cardDue >= 1
   const nameReady = !needsName || (firstName.trim().length > 0 && lastName.trim().length > 0)
 
   const onConsentChange = useCallback((acks: ConsentAck[] | null, complete: boolean) => {
@@ -411,7 +425,8 @@ export function PortalCardCheckout({
         body: JSON.stringify({
           ...payBody,
           couponCode: couponCode.trim() || undefined,
-          useCoveBalance: payBody.kind === 'product' ? useCove : false,
+          useCoveBalance:
+            payBody.kind === 'product' || payBody.kind === 'cart' ? useCove : false,
           firstName: firstName.trim() || undefined,
           lastName: lastName.trim() || undefined,
           consents: needsConsent ? consents : undefined,
@@ -429,7 +444,9 @@ export function PortalCardCheckout({
       setNextSteps(Array.isArray(conf?.nextSteps) ? conf.nextSteps : [])
       setPortalHref(typeof conf?.portalHref === 'string' ? conf.portalHref : '/member-portal')
       setEmailed(Boolean(conf?.emailed))
-      setSuccess('Payment successful. Thank you!')
+      setSuccess(
+        `Payment successful.\n${title}\n$${due.toFixed(2)}${subtitle ? `\n${subtitle}` : ''}`,
+      )
       trackCheckoutPurchase({
         data,
         amount,
@@ -438,7 +455,7 @@ export function PortalCardCheckout({
         paymentType: useStored ? 'square_card_on_file' : 'square_card',
       })
       onPaid?.(data)
-      setTimeout(() => onClose(), conf?.nextSteps?.length ? 6000 : 1400)
+      /* receipt stays open until parent closes */
     } catch (err) {
       const raw = err instanceof Error ? err.message : 'Payment failed.'
       setError(
@@ -469,10 +486,13 @@ export function PortalCardCheckout({
       aria-modal="true"
       aria-labelledby={`${containerId}-title`}
       onClick={(e) => {
-        if (e.target === e.currentTarget && !busy) onClose()
+        if (e.target === e.currentTarget && !busy && !success) onClose()
       }}
     >
-      <div className="w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl border border-[var(--border)] p-4 space-y-3">
+      <div
+        ref={panelRef}
+        className="w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl border border-[var(--border)] p-4 space-y-3"
+      >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p id={`${containerId}-title`} className="text-sm font-bold text-[#1A1A1A] leading-snug line-clamp-2">
@@ -485,7 +505,7 @@ export function PortalCardCheckout({
             {discountLine ? (
               <p className="text-xs text-[#5A6070] mt-0.5">{discountLine}</p>
             ) : null}
-            {payBody.kind === 'product' && coveDue > 0 ? (
+            {(payBody.kind === 'product' || payBody.kind === 'cart') && coveDue > 0 ? (
               <p className="text-xs text-[#5A6070] mt-0.5">
                 Cove ${coveDue.toFixed(2)}
                 {cardDue > 0 ? ` · card $${cardDue.toFixed(2)}` : ''}
@@ -527,7 +547,8 @@ export function PortalCardCheckout({
             </button>
           ))}
 
-        {payBody.kind === 'product' && (quote?.coveBalance ?? 0) > 0 ? (
+        {(payBody.kind === 'product' || payBody.kind === 'cart') &&
+        (quote?.coveBalance ?? 0) > 0 ? (
           <label className="flex items-start gap-2 text-xs text-[#1A1A1A]">
             <input
               type="checkbox"
@@ -535,7 +556,10 @@ export function PortalCardCheckout({
               onChange={(e) => setUseCove(e.target.checked)}
               className="mt-0.5"
             />
-            <span>Use Cove balance first (${Number(quote?.coveBalance ?? 0).toFixed(2)})</span>
+            <span className="whitespace-pre-line">
+              {`Use Cove balance first ($${Number(quote?.coveBalance ?? 0).toFixed(2)}).
+Applies to this whole bag total.}`}
+            </span>
           </label>
         ) : null}
 
@@ -581,6 +605,10 @@ export function PortalCardCheckout({
 
         {needsCard && !useStored ? (
           <div>
+            <p className="mb-1 text-[11px] text-[#5A6070] inline-flex items-center gap-1">
+              Card details
+              <HelpTip tipKey="checkout.card.security" label="Card security" />
+            </p>
             <div
               id={containerId}
               className="min-h-[88px] rounded-lg border border-[var(--border)] bg-white px-2 py-2"
@@ -609,15 +637,17 @@ export function PortalCardCheckout({
           <p className="text-xs text-amber-700">Card payments are temporarily unavailable.</p>
         ) : null}
         {error ? (
-          <p className="text-xs text-red-600">
+          <p className="text-xs text-red-600 whitespace-pre-line">
             {/container element removed/i.test(error)
               ? 'Card form needed a moment. Close and try again.'
-              : error}
+              : /could not confirm|ambiguous|network/i.test(error)
+                ? tooltipCopy('checkout.ambiguous.failure')
+                : error}
           </p>
         ) : null}
         {success ? (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-3 space-y-1">
-            <p className="text-xs font-semibold text-green-800">{success}</p>
+          <div className="rounded-lg border border-green-200 bg-green-50 p-3 space-y-2">
+            <p className="text-xs font-semibold text-green-800 whitespace-pre-line">{success}</p>
             {emailed ? (
               <p className="text-[11px] text-green-800">Confirmation email on the way.</p>
             ) : null}
@@ -628,11 +658,24 @@ export function PortalCardCheckout({
                 ))}
               </ul>
             ) : null}
-            {portalHref ? (
-              <a href={portalHref} className="text-[11px] font-semibold underline text-green-900">
-                Continue in portal
-              </a>
-            ) : null}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {portalHref ? (
+                <a
+                  href={portalHref}
+                  className="inline-flex items-center rounded-lg px-3 py-1.5 text-[11px] font-bold text-white"
+                  style={{ backgroundColor: 'var(--brand-green)' }}
+                >
+                  Continue in portal
+                </a>
+              ) : null}
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-[11px] font-semibold underline text-green-900"
+              >
+                Close
+              </button>
+            </div>
           </div>
         ) : null}
 
@@ -662,19 +705,18 @@ export function PortalCardCheckout({
           showPayPal ? (
             <PortalPayPalButtons
               active={open && !busy && !success && nameReady && (!needsConsent || consentComplete)}
-              payBody={
-                payBody.kind === 'product' || payBody.kind === 'program'
-                  ? {
-                      ...payBody,
-                      couponCode: couponCode.trim() || undefined,
-                      ...(payBody.kind === 'product' ? { useCoveBalance: useCove } : {}),
-                      consents: needsConsent ? consents ?? undefined : undefined,
-                    }
-                  : {
-                      ...payBody,
-                      consents: needsConsent ? consents ?? undefined : undefined,
-                    }
-              }
+              payBody={{
+                ...payBody,
+                ...(payBody.kind === 'product' ||
+                payBody.kind === 'program' ||
+                payBody.kind === 'cart'
+                  ? { couponCode: couponCode.trim() || undefined }
+                  : {}),
+                ...(payBody.kind === 'product' || payBody.kind === 'cart'
+                  ? { useCoveBalance: useCove }
+                  : {}),
+                consents: needsConsent ? consents ?? undefined : undefined,
+              }}
               onBeforePay={async () => {
                 await ensureParentNameSaved()
               }}
@@ -694,7 +736,7 @@ export function PortalCardCheckout({
                   paymentType: 'paypal',
                 })
                 onPaid?.(data)
-                setTimeout(() => onClose(), conf?.nextSteps?.length ? 6000 : 1400)
+                /* receipt stays open until parent closes */
               }}
               onError={(message) => setError(message)}
             />

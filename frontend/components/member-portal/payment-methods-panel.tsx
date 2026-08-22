@@ -5,6 +5,7 @@ import { CreditCard, Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GiftCardSettings } from './gift-card-settings'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { HelpTip } from '@/components/ui/help-tip'
 
 type StoredCard = {
   brand: string
@@ -323,7 +324,10 @@ export function PaymentMethodsPanel() {
           <CreditCard className="h-4 w-4" style={{ color: 'var(--brand-green)' }} />
         </div>
         <div className="min-w-0">
-          <h2 className="text-base font-bold text-[#1A1A1A]">Cards and PayPal on file</h2>
+          <h2 className="text-base font-bold text-[#1A1A1A] inline-flex items-center gap-2">
+            Cards and PayPal on file
+            <HelpTip tipKey="portal.paymentmethods.why" label="Why save a payment method" />
+          </h2>
           <p className="mt-1 text-sm text-[#5A6070] whitespace-pre-line">
             {vanillaizeIfDemo(`Square stores your card securely for Cove Digital reloads, membership, spirit wear, and enrichment.
 Save a card or PayPal here for one-tap checkout.
