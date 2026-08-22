@@ -251,6 +251,7 @@ export function PortalCardCheckout({
   useEffect(() => {
     if (!open || !config?.configured || useStored || !needsCard) return
     let cancelled = false
+    let attached: SquareCard | null = null
 
     async function setup() {
       const src =
@@ -274,26 +275,62 @@ export function PortalCardCheckout({
       }
 
       if (cancelled || !window.Square || !config) return
-      await cardRef.current?.destroy().catch(() => undefined)
+
+      // Wait for the card host to exist. Closing the modal mid-load must not attach.
+      for (let i = 0; i < 10; i++) {
+        if (cancelled) return
+        if (document.getElementById(containerId)) break
+        await new Promise<void>((r) => requestAnimationFrame(() => r()))
+      }
+      if (cancelled || !document.getElementById(containerId)) return
+
+      const prev = cardRef.current
+      cardRef.current = null
+      if (prev) await prev.destroy().catch(() => undefined)
+
       const payments = await window.Square.payments(config.applicationId, config.locationId)
+      if (cancelled) return
       const card = await payments.card()
+      if (cancelled) {
+        await card.destroy().catch(() => undefined)
+        return
+      }
+      if (!document.getElementById(containerId)) {
+        await card.destroy().catch(() => undefined)
+        return
+      }
       await card.attach(`#${containerId}`)
+      if (cancelled) {
+        await card.destroy().catch(() => undefined)
+        return
+      }
+      attached = card
       cardRef.current = card
       setReady(true)
     }
 
-    setup().catch((err) => setError(err instanceof Error ? err.message : 'Payment form unavailable'))
+    setup().catch((err) => {
+      if (!cancelled) {
+        setError(err instanceof Error ? err.message : 'Payment form unavailable')
+      }
+    })
     return () => {
       cancelled = true
-      cardRef.current?.destroy().catch(() => undefined)
+      const card = attached || cardRef.current
+      attached = null
       cardRef.current = null
-      setReady(false)
+      // Destroy while the host div is still mounted (cleanup runs before DOM removal).
+      void card?.destroy().catch(() => undefined)
     }
   }, [open, config, useStored, containerId, needsCard])
 
   useEffect(() => {
     if (!needsCard) setError('')
   }, [needsCard])
+
+  useEffect(() => {
+    if (!open) setReady(false)
+  }, [open])
 
   async function ensureParentNameSaved() {
     if (!needsName) return
