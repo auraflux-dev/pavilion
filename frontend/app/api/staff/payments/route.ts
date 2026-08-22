@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
-import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
+import { getStaffSession, requireStaffRoleOrWorkspace } from '@/lib/staff/session'
 import { loadGiftCard } from '@/lib/square'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!requireStaffRole(session?.staff ?? null, ['treasurer', 'admin'])) return null
+  if (
+    !requireStaffRoleOrWorkspace(session?.staff ?? null, ['treasurer', 'admin'], ['payments'])
+  ) {
+    return null
+  }
   return session
 }
 

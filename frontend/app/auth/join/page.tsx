@@ -225,7 +225,9 @@ function JoinInner() {
     <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: 'var(--brand-warm)' }}>
       <div className="w-full max-w-md bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6 sm:p-8">
         <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: 'var(--brand-green)' }}>
-          {vanillaizeIfDemo('SHMS PTO')}
+          <a href="/" className="hover:underline" style={{ color: 'var(--brand-green)' }}>
+            {vanillaizeIfDemo('SHMS PTO')}
+          </a>
         </p>
         <h1 className="text-2xl font-bold text-[#1A1A1A] mb-1">
           {isStaffReturn
@@ -234,6 +236,11 @@ function JoinInner() {
               ? 'Create Your Account'
               : 'Log In'}
         </h1>
+        <p className="text-xs text-[#5A6070] mb-4">
+          <a href="/" className="underline" style={{ color: 'var(--brand-green)' }}>
+            Back to site
+          </a>
+        </p>
         <p className="text-sm text-[#5A6070] mb-6">
           {isStaffReturn
             ? vanillaizeIfDemo(

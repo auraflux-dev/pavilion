@@ -3,7 +3,7 @@
  * Assigned in CMS collection StaffRoles (email + comma-separated roles).
  */
 import { getWixClient } from '@/lib/wix-client'
-import { effectiveStaffRoles, parseExtraWorkspaces } from '@/lib/staff/permissions'
+import { parseExtraWorkspaces } from '@/lib/staff/permissions'
 import type { StaffWorkspace } from '@/lib/audience'
 import { isDemoInstance } from '@/lib/demo/instance'
 
@@ -203,9 +203,8 @@ export function hasStaffRole(profile: StaffProfile | null, role: StaffRole | Sta
  if (!profile) return false
  const needed = Array.isArray(role) ? role : [role]
  if (profile.roles.includes('admin')) return true
- if (needed.some((r) => profile.roles.includes(r))) return true
- const effective = effectiveStaffRoles(profile.roles, profile.extraWorkspaces)
- return needed.some((r) => effective.includes(r))
+ // Extras are workspace grants only. Do not treat them as whole roles.
+ return needed.some((r) => profile.roles.includes(r))
 }
 
 /**

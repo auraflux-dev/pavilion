@@ -3,7 +3,7 @@
  * Excel workbook (Summary, Budget, Activity) for treasurer planning.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
+import { getStaffSession, requireStaffRoleOrWorkspace } from '@/lib/staff/session'
 import { DEFAULT_FISCAL_YEAR, listBudgetLines } from '@/lib/staff/budget'
 import { listBudgetEntries } from '@/lib/staff/budget-sync'
 import { buildBudgetWorkbook } from '@/lib/staff/budget-export'
@@ -13,7 +13,7 @@ export const maxDuration = 60
 
 export async function GET(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!requireStaffRole(session?.staff ?? null, ['treasurer', 'admin'])) {
+  if (!requireStaffRoleOrWorkspace(session?.staff ?? null, ['treasurer', 'admin'], ['budget'])) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   const year = req.nextUrl.searchParams.get('year')?.trim() || DEFAULT_FISCAL_YEAR

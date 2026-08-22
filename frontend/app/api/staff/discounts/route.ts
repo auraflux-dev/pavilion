@@ -4,7 +4,7 @@
  * PATCH /api/staff/discounts. activate/deactivate
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
+import { getStaffSession, requireStaffRoleOrWorkspace } from '@/lib/staff/session'
 import {
   createDiscountCode,
   issueDiscountToMember,
@@ -16,7 +16,11 @@ export const dynamic = 'force-dynamic'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!requireStaffRole(session?.staff ?? null, ['retail', 'membership', 'admin'])) {
+  if (
+    !requireStaffRoleOrWorkspace(session?.staff ?? null, ['retail', 'membership', 'admin'], [
+      'discounts',
+    ])
+  ) {
     return null
   }
   return session

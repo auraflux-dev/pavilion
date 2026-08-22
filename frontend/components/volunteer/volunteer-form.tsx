@@ -1,11 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 import { trackGenerateLead } from '@/lib/ga'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { useAuth } from '@/lib/hooks/use-auth'
+
+const DRAFT_KEY = 'volunteer-form-draft-v1'
 
 /** Used only when VolunteerOpportunities CMS returns no active rows */
 const FALLBACK_OPPORTUNITIES = [
@@ -24,10 +27,12 @@ type VolunteerFormProps = {
 }
 
 export function VolunteerForm({ opportunities }: VolunteerFormProps) {
-  const options =
-    opportunities && opportunities.length > 0
-      ? opportunities
-      : FALLBACK_OPPORTUNITIES
+  const { status: authStatus } = useAuth()
+  const options = useMemo(() => {
+    const raw =
+      opportunities && opportunities.length > 0 ? opportunities : FALLBACK_OPPORTUNITIES
+    return raw.map((title) => vanillaizeIfDemo(title))
+  }, [opportunities])
 
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [form, setForm] = useState({
@@ -39,10 +44,27 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
     notes: '',
   })
 
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY)
+      if (!raw) return
+      const parsed = JSON.parse(raw) as typeof form
+      if (parsed && typeof parsed === 'object') setForm((prev) => ({ ...prev, ...parsed }))
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    const next = { ...form, [e.target.name]: e.target.value }
+    setForm(next)
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(next))
+    } catch {
+      /* ignore */
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -57,6 +79,11 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
       })
       if (!res.ok) throw new Error('Failed')
       trackGenerateLead({ formId: 'volunteer', leadType: form.opportunity || 'volunteer' })
+      try {
+        sessionStorage.removeItem(DRAFT_KEY)
+      } catch {
+        /* ignore */
+      }
       setStatus('success')
     } catch {
       setStatus('error')
@@ -85,6 +112,13 @@ export function VolunteerForm({ opportunities }: VolunteerFormProps) {
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 lg:p-8 shadow-sm space-y-5">
       <h3 className="text-xl font-bold text-[#1A1A1A]">Sign Up to Volunteer</h3>
+      {authStatus === 'visitor' ? (
+        <p className="text-sm text-[#5A6070] whitespace-pre-line rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-3">
+          {vanillaizeIfDemo(
+            'You need a free account to submit.\nYour answers stay saved on this device when you continue to sign in.',
+          )}
+        </p>
+      ) : null}
 
       {/* Name row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

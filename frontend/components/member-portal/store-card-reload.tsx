@@ -167,16 +167,26 @@ export function StoreCardReload({
     }
   }, [open, config, storedCard, useStored])
 
+  const customTrim = customAmount.trim()
+  const customParsed = customTrim === '' ? null : Number.parseInt(customTrim, 10)
+  const customValid =
+    customParsed != null &&
+    Number.isInteger(customParsed) &&
+    customParsed >= 1 &&
+    customParsed <= maxAmount
+  const chargeAmount = customTrim === '' ? amount : customValid ? customParsed : null
+
   async function submit() {
     const loadStudentId = studentId || studentList[0]?.id || ''
     if (!loadStudentId) {
       setError(vanillaizeIfDemo('Add a student in the portal before loading the Cove Digital Card.'))
       return
     }
-    if (!Number.isInteger(amount) || amount < 1 || amount > maxAmount) {
+    if (chargeAmount == null || !Number.isInteger(chargeAmount) || chargeAmount < 1 || chargeAmount > maxAmount) {
       setError(`Enter a whole-dollar amount from $1 to $${maxAmount}.`)
       return
     }
+    const amount = chargeAmount
     setBusy(true)
     setError('')
     setSuccess('')
@@ -202,8 +212,18 @@ export function StoreCardReload({
           saveCard: !useStored && saveCard,
         }),
       })
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error ?? 'Payment failed.')
+      let data: Record<string, unknown> = {}
+      try {
+        data = await response.json()
+      } catch {
+        if (response.ok) {
+          throw new Error(
+            'We could not confirm this payment. Check Member Portal before trying again so you are not charged twice.',
+          )
+        }
+        throw new Error('Payment failed.')
+      }
+      if (!response.ok) throw new Error(String(data.error ?? 'Payment failed.'))
 
       const loadedBonus = Number(data.bonusPercent ?? appliedBonus) || 0
       setAppliedBonus(0)
@@ -216,8 +236,8 @@ export function StoreCardReload({
             } successfully.`
           : `Loaded successfully. New balance: $${Number(data.newBalance).toFixed(2)}`
       )
-      if (data.paymentMethod) {
-        setStoredCard(data.paymentMethod)
+      if (data.paymentMethod && typeof data.paymentMethod === 'object') {
+        setStoredCard(data.paymentMethod as StoredCard)
         setUseStored(true)
       }
       onLoaded?.()
@@ -324,13 +344,20 @@ export function StoreCardReload({
             onChange={(event) => {
               const raw = event.target.value
               setCustomAmount(raw)
+              if (raw.trim() === '') return
               const n = parseInt(raw, 10)
               if (Number.isInteger(n) && n >= 1 && n <= maxAmount) setAmount(n)
             }}
             placeholder={`e.g. 75`}
             className="mt-1 w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg bg-white"
+            aria-invalid={customTrim !== '' && !customValid}
           />
         </label>
+        {customTrim !== '' && !customValid ? (
+          <p className="mt-1 text-xs text-red-600" role="alert">
+            Enter a whole dollar amount from $1 to ${maxAmount}.
+          </p>
+        ) : null}
         {appliedBonus > 0 ? (
           <p className="mt-2 text-[11px] text-[var(--brand-green)] font-semibold">
             First-load bonus: pay ${amount} · get $
@@ -388,7 +415,8 @@ export function StoreCardReload({
             {storedCard
               ? 'Save this card securely for future reloads and optional auto top-off.'
               : 'Save this card to Payment methods (checked by default on first save). Optional auto top-off uses the same card.'}
-            {vanillaizeIfDemo(' We never store the card number.')}
+            {' '}
+            {vanillaizeIfDemo('We never store the card number.')}
           </label>
         </>
       ) : null}
@@ -408,6 +436,7 @@ export function StoreCardReload({
           busy ||
           !config?.configured ||
           !studentId ||
+          chargeAmount == null ||
           (!useStored && !ready)
         }
         className="w-full text-white font-bold"
@@ -415,17 +444,23 @@ export function StoreCardReload({
       >
         {busy ? (
           <Loader2 className="w-4 h-4 animate-spin" />
+        ) : chargeAmount == null ? (
+          `Enter $${1} to $${maxAmount}`
         ) : appliedBonus > 0 ? (
-          `Pay $${amount} with card · load $${(amount * (1 + appliedBonus / 100)).toFixed(2).replace(/\.00$/, '')}`
+          `Pay $${chargeAmount} with card · load $${(chargeAmount * (1 + appliedBonus / 100)).toFixed(2).replace(/\.00$/, '')}`
         ) : (
-          `Pay & load $${amount} with card`
+          `Pay & load $${chargeAmount} with card`
         )}
       </Button>
 
       {studentId ? (
         <PortalPayPalButtons
-          active={!busy}
-          payBody={{ kind: 'store-card', studentId, amountCents: amount * 100 }}
+          active={!busy && chargeAmount != null}
+          payBody={{
+            kind: 'store-card',
+            studentId,
+            amountCents: (chargeAmount ?? amount) * 100,
+          }}
           onPaid={(data) => {
             const loadedBonus = Number(data.bonusPercent ?? appliedBonus) || 0
             setAppliedBonus(0)

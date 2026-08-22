@@ -447,24 +447,20 @@ export function StaffDashboard() {
                   ? `Private trial staff for your school.\nPick an area below, or use the top nav.\nStart with Membership, Events, or Site.`
                   : `Roles: ${me.roles.join(', ')}.\nStaff login: ${me.email}.\nPick an area below, or use the top nav.\nOnly what you need for that job.`}
               </p>
-              {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
-                <div className="mt-3">
-                  <StaffSyncFreshnessChip />
-                </div>
-              )}
+              <div className="mt-3">
+                <StaffSyncFreshnessChip />
+              </div>
             </div>
-            {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
-              <>
-                <StaffPersonalEmailPanel
-                  initialEmail={me.personalEmail ?? ''}
-                  onSaved={(email) =>
-                    setMe((current) => (current ? { ...current, personalEmail: email } : current))
-                  }
-                />
-                <StaffWalkthroughNotice roles={me.roles} email={me.email} />
-                <StaffOnboardingPanel onOpenWorkspace={go} />
-              </>
-            )}
+            <>
+              <StaffPersonalEmailPanel
+                initialEmail={me.personalEmail ?? ''}
+                onSaved={(email) =>
+                  setMe((current) => (current ? { ...current, personalEmail: email } : current))
+                }
+              />
+              <StaffWalkthroughNotice roles={me.roles} email={me.email} />
+              <StaffOnboardingPanel onOpenWorkspace={go} />
+            </>
             {activityItems.length > 0 ? (
               <div className="rounded-xl border border-[var(--brand-green)]/25 bg-[#E8F3E8] p-4 space-y-2">
                 <p className="text-sm font-bold text-[var(--brand-green)]">Needs your attention</p>

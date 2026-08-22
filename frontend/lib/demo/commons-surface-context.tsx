@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { StaffWorkspace } from '@/lib/audience'
+import { setClientPavilionSurface } from '@/lib/demo/brand'
+import { COMMONS_COMMERCE_GATED_WORKSPACES } from '@/lib/demo/commons-surface'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 type SurfaceState = {
@@ -29,15 +31,22 @@ export function CommonsSurfaceProvider({
   children: ReactNode
   enabled: boolean
 }) {
+  // Keep client vanillaize/isPavilionSurface in sync (COMMONS_PLATFORM alone is not inlined).
+  useEffect(() => {
+    setClientPavilionSurface(enabled)
+    return () => setClientPavilionSurface(false)
+  }, [enabled])
+
   const [state, setState] = useState<Omit<SurfaceState, 'enabled'>>(() =>
     enabled
       ? {
-          liveCommerce: isPublicDemoInstance() ? false : true,
+          // Fail closed while loading: no live commerce, money workspaces hidden.
+          liveCommerce: false,
           loading: true,
           note: isPublicDemoInstance()
             ? 'Sample school.\nLive checkout and card loads stay off here.'
-            : '',
-          hiddenStaffWorkspaces: [],
+            : 'Checking store connection…',
+          hiddenStaffWorkspaces: [...COMMONS_COMMERCE_GATED_WORKSPACES],
         }
       : {
           liveCommerce: true,
@@ -69,7 +78,15 @@ export function CommonsSurfaceProvider({
       })
       .catch(() => {
         if (!cancelled) {
-          setState((s) => ({ ...s, loading: false, liveCommerce: isPublicDemoInstance() ? false : s.liveCommerce }))
+          // Fail closed on surface fetch errors.
+          setState({
+            liveCommerce: false,
+            loading: false,
+            note: isPublicDemoInstance()
+              ? 'Sample school.\nLive checkout and card loads stay off here.'
+              : 'Could not confirm store connection. Money tools stay off until this loads.',
+            hiddenStaffWorkspaces: [...COMMONS_COMMERCE_GATED_WORKSPACES],
+          })
         }
       })
     return () => {

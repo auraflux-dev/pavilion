@@ -172,6 +172,7 @@ export function MemberDashboard({
   >([])
   const [purchases, setPurchases] = useState<PurchaseItem[]>([])
   const [status, setStatus] = useState<'loading' | 'error' | 'ok'>('loading')
+  const [authExpired, setAuthExpired] = useState(false)
   const [familyTab, setFamilyTab] = useState<'calendar' | 'messages'>('calendar')
   const [messagesSeenAt, setMessagesSeenAt] = useState(0)
   const [membershipSuccessNudge, setMembershipSuccessNudge] = useState(false)
@@ -212,7 +213,11 @@ export function MemberDashboard({
         fetch('/api/students'),
         fetch('/api/portal/family'),
       ])
-      if (!meRes.ok) throw new Error('auth')
+      if (!meRes.ok) {
+        setAuthExpired(meRes.status === 401 || meRes.status === 403)
+        throw new Error('auth')
+      }
+      setAuthExpired(false)
       const meData = await meRes.json()
       const studentsData = studentsRes.ok ? await studentsRes.json() : { students: [] }
       const familyData = familyRes.ok
@@ -345,11 +350,25 @@ export function MemberDashboard({
 
   if (status === 'error' || !member) {
     return (
-      <div className="text-center py-24">
-        <p className="text-[#5A6070] mb-4">{copy.loadError}</p>
-        <Button onClick={load} variant="outline" size="sm">
-          <RefreshCw className="w-4 h-4 mr-2" /> Retry
-        </Button>
+      <div className="text-center py-24 space-y-4">
+        <p className="text-[#5A6070] whitespace-pre-line">
+          {authExpired
+            ? 'Your session expired.\nLog in again to pick up where you left off.'
+            : copy.loadError}
+        </p>
+        {authExpired ? (
+          <a
+            href="/auth/join?mode=login&returnTo=%2Fmember-portal"
+            className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-bold text-white"
+            style={{ backgroundColor: 'var(--brand-green)' }}
+          >
+            Log in again
+          </a>
+        ) : (
+          <Button onClick={load} variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 mr-2" /> Retry
+          </Button>
+        )}
       </div>
     )
   }

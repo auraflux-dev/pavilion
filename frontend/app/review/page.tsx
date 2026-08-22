@@ -190,7 +190,7 @@ function ReviewJoinInner() {
         </a>
         {' · '}
         <a href="/trial" className="underline" style={{ color: 'var(--brand-green)' }}>
-          Ask Auraflux about a private trial
+          Ask about a private Pavilion trial
         </a>
       </p>
     </main>

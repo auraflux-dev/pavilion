@@ -190,7 +190,10 @@ function JoinInner({ tierId, tierName, price }: Props) {
           containerId={`membership-pay-${tierId}`}
           onPaid={() => {
             sessionStorage.removeItem('pendingMembership')
-            window.location.href = '/member-portal?membership=success'
+            // Let the checkout confirmation panel show before leaving.
+            window.setTimeout(() => {
+              window.location.href = '/member-portal?membership=success'
+            }, 1800)
           }}
         />
       </div>

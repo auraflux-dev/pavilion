@@ -132,10 +132,38 @@ export function StaffMembershipPanel() {
     }
   }
 
+  async function confirmAudience(channel: 'portal' | 'email') {
+    const r = await fetch('/api/staff/membership/outreach', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        channel: channel === 'email' ? 'email' : 'portal',
+        subject,
+        body,
+        tier,
+        grade,
+        dryRun: true,
+        alsoPortal: false,
+      }),
+    })
+    const d = await r.json()
+    if (!r.ok) throw new Error(d.error ?? 'Could not count recipients')
+    const count = Number(d.recipientCount ?? 0)
+    const label =
+      channel === 'email'
+        ? `Send real email to ${count} matching parent${count === 1 ? '' : 's'}?\nThere is no undo.`
+        : `Post to portal inbox for ${count} matching parent${count === 1 ? '' : 's'}?`
+    return window.confirm(label)
+  }
+
   async function sendPortal() {
     setBusy(true)
     setStatus('')
     try {
+      if (!(await confirmAudience('portal'))) {
+        setStatus('Send cancelled.')
+        return
+      }
       const r = await fetch('/api/staff/membership/outreach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -155,6 +183,10 @@ export function StaffMembershipPanel() {
     setBusy(true)
     setStatus('')
     try {
+      if (!(await confirmAudience('email'))) {
+        setStatus('Send cancelled.')
+        return
+      }
       const r = await fetch('/api/staff/membership/outreach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

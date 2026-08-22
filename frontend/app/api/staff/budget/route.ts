@@ -5,7 +5,7 @@
  * DELETE line (?id=) or keyed activity (?entryId=)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
+import { getStaffSession, requireStaffRoleOrWorkspace } from '@/lib/staff/session'
 import {
   createBudgetLine,
   DEFAULT_FISCAL_YEAR,
@@ -41,7 +41,9 @@ export const maxDuration = 60
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!requireStaffRole(session?.staff ?? null, ['treasurer', 'admin'])) return null
+  if (!requireStaffRoleOrWorkspace(session?.staff ?? null, ['treasurer', 'admin'], ['budget'])) {
+    return null
+  }
   return session
 }
 

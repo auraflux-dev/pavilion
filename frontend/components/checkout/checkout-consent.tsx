@@ -29,6 +29,7 @@ export function CheckoutConsent({ kind, onChange }: Props) {
   const [items, setItems] = useState<ConsentDocPayload[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [loadFailed, setLoadFailed] = useState(false)
   const [accepted, setAccepted] = useState<Record<string, boolean>>({})
   const [choices, setChoices] = useState<Record<string, boolean | null>>({})
   const [reading, setReading] = useState<ConsentDocPayload | null>(null)
@@ -37,6 +38,7 @@ export function CheckoutConsent({ kind, onChange }: Props) {
     let cancelled = false
     setLoading(true)
     setError('')
+    setLoadFailed(false)
     setAccepted({})
     setChoices({})
     onChange(null, false)
@@ -48,6 +50,7 @@ export function CheckoutConsent({ kind, onChange }: Props) {
         if (cancelled) return
         const list = (data.items ?? []) as ConsentDocPayload[]
         setItems(list)
+        setLoadFailed(false)
         const initialChoices: Record<string, boolean | null> = {}
         for (const item of list) {
           if (item.mode === 'choice') initialChoices[item.id] = null
@@ -55,7 +58,12 @@ export function CheckoutConsent({ kind, onChange }: Props) {
         setChoices(initialChoices)
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Could not load terms')
+        if (!cancelled) {
+          setLoadFailed(true)
+          setItems([])
+          setError(err instanceof Error ? err.message : 'Could not load terms')
+          onChange(null, false)
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -69,14 +77,20 @@ export function CheckoutConsent({ kind, onChange }: Props) {
   }, [kind])
 
   const complete = useMemo(() => {
+    // Fail closed: never treat a load failure as "no consents required".
+    if (loadFailed) return false
     if (!items.length) return true
     return items.every((item) => {
       if (item.mode === 'agree') return Boolean(accepted[item.id])
       return choices[item.id] === true || choices[item.id] === false
     })
-  }, [items, accepted, choices])
+  }, [items, accepted, choices, loadFailed])
 
   useEffect(() => {
+    if (loadFailed) {
+      onChange(null, false)
+      return
+    }
     if (!items.length) {
       onChange([], true)
       return
@@ -105,8 +119,14 @@ export function CheckoutConsent({ kind, onChange }: Props) {
     )
   }
 
-  if (error) {
-    return <p className="text-xs text-red-600">{error}</p>
+  if (error || loadFailed) {
+    return (
+      <p className="text-sm text-red-600" role="alert">
+        {error || 'Could not load terms.'}
+        {' '}
+        Payment is blocked until terms load. Refresh and try again.
+      </p>
+    )
   }
 
   if (!items.length) return null

@@ -247,7 +247,7 @@ export function NavbarClient({ links, brand, mode }: Props) {
             </span>
             <span
               className="text-xs font-semibold tracking-wide uppercase whitespace-nowrap"
-              style={{ color: 'var(--brand-gold)' }}
+              style={{ color: 'var(--brand-dark)' }}
             >
               {`PTO · ${brand.cheer}`}
             </span>

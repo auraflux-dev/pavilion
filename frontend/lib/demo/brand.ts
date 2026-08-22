@@ -104,8 +104,15 @@ export function publicBrandFace(): PublicBrandFace {
 }
 
 /** Demo or any Commons/Pavilion surface (trial or pre-trial). */
+/** Client-only: set by CommonsSurfaceProvider when the shell is enabled. */
+let clientPavilionSurface = false
+
+export function setClientPavilionSurface(enabled: boolean) {
+  clientPavilionSurface = enabled
+}
+
 export function isPavilionSurface(): boolean {
-  return isDemoInstance() || isCommonsPlatform()
+  return isDemoInstance() || isCommonsPlatform() || clientPavilionSurface
 }
 
 export function demoStorePath(): string {
@@ -159,6 +166,8 @@ export function vanillaizeCopy(input: string, brand: PublicBrandFace = DEMO_BRAN
     .replace(/\bCove hours\b/gi, `${brand.store} hours`)
     .replace(/\bCove\b/g, brand.store)
     .replace(/\ba The Perch\b/g, 'a Perch')
+    .replace(/\bthe The Perch\b/g, 'the Perch')
+    .replace(/\band The The Perch\b/g, 'and The Perch')
     .replace(/\bGo Stingrays!/gi, brand.cheer)
     .replace(/\bStingrays\b/gi, brand.mascotPlural)
     .replace(/\bStingray\b/gi, brand.mascot)
@@ -186,8 +195,9 @@ export function vanillaizeCopy(input: string, brand: PublicBrandFace = DEMO_BRAN
     .replace(/\bBoA\b/g, 'bank')
     .replace(/shmspto\.org/gi, brand.host)
     .replace(/@shmspto\b/gi, `@${brand.host}`)
-    .replace(/\s{2,}/g, ' ')
-    .replace(/\s+\./g, '.')
+    // Keep authored newlines (copy-line-breaks rule). Only collapse spaces/tabs.
+    .replace(/[^\S\n]{2,}/g, ' ')
+    .replace(/ +\./g, '.')
     .trim()
 
   return s.replace(/«D(\d+)»/g, (_, i) => protectedChunks[Number(i)] ?? '')

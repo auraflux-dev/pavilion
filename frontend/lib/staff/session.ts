@@ -6,6 +6,8 @@ import {
   resolveStaffForSession,
   type StaffProfile,
 } from '@/lib/staff/roles'
+import { staffCanWorkspace } from '@/lib/staff/permissions'
+import type { StaffWorkspace } from '@/lib/audience'
 import { commonsStaffProfile, loadCommonsStaffJson } from '@/lib/crm/commons-staff'
 import { isCommonsPlatformHost } from '@/lib/crm/auth-edge'
 import { isDemoInstance } from '@/lib/demo/instance'
@@ -115,4 +117,14 @@ export async function getEffectiveParentEmail(req: NextRequest): Promise<{
 
 export function requireStaffRole(staff: StaffProfile | null, role: Parameters<typeof hasStaffRole>[1]) {
   return hasStaffRole(staff, role)
+}
+
+export function requireStaffRoleOrWorkspace(
+  staff: StaffProfile | null,
+  roles: Parameters<typeof hasStaffRole>[1],
+  workspaces: StaffWorkspace[],
+) {
+  if (hasStaffRole(staff, roles)) return true
+  if (!staff) return false
+  return workspaces.some((ws) => staffCanWorkspace(staff, ws))
 }

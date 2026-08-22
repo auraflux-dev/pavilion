@@ -131,7 +131,13 @@ export function InviteCoParentPanel() {
 
       {!isPrimary ? (
         <p className="text-xs text-[#1B2A4A]">
-          Linked to the account of <strong>{primaryParentEmail}</strong>.
+          {primaryParentEmail.trim()
+            ? (
+                <>
+                  Linked to the account of <strong>{primaryParentEmail}</strong>.
+                </>
+              )
+            : 'Linked to the primary parent account on this household.'}
         </p>
       ) : (
         <form onSubmit={(ev) => void invite(ev)} className="space-y-2">

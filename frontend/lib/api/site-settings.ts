@@ -63,7 +63,8 @@ async function fetchAllSettings(): Promise<Record<string, string>> {
  for (const item of (data.dataItems ?? []) as WixDataItem[]) {
  if (item.data?.key) map[item.data.key] = item.data.value ?? ''
  }
- return isDemoInstance() ? vanillaizeRecord(map) : map
+ const { isPavilionSurface } = await import('@/lib/demo/brand')
+ return isPavilionSurface() ? vanillaizeRecord(map) : map
  } catch {
  return {}
  }

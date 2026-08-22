@@ -20,17 +20,21 @@ export const revalidate = 300
 
 export async function generateMetadata() {
   const { isDemoInstance } = await import('@/lib/demo/instance')
-  const { DEMO_BRAND } = await import('@/lib/demo/brand')
-  if (isDemoInstance()) {
+  const { DEMO_BRAND, isPavilionSurface, publicBrandFace, vanillaizeIfDemo } = await import(
+    '@/lib/demo/brand'
+  )
+  if (isDemoInstance() || isPavilionSurface()) {
+    const brand = publicBrandFace()
     return {
-      title: DEMO_BRAND.store,
-      description: `${DEMO_BRAND.store}: ${DEMO_BRAND.card}, snack window, and spirit wear for ${DEMO_BRAND.school}.`,
+      title: brand.store,
+      description: `${brand.store}: ${brand.card}, snack window, and spirit wear for ${brand.school}.`,
     }
   }
   return {
     title: 'The Cove',
-    description:
+    description: vanillaizeIfDemo(
       'The Cove: SHMS PTO Cove Digital Card, snack window menu, and spirit wear in one place.',
+    ),
   }
 }
 

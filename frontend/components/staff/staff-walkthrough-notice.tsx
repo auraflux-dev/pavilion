@@ -24,9 +24,14 @@ export function StaffWalkthroughNotice({
   const commons =
     typeof process !== 'undefined' &&
     process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
+  const demo =
+    typeof process !== 'undefined' &&
+    (process.env.NEXT_PUBLIC_DEMO_INSTANCE === 'true' ||
+      process.env.DEMO_INSTANCE === 'true')
 
   const isAudience =
     !commons &&
+    !demo &&
     (roles.includes('marketing') ||
       roles.includes('admin') ||
       email.toLowerCase() === 'vp-marketing@shmspto.org')
