@@ -222,15 +222,14 @@ export async function resolveCheckoutIntent(
     if (!programId || !studentId) throw new Error('Program and student required')
     const program = await getProgramById(programId)
     if (!program) throw new Error('Program not open for registration')
-    if (!program.registrationOpen) {
-      const { isProgramsReviewHost } = await import('@/lib/programs/public-access')
-      if (!(await isProgramsReviewHost())) {
-        throw new Error('Program not open for registration')
-      }
+    const stagingCheckout =
+      process.env.VERCEL_ENV === 'preview' || process.env.PROGRAMS_STAGING_CHECKOUT === 'true'
+    if (!program.registrationOpen && !stagingCheckout) {
+      throw new Error('Program not open for registration')
     }
     const { assertCanRegisterForProgram } = await import('@/lib/programs/registration-access')
     const access = await assertCanRegisterForProgram(
-      { ...program, registrationOpen: true },
+      stagingCheckout ? { ...program, registrationOpen: true } : program,
       parentEmail,
     )
     if (!access.ok) throw new Error(access.error || 'Registration not available')
