@@ -390,6 +390,11 @@ export async function GET(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const item of payRes.items ?? []) {
       const p = item as any
+      const status = String(p.status ?? '').toLowerCase()
+      const src = String(p.source ?? '').toLowerCase()
+      const method = String(p.paymentMethod ?? '').toLowerCase()
+      if (status === 'historical') continue
+      if (src.includes('jumbula') || method.includes('jumbula')) continue
       const norm = normalizePaymentLedgerRow(p)
       purchases.push({
         id: p._id,
@@ -431,6 +436,8 @@ export async function GET(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const item of enrollRes.items ?? []) {
       const e = item as any
+      const status = String(e.status ?? '').toLowerCase()
+      if (status === 'historical' || status === 'cancelled') continue
       const pid = String(e.programId ?? '').trim()
       const pname = String(e.programName ?? '').trim().toLowerCase()
       if (pid) familyProgramIds.add(pid)

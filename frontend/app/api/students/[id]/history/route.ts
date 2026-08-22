@@ -48,23 +48,31 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const currentEnrollments = mappedEnrollments.filter(
       (e) => !PAST_STATUSES.has(String(e.status).toLowerCase()),
     )
-    const pastEnrollments = mappedEnrollments.filter((e) =>
-      PAST_STATUSES.has(String(e.status).toLowerCase()),
-    )
+    // Jumbula / prior-year rows stay in CMS only. Do not surface to the portal.
+    const pastEnrollments: typeof currentEnrollments = []
 
-    const payments = (payRes.items ?? []).map((item: Record<string, unknown>) => {
-      const norm = normalizePaymentLedgerRow(item)
-      return {
-        id: item._id,
-        programName: norm.programName,
-        amount: norm.amount,
-        status: norm.status,
-        paymentDate: norm.paymentDate,
-        paymentMethod: norm.paymentMethod,
-        detail: norm.detail ?? '',
-        transactionId: item.transactionId ?? '',
-      }
-    })
+    const payments = (payRes.items ?? [])
+      .filter((item: Record<string, unknown>) => {
+        const status = String(item.status ?? '').toLowerCase()
+        const src = String(item.source ?? '').toLowerCase()
+        const method = String(item.paymentMethod ?? '').toLowerCase()
+        if (status === 'historical') return false
+        if (src.includes('jumbula') || method.includes('jumbula')) return false
+        return true
+      })
+      .map((item: Record<string, unknown>) => {
+        const norm = normalizePaymentLedgerRow(item)
+        return {
+          id: item._id,
+          programName: norm.programName,
+          amount: norm.amount,
+          status: norm.status,
+          paymentDate: norm.paymentDate,
+          paymentMethod: norm.paymentMethod,
+          detail: norm.detail ?? '',
+          transactionId: item.transactionId ?? '',
+        }
+      })
 
     const transferOptions = programs
       .filter((p) => p.registrationOpen !== false)

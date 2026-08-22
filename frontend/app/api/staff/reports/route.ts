@@ -6,7 +6,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
 import { canManageAllPrograms, scopedProgramIds } from '@/lib/staff/roles'
-import { listProgramEnrollments } from '@/lib/programs/enrollments'
+import {
+  isHistoricalEnrollmentStatus,
+  listProgramEnrollments,
+} from '@/lib/programs/enrollments'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,8 +69,10 @@ export async function GET(req: NextRequest) {
           return NextResponse.json({ error: 'Not assigned to this program' }, { status: 403 })
         }
         const rows = await listProgramEnrollments(programId)
-        const filtered = rows.filter((r) =>
-          inRange(String(r.enrolledAt ?? r.registrationDate ?? ''), from, to),
+        const filtered = rows.filter(
+          (r) =>
+            !isHistoricalEnrollmentStatus(r.status) &&
+            inRange(String(r.enrolledAt ?? r.registrationDate ?? ''), from, to),
         )
         return NextResponse.json({
           focus,
@@ -102,7 +107,11 @@ export async function GET(req: NextRequest) {
         const set = new Set(scoped)
         rows = rows.filter((r) => set.has(String(r.programId ?? '')))
       }
-      rows = rows.filter((r) => inRange(String(r.enrolledAt ?? ''), from, to))
+      rows = rows.filter(
+        (r) =>
+          !isHistoricalEnrollmentStatus(String(r.status ?? '')) &&
+          inRange(String(r.enrolledAt ?? ''), from, to),
+      )
       return NextResponse.json({
         focus,
         columns: [
@@ -142,7 +151,14 @@ export async function GET(req: NextRequest) {
         .find()
         .catch(() => ({ items: [] }))
       let rows = (found.items ?? []) as Record<string, unknown>[]
-      rows = rows.filter((r) => inRange(String(r.paymentDate ?? ''), from, to))
+      rows = rows.filter((r) => {
+        const status = String(r.status ?? '').toLowerCase()
+        const src = String(r.source ?? '').toLowerCase()
+        const method = String(r.paymentMethod ?? '').toLowerCase()
+        if (status === 'historical') return false
+        if (src.includes('jumbula') || method.includes('jumbula')) return false
+        return inRange(String(r.paymentDate ?? ''), from, to)
+      })
       if (focus === 'cove') {
         rows = rows.filter((r) => {
           const src = String(r.source ?? '').toLowerCase()
@@ -194,6 +210,10 @@ export async function GET(req: NextRequest) {
       let rows = ((found.items ?? []) as Record<string, unknown>[]).filter((r) => {
         const src = String(r.source ?? '').toLowerCase()
         const name = String(r.programName ?? '').toLowerCase()
+        const status = String(r.status ?? '').toLowerCase()
+        const method = String(r.paymentMethod ?? '').toLowerCase()
+        if (status === 'historical') return false
+        if (src.includes('jumbula') || method.includes('jumbula')) return false
         return src.includes('membership') || name.includes('membership')
       })
       rows = rows.filter((r) => inRange(String(r.paymentDate ?? ''), from, to))

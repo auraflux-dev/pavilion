@@ -20,6 +20,7 @@ import {
   ALL_ENROLL_STATUSES,
   WAITLIST_STATUS,
   countSeatsTaken,
+  isHistoricalEnrollmentStatus,
   listProgramEnrollments,
   promoteFirstWaitlisted,
   updateLegacyEnrollmentStatus,
@@ -102,7 +103,9 @@ export async function GET(req: NextRequest) {
     const program = await getProgramById(programId)
     if (!program) return NextResponse.json({ error: 'Program not found' }, { status: 404 })
 
-    const rows = await listProgramEnrollments(programId)
+    const rows = (await listProgramEnrollments(programId)).filter(
+      (r) => !isHistoricalEnrollmentStatus(r.status),
+    )
     const safetyMap = await loadStudentSafetyMap(rows.map((r) => String(r.studentId ?? '')))
     const seatsTaken = await countSeatsTaken(programId)
     const capacity = Number(program.capacity ?? 0) || 0

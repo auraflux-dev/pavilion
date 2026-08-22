@@ -8,6 +8,10 @@ export const WAITLIST_STATUS = 'Waitlisted'
 export const SEAT_STATUSES = new Set(['Enrolled', 'Paid']) // count toward capacity
 export const REQUEST_STATUSES = new Set(['RefundRequested', 'TransferRequested'])
 export const TERMINAL_STATUSES = new Set(['Cancelled', 'Refunded'])
+/** Jumbula / prior-year import rows. Keep in CMS; hide from live Staff + portal surfaces. */
+export function isHistoricalEnrollmentStatus(status: string | null | undefined): boolean {
+  return String(status ?? '').trim().toLowerCase() === 'historical'
+}
 export const ALL_ENROLL_STATUSES = [
   'Enrolled',
   'Paid',
