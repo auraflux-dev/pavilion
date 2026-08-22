@@ -199,7 +199,7 @@ export function ProgramLanding({ program }: { program: Program }) {
               <div className="space-y-2 pt-2">
                 <Button className="w-full font-semibold text-white" style={{ backgroundColor: 'var(--brand-green)' }} asChild>
                   <a href="#register">
-                    {program.registrationOpen ? 'Checkout on this page' : 'See checkout dates'}
+                    {program.registrationOpen ? 'Register now' : 'Registration opens soon'}
                   </a>
                 </Button>
                 <Button

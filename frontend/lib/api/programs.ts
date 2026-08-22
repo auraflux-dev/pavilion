@@ -141,7 +141,10 @@ export async function getAllPrograms(opts?: {
 }): Promise<Program[]> {
   if (isDemoInstance()) {
     const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
-    const listed = filterProgramsForPublicCatalog([...DEMO_PROGRAMS], opts)
+    const listed = filterProgramsForPublicCatalog(
+      DEMO_PROGRAMS.map((p) => withReviewHostCheckout(p, opts?.reviewHost)),
+      opts,
+    )
     if (opts?.reviewHost && !listed.some((p) => resolveProgramSeason(p) === 'spring-2027')) {
       return [...listed, ...spring2027StagingCatalogPrograms()]
     }
@@ -173,6 +176,15 @@ export async function getFeaturedPrograms(opts?: {
   return publicPrograms(result.items as Record<string, unknown>[], opts);
 }
 
+/** Staging / Preview: treat CMS Fall (and real Spring) rows as open so checkout dry-runs work. */
+function withReviewHostCheckout(program: Program, reviewHost?: boolean): Program {
+  if (!reviewHost) return program
+  // Synthetic Spring stubs are not Wix rows; Register would 404.
+  if (program._id.startsWith('staging-')) return program
+  if (program.registrationOpen) return program
+  return { ...program, registrationOpen: true }
+}
+
 function publicPrograms(
   items: Record<string, unknown>[],
   opts?: { reviewHost?: boolean },
@@ -180,6 +192,7 @@ function publicPrograms(
   const listed = filterProgramsForPublicCatalog(
     items
       .map(mapProgramItem)
+      .map((p) => withReviewHostCheckout(p, opts?.reviewHost))
       .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags))
       // Public catalog: open registration and/or featured (keeps legacy closed CMS rows off the site).
       .filter((p) => p.registrationOpen || p.featured),
@@ -200,7 +213,10 @@ export async function getProgramById(id: string): Promise<Program | null> {
   const client = getWixClient();
   try {
     const item = await client.items.get("Programs", id);
-    return mapProgramItem(item as Record<string, unknown>);
+    const program = mapProgramItem(item as Record<string, unknown>)
+    const { isProgramsReviewHost } = await import('@/lib/programs/public-access')
+    const reviewHost = await isProgramsReviewHost()
+    return withReviewHostCheckout(program, reviewHost)
   } catch {
     return null;
   }
