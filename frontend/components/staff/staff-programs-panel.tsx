@@ -12,6 +12,7 @@ import {
   toDatetimeLocalValue,
 } from '@/lib/programs/registration-access'
 import { Fall2026EpSchedule } from '@/components/programs/fall-2026-ep-schedule'
+import { StaffProgramsCalendarPlanner } from '@/components/staff/staff-programs-calendar-planner'
 import {
   fall2026PacketCmsDefaults,
   fallEpClassById,
@@ -648,7 +649,7 @@ export function StaffProgramsPanel() {
         <h2 className="text-lg font-bold">Programs</h2>
         <p className="text-xs text-[#5A6070] whitespace-pre-line">
           {`Programs = public catalog cards.
-Calendar = season schedule table.
+Calendar = season schedule table plus school calendar overlays for planning.
 Roster / Attendance = enrolled families.`}
         </p>
         <p className="text-[11px] text-[#5A6070] mt-1 min-h-[1.25rem]" aria-live="polite">
@@ -1580,7 +1581,8 @@ Parents see it in their portal Messages and on the class board.`}
         <div className="space-y-4">
           <p className="text-xs text-[#5A6070] whitespace-pre-line">
             {`Season schedule table (what instructors share).
-Edit cells here or on the Programs card. Click out to save.`}
+Edit cells here or on the Programs card. Click out to save.
+Use Planning calendar below to overlay LCPS or other school calendars.`}
           </p>
           <div className="rounded-lg border border-[var(--border)] bg-[var(--brand-warm)] p-4">
             <Fall2026EpSchedule
@@ -1593,6 +1595,7 @@ Edit cells here or on the Programs card. Click out to save.`}
               onRemoveProgram={(id, name) => void deleteProgram(id, name)}
             />
           </div>
+          <StaffProgramsCalendarPlanner programs={visiblePrograms} />
         </div>
       ) : null}
     </section>
