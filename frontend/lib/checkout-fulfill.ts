@@ -475,10 +475,24 @@ export async function fulfillPaidCheckout(opts: {
   paymentMethod: string
   sourcePrefix: 'square' | 'paypal'
   consents?: ConsentAck[]
+  /** Staging loadtest: skip purchase email / portal message. */
+  skipConfirmation?: boolean
 }): Promise<Record<string, unknown>> {
-  const { resolved, parentEmail, parentName, transactionId, paymentMethod, sourcePrefix, consents } =
-    opts
+  const {
+    resolved,
+    parentEmail,
+    parentName,
+    transactionId,
+    paymentMethod,
+    sourcePrefix,
+    consents,
+    skipConfirmation = false,
+  } = opts
   const client = getWixClient()
+  const confirm = async (
+    result: Record<string, unknown>,
+    input: Parameters<typeof attachPurchaseConfirmation>[1],
+  ) => (skipConfirmation ? result : attachPurchaseConfirmation(result, input))
 
   if (resolved.kind === 'cart') {
     let parts: ResolvedCheckout[] = []
@@ -525,6 +539,7 @@ export async function fulfillPaidCheckout(opts: {
         paymentMethod: methodNote,
         sourcePrefix,
         consents,
+        skipConfirmation,
       })
       results.push(partResult)
     }
@@ -549,7 +564,7 @@ export async function fulfillPaidCheckout(opts: {
         .join(' · '),
     })
 
-    return attachPurchaseConfirmation(
+    return confirm(
       {
         kind: 'cart',
         count: parts.length,
@@ -619,7 +634,7 @@ export async function fulfillPaidCheckout(opts: {
     if (resolved.meta.consumeDiscountId) {
       await consumeDiscountCode(resolved.meta.consumeDiscountId)
     }
-    return attachPurchaseConfirmation(
+    return confirm(
       {
         kind: 'program',
         ...enrolled,
@@ -670,7 +685,7 @@ export async function fulfillPaidCheckout(opts: {
         ? { studentId: applied.updatedStudentIds[0] }
         : {}),
     })
-    return attachPurchaseConfirmation(
+    return confirm(
       { kind: 'membership', tier, applied, paymentId: transactionId },
       {
         kind: 'membership',
@@ -737,7 +752,7 @@ export async function fulfillPaidCheckout(opts: {
         .filter(Boolean)
         .join(' · '),
     })
-    return attachPurchaseConfirmation(
+    return confirm(
       {
         kind: 'product',
         productId: resolved.meta.productId,
@@ -779,7 +794,7 @@ export async function fulfillPaidCheckout(opts: {
       parentEmail,
       notes: `${resolved.meta.eventId}|qty:${quantity}`,
     })
-    return attachPurchaseConfirmation(
+    return confirm(
       {
         kind: 'event',
         eventId: resolved.meta.eventId,
@@ -813,7 +828,7 @@ export async function fulfillPaidCheckout(opts: {
       parentEmail,
       notes: note || 'General PTO donation',
     })
-    return attachPurchaseConfirmation(
+    return confirm(
       {
         kind: 'donation',
         amount: resolved.amount,
@@ -902,7 +917,7 @@ export async function fulfillPaidCheckout(opts: {
           ? `Paid $${resolved.amount}; loaded $${(loadCents / 100).toFixed(2)} (+${bonusPercent}%) on the Cove Digital Card`
           : 'Family Cove Digital Card load',
     })
-    return attachPurchaseConfirmation(
+    return confirm(
       {
         kind: 'store-card',
         paymentId: transactionId,
