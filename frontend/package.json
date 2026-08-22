@@ -52,6 +52,7 @@
     "@wix/sdk": "^1.21.12",
     "@wix/stores": "^1.0.801",
     "autoprefixer": "^10.4.20",
+    "bcrypt": "^6.0.0",
     "better-auth": "^1.7.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -84,6 +85,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^24",
     "@types/pg": "^8.23.1",
     "@types/react": "19.2.14",

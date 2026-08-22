@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { nextCookies } from 'better-auth/next-js'
 import { getPool } from '@/lib/crm/db'
+import { hashPassword, verifyPassword } from '@/lib/crm/bcrypt-password'
 import { isDemoInstance, publicSiteUrl } from '@/lib/demo/instance'
 
 export const AUTH_BASE_PATH = '/api/id'
@@ -27,7 +28,13 @@ export function createCommonsAuth() {
       'https://commons-pto-demo.vercel.app',
       'https://commons-pto.vercel.app',
     ],
-    emailAndPassword: { enabled: true },
+    emailAndPassword: {
+      enabled: true,
+      password: {
+        hash: hashPassword,
+        verify: verifyPassword,
+      },
+    },
     plugins: [nextCookies()],
   })
 }
