@@ -37,16 +37,14 @@ export default async function Spring2027EpSchedulePage({
       <div className="print:hidden">
         <AnnouncementBar />
         <Navbar />
-        {/* Staff / preview-secret only. Staging review host stays a clean site page. */}
-        {access.previewMode && access.reason !== 'staging' ? (
-          <ProgramsPreviewBanner />
-        ) : null}
+        {/* Never show staff-preview chrome on this public share page. */}
       </div>
       <main id="main-content" className="flex-1 bg-[var(--brand-warm)] py-10 md:py-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <Spring2027EpSchedule
             rows={rows}
-            footnote="Weather makeups if a night is cancelled: Tue May 11, 18, 25, Jun 1. Wed May 5, 12, 19, 26.\nLast day of school Jun 11."
+            footnote={`Weather makeups if a night is cancelled: Tue May 11, 18, 25, Jun 1. Wed May 5, 12, 19, 26.
+Last day of school Jun 11.`}
           />
         </div>
       </main>
