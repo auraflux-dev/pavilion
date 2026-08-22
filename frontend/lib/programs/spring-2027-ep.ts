@@ -7,13 +7,12 @@
 export const SPRING_2027_EP_LOCATION = 'SHMS Library'
 
 /**
- * Placeholder Tuesday nights (12). Skips student/named holidays that land on Tuesday:
- * Tue Mar 9 Eid; Tue Mar 23 spring break.
- * Source holidays: LCPS 2026-27 calendar summaries (verify with ICS before lock).
+ * Placeholder Tuesday nights (12). First week of February start.
+ * Skips: Tue Mar 9 Eid; Tue Mar 23 spring break.
+ * Snow buffer after last class (not on the sold list): May 11, 18, 25, Jun 1.
+ * Source: LCPS events ICS (loudoun_county_public_schools_events.ics) + 2026-27 board calendar.
  */
 export const SPRING_2027_TUESDAY_DATES = [
-  '2027-01-19',
-  '2027-01-26',
   '2027-02-02',
   '2027-02-09',
   '2027-02-16',
@@ -24,15 +23,24 @@ export const SPRING_2027_TUESDAY_DATES = [
   '2027-04-06',
   '2027-04-13',
   '2027-04-20',
+  '2027-04-27',
+  '2027-05-04',
+] as const
+
+/** Optional makeup Tuesdays after the published 12 (weather). Before last day of school Jun 11. */
+export const SPRING_2027_TUESDAY_SNOW_BUFFER = [
+  '2027-05-11',
+  '2027-05-18',
+  '2027-05-25',
+  '2027-06-01',
 ] as const
 
 /**
- * Placeholder Wednesday nights (12). Skip Wed Mar 24 (spring break).
- * Wed Mar 10 still meets (Eid was Tuesday Mar 9).
+ * Placeholder Wednesday nights (12). First week of February start.
+ * Skip Wed Mar 24 (spring break). Wed Mar 10 still meets (Eid was Tuesday Mar 9).
+ * Snow buffer after last class: May 5, 12, 19, 26.
  */
 export const SPRING_2027_WEDNESDAY_DATES = [
-  '2027-01-20',
-  '2027-01-27',
   '2027-02-03',
   '2027-02-10',
   '2027-02-17',
@@ -43,6 +51,15 @@ export const SPRING_2027_WEDNESDAY_DATES = [
   '2027-03-31',
   '2027-04-07',
   '2027-04-14',
+  '2027-04-21',
+  '2027-04-28',
+] as const
+
+export const SPRING_2027_WEDNESDAY_SNOW_BUFFER = [
+  '2027-05-05',
+  '2027-05-12',
+  '2027-05-19',
+  '2027-05-26',
 ] as const
 
 export type Spring2027EpClass = {
@@ -75,7 +92,8 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
     vendor: 'Missy Spears',
     dates: SPRING_2027_TUESDAY_DATES,
     skips: 'Tue Mar 9 Eid; Tue Mar 23 spring break',
-    sessionNote: 'Placeholder Spring nights. Confirm vendor and syllabus before public unlock.',
+    sessionNote:
+      'First week of Feb start. Snow makeups after May 4 if needed (May 11, 18, 25, Jun 1).',
     continuesFromFall: true,
   },
   {
@@ -90,7 +108,8 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
     vendor: 'Lumi (Andrew Martineau)',
     dates: SPRING_2027_TUESDAY_DATES,
     skips: 'Tue Mar 9 Eid; Tue Mar 23 spring break',
-    sessionNote: 'Lumi Part II (weeks 13 to 24). Placeholder nights until registration window locks.',
+    sessionNote:
+      'Lumi Part II (weeks 13 to 24). Snow makeups after May 4 if needed (May 11, 18, 25, Jun 1).',
     continuesFromFall: true,
   },
   {
@@ -105,7 +124,8 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
     vendor: 'RSM Ashburn',
     dates: SPRING_2027_WEDNESDAY_DATES,
     skips: 'Wed Mar 24 spring break',
-    sessionNote: 'RSM year plan weeks 13 to 24. Placeholder nights until Option A Spring invoice locks.',
+    sessionNote:
+      'RSM year plan weeks 13 to 24. Snow makeups after Apr 28 if needed (May 5, 12, 19, 26).',
     continuesFromFall: true,
   },
   {
@@ -120,7 +140,8 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
     vendor: 'Loudoun Robotics',
     dates: SPRING_2027_WEDNESDAY_DATES,
     skips: 'Wed Mar 24 spring break',
-    sessionNote: 'Loudoun Spring semester (blocks to Python path). Placeholder nights until syllabus-before-semester lands.',
+    sessionNote:
+      'Loudoun Spring semester. Snow makeups after Apr 28 if needed (May 5, 12, 19, 26).',
     continuesFromFall: true,
   },
 ]

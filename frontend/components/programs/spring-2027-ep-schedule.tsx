@@ -26,7 +26,7 @@ export function Spring2027EpSchedule({
           <h2 className="text-2xl font-bold text-[#1A1A1A]">Spring 2027 class nights</h2>
           <p className="mt-1 text-sm text-[#5A6070] whitespace-pre-line">
             {SPRING_2027_EP_PLACEHOLDER
-              ? 'Placeholder dates for staging review.\nConfirm against LCPS calendar and vendor packets before public unlock.'
+              ? 'Placeholder dates for staging review.\nFirst week of February start. Twelve nights plus snow buffers after the last class.\nConfirm against LCPS calendar and vendor packets before public unlock.'
               : 'Print this page or save as PDF to share with instructors.'}
           </p>
         </div>
