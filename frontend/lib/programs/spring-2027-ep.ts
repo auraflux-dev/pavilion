@@ -4,6 +4,8 @@
  * Confirm against LCPS ICS before locking. Do not feed member portal from here.
  */
 
+import type { Program } from '@/lib/api/programs'
+
 export const SPRING_2027_EP_LOCATION = 'SHMS Library'
 
 /**
@@ -180,4 +182,77 @@ export function spring2027PacketScheduleRows(): Spring2027ScheduleRow[] {
     skipsNote: c.skips,
     sessionNote: c.sessionNote,
   }))
+}
+
+/** Staging-only catalog cards when CMS has no Spring rows yet. Never sold from here. */
+const SPRING_STAGING_CATALOG: Record<
+  string,
+  { fee: number; capacity: number; category: string; description: string }
+> = {
+  ye: {
+    fee: 375,
+    capacity: 30,
+    category: 'Strategy',
+    description:
+      'Startup basics: brand, audience, and founding a business.\n\nContinue with Missy Spears from Fall.\n\n• Ideation, market research, and target audiences.\n\n• Brand identity, mission, and marketing basics.',
+  },
+  essay: {
+    fee: 375,
+    capacity: 14,
+    category: 'Creative Arts',
+    description:
+      'Middle school essay craft with Lumi.\n\nAndrew Martineau leads twelve Spring nights.\n\n• Structure, thesis, and revision.\n\n• Cap 14 so every student gets coaching time.',
+  },
+  mathcounts: {
+    fee: 375,
+    capacity: 30,
+    category: 'Competition',
+    description:
+      'Competitive math prep with RSM Ashburn.\n\nProblem-solving nights for grades 6 to 8.\n\n• Contests and challenge sets.\n\n• Same Wednesday early slot as Fall.',
+  },
+  robotics: {
+    fee: 450,
+    capacity: 30,
+    category: 'STEM',
+    description:
+      'Robotics with Loudoun Robotics.\n\nBuild, code, and compete skills in the library.\n\n• Wednesday evening stack after math.\n\n• List $450 for Spring.',
+  },
+}
+
+/**
+ * Synthetic Spring programs for staging /programs only.
+ * Skipped when CMS already has spring-2027 rows.
+ */
+export function spring2027StagingCatalogPrograms(): Program[] {
+  return SPRING_2027_EP_CLASSES.map((c, i) => {
+    const meta = SPRING_STAGING_CATALOG[c.id]
+    const startDate = c.dates[0]
+    const endDate = c.dates[c.dates.length - 1]
+    return {
+      _id: `staging-spring-2027-${c.id}`,
+      name: c.name,
+      description: meta.description,
+      fee: meta.fee,
+      capacity: meta.capacity,
+      registrationOpen: false,
+      requiresWaiver: true,
+      grades: '6-8',
+      category: meta.category,
+      featured: true,
+      sortOrder: 100 + i,
+      dayOfWeek: c.dayOfWeek,
+      classTime: c.classTime,
+      durationWeeks: c.dates.length,
+      startDate,
+      endDate,
+      location: SPRING_2027_EP_LOCATION,
+      meetingDates: c.dates.join(','),
+      skipsNote: c.skips,
+      instructorName: c.vendor,
+      memberDiscountNote: 'Members 10 / 15 / 30% off',
+      season: 'spring-2027',
+      tags: 'coming-soon,spring-2027',
+      schedule: `${c.dayOfWeek}s ${c.classTime}, 12 sessions`,
+    }
+  })
 }

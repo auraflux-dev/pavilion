@@ -19,7 +19,10 @@ export function programPublicSlug(program: Pick<Program, 'name'>): string {
   return slugify(program.name)
 }
 
-export function programPublicPath(program: Pick<Program, 'name'>): string {
+export function programPublicPath(program: Pick<Program, 'name' | 'season'>): string {
+  if (String(program.season ?? '').trim() === 'spring-2027') {
+    return '/programs/spring-2027'
+  }
   return `/programs/${programPublicSlug(program)}`
 }
 

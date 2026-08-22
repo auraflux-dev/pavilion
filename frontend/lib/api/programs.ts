@@ -4,7 +4,8 @@ import { isDemoInstance } from '@/lib/demo/instance'
 import { getWixClient } from "@/lib/wix-client";
 import { formatProgramSchedule } from "@/lib/programs/schedule";
 import { memberPriorityUntilIso } from '@/lib/programs/registration-access'
-import { filterProgramsForPublicCatalog } from '@/lib/programs/season'
+import { filterProgramsForPublicCatalog, resolveProgramSeason } from '@/lib/programs/season'
+import { spring2027StagingCatalogPrograms } from '@/lib/programs/spring-2027-ep'
 
 export interface Program {
   _id: string;
@@ -140,7 +141,11 @@ export async function getAllPrograms(opts?: {
 }): Promise<Program[]> {
   if (isDemoInstance()) {
     const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
-    return filterProgramsForPublicCatalog([...DEMO_PROGRAMS], opts)
+    const listed = filterProgramsForPublicCatalog([...DEMO_PROGRAMS], opts)
+    if (opts?.reviewHost && !listed.some((p) => resolveProgramSeason(p) === 'spring-2027')) {
+      return [...listed, ...spring2027StagingCatalogPrograms()]
+    }
+    return listed
   }
   if (process.env.COMMONS_PLATFORM === 'true') return []
   const client = getWixClient();
@@ -172,7 +177,7 @@ function publicPrograms(
   items: Record<string, unknown>[],
   opts?: { reviewHost?: boolean },
 ): Program[] {
-  return filterProgramsForPublicCatalog(
+  const listed = filterProgramsForPublicCatalog(
     items
       .map(mapProgramItem)
       .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags))
@@ -180,6 +185,11 @@ function publicPrograms(
       .filter((p) => p.registrationOpen || p.featured),
     opts,
   )
+  // Staging / Preview only: fill Spring tab from the EP packet when CMS has no Spring rows.
+  if (!opts?.reviewHost) return listed
+  const hasSpringCms = listed.some((p) => resolveProgramSeason(p) === 'spring-2027')
+  if (hasSpringCms) return listed
+  return [...listed, ...spring2027StagingCatalogPrograms()]
 }
 
 export async function getProgramById(id: string): Promise<Program | null> {
