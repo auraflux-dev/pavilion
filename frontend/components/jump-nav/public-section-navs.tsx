@@ -211,7 +211,7 @@ export function ProgramsSectionNav({ springCatalogVisible = false }: { springCat
               {
                 href: '/programs/spring-2027',
                 label: 'Spring 2027 schedule',
-                hint: 'Placeholder nights',
+                hint: 'Times and dates',
                 icon: CalendarDays,
               },
             ]

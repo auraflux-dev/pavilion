@@ -92,8 +92,6 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
     vendor: 'Missy Spears',
     dates: SPRING_2027_TUESDAY_DATES,
     skips: 'Tue Mar 9 Eid; Tue Mar 23 spring break',
-    sessionNote:
-      'First week of Feb start. Snow makeups after May 4 if needed (May 11, 18, 25, Jun 1).',
     continuesFromFall: true,
   },
   {
@@ -108,8 +106,6 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
     vendor: 'Lumi (Andrew Martineau)',
     dates: SPRING_2027_TUESDAY_DATES,
     skips: 'Tue Mar 9 Eid; Tue Mar 23 spring break',
-    sessionNote:
-      'Lumi Part II (weeks 13 to 24). Snow makeups after May 4 if needed (May 11, 18, 25, Jun 1).',
     continuesFromFall: true,
   },
   {
@@ -124,8 +120,6 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
     vendor: 'RSM Ashburn',
     dates: SPRING_2027_WEDNESDAY_DATES,
     skips: 'Wed Mar 24 spring break',
-    sessionNote:
-      'RSM year plan weeks 13 to 24. Snow makeups after Apr 28 if needed (May 5, 12, 19, 26).',
     continuesFromFall: true,
   },
   {
@@ -140,8 +134,6 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
     vendor: 'Loudoun Robotics',
     dates: SPRING_2027_WEDNESDAY_DATES,
     skips: 'Wed Mar 24 spring break',
-    sessionNote:
-      'Loudoun Spring semester. Snow makeups after Apr 28 if needed (May 5, 12, 19, 26).',
     continuesFromFall: true,
   },
 ]

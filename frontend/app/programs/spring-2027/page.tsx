@@ -4,16 +4,13 @@ import { Footer } from '@/components/footer'
 import { notFound } from 'next/navigation'
 import { Spring2027EpSchedule } from '@/components/programs/spring-2027-ep-schedule'
 import { ProgramsPreviewBanner } from '@/components/programs/programs-preview-banner'
-import {
-  isSpringCatalogListed,
-  SPRING_CATALOG_ENABLED,
-} from '@/lib/programs/season'
+import { isSpringCatalogListed } from '@/lib/programs/season'
 import { spring2027PacketScheduleRows } from '@/lib/programs/spring-2027-ep'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Spring 2027 Enrichment Schedule | SHMS PTO',
-  description: 'Spring 2027 enrichment at Stone Hill. Placeholder nights for review.',
+  description: 'Spring 2027 enrichment at Stone Hill. Share with instructors.',
 }
 
 export const revalidate = 300
@@ -40,22 +37,16 @@ export default async function Spring2027EpSchedulePage({
       <div className="print:hidden">
         <AnnouncementBar />
         <Navbar />
-        {access.previewMode || !SPRING_CATALOG_ENABLED ? <ProgramsPreviewBanner /> : null}
+        {/* Staff / preview-secret only. Staging review host stays a clean site page. */}
+        {access.previewMode && access.reason !== 'staging' ? (
+          <ProgramsPreviewBanner />
+        ) : null}
       </div>
       <main id="main-content" className="flex-1 bg-[var(--brand-warm)] py-10 md:py-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <Spring2027EpSchedule
             rows={rows}
-            footnote={
-              [
-                reviewHost && !SPRING_CATALOG_ENABLED
-                  ? 'Staging / Preview only.\nwww parents do not see Spring until SPRING_CATALOG_ENABLED is flipped.'
-                  : '',
-                'Snow-day buffer (not sold as meetings): Tue May 11, 18, 25, Jun 1. Wed May 5, 12, 19, 26.\nLast day of school Jun 11.',
-              ]
-                .filter(Boolean)
-                .join('\n')
-            }
+            footnote="Weather makeups if a night is cancelled: Tue May 11, 18, 25, Jun 1. Wed May 5, 12, 19, 26.\nLast day of school Jun 11."
           />
         </div>
       </main>
