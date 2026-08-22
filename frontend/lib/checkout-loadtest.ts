@@ -345,6 +345,99 @@ export async function runLoadtestWorker(opts: {
   }
 }
 
+/** Prove Preview PayPal sandbox keys through our Orders create path. */
+export async function runLoadtestPaypalCreate(opts?: {
+  amountDollars?: number
+  runId?: string
+}): Promise<{
+  ok: boolean
+  outcome: 'ok' | 'error'
+  orderId?: string
+  amount?: number
+  environment?: string
+  approveUrl?: string
+  error?: string
+  t_ms: number
+}> {
+  const t0 = Date.now()
+  try {
+    const { createPayPalOrder, isPayPalConfigured, getPayPalPublicConfig } = await import(
+      '@/lib/paypal'
+    )
+    if (!isPayPalConfigured()) {
+      return {
+        ok: false,
+        outcome: 'error',
+        error: 'PayPal is not configured',
+        t_ms: Date.now() - t0,
+      }
+    }
+    const cfg = getPayPalPublicConfig()
+    if (cfg.environment !== 'sandbox') {
+      return {
+        ok: false,
+        outcome: 'error',
+        error: `PayPal must be sandbox for loadtest (got ${cfg.environment})`,
+        t_ms: Date.now() - t0,
+      }
+    }
+    const amount = Math.max(1, Number(opts?.amountDollars ?? 5) || 5)
+    const runId = sanitizeId(String(opts?.runId ?? 'pp'), 16) || 'pp'
+    const order = await createPayPalOrder({
+      amount,
+      description: `Loadtest PayPal ${runId}`,
+      customId: `lt:pp:${runId}`.slice(0, 127),
+      softDescriptor: 'SHMSPTO',
+    })
+
+    let approveUrl = ''
+    const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? ''
+    const secret = process.env.PAYPAL_CLIENT_SECRET ?? ''
+    if (clientId && secret) {
+      const basic = Buffer.from(`${clientId}:${secret}`).toString('base64')
+      const base = 'https://api-m.sandbox.paypal.com'
+      const tokRes = await fetch(`${base}/v1/oauth2/token`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${basic}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'grant_type=client_credentials',
+        cache: 'no-store',
+      })
+      const tok = (await tokRes.json()) as { access_token?: string }
+      if (tok.access_token) {
+        const ordRes = await fetch(`${base}/v2/checkout/orders/${order.id}`, {
+          headers: { Authorization: `Bearer ${tok.access_token}` },
+          cache: 'no-store',
+        })
+        const ord = (await ordRes.json()) as {
+          links?: Array<{ rel?: string; href?: string }>
+        }
+        approveUrl =
+          ord.links?.find((l) => l.rel === 'approve' || l.rel === 'payer-action')?.href || ''
+      }
+    }
+
+    return {
+      ok: true,
+      outcome: 'ok',
+      orderId: order.id,
+      amount,
+      environment: cfg.environment,
+      approveUrl: approveUrl || undefined,
+      t_ms: Date.now() - t0,
+    }
+  } catch (err) {
+    return {
+      ok: false,
+      outcome: 'error',
+      error: err instanceof Error ? err.message : String(err),
+      t_ms: Date.now() - t0,
+    }
+  }
+}
+
 export async function cleanupLoadtestRun(runIdRaw: string): Promise<{
   runId: string
   deletedStudents: number
