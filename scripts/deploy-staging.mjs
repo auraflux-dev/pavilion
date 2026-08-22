@@ -38,6 +38,19 @@ function run(cmd, cmdArgs, opts = {}) {
 }
 
 console.log(`Deploying Preview from ${root} …`)
+run(
+  'npx',
+  [
+    'vercel',
+    'link',
+    '--yes',
+    '--project',
+    'frontend',
+    '--scope',
+    'treasurer-4353s-projects',
+  ],
+  { cwd: root },
+)
 const deployOut = run('npx', ['vercel', 'deploy', '--yes'], { cwd: root })
 let deploymentUrl = ''
 try {
