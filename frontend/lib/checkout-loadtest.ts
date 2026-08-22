@@ -5,7 +5,6 @@
  */
 import { createHash, randomUUID, timingSafeEqual } from 'crypto'
 import type { NextRequest } from 'next/server'
-import { getPrograms } from '@/lib/api/programs'
 import { consentItemsFor, type ConsentAck } from '@/lib/checkout-consent'
 import { resolveCheckoutIntent, fulfillPaidCheckout } from '@/lib/checkout-fulfill'
 import { chargePayment } from '@/lib/square'
@@ -88,21 +87,41 @@ export async function pickLoadtestProgramId(explicit?: string): Promise<{
   fee: number
 }> {
   const want = String(explicit ?? '').trim()
-  const programs = await getPrograms()
-  const paid = programs.filter((p) => Number(p.fee ?? 0) > 0 && !isCmsQaName(p.name))
   if (want) {
-    const match = paid.find((p) => p._id === want)
-    if (!match) throw new Error(`Program ${want} not found or has no fee`)
+    const { getProgramById } = await import('@/lib/api/programs')
+    const match = await getProgramById(want)
+    if (!match || Number(match.fee ?? 0) <= 0) {
+      throw new Error(`Program ${want} not found or has no fee`)
+    }
     return { programId: match._id, programName: match.name, fee: Number(match.fee) }
   }
+
+  // Do not use getPrograms() (registrationOpen only). Staging resolve force-opens closed rows.
+  const client = getWixClient()
+  const result = await client.items.query('Programs').limit(100).find()
+  type Row = {
+    _id: string
+    name: string
+    fee: number
+    category?: string
+    fallEpClassId?: string
+  }
+  const mapped: Row[] = (result.items as Record<string, unknown>[]).map((item) => ({
+    _id: String(item._id ?? ''),
+    name: String(item.name ?? ''),
+    fee: Number(item.fee ?? 0) || 0,
+    category: item.category ? String(item.category) : undefined,
+    fallEpClassId: item.fallEpClassId ? String(item.fallEpClassId) : undefined,
+  }))
+  const paid = mapped.filter(
+    (p) => p._id && p.fee > 0 && !/\bqa\b|loadtest|cms.?qa/i.test(p.name),
+  )
   const fall =
-    paid.find((p) => /fall|autumn|2026/i.test(`${p.name} ${p.category ?? ''}`)) ?? paid[0]
+    paid.find((p) => String(p.fallEpClassId ?? '').trim().length > 0) ??
+    paid.find((p) => /fall|2026/i.test(`${p.name} ${p.category ?? ''}`)) ??
+    paid[0]
   if (!fall) throw new Error('No paid programs available for loadtest')
   return { programId: fall._id, programName: fall.name, fee: Number(fall.fee) }
-}
-
-function isCmsQaName(name: string): boolean {
-  return /qa\b|test\b|loadtest/i.test(name)
 }
 
 export async function ensureLoadtestStudent(opts: {
