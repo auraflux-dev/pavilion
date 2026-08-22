@@ -12,6 +12,7 @@ import { MemberGate } from '@/components/member-gate'
 import type { ConsentAck } from '@/lib/checkout-consent'
 import type { Program } from '@/lib/api/programs'
 import { formatProgramSchedule } from '@/lib/programs/schedule'
+import { displayProgramName } from '@/lib/programs/display-name'
 import {
   formatMemberPriorityUntil,
   getRegistrationPhase,
@@ -310,8 +311,8 @@ Only paste a code here if you need to override.`}
         open={payOpen}
         onClose={() => setPayOpen(false)}
         amount={payAmount}
-        title={`Pay. ${program.name}`}
-        subtitle="Enrichment program registration"
+        title={displayProgramName(program.name)}
+        subtitle="Enrichment registration"
         payBody={{
           kind: 'program',
           programId: program._id,

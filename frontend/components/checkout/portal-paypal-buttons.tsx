@@ -67,7 +67,7 @@ export function PortalPayPalButtons({ payBody, onPaid, onError, onBeforePay, act
 
       const src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
         cfg.clientId,
-      )}&currency=USD&intent=capture&components=buttons&vault=true&enable-funding=paypal`
+      )}&currency=USD&intent=capture&components=buttons&vault=true&enable-funding=paypal&disable-funding=credit,card,paylater`
       let script = document.querySelector<HTMLScriptElement>(`script[src^="https://www.paypal.com/sdk/js"]`)
       if (!script) {
         script = document.createElement('script')
@@ -88,7 +88,7 @@ export function PortalPayPalButtons({ payBody, onPaid, onError, onBeforePay, act
       hostRef.current.innerHTML = ''
       await window.paypal
         .Buttons({
-          style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+          style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal' },
           createOrder: async () => {
             if (onBeforePay) await onBeforePay()
             const res = await fetch('/api/checkout/paypal/create-order', {
