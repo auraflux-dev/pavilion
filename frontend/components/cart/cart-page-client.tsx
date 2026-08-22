@@ -13,11 +13,12 @@ export function CartPageClient() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-[#1A1A1A]">Cart</h1>
+        <h1 className="text-3xl font-bold text-[#1A1A1A]">Bag</h1>
         <p className="mt-2 text-sm text-[#5A6070] whitespace-pre-line">
           {count === 0
-            ? 'Your cart is empty.'
-            : `${count} item${count === 1 ? '' : 's'} · $${total.toFixed(2)} list price before discounts.`}
+            ? 'Your bag is empty.'
+            : `${count} item${count === 1 ? '' : 's'} · $${total.toFixed(2)}.
+One checkout pays for the whole bag.`}
         </p>
       </div>
 
@@ -78,10 +79,10 @@ Add something and it will stay here until you check out.`}
             style={{ backgroundColor: 'var(--brand-green)' }}
             onClick={() => setOpen(true)}
           >
-            Check out
+            {`Check out · $${total.toFixed(2)}`}
           </Button>
           <Button type="button" variant="outline" onClick={() => clear()}>
-            Clear cart
+            Empty bag
           </Button>
         </div>
       ) : null}

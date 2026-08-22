@@ -102,6 +102,33 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    if (kind === 'cart') {
+      const effective = await getEffectiveParentEmail(req)
+      if (!effective) return NextResponse.json({ error: 'Log in to quote' }, { status: 401 })
+      const parentEmail = effective.parentEmail
+      const accountEmails = [
+        effective.actorEmail,
+        ...effective.session.emails,
+      ]
+      const { resolveCheckoutIntent } = await import('@/lib/checkout-fulfill')
+      const couponCode = String(body.couponCode ?? '').trim() || null
+      const cartLines = Array.isArray(body.cartLines) ? body.cartLines : []
+      const resolved = await resolveCheckoutIntent(
+        { kind: 'cart', cartLines, couponCode },
+        parentEmail,
+        accountEmails,
+      )
+      return NextResponse.json({
+        kind,
+        name: resolved.description,
+        listAmount: resolved.amount,
+        amount: resolved.amount,
+        discountCode: resolved.meta.discountCode || '',
+        discountPercent: 0,
+        cartCount: Number(resolved.meta.cartCount ?? cartLines.length) || 0,
+      })
+    }
+
     if (kind === 'program') {
       const effective = await getEffectiveParentEmail(req)
       if (!effective) return NextResponse.json({ error: 'Log in to quote' }, { status: 401 })

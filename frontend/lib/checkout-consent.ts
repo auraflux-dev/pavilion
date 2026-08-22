@@ -5,7 +5,14 @@
 import { getLegalDoc, type LegalDoc, type LegalDocSlug } from '@/lib/api/legal'
 import { getWixClient } from '@/lib/wix-client'
 
-export type CheckoutConsentKind = 'membership' | 'program' | 'store-card' | 'product' | 'event' | 'donation'
+export type CheckoutConsentKind =
+  | 'membership'
+  | 'program'
+  | 'store-card'
+  | 'product'
+  | 'event'
+  | 'donation'
+  | 'cart'
 
 export type ConsentItem = {
   id: string
@@ -77,26 +84,49 @@ const EVENT_ITEMS: ConsentItem[] = [
 ]
 
 /** Store-card / Cove product purchases don't need enrichment waivers. */
+export function consentItemsForKinds(kinds: CheckoutConsentKind[]): ConsentItem[] {
+  const seen = new Set<string>()
+  const out: ConsentItem[] = []
+  for (const kind of kinds) {
+    if (kind === 'cart') continue
+    for (const item of consentItemsFor(kind)) {
+      if (seen.has(item.id)) continue
+      seen.add(item.id)
+      out.push(item)
+    }
+  }
+  return out
+}
+
 export function consentItemsFor(kind: CheckoutConsentKind): ConsentItem[] {
+  if (kind === 'cart') return []
   if (kind === 'membership') return MEMBERSHIP_ITEMS
   if (kind === 'program') return PROGRAM_ITEMS
   if (kind === 'event') return EVENT_ITEMS
   return []
 }
 
-export async function loadConsentDocs(kind: CheckoutConsentKind): Promise<
-  Array<ConsentItem & { doc: LegalDoc }>
-> {
-  const items = consentItemsFor(kind)
+export async function loadConsentDocs(
+  kind: CheckoutConsentKind,
+  kinds?: CheckoutConsentKind[],
+): Promise<Array<ConsentItem & { doc: LegalDoc }>> {
+  const items =
+    kind === 'cart' || (kinds && kinds.length > 0)
+      ? consentItemsForKinds(kinds && kinds.length > 0 ? kinds : [])
+      : consentItemsFor(kind)
   const docs = await Promise.all(items.map(async (item) => ({ ...item, doc: await getLegalDoc(item.slug) })))
   return docs
 }
 
 export function validateConsentAcks(
   kind: CheckoutConsentKind,
-  acks: ConsentAck[] | undefined
+  acks: ConsentAck[] | undefined,
+  kinds?: CheckoutConsentKind[],
 ): { ok: true; acks: ConsentAck[] } | { ok: false; error: string } {
-  const required = consentItemsFor(kind)
+  const required =
+    kind === 'cart' || (kinds && kinds.length > 0)
+      ? consentItemsForKinds(kinds && kinds.length > 0 ? kinds : [])
+      : consentItemsFor(kind)
   if (required.length === 0) return { ok: true, acks: [] }
   if (!Array.isArray(acks) || acks.length === 0) {
     return { ok: false, error: 'Please review and accept the required terms before paying.' }
@@ -114,7 +144,7 @@ export function validateConsentAcks(
       return { ok: false, error: `Please choose yes or no for photo/media permission.` }
     }
     if (!ack.acceptedAt || !ack.docVersion) {
- return { ok: false, error: 'Consent acknowledgment is incomplete. reopen checkout and try again.' }
+      return { ok: false, error: 'Consent acknowledgment is incomplete. reopen checkout and try again.' }
     }
   }
   return { ok: true, acks }

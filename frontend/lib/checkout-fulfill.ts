@@ -34,7 +34,14 @@ import {
   type PurchaseConfirmationInput,
 } from '@/lib/purchase-confirmation'
 
-export type CheckoutKind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation'
+export type CheckoutKind =
+  | 'membership'
+  | 'product'
+  | 'store-card'
+  | 'program'
+  | 'event'
+  | 'donation'
+  | 'cart'
 
 export type CheckoutIntent = {
   kind: CheckoutKind
@@ -60,6 +67,10 @@ export type CheckoutIntent = {
   /** Optional parent note for donations */
   note?: string
   consents?: import('@/lib/checkout-consent').ConsentAck[]
+  /** Bag checkout: one payment for many lines. */
+  cartLines?: CheckoutIntent[]
+  /** Stable id from visitor cart (cleared client-side after pay). */
+  cartLineId?: string
 }
 
 export type ResolvedCheckout = {
@@ -108,6 +119,43 @@ export async function resolveCheckoutIntent(
   accountEmails?: string[],
 ): Promise<ResolvedCheckout> {
   const kind = intent.kind
+
+  if (kind === 'cart') {
+    const raw = Array.isArray(intent.cartLines) ? intent.cartLines : []
+    if (raw.length === 0) throw new Error('Your bag is empty')
+    if (raw.length > 12) throw new Error('Too many items in the bag. Remove some and try again.')
+    const parts: ResolvedCheckout[] = []
+    for (const line of raw) {
+      const lineKind = String(line?.kind ?? '').trim()
+      if (!lineKind || lineKind === 'cart' || lineKind === 'store-card') {
+        throw new Error('That bag item cannot be checked out this way')
+      }
+      const resolvedLine = await resolveCheckoutIntent(
+        { ...line, kind: lineKind as CheckoutKind, couponCode: line.couponCode ?? intent.couponCode },
+        parentEmail,
+        accountEmails,
+      )
+      parts.push(resolvedLine)
+    }
+    const amount = Math.round(parts.reduce((sum, p) => sum + p.amount, 0) * 100) / 100
+    if (amount <= 0) throw new Error('Nothing to charge in the bag')
+    const titles = parts.map((p) => p.description).filter(Boolean)
+    return {
+      kind: 'cart',
+      amount,
+      amountCents: Math.round(amount * 100),
+      description:
+        parts.length === 1
+          ? titles[0] || 'Bag'
+          : `Bag · ${parts.length} items`,
+      customId: `bag:${parentEmail.replace(/[^a-zA-Z0-9]/g, '').slice(0, 20)}:${parts.length}`,
+      meta: {
+        cartPartsJson: JSON.stringify(parts),
+        cartCount: String(parts.length),
+        cartTitles: titles.slice(0, 6).join(' · '),
+      },
+    }
+  }
 
   if (kind === 'membership') {
     const tier = String(intent.tier ?? '').trim().toLowerCase()
@@ -431,6 +479,48 @@ export async function fulfillPaidCheckout(opts: {
   const { resolved, parentEmail, parentName, transactionId, paymentMethod, sourcePrefix, consents } =
     opts
   const client = getWixClient()
+
+  if (resolved.kind === 'cart') {
+    let parts: ResolvedCheckout[] = []
+    try {
+      parts = JSON.parse(String(resolved.meta.cartPartsJson ?? '[]')) as ResolvedCheckout[]
+    } catch {
+      throw new Error('Bag checkout data was invalid')
+    }
+    if (!Array.isArray(parts) || parts.length === 0) throw new Error('Bag checkout data was empty')
+    const results: Record<string, unknown>[] = []
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i]
+      const partResult = await fulfillPaidCheckout({
+        resolved: part,
+        parentEmail,
+        parentName,
+        transactionId: `${transactionId}:bag${i + 1}`,
+        paymentMethod,
+        sourcePrefix,
+        consents,
+      })
+      results.push(partResult)
+    }
+    return attachPurchaseConfirmation(
+      {
+        kind: 'cart',
+        count: parts.length,
+        lines: results,
+        paymentId: transactionId,
+      },
+      {
+        kind: 'program',
+        parentEmail,
+        parentName,
+        amount: resolved.amount,
+        description: resolved.description,
+        transactionId,
+        meta: resolved.meta,
+        extras: { lines: results } as Record<string, unknown>,
+      },
+    )
+  }
 
   if (resolved.kind === 'program') {
     const enrolled = await enrollInProgram({

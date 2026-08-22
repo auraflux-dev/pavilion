@@ -23,11 +23,32 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const intent = body as CheckoutIntent & { consents?: ConsentAck[] }
-    if (!intent.kind || !['membership', 'product', 'store-card', 'program', 'event', 'donation'].includes(intent.kind)) {
+    if (
+      !intent.kind ||
+      !['membership', 'product', 'store-card', 'program', 'event', 'donation', 'cart'].includes(
+        intent.kind,
+      )
+    ) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
     }
 
-    const consentCheck = validateConsentAcks(intent.kind as CheckoutConsentKind, intent.consents)
+    const cartConsentKinds =
+      intent.kind === 'cart' && Array.isArray(intent.cartLines)
+        ? Array.from(
+            new Set(
+              intent.cartLines
+                .map((l) => String(l.kind ?? ''))
+                .filter((k): k is CheckoutConsentKind =>
+                  k === 'membership' || k === 'program' || k === 'event',
+                ),
+            ),
+          )
+        : undefined
+    const consentCheck = validateConsentAcks(
+      intent.kind as CheckoutConsentKind,
+      intent.consents,
+      cartConsentKinds,
+    )
     if (!consentCheck.ok) {
       return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }

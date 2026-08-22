@@ -22,10 +22,12 @@ type ConsentDocPayload = {
 
 interface Props {
   kind: CheckoutConsentKind
+  /** When kind is cart, merge consents for these line kinds. */
+  kinds?: CheckoutConsentKind[]
   onChange: (acks: ConsentAck[] | null, complete: boolean) => void
 }
 
-export function CheckoutConsent({ kind, onChange }: Props) {
+export function CheckoutConsent({ kind, kinds, onChange }: Props) {
   const [items, setItems] = useState<ConsentDocPayload[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -43,7 +45,9 @@ export function CheckoutConsent({ kind, onChange }: Props) {
     setChoices({})
     onChange(null, false)
 
-    fetch(`/api/checkout/consent?kind=${encodeURIComponent(kind)}`)
+    const qs = new URLSearchParams({ kind })
+    if (kind === 'cart' && kinds?.length) qs.set('kinds', kinds.join(','))
+    fetch(`/api/checkout/consent?${qs.toString()}`)
       .then(async (r) => {
         const data = await r.json()
         if (!r.ok) throw new Error(data.error || 'Could not load terms')
@@ -74,7 +78,7 @@ export function CheckoutConsent({ kind, onChange }: Props) {
     }
     // onChange is stable enough via parent; avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kind])
+  }, [kind, kinds?.join(',')])
 
   const complete = useMemo(() => {
     // Fail closed: never treat a load failure as "no consents required".

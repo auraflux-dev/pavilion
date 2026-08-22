@@ -43,7 +43,7 @@ import {
   type CheckoutConsentKind,
 } from '@/lib/checkout-consent'
 
-type Kind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation'
+type Kind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation' | 'cart'
 
 type StudentRow = {
   _id: string
@@ -66,11 +66,30 @@ export async function POST(req: NextRequest) {
     const saveCard = Boolean(body.saveCard)
     const consents = body.consents as ConsentAck[] | undefined
 
-    if (!kind || !['membership', 'product', 'store-card', 'program', 'event', 'donation'].includes(kind)) {
+    if (
+      !kind ||
+      !['membership', 'product', 'store-card', 'program', 'event', 'donation', 'cart'].includes(kind)
+    ) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
     }
 
-    const consentCheck = validateConsentAcks(kind as CheckoutConsentKind, consents)
+    const cartConsentKinds =
+      kind === 'cart' && Array.isArray(body.cartLines)
+        ? Array.from(
+            new Set(
+              (body.cartLines as Array<{ kind?: string }>)
+                .map((l) => String(l.kind ?? ''))
+                .filter((k): k is CheckoutConsentKind =>
+                  k === 'membership' || k === 'program' || k === 'event',
+                ),
+            ),
+          )
+        : undefined
+    const consentCheck = validateConsentAcks(
+      kind as CheckoutConsentKind,
+      consents,
+      cartConsentKinds,
+    )
     if (!consentCheck.ok) {
       return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }
@@ -143,6 +162,50 @@ export async function POST(req: NextRequest) {
 
     if (!paymentSource) {
       paymentSource = undefined
+    }
+
+    // ── Bag (multi-line) ─────────────────────────────────────────
+    if (kind === 'cart') {
+      const effective = await getEffectiveParentEmail(req)
+      const parentEmail = effective?.parentEmail ?? session.email
+      const accountEmails = [
+        effective?.actorEmail ?? session.email,
+        ...session.emails,
+      ]
+      const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
+      const couponCode = String(body.couponCode ?? '').trim() || null
+      const cartLines = Array.isArray(body.cartLines) ? body.cartLines : []
+      const resolved = await resolveCheckoutIntent(
+        { kind: 'cart', cartLines, couponCode },
+        parentEmail,
+        accountEmails,
+      )
+      if (!paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card to pay' },
+          { status: 400 },
+        )
+      }
+      const paymentKey = randomUUID()
+      const payment = await chargePayment({
+        sourceId: paymentSource,
+        amountCents: resolved.amountCents,
+        idempotencyKey: paymentKey,
+        customerId,
+        referenceId: resolved.customId,
+        buyerEmailAddress: session.email,
+        note: resolved.description,
+      })
+      const result = await fulfillPaidCheckout({
+        resolved,
+        parentEmail,
+        parentName: name,
+        transactionId: payment.id ?? paymentKey,
+        paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
+        sourcePrefix: 'square',
+        consents: consentCheck.acks,
+      })
+      return NextResponse.json({ ok: true, ...result })
     }
 
     // ── Enrichment program ──────────────────────────────────────

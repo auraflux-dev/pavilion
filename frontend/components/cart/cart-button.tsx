@@ -10,7 +10,7 @@ export function CartButton() {
       type="button"
       onClick={() => setOpen(true)}
       className="relative p-2 rounded-md hover:bg-[var(--brand-soft)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]"
-      aria-label={count > 0 ? `Cart, ${count} items` : 'Cart'}
+      aria-label={count > 0 ? `Bag, ${count} items` : 'Bag'}
     >
       <ShoppingBag className="w-5 h-5 text-[#1A1A1A]" aria-hidden="true" />
       {count > 0 ? (

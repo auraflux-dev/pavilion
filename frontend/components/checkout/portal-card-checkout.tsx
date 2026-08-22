@@ -58,6 +58,12 @@ export type PortalPayBody =
     }
   | { kind: 'event'; eventId: string; quantity: number; consents?: ConsentAck[] }
   | { kind: 'donation'; amountCents: number; note?: string; consents?: ConsentAck[] }
+  | {
+      kind: 'cart'
+      cartLines: Exclude<PortalPayBody, { kind: 'cart' | 'store-card' }>[]
+      couponCode?: string | null
+      consents?: ConsentAck[]
+    }
 
 interface Props {
   open: boolean
@@ -134,7 +140,7 @@ export function PortalCardCheckout({
 
   useEffect(() => {
     if (!open) return
-    if (payBody.kind !== 'product' && payBody.kind !== 'program') {
+    if (payBody.kind !== 'product' && payBody.kind !== 'program' && payBody.kind !== 'cart') {
       setQuote({ amount })
       return
     }
@@ -186,12 +192,30 @@ export function PortalCardCheckout({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, amount, title, payBody.kind])
 
+  const cartConsentKinds: CheckoutConsentKind[] =
+    payBody.kind === 'cart'
+      ? Array.from(
+          new Set(
+            payBody.cartLines
+              .map((l) => l.kind)
+              .filter(
+                (k): k is 'membership' | 'program' | 'event' =>
+                  k === 'membership' || k === 'program' || k === 'event',
+              ),
+          ),
+        )
+      : []
   const consentKind: CheckoutConsentKind =
-    payBody.kind === 'membership' || payBody.kind === 'program' || payBody.kind === 'event'
-      ? payBody.kind
-      : 'product'
+    payBody.kind === 'cart'
+      ? 'cart'
+      : payBody.kind === 'membership' || payBody.kind === 'program' || payBody.kind === 'event'
+        ? payBody.kind
+        : 'product'
   const needsConsent =
-    payBody.kind === 'membership' || payBody.kind === 'program' || payBody.kind === 'event'
+    payBody.kind === 'membership' ||
+    payBody.kind === 'program' ||
+    payBody.kind === 'event' ||
+    (payBody.kind === 'cart' && cartConsentKinds.length > 0)
   const showConsentUi = needsConsent && !prefilledConsents?.length
   const due = quote?.amount ?? amount
   /** Wait for product quote before mounting Square; otherwise cardDue falls back to list price and attach races the DOM. */
@@ -574,7 +598,11 @@ export function PortalCardCheckout({
         ) : null}
 
         {showConsentUi ? (
-          <CheckoutConsent kind={consentKind} onChange={onConsentChange} />
+          <CheckoutConsent
+            kind={consentKind}
+            kinds={payBody.kind === 'cart' ? cartConsentKinds : undefined}
+            onChange={onConsentChange}
+          />
         ) : null}
 
         {config && !config.configured ? (

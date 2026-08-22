@@ -14,10 +14,10 @@ export type GaItem = {
   quantity?: number
 }
 
-type PayKind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation'
+type PayKind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation' | 'cart'
 
-type PayBodyLike = {
-  kind: PayKind
+export type PayBodyLike = {
+  kind: string
   tier?: string
   productId?: string
   programId?: string
