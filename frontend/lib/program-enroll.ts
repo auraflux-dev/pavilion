@@ -94,16 +94,15 @@ export async function enrollInProgram(opts: {
 }> {
   const program = await getProgramById(opts.programId)
   if (!program) throw new Error('Program not found')
-  if (!program.registrationOpen) {
-    const { isProgramsReviewHost } = await import('@/lib/programs/public-access')
-    if (!(await isProgramsReviewHost())) {
-      throw new Error('Registration is closed for this program')
-    }
+  const stagingCheckout =
+    process.env.VERCEL_ENV === 'preview' || process.env.PROGRAMS_STAGING_CHECKOUT === 'true'
+  if (!program.registrationOpen && !stagingCheckout) {
+    throw new Error('Registration is closed for this program')
   }
 
   const { assertCanRegisterForProgram } = await import('@/lib/programs/registration-access')
   const access = await assertCanRegisterForProgram(
-    { ...program, registrationOpen: true },
+    stagingCheckout ? { ...program, registrationOpen: true } : program,
     opts.parentEmail,
   )
   if (!access.ok) throw new Error(access.error || 'Registration not available')

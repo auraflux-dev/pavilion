@@ -48,16 +48,15 @@ export async function POST(req: NextRequest) {
 
     const program = await getProgramById(programId)
     if (!program) return NextResponse.json({ error: 'Program not found' }, { status: 404 })
-    if (!program.registrationOpen) {
-      const { isProgramsReviewHost } = await import('@/lib/programs/public-access')
-      if (!(await isProgramsReviewHost())) {
-        return NextResponse.json({ error: 'Registration is closed' }, { status: 400 })
-      }
+    const stagingCheckout =
+      process.env.VERCEL_ENV === 'preview' || process.env.PROGRAMS_STAGING_CHECKOUT === 'true'
+    if (!program.registrationOpen && !stagingCheckout) {
+      return NextResponse.json({ error: 'Registration is closed' }, { status: 400 })
     }
 
     const { assertCanRegisterForProgram } = await import('@/lib/programs/registration-access')
     const access = await assertCanRegisterForProgram(
-      { ...program, registrationOpen: true },
+      stagingCheckout ? { ...program, registrationOpen: true } : program,
       parentEmail,
     )
     if (!access.ok) {
