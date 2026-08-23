@@ -49,13 +49,14 @@ UPTIMEROBOT_API_KEY=xxx node scripts/setup-uptimerobot.mjs
 
 ## Backups (full CMS export)
 
-Primary: **Cloudflare R2** (same account as AuraFlux, bucket `auraflux-backups`).
+Primary: **Cloudflare R2** bucket **`shmspto`** (SHMS-dedicated; school PTO-owned).
 
 Layout:
 
 ```
-auraflux-backups/shmspto/cms/shmspto-cms-backup-YYYY-MM-DD.json.gz
-auraflux-backups/shmspto/cms/latest.json.gz
+shmspto/cms/shmspto-cms-backup-YYYY-MM-DD.json.gz
+shmspto/cms/latest.json.gz
+shmspto/newsletter-heroes/*.png
 ```
 
 Required Vercel env: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BACKUP_BUCKET`.
