@@ -35,7 +35,6 @@ import { StaffPageContentPanel } from '@/components/staff/staff-page-content-pan
 import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-panel'
 import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection-panel'
 import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
-import { StaffNewsletterBrandingPanel } from '@/components/staff/staff-newsletter-branding-panel'
 import { StaffNewsletterSendReportPanel } from '@/components/staff/staff-newsletter-send-report'
 import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
 import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
@@ -889,7 +888,6 @@ export function StaffDashboard() {
         ) : null}
         {active === 'newsletter' && canNewsletter ? (
           <div className="space-y-4">
-            <StaffNewsletterBrandingPanel />
             <StaffWhatsAppQueuePanel />
             <StaffNewsletterPanel />
             <StaffNewsletterSendReportPanel />

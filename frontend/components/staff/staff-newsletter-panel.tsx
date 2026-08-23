@@ -23,7 +23,6 @@ import {
   presetLabel,
   stringifyBeatsJson,
   type NewsletterBeat,
-  type NewsletterBeatPreset,
 } from '@/lib/staff/newsletter-sections'
 import { buildWhatsAppGraphicShare } from '@/lib/staff/whatsapp-compose'
 import { uploadNewsletterPngFiles } from '@/lib/staff/newsletter-upload-client'
@@ -31,6 +30,8 @@ import {
   StaffNewsletterTemplatesPanel,
   type NewsletterCanvaMeta,
 } from '@/components/staff/staff-newsletter-templates-panel'
+import { StaffNewsletterStep } from '@/components/staff/staff-newsletter-step'
+import { StaffNewsletterBrandingPanel } from '@/components/staff/staff-newsletter-branding-panel'
 
 type TestGroupMember = { email: string; label: string }
 type TestGroups = {
@@ -91,6 +92,7 @@ export function StaffNewsletterPanel() {
     Array<{ key: string; filename: string; mimeType: string }>
   >([])
   const [senderPreview, setSenderPreview] = useState({ name: '', staffEmail: '', replyEmail: '' })
+  const [canEditSiteCss, setCanEditSiteCss] = useState(false)
   const [status, setStatus] = useState('')
 
   const load = useCallback(async () => {
@@ -120,6 +122,8 @@ export function StaffNewsletterPanel() {
         const staffEmail = String(md.email ?? '').trim()
         const replyEmail = String(md.personalEmail ?? md.email ?? '').trim()
         setSenderPreview({ name, staffEmail, replyEmail })
+        const roles = Array.isArray(md.roles) ? md.roles : []
+        setCanEditSiteCss(Boolean(md.isAdmin || roles.includes('marketing') || roles.includes('admin')))
       }
     } catch {
       /* ignore */
@@ -594,168 +598,55 @@ export function StaffNewsletterPanel() {
   }
 
   return (
-    <div className="space-y-4">
-      <StaffNewsletterTemplatesPanel
-        subject={subject}
-        body={body}
-        utmCampaign={utmCampaign}
-        beatsJson={stringifyBeatsJson({ intro, beats, signoff })}
-        canvaMeta={canvaMeta}
-        onCanvaMetaChange={setCanvaMeta}
-        onLoad={(tpl) => {
-          setSubject(tpl.subject)
-          setBody(tpl.body)
-          setUtmCampaign(tpl.utmCampaign || defaultUtmCampaign(tpl.subject))
-          setTemplateId(tpl.templateId)
-          setCanvaMeta({
-            canvaViewUrl: tpl.canvaViewUrl,
-            canvaThumbnailUrl: tpl.canvaThumbnailUrl,
-            canvaTitle: tpl.canvaTitle,
-            canvaDesignId: tpl.canvaDesignId,
-            canvaEditUrl: tpl.canvaEditUrl,
-            heroImageUrl: tpl.heroImageUrl,
-            heroImageKey: tpl.heroImageKey,
-            pageImageUrls: tpl.pageImageUrls,
-          })
-          const parsed = parseBeatsJson(tpl.beatsJson)
-          if (parsed && composeNewsletterBody(parsed).trim()) {
-            setUseBeats(true)
-            setIntro(parsed.intro)
-            setBeats(parsed.beats)
-            setSignoff(parsed.signoff)
-          } else {
-            setUseBeats(false)
-          }
-          if (tpl.heroImageUrl || tpl.canvaThumbnailUrl) setTrackOpens(true)
-        }}
-      />
+    <section id="member-newsletter" className="scroll-mt-28 space-y-4">
+      <div className="rounded-xl border border-[var(--border)] bg-white px-5 py-4">
+        <h2 className="text-lg font-bold">Create newsletter</h2>
+        <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
+          Work top to bottom: audience, graphic, body, email look, then test and send.
+          {emailConfigured
+            ? ''
+            : '\nGmail send is not ready. Connect Google in Staff → Inbox (president@).'}
+        </p>
+        {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
+          <p className="text-xs text-[#5A6070] mt-2">
+            <Link
+              href="/staff?view=help&article=member-newsletter-diane"
+              className="font-semibold text-[var(--brand-green)] hover:underline"
+            >
+              How this works
+            </Link>
+            {' · '}Canva PNG, test send, Weekly Scoop, schedule.
+          </p>
+        )}
+      </div>
 
-      <section
-        id="member-newsletter"
-        className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
+      <StaffNewsletterStep
+        step={1}
+        title="Who is this for?"
+        description="Pick the audience, filters, and subject line."
+        id="newsletter-step-audience"
       >
-        <div>
-          <h2 className="text-lg font-bold">Member newsletter</h2>
-          {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
-            <div className="mt-2 rounded-lg border border-[var(--brand-green)]/25 bg-[#E8F3E8] px-3 py-2.5 space-y-1">
-              <p className="text-xs font-bold text-[#1A1A1A]">
-                Ready for review. VP Marketing walkthrough (video + screenshots)
-              </p>
-              <p className="text-xs text-[#5A6070] leading-relaxed">
-                <Link
-                  href="/staff?view=help&article=member-newsletter-diane"
-                  className="font-semibold text-[var(--brand-green)] hover:underline"
-                >
-                  Watch How this works
-                </Link>
-                {' · '}Canva PNG, test send, Weekly Scoop, schedule.
-              </p>
-            </div>
-          )}
-          <p className="text-xs text-[#5A6070] mt-2 whitespace-pre-line">
-            No HTML coding required. Write plain text, attach a Canva design or upload PNGs.
-            Top graphic optional. Each section can have its own image (social / event PNG).
-            Sends include SHMS header/footer + your graphic + body.
-            {'\n'}
-            Paid members get the full email (plain text + Canva).
-            Free parents get the SHMS Weekly Scoop as a link once a month: WhatsApp, portal, optional email.
-            Footer signups are the public form list.
-            {emailConfigured
-              ? ''
-              : '\nGmail send is not ready yet. Connect Google in Staff → Inbox (president@) or sends fall back to your mail app.'}
-          </p>
-        </div>
-
-        <div
-          data-help-shot="test-send"
-          className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3"
-        >
-          <p className="text-sm font-semibold text-[#1A1A1A]">Test send (board preview)</p>
-          <p className="text-xs text-[#5A6070] whitespace-pre-line">
-            Subject is prefixed with [TEST]. Does not post to the parent portal or member archive.
-            {'\n'}
-            Add your personal Gmail under Staff → Home if “Just me” is empty.
-          </p>
-          <div className="grid sm:grid-cols-2 gap-2">
-            <label className="text-xs text-[#5A6070]">
-              Test group
-              <select
-                value={testGroup}
-                onChange={(e) =>
-                  setTestGroup(e.target.value as 'me' | 'board' | 'board_and_custom')
-                }
-                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-              >
-                <option value="me">Just me</option>
-                <option value="board">Board test group (StaffRoles emails)</option>
-                <option value="board_and_custom">Board + Site Settings test list</option>
-              </select>
-            </label>
-            <label className="text-xs text-[#5A6070]">
-              Extra test emails (optional)
-              <input
-                value={testEmailsExtra}
-                onChange={(e) => setTestEmailsExtra(e.target.value)}
-                placeholder="you@gmail.com, colleague@…"
-                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-              />
-            </label>
-          </div>
-          {testGroups?.board.length ? (
-            <p className="text-[11px] text-[#5A6070]">
-              Board group:{' '}
-              {testGroups.board
-                .slice(0, 6)
-                .map((m) => m.label)
-                .join(' · ')}
-              {testGroups.board.length > 6 ? ` · +${testGroups.board.length - 6} more` : ''}
-            </p>
-          ) : null}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={busy || !subject || !body}
-              onClick={() => void previewTestRecipients()}
-            >
-              Preview test recipients
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={busy || !subject || !body}
-              onClick={() => void sendTestEmail()}
-            >
-              Send test email
-            </Button>
-          </div>
-        </div>
-
-        <div data-help-shot="newsletter-type" className="space-y-2">
-          <p className="text-xs font-semibold text-[#1A1A1A]">Newsletter type</p>
-
-          <label className="text-xs text-[#5A6070]">
-            Who this is for
-            <select
-              value={sendAudience}
-              onChange={(e) => {
-                const v = e.target.value
-                const next: NewsletterKind =
-                  v === 'scoop' || v === 'subscribers' || v === 'paid' ? v : 'paid'
-                setSendAudience(next)
-                if (next === 'paid' && (tier === 'all' || tier === 'free')) setTier('paid')
-                if (next === 'scoop' && !subject.trim()) setSubject(SCOOP_DEFAULT_SUBJECT)
-              }}
-              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-            >
-              <option value="paid">Paid members (full email)</option>
-              <option value="scoop">Weekly Scoop (free monthly link)</option>
-              <option value="subscribers">
-                Footer signup list only ({subscriberCount} email{subscriberCount === 1 ? '' : 's'})
-              </option>
-            </select>
-          </label>
-        </div>
+        <label className="text-xs text-[#5A6070] block">
+          Who this is for
+          <select
+            value={sendAudience}
+            onChange={(e) => {
+              const v = e.target.value
+              const next: NewsletterKind =
+                v === 'scoop' || v === 'subscribers' || v === 'paid' ? v : 'paid'
+              setSendAudience(next)
+              if (next === 'paid' && (tier === 'all' || tier === 'free')) setTier('paid')
+              if (next === 'scoop' && !subject.trim()) setSubject(SCOOP_DEFAULT_SUBJECT)
+            }}
+            className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="paid">Paid members (full email)</option>
+            <option value="scoop">Weekly Scoop (free monthly link)</option>
+            <option value="subscribers">
+              Footer signup list only ({subscriberCount} email{subscriberCount === 1 ? '' : 's'})
+            </option>
+          </select>
+        </label>
 
         {sendAudience === 'scoop' ? (
           <div
@@ -834,16 +725,67 @@ export function StaffNewsletterPanel() {
             .join(', ') || 'none. Add in Site settings'}
         </p>
 
-        <div data-help-shot="copy-tracking" className="space-y-2">
-        <input
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          placeholder={
-            sendAudience === 'scoop' ? SCOOP_DEFAULT_SUBJECT : 'Subject / headline'
-          }
-          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-        />
+        <label className="text-xs text-[#5A6070] block">
+          Subject / headline
+          <input
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder={sendAudience === 'scoop' ? SCOOP_DEFAULT_SUBJECT : 'Subject / headline'}
+            className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+          />
+        </label>
+      </StaffNewsletterStep>
 
+      <StaffNewsletterStep
+        step={2}
+        title="Hero graphic"
+        description="Attach Canva, upload PNG, or load a saved template."
+        id="newsletter-step-graphic"
+      >
+        <StaffNewsletterTemplatesPanel
+          subject={subject}
+          body={body}
+          utmCampaign={utmCampaign}
+          beatsJson={stringifyBeatsJson({ intro, beats, signoff })}
+          canvaMeta={canvaMeta}
+          onCanvaMetaChange={setCanvaMeta}
+          onLoad={(tpl) => {
+            setSubject(tpl.subject)
+            setBody(tpl.body)
+            setUtmCampaign(tpl.utmCampaign || defaultUtmCampaign(tpl.subject))
+            setTemplateId(tpl.templateId)
+            setCanvaMeta({
+              canvaViewUrl: tpl.canvaViewUrl,
+              canvaThumbnailUrl: tpl.canvaThumbnailUrl,
+              canvaTitle: tpl.canvaTitle,
+              canvaDesignId: tpl.canvaDesignId,
+              canvaEditUrl: tpl.canvaEditUrl,
+              heroImageUrl: tpl.heroImageUrl,
+              heroImageKey: tpl.heroImageKey,
+              pageImageUrls: tpl.pageImageUrls,
+            })
+            const parsed = parseBeatsJson(tpl.beatsJson)
+            if (parsed && composeNewsletterBody(parsed).trim()) {
+              setUseBeats(true)
+              setIntro(parsed.intro)
+              setBeats(parsed.beats)
+              setSignoff(parsed.signoff)
+            } else {
+              setUseBeats(false)
+            }
+            if (tpl.heroImageUrl || tpl.canvaThumbnailUrl) setTrackOpens(true)
+          }}
+        />
+      </StaffNewsletterStep>
+
+      <StaffNewsletterStep
+        step={3}
+        title="Newsletter body"
+        description="Plain text or sections. Add optional section images and file attachments."
+        id="newsletter-step-body"
+        defaultOpen
+      >
+        <div data-help-shot="copy-tracking" className="space-y-2">
         <label className="flex items-center gap-2 text-xs text-[#5A6070]">
           <input
             type="checkbox"
@@ -852,21 +794,6 @@ export function StaffNewsletterPanel() {
           />
           Write in sections (intro, beats, sign-off). Optional PNG per section breaks up the text in email.
         </label>
-        <p className="text-[11px] text-[#5A6070]">
-          Header, footer, and logo:{' '}
-          <Link href="/staff?view=newsletter#newsletter-branding" className="underline text-[var(--brand-green)]">
-            Staff → Newsletter → Email branding
-          </Link>
-          . Every email also gets the school address and an unsubscribe link automatically (CAN-SPAM).
-        </p>
-        {senderPreview.name ? (
-          <p className="text-xs text-[#5A6070]">
-            From: <span className="font-semibold text-[#1A1A1A]">{senderPreview.name}</span> via
-            president@shmspto.org
-            {' · '}
-            Reply-To: {senderPreview.replyEmail}
-          </p>
-        ) : null}
         {useBeats ? (
           <div
             data-help-shot="beats"
@@ -1032,6 +959,134 @@ export function StaffNewsletterPanel() {
         )}
         <p className="text-[11px] text-[#5A6070]">{NEWSLETTER_MERGE_HINT}</p>
 
+        <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2">
+          <p className="text-sm font-semibold text-[#1A1A1A]">Attachments (optional)</p>
+          <input
+            ref={attachFileRef}
+            type="file"
+            accept=".pdf,image/png,image/jpeg"
+            className="hidden"
+            onChange={(e) => void onAttachmentSelected(e.target.files)}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={busy}
+            onClick={() => attachFileRef.current?.click()}
+          >
+            Attach file (PDF or image)
+          </Button>
+          {attachments.length ? (
+            <ul className="text-xs text-[#5A6070] space-y-1">
+              {attachments.map((a) => (
+                <li key={a.key} className="flex items-center gap-2">
+                  <span>{a.filename}</span>
+                  <button
+                    type="button"
+                    className="underline"
+                    onClick={() => setAttachments((prev) => prev.filter((x) => x.key !== a.key))}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+        </div>
+      </StaffNewsletterStep>
+
+      <StaffNewsletterStep
+        step={4}
+        title="Email look"
+        description="Logo, header, footer, and CSS templates. Preview with filler text before you send."
+        id="newsletter-branding"
+        defaultOpen={false}
+      >
+        <StaffNewsletterBrandingPanel embedded canEditSiteTemplates={canEditSiteCss} />
+      </StaffNewsletterStep>
+
+      <StaffNewsletterStep
+        step={5}
+        title="Test, review & send"
+        description="Test to board, tune tracking, schedule, or send now."
+        id="newsletter-step-send"
+      >
+        {senderPreview.name ? (
+          <p className="text-xs text-[#5A6070]">
+            From: <span className="font-semibold text-[#1A1A1A]">{senderPreview.name}</span> via
+            president@shmspto.org
+            {' · '}
+            Reply-To: {senderPreview.replyEmail}
+          </p>
+        ) : null}
+
+        <div
+          data-help-shot="test-send"
+          className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3"
+        >
+          <p className="text-sm font-semibold text-[#1A1A1A]">Test send</p>
+          <p className="text-xs text-[#5A6070] whitespace-pre-line">
+            Subject is prefixed with [TEST]. Does not post to the portal or archive.
+            {'\n'}
+            Add your personal Gmail under Staff → Home if “Just me” is empty.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-2">
+            <label className="text-xs text-[#5A6070]">
+              Test group
+              <select
+                value={testGroup}
+                onChange={(e) =>
+                  setTestGroup(e.target.value as 'me' | 'board' | 'board_and_custom')
+                }
+                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+              >
+                <option value="me">Just me</option>
+                <option value="board">Board test group</option>
+                <option value="board_and_custom">Board + Site Settings test list</option>
+              </select>
+            </label>
+            <label className="text-xs text-[#5A6070]">
+              Extra test emails
+              <input
+                value={testEmailsExtra}
+                onChange={(e) => setTestEmailsExtra(e.target.value)}
+                placeholder="you@gmail.com"
+                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+              />
+            </label>
+          </div>
+          {testGroups?.board.length ? (
+            <p className="text-[11px] text-[#5A6070]">
+              Board group:{' '}
+              {testGroups.board
+                .slice(0, 6)
+                .map((m) => m.label)
+                .join(' · ')}
+              {testGroups.board.length > 6 ? ` · +${testGroups.board.length - 6} more` : ''}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy || !subject || !body}
+              onClick={() => void previewTestRecipients()}
+            >
+              Preview test recipients
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy || !subject || !body}
+              onClick={() => void sendTestEmail()}
+            >
+              Send test email
+            </Button>
+          </div>
+        </div>
+
         <div className="grid sm:grid-cols-2 gap-2">
           <label className="text-xs text-[#5A6070]">
             UTM campaign (GA4)
@@ -1060,7 +1115,6 @@ export function StaffNewsletterPanel() {
               Track opens (HTML + pixel when Canva hero or this is on)
             </label>
           </div>
-        </div>
         </div>
 
         {sendAudience === 'scoop' ? null : (
@@ -1157,42 +1211,6 @@ export function StaffNewsletterPanel() {
           )}
         </div>
 
-        <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2">
-          <p className="text-sm font-semibold text-[#1A1A1A]">Attachments (optional)</p>
-          <input
-            ref={attachFileRef}
-            type="file"
-            accept=".pdf,image/png,image/jpeg"
-            className="hidden"
-            onChange={(e) => void onAttachmentSelected(e.target.files)}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={busy}
-            onClick={() => attachFileRef.current?.click()}
-          >
-            Attach file (PDF or image)
-          </Button>
-          {attachments.length ? (
-            <ul className="text-xs text-[#5A6070] space-y-1">
-              {attachments.map((a) => (
-                <li key={a.key} className="flex items-center gap-2">
-                  <span>{a.filename}</span>
-                  <button
-                    type="button"
-                    className="underline"
-                    onClick={() => setAttachments((prev) => prev.filter((x) => x.key !== a.key))}
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-
         <div data-help-shot="send-actions" className="flex flex-wrap gap-2">
           {sendAudience === 'scoop' ? (
             <>
@@ -1261,7 +1279,7 @@ export function StaffNewsletterPanel() {
           )}
         </div>
         {status ? <p className="text-sm text-[#1A1A1A] whitespace-pre-line">{status}</p> : null}
-      </section>
-    </div>
+      </StaffNewsletterStep>
+    </section>
   )
 }

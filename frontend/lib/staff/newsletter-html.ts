@@ -97,10 +97,10 @@ function beatBlock(beat: NewsletterBeat, isFirst: boolean): string {
     ? beatImageHtml(imageUrl, title || 'Section image', beat.imageLinkUrl)
     : ''
   const bodyHtml = body ? plainTextToEmailHtml(body) : ''
-  return `<tr><td style="padding:${SECTION_DIVIDER_PADDING};${border}">
-    ${title ? `<p style="margin:${SECTION_INNER_PADDING};font-family:${NEWSLETTER_FONT_HEADING};font-size:18px;font-weight:700;line-height:1.3;color:#1A1A1A">${escapeHtml(title)}</p>` : ''}
+  return `<tr><td class="nl-section" style="padding:${SECTION_DIVIDER_PADDING};${border}">
+    ${title ? `<p class="nl-section-title" style="margin:${SECTION_INNER_PADDING};font-family:${NEWSLETTER_FONT_HEADING};font-size:18px;font-weight:700;line-height:1.3;color:#1A1A1A">${escapeHtml(title)}</p>` : ''}
     ${imageHtml}
-    ${bodyHtml ? `<div style="font-family:${NEWSLETTER_FONT_BODY};font-size:15px;line-height:1.55;color:#1A1A1A">${bodyHtml}</div>` : ''}
+    ${bodyHtml ? `<div class="nl-body" style="font-family:${NEWSLETTER_FONT_BODY};font-size:15px;line-height:1.55;color:#1A1A1A">${bodyHtml}</div>` : ''}
   </td></tr>`
 }
 

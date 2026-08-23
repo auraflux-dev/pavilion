@@ -571,6 +571,11 @@ export const SITE_SETTING_GROUPS: {
         label: 'Custom CSS (advanced; applies to newsletter HTML)',
         multiline: true,
       },
+      {
+        key: 'newsletterCssTemplatesJson',
+        label: 'Shared CSS templates (JSON array; team presets)',
+        multiline: true,
+      },
     ],
   },
   {
