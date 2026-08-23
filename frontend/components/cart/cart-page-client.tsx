@@ -50,6 +50,15 @@ Add something and it will stay here until you check out.`}
               <div className="min-w-0">
                 <p className="font-bold text-[#1A1A1A]">{line.title}</p>
                 <p className="text-xs text-[#5A6070] mt-0.5 capitalize">{line.kind}</p>
+                {line.studentId ? (
+                  <p className="text-xs text-[#5A6070] mt-1">
+                    Student assigned on this line (change in the bag drawer if needed).
+                  </p>
+                ) : line.kind === 'program' ? (
+                  <p className="text-xs text-amber-800 mt-1">
+                    Pick a student in the bag drawer before checkout.
+                  </p>
+                ) : null}
                 <p className="text-sm font-semibold mt-2" style={{ color: 'var(--brand-green)' }}>
                   ${Number(line.amount || 0).toFixed(2)}
                   {line.quantity && line.quantity > 1 ? ` × ${line.quantity}` : ''}

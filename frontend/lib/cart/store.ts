@@ -97,7 +97,8 @@ export function updateCartLine(id: string, patch: Partial<CartLine>) {
 function cartLineKey(line: CartLine): string {
   if (line.kind === 'program') {
     const addons = (line.addonProgramIds ?? []).slice().sort().join('+')
-    return `program:${line.programId}:${addons}`
+    // Include student so twins can each hold the same class in the bag.
+    return `program:${line.programId}:${addons}:${line.studentId || ''}`
   }
   if (line.kind === 'product') return `product:${line.productId}:${line.variantId || ''}`
   if (line.kind === 'membership') return `membership:${line.tier}`

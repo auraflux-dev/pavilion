@@ -16,9 +16,16 @@ function lineNeedsStudent(line: CartLine) {
   return line.kind === 'program' || line.kind === 'event' || line.kind === 'membership'
 }
 
-function payBodyForLine(line: CartLine, studentId: string): Exclude<PortalPayBody, { kind: 'cart' | 'store-card' }> | null {
+function studentLabel(students: Student[], id: string | undefined) {
+  if (!id) return ''
+  const s = students.find((x) => x.id === id)
+  if (!s) return ''
+  return `${s.firstName} ${s.lastName} (Grade ${s.grade})`
+}
+
+function payBodyForLine(line: CartLine): Exclude<PortalPayBody, { kind: 'cart' | 'store-card' }> | null {
   if (line.kind === 'program' && line.programId) {
-    const sid = line.studentId || studentId
+    const sid = String(line.studentId ?? '').trim()
     if (!sid) return null
     return {
       kind: 'program',
@@ -38,7 +45,7 @@ function payBodyForLine(line: CartLine, studentId: string): Exclude<PortalPayBod
     return {
       kind: 'membership',
       tier: line.tier,
-      studentId: line.studentId || studentId || null,
+      studentId: line.studentId || null,
       shirtSize: line.shirtSize,
       shirtDesign: line.shirtDesign,
       shirtProductId: line.shirtProductId,
@@ -65,7 +72,6 @@ function payBodyForLine(line: CartLine, studentId: string): Exclude<PortalPayBod
 export function CartDrawer() {
   const { lines, open, total, count, setOpen, remove, update, clear } = useCart()
   const [students, setStudents] = useState<Student[]>([])
-  const [studentId, setStudentId] = useState('')
   const [studentsLoading, setStudentsLoading] = useState(false)
   const [payOpen, setPayOpen] = useState(false)
   const [bagError, setBagError] = useState('')
@@ -81,11 +87,21 @@ export function CartDrawer() {
         if (!r.ok) throw new Error(data.error || 'Could not load students')
         const list = (data.students ?? []) as Student[]
         setStudents(list)
-        if (list.length === 1) setStudentId(list[0].id)
       })
       .catch(() => {})
       .finally(() => setStudentsLoading(false))
   }, [open, lines])
+
+  // Only auto-assign when the account has one student and a line is still missing one.
+  useEffect(() => {
+    if (!open || students.length !== 1) return
+    const onlyId = students[0].id
+    for (const line of lines) {
+      if (lineNeedsStudent(line) && !String(line.studentId ?? '').trim()) {
+        update(line.id, { studentId: onlyId })
+      }
+    }
+  }, [open, students, lines, update])
 
   useEffect(() => {
     if (!open) {
@@ -97,16 +113,19 @@ export function CartDrawer() {
   const cartLinesPay = useMemo(() => {
     const out: Exclude<PortalPayBody, { kind: 'cart' | 'store-card' }>[] = []
     for (const line of lines) {
-      const body = payBodyForLine(line, studentId)
+      const body = payBodyForLine(line)
       if (!body) return null
       out.push(body)
     }
     return out
-  }, [lines, studentId])
+  }, [lines])
 
-  const needsStudent = lines.some((l) => lineNeedsStudent(l))
-  const studentReady = !needsStudent || Boolean(studentId)
-  const canCheckout = lines.length > 0 && studentReady && cartLinesPay != null && cartLinesPay.length === lines.length
+  const missingStudentLines = lines.filter(
+    (l) => l.kind === 'program' && !String(l.studentId ?? '').trim(),
+  )
+  const studentReady = missingStudentLines.length === 0
+  const canCheckout =
+    lines.length > 0 && studentReady && cartLinesPay != null && cartLinesPay.length === lines.length
 
   const panelRef = useRef<HTMLElement>(null)
   useDialogA11y(open, () => setOpen(false), panelRef)
@@ -150,7 +169,7 @@ Your bag keeps items until you check out.`}
             lines.map((line) => (
               <div
                 key={line.id}
-                className="rounded-xl border border-[var(--border)] bg-[var(--brand-warm)] px-3 py-3"
+                className="rounded-xl border border-[var(--border)] bg-[var(--brand-warm)] px-3 py-3 space-y-2"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
@@ -178,17 +197,11 @@ Your bag keeps items until you check out.`}
                     Remove
                   </button>
                 </div>
-              </div>
-            ))
-          )}
 
-          {lines.length > 0 ? (
-            <MemberGate label="Log in to check out">
-              <div className="space-y-3 pt-1">
-                {needsStudent ? (
+                {lineNeedsStudent(line) ? (
                   <div>
-                    <label className="block text-xs font-semibold text-[#5A6070] mb-1">
-                      Student for this order
+                    <label className="block text-[11px] font-semibold text-[#5A6070] mb-1">
+                      {line.kind === 'membership' ? 'Student (optional)' : 'Student for this class'}
                     </label>
                     {studentsLoading ? (
                       <p className="text-xs text-[#5A6070] flex items-center gap-1.5">
@@ -201,17 +214,13 @@ Emergency contact and pick-up are required.`}
                       </p>
                     ) : (
                       <select
-                        value={studentId}
-                        onChange={(e) => {
-                          const next = e.target.value
-                          setStudentId(next)
-                          lines.forEach((l) => {
-                            if (lineNeedsStudent(l)) update(l.id, { studentId: next })
-                          })
-                        }}
-                        className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm"
+                        value={line.studentId || ''}
+                        onChange={(e) => update(line.id, { studentId: e.target.value || undefined })}
+                        className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm"
                       >
-                        <option value="">Select…</option>
+                        <option value="">
+                          {line.kind === 'membership' ? 'No student linked' : 'Select…'}
+                        </option>
                         {students.map((s) => (
                           <option key={s.id} value={s.id}>
                             {s.firstName} {s.lastName} (Grade {s.grade})
@@ -219,9 +228,20 @@ Emergency contact and pick-up are required.`}
                         ))}
                       </select>
                     )}
+                    {line.studentId && studentLabel(students, line.studentId) ? (
+                      <p className="text-[11px] text-[#5A6070] mt-1">
+                        Enrolling: {studentLabel(students, line.studentId)}
+                      </p>
+                    ) : null}
                   </div>
                 ) : null}
+              </div>
+            ))
+          )}
 
+          {lines.length > 0 ? (
+            <MemberGate label="Log in to check out">
+              <div className="space-y-3 pt-1">
                 {bagError ? <p className="text-xs text-red-600 whitespace-pre-line">{bagError}</p> : null}
 
                 <div className="rounded-xl border border-[var(--border)] bg-white px-3 py-3 space-y-1">
@@ -231,6 +251,7 @@ Emergency contact and pick-up are required.`}
                   </div>
                   <p className="text-[11px] text-[#5A6070] whitespace-pre-line">
                     {`One payment for everything in the bag.
+Pick the student on each class line (twins can differ).
 Member and board discounts apply at checkout.`}
                   </p>
                 </div>
@@ -244,8 +265,8 @@ Member and board discounts apply at checkout.`}
                     setBagError('')
                     if (!canCheckout || !cartLinesPay) {
                       setBagError(
-                        needsStudent && !studentId
-                          ? 'Select a student before checkout.'
+                        missingStudentLines.length
+                          ? 'Choose a student on each class line before checkout.'
                           : 'Fix bag items before checkout.',
                       )
                       return
