@@ -1,5 +1,5 @@
 /**
- * Locked Fall 2026 enrichment grid (library, two nights, stacked classes).
+ * Locked Fall 2026 enrichment grid (library, Tue / Wed / Thu nights).
  * Public /programs/fall-2026 + staff Programs use this. Do not feed member portal from here.
  */
 
@@ -36,6 +36,22 @@ export const FALL_2026_WEDNESDAY_DATES = [
   '2026-12-09',
 ] as const
 
+/** Thursdays aligned to Wed cohort; skip Thanksgiving Thu Nov 26. */
+export const FALL_2026_THURSDAY_DATES = [
+  '2026-09-17',
+  '2026-09-24',
+  '2026-10-01',
+  '2026-10-08',
+  '2026-10-15',
+  '2026-10-22',
+  '2026-10-29',
+  '2026-11-05',
+  '2026-11-12',
+  '2026-11-19',
+  '2026-12-03',
+  '2026-12-10',
+] as const
+
 export type Fall2026EpClass = {
   id: string
   name: string
@@ -43,7 +59,7 @@ export type Fall2026EpClass = {
   publicSlug: string
   /** Match Wix Programs.name (substring, case-insensitive) */
   cmsNameIncludes: string[]
-  dayOfWeek: 'Tuesday' | 'Wednesday'
+  dayOfWeek: 'Tuesday' | 'Wednesday' | 'Thursday'
   classTime: string
   startClock: string
   endClock: string
@@ -86,34 +102,34 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
     suggestedMailbox: '',
   },
   {
-    id: 'mathcounts',
-    name: 'Competitive Math Prep',
-    publicSlug: 'competitive-math',
-    cmsNameIncludes: ['mathcounts', 'mathnasium', 'competitive math', 'math prep'],
-    dayOfWeek: 'Wednesday',
-    classTime: '5:30 to 6:45 PM',
-    startClock: '17:30',
-    endClock: '18:45',
-    vendor: 'RSM Ashburn',
-    dates: FALL_2026_WEDNESDAY_DATES,
-    skips: 'Wed Nov 25 Thanksgiving',
-    sessionNote: 'Oct 28 meets (end of quarter).',
-    suggestedMailbox: 'ep-math@shmspto.org',
-  },
-  {
     id: 'robotics',
     name: 'Robotics',
     publicSlug: 'robotics',
     cmsNameIncludes: ['robotics'],
     dayOfWeek: 'Wednesday',
-    classTime: '7:00 to 8:00 PM',
-    startClock: '19:00',
-    endClock: '20:00',
+    classTime: '6:00 to 7:00 PM',
+    startClock: '18:00',
+    endClock: '19:00',
     vendor: 'Loudoun Robotics',
     dates: FALL_2026_WEDNESDAY_DATES,
     skips: 'Wed Nov 25 Thanksgiving',
     sessionNote: 'Oct 28 meets (end of quarter).',
     suggestedMailbox: 'ep-robotics@shmspto.org',
+  },
+  {
+    id: 'mathcounts',
+    name: 'Competitive Math Prep',
+    publicSlug: 'competitive-math',
+    cmsNameIncludes: ['mathcounts', 'mathnasium', 'competitive math', 'math prep'],
+    dayOfWeek: 'Thursday',
+    classTime: '6:00 to 7:00 PM',
+    startClock: '18:00',
+    endClock: '19:00',
+    vendor: 'RSM Ashburn',
+    dates: FALL_2026_THURSDAY_DATES,
+    skips: 'Thu Nov 26 Thanksgiving',
+    sessionNote: 'Tentative until RSM confirms. Oct 29 meets (end of quarter week).',
+    suggestedMailbox: 'ep-math@shmspto.org',
   },
 ]
 

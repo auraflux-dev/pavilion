@@ -94,7 +94,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     bullets: [],
     sectionTitle: 'Fall 2026 schedule',
     sectionBody:
-      'Tuesdays and Wednesdays in the library.\n12 sessions each. Share with instructors.',
+      'Tuesdays, Wednesdays, and Thursdays in the library.\n12 sessions each. Share with instructors.',
   }),
   volunteer: empty('volunteer', {
     eyebrow: 'Get Involved',

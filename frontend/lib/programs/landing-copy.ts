@@ -126,7 +126,7 @@ const FALL: Record<string, ProgramLandingCopy> = {
     highlights: [
       'RSM Ashburn at Stone Hill. Not a center membership.',
       'Sprint, Target, Team, and Countdown practice every arc.',
-      'Twelve Wednesday nights. Cap 30.',
+      'Twelve Thursday nights. Cap 30.',
     ],
     curriculumTitle: 'Fall curriculum (RSM Ashburn proposal)',
     curriculum: [
@@ -227,7 +227,7 @@ const SPRING: Record<string, ProgramLandingCopy> = {
     pitch:
       'RSM Ashburn Part II.\nAdvanced systems, team tactics, and full mocks.',
     highlights: [
-      'Same Wednesday night. Cap 30.',
+      'Same Thursday night. Cap 30.',
       'Sprint, Target, Team, and Countdown under time.',
       'Mock competitions late in the semester.',
     ],

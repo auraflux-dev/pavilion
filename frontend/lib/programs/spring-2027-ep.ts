@@ -64,12 +64,38 @@ export const SPRING_2027_WEDNESDAY_SNOW_BUFFER = [
   '2027-05-26',
 ] as const
 
+/**
+ * Placeholder Thursday nights (12). Day after Wed cohort.
+ * Skip Thu Mar 25 (spring break).
+ */
+export const SPRING_2027_THURSDAY_DATES = [
+  '2027-02-04',
+  '2027-02-11',
+  '2027-02-18',
+  '2027-02-25',
+  '2027-03-04',
+  '2027-03-11',
+  '2027-03-18',
+  '2027-04-01',
+  '2027-04-08',
+  '2027-04-15',
+  '2027-04-22',
+  '2027-04-29',
+] as const
+
+export const SPRING_2027_THURSDAY_SNOW_BUFFER = [
+  '2027-05-06',
+  '2027-05-13',
+  '2027-05-20',
+  '2027-05-27',
+] as const
+
 export type Spring2027EpClass = {
   id: string
   name: string
   publicSlug: string
   cmsNameIncludes: string[]
-  dayOfWeek: 'Tuesday' | 'Wednesday'
+  dayOfWeek: 'Tuesday' | 'Wednesday' | 'Thursday'
   classTime: string
   startClock: string
   endClock: string
@@ -111,31 +137,31 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
     continuesFromFall: true,
   },
   {
-    id: 'mathcounts',
-    name: 'Competitive Math Prep',
-    publicSlug: 'competitive-math',
-    cmsNameIncludes: ['mathcounts', 'mathnasium', 'competitive math', 'math prep'],
-    dayOfWeek: 'Wednesday',
-    classTime: '5:30 to 6:45 PM',
-    startClock: '17:30',
-    endClock: '18:45',
-    vendor: 'RSM Ashburn',
-    dates: SPRING_2027_WEDNESDAY_DATES,
-    skips: 'Wed Mar 24 spring break',
-    continuesFromFall: true,
-  },
-  {
     id: 'robotics',
     name: 'Robotics',
     publicSlug: 'robotics',
     cmsNameIncludes: ['robotics'],
     dayOfWeek: 'Wednesday',
-    classTime: '7:00 to 8:00 PM',
-    startClock: '19:00',
-    endClock: '20:00',
+    classTime: '6:00 to 7:00 PM',
+    startClock: '18:00',
+    endClock: '19:00',
     vendor: 'Loudoun Robotics',
     dates: SPRING_2027_WEDNESDAY_DATES,
     skips: 'Wed Mar 24 spring break',
+    continuesFromFall: true,
+  },
+  {
+    id: 'mathcounts',
+    name: 'Competitive Math Prep',
+    publicSlug: 'competitive-math',
+    cmsNameIncludes: ['mathcounts', 'mathnasium', 'competitive math', 'math prep'],
+    dayOfWeek: 'Thursday',
+    classTime: '6:00 to 7:00 PM',
+    startClock: '18:00',
+    endClock: '19:00',
+    vendor: 'RSM Ashburn',
+    dates: SPRING_2027_THURSDAY_DATES,
+    skips: 'Thu Mar 25 spring break',
     continuesFromFall: true,
   },
 ]
