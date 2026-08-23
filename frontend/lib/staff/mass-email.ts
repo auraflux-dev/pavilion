@@ -20,6 +20,8 @@ export type MassEmailDraft = {
   subject: string
   body: string
   fromName: string
+  /** Staff @shmspto.org address shown in From / Reply-To (not the OAuth mailbox). */
+  fromEmail?: string
   replyTo?: string
   recipients: string[]
   html?: string
@@ -127,11 +129,15 @@ export function gmailSenderAddress(): string {
 
 export function gmailFromHeader(fromName: string, senderEmail?: string): string {
   const sender = (senderEmail || gmailSenderAddress()).trim().toLowerCase()
-  const name = (fromName || process.env.GMAIL_FROM_NAME?.trim() || 'SHMS PTO').replace(
-    /[\r\n"]/g,
-    '',
-  )
-  return `${name} <${sender}>`
+  const name = (fromName || 'SHMS PTO').replace(/[\r\n"]/g, '').trim()
+  return name ? `${name} <${sender}>` : sender
+}
+
+export function gmailReplyToHeader(fromName: string, email: string): string {
+  const addr = String(email ?? '').trim()
+  if (!addr) return ''
+  if (addr.includes('<') && addr.includes('@')) return addr
+  return gmailFromHeader(fromName, addr)
 }
 
 export type EmailAttachment = {
@@ -191,8 +197,9 @@ export async function sendMassEmail(
 
   const { resolveGmailSendAuth } = await import('./gmail-send-auth')
   let auth: Awaited<ReturnType<typeof resolveGmailSendAuth>> = null
+  const preferSender = draft.fromEmail?.trim().toLowerCase()
   try {
-    auth = await resolveGmailSendAuth()
+    auth = await resolveGmailSendAuth(preferSender)
   } catch (err) {
     return {
       ok: false,
@@ -216,8 +223,9 @@ export async function sendMassEmail(
   }
 
   const accessToken = auth.accessToken
-  const from = gmailFromHeader(draft.fromName, auth.senderEmail)
-  const replyTo = (draft.replyTo || auth.senderEmail).trim()
+  const fromEmail = (draft.fromEmail || auth.senderEmail).trim().toLowerCase()
+  const from = gmailFromHeader(draft.fromName, fromEmail)
+  const replyTo = gmailReplyToHeader(draft.fromName, draft.replyTo || fromEmail)
 
   let brandingWrap: Awaited<
     ReturnType<typeof import('./newsletter-branding').loadNewsletterBrandingFromKeys>

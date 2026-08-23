@@ -316,9 +316,8 @@ export async function executeNewsletterEmail(
   let outboundBody = message
   let archiveBody = message
   let newsletterSendId: string | null = null
-  const fromName = input.actorName || input.actorEmail
-  const replyEmail = (input.actorPersonalEmail || input.actorEmail).trim().toLowerCase()
-  const replyTo = replyEmail.includes('@') ? `${fromName} <${replyEmail}>` : input.actorEmail
+  const staffEmail = input.actorEmail.trim().toLowerCase()
+  const fromName = input.actorName || staffEmail
 
   const emailAttachments: EmailAttachment[] = []
   for (const meta of input.attachmentKeys ?? []) {
@@ -334,7 +333,8 @@ export async function executeNewsletterEmail(
   const draftBase = {
     subject: effectiveSubject,
     fromName,
-    replyTo,
+    fromEmail: staffEmail,
+    replyTo: staffEmail,
     recipients,
     attachments: emailAttachments.length ? emailAttachments : undefined,
   }

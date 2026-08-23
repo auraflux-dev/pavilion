@@ -41,7 +41,7 @@ export async function preferredGmailSender(): Promise<string> {
   return DEFAULT_SENDERS[0]
 }
 
-export async function resolveGmailSendAuth(): Promise<GmailSendAuth | null> {
+export async function resolveGmailSendAuth(preferSender?: string): Promise<GmailSendAuth | null> {
   const fromName =
     process.env.GMAIL_FROM_NAME?.trim() ||
     (await siteSetting('gmailFromName')) ||
@@ -81,7 +81,11 @@ export async function resolveGmailSendAuth(): Promise<GmailSendAuth | null> {
 
   const preferred = await preferredGmailSender()
   const candidates = Array.from(
-    new Set([preferred, ...DEFAULT_SENDERS].map((e) => e.trim().toLowerCase()).filter(Boolean)),
+    new Set(
+      [preferSender, preferred, ...DEFAULT_SENDERS]
+        .map((e) => String(e ?? '').trim().toLowerCase())
+        .filter(Boolean),
+    ),
   )
 
   for (const email of candidates) {

@@ -91,7 +91,7 @@ export function StaffNewsletterPanel() {
   const [attachments, setAttachments] = useState<
     Array<{ key: string; filename: string; mimeType: string }>
   >([])
-  const [senderPreview, setSenderPreview] = useState({ name: '', staffEmail: '', replyEmail: '' })
+  const [senderPreview, setSenderPreview] = useState({ name: '', staffEmail: '' })
   const [canEditSiteCss, setCanEditSiteCss] = useState(false)
   const [status, setStatus] = useState('')
 
@@ -119,9 +119,8 @@ export function StaffNewsletterPanel() {
       const md = await mr.json()
       if (mr.ok) {
         const name = String(md.name ?? md.boardTitle ?? md.email ?? '').trim()
-        const staffEmail = String(md.email ?? '').trim()
-        const replyEmail = String(md.personalEmail ?? md.email ?? '').trim()
-        setSenderPreview({ name, staffEmail, replyEmail })
+        const staffEmail = String(md.email ?? '').trim().toLowerCase()
+        setSenderPreview({ name, staffEmail })
         const roles = Array.isArray(md.roles) ? md.roles : []
         setCanEditSiteCss(Boolean(md.isAdmin || roles.includes('marketing') || roles.includes('admin')))
       }
@@ -1013,12 +1012,13 @@ export function StaffNewsletterPanel() {
         description="Test to board, tune tracking, schedule, or send now."
         id="newsletter-step-send"
       >
-        {senderPreview.name ? (
+        {senderPreview.staffEmail ? (
           <p className="text-xs text-[#5A6070]">
-            From: <span className="font-semibold text-[#1A1A1A]">{senderPreview.name}</span> via
-            president@shmspto.org
-            {' · '}
-            Reply-To: {senderPreview.replyEmail}
+            Sending as{' '}
+            <span className="font-semibold text-[#1A1A1A]">
+              {senderPreview.name || senderPreview.staffEmail}
+            </span>{' '}
+            ({senderPreview.staffEmail})
           </p>
         ) : null}
 
