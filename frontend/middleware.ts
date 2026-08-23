@@ -24,12 +24,20 @@ import { commonsRequiresLogin, isCommonsPublicPath } from '@/lib/crm/private-ten
 import { isDemoInstance } from '@/lib/demo/instance'
 import { isCommonsDemoHiddenPath } from '@/lib/demo/commons-surface'
 import { demoPiiStub } from '@/lib/demo/seed'
+import {
+  fixturePiiStub,
+  isSyntheticPiiPath,
+  isSyntheticStagingFromRequest,
+  isSyntheticWriteAllowPath,
+  syntheticWriteResponse,
+} from '@/lib/fixtures'
 
 const PROTECTED_ROUTES = ['/member-portal', '/staff']
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const demo = isDemoInstance()
+  const synthetic = !demo && isSyntheticStagingFromRequest(req)
 
   // Commons platform tenants are private. login we issue, not a public school site.
   if (commonsRequiresLogin() && !isCommonsPublicPath(pathname)) {
@@ -94,9 +102,19 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  if (synthetic && pathname.startsWith('/api/')) {
+    if (isWriteMethod(req.method) && !isSyntheticWriteAllowPath(pathname)) {
+      return syntheticWriteResponse()
+    }
+    if (req.method === 'GET' && isSyntheticPiiPath(pathname)) {
+      return NextResponse.json(fixturePiiStub(pathname, null))
+    }
+  }
+
   // Printable payment cheat sheet on Stone Hill. no session (table QR / print).
   const staffPublic =
     !demo &&
+    !synthetic &&
     (pathname === '/staff/in-person' || pathname.startsWith('/staff/in-person/'))
 
   if (!staffPublic && PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {

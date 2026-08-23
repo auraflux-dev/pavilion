@@ -33,6 +33,7 @@ import {
   newsletterUnsubscribeApiUrl,
   newsletterUnsubscribePageUrl,
 } from '@/lib/staff/newsletter-unsubscribe'
+import { isSyntheticStagingMode } from '@/lib/fixtures/synthetic-mode'
 import {
   buildNewsletterTestGroups,
   parseEmailList,
@@ -205,6 +206,17 @@ export async function publishScoopToPortal(opts: {
 export async function executeNewsletterEmail(
   input: NewsletterExecuteInput,
 ): Promise<NewsletterExecuteResult> {
+  if (isSyntheticStagingMode() && input.dryRun !== true) {
+    return {
+      ok: false,
+      error: 'Synthetic staging. Newsletter sends are blocked. Use www.shmspto.org for live email.',
+      recipientCount: 0,
+      recipientsPreview: [],
+      audience: input.sendAudience ?? 'members',
+      testSend: input.sendAudience === 'test',
+    }
+  }
+
   const subject = String(input.subject ?? '').trim()
   const message = String(input.message ?? '').trim()
   const tier = String(input.tier ?? 'all').trim() || 'all'

@@ -14,6 +14,8 @@ import {
 } from '@/lib/stored-payment-methods'
 import { getCatalogConfig, isAllowedStoreCardLoadAmount } from '@/lib/api/catalog-config'
 import { getPaidMembershipTiers } from '@/lib/api/membership'
+import { isSyntheticStagingMode } from '@/lib/fixtures/synthetic-mode'
+import { FIXTURE_CHECKOUT_PAY_BLOCKED } from '@/lib/fixtures/checkout'
 
 import { applyPaidMembership } from '@/lib/membership-sync'
 import {
@@ -55,6 +57,10 @@ type StudentRow = {
 }
 
 export async function POST(req: NextRequest) {
+  if (isSyntheticStagingMode()) {
+    return NextResponse.json(FIXTURE_CHECKOUT_PAY_BLOCKED, { status: 403 })
+  }
+
   const session = await getMemberSession(req)
   if (!session) return NextResponse.json({ error: 'Log in to pay' }, { status: 401 })
 

@@ -25,6 +25,7 @@ import {
   publishScoopToPortal,
 } from '@/lib/staff/newsletter-execute'
 import { canApproveNewsletter } from '@/lib/staff/newsletter-jobs'
+import { isSyntheticStagingMode } from '@/lib/fixtures/synthetic-mode'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -198,12 +199,33 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
+    const dryRun = body.dryRun === true
+    if (isSyntheticStagingMode()) {
+      if (dryRun) {
+        return NextResponse.json({
+          ok: true,
+          synthetic: true,
+          recipientCount: 3,
+          recipientsPreview: ['reviewer@example.com', 'board@example.com', 'member@example.com'],
+          audience: String(body.sendAudience ?? 'paid'),
+          testSend: body.sendAudience === 'test' || body.testSend === true,
+        })
+      }
+      return NextResponse.json(
+        {
+          error:
+            'Synthetic staging. Live outreach and newsletter sends are blocked. Use www.shmspto.org.',
+          synthetic: true,
+        },
+        { status: 403 },
+      )
+    }
+
     const channel = String(body.channel ?? 'portal').trim() // portal | email | whatsapp
     const subject = String(body.subject ?? '').trim()
     const message = String(body.body ?? body.message ?? '').trim()
     const tier = String(body.tier ?? 'all').trim() || 'all'
     const grade = String(body.grade ?? '').trim()
-    const dryRun = body.dryRun === true
     const alsoPortal = body.alsoPortal !== false
     const customEmails = Array.isArray(body.emails)
       ? body.emails.map((e: unknown) => String(e))

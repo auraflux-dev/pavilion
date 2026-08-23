@@ -11,11 +11,19 @@ import {
   membershipChargeDollars,
 } from '@/lib/membership-pricing'
 import { tierRank } from '@/lib/staff/members-roster'
+import { isSyntheticStagingMode } from '@/lib/fixtures/synthetic-mode'
+import { fixtureCheckoutQuote } from '@/lib/fixtures/stubs'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const kind = body.kind as string
+
+    if (isSyntheticStagingMode()) {
+      const quote = fixtureCheckoutQuote(String(kind ?? ''))
+      if (quote) return NextResponse.json(quote)
+      return NextResponse.json({ error: 'Unknown checkout kind (synthetic)' }, { status: 400 })
+    }
 
     if (kind === 'membership') {
       const tier = String(body.tier ?? '').trim().toLowerCase()

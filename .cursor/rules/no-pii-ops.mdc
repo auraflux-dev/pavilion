@@ -25,7 +25,8 @@ Agents must **not** read, query, export, paste, or modify live **parent, staff, 
 ## Allowed without asking
 
 - Edit **code, types, schemas, UI, tests** that describe data shapes (no live values)
-- Use **fixtures/mocks** with fake names (`parent@example.com`, `Jane Example`)
+- Use **fixtures/mocks** from `@/lib/fixtures` (cart, checkout quotes, Riverside-shaped roster)
+- **Synthetic staging** (`shmspto.vercel.app`, local `.env.development`): fixture data only, no live Wix
 - Deploy from clean worktree when ship rules say so (do not pull env into the workspace to “inspect”)
 - Read **public** site content and staff **help** copy (no roster APIs)
 
