@@ -223,9 +223,7 @@ export function ProgramRegisterForm({
         </div>
 
         {!program.registrationOpen ? (
-          <p className="text-sm text-[#5A6070] whitespace-pre-line">
-            {`Registration is not open yet.\nPaid members: Thu Aug 27 to Wed Sep 2, 2026.\nEveryone signed in: Thu Sep 3 to Wed Sep 9, 2026.`}
-          </p>
+          <p className="text-sm text-[#5A6070]">Registration is not open yet.</p>
         ) : null}
 
         {program.registrationOpen && priorityUntilLabel ? (
