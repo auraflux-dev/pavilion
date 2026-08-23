@@ -11,17 +11,19 @@ import {
   serializeMeetingDates,
 } from '@/lib/programs/fall-2026-ep'
 import { formatProgramSchedule } from '@/lib/programs/schedule'
-import { resolveProgramSeason } from '@/lib/programs/season'
+import { resolveProgramSeason, isPublicProgramsCatalogOpen } from '@/lib/programs/season'
 import type { ProgramsCatalogAccess } from '@/lib/programs/public-access'
 
-/** List /programs when time gate passes and school is in session, or on staging review host. */
+/** List /programs when the public unlock passed, school is in session, or on staging. */
 export function isProgramsCatalogListed(opts: {
   inSession: boolean
   access: ProgramsCatalogAccess
   reviewHost?: boolean
 }): boolean {
   if (!opts.access.allowed) return false
-  return opts.inSession || Boolean(opts.reviewHost)
+  if (opts.reviewHost) return true
+  if (isPublicProgramsCatalogOpen()) return true
+  return opts.inSession
 }
 
 function tagSet(tags: string | undefined): Set<string> {

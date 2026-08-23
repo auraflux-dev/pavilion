@@ -4,7 +4,6 @@ import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { ProgramLanding } from '@/components/programs/program-landing'
-import { ProgramsPreviewBanner } from '@/components/programs/programs-preview-banner'
 import { getAllPrograms } from '@/lib/api/programs'
 import { displayProgramName } from '@/lib/programs/display-name'
 import { FALL_2026_EP_CLASSES } from '@/lib/programs/fall-2026-ep'
@@ -84,7 +83,6 @@ export default async function ProgramLandingPage({
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
-      {access.previewMode ? <ProgramsPreviewBanner /> : null}
       <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
         <ProgramLanding program={program} companion={companion} />
       </main>

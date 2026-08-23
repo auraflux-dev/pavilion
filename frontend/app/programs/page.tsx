@@ -18,7 +18,6 @@ import { BrandImageWash } from '@/components/brand/brand-image-wash'
 import { canViewProgramsCatalogNow, isProgramsReviewHost } from '@/lib/programs/public-access'
 import { isProgramsCatalogListed } from '@/lib/programs/public-catalog'
 import { isSpringCatalogListed } from '@/lib/programs/season'
-import { ProgramsPreviewBanner } from '@/components/programs/programs-preview-banner'
 
 export const revalidate = 300 // revalidate every 5 minutes
 
@@ -54,7 +53,6 @@ export default async function ProgramsPage({
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
-      {access.previewMode ? <ProgramsPreviewBanner /> : null}
 
       <main id="main-content">
         <PageHero

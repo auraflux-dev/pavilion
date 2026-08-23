@@ -74,6 +74,14 @@ const nextConfig = {
   async rewrites() {
     return [
       {
+        source: '/programs/curriculum',
+        destination: '/share/curriculum/index.html',
+      },
+      {
+        source: '/programs/curriculum/:season/:slug',
+        destination: '/share/curriculum/:season/:slug/index.html',
+      },
+      {
         source: '/_api/:path*',
         destination: '/api/wix-auth-proxy/_api/:path*',
       },

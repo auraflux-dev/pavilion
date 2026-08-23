@@ -3,7 +3,6 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { notFound } from 'next/navigation'
 import { Fall2026EpSchedule } from '@/components/programs/fall-2026-ep-schedule'
-import { ProgramsPreviewBanner } from '@/components/programs/programs-preview-banner'
 import { getAllPrograms } from '@/lib/api/programs'
 import { selectCurrentFall2026Programs } from '@/lib/programs/fall-2026-ep'
 import type { Metadata } from 'next'
@@ -52,7 +51,6 @@ export default async function Fall2026EpSchedulePage({
       <div className="print:hidden">
         <AnnouncementBar />
         <Navbar />
-        {access.previewMode ? <ProgramsPreviewBanner /> : null}
       </div>
       <main id="main-content" className="flex-1 bg-[var(--brand-warm)] py-10 md:py-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">

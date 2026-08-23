@@ -2,14 +2,18 @@
 /**
  * Deploy Stone Hill to stable staging: https://shmspto.vercel.app
  *
- *   node scripts/deploy-staging.mjs
- *   node scripts/deploy-staging.mjs --cwd /tmp/clean-worktree
+ * Stone Hill builds from auraflux-dev/shmspto (not this monorepo).
+ * Prefer: node scripts/deploy-staging.mjs --cwd /path/to/shmspto
+ *
+ *   node scripts/deploy-staging.mjs --cwd ../shmspto
  */
 import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
 const STAGING_HOST = 'shmspto.vercel.app'
 const STAGING_URL = `https://${STAGING_HOST}`
+const VERCEL_SCOPE = 'robert-4220s-projects'
+const VERCEL_PROJECT = 'frontend'
 
 const args = process.argv.slice(2)
 let cwd = process.cwd()
@@ -17,10 +21,11 @@ const cwdIdx = args.indexOf('--cwd')
 if (cwdIdx >= 0 && args[cwdIdx + 1]) cwd = resolve(args[cwdIdx + 1])
 
 const root = cwd.endsWith('/frontend') ? resolve(cwd, '..') : cwd
+const frontendDir = resolve(root, 'frontend')
 
 function run(cmd, cmdArgs, opts = {}) {
   const res = spawnSync(cmd, cmdArgs, {
-    cwd: opts.cwd ?? root,
+    cwd: opts.cwd ?? frontendDir,
     encoding: 'utf8',
     shell: false,
     stdio: opts.capture === false ? 'inherit' : ['ignore', 'pipe', 'pipe'],
@@ -37,7 +42,7 @@ function run(cmd, cmdArgs, opts = {}) {
   return out
 }
 
-console.log(`Deploying Preview from ${root} …`)
+console.log(`Deploying Preview from ${frontendDir} (scope ${VERCEL_SCOPE}) …`)
 run(
   'npx',
   [
@@ -45,13 +50,21 @@ run(
     'link',
     '--yes',
     '--project',
-    'frontend',
+    VERCEL_PROJECT,
     '--scope',
-    'treasurer-4353s-projects',
+    VERCEL_SCOPE,
   ],
-  { cwd: root },
+  { cwd: frontendDir },
 )
-const deployOut = run('npx', ['vercel', 'deploy', '--yes'], { cwd: root })
+
+const deployOut = run('npx', [
+  'vercel',
+  'deploy',
+  '--yes',
+  '--scope',
+  VERCEL_SCOPE,
+])
+
 let deploymentUrl = ''
 try {
   const start = deployOut.lastIndexOf('{')
@@ -74,10 +87,12 @@ if (!deploymentUrl) {
 
 const hostOnly = deploymentUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
 console.log(`Aliasing ${hostOnly} → ${STAGING_HOST} …`)
-run('npx', ['vercel', 'alias', hostOnly, STAGING_HOST], {
-  cwd: root,
-  capture: false,
-})
+run(
+  'npx',
+  ['vercel', 'alias', hostOnly, STAGING_HOST, '--scope', VERCEL_SCOPE],
+  { cwd: frontendDir, capture: false },
+)
 
 console.log(`\nStaging ready: ${STAGING_URL}`)
-console.log('Production + GitHub wait on Rob OK.')
+console.log('Run: node scripts/check-prod-deploy.mjs --staging (from shmspto repo)')
+console.log('Production waits on Rob OK (shmspto: node scripts/deploy-production.mjs).')
