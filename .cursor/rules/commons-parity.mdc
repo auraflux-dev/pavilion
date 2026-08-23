@@ -9,15 +9,14 @@ Build **Pavilion** as if SHMS never existed (product, tenants, `onpavilion.com`,
 
 Stone Hill (`frontend` / www.shmspto.org) and Pavilion apps (`commons-pto-demo`, `commons-pto`, `commons-site`) share this monorepo for now but are **separate products**.
 
-Application ships follow **Staging-first** in `ship-after-serena.mdc` (critical, every agent):
+Application ships follow **Staging-first** in `ship-after-serena.mdc` and **`shms-deploy-git.mdc`** (critical, every agent):
 
-1. Serena QA → commit task files only (no push yet).
-2. **Staging** deploy of the **target product(s) for that task** from a **clean worktree of that SHA**. Never `--prod` yet. Never deploy from a dirty tree.
-   Stone Hill → alias to **https://shmspto.vercel.app** (not ephemeral Preview URLs). Prefer `node scripts/deploy-staging.mjs --cwd <worktree>`.
-3. **STOP.** Give Rob https://shmspto.vercel.app. Wait for explicit OK.
-4. After OK: promote / `--prod`, **then** push GitHub.
+1. Serena QA → commit in **`auraflux-dev/shmspto`** for Stone Hill (port `frontend/` diffs from this monorepo if needed).
+2. **Staging review** on **https://shmspto.vercel.app** when staging is current (visitor-facing). Never use ephemeral Preview URLs for Rob review.
+3. **STOP.** Wait for explicit OK on visitor changes.
+4. **`git push origin main`** on **`shmspto`**. Treasurer Vercel auto-deploys. Run **`node scripts/check-prod-deploy.mjs`**. Agents do not `vercel deploy` Stone Hill locally.
 
-Staff-only exception (Staff UI / `/api/staff` / staff permissions with no visitor UI change): commit → staging **and** prod from the same SHA (no Rob wait) → push. Details in `ship-after-serena.mdc`.
+Staff-only exception: push `shmspto` `main` after Serena QA (no Rob wait), then run the check script.
 5. **Default after a Stone Hill application ship:** also deploy Pavilion app code from the **same SHA** (`commons-pto-demo` and `commons-pto` as relevant). Almost every SHMS product change belongs on Pavilion too. **Hard rule:** Pavilion stays vanilla. No Stone Hill / SHMS branding, school PII, or SHMS-specific copy on Pavilion surfaces (demo gates + `vanillaizeIfDemo` / Commons surface still apply). Skip Pavilion only when the change is clearly SHMS-only (school CMS content, SHMS-only env, one-off school ops) or Rob says skip.
 6. If the task is Pavilion-only (`commons-site`, demo vanillaize, trial packs), ship Pavilion projects only (same staging → OK → prod → push). Do not require a Stone Hill deploy.
 
