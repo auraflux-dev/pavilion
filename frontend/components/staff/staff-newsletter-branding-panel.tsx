@@ -5,15 +5,7 @@ import { Button } from '@/components/ui/button'
 import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
 import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 import { uploadNewsletterPngFiles } from '@/lib/staff/newsletter-upload-client'
-import {
-  NEWSLETTER_CSS_PREVIEW_SECTIONS,
-  loadLocalCssTemplates,
-  mergeCssTemplateLists,
-  parseSiteCssTemplatesJson,
-  saveLocalCssTemplates,
-  serializeSiteCssTemplates,
-  type NewsletterCssTemplate,
-} from '@/lib/staff/newsletter-css-templates'
+import { NEWSLETTER_CSS_PREVIEW_SECTIONS } from '@/lib/staff/newsletter-css-templates'
 import { parseNewsletterBranding } from '@/lib/staff/newsletter-branding'
 import { buildNewsletterHtml } from '@/lib/staff/newsletter-html'
 
@@ -23,33 +15,20 @@ type Group = { id: string; label: string; keys: SettingKey[] }
 type Props = {
   /** When true, hide outer title (embedded in composer step). */
   embedded?: boolean
-  canEditSiteTemplates?: boolean
 }
 
 /**
- * Newsletter header, footer, logo, CSS templates, and preview.
+ * Newsletter header, footer, logo, and inline preview.
+ * Full CSS editing lives in Template library (CSS) below the composer.
  */
-export function StaffNewsletterBrandingPanel({ embedded = false, canEditSiteTemplates = false }: Props) {
+export function StaffNewsletterBrandingPanel({ embedded = false }: Props) {
   const [groups, setGroups] = useState<Group[]>([])
   const [settings, setSettings] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
-  const [cssOpen, setCssOpen] = useState(false)
+  const [logoStatus, setLogoStatus] = useState('')
   const [previewOpen, setPreviewOpen] = useState(false)
-  const [templateName, setTemplateName] = useState('')
-  const [selectedTemplateId, setSelectedTemplateId] = useState('builtin:builtin-none')
-  const [localTemplates, setLocalTemplates] = useState<NewsletterCssTemplate[]>([])
   const logoInputRef = useRef<HTMLInputElement>(null)
-
-  const siteTemplates = useMemo(
-    () => parseSiteCssTemplatesJson(settings.newsletterCssTemplatesJson ?? ''),
-    [settings.newsletterCssTemplatesJson],
-  )
-
-  const allTemplates = useMemo(
-    () => mergeCssTemplateLists(siteTemplates, localTemplates),
-    [siteTemplates, localTemplates],
-  )
 
   const branding = useMemo(
     () =>
@@ -76,7 +55,6 @@ export function StaffNewsletterBrandingPanel({ embedded = false, canEditSiteTemp
     const g = ((d.groups ?? []) as Group[]).filter((x) => x.id === 'newsletter-branding')
     setGroups(g)
     setSettings(d.settings ?? {})
-    setLocalTemplates(loadLocalCssTemplates())
   }, [])
 
   useEffect(() => {
@@ -107,81 +85,22 @@ export function StaffNewsletterBrandingPanel({ embedded = false, canEditSiteTemp
   async function uploadLogo(files: FileList | null) {
     if (!files?.length) return
     setBusy(true)
+    setLogoStatus('')
     setStatus('')
     try {
       const uploaded = await uploadNewsletterPngFiles(files)
       const url = uploaded.heroImageUrl
       if (!url) throw new Error('Upload did not return a URL')
       await saveKey('newsletterHeaderLogoUrl', url)
-      setStatus('Logo uploaded and saved.')
+      setLogoStatus('Logo uploaded and saved. Preview below.')
     } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Logo upload failed')
+      const msg = err instanceof Error ? err.message : 'Logo upload failed'
+      setLogoStatus(msg)
+      setStatus(msg)
     } finally {
       setBusy(false)
       if (logoInputRef.current) logoInputRef.current.value = ''
     }
-  }
-
-  function templateKey(t: NewsletterCssTemplate) {
-    return `${t.source}:${t.id}`
-  }
-
-  function applyTemplate(key: string) {
-    const tpl = allTemplates.find((t) => templateKey(t) === key)
-    if (!tpl) return
-    setSelectedTemplateId(key)
-    setSettings((s) => ({ ...s, newsletterCustomCss: tpl.css }))
-    setCssOpen(Boolean(tpl.css.trim()))
-    setStatus(tpl.css.trim() ? `Loaded template: ${tpl.name}` : 'Cleared custom CSS.')
-  }
-
-  function saveTemplateLocal() {
-    const name = templateName.trim()
-    const css = settings.newsletterCustomCss ?? ''
-    if (!name) {
-      setStatus('Enter a template name first.')
-      return
-    }
-    const id = `local-${Date.now().toString(36)}`
-    const next: NewsletterCssTemplate[] = [
-      ...localTemplates.filter((t) => t.name !== name),
-      { id, name, css, updatedAt: new Date().toISOString(), source: 'local' },
-    ]
-    setLocalTemplates(next)
-    saveLocalCssTemplates(next)
-    setSelectedTemplateId(templateKey({ id, name, css, updatedAt: new Date().toISOString(), source: 'local' }))
-    setTemplateName('')
-    setStatus(`Saved "${name}" on this browser.`)
-  }
-
-  async function saveTemplateSite() {
-    if (!canEditSiteTemplates) return
-    const name = templateName.trim()
-    const css = settings.newsletterCustomCss ?? ''
-    if (!name) {
-      setStatus('Enter a template name first.')
-      return
-    }
-    const id = `site-${Date.now().toString(36)}`
-    const nextSite = [
-      ...siteTemplates.filter((t) => t.name !== name),
-      { id, name, css, updatedAt: new Date().toISOString(), source: 'site' as const },
-    ]
-    const json = serializeSiteCssTemplates(nextSite)
-    await saveKey('newsletterCssTemplatesJson', json)
-    setSelectedTemplateId(templateKey({ id, name, css, updatedAt: new Date().toISOString(), source: 'site' }))
-    setTemplateName('')
-    setStatus(`Saved "${name}" for the whole team.`)
-  }
-
-  function openPreviewWindow() {
-    const w = window.open('', '_blank', 'noopener,noreferrer,width=720,height=900')
-    if (!w) {
-      setPreviewOpen(true)
-      return
-    }
-    w.document.write(previewHtml)
-    w.document.close()
   }
 
   const group = groups[0]
@@ -207,7 +126,7 @@ export function StaffNewsletterBrandingPanel({ embedded = false, canEditSiteTemp
         <div>
           <h2 className="text-lg font-bold">Email branding</h2>
           <p className="text-xs text-[#5A6070]">
-            Header logo, title, footer, and CSS for all staff HTML emails.
+            Header logo, title, and footer for all staff HTML emails. CSS templates are in the library below.
           </p>
         </div>
       ) : null}
@@ -231,11 +150,25 @@ export function StaffNewsletterBrandingPanel({ embedded = false, canEditSiteTemp
           >
             {logoUrl ? 'Replace logo' : 'Upload logo'}
           </Button>
-          {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="" className="h-10 w-auto rounded border border-[var(--border)]" />
-          ) : null}
         </div>
+        {logoStatus ? (
+          <p
+            className={`text-xs rounded-lg px-3 py-2 ${
+              logoStatus.includes('failed') || logoStatus.includes('R2')
+                ? 'bg-red-50 text-red-800 border border-red-200'
+                : 'bg-[#E8F3E8] text-[#1A1A1A] border border-[var(--brand-green)]/25'
+            }`}
+          >
+            {logoStatus}
+          </p>
+        ) : null}
+        {logoUrl ? (
+          <div className="rounded-lg border-2 border-[var(--brand-green)]/40 bg-[#FAFCF9] p-3 space-y-2">
+            <p className="text-xs font-semibold text-[var(--brand-green)]">✓ Logo ready</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoUrl} alt="" className="h-12 w-auto rounded border border-[var(--border)]" />
+          </div>
+        ) : null}
       </div>
 
       {group.keys
@@ -261,100 +194,28 @@ export function StaffNewsletterBrandingPanel({ embedded = false, canEditSiteTemp
           </div>
         ))}
 
-      <div className="space-y-3 rounded-lg border border-[var(--border)] p-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <button
-            type="button"
-            className="text-sm font-semibold text-[#1B2A4A] underline-offset-2 hover:underline"
-            onClick={() => setCssOpen((v) => !v)}
-          >
-            {cssOpen ? '▼' : '▶'} CSS editor
-          </button>
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="outline" size="sm" disabled={busy} onClick={openPreviewWindow}>
-              Preview with filler text
-            </Button>
-          </div>
-        </div>
-
-        <label className="text-xs text-[#5A6070] block">
-          Load CSS template
-          <select
-            value={selectedTemplateId}
-            onChange={(e) => applyTemplate(e.target.value)}
-            className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-          >
-            {allTemplates.map((t) => (
-              <option key={templateKey(t)} value={templateKey(t)}>
-                {t.name}
-                {t.source === 'local' ? ' (this browser)' : ''}
-                {t.source === 'site' ? ' (team)' : ''}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        {cssOpen ? (
-          <>
-            <StaffPlainCopyField
-              label="Custom CSS"
-              value={settings.newsletterCustomCss ?? ''}
-              rows={8}
-              onChange={(val) => setSettings((s) => ({ ...s, newsletterCustomCss: val }))}
-              onCommit={(val) =>
-                setSettings((s) => ({ ...s, newsletterCustomCss: normalizePlainCopy(val) }))
-              }
-            />
-            <div className="flex flex-wrap gap-2 items-end">
-              <label className="text-xs text-[#5A6070] flex-1 min-w-[10rem]">
-                Save as template
-                <input
-                  value={templateName}
-                  onChange={(e) => setTemplateName(e.target.value)}
-                  placeholder="e.g. Fall 2026 green theme"
-                  className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-                />
-              </label>
-              <Button type="button" size="sm" variant="outline" disabled={busy} onClick={saveTemplateLocal}>
-                Save on this browser
-              </Button>
-              {canEditSiteTemplates ? (
-                <Button type="button" size="sm" disabled={busy} onClick={() => void saveTemplateSite()}>
-                  Save for team
-                </Button>
-              ) : null}
-            </div>
-            <Button type="button" size="sm" disabled={busy} onClick={() => void saveKey('newsletterCustomCss')}>
-              Apply CSS to live emails
-            </Button>
-            <p className="text-[11px] text-[#5A6070]">
-              Use classes like <code className="text-[10px]">.nl-section-title</code>,{' '}
-              <code className="text-[10px]">.nl-body</code>, and{' '}
-              <code className="text-[10px]">.nl-section</code>. Preview opens sample filler copy.
-            </p>
-          </>
-        ) : (
-          <p className="text-[11px] text-[#5A6070]">
-            Click CSS editor to expand. Load a saved template or preview before you send.
-          </p>
-        )}
+      <div className="space-y-2 rounded-lg border border-[var(--border)] p-3">
+        <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => setPreviewOpen(true)}>
+          Preview with filler text
+        </Button>
+        <p className="text-[11px] text-[#5A6070]">
+          Opens inline. Links in filler copy show as clickable links.
+        </p>
       </div>
 
       {previewOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-xl bg-white shadow-lg">
-            <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
-              <p className="text-sm font-semibold text-[#1B2A4A]">CSS preview (filler text)</p>
-              <Button type="button" variant="outline" size="sm" onClick={() => setPreviewOpen(false)}>
-                Close
-              </Button>
-            </div>
-            <iframe
-              title="Newsletter CSS preview"
-              srcDoc={previewHtml}
-              className="min-h-[480px] w-full flex-1 border-0 bg-[#F4F7F5]"
-            />
+        <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] overflow-hidden">
+          <div className="flex items-center justify-between border-b border-[var(--border)] px-3 py-2">
+            <p className="text-sm font-semibold text-[#1B2A4A]">Preview (filler text)</p>
+            <Button type="button" variant="outline" size="sm" onClick={() => setPreviewOpen(false)}>
+              Close
+            </Button>
           </div>
+          <iframe
+            title="Newsletter preview"
+            srcDoc={previewHtml}
+            className="min-h-[480px] w-full border-0 bg-[#F4F7F5]"
+          />
         </div>
       ) : null}
 

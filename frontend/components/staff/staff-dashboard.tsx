@@ -891,11 +891,6 @@ export function StaffDashboard() {
             <StaffNewsletterPanel />
             <StaffWhatsAppQueuePanel />
             <StaffNewsletterSendReportPanel />
-            <StaffCmsCollectionPanel
-              collection="Newsletters"
-              title="Newsletter archive → portal Messages"
-              sectionId="newsletter-archive"
-            />
           </div>
         ) : null}
         {active === 'expenses' ? (

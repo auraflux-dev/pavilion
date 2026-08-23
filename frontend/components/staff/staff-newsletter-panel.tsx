@@ -19,17 +19,16 @@ import {
   composeNewsletterBody,
   defaultNewsletterBeats,
   emptyNewsletterBeat,
-  parseBeatsJson,
   presetLabel,
   stringifyBeatsJson,
   type NewsletterBeat,
 } from '@/lib/staff/newsletter-sections'
 import { buildWhatsAppGraphicShare } from '@/lib/staff/whatsapp-compose'
 import { uploadNewsletterPngFiles } from '@/lib/staff/newsletter-upload-client'
-import {
-  StaffNewsletterTemplatesPanel,
-  type NewsletterCanvaMeta,
-} from '@/components/staff/staff-newsletter-templates-panel'
+import { NEWSLETTER_DEFAULT_CSS } from '@/lib/staff/newsletter-default-css'
+import type { NewsletterHeroMeta } from '@/lib/staff/newsletter-hero-meta'
+import { StaffNewsletterHeroPanel } from '@/components/staff/staff-newsletter-hero-panel'
+import { StaffNewsletterCssLibrary } from '@/components/staff/staff-newsletter-css-library'
 import { StaffNewsletterStep } from '@/components/staff/staff-newsletter-step'
 import { StaffNewsletterBrandingPanel } from '@/components/staff/staff-newsletter-branding-panel'
 
@@ -82,15 +81,19 @@ export function StaffNewsletterPanel() {
   const [trackClicks, setTrackClicks] = useState(true)
   const [trackOpens, setTrackOpens] = useState(false)
   const [templateId, setTemplateId] = useState('')
-  const [canvaMeta, setCanvaMeta] = useState<NewsletterCanvaMeta>({})
+  const [heroMeta, setHeroMeta] = useState<NewsletterHeroMeta>({})
+  const [liveCss, setLiveCss] = useState(NEWSLETTER_DEFAULT_CSS)
+  const [brandingHint, setBrandingHint] = useState('')
   const [alsoPortal, setAlsoPortal] = useState(true)
   const [busy, setBusy] = useState(false)
   const [beatUploadIdx, setBeatUploadIdx] = useState<number | null>(null)
+  const [beatUploadStatus, setBeatUploadStatus] = useState<Record<number, string>>({})
   const beatFileRef = useRef<HTMLInputElement>(null)
   const attachFileRef = useRef<HTMLInputElement>(null)
   const [attachments, setAttachments] = useState<
     Array<{ key: string; filename: string; mimeType: string }>
   >([])
+  const [attachmentStatus, setAttachmentStatus] = useState('')
   const [senderPreview, setSenderPreview] = useState({ name: '', staffEmail: '' })
   const [canEditSiteCss, setCanEditSiteCss] = useState(false)
   const [status, setStatus] = useState('')
@@ -127,6 +130,26 @@ export function StaffNewsletterPanel() {
     } catch {
       /* ignore */
     }
+    try {
+      const sr = await fetch('/api/staff/site-settings')
+      const sd = await sr.json()
+      if (sr.ok) {
+        const settings = sd.settings ?? {}
+        const css = String(settings.newsletterCustomCss ?? '').trim()
+        setLiveCss(css || NEWSLETTER_DEFAULT_CSS)
+        const logo = String(settings.newsletterHeaderLogoUrl ?? '').trim()
+        const title = String(settings.newsletterHeaderTitle ?? '').trim()
+        if (logo || title) {
+          setBrandingHint(
+            [logo ? 'Logo loaded from site settings' : '', title ? `Header: ${title}` : '']
+              .filter(Boolean)
+              .join(' · '),
+          )
+        }
+      }
+    } catch {
+      /* site settings optional on load */
+    }
   }, [])
 
   useEffect(() => {
@@ -145,7 +168,7 @@ export function StaffNewsletterPanel() {
   }, [useBeats, intro, beats, signoff])
 
   function scoopLink() {
-    return resolveScoopUrl(scoopUrl, canvaMeta.canvaViewUrl)
+    return resolveScoopUrl(scoopUrl, heroMeta.canvaViewUrl)
   }
 
   function scoopShareText() {
@@ -179,7 +202,11 @@ export function StaffNewsletterPanel() {
         imageKey: uploaded.heroImageKey,
       }
       setBeats(next)
-      setStatus('Section image uploaded. It appears in the email between heading and body.')
+      setBeatUploadStatus((s) => ({
+        ...s,
+        [i]: 'Section image uploaded. Preview below.',
+      }))
+      setStatus('Section image uploaded.')
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Section image upload failed')
     } finally {
@@ -193,6 +220,11 @@ export function StaffNewsletterPanel() {
     const next = beats.slice()
     next[index] = { ...next[index], imageUrl: '', imageKey: '', imageLinkUrl: '' }
     setBeats(next)
+    setBeatUploadStatus((s) => {
+      const copy = { ...s }
+      delete copy[index]
+      return copy
+    })
   }
 
   async function onAttachmentSelected(files: FileList | null) {
@@ -213,6 +245,7 @@ export function StaffNewsletterPanel() {
         ...prev,
         { key: d.key, filename: d.filename, mimeType: d.mimeType },
       ])
+      setAttachmentStatus(`Attached ${d.filename}. Listed below.`)
       setStatus(`Attached ${d.filename}.`)
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Attachment upload failed')
@@ -220,17 +253,6 @@ export function StaffNewsletterPanel() {
       setBusy(false)
       if (attachFileRef.current) attachFileRef.current.value = ''
     }
-  }
-
-  function canvaPngBlock(): string | null {
-    if (sendAudience !== 'paid') return null
-    if (!canvaMeta.canvaDesignId?.trim()) return null
-    if (canvaMeta.heroImageUrl?.trim()) return null
-    return [
-      'Canva is attached but the email PNG is not ready yet.',
-      'In Templates above: Export PNG for email, or Upload PNG from Canva Download.',
-      'Paid emails need the graphic above your text.',
-    ].join('\n')
   }
 
   function outreachPayload(extra: Record<string, unknown> = {}) {
@@ -249,12 +271,12 @@ export function StaffNewsletterPanel() {
       trackClicks,
       trackOpens,
       templateId: templateId || undefined,
-      canvaViewUrl: canvaMeta.canvaViewUrl,
-      canvaThumbnailUrl: canvaMeta.canvaThumbnailUrl,
-      canvaTitle: canvaMeta.canvaTitle,
-      canvaDesignId: canvaMeta.canvaDesignId,
-      heroImageUrl: canvaMeta.heroImageUrl,
-      extraImageUrls: (canvaMeta.pageImageUrls ?? []).slice(1),
+      canvaViewUrl: heroMeta.canvaViewUrl,
+      canvaThumbnailUrl: heroMeta.canvaThumbnailUrl,
+      canvaTitle: heroMeta.canvaTitle,
+      canvaDesignId: heroMeta.canvaDesignId,
+      heroImageUrl: heroMeta.heroImageUrl,
+      extraImageUrls: (heroMeta.pageImageUrls ?? []).slice(1),
       beatsJson: beatsPayload(),
       attachmentKeys: attachments.length ? attachments : undefined,
       testEmails: testEmailsExtra,
@@ -296,11 +318,6 @@ export function StaffNewsletterPanel() {
   }
 
   async function sendTestEmail() {
-    const pngBlock = canvaPngBlock()
-    if (pngBlock) {
-      setStatus(pngBlock)
-      return
-    }
     setBusy(true)
     setStatus('')
     try {
@@ -371,11 +388,6 @@ export function StaffNewsletterPanel() {
   }
 
   async function sendEmail() {
-    const pngBlock = canvaPngBlock()
-    if (pngBlock) {
-      setStatus(pngBlock)
-      return
-    }
     setBusy(true)
     setStatus('')
     try {
@@ -424,10 +436,8 @@ export function StaffNewsletterPanel() {
           `Sent via Gmail: ${d.send.sent} delivered, ${d.send.failed} failed` +
             (d.portalInserted ? ' · portal inbox updated' : '') +
             (d.newsletterArchived
-              ? ' · newsletter archived for Messages'
-              : alsoPortal
-                ? ' · newsletter archive skipped or failed. Check Newsletters CMS'
-                : '') +
+              ? ' · archived to newsletter history'
+              : ' · archive skipped or failed') +
             (d.newsletterSendId
               ? ` · tracking id ${d.newsletterSendId} (see Send report below)`
               : ''),
@@ -478,7 +488,7 @@ export function StaffNewsletterPanel() {
       }
       const graphic = buildWhatsAppGraphicShare({
         message: plan.message,
-        imageUrl: canvaMeta.heroImageUrl || canvaMeta.canvaThumbnailUrl,
+        imageUrl: heroMeta.heroImageUrl || heroMeta.canvaThumbnailUrl,
       })
       if (graphic.imageUrl) {
         window.open(graphic.imageUrl, '_blank', 'noopener,noreferrer')
@@ -529,11 +539,6 @@ export function StaffNewsletterPanel() {
   async function queueSend() {
     if (!sendAtLocal.trim()) {
       setStatus('Pick a send date and time first.')
-      return
-    }
-    const pngBlock = canvaPngBlock()
-    if (pngBlock) {
-      setStatus(pngBlock)
       return
     }
     setBusy(true)
@@ -662,7 +667,7 @@ export function StaffNewsletterPanel() {
               <input
                 value={scoopUrl}
                 onChange={(e) => setScoopUrl(e.target.value)}
-                placeholder={resolveScoopUrl('', canvaMeta.canvaViewUrl)}
+                placeholder={resolveScoopUrl('', heroMeta.canvaViewUrl)}
                 className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
             </label>
@@ -738,41 +743,15 @@ export function StaffNewsletterPanel() {
       <StaffNewsletterStep
         step={2}
         title="Hero graphic"
-        description="Attach Canva, upload PNG, or load a saved template."
+        description="Optional top PNG in the email."
         id="newsletter-step-graphic"
       >
-        <StaffNewsletterTemplatesPanel
-          subject={subject}
-          body={body}
-          utmCampaign={utmCampaign}
-          beatsJson={stringifyBeatsJson({ intro, beats, signoff })}
-          canvaMeta={canvaMeta}
-          onCanvaMetaChange={setCanvaMeta}
-          onLoad={(tpl) => {
-            setSubject(tpl.subject)
-            setBody(tpl.body)
-            setUtmCampaign(tpl.utmCampaign || defaultUtmCampaign(tpl.subject))
-            setTemplateId(tpl.templateId)
-            setCanvaMeta({
-              canvaViewUrl: tpl.canvaViewUrl,
-              canvaThumbnailUrl: tpl.canvaThumbnailUrl,
-              canvaTitle: tpl.canvaTitle,
-              canvaDesignId: tpl.canvaDesignId,
-              canvaEditUrl: tpl.canvaEditUrl,
-              heroImageUrl: tpl.heroImageUrl,
-              heroImageKey: tpl.heroImageKey,
-              pageImageUrls: tpl.pageImageUrls,
-            })
-            const parsed = parseBeatsJson(tpl.beatsJson)
-            if (parsed && composeNewsletterBody(parsed).trim()) {
-              setUseBeats(true)
-              setIntro(parsed.intro)
-              setBeats(parsed.beats)
-              setSignoff(parsed.signoff)
-            } else {
-              setUseBeats(false)
-            }
-            if (tpl.heroImageUrl || tpl.canvaThumbnailUrl) setTrackOpens(true)
+        <StaffNewsletterHeroPanel
+          heroImageUrl={heroMeta.heroImageUrl ?? ''}
+          pageImageUrls={heroMeta.pageImageUrls ?? []}
+          onChange={(meta) => {
+            setHeroMeta((prev) => ({ ...prev, ...meta }))
+            if (meta.heroImageUrl) setTrackOpens(true)
           }}
         />
       </StaffNewsletterStep>
@@ -820,10 +799,27 @@ export function StaffNewsletterPanel() {
                   className="rounded-lg border border-[var(--border)] bg-white p-3 space-y-2"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-xs font-semibold text-[#1A1A1A]">
-                      Section {i + 1}
-                      {preset ? ` · ${preset.label}` : ''}
-                    </p>
+                    <label className="text-xs text-[#5A6070]">
+                      Section type
+                      <select
+                        value={beat.preset}
+                        onChange={(e) => {
+                          const next = beats.slice()
+                          next[i] = {
+                            ...next[i],
+                            preset: e.target.value as NewsletterBeat['preset'],
+                          }
+                          setBeats(next)
+                        }}
+                        className="mt-1 block border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                      >
+                        {NEWSLETTER_BEAT_PRESETS.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                     <Button
                       type="button"
                       variant="outline"
@@ -889,15 +885,25 @@ export function StaffNewsletterPanel() {
                       ) : null}
                     </div>
                     <p className="text-[11px] text-[#5A6070]">
-                      Canva → Download PNG. Shows in email under the heading (social / event graphic).
+                      PNG shows in email under the heading.
                     </p>
+                    {beatUploadStatus[i] ? (
+                      <p className="text-xs rounded-lg px-3 py-2 bg-[#E8F3E8] text-[#1A1A1A] border border-[var(--brand-green)]/25">
+                        {beatUploadStatus[i]}
+                      </p>
+                    ) : null}
                     {beat.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={beat.imageUrl}
-                        alt=""
-                        className="max-h-32 w-auto rounded border border-[var(--border)]"
-                      />
+                      <div className="rounded-lg border-2 border-[var(--brand-green)]/40 bg-[#FAFCF9] p-3 space-y-2">
+                        <p className="text-xs font-semibold text-[var(--brand-green)]">
+                          ✓ Section image ready
+                        </p>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={beat.imageUrl}
+                          alt=""
+                          className="max-h-32 w-auto rounded border border-[var(--border)]"
+                        />
+                      </div>
                     ) : null}
                     <label className="text-xs text-[#5A6070] block">
                       Image link (optional)
@@ -976,21 +982,34 @@ export function StaffNewsletterPanel() {
           >
             Attach file (PDF or image)
           </Button>
+          {attachmentStatus ? (
+            <p className="text-xs rounded-lg px-3 py-2 bg-[#E8F3E8] text-[#1A1A1A] border border-[var(--brand-green)]/25">
+              {attachmentStatus}
+            </p>
+          ) : null}
           {attachments.length ? (
-            <ul className="text-xs text-[#5A6070] space-y-1">
-              {attachments.map((a) => (
-                <li key={a.key} className="flex items-center gap-2">
-                  <span>{a.filename}</span>
-                  <button
-                    type="button"
-                    className="underline"
-                    onClick={() => setAttachments((prev) => prev.filter((x) => x.key !== a.key))}
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <div className="rounded-lg border-2 border-[var(--brand-green)]/40 bg-[#FAFCF9] p-3 space-y-2">
+              <p className="text-xs font-semibold text-[var(--brand-green)]">
+                ✓ {attachments.length} attachment{attachments.length === 1 ? '' : 's'} ready
+              </p>
+              <ul className="text-xs text-[#5A6070] space-y-1">
+                {attachments.map((a) => (
+                  <li key={a.key} className="flex items-center gap-2">
+                    <span>{a.filename}</span>
+                    <button
+                      type="button"
+                      className="underline"
+                      onClick={() => {
+                        setAttachments((prev) => prev.filter((x) => x.key !== a.key))
+                        setAttachmentStatus('')
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
         </div>
         </div>
@@ -999,11 +1018,16 @@ export function StaffNewsletterPanel() {
       <StaffNewsletterStep
         step={4}
         title="Email look"
-        description="Logo, header, footer, and CSS templates. Preview with filler text before you send."
+        description="Logo, header, and footer from site settings. CSS templates are in the library below."
         id="newsletter-branding"
         defaultOpen={false}
       >
-        <StaffNewsletterBrandingPanel embedded canEditSiteTemplates={canEditSiteCss} />
+        {brandingHint ? (
+          <p className="text-xs text-[#5A6070] rounded-lg bg-[#FAFCF9] border border-[var(--border)] px-3 py-2">
+            Live branding loaded: {brandingHint}
+          </p>
+        ) : null}
+        <StaffNewsletterBrandingPanel embedded />
       </StaffNewsletterStep>
 
       <StaffNewsletterStep
@@ -1112,7 +1136,7 @@ export function StaffNewsletterPanel() {
                 checked={trackOpens}
                 onChange={(e) => setTrackOpens(e.target.checked)}
               />
-              Track opens (HTML + pixel when Canva hero or this is on)
+              Track opens (HTML + pixel when hero graphic or this is on)
             </label>
           </div>
         </div>
@@ -1125,7 +1149,7 @@ export function StaffNewsletterPanel() {
             disabled={sendAudience === 'subscribers'}
             onChange={(e) => setAlsoPortal(e.target.checked)}
           />
-          Also post to parent portal inbox when sending email
+          Also post to parent portal inbox when sending email (archive saves automatically)
           {sendAudience === 'subscribers'
             ? ' (signup list is email-only)'
             : sendAudience === 'paid'
@@ -1280,6 +1304,12 @@ export function StaffNewsletterPanel() {
         </div>
         {status ? <p className="text-sm text-[#1A1A1A] whitespace-pre-line">{status}</p> : null}
       </StaffNewsletterStep>
+
+      <StaffNewsletterCssLibrary
+        canEditSiteTemplates={canEditSiteCss}
+        activeCss={liveCss}
+        onApplyCss={(css) => setLiveCss(css)}
+      />
     </section>
   )
 }

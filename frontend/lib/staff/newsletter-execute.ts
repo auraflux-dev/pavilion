@@ -484,7 +484,9 @@ export async function executeNewsletterEmail(
 
   let portalInserted = false
   let newsletterArchived = false
-  if (effectiveAlsoPortal && !dryRun && !isTestAudience && !isSubscribers) {
+  const shouldPostSend = !dryRun && !isTestAudience && !isSubscribers
+
+  if (shouldPostSend && effectiveAlsoPortal) {
     if (!isScoop) {
       try {
         const client = getWixClient()
@@ -524,6 +526,9 @@ export async function executeNewsletterEmail(
         // ParentMessages optional
       }
     }
+  }
+
+  if (shouldPostSend) {
     newsletterArchived = await archiveNewsletter({
       title: effectiveSubject,
       body: archiveBody,

@@ -9,10 +9,11 @@ import {
 } from '@/lib/staff/newsletter-branding'
 import { newsletterSiteOrigin } from './newsletter-site'
 
-/** Shared newsletter typography (body + headings). */
-export const NEWSLETTER_FONT_BODY =
+/** Single sans-serif stack for all newsletter text. */
+export const NEWSLETTER_FONT =
   "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
-export const NEWSLETTER_FONT_HEADING = "Georgia,'Times New Roman',Times,serif"
+export const NEWSLETTER_FONT_BODY = NEWSLETTER_FONT
+export const NEWSLETTER_FONT_HEADING = NEWSLETTER_FONT
 
 const SECTION_DIVIDER_PADDING = '28px 0 0'
 const SECTION_INNER_PADDING = '0 0 4px'
@@ -29,9 +30,14 @@ function openPixelUrl(sendId: string): string {
   return `${newsletterSiteOrigin()}/api/o/${encodeURIComponent(sendId)}`
 }
 
-/** Convert plain-text body to email-safe HTML (escape + preserve line breaks). */
+/** Convert plain-text body to email-safe HTML (escape, line breaks, auto-link URLs). */
 export function plainTextToEmailHtml(text: string): string {
-  return escapeHtml(text).replace(/\r\n/g, '\n').replace(/\n/g, '<br />\n')
+  const escaped = escapeHtml(text).replace(/\r\n/g, '\n')
+  const linked = escaped.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi, (url) => {
+    const href = url.startsWith('http') ? url : `https://${url}`
+    return `<a href="${escapeHtml(href)}" style="color:#1B6B45;text-decoration:underline">${url}</a>`
+  })
+  return linked.replace(/\n/g, '<br />\n')
 }
 
 const FOOTER_TEXT_STYLE = `margin:0;font-family:${NEWSLETTER_FONT_BODY};font-size:12px;line-height:1.5;color:#5A6070;text-align:center`
@@ -206,19 +212,19 @@ export function buildNewsletterHtml(opts: {
     : ''
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="nl-wrap">
 <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>SHMS PTO</title>${customCssBlock}</head>
-<body style="margin:0;padding:0;background:#F4F7F5">
+<body class="nl-wrap" style="margin:0;padding:0;background:#F4F7F5;font-family:${NEWSLETTER_FONT}">
 ${pixel}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F7F5">
   <tr><td align="center" style="padding:24px 12px">
     <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #E2E8E4">
-      <tr><td style="background:#1B6B45;padding:16px 20px;text-align:center">
+      <tr><td class="nl-header" style="background:#1B6B45;padding:16px 20px;text-align:center">
         <a href="${escapeHtml(origin)}" style="text-decoration:none">
           <img src="${escapeHtml(logoUrl)}" alt="SHMS PTO" width="120" style="display:inline-block;height:auto;border:0;max-width:120px" />
         </a>
-        <p style="margin:10px 0 0;font-family:${NEWSLETTER_FONT_HEADING};font-size:16px;color:#ffffff;letter-spacing:0.02em">${escapeHtml(branding.headerTitle)}</p>
+        <p class="nl-header-title" style="margin:10px 0 0;font-family:${NEWSLETTER_FONT};font-size:16px;color:#ffffff;letter-spacing:0.02em">${escapeHtml(branding.headerTitle)}</p>
       </td></tr>
       <tr><td style="padding:24px 20px">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
@@ -227,7 +233,7 @@ ${pixel}
           ${bodyHtml}
         </table>
       </td></tr>
-      <tr><td style="padding:16px 20px 20px;border-top:1px solid #E2E8E4">
+      <tr><td class="nl-footer" style="padding:16px 20px 20px;border-top:1px solid #E2E8E4">
         ${footerHtml(origin, branding, {
           physicalAddress: opts.physicalAddress,
           unsubscribeUrl: opts.unsubscribeUrl,

@@ -2,6 +2,8 @@
  * Saved newsletter CSS templates (built-in presets + local + optional site-wide JSON).
  */
 
+import { NEWSLETTER_DEFAULT_CSS } from '@/lib/staff/newsletter-default-css'
+
 export type NewsletterCssTemplate = {
   id: string
   name: string
@@ -14,8 +16,15 @@ export const NEWSLETTER_CSS_TEMPLATES_STORAGE_KEY = 'shmspto.newsletterCssTempla
 
 export const BUILTIN_NEWSLETTER_CSS_TEMPLATES: NewsletterCssTemplate[] = [
   {
+    id: 'builtin-shms-default',
+    name: 'SHMS default',
+    css: NEWSLETTER_DEFAULT_CSS,
+    updatedAt: '',
+    source: 'builtin',
+  },
+  {
     id: 'builtin-none',
-    name: 'Default (no extra CSS)',
+    name: 'No extra CSS',
     css: '',
     updatedAt: '',
     source: 'builtin',
@@ -124,7 +133,7 @@ export const NEWSLETTER_CSS_PREVIEW_SECTIONS = {
     {
       preset: 'cta' as const,
       heading: 'Sample call to action',
-      body: 'Sign up on the member portal.\nLink: https://www.shmspto.org/programs',
+      body: 'Sign up on the member portal.\nVisit https://www.shmspto.org/programs for details.',
       imageUrl: '',
       imageKey: '',
       imageLinkUrl: '',

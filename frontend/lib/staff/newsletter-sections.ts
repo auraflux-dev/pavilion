@@ -58,11 +58,7 @@ export function beatHasContent(beat: NewsletterBeat): boolean {
 }
 
 export function defaultNewsletterBeats(): NewsletterBeat[] {
-  return [
-    emptyNewsletterBeat('event'),
-    emptyNewsletterBeat('question'),
-    emptyNewsletterBeat('cta'),
-  ]
+  return [emptyNewsletterBeat('custom')]
 }
 
 /** @deprecated */

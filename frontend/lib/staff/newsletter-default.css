@@ -1,0 +1,59 @@
+/* SHMS PTO newsletter — default staff CSS (Step 4 editor + Template library).
+   Classes: .nl-wrap, .nl-header, .nl-hero, .nl-section, .nl-section-title, .nl-body, .nl-footer */
+
+.nl-wrap {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #1a1a1a;
+}
+
+.nl-header {
+  background: #1b6b45;
+}
+
+.nl-header-title {
+  font-family: inherit;
+  font-size: 16px;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+.nl-hero img {
+  border-radius: 8px;
+}
+
+.nl-section {
+  padding-top: 28px;
+}
+
+.nl-section-title {
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #1a1a1a;
+  margin: 0 0 10px;
+}
+
+.nl-body {
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #1a1a1a;
+}
+
+.nl-body a {
+  color: #1b6b45;
+  text-decoration: underline;
+}
+
+.nl-footer {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #5a6070;
+  text-align: center;
+}
+
+.nl-footer a {
+  color: #1b6b45;
+  text-decoration: underline;
+}
