@@ -6,10 +6,15 @@
  */
 import { useRef, useState } from 'react'
 
+export type StaffFlyerUploadResult = {
+  url: string
+  id?: string
+}
+
 type Props = {
   label?: string
   currentUrl?: string | null
-  onUploaded: (url: string) => void | Promise<void>
+  onUploaded: (result: StaffFlyerUploadResult) => void | Promise<void>
   disabled?: boolean
 }
 
@@ -33,7 +38,10 @@ export function StaffFlyerUpload({
       const r = await fetch('/api/staff/media/upload', { method: 'POST', body })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Upload failed')
-      await onUploaded(String(d.url))
+      await onUploaded({
+        url: String(d.url),
+        id: typeof d.id === 'string' ? d.id : undefined,
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
     } finally {

@@ -51,15 +51,17 @@ UPTIMEROBOT_API_KEY=xxx node scripts/setup-uptimerobot.mjs
 
 Primary: **Cloudflare R2** bucket **`shmspto`** (SHMS-dedicated; school PTO-owned).
 
-Layout:
+Layout (bucket **`shmspto`**):
 
 ```
-shmspto/cms/shmspto-cms-backup-YYYY-MM-DD.json.gz
-shmspto/cms/latest.json.gz
-shmspto/newsletter-heroes/*.png
+cms/shmspto-cms-backup-YYYY-MM-DD.json.gz
+cms/latest.json.gz
+newsletter-heroes/*.png
 ```
 
 Required Vercel env: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BACKUP_BUCKET`.
+
+Probe and fix read-only tokens: `scripts/ops/R2_SETUP.md`.
 
 Vercel Cron hits `GET /api/cron/backup-cms` daily at 07:00 UTC (`frontend/vercel.json`).
 

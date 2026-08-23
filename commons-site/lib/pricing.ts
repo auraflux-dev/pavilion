@@ -11,4 +11,4 @@ export const ADDON_STORE_USD = 99
 export const ADDON_CREATIVE_USD = 99
 
 export const DEMO_URL =
-  'https://commons-pto-demo.vercel.app/review?code=riverside-board'
+  'https://commons-pto-demo.vercel.app/review?code=66988432952500a7587ff938'

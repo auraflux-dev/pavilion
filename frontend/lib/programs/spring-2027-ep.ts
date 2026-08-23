@@ -210,7 +210,10 @@ export function spring2027PacketScheduleRows(): Spring2027ScheduleRow[] {
   }))
 }
 
-/** Staging-only catalog cards when CMS has no Spring rows yet. Never sold from here. */
+/**
+ * Spring catalog cards from the EP packet when CMS has no spring-2027 rows yet.
+ * Registration stays closed until Staff opens CMS rows.
+ */
 const SPRING_STAGING_CATALOG: Record<
   string,
   { fee: number; capacity: number; category: string; description: string }
@@ -246,8 +249,7 @@ const SPRING_STAGING_CATALOG: Record<
 }
 
 /**
- * Synthetic Spring programs for staging /programs only.
- * Skipped when CMS already has spring-2027 rows.
+ * Synthetic Spring programs for /programs when CMS has no spring-2027 rows yet.
  */
 export function spring2027StagingCatalogPrograms(): Program[] {
   return SPRING_2027_EP_CLASSES.map((c, i) => {

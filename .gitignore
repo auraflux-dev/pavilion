@@ -47,3 +47,4 @@ scripts/sales/out/
 promo-videos/voices/**/*.mp3
 promo-videos/voices/**/*.m4a
 promo-videos/voices/**/*.wav
+.env*

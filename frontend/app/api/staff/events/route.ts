@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUpcomingEvents } from '@/lib/api/events'
 import { getWixClient } from '@/lib/wix-client'
+import {
+  createStaffEvent,
+  easternDatetimeLocalToIso,
+  patchStaffEvent,
+  patchStaffEventText,
+  wixEventsErrorMessage,
+} from '@/lib/wix/events-api'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
+
+const STAFF_EVENTS_API_VERSION = 3
 
 function gate(req: NextRequest) {
   return getStaffSession(req).then((session) => {
@@ -12,10 +21,15 @@ function gate(req: NextRequest) {
   })
 }
 
-function toDate(input: string): Date {
-  const d = new Date(input)
+function parseStaffDatetime(raw: string): string {
+  const trimmed = String(raw ?? '').trim()
+  if (!trimmed) throw new Error('Invalid date')
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed)) {
+    return easternDatetimeLocalToIso(trimmed)
+  }
+  const d = new Date(trimmed)
   if (Number.isNaN(d.getTime())) throw new Error('Invalid date')
-  return d
+  return d.toISOString()
 }
 
 export async function GET(req: NextRequest) {
@@ -25,10 +39,11 @@ export async function GET(req: NextRequest) {
     const events = await getUpcomingEvents(30)
     const siteId = process.env.WIX_SITE_ID || '509fda24-8dbf-43c6-aa74-df9f8b63c388'
     return NextResponse.json({
+      apiVersion: STAFF_EVENTS_API_VERSION,
       events: events.map((e) => ({
         id: e.id ?? '',
         title: e.title ?? '',
-        description: e.description ?? '',
+        description: e.description ?? e.shortDescription ?? '',
         location: e.location?.name ?? '',
         startDate: e.dateAndTimeSettings?.startDate ?? '',
         endDate: e.dateAndTimeSettings?.endDate ?? '',
@@ -62,49 +77,21 @@ export async function POST(req: NextRequest) {
     if (!title) return NextResponse.json({ error: 'Title is required' }, { status: 400 })
     if (!startRaw) return NextResponse.json({ error: 'Start date is required' }, { status: 400 })
 
-    const startDate = toDate(startRaw)
-    const endDate = endRaw ? toDate(endRaw) : startDate
+    const startDate = parseStaffDatetime(startRaw)
+    const endDate = endRaw ? parseStaffDatetime(endRaw) : startDate
 
-    // Wix Events description is rich-content (object), not a plain string.
-    // Create without it, then patch a simple paragraph if copy was provided.
-    const client = getWixClient()
-    const created = await client.wixEventsV2.createEvent(
-      {
-        title,
-        location: {
-          type: 'VENUE',
-          name: locationName,
-        },
-        dateAndTimeSettings: {
-          startDate,
-          endDate,
-          timeZoneId: 'America/New_York',
-        },
-        registration: {
-          initialType,
-        },
-      } as unknown as Parameters<typeof client.wixEventsV2.createEvent>[0],
-      { draft },
-    )
+    const id = await createStaffEvent({
+      title,
+      description,
+      locationName,
+      startDate,
+      endDate,
+      initialType,
+      draft,
+    })
 
-    const id = (created as { _id?: string })._id ?? ''
-    if (id && description) {
-      try {
-        await client.wixEventsV2.updateEvent(id, {
-          event: {
-            description: {
-              nodes: [
-                {
-                  type: 'PARAGRAPH',
-                  nodes: [{ type: 'TEXT', textData: { text: description } }],
-                },
-              ],
-            },
-          },
-        } as unknown as Parameters<typeof client.wixEventsV2.updateEvent>[1])
-      } catch (err) {
-        console.warn('/api/staff/events description update skipped', err)
-      }
+    if (!id) {
+      return NextResponse.json({ error: 'Wix did not return an event id' }, { status: 400 })
     }
 
     const ticketPrice = Number(body.ticketPrice ?? 0) || 0
@@ -124,22 +111,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       id,
-      slug: (created as { slug?: string }).slug ?? '',
-      status: (created as { status?: string }).status ?? '',
+      slug: '',
+      status: draft ? 'DRAFT' : 'SCHEDULED',
       draft,
       ticketPrice: initialType === 'TICKETING' ? ticketPrice : 0,
     })
   } catch (err) {
     console.error('/api/staff/events POST', err)
-    return NextResponse.json(
-      {
-        error:
-          err instanceof Error
-            ? err.message
-            : 'Could not create event. confirm API key has Manage Events permission',
-      },
-      { status: 400 },
-    )
+    let message =
+      err instanceof Error
+        ? err.message
+        : 'Could not create event. Confirm API key has Manage Events permission.'
+    try {
+      const parsed = JSON.parse(message) as unknown
+      message = wixEventsErrorMessage(parsed, message)
+    } catch {
+      /* use message as-is */
+    }
+    return NextResponse.json({ error: message }, { status: 400 })
   }
 }
 
@@ -164,27 +153,32 @@ export async function PATCH(req: NextRequest) {
 
     const event: Record<string, unknown> = {}
     if (body.title != null) event.title = String(body.title).trim()
-    if (body.description != null) event.description = String(body.description).trim()
     if (body.location != null) {
       event.location = { type: 'VENUE', name: String(body.location).trim() || 'SHMS PTO' }
     }
     if (body.startDate || body.endDate) {
-      const startDate = body.startDate ? toDate(String(body.startDate)) : undefined
-      const endDate = body.endDate ? toDate(String(body.endDate)) : startDate
+      const startDate = body.startDate ? parseStaffDatetime(String(body.startDate)) : undefined
+      const endDate = body.endDate ? parseStaffDatetime(String(body.endDate)) : startDate
       event.dateAndTimeSettings = {
         ...(startDate ? { startDate } : {}),
         ...(endDate ? { endDate } : {}),
         timeZoneId: 'America/New_York',
       }
     }
-    if (body.image != null) {
-      const url = String(body.image).trim()
-      event.mainImage = url ? { url } : null
+    const imageId = String(body.imageId ?? '').trim()
+    if (imageId) {
+      event.mainImage = { id: imageId }
+    } else if (body.image === null || body.image === '') {
+      event.mainImage = null
     }
 
-    await client.wixEventsV2.updateEvent(id, { event } as unknown as Parameters<
-      typeof client.wixEventsV2.updateEvent
-    >[1])
+    if (Object.keys(event).length > 0) {
+      await patchStaffEvent(id, event)
+    }
+
+    if (body.description != null) {
+      await patchStaffEventText(id, String(body.description))
+    }
 
     if (body.ticketPrice != null || body.capacity != null || body.ticketsOpen != null) {
       const ticketPrice = Number(body.ticketPrice ?? 0) || 0
@@ -204,9 +198,13 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ ok: true, id, action: 'update' })
   } catch (err) {
     console.error('/api/staff/events PATCH', err)
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Could not update event' },
-      { status: 400 },
-    )
+    let message = err instanceof Error ? err.message : 'Could not update event'
+    try {
+      const parsed = JSON.parse(message) as unknown
+      message = wixEventsErrorMessage(parsed, message)
+    } catch {
+      /* use message as-is */
+    }
+    return NextResponse.json({ error: message }, { status: 400 })
   }
 }

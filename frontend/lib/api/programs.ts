@@ -8,7 +8,16 @@ import {
   markCatalogTuitionTbd,
   overlayFall2026PacketProgram,
 } from '@/lib/programs/public-catalog'
-import { filterProgramsForPublicCatalog, resolveProgramSeason } from '@/lib/programs/season'
+import {
+  filterProgramsForPublicCatalog,
+  isSpringCatalogListed,
+  resolveProgramSeason,
+} from '@/lib/programs/season'
+import {
+  matchFall2026EpClass,
+  selectCurrentFall2026Programs,
+} from '@/lib/programs/fall-2026-ep'
+import { programPublicSlug } from '@/lib/programs/public-path'
 import { spring2027StagingCatalogPrograms } from '@/lib/programs/spring-2027-ep'
 
 export interface Program {
@@ -146,13 +155,12 @@ export async function getAllPrograms(opts?: {
   if (isDemoInstance()) {
     const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
     const listed = filterProgramsForPublicCatalog(
-      DEMO_PROGRAMS.map((p) => withReviewHostCheckout(p, opts?.reviewHost)),
+      dedupePublicCatalogPrograms(
+        DEMO_PROGRAMS.map((p) => withReviewHostCheckout(p, opts?.reviewHost)),
+      ),
       opts,
     )
-    if (opts?.reviewHost && !listed.some((p) => resolveProgramSeason(p) === 'spring-2027')) {
-      return [...listed, ...spring2027StagingCatalogPrograms()]
-    }
-    return listed
+    return appendSpringPacketIfNeeded(listed, opts)
   }
   if (process.env.COMMONS_PLATFORM === 'true') return []
   const client = getWixClient();
@@ -189,27 +197,96 @@ function withReviewHostCheckout(program: Program, reviewHost?: boolean): Program
   return { ...program, registrationOpen: true }
 }
 
+/** One CMS row per Fall 2026 packet class (drops duplicate Robotics/Math rows). */
+/** Bump when catalog dedupe logic changes (deploy verification). */
+export const PUBLIC_CATALOG_DEDUPE_VERSION = 2
+
+function fallCatalogPickerScore(program: Program): number {
+  let score = 0
+  if (String(program.fallEpClassId ?? '').trim()) score += 40
+  if (program.registrationOpen) score += 25
+  if (program.featured) score += 15
+  const start = String(program.startDate ?? '').slice(0, 10)
+  const end = String(program.endDate ?? '').slice(0, 10)
+  if (start >= '2026-08-01' && start < '2027-01-01') score += 100
+  else if (start.startsWith('2026')) score += 50
+  if (end >= '2026-08-01' && end < '2027-01-01') score += 30
+  if (start && start < '2026-08-01') score -= 200
+  if (end && end < '2026-08-01') score -= 200
+  return score
+}
+
+/** One CMS row per Fall 2026 packet class (drops duplicate Robotics/Math rows). */
+function dedupePublicCatalogPrograms(programs: Program[]): Program[] {
+  const pickedIds = new Set(
+    selectCurrentFall2026Programs(
+      programs.map((p) => ({
+        id: p._id,
+        name: p.name,
+        fallEpClassId: p.fallEpClassId,
+        startDate: p.startDate,
+        endDate: p.endDate,
+        registrationOpen: p.registrationOpen,
+        featured: p.featured,
+      })),
+    ).map((p) => p.id),
+  )
+  const epFiltered = programs.filter((p) => {
+    const packetMatch =
+      Boolean(String(p.fallEpClassId ?? '').trim()) || Boolean(matchFall2026EpClass(p.name))
+    if (!packetMatch) return true
+    return pickedIds.has(p._id)
+  })
+
+  // Belt-and-suspenders: duplicate CMS rows often share the same public slug.
+  const fallBySlug = new Map<string, Program>()
+  const other: Program[] = []
+  for (const program of epFiltered) {
+    if (resolveProgramSeason(program) !== 'fall-2026') {
+      other.push(program)
+      continue
+    }
+    const slug = programPublicSlug(program)
+    const existing = fallBySlug.get(slug)
+    if (!existing || fallCatalogPickerScore(program) > fallCatalogPickerScore(existing)) {
+      fallBySlug.set(slug, program)
+    }
+  }
+  return [...other, ...fallBySlug.values()]
+}
+
+/** EP packet Spring cards when the tab is on but CMS has no spring-2027 rows yet. */
+function appendSpringPacketIfNeeded(
+  programs: Program[],
+  opts?: { reviewHost?: boolean },
+): Program[] {
+  if (!isSpringCatalogListed({ reviewHost: opts?.reviewHost })) return programs
+  if (programs.some((p) => resolveProgramSeason(p) === 'spring-2027')) return programs
+  return [...programs, ...spring2027StagingCatalogPrograms()]
+}
+
+function shapePublicCatalogItems(
+  items: Record<string, unknown>[],
+  opts?: { reviewHost?: boolean },
+): Program[] {
+  return items
+    .map(mapProgramItem)
+    .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags))
+    .filter((p) => p.registrationOpen || p.featured)
+    .map((p) => withReviewHostCheckout(p, opts?.reviewHost))
+    .map(overlayFall2026PacketProgram)
+    .map(markCatalogTuitionTbd)
+}
+
 function publicPrograms(
   items: Record<string, unknown>[],
   opts?: { reviewHost?: boolean },
 ): Program[] {
-  // Featured/open filter MUST run before review-host checkout open.
-  // Staging used to force-open every CMS row first, which flooded /programs with old seasons.
   const listed = filterProgramsForPublicCatalog(
-    items
-      .map(mapProgramItem)
-      .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags))
-      .filter((p) => p.registrationOpen || p.featured)
-      .map((p) => withReviewHostCheckout(p, opts?.reviewHost))
-      .map(overlayFall2026PacketProgram)
-      .map(markCatalogTuitionTbd),
+    dedupePublicCatalogPrograms(shapePublicCatalogItems(items, opts)),
     opts,
   )
-  // Staging / Preview only: fill Spring tab from the EP packet when CMS has no Spring rows.
-  if (!opts?.reviewHost) return listed
-  const hasSpringCms = listed.some((p) => resolveProgramSeason(p) === 'spring-2027')
-  if (hasSpringCms) return listed
-  return [...listed, ...spring2027StagingCatalogPrograms()]
+  return appendSpringPacketIfNeeded(listed, opts)
 }
 
 export async function getProgramById(id: string): Promise<Program | null> {

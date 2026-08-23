@@ -13,7 +13,7 @@ export const GALLERY_ITEMS: GalleryItem[] = [
     title: 'Riverside demo',
     kind: 'demo',
     blurb: 'Public demo board tour. Vanilla school brand for prospects.',
-    href: 'https://commons-pto-demo.vercel.app/review?code=riverside-board',
+    href: 'https://commons-pto-demo.vercel.app/review?code=66988432952500a7587ff938',
     placeholder: true,
   },
   {

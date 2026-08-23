@@ -3,10 +3,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
-import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
-import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
-
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type EventRow = {
   id: string
@@ -22,13 +18,33 @@ type EventRow = {
 const emptyForm = {
   title: '',
   description: '',
-  location: vanillaizeIfDemo('School building'),
+  location: 'SHMS PTO',
   startDate: '',
   endDate: '',
   registrationType: 'RSVP',
   ticketPrice: '',
   capacity: '',
   draft: false,
+}
+
+/** Wix returns ISO strings; datetime-local needs YYYY-MM-DDTHH:mm in Eastern. */
+function toDatetimeLocalValue(raw: string): string {
+  if (!raw) return ''
+  const d = new Date(raw)
+  if (Number.isNaN(d.getTime())) return ''
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(d)
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? ''
+  const hour = get('hour') === '24' ? '00' : get('hour')
+  return `${get('year')}-${get('month')}-${get('day')}T${hour}:${get('minute')}`
 }
 
 export function StaffEventsPanel() {
@@ -65,9 +81,9 @@ export function StaffEventsPanel() {
     setForm({
       title: e.title,
       description: e.description,
-      location: e.location || vanillaizeIfDemo('School building'),
-      startDate: e.startDate ? e.startDate.slice(0, 16) : '',
-      endDate: e.endDate ? e.endDate.slice(0, 16) : '',
+      location: e.location || 'SHMS PTO',
+      startDate: toDatetimeLocalValue(e.startDate),
+      endDate: toDatetimeLocalValue(e.endDate),
       registrationType: 'RSVP',
       ticketPrice: '',
       capacity: '',
@@ -83,17 +99,20 @@ export function StaffEventsPanel() {
     setError('')
     try {
       if (editingId) {
+        const payload: Record<string, string> = {
+          id: editingId,
+          title: form.title,
+          description: form.description,
+          location: form.location,
+        }
+        if (form.startDate.trim()) {
+          payload.startDate = form.startDate
+          payload.endDate = form.endDate.trim() || form.startDate
+        }
         const r = await fetch('/api/staff/events', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: editingId,
-            title: form.title,
-            description: normalizePlainCopy(form.description),
-            location: form.location,
-            startDate: form.startDate,
-            endDate: form.endDate || form.startDate,
-          }),
+          body: JSON.stringify(payload),
         })
         const d = await r.json()
         if (!r.ok) throw new Error(d.error ?? 'Update failed')
@@ -104,7 +123,7 @@ export function StaffEventsPanel() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             title: form.title,
-            description: normalizePlainCopy(form.description),
+            description: form.description,
             location: form.location,
             startDate: form.startDate,
             endDate: form.endDate || form.startDate,
@@ -149,14 +168,17 @@ export function StaffEventsPanel() {
     }
   }
 
-  async function setEventImage(id: string, url: string) {
+  async function setEventImage(id: string, media: { url: string; id?: string }) {
     setBusy(true)
     setError('')
     try {
+      if (!media.id) {
+        throw new Error('Upload did not return a Wix media id. Try the upload again.')
+      }
       const r = await fetch('/api/staff/events', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, image: url }),
+        body: JSON.stringify({ id, imageId: media.id }),
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Could not save flyer')
@@ -205,15 +227,12 @@ export function StaffEventsPanel() {
             placeholder="Title"
             className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
           />
-          <StaffPlainCopyField
-            label="Description"
+          <textarea
             value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            placeholder="Description"
             rows={3}
-            textareaClassName="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
-            onChange={(next) => setForm({ ...form, description: next })}
-            onCommit={(next) =>
-              setForm((f) => ({ ...f, description: normalizePlainCopy(next) }))
-            }
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
           />
           <input
             value={form.location}
@@ -349,7 +368,7 @@ export function StaffEventsPanel() {
                 label="Event flyer"
                 currentUrl={e.image}
                 disabled={busy}
-                onUploaded={(url) => void setEventImage(e.id, url)}
+                onUploaded={(media) => void setEventImage(e.id, media)}
               />
             ) : null}
           </div>
