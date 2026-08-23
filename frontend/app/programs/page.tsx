@@ -17,6 +17,7 @@ import { ProgramsSectionNav } from '@/components/jump-nav/public-section-navs'
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
 import { canViewProgramsCatalogNow, isProgramsReviewHost } from '@/lib/programs/public-access'
 import { isProgramsCatalogListed } from '@/lib/programs/public-catalog'
+import { isSpringCatalogListed } from '@/lib/programs/season'
 import { ProgramsPreviewBanner } from '@/components/programs/programs-preview-banner'
 
 export const revalidate = 300 // revalidate every 5 minutes
@@ -41,6 +42,7 @@ export default async function ProgramsPage({
     ).join(', ') || DEFAULT_PROGRAMS_INBOXES
   const inSession = settings.getBool('schoolInSession', false)
   const catalogOpen = isProgramsCatalogListed({ inSession, access, reviewHost })
+  const springCatalogVisible = isSpringCatalogListed({ reviewHost })
 
   try {
     programs = catalogOpen ? await getAllPrograms({ reviewHost }) : []
@@ -85,7 +87,7 @@ export default async function ProgramsPage({
                   }),
           }}
         />
-        {catalogOpen ? <ProgramsSectionNav springCatalogVisible={reviewHost} /> : null}
+        {catalogOpen ? <ProgramsSectionNav springCatalogVisible={springCatalogVisible} /> : null}
 
         {catalogOpen ? (
           <section
@@ -132,7 +134,7 @@ export default async function ProgramsPage({
                       {page.sectionBody ? `\n${page.sectionBody}` : ''}
                     </p>
                   )}
-                  <ProgramsFilter programs={programs} springCatalogVisible={reviewHost} />
+                  <ProgramsFilter programs={programs} springCatalogVisible={springCatalogVisible} />
                 </>
               )}
             </div>

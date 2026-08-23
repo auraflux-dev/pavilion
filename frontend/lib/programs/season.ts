@@ -3,8 +3,8 @@
  *
  * Locked product rules:
  * - Public catalog is Fall / Spring (no Full year tab).
- * - Spring stays hidden on www until SPRING_CATALOG_ENABLED is flipped.
- *   Staging / Preview review hosts can list Spring earlier for dry runs.
+ * - Spring lists on www when SPRING_CATALOG_ENABLED is true (and CMS has Spring rows).
+ *   Staging / Preview review hosts could preview Spring earlier before the flip.
  * - Full-year buy stays dark until RFPs clear (FULL_YEAR_CATALOG_ENABLED).
  * - Checkout consents for programs stay enrichment-waiver + medical + photo
  *   (see checkout-consent.ts). requiresWaiver on a CMS row is separate.
@@ -16,7 +16,7 @@ export type CatalogSeasonId = 'fall-2026' | 'spring-2027' | 'full-year'
  * Flip when Spring classes should list on www (production).
  * Staging / Preview review hosts can show Spring earlier via `reviewHost`.
  */
-export const SPRING_CATALOG_ENABLED = false
+export const SPRING_CATALOG_ENABLED = true
 
 export type SeasonCatalogVisibilityOpts = {
   /** True on shmspto.vercel.app and Vercel Preview hosts. */
