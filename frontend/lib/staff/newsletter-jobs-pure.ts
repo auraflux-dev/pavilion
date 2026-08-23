@@ -36,6 +36,7 @@ export type NewsletterJobPayload = {
   testGroup?: 'me' | 'board' | 'custom' | 'board_and_custom'
   testEmails?: string
   emails?: string[]
+  attachmentKeys?: Array<{ key: string; filename: string; mimeType: string }>
 }
 
 export type NewsletterJob = {

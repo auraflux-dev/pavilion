@@ -12,6 +12,7 @@ import {
 import { newsletterSiteOrigin } from './newsletter-site'
 
 const PREFIX = 'newsletter-heroes/'
+const ATTACHMENT_PREFIX = 'newsletter-attachments/'
 
 export function newsletterAssetsConfigured(): boolean {
   return Boolean(
@@ -30,6 +31,7 @@ function makeR2Client(): S3Client {
       accessKeyId: process.env.R2_ACCESS_KEY_ID!.trim(),
       secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!.trim(),
     },
+    forcePathStyle: true,
   })
 }
 
@@ -51,6 +53,66 @@ export function publicNewsletterAssetUrl(key: string): string {
   return `${newsletterSiteOrigin()}/api/newsletter-assets/${encodeURIComponent(key)}`
 }
 
+export function normalizeNewsletterAttachmentKey(raw: string): string | null {
+  const key = String(raw ?? '')
+    .trim()
+    .replace(/^\/+/, '')
+  if (!key.startsWith(ATTACHMENT_PREFIX)) return null
+  if (!/^newsletter-attachments\/[a-zA-Z0-9._-]+$/.test(key)) return null
+  return key
+}
+
+export async function putNewsletterAttachment(
+  buf: Buffer,
+  opts: { filename: string; mimeType: string },
+): Promise<{ key: string; url: string; filename: string; mimeType: string }> {
+  if (!newsletterAssetsConfigured()) {
+    throw new Error('Attachment storage is not configured (R2).')
+  }
+  const base = opts.filename.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 48) || 'file'
+  const key = `${ATTACHMENT_PREFIX}${base}-${randomUUID().slice(0, 8)}`
+  const client = makeR2Client()
+  await client.send(
+    new PutObjectCommand({
+      Bucket: bucket(),
+      Key: key,
+      Body: buf,
+      ContentType: opts.mimeType || 'application/octet-stream',
+      CacheControl: 'private, max-age=3600',
+      Metadata: {
+        site: 'shmspto',
+        kind: 'newsletter-attachment',
+        filename: base,
+      },
+    }),
+  )
+  return {
+    key,
+    url: publicNewsletterAssetUrl(key),
+    filename: opts.filename,
+    mimeType: opts.mimeType,
+  }
+}
+
+export async function getNewsletterAttachment(key: string): Promise<Buffer | null> {
+  const safe = normalizeNewsletterAttachmentKey(key)
+  if (!safe || !newsletterAssetsConfigured()) return null
+  const client = makeR2Client()
+  try {
+    const res = await client.send(
+      new GetObjectCommand({
+        Bucket: bucket(),
+        Key: safe,
+      }),
+    )
+    const bytes = await res.Body?.transformToByteArray()
+    if (!bytes) return null
+    return Buffer.from(bytes)
+  } catch {
+    return null
+  }
+}
+
 export async function putNewsletterHeroPng(
   png: Buffer,
   opts?: { designId?: string },
@@ -65,19 +127,29 @@ export async function putNewsletterHeroPng(
     : 'hero'
   const key = `${PREFIX}${slug}-${randomUUID().slice(0, 8)}.png`
   const client = makeR2Client()
-  await client.send(
-    new PutObjectCommand({
-      Bucket: bucket(),
-      Key: key,
-      Body: png,
-      ContentType: 'image/png',
-      CacheControl: 'public, max-age=31536000, immutable',
-      Metadata: {
-        site: 'shmspto',
-        kind: 'newsletter-hero',
-      },
-    }),
-  )
+  try {
+    await client.send(
+      new PutObjectCommand({
+        Bucket: bucket(),
+        Key: key,
+        Body: png,
+        ContentType: 'image/png',
+        CacheControl: 'public, max-age=31536000, immutable',
+        Metadata: {
+          site: 'shmspto',
+          kind: 'newsletter-hero',
+        },
+      }),
+    )
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    if (/access denied/i.test(msg)) {
+      throw new Error(
+        'R2 token cannot write newsletter PNGs (read-only). Ask an admin to create an Object Read & Write token for bucket shmspto. See scripts/ops/R2_SETUP.md.',
+      )
+    }
+    throw err
+  }
   return { key, url: publicNewsletterAssetUrl(key) }
 }
 

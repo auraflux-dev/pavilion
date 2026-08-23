@@ -6,6 +6,8 @@ import {
   normalizeCommsPlannerKind,
   normalizeCommsStatus,
   parseCommsAudiences,
+  parseAssigneeEmails,
+  serializeAssigneeEmails,
   serializeCommsAudiences,
   type CommsCalendarItem,
 } from '@/lib/staff/comms-calendar'
@@ -23,6 +25,9 @@ type Row = {
   publishAt?: string | Date | null
   ownerEmail?: string
   ownerName?: string
+  assigneeEmails?: string
+  assigneeGroup?: string
+  isEvent?: boolean
   assetUrl?: string
   notes?: string
   publishedAt?: string | Date | null
@@ -59,6 +64,9 @@ function mapItem(row: Row): CommsCalendarItem {
     publishAt: toIso(row.publishAt),
     ownerEmail: String(row.ownerEmail ?? '').toLowerCase(),
     ownerName: String(row.ownerName ?? ''),
+    assigneeEmails: parseAssigneeEmails(row.assigneeEmails),
+    assigneeGroup: String(row.assigneeGroup ?? ''),
+    isEvent: row.isEvent === true,
     assetUrl: String(row.assetUrl ?? ''),
     notes: String(row.notes ?? ''),
     publishedAt: toIso(row.publishedAt),
@@ -78,6 +86,25 @@ function canAccessComms(staff: NonNullable<Awaited<ReturnType<typeof getStaffSes
     requireStaffRole(staff, 'membership') ||
     requireStaffRole(staff, 'events')
   )
+}
+
+async function loadStaffOptions() {
+  try {
+    const client = getWixClient()
+    const result = await client.items.query('StaffRoles').limit(100).find()
+    return (result.items ?? [])
+      .filter((row) => (row as { active?: boolean }).active !== false)
+      .map((row) => {
+        const r = row as { email?: string; name?: string; boardTitle?: string }
+        const email = String(r.email ?? '').trim().toLowerCase()
+        const name = String(r.name ?? r.boardTitle ?? email).trim()
+        return email ? { email, name } : null
+      })
+      .filter((x): x is { email: string; name: string } => Boolean(x))
+      .sort((a, b) => a.name.localeCompare(b.name))
+  } catch {
+    return []
+  }
 }
 
 export async function GET(req: NextRequest) {
@@ -143,6 +170,7 @@ export async function GET(req: NextRequest) {
       myEmail: session.email,
       myName: session.staff.name || session.email,
       myRoles: session.staff.roles,
+      staffOptions: await loadStaffOptions(),
     })
   } catch (err) {
     console.error('/api/staff/comms-calendar GET error:', err)
@@ -188,6 +216,9 @@ export async function POST(req: NextRequest) {
         .trim()
         .toLowerCase() || session.email
     const ownerName = String(body.ownerName ?? session.staff.name ?? ownerEmail).trim() || ownerEmail
+    const assigneeEmails = parseAssigneeEmails(body.assigneeEmails)
+    const assigneeGroup = String(body.assigneeGroup ?? '').trim()
+    const isEvent = body.isEvent === true
 
     const row = {
       title,
@@ -199,6 +230,9 @@ export async function POST(req: NextRequest) {
       publishAt: publishAt || null,
       ownerEmail,
       ownerName,
+      assigneeEmails: serializeAssigneeEmails(assigneeEmails),
+      assigneeGroup,
+      isEvent,
       assetUrl: String(body.assetUrl ?? '').trim(),
       notes: String(body.notes ?? '').trim(),
       publishedAt: status === 'published' ? now : null,

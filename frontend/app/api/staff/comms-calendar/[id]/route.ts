@@ -6,6 +6,8 @@ import {
   normalizeCommsPlannerKind,
   normalizeCommsStatus,
   parseCommsAudiences,
+  parseAssigneeEmails,
+  serializeAssigneeEmails,
   serializeCommsAudiences,
   type CommsCalendarItem,
 } from '@/lib/staff/comms-calendar'
@@ -23,6 +25,9 @@ type Row = {
   publishAt?: string | Date | null
   ownerEmail?: string
   ownerName?: string
+  assigneeEmails?: string
+  assigneeGroup?: string
+  isEvent?: boolean
   assetUrl?: string
   notes?: string
   publishedAt?: string | Date | null
@@ -59,6 +64,9 @@ function mapItem(row: Row): CommsCalendarItem {
     publishAt: toIso(row.publishAt),
     ownerEmail: String(row.ownerEmail ?? '').toLowerCase(),
     ownerName: String(row.ownerName ?? ''),
+    assigneeEmails: parseAssigneeEmails(row.assigneeEmails),
+    assigneeGroup: String(row.assigneeGroup ?? ''),
+    isEvent: row.isEvent === true,
     assetUrl: String(row.assetUrl ?? ''),
     notes: String(row.notes ?? ''),
     publishedAt: toIso(row.publishedAt),
@@ -148,6 +156,13 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
           ? String(body.ownerEmail).trim().toLowerCase()
           : existing.ownerEmail,
       ownerName: body.ownerName != null ? String(body.ownerName).trim() : existing.ownerName,
+      assigneeEmails:
+        body.assigneeEmails != null
+          ? serializeAssigneeEmails(parseAssigneeEmails(body.assigneeEmails))
+          : existing.assigneeEmails,
+      assigneeGroup:
+        body.assigneeGroup != null ? String(body.assigneeGroup).trim() : existing.assigneeGroup,
+      isEvent: body.isEvent != null ? body.isEvent === true : existing.isEvent === true,
       assetUrl: body.assetUrl != null ? String(body.assetUrl).trim() : existing.assetUrl,
       notes: body.notes != null ? String(body.notes).trim() : existing.notes,
       publishedAt: publishedAt || null,

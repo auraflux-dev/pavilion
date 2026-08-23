@@ -23,6 +23,7 @@ export type MassEmailDraft = {
   replyTo?: string
   recipients: string[]
   html?: string
+  attachments?: EmailAttachment[]
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -126,11 +127,17 @@ export function gmailSenderAddress(): string {
 
 export function gmailFromHeader(fromName: string, senderEmail?: string): string {
   const sender = (senderEmail || gmailSenderAddress()).trim().toLowerCase()
-  const name = (process.env.GMAIL_FROM_NAME?.trim() || fromName || 'SHMS PTO').replace(
+  const name = (fromName || process.env.GMAIL_FROM_NAME?.trim() || 'SHMS PTO').replace(
     /[\r\n"]/g,
     '',
   )
   return `${name} <${sender}>`
+}
+
+export type EmailAttachment = {
+  filename: string
+  mimeType: string
+  contentBase64: string
 }
 
 export type SendMassEmailResult = {
@@ -211,6 +218,34 @@ export async function sendMassEmail(
   const accessToken = auth.accessToken
   const from = gmailFromHeader(draft.fromName, auth.senderEmail)
   const replyTo = (draft.replyTo || auth.senderEmail).trim()
+
+  let brandingWrap: Awaited<
+    ReturnType<typeof import('./newsletter-branding').loadNewsletterBrandingFromKeys>
+  > | null = null
+  async function wrapHtml(html: string | undefined): Promise<string | undefined> {
+    const h = html?.trim()
+    if (!h || /^\s*<!DOCTYPE/i.test(h)) return h
+    if (!brandingWrap) {
+      const { loadNewsletterBrandingFromKeys } = await import('./newsletter-branding')
+      const { getWixClient } = await import('@/lib/wix-client')
+      brandingWrap = await loadNewsletterBrandingFromKeys(async (key) => {
+        try {
+          const client = getWixClient()
+          const result = await client.items
+            .query('SiteSettings')
+            .eq('key', key)
+            .limit(1)
+            .find()
+          return String(result.items?.[0]?.value ?? '')
+        } catch {
+          return ''
+        }
+      })
+    }
+    const { wrapStaffEmailBody } = await import('./staff-email-shell')
+    return wrapStaffEmailBody(h, brandingWrap)
+  }
+
   const errors: string[] = []
   let sent = 0
   let failed = 0
@@ -219,14 +254,17 @@ export async function sendMassEmail(
   for (const to of recipients) {
     try {
       const personalized = opts.personalize?.(to)
+      const htmlRaw = (personalized?.html ?? draft.html)?.trim()
+      const html = htmlRaw ? await wrapHtml(htmlRaw) : undefined
       const raw = buildRawMimeMessage({
         from,
         to,
         replyTo,
         subject: (personalized?.subject ?? draft.subject).trim(),
         text: (personalized?.body ?? draft.body).trim(),
-        html: (personalized?.html ?? draft.html)?.trim(),
+        html,
         listUnsubscribeUrl: personalized?.listUnsubscribeUrl?.trim(),
+        attachments: draft.attachments,
       })
       const res = await fetch(GMAIL_SEND_URL, {
         method: 'POST',
@@ -309,6 +347,7 @@ export function buildRawMimeMessage(opts: {
   text: string
   html?: string
   listUnsubscribeUrl?: string
+  attachments?: EmailAttachment[]
 }): string {
   const subject = encodeRfc2047(opts.subject)
   const text = opts.text.replace(/\r?\n/g, '\r\n')
@@ -325,6 +364,61 @@ export function buildRawMimeMessage(opts: {
         ]
       : []),
   ]
+
+  const attachments = (opts.attachments ?? []).filter((a) => a.contentBase64.trim())
+  const hasAttachments = attachments.length > 0
+
+  function alternativePart(boundary: string): string[] {
+    const html = opts.html?.replace(/\r?\n/g, '\r\n') ?? ''
+    if (opts.html?.trim()) {
+      return [
+        `Content-Type: multipart/alternative; boundary="${boundary}"`,
+        '',
+        `--${boundary}`,
+        'Content-Type: text/plain; charset="UTF-8"',
+        'Content-Transfer-Encoding: 8bit',
+        '',
+        text,
+        `--${boundary}`,
+        'Content-Type: text/html; charset="UTF-8"',
+        'Content-Transfer-Encoding: 8bit',
+        '',
+        html,
+        `--${boundary}--`,
+      ]
+    }
+    return [
+      'Content-Type: text/plain; charset="UTF-8"',
+      'Content-Transfer-Encoding: 8bit',
+      '',
+      text,
+    ]
+  }
+
+  if (hasAttachments) {
+    const mixed = `mix_${Date.now().toString(36)}`
+    const alt = `alt_${Date.now().toString(36)}`
+    const parts: string[] = [
+      ...headers,
+      `Content-Type: multipart/mixed; boundary="${mixed}"`,
+      '',
+      `--${mixed}`,
+      ...alternativePart(alt),
+    ]
+    for (const file of attachments) {
+      const safeName = file.filename.replace(/[\r\n"]/g, '_') || 'attachment'
+      parts.push(
+        `--${mixed}`,
+        `Content-Type: ${file.mimeType || 'application/octet-stream'}; name="${safeName}"`,
+        'Content-Transfer-Encoding: base64',
+        `Content-Disposition: attachment; filename="${safeName}"`,
+        '',
+        file.contentBase64.replace(/\s/g, ''),
+      )
+    }
+    parts.push(`--${mixed}--`)
+    return encodeRawMime(parts.join('\r\n'))
+  }
 
   if (opts.html?.trim()) {
     const boundary = `nl_${Date.now().toString(36)}`

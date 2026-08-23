@@ -15,6 +15,7 @@ import {
   sanitizeRecipients,
   sendMassEmail,
   validateMassEmailDraft,
+  type EmailAttachment,
 } from '@/lib/staff/mass-email'
 import { defaultUtmCampaign } from '@/lib/staff/newsletter-utm'
 import { prepareTrackedNewsletterSend } from '@/lib/staff/newsletter-tracking'
@@ -34,6 +35,7 @@ import {
   newsletterUnsubscribePageUrl,
 } from '@/lib/staff/newsletter-unsubscribe'
 import { isSyntheticStagingMode } from '@/lib/fixtures/synthetic-mode'
+import { getNewsletterAttachment } from '@/lib/staff/newsletter-assets'
 import {
   buildNewsletterTestGroups,
   parseEmailList,
@@ -69,6 +71,8 @@ export type NewsletterExecuteInput = {
   includeSubscribers?: boolean
   dryRun?: boolean
   actorPersonalEmail?: string
+  /** R2 keys from /api/staff/newsletter/upload-attachment */
+  attachmentKeys?: Array<{ key: string; filename: string; mimeType: string }>
 }
 
 export type NewsletterExecuteResult = {
@@ -313,12 +317,26 @@ export async function executeNewsletterEmail(
   let archiveBody = message
   let newsletterSendId: string | null = null
   const fromName = input.actorName || input.actorEmail
+  const replyEmail = (input.actorPersonalEmail || input.actorEmail).trim().toLowerCase()
+  const replyTo = replyEmail.includes('@') ? `${fromName} <${replyEmail}>` : input.actorEmail
+
+  const emailAttachments: EmailAttachment[] = []
+  for (const meta of input.attachmentKeys ?? []) {
+    const buf = await getNewsletterAttachment(meta.key)
+    if (!buf) continue
+    emailAttachments.push({
+      filename: meta.filename || 'attachment',
+      mimeType: meta.mimeType || 'application/octet-stream',
+      contentBase64: buf.toString('base64'),
+    })
+  }
 
   const draftBase = {
     subject: effectiveSubject,
     fromName,
-    replyTo: input.actorEmail,
+    replyTo,
     recipients,
+    attachments: emailAttachments.length ? emailAttachments : undefined,
   }
 
   if (!dryRun && !isTestAudience) {

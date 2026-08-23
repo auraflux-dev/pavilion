@@ -99,6 +99,11 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
   const [publishLocal, setPublishLocal] = useState('')
   const [assetUrl, setAssetUrl] = useState('')
   const [notes, setNotes] = useState('')
+  const [assigneeEmails, setAssigneeEmails] = useState<string[]>([])
+  const [assigneeGroup, setAssigneeGroup] = useState('')
+  const [isEvent, setIsEvent] = useState(false)
+  const [staffOptions, setStaffOptions] = useState<{ email: string; name: string }[]>([])
+  const [savedGroups, setSavedGroups] = useState<{ name: string; emails: string[] }[]>([])
 
   const weekStart = useMemo(() => {
     const base = startOfWeekMonday()
@@ -129,6 +134,7 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Could not load calendar')
       setItems(d.items ?? [])
+      setStaffOptions(d.staffOptions ?? [])
     } catch (err) {
       setStatusMsg(err instanceof Error ? err.message : 'Could not load calendar')
     } finally {
@@ -207,6 +213,37 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
     setAudiences((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]))
   }
 
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('commsCalendarStaffGroups')
+      if (raw) setSavedGroups(JSON.parse(raw) as { name: string; emails: string[] }[])
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
+  function toggleAssignee(email: string) {
+    setAssigneeEmails((prev) =>
+      prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email],
+    )
+  }
+
+  function saveCurrentGroup() {
+    const name = assigneeGroup.trim()
+    if (!name || assigneeEmails.length === 0) return
+    const next = savedGroups.filter((g) => g.name !== name).concat({ name, emails: assigneeEmails })
+    setSavedGroups(next)
+    localStorage.setItem('commsCalendarStaffGroups', JSON.stringify(next))
+    setStatusMsg(`Saved group "${name}".`)
+  }
+
+  function applySavedGroup(name: string) {
+    const group = savedGroups.find((g) => g.name === name)
+    if (!group) return
+    setAssigneeGroup(group.name)
+    setAssigneeEmails(group.emails)
+  }
+
   function resetForm() {
     setEditingId(null)
     setTitle('')
@@ -217,6 +254,9 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
     setPublishLocal('')
     setAssetUrl('')
     setNotes('')
+    setAssigneeEmails([])
+    setAssigneeGroup('')
+    setIsEvent(false)
   }
 
   function startEdit(item: CommsCalendarItem) {
@@ -230,6 +270,9 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
     setPublishLocal(toLocalInputValue(item.publishAt))
     setAssetUrl(item.assetUrl)
     setNotes(item.notes)
+    setAssigneeEmails(item.assigneeEmails ?? [])
+    setAssigneeGroup(item.assigneeGroup ?? '')
+    setIsEvent(item.isEvent === true)
   }
 
   function startNewOnDate(isoDate: string) {
@@ -243,6 +286,9 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
     setPublishLocal(`${isoDate}T09:00`)
     setAssetUrl('')
     setNotes('')
+    setAssigneeEmails([])
+    setAssigneeGroup('')
+    setIsEvent(true)
   }
 
   async function saveItem() {
@@ -259,6 +305,9 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
         publishAt: fromLocalInputValue(publishLocal),
         assetUrl,
         notes,
+        assigneeEmails,
+        assigneeGroup,
+        isEvent,
       }
       const r = await fetch(
         editingId ? `/api/staff/comms-calendar/${editingId}` : '/api/staff/comms-calendar',
@@ -339,6 +388,11 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
             {item.audiences.map((a) => COMMS_AUDIENCE_LABEL[a]).join(' · ')}
             {item.publishAt ? ` · ${formatWhen(item.publishAt)}` : ''}
             {item.ownerName ? ` · ${item.ownerName}` : ''}
+            {item.isEvent ? ' · Event' : ''}
+            {item.assigneeGroup ? ` · ${item.assigneeGroup}` : ''}
+            {item.assigneeEmails?.length
+              ? ` · +${item.assigneeEmails.length} assignee${item.assigneeEmails.length === 1 ? '' : 's'}`
+              : ''}
           </p>
           {item.body ? <p className="mt-1 line-clamp-2 text-sm text-[#3D4454]">{item.body}</p> : null}
           {item.notes ? <p className="mt-1 text-xs italic text-[#5A6070]">{item.notes}</p> : null}
@@ -664,8 +718,62 @@ export function StaffCommsCalendarPanel({ onOpenWorkspace }: Props) {
             className="mt-1 w-full rounded border border-[#D8DEE8] bg-white px-3 py-2"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Needs Grace review · wait for flyer from Events"
+            placeholder="Needs VP Marketing review · wait for flyer from Events"
           />
+        </label>
+        <fieldset>
+          <legend className="text-sm text-[#5A6070]">Assign staff</legend>
+          {savedGroups.length > 0 ? (
+            <div className="mt-1 flex flex-wrap gap-2">
+              {savedGroups.map((g) => (
+                <Button
+                  key={g.name}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => applySavedGroup(g.name)}
+                >
+                  {g.name}
+                </Button>
+              ))}
+            </div>
+          ) : null}
+          <div className="mt-2 flex flex-wrap gap-3">
+            {staffOptions.map((s) => (
+              <label key={s.email} className="flex items-center gap-1.5 text-sm text-[#1B2A4A]">
+                <input
+                  type="checkbox"
+                  checked={assigneeEmails.includes(s.email)}
+                  onChange={() => toggleAssignee(s.email)}
+                />
+                {s.name}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <div className="flex flex-wrap gap-3 items-end">
+          <label className="text-sm flex-1 min-w-[12rem]">
+            <span className="text-[#5A6070]">Group name (optional)</span>
+            <input
+              className="mt-1 w-full rounded border border-[#D8DEE8] bg-white px-3 py-2"
+              value={assigneeGroup}
+              onChange={(e) => setAssigneeGroup(e.target.value)}
+              placeholder="Marketing team"
+            />
+          </label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!assigneeGroup.trim() || assigneeEmails.length === 0}
+            onClick={saveCurrentGroup}
+          >
+            Save group
+          </Button>
+        </div>
+        <label className="flex items-center gap-2 text-sm text-[#1B2A4A]">
+          <input type="checkbox" checked={isEvent} onChange={(e) => setIsEvent(e.target.checked)} />
+          Show as calendar event
         </label>
         <div className="flex flex-wrap gap-2">
           <Button type="submit" disabled={busy || !title.trim() || audiences.length === 0}>

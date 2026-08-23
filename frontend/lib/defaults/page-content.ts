@@ -90,7 +90,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   programs: empty('programs', {
     eyebrow: 'Fall 2026 Enrichment',
     title: 'Enrichment Programs',
-    body: 'After-school classes for grades 6 to 8.',
+    body: 'Evening classes for grades 6 to 8.',
     bullets: [],
     sectionTitle: 'Fall 2026 schedule',
     sectionBody:

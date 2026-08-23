@@ -1,6 +1,5 @@
 import { applyMergeFields, type NewsletterMergeVars } from '@/lib/staff/newsletter-merge'
 import {
-  presetLabel,
   type NewsletterBeat,
   type NewsletterSections,
 } from '@/lib/staff/newsletter-sections'
@@ -9,6 +8,14 @@ import {
   type NewsletterBranding,
 } from '@/lib/staff/newsletter-branding'
 import { newsletterSiteOrigin } from './newsletter-site'
+
+/** Shared newsletter typography (body + headings). */
+export const NEWSLETTER_FONT_BODY =
+  "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+export const NEWSLETTER_FONT_HEADING = "Georgia,'Times New Roman',Times,serif"
+
+const SECTION_DIVIDER_PADDING = '28px 0 0'
+const SECTION_INNER_PADDING = '0 0 4px'
 
 function escapeHtml(s: string): string {
   return s
@@ -27,8 +34,7 @@ export function plainTextToEmailHtml(text: string): string {
   return escapeHtml(text).replace(/\r\n/g, '\n').replace(/\n/g, '<br />\n')
 }
 
-const FOOTER_TEXT_STYLE =
-  "margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;line-height:1.5;color:#5A6070;text-align:center"
+const FOOTER_TEXT_STYLE = `margin:0;font-family:${NEWSLETTER_FONT_BODY};font-size:12px;line-height:1.5;color:#5A6070;text-align:center`
 
 function footerLineHtml(line: string, marginTop: string): string {
   const trimmed = line.trim()
@@ -69,12 +75,15 @@ function footerHtml(
   return blocks.join('\n')
 }
 
-function beatImageHtml(url: string, alt: string): string {
+function beatImageHtml(url: string, alt: string, linkUrl?: string): string {
   const safeUrl = escapeHtml(url.trim())
   if (!safeUrl) return ''
-  return `<div style="margin:0 0 12px">
-    <img src="${safeUrl}" alt="${escapeHtml(alt)}" width="560" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:8px" />
-  </div>`
+  const img = `<img src="${safeUrl}" alt="${escapeHtml(alt)}" width="560" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:8px" />`
+  const href = String(linkUrl ?? '').trim()
+  const inner = href
+    ? `<a href="${escapeHtml(href)}" style="text-decoration:none" target="_blank" rel="noopener noreferrer">${img}</a>`
+    : img
+  return `<div style="margin:0 0 14px">${inner}</div>`
 }
 
 function beatBlock(beat: NewsletterBeat, isFirst: boolean): string {
@@ -82,16 +91,16 @@ function beatBlock(beat: NewsletterBeat, isFirst: boolean): string {
   const body = beat.body.trim()
   const imageUrl = String(beat.imageUrl ?? '').trim()
   if (!heading && !body && !imageUrl) return ''
-  const label = presetLabel(beat.preset)
-  const border = isFirst ? '' : 'border-top:1px solid #E2E8E4;'
-  const title = heading || label
-  const imageHtml = imageUrl ? beatImageHtml(imageUrl, title || label) : ''
+  const border = isFirst ? '' : `border-top:1px solid #E2E8E4;`
+  const title = heading
+  const imageHtml = imageUrl
+    ? beatImageHtml(imageUrl, title || 'Section image', beat.imageLinkUrl)
+    : ''
   const bodyHtml = body ? plainTextToEmailHtml(body) : ''
-  return `<tr><td style="padding:18px 0 0;${border}">
-    <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#1B6B45">${escapeHtml(label)}</p>
-    ${title ? `<p style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:700;line-height:1.3;color:#1A1A1A">${escapeHtml(title)}</p>` : ''}
+  return `<tr><td style="padding:${SECTION_DIVIDER_PADDING};${border}">
+    ${title ? `<p style="margin:${SECTION_INNER_PADDING};font-family:${NEWSLETTER_FONT_HEADING};font-size:18px;font-weight:700;line-height:1.3;color:#1A1A1A">${escapeHtml(title)}</p>` : ''}
     ${imageHtml}
-    ${bodyHtml ? `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55;color:#1A1A1A">${bodyHtml}</div>` : ''}
+    ${bodyHtml ? `<div style="font-family:${NEWSLETTER_FONT_BODY};font-size:15px;line-height:1.55;color:#1A1A1A">${bodyHtml}</div>` : ''}
   </td></tr>`
 }
 
@@ -103,7 +112,7 @@ export function buildNewsletterSectionsHtml(
   const rows: string[] = []
   const intro = apply(sections.intro).trim()
   if (intro) {
-    rows.push(`<tr><td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55;color:#1A1A1A">
+    rows.push(`<tr><td style="font-family:${NEWSLETTER_FONT_BODY};font-size:15px;line-height:1.55;color:#1A1A1A">
       ${plainTextToEmailHtml(intro)}
     </td></tr>`)
   }
@@ -123,7 +132,7 @@ export function buildNewsletterSectionsHtml(
   })
   const signoff = apply(sections.signoff).trim()
   if (signoff) {
-    rows.push(`<tr><td style="padding:18px 0 0;border-top:1px solid #E2E8E4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55;color:#1A1A1A">
+    rows.push(`<tr><td style="padding:${SECTION_DIVIDER_PADDING};border-top:1px solid #E2E8E4;font-family:${NEWSLETTER_FONT_BODY};font-size:15px;line-height:1.55;color:#1A1A1A">
       ${plainTextToEmailHtml(signoff)}
     </td></tr>`)
   }
@@ -151,8 +160,11 @@ export function buildNewsletterHtml(opts: {
   const branding = opts.branding ?? {
     headerTitle: NEWSLETTER_BRANDING_DEFAULTS.newsletterHeaderTitle,
     footerLines: NEWSLETTER_BRANDING_DEFAULTS.newsletterFooterText.split('\n'),
+    headerLogoUrl: '',
+    customCss: '',
   }
-  const logoUrl = `${origin}/brand/cove-logo-640.png`
+  const logoUrl =
+    branding.headerLogoUrl.trim() || `${origin}/brand/cove-logo-640.png`
   const heroUrl = (opts.heroImageUrl || opts.canvaThumbnailUrl || '').trim()
   const extra = (opts.extraImageUrls ?? [])
     .map((u) => String(u ?? '').trim())
@@ -169,7 +181,7 @@ export function buildNewsletterHtml(opts: {
       opts.sections.signoff.trim())
   const bodyHtml = useSections
     ? buildNewsletterSectionsHtml(opts.sections!, opts.merge)
-    : `<tr><td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55;color:#1A1A1A">
+    : `<tr><td style="font-family:${NEWSLETTER_FONT_BODY};font-size:15px;line-height:1.55;color:#1A1A1A">
             ${plainTextToEmailHtml(apply(opts.textBody))}
           </td></tr>`
   const pixel =
@@ -189,10 +201,14 @@ export function buildNewsletterHtml(opts: {
     .map((url, i) => imageBlock(url, `${heroAlt} page ${i + 2}`))
     .join('')
 
+  const customCssBlock = branding.customCss.trim()
+    ? `<style type="text/css">${branding.customCss}</style>`
+    : ''
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>SHMS PTO</title></head>
+<title>SHMS PTO</title>${customCssBlock}</head>
 <body style="margin:0;padding:0;background:#F4F7F5">
 ${pixel}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F7F5">
@@ -202,7 +218,7 @@ ${pixel}
         <a href="${escapeHtml(origin)}" style="text-decoration:none">
           <img src="${escapeHtml(logoUrl)}" alt="SHMS PTO" width="120" style="display:inline-block;height:auto;border:0;max-width:120px" />
         </a>
-        <p style="margin:10px 0 0;font-family:Georgia,serif;font-size:16px;color:#ffffff;letter-spacing:0.02em">${escapeHtml(branding.headerTitle)}</p>
+        <p style="margin:10px 0 0;font-family:${NEWSLETTER_FONT_HEADING};font-size:16px;color:#ffffff;letter-spacing:0.02em">${escapeHtml(branding.headerTitle)}</p>
       </td></tr>
       <tr><td style="padding:24px 20px">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">

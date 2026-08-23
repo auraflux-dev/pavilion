@@ -100,6 +100,12 @@ export type CommsCalendarItem = {
   publishAt: string
   ownerEmail: string
   ownerName: string
+  /** Additional staff assignees (comma-separated @shmspto.org emails in CMS). */
+  assigneeEmails: string[]
+  /** Optional group label (e.g. Marketing team). */
+  assigneeGroup: string
+  /** Show as a calendar event (not just a comms task). */
+  isEvent: boolean
   /** Canva, Drive, draft Doc, post preview, etc. */
   assetUrl: string
   notes: string
@@ -139,6 +145,27 @@ export function parseCommsAudiences(raw: unknown): CommsAudience[] {
 
 export function serializeCommsAudiences(audiences: CommsAudience[]): string {
   return audiences.join(',')
+}
+
+export function parseAssigneeEmails(raw: unknown): string[] {
+  const parts = Array.isArray(raw)
+    ? raw.map((x) => String(x))
+    : String(raw ?? '')
+        .split(/[,|;]/)
+        .map((s) => s.trim().toLowerCase())
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const part of parts) {
+    const e = part.trim().toLowerCase()
+    if (!e || !e.includes('@') || seen.has(e)) continue
+    seen.add(e)
+    out.push(e)
+  }
+  return out
+}
+
+export function serializeAssigneeEmails(emails: string[]): string {
+  return emails.join(',')
 }
 
 export function normalizeCommsChannel(raw: unknown): CommsChannel {

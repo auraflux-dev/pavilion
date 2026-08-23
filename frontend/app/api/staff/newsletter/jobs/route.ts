@@ -49,6 +49,18 @@ function payloadFromBody(
       ? body.extraImageUrls.map((u) => String(u)).filter(Boolean)
       : undefined,
     beatsJson: String(body.beatsJson ?? '').trim() || undefined,
+    attachmentKeys: Array.isArray(body.attachmentKeys)
+      ? body.attachmentKeys
+          .map((a: unknown) => {
+            const row = a as { key?: string; filename?: string; mimeType?: string }
+            return {
+              key: String(row.key ?? '').trim(),
+              filename: String(row.filename ?? 'attachment').trim(),
+              mimeType: String(row.mimeType ?? 'application/octet-stream').trim(),
+            }
+          })
+          .filter((a: { key: string }) => a.key)
+      : undefined,
     canvaDesignId: String(body.canvaDesignId ?? '').trim() || undefined,
     sendAudience,
     includeSubscribers: body.includeSubscribers === true,

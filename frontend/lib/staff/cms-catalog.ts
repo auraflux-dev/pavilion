@@ -368,6 +368,13 @@ export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
       { key: 'publishAt', label: 'Publish / send at (ISO)', type: 'text' },
       { key: 'ownerEmail', label: 'Owner email', type: 'text' },
       { key: 'ownerName', label: 'Owner name', type: 'text' },
+      {
+        key: 'assigneeEmails',
+        label: 'Assignee emails (comma-separated staff @shmspto.org)',
+        type: 'text',
+      },
+      { key: 'assigneeGroup', label: 'Group name (optional)', type: 'text' },
+      { key: 'isEvent', label: 'Calendar event (true/false)', type: 'boolean' },
       { key: 'assetUrl', label: 'Asset / draft URL', type: 'text' },
       { key: 'notes', label: 'Internal notes', type: 'textarea' },
       { key: 'publishedAt', label: 'Published at (ISO)', type: 'text' },
@@ -536,18 +543,34 @@ export const SITE_SETTING_GROUPS: {
         label:
           'Daily activity report extra emails (comma-separated, 6am Eastern; report includes membership totals by type)',
       },
-      {
-        key: 'newsletterHeaderTitle',
-        label: 'Newsletter email header title (under logo, one-time default)',
-      },
-      {
-        key: 'newsletterFooterText',
-        label: 'Newsletter email footer lines (one-time default; unsubscribe is automatic)',
-        multiline: true,
-      },
       { key: 'contactAddress', label: 'Address', multiline: true },
       { key: 'contactStoreHours', label: 'The Cove in-person snack window hours' },
       { key: 'storeHours', label: 'The Cove in-person hours (footer / alt)' },
+    ],
+  },
+  {
+    id: 'newsletter-branding',
+    label: 'Newsletter email branding',
+    roles: ['marketing', 'admin'],
+    keys: [
+      {
+        key: 'newsletterHeaderTitle',
+        label: 'Header title (under logo)',
+      },
+      {
+        key: 'newsletterHeaderLogoUrl',
+        label: 'Header logo URL (PNG; upload in Newsletter workspace)',
+      },
+      {
+        key: 'newsletterFooterText',
+        label: 'Footer lines (unsubscribe is automatic)',
+        multiline: true,
+      },
+      {
+        key: 'newsletterCustomCss',
+        label: 'Custom CSS (advanced; applies to newsletter HTML)',
+        multiline: true,
+      },
     ],
   },
   {

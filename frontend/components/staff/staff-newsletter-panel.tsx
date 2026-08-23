@@ -86,6 +86,11 @@ export function StaffNewsletterPanel() {
   const [busy, setBusy] = useState(false)
   const [beatUploadIdx, setBeatUploadIdx] = useState<number | null>(null)
   const beatFileRef = useRef<HTMLInputElement>(null)
+  const attachFileRef = useRef<HTMLInputElement>(null)
+  const [attachments, setAttachments] = useState<
+    Array<{ key: string; filename: string; mimeType: string }>
+  >([])
+  const [senderPreview, setSenderPreview] = useState({ name: '', staffEmail: '', replyEmail: '' })
   const [status, setStatus] = useState('')
 
   const load = useCallback(async () => {
@@ -106,6 +111,18 @@ export function StaffNewsletterPanel() {
       }
     } catch {
       // jobs collection may not exist yet
+    }
+    try {
+      const mr = await fetch('/api/staff/me')
+      const md = await mr.json()
+      if (mr.ok) {
+        const name = String(md.name ?? md.boardTitle ?? md.email ?? '').trim()
+        const staffEmail = String(md.email ?? '').trim()
+        const replyEmail = String(md.personalEmail ?? md.email ?? '').trim()
+        setSenderPreview({ name, staffEmail, replyEmail })
+      }
+    } catch {
+      /* ignore */
     }
   }, [])
 
@@ -171,8 +188,35 @@ export function StaffNewsletterPanel() {
 
   function clearBeatImage(index: number) {
     const next = beats.slice()
-    next[index] = { ...next[index], imageUrl: '', imageKey: '' }
+    next[index] = { ...next[index], imageUrl: '', imageKey: '', imageLinkUrl: '' }
     setBeats(next)
+  }
+
+  async function onAttachmentSelected(files: FileList | null) {
+    const file = files?.[0]
+    if (!file) return
+    setBusy(true)
+    setStatus('')
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const r = await fetch('/api/staff/newsletter/upload-attachment', {
+        method: 'POST',
+        body: form,
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Upload failed')
+      setAttachments((prev) => [
+        ...prev,
+        { key: d.key, filename: d.filename, mimeType: d.mimeType },
+      ])
+      setStatus(`Attached ${d.filename}.`)
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Attachment upload failed')
+    } finally {
+      setBusy(false)
+      if (attachFileRef.current) attachFileRef.current.value = ''
+    }
   }
 
   function canvaPngBlock(): string | null {
@@ -209,6 +253,7 @@ export function StaffNewsletterPanel() {
       heroImageUrl: canvaMeta.heroImageUrl,
       extraImageUrls: (canvaMeta.pageImageUrls ?? []).slice(1),
       beatsJson: beatsPayload(),
+      attachmentKeys: attachments.length ? attachments : undefined,
       testEmails: testEmailsExtra,
       ...extra,
     }
@@ -808,12 +853,20 @@ export function StaffNewsletterPanel() {
           Write in sections (intro, beats, sign-off). Optional PNG per section breaks up the text in email.
         </label>
         <p className="text-[11px] text-[#5A6070]">
-          Header title and footer are one-time defaults in{' '}
-          <Link href="/staff?view=site" className="underline text-[var(--brand-green)]">
-            Staff → Site settings
+          Header, footer, and logo:{' '}
+          <Link href="/staff?view=newsletter#newsletter-branding" className="underline text-[var(--brand-green)]">
+            Staff → Newsletter → Email branding
           </Link>
           . Every email also gets the school address and an unsubscribe link automatically (CAN-SPAM).
         </p>
+        {senderPreview.name ? (
+          <p className="text-xs text-[#5A6070]">
+            From: <span className="font-semibold text-[#1A1A1A]">{senderPreview.name}</span> via
+            president@shmspto.org
+            {' · '}
+            Reply-To: {senderPreview.replyEmail}
+          </p>
+        ) : null}
         {useBeats ? (
           <div
             data-help-shot="beats"
@@ -858,27 +911,6 @@ export function StaffNewsletterPanel() {
                   {preset?.hint ? (
                     <p className="text-[11px] text-[#5A6070]">{preset.hint}</p>
                   ) : null}
-                  <label className="text-xs text-[#5A6070] block">
-                    Section type
-                    <select
-                      value={beat.preset}
-                      onChange={(e) => {
-                        const next = beats.slice()
-                        next[i] = {
-                          ...next[i],
-                          preset: e.target.value as NewsletterBeatPreset,
-                        }
-                        setBeats(next)
-                      }}
-                      className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-                    >
-                      {NEWSLETTER_BEAT_PRESETS.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
                   <label className="text-xs text-[#5A6070] block">
                     Heading (bold in email)
                     <input
@@ -941,6 +973,19 @@ export function StaffNewsletterPanel() {
                         className="max-h-32 w-auto rounded border border-[var(--border)]"
                       />
                     ) : null}
+                    <label className="text-xs text-[#5A6070] block">
+                      Image link (optional)
+                      <input
+                        value={beat.imageLinkUrl ?? ''}
+                        onChange={(e) => {
+                          const next = beats.slice()
+                          next[i] = { ...next[i], imageLinkUrl: e.target.value }
+                          setBeats(next)
+                        }}
+                        placeholder="https://…"
+                        className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                      />
+                    </label>
                   </div>
                 </div>
               )
@@ -1110,6 +1155,42 @@ export function StaffNewsletterPanel() {
           ) : (
             <p className="text-[11px] text-[#5A6070]">No pending or scheduled jobs.</p>
           )}
+        </div>
+
+        <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2">
+          <p className="text-sm font-semibold text-[#1A1A1A]">Attachments (optional)</p>
+          <input
+            ref={attachFileRef}
+            type="file"
+            accept=".pdf,image/png,image/jpeg"
+            className="hidden"
+            onChange={(e) => void onAttachmentSelected(e.target.files)}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={busy}
+            onClick={() => attachFileRef.current?.click()}
+          >
+            Attach file (PDF or image)
+          </Button>
+          {attachments.length ? (
+            <ul className="text-xs text-[#5A6070] space-y-1">
+              {attachments.map((a) => (
+                <li key={a.key} className="flex items-center gap-2">
+                  <span>{a.filename}</span>
+                  <button
+                    type="button"
+                    className="underline"
+                    onClick={() => setAttachments((prev) => prev.filter((x) => x.key !== a.key))}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
 
         <div data-help-shot="send-actions" className="flex flex-wrap gap-2">

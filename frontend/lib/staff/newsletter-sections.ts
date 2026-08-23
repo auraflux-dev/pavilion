@@ -36,6 +36,8 @@ export type NewsletterBeat = {
   /** Optional inline graphic (social / event PNG) in HTML email. */
   imageUrl?: string
   imageKey?: string
+  /** Optional link when the section image is clicked. */
+  imageLinkUrl?: string
 }
 
 /** @deprecated use NEWSLETTER_BEAT_PRESETS */
@@ -44,7 +46,7 @@ export const NEWSLETTER_BEAT_LABELS = NEWSLETTER_BEAT_PRESETS.filter((p) => p.id
 ) as ['Event', 'Question', 'CTA']
 
 export function emptyNewsletterBeat(preset: NewsletterBeatPreset = 'custom'): NewsletterBeat {
-  return { preset, heading: '', body: '', imageUrl: '', imageKey: '' }
+  return { preset, heading: '', body: '', imageUrl: '', imageKey: '', imageLinkUrl: '' }
 }
 
 export function beatHasContent(beat: NewsletterBeat): boolean {
@@ -105,6 +107,7 @@ export function normalizeNewsletterSections(raw: Partial<NewsletterSections> | n
     body: String(b?.body ?? '').trim(),
     imageUrl: String(b?.imageUrl ?? '').trim(),
     imageKey: String(b?.imageKey ?? '').trim(),
+    imageLinkUrl: String(b?.imageLinkUrl ?? '').trim(),
   }))
   while (normalized.length < 1) normalized.push(emptyNewsletterBeat('event'))
   return {
@@ -137,6 +140,7 @@ export function parseBeatsJson(raw: string): NewsletterSections | null {
         body: String(b.body ?? ''),
         imageUrl: String(b.imageUrl ?? ''),
         imageKey: String(b.imageKey ?? ''),
+        imageLinkUrl: String(b.imageLinkUrl ?? ''),
       })),
       signoff: p.signoff,
     })

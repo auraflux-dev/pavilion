@@ -61,7 +61,7 @@ export default async function ProgramsPage({
             body: catalogOpen
               ? isDemoInstance()
                 ? 'After-school clubs and classes for elementary grades.'
-                : 'After-school classes for grades 6 to 8.'
+                : 'Evening classes for grades 6 to 8.'
               : inSession
                 ? 'Check back here once you receive the announcement that registration is open.'
                 : vanillaizeIfDemo(
