@@ -833,7 +833,7 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                       checked={p.registrationOpen}
                       onChange={(e) => void saveProgram(p.id, { registrationOpen: e.target.checked })}
                     />
-                    Registration open
+                    Registration open (checkout)
                   </label>
                   <label className="inline-flex items-center gap-1">
                     <input

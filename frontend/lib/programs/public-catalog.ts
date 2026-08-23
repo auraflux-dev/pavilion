@@ -74,11 +74,20 @@ export function overlayFall2026PacketProgram(program: Program): Program {
   }
 }
 
-/** Fall + Spring catalog rows show Tuition TBD until fees are locked in CMS. */
+/**
+ * Fall + Spring: show Tuition TBD only when CMS fee is unset/zero.
+ * Real CMS fees display on the catalog. Checkout still requires Registration open.
+ */
 export function markCatalogTuitionTbd(program: Program): Program {
   const season = resolveProgramSeason(program)
   if (season !== 'fall-2026' && season !== 'spring-2027') return program
+  const fee = Number(program.fee ?? 0)
   const tags = tagSet(program.tags)
+  if (fee > 0) {
+    if (!tags.has('fee-tbd')) return program
+    tags.delete('fee-tbd')
+    return { ...program, tags: joinTags(tags) }
+  }
   tags.add('fee-tbd')
   return {
     ...program,
