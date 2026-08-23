@@ -159,7 +159,7 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
     classTime: '6:00 to 7:00 PM',
     startClock: '18:00',
     endClock: '19:00',
-    vendor: 'RSM Ashburn',
+    vendor: 'Janet Bih',
     dates: SPRING_2027_THURSDAY_DATES,
     skips: 'Thu Mar 25 spring break',
     continuesFromFall: true,
@@ -234,7 +234,7 @@ const SPRING_STAGING_CATALOG: Record<
     capacity: 30,
     category: 'Competition',
     description:
-      'RSM Ashburn Part II: advanced systems, team tactics, and mocks.\n\n• Mixed strategy selection and timed rounds\n• Sprint, Target, Team, and Countdown focus\n• Full mock competitions late in the semester\n\nCap 30. Continues the Fall year plan.',
+      'Competitive Math Part II with Janet Bih: advanced systems, team tactics, and mocks.\n\n• Mixed strategy selection and timed rounds\n• Sprint, Target, Team, and Countdown focus\n• Full mock competitions late in the semester\n\nCap 10 to 30. Continues the Fall year plan.',
   },
   robotics: {
     fee: 450,

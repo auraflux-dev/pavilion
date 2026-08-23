@@ -19,7 +19,7 @@ export const WORKSPACE_MAILBOXES: WorkspaceMailbox[] = [
   { email: 'ep-music-tabla@shmspto.org', displayName: 'EP Music Tabla', group: 'ep' },
   { email: 'ep-businessplan@shmspto.org', displayName: 'EP Business Plan Instructor', group: 'ep', note: 'Fall 2026 YE suggestion' },
   { email: 'ep-finance@shmspto.org', displayName: 'EP Finance Instructor', group: 'ep' },
-  { email: 'ep-math@shmspto.org', displayName: 'EP Math Instructor', group: 'ep', note: 'Fall 2026 MATHCOUNTS suggestion' },
+  { email: 'ep-math@shmspto.org', displayName: 'EP Math Instructor', group: 'ep', note: 'Fall 2026 Competitive Math · Janet Bih' },
   { email: 'ep-programming@shmspto.org', displayName: 'EP Programming Instructor', group: 'ep' },
   { email: 'ep-robotics@shmspto.org', displayName: 'EP Robotics Instructor', group: 'ep', note: 'Fall 2026 Robotics suggestion' },
   { email: 'gracehuang@shmspto.org', displayName: 'Grace Huang', group: 'person' },

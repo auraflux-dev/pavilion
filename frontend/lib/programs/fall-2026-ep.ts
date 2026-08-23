@@ -125,10 +125,10 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
     classTime: '6:00 to 7:00 PM',
     startClock: '18:00',
     endClock: '19:00',
-    vendor: 'RSM Ashburn',
+    vendor: 'Janet Bih',
     dates: FALL_2026_THURSDAY_DATES,
     skips: 'Thu Nov 26 Thanksgiving',
-    sessionNote: 'Tentative until RSM confirms. Oct 29 meets (end of quarter week).',
+    sessionNote: 'Oct 29 meets (end of quarter week). Cap 10 to 30.',
     suggestedMailbox: 'ep-math@shmspto.org',
   },
 ]

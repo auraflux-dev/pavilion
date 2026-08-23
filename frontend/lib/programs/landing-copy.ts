@@ -47,13 +47,13 @@ Lumi Education. Andrew Martineau leads.
 
 Spring analytical writing sold separately.`,
 
-  mathcounts: `Contest math on campus with RSM Ashburn.
+  mathcounts: `Contest math on campus with Janet Bih.
 MATHCOUNTS and AMC-style rounds for grades 6 to 8.
 
 • Week 1 diagnostic, then number theory through geometry
 • Sprint, Target, Team, and Countdown practice
 • Weekly problem sets and a Fall mock at week 12
-• Not a center membership. Cap 30.
+• Cap 10 to 30.
 
 Pre-algebra helps. No contest experience required.`,
 
@@ -124,11 +124,11 @@ const FALL: Record<string, ProgramLandingCopy> = {
     pitch:
       'Contest math on campus.\nBuild toward MATHCOUNTS and AMC-style rounds.',
     highlights: [
-      'RSM Ashburn at Stone Hill. Not a center membership.',
+      'Janet Bih at Stone Hill. Contest prep for grades 6 to 8.',
       'Sprint, Target, Team, and Countdown practice every arc.',
-      'Twelve Thursday nights. Cap 30.',
+      'Twelve Thursday nights. Cap 10 to 30.',
     ],
-    curriculumTitle: 'Fall curriculum (RSM Ashburn proposal)',
+    curriculumTitle: 'Fall curriculum',
     curriculum: [
       { week: 1, title: 'Diagnostic & competition mindset' },
       { week: 2, title: 'Number theory I' },
@@ -225,13 +225,13 @@ const SPRING: Record<string, ProgramLandingCopy> = {
   mathcounts: {
     eyebrow: 'Spring 2027 · Competition',
     pitch:
-      'RSM Ashburn Part II.\nAdvanced systems, team tactics, and full mocks.',
+      'Competitive Math Part II.\nAdvanced systems, team tactics, and full mocks.',
     highlights: [
-      'Same Thursday night. Cap 30.',
+      'Same Thursday night with Janet Bih. Cap 10 to 30.',
       'Sprint, Target, Team, and Countdown under time.',
       'Mock competitions late in the semester.',
     ],
-    curriculumTitle: 'Spring curriculum (RSM Part II)',
+    curriculumTitle: 'Spring curriculum (Part II)',
     curriculum: [
       { week: 1, title: 'Fall skills check' },
       { week: 2, title: 'Mixed strategy selection' },
