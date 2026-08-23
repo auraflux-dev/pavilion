@@ -11,6 +11,7 @@ import {
   type StaffRole,
 } from '@/lib/staff/roles'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { isSyntheticStagingMode } from '@/lib/fixtures/synthetic-mode'
 import { vanillaizeDeep, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { getDemoReviewSession } from '@/lib/demo/session'
 
@@ -19,6 +20,7 @@ import { getDemoReviewSession } from '@/lib/demo/session'
  * roles so admins just assign roles in Staff → Admin · Staff access (no preload).
  */
 async function ensureStaffRegistration(email: string, displayName: string) {
+  if (isSyntheticStagingMode()) return
   try {
     const client = getWixClient()
     const existing = await client.items.query('StaffRoles').eq('email', email).limit(5).find()

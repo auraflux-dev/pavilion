@@ -21,6 +21,10 @@ export {
   fixturePiiStub,
 } from '@/lib/fixtures/stubs'
 export {
+  resolveSyntheticStaffForSession,
+  syntheticStaffProfile,
+} from '@/lib/fixtures/staff'
+export {
   isSyntheticReviewHost,
   isSyntheticStagingFromRequest,
   isSyntheticStagingMode,

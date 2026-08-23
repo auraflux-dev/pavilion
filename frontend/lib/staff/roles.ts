@@ -147,6 +147,10 @@ export async function resolveStaffForSession(
   email: string,
   extraEmails: string[] = [],
 ): Promise<StaffProfile | null> {
+  const { resolveSyntheticStaffForSession } = await import('@/lib/fixtures/staff')
+  const synthetic = resolveSyntheticStaffForSession(email, extraEmails)
+  if (synthetic) return synthetic
+
   const candidates = [email, ...extraEmails]
     .map((value) => value.trim().toLowerCase())
     .filter((value, i, all) => value.includes('@') && all.indexOf(value) === i)
@@ -181,6 +185,10 @@ export async function resolveStaffForSession(
 export async function getStaffProfile(email: string): Promise<StaffProfile | null> {
   const normalized = email.trim().toLowerCase()
   if (!normalized || !isStaffEmail(normalized)) return null
+
+  const { syntheticStaffProfile } = await import('@/lib/fixtures/staff')
+  const synthetic = syntheticStaffProfile(normalized)
+  if (synthetic) return synthetic
 
   try {
     const client = getWixClient()
