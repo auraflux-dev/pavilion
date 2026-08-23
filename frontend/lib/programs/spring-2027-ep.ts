@@ -258,7 +258,7 @@ export function spring2027StagingCatalogPrograms(): Program[] {
       _id: `staging-spring-2027-${c.id}`,
       name: c.name,
       description: meta.description,
-      fee: meta.fee,
+      fee: 0,
       capacity: meta.capacity,
       registrationOpen: false,
       requiresWaiver: true,
@@ -275,9 +275,9 @@ export function spring2027StagingCatalogPrograms(): Program[] {
       meetingDates: c.dates.join(','),
       skipsNote: c.skips,
       instructorName: c.vendor,
-      memberDiscountNote: 'Members 10 / 15 / 30% off',
+      memberDiscountNote: '',
       season: 'spring-2027',
-      tags: 'coming-soon,spring-2027',
+      tags: 'coming-soon,spring-2027,fee-tbd',
       schedule: `${c.dayOfWeek}s ${c.classTime}, 12 sessions`,
     }
   })

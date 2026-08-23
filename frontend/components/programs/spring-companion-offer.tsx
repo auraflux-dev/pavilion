@@ -29,7 +29,11 @@ export function SpringCompanionOffer({
 }: Props) {
   const name = displayProgramName(companion.name)
   const fee = Number(companion.fee ?? 0)
-  const feeLabel = fee > 0 ? `$${fee}` : ''
+  const feeTbd = String(companion.tags ?? '')
+    .split(/[,;\n]+/)
+    .map((t) => t.trim().toLowerCase())
+    .includes('fee-tbd')
+  const feeLabel = feeTbd ? 'Tuition TBD' : fee > 0 ? `$${fee}` : ''
   const href = programPublicPath(companion)
   const companionIsSpring = resolveProgramSeason(companion) === 'spring-2027'
 

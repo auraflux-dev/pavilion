@@ -5,7 +5,7 @@ export function ProgramsPreviewBanner() {
       className="border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-center text-sm text-amber-950"
       role="status"
     >
-      Staff preview. Parents still see the closed page until Sunday, August 23 at 4:00 PM Eastern.
+      Staff preview. Parents on www.shmspto.org see the same catalog when school is in session.
     </div>
   )
 }

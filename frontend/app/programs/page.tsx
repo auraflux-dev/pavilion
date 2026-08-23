@@ -16,6 +16,7 @@ import {
 import { ProgramsSectionNav } from '@/components/jump-nav/public-section-navs'
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
 import { canViewProgramsCatalogNow, isProgramsReviewHost } from '@/lib/programs/public-access'
+import { isProgramsCatalogListed } from '@/lib/programs/public-catalog'
 import { ProgramsPreviewBanner } from '@/components/programs/programs-preview-banner'
 
 export const revalidate = 300 // revalidate every 5 minutes
@@ -39,7 +40,7 @@ export default async function ProgramsPage({
       settings.get('contactEmailPrograms', DEFAULT_PROGRAMS_INBOXES),
     ).join(', ') || DEFAULT_PROGRAMS_INBOXES
   const inSession = settings.getBool('schoolInSession', false)
-  const catalogOpen = inSession && access.allowed
+  const catalogOpen = isProgramsCatalogListed({ inSession, access, reviewHost })
 
   try {
     programs = catalogOpen ? await getAllPrograms({ reviewHost }) : []

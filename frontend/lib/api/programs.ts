@@ -4,6 +4,10 @@ import { isDemoInstance } from '@/lib/demo/instance'
 import { getWixClient } from "@/lib/wix-client";
 import { formatProgramSchedule } from "@/lib/programs/schedule";
 import { memberPriorityUntilIso } from '@/lib/programs/registration-access'
+import {
+  markCatalogTuitionTbd,
+  overlayFall2026PacketProgram,
+} from '@/lib/programs/public-catalog'
 import { filterProgramsForPublicCatalog, resolveProgramSeason } from '@/lib/programs/season'
 import { spring2027StagingCatalogPrograms } from '@/lib/programs/spring-2027-ep'
 
@@ -196,7 +200,9 @@ function publicPrograms(
       .map(mapProgramItem)
       .filter((p) => p.name && !isCmsQaItem(p.name, p.description, p.detail, p.tags))
       .filter((p) => p.registrationOpen || p.featured)
-      .map((p) => withReviewHostCheckout(p, opts?.reviewHost)),
+      .map((p) => withReviewHostCheckout(p, opts?.reviewHost))
+      .map(overlayFall2026PacketProgram)
+      .map(markCatalogTuitionTbd),
     opts,
   )
   // Staging / Preview only: fill Spring tab from the EP packet when CMS has no Spring rows.

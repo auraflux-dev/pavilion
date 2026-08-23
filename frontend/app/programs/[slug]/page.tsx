@@ -12,6 +12,7 @@ import { findProgramBySlug } from '@/lib/programs/public-path'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { isProgramsReviewHost } from '@/lib/programs/public-access'
+import { isProgramsCatalogListed } from '@/lib/programs/public-catalog'
 
 export const revalidate = 300
 
@@ -62,11 +63,11 @@ export default async function ProgramLandingPage({
   const previewToken = typeof sp.programsPreview === 'string' ? sp.programsPreview : null
   const { canViewProgramsCatalogNow } = await import('@/lib/programs/public-access')
   const access = await canViewProgramsCatalogNow({ previewToken })
+  const reviewHost = await isProgramsReviewHost()
   const settings = await getSiteSettings()
   const inSession = settings.getBool('schoolInSession', false)
-  if (!inSession || !access.allowed) notFound()
+  if (!isProgramsCatalogListed({ inSession, access, reviewHost })) notFound()
 
-  const reviewHost = await isProgramsReviewHost()
   const programs = await getAllPrograms({ reviewHost }).catch(() => [])
   const program = findProgramBySlug(programs, slug)
   if (!program) notFound()

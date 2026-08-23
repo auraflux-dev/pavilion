@@ -290,7 +290,9 @@ export function fall2026PacketCmsDefaults(klass: Fall2026EpClass): Record<string
     durationWeeks: klass.dates.length,
     meetingDates: serializeMeetingDates([...klass.dates]),
     skipsNote: klass.skips,
-    memberDiscountNote: 'Members 10 / 15 / 30% off',
+    fee: 0,
+    tags: 'fee-tbd',
+    memberDiscountNote: '',
   }
 }
 

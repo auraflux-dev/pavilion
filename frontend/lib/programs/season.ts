@@ -33,11 +33,10 @@ export const FULL_YEAR_CATALOG_ENABLED = false
 
 /**
  * Public enrichment unlock (America/New_York).
- * Visitors stay dark until Sunday 2026-08-23 at 4:00 PM Eastern
- * (school newsletter goes out Sunday evening).
- * Staff + preview-secret bypass: see `canViewProgramsCatalogNow`.
+ * Open at start of Scoop day (Aug 23, 2026). Staff + preview-secret bypass earlier
+ * via `canViewProgramsCatalogNow`.
  */
-export const PROGRAMS_PUBLIC_OPENS_AT_MS = Date.parse('2026-08-23T16:00:00-04:00')
+export const PROGRAMS_PUBLIC_OPENS_AT_MS = Date.parse('2026-08-23T00:00:00-04:00')
 
 export const PROGRAMS_PREVIEW_COOKIE = 'shms_programs_preview'
 
