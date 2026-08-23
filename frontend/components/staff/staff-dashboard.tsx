@@ -888,8 +888,8 @@ export function StaffDashboard() {
         ) : null}
         {active === 'newsletter' && canNewsletter ? (
           <div className="space-y-4">
-            <StaffWhatsAppQueuePanel />
             <StaffNewsletterPanel />
+            <StaffWhatsAppQueuePanel />
             <StaffNewsletterSendReportPanel />
             <StaffCmsCollectionPanel
               collection="Newsletters"
