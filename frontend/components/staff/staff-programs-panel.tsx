@@ -1073,7 +1073,7 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                 label="Program flyer"
                 currentUrl={p.image}
                 disabled={false}
-                onUploaded={(url) => void saveProgram(p.id, { image: url })}
+                onUploaded={(media) => void saveProgram(p.id, { image: media.url })}
               />
               <div className="border-t border-[var(--border)] pt-2">
                 <button

@@ -221,7 +221,7 @@ export function StaffPageContentPanel() {
               label="Page flyer / hero image"
               currentUrl={form.flyerImage}
               disabled={busy}
-              onUploaded={(url) => setForm({ ...form, flyerImage: url })}
+              onUploaded={(media) => setForm({ ...form, flyerImage: media.url })}
             />
             <p className="text-[11px] text-[#5A6070] mt-1">
               Upload then click Save page copy so the flyer sticks on this page.
