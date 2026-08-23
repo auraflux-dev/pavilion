@@ -142,8 +142,8 @@ export function StaffNewsletterPanel() {
     if (!canvaMeta.canvaDesignId?.trim()) return null
     if (canvaMeta.heroImageUrl?.trim()) return null
     return [
-      'Canva is attached but the PNG is not exported yet.',
-      'In Templates above: click Export PNG for email and wait for the preview.',
+      'Canva is attached but the email PNG is not ready yet.',
+      'In Templates above: Export PNG for email, or Upload PNG from Canva Download.',
       'Paid emails need the graphic above your text.',
     ].join('\n')
   }

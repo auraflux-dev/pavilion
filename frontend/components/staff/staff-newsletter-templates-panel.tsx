@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { parseCanvaDesignUrl } from '@/lib/canva/parse-design-url'
 import type { CanvaDesign } from '@/lib/canva/client'
@@ -74,6 +74,7 @@ export function StaffNewsletterTemplatesPanel({
   const [canvaUrl, setCanvaUrl] = useState('')
   const [canvaDesigns, setCanvaDesigns] = useState<CanvaDesign[]>([])
   const [canvaConnected, setCanvaConnected] = useState(false)
+  const pngUploadRef = useRef<HTMLInputElement>(null)
 
   const loadTemplates = useCallback(async () => {
     const r = await fetch('/api/staff/cms/NewsletterTemplates')
@@ -160,6 +161,46 @@ export function StaffNewsletterTemplatesPanel({
     }
   }
 
+  async function uploadPngFiles(fileList: FileList | null) {
+    if (!fileList?.length) {
+      setStatus('Choose PNG file(s) from Canva Download.')
+      return
+    }
+    setBusy(true)
+    setStatus('Uploading PNG for email…')
+    try {
+      const form = new FormData()
+      Array.from(fileList).forEach((file) => form.append('files', file))
+      const r = await fetch('/api/staff/newsletter/upload-png', {
+        method: 'POST',
+        body: form,
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Upload failed')
+      onCanvaMetaChange({
+        ...canvaMeta,
+        heroImageUrl: String(d.heroImageUrl ?? ''),
+        heroImageKey: String(d.heroImageKey ?? ''),
+        pageImageUrls: Array.isArray(d.pageImageUrls)
+          ? d.pageImageUrls.map((u: unknown) => String(u)).filter(Boolean)
+          : String(d.heroImageUrl ?? '')
+            ? [String(d.heroImageUrl)]
+            : [],
+      })
+      const n = Number(d.pageCount ?? 1)
+      setStatus(
+        n > 1
+          ? `PNG uploaded (${n} pages). Preview below. Then test send.`
+          : 'PNG uploaded for email. Preview below. Then test send.',
+      )
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setBusy(false)
+      if (pngUploadRef.current) pngUploadRef.current.value = ''
+    }
+  }
+
   async function exportPng(fromMeta?: NewsletterCanvaMeta) {
     const meta = { ...canvaMeta, ...fromMeta }
     const designId = String(meta.canvaDesignId ?? '').trim()
@@ -196,7 +237,7 @@ export function StaffNewsletterTemplatesPanel({
     } catch (err) {
       setStatus(
         (err instanceof Error ? err.message : 'Export failed') +
-          '\nYou can still send with a thumbnail if export is unavailable.',
+          '\nTry Upload PNG instead (Canva → Share → Download → PNG).',
       )
     } finally {
       setBusy(false)
@@ -292,7 +333,7 @@ export function StaffNewsletterTemplatesPanel({
           Design = Canva PNG + fixed SHMS header (logo + title). Multi-page Canva exports every page into the email.
           Use sections for intro, events, reply prompts, CTAs, and sign-off. Body stays plain text (no HTML coding).
           {'\n'}
-          Attach Canva → Export PNG for email (required for paid sends) → write copy → test send.
+          Attach Canva → Export PNG or Upload PNG (required for paid sends) → write copy → test send.
           {'\n'}
           Unsubscribe link and postal address are added to every send automatically.
         </p>
@@ -348,7 +389,27 @@ export function StaffNewsletterTemplatesPanel({
           >
             Export PNG for email
           </Button>
+          <input
+            ref={pngUploadRef}
+            type="file"
+            accept="image/png"
+            multiple
+            className="hidden"
+            onChange={(e) => void uploadPngFiles(e.target.files)}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy}
+            onClick={() => pngUploadRef.current?.click()}
+          >
+            Upload PNG
+          </Button>
         </div>
+        <p className="text-[11px] text-[#5A6070] whitespace-pre-line">
+          No Canva API? In Canva: Share → Download → PNG (all pages). Then Upload PNG here.
+          Multi-page: select every page file at once, or upload one at a time (re-upload replaces).
+        </p>
         {canvaConnected && canvaDesigns.length ? (
           <div className="grid gap-2 sm:grid-cols-3">
             {canvaDesigns.slice(0, 6).map((d) => (
@@ -386,9 +447,9 @@ export function StaffNewsletterTemplatesPanel({
         )}
         {canvaMeta.canvaDesignId && !canvaMeta.heroImageUrl ? (
           <p className="text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 whitespace-pre-line">
-            Canva is attached but PNG is not exported yet.
+            Canva is attached but the email PNG is not ready yet.
             {'\n'}
-            Click Export PNG for email and wait for the preview before you test or send a paid newsletter.
+            Click Export PNG for email, or Upload PNG from Canva Download, and wait for the preview before you test or send a paid newsletter.
           </p>
         ) : null}
         {canvaMeta.canvaViewUrl ? (
