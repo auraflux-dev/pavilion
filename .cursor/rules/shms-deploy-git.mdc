@@ -1,0 +1,34 @@
+---
+description: Stone Hill production ships via auraflux-dev/shmspto Git push only
+alwaysApply: true
+---
+
+# Stone Hill deploy (treasurer Git)
+
+Stone Hill (`www.shmspto.org`) deploys from **`auraflux-dev/shmspto`**, not this monorepo's `origin`.
+
+## Agent ship path (required)
+
+1. **Serena QA** on the changed files.
+2. **Commit** in the **`shmspto` repo** (local clone, e.g. `~/shmspto`).
+   - If you edited `frontend/` here in `wix-shmspto`, port the same diff into `~/shmspto/frontend/` before commit.
+   - Do **not** treat `git push origin main` on `wix-shmspto` as a Stone Hill production deploy.
+3. **`git push origin main`** on `auraflux-dev/shmspto`.
+4. Treasurer Vercel project **`frontend`** auto-builds Production from that push.
+5. **`node scripts/check-prod-deploy.mjs`** from the `shmspto` repo. Git push alone is not done until this passes on https://www.shmspto.org.
+
+## Agents cannot CLI-deploy Stone Hill
+
+- Do **not** run `vercel deploy --prod` for Stone Hill from agent shells (no treasurer Vercel login).
+- Do **not** deploy Stone Hill from `robert-4220s-projects` or Pavilion projects.
+- CLI fallback (`node scripts/deploy-production.mjs`) is Rob-only with treasurer login. See `~/shmspto/scripts/DEPLOY.md`.
+
+## Staging + Rob OK (visitor-facing)
+
+For public visitor UI (not staff-only): Rob reviews on **https://shmspto.vercel.app** when staging is current, then OK before pushing `shmspto` `main` for production.
+
+Staff-only (`/staff`, `app/api/staff`, staff components with no visitor copy change): push `shmspto` `main` after Serena QA without waiting for Rob OK.
+
+## Pavilion (this repo)
+
+Pavilion marketing/demo/trial still ship from **`wix-shmspto`** (`commons-site`, `commons-pto-demo`, `commons-pto`) per `commons-parity.mdc`. Never mix SHMS Wix env onto Pavilion.

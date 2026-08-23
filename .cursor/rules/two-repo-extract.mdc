@@ -5,13 +5,21 @@ alwaysApply: true
 
 # Two repos
 
-- **SHMS school:** `auraflux-dev/shmspto` → Vercel `frontend` → www.shmspto.org  
+- **SHMS school:** `auraflux-dev/shmspto` → Vercel `frontend` (team **treasurer-4353s-projects**) → www.shmspto.org  
   Do school work and ships in that repo (or ask to clone it). Forbids Commons/Pavilion env.
+
+## SHMS deploy path (agents)
+
+1. Code changes → **commit** → **push** `auraflux-dev/shmspto` **`main`**
+2. **Treasurer** Vercel auto-deploys production (`frontend` is Git-connected)
+3. Confirm live: `node scripts/check-prod-deploy.mjs` (from the **shmspto** repo)
+
+Agents **cannot** run `vercel deploy` for SHMS without treasurer login. That is fine. **Git push on treasurer is the deploy path.** Do not create a `frontend` project on robert-4220.
 - **Pavilion platform:** `auraflux-dev/wix-shmspto` (this workspace) → `commons-site`, `commons-pto-demo`, `commons-pto`  
 
 Build Pavilion as if SHMS never existed. After an SHMS application ship, **default to deploying Pavilion** from the same SHA (vanilla only. no SHMS branding/copy). Skip only when the change is clearly school-only or Rob says skip.
 
-Application ships are **Staging-first** (see `ship-after-serena.mdc`): https://shmspto.vercel.app → Rob OK → production → GitHub. Exception: staff-only changes update staging and prod together without waiting (same rule file).
+Application ships are **Staging-first** (see `ship-after-serena.mdc` and `shms-deploy-git.mdc`): https://shmspto.vercel.app → Rob OK → **push `auraflux-dev/shmspto` `main`** → `node scripts/check-prod-deploy.mjs`. Agents do not `vercel deploy` Stone Hill locally.
 
 Never mix env across the wall. See `EXTRACT.md`, `mem:hskrg-org`, `mem:hskrg-tools-inventory`.
 

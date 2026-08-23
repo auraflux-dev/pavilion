@@ -103,7 +103,7 @@ for (const check of checks) {
 
 if (failed) {
   console.log(`${failed} check(s) failed on ${base}.`)
-  console.log('Git push alone does not mean www is live. Redeploy Vercel project frontend, then re-run this script.')
+  console.log('Push auraflux-dev/shmspto main and wait for treasurer Vercel Production to finish, then re-run this script.')
   process.exit(1)
 }
 

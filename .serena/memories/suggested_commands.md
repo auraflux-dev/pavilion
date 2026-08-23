@@ -15,6 +15,14 @@ NODE_PATH=~/cwn-c0/node_modules node scripts/gemini_parent_tour_qa.js
 Watch file: `~/Downloads/SHMSPTO_WATCH_THIS_parent_tour_16x9.mp4`
 
 ## Ship loop (required)
-1. Commit process + creative (not `out/` / archives — see root `.gitignore`)
-2. Serena activate `wix-shmspto` + post-commit scan (no hardcoded secrets; env-only keys)
-3. `git push origin main` → Vercel production auto-deploy (shmspto.org)
+
+### Stone Hill (www.shmspto.org)
+1. Port `frontend/` changes to **`~/shmspto`** (or work in that repo directly).
+2. Serena QA → commit on **`auraflux-dev/shmspto`**
+3. `git push origin main` on **shmspto** → treasurer Vercel auto-deploys
+4. `node scripts/check-prod-deploy.mjs` from the **shmspto** repo
+
+Do **not** treat `wix-shmspto` `git push` as Stone Hill production. See `.cursor/rules/shms-deploy-git.mdc` and `~/shmspto/scripts/DEPLOY.md`.
+
+### Pavilion (this monorepo)
+Commit and push `wix-shmspto` for `commons-site` / demo / trial only.

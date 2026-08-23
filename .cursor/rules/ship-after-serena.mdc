@@ -1,5 +1,5 @@
 ---
-description: Serena QA → staging (shmspto.vercel.app) → STOP for Rob → prod → push. Critical for every agent.
+description: Serena QA → staging (shmspto.vercel.app) → STOP for Rob → push shmspto main → check-prod. Critical.
 alwaysApply: true
 ---
 
@@ -13,54 +13,39 @@ If Serena fails: fix and re-run. Do not commit, deploy, or push.
 
 If Serena passes (diagnostics clean, scoped to the task), do this **exact** order:
 
-## 1. Commit (local only)
+## Stone Hill (`www.shmspto.org`)
 
-- Commit **only** the files for that change.
-- Do **not** `git push` yet.
+Stone Hill production deploys from **`auraflux-dev/shmspto`** via treasurer Git integration. See **`shms-deploy-git.mdc`**.
 
-## 2. Staging deploy (required hard gate)
+1. **Commit** in the **`shmspto` repo** (port `frontend/` diffs from this monorepo if needed). Do **not** push `wix-shmspto` `main` for Stone Hill prod.
+2. **Staging review** (visitor-facing): confirm **https://shmspto.vercel.app** when staging is current. **STOP** for Rob OK (`looks good`, `ship it`, `go live`, `OK`, etc.).
+3. **`git push origin main`** on `auraflux-dev/shmspto`. Treasurer Vercel **`frontend`** auto-deploys. Agents do **not** run `vercel deploy --prod` locally (no treasurer login).
+4. **`node scripts/check-prod-deploy.mjs`** from the `shmspto` repo. Done means checks pass on https://www.shmspto.org, not just GitHub green.
 
-- From a **clean worktree of that commit SHA**, deploy to the **stable staging host** (never `--prod` yet).
-  - Stone Hill → Vercel project `frontend`, then **alias** the deployment to `shmspto.vercel.app`.
-    Prefer: `node scripts/deploy-staging.mjs --cwd <clean-worktree>`.
-  - Pavilion marketing → `commons-site` (use that project’s stable review URL if one exists; otherwise Preview URL).
-  - Pavilion demo/trial → `commons-pto-demo` / `commons-pto` as relevant.
-- Never deploy from a dirty working tree.
-- **Do not** give Rob ephemeral `frontend-xxxxx.vercel.app` links for Stone Hill review. Always:
-  **https://shmspto.vercel.app**
-- In the reply, paste that staging URL and say production + GitHub are waiting on his OK.
+**Staff-only** Stone Hill (`/staff`, `app/api/staff`, staff UI with no visitor copy change): skip Rob wait. Push `shmspto` `main` after Serena QA, then run the check script.
 
-## 3. STOP — wait for Rob
+## Pavilion (this monorepo)
 
-**Hard stop.** Do not continue until Rob explicitly approves with clear go-ahead, for example: `looks good`, `ship it`, `promote`, `go live`, `prod`, `push`, or `OK`.
-
-Until then:
-
-- Do **not** `vercel --prod` / `vercel promote … --prod`.
-- Do **not** `git push`.
-- Do **not** treat “done” as production. Done means **staging is up at shmspto.vercel.app and the link was delivered**.
-
-## 4. After Rob approves: production, then GitHub
-
-1. Promote that same staging deployment to production, or `vercel --prod` from the **same clean worktree SHA**.
-2. **Then** `git push` that commit to GitHub.
-3. After a **Stone Hill** application ship: **default to also deploying Pavilion** (`commons-pto-demo` / `commons-pto`) from the same SHA. Pavilion must stay vanilla (no SHMS branding or school-specific copy). Skip only for clearly SHMS-only work or if Rob says skip.
+- **Commit** task files on `wix-shmspto` (do not push Stone Hill via this repo).
+- Pavilion marketing → `commons-site` (`onpavilion.com`).
+- Pavilion demo/trial → `commons-pto-demo` / `commons-pto` as relevant.
+- Default: after a Stone Hill ship, also ship Pavilion from the same product change when it applies (vanilla only). Skip for clearly SHMS-only work or if Rob says skip.
+- Never deploy from a dirty working tree. Never mix Stone Hill and Pavilion env.
 
 ## Exceptions
 
-- **Rules / docs / memories only** (no application runtime): commit then push. Skip staging and production.
-- **Staff-only** (Staff dashboard, `/staff`, `components/staff`, `app/api/staff`, staff permissions/roles with no public visitor UI change): after Serena QA, commit from a **clean worktree of that SHA** → **staging** (`node scripts/deploy-staging.mjs --cwd <worktree>`, alias `shmspto.vercel.app`) **and** **production** (`vercel --prod` or promote that same SHA) → then `git push`. **Do not wait** for Rob OK. Staging must stay current with prod so staff review hosts do not go stale. If the same commit also changes public pages, membership, checkout, or visitor copy, use full Staging-first instead (staging only, then wait for OK).
+- **Rules / docs / memories only** (no application runtime): commit on `wix-shmspto`, then push `wix-shmspto` `main`. Skip deploy checks.
 - Never include unrelated WIP, secrets, Budget/Plaid/terminal/spirit-wear/`tmp` unless they are the task.
 - Never mix Stone Hill and Pavilion env (DATABASE_URL, Wix, Square, Stripe).
 
 ## Anti-patterns (forbidden)
 
-- Commit → `vercel --prod` → push in one turn without staging + Rob OK.
-- Pushing to GitHub before production promote when this was an application ship.
-- Calling the task “shipped” or “live” when only staging exists.
-- Asking Rob to review on a one-off `frontend-*.vercel.app` Preview URL.
+- Pushing `wix-shmspto` `main` and calling Stone Hill “shipped.”
+- `vercel deploy --prod` for Stone Hill from agent shells (`robert-4220` or treasurer).
+- Deploying Stone Hill from `robert-4220s-projects`.
+- Calling the task “live” when `check-prod-deploy.mjs` has not passed.
+- Asking Rob to review on a one-off `frontend-xxxxx.vercel.app` Preview URL.
 - Skipping staging for public visitor changes by labeling them “staff-related.”
-- Staff-only prod deploy that leaves `shmspto.vercel.app` on an older SHA.
 
 ## Staging URL (Stone Hill)
 

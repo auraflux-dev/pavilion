@@ -11,7 +11,9 @@ Only these projects should exist for this product map:
 
 | Project | Domain / URL | Repo to deploy from |
 |---------|--------------|---------------------|
-| `frontend` | shmspto.org | **only** `auraflux-dev/shmspto` |
+| `frontend` | shmspto.org | **only** `auraflux-dev/shmspto` — push `main`, treasurer Git auto-deploy |
+
+Git push on `shmspto` `main` triggers treasurer Vercel Production. Agents verify with `node scripts/check-prod-deploy.mjs` (see `~/shmspto/scripts/DEPLOY.md`). Do not deploy Stone Hill via `vercel deploy` from agent shells.
 | `commons-site` | onpavilion.com | `wix-shmspto` (`commons-site/`) |
 | `commons-pto-demo` | commons-pto-demo.vercel.app | `wix-shmspto` (`frontend/` + demo env) |
 | `commons-pto` | commons-pto.vercel.app | `wix-shmspto` (`frontend/` + trial env) |
@@ -20,7 +22,9 @@ Unrelated keep (not Pavilion/SHMS): `gig-finder` if still in use.
 
 **Never** create one-off `wix-shmspto-*` / ship scratch projects. Deploy with CLI into the allowlisted project id, from a clean worktree, no dirty tree.
 
-Git auto-connect is optional. Prefer CLI so a push cannot land on the wrong product.
+**SHMS:** Git on treasurer `frontend` is the deploy path (`push main` → auto-deploy → `node scripts/check-prod-deploy.mjs`). Agents do not `vercel deploy` SHMS without treasurer login.
+
+**Pavilion:** deploy from `wix-shmspto` to robert-4220 projects (`commons-site`, `commons-pto-demo`, `commons-pto`). Never deploy monorepo `frontend/` to treasurer or to a robert-4220 project named `frontend`.
 
 ## SHMS repo rules
 - Forbids `COMMONS_PLATFORM` / `DEMO_INSTANCE`
