@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { parseCanvaDesignUrl } from '@/lib/canva/parse-design-url'
 import type { CanvaDesign } from '@/lib/canva/client'
+import { uploadNewsletterPngFiles } from '@/lib/staff/newsletter-upload-client'
 
 export type NewsletterCanvaMeta = {
   canvaDesignId?: string
@@ -169,25 +170,14 @@ export function StaffNewsletterTemplatesPanel({
     setBusy(true)
     setStatus('Uploading PNG for email…')
     try {
-      const form = new FormData()
-      Array.from(fileList).forEach((file) => form.append('files', file))
-      const r = await fetch('/api/staff/newsletter/upload-png', {
-        method: 'POST',
-        body: form,
-      })
-      const d = await r.json()
-      if (!r.ok) throw new Error(d.error ?? 'Upload failed')
+      const d = await uploadNewsletterPngFiles(fileList)
       onCanvaMetaChange({
         ...canvaMeta,
-        heroImageUrl: String(d.heroImageUrl ?? ''),
-        heroImageKey: String(d.heroImageKey ?? ''),
-        pageImageUrls: Array.isArray(d.pageImageUrls)
-          ? d.pageImageUrls.map((u: unknown) => String(u)).filter(Boolean)
-          : String(d.heroImageUrl ?? '')
-            ? [String(d.heroImageUrl)]
-            : [],
+        heroImageUrl: d.heroImageUrl,
+        heroImageKey: d.heroImageKey,
+        pageImageUrls: d.pageImageUrls,
       })
-      const n = Number(d.pageCount ?? 1)
+      const n = d.pageCount
       setStatus(
         n > 1
           ? `PNG uploaded (${n} pages). Preview below. Then test send.`
@@ -333,7 +323,9 @@ export function StaffNewsletterTemplatesPanel({
           Design = Canva PNG + fixed SHMS header (logo + title). Multi-page Canva exports every page into the email.
           Use sections for intro, events, reply prompts, CTAs, and sign-off. Body stays plain text (no HTML coding).
           {'\n'}
-          Attach Canva → Export PNG or Upload PNG (required for paid sends) → write copy → test send.
+          Attach Canva → Export PNG or Upload PNG (optional top graphic) → write copy → test send.
+          {'\n'}
+          Each section can also have its own uploaded PNG (social / event graphic).
           {'\n'}
           Unsubscribe link and postal address are added to every send automatically.
         </p>

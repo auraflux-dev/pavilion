@@ -1,6 +1,6 @@
 /**
  * Plain-text merge fields for newsletter subject/body.
- * Diane-safe: still editable as normal text; tokens like {{firstName}}.
+ * VP Marketing-safe: still editable as normal text; tokens like {{firstName}}.
  */
 
 export const NEWSLETTER_MERGE_HINT =

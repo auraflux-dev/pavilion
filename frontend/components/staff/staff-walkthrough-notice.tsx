@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * One-shot Staff Home alert: Diane’s Member Newsletter walkthrough is ready to review.
+ * One-shot Staff Home alert: VP Marketing Member Newsletter walkthrough is ready to review.
  * Dismissed per browser (localStorage) so it does not nag after she opens it.
  */
 import { useEffect, useState } from 'react'
@@ -70,7 +70,7 @@ export function StaffWalkthroughNotice({
         />
         <div className="min-w-0 flex-1 space-y-2">
           <p className="text-sm font-bold text-[#1A1A1A]">
-            Diane. Member Newsletter walkthrough is ready to review
+            VP Marketing: Member Newsletter walkthrough is ready to review
           </p>
           <p className="text-sm leading-relaxed text-[#5A6070] whitespace-pre-line">
             Short training video plus screenshots for Canva PNGs, test sends, Weekly Scoop, and schedule.

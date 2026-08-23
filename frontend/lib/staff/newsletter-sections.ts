@@ -33,6 +33,9 @@ export type NewsletterBeat = {
   preset: NewsletterBeatPreset
   heading: string
   body: string
+  /** Optional inline graphic (social / event PNG) in HTML email. */
+  imageUrl?: string
+  imageKey?: string
 }
 
 /** @deprecated use NEWSLETTER_BEAT_PRESETS */
@@ -41,7 +44,15 @@ export const NEWSLETTER_BEAT_LABELS = NEWSLETTER_BEAT_PRESETS.filter((p) => p.id
 ) as ['Event', 'Question', 'CTA']
 
 export function emptyNewsletterBeat(preset: NewsletterBeatPreset = 'custom'): NewsletterBeat {
-  return { preset, heading: '', body: '' }
+  return { preset, heading: '', body: '', imageUrl: '', imageKey: '' }
+}
+
+export function beatHasContent(beat: NewsletterBeat): boolean {
+  return Boolean(
+    String(beat.heading ?? '').trim() ||
+      String(beat.body ?? '').trim() ||
+      String(beat.imageUrl ?? '').trim(),
+  )
 }
 
 export function defaultNewsletterBeats(): NewsletterBeat[] {
@@ -92,6 +103,8 @@ export function normalizeNewsletterSections(raw: Partial<NewsletterSections> | n
     preset: normalizePreset((b as NewsletterBeat).preset),
     heading: String(b?.heading ?? '').trim(),
     body: String(b?.body ?? '').trim(),
+    imageUrl: String(b?.imageUrl ?? '').trim(),
+    imageKey: String(b?.imageKey ?? '').trim(),
   }))
   while (normalized.length < 1) normalized.push(emptyNewsletterBeat('event'))
   return {
@@ -122,6 +135,8 @@ export function parseBeatsJson(raw: string): NewsletterSections | null {
         preset: normalizePreset(b.preset),
         heading: String(b.heading ?? ''),
         body: String(b.body ?? ''),
+        imageUrl: String(b.imageUrl ?? ''),
+        imageKey: String(b.imageKey ?? ''),
       })),
       signoff: p.signoff,
     })
@@ -137,5 +152,5 @@ export function stringifyBeatsJson(opts: NewsletterSections): string {
 export function sectionsHaveContent(sections: NewsletterSections): boolean {
   if (String(sections.intro ?? '').trim()) return true
   if (String(sections.signoff ?? '').trim()) return true
-  return (sections.beats ?? []).some((b) => b.heading.trim() || b.body.trim())
+  return (sections.beats ?? []).some((b) => beatHasContent(b))
 }

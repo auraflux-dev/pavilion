@@ -69,17 +69,28 @@ function footerHtml(
   return blocks.join('\n')
 }
 
+function beatImageHtml(url: string, alt: string): string {
+  const safeUrl = escapeHtml(url.trim())
+  if (!safeUrl) return ''
+  return `<div style="margin:0 0 12px">
+    <img src="${safeUrl}" alt="${escapeHtml(alt)}" width="560" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:8px" />
+  </div>`
+}
+
 function beatBlock(beat: NewsletterBeat, isFirst: boolean): string {
   const heading = beat.heading.trim()
   const body = beat.body.trim()
-  if (!heading && !body) return ''
+  const imageUrl = String(beat.imageUrl ?? '').trim()
+  if (!heading && !body && !imageUrl) return ''
   const label = presetLabel(beat.preset)
   const border = isFirst ? '' : 'border-top:1px solid #E2E8E4;'
   const title = heading || label
+  const imageHtml = imageUrl ? beatImageHtml(imageUrl, title || label) : ''
   const bodyHtml = body ? plainTextToEmailHtml(body) : ''
   return `<tr><td style="padding:18px 0 0;${border}">
     <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#1B6B45">${escapeHtml(label)}</p>
-    <p style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:700;line-height:1.3;color:#1A1A1A">${escapeHtml(title)}</p>
+    ${title ? `<p style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:700;line-height:1.3;color:#1A1A1A">${escapeHtml(title)}</p>` : ''}
+    ${imageHtml}
     ${bodyHtml ? `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55;color:#1A1A1A">${bodyHtml}</div>` : ''}
   </td></tr>`
 }
@@ -96,7 +107,9 @@ export function buildNewsletterSectionsHtml(
       ${plainTextToEmailHtml(intro)}
     </td></tr>`)
   }
-  const activeBeats = sections.beats.filter((b) => b.heading.trim() || b.body.trim())
+  const activeBeats = sections.beats.filter(
+    (b) => b.heading.trim() || b.body.trim() || String(b.imageUrl ?? '').trim(),
+  )
   activeBeats.forEach((beat, i) => {
     const block = beatBlock(
       {
@@ -150,7 +163,9 @@ export function buildNewsletterHtml(opts: {
   const useSections =
     opts.sections &&
     (opts.sections.intro.trim() ||
-      opts.sections.beats.some((b) => b.heading.trim() || b.body.trim()) ||
+      opts.sections.beats.some(
+        (b) => b.heading.trim() || b.body.trim() || String(b.imageUrl ?? '').trim(),
+      ) ||
       opts.sections.signoff.trim())
   const bodyHtml = useSections
     ? buildNewsletterSectionsHtml(opts.sections!, opts.merge)

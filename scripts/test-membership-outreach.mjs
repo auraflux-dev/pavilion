@@ -305,6 +305,27 @@ check('newsletter html stacks extra Canva pages', () => {
   assert.equal((html.match(/p1\.png/g) || []).length, 1)
 })
 
+check('newsletter beat section image in html', () => {
+  const html = buildNewsletterHtml({
+    textBody: '',
+    sections: {
+      intro: '',
+      signoff: '',
+      beats: [
+        {
+          preset: 'event',
+          heading: 'Back to School Night',
+          body: 'Thursday at 6.',
+          imageUrl: 'https://www.shmspto.org/api/newsletter-assets/newsletter-heroes/event.png',
+        },
+      ],
+    },
+  })
+  assert.ok(html.includes('event.png'))
+  assert.ok(html.includes('Back to School Night'))
+  assert.ok(html.includes('Thursday at 6.'))
+})
+
 check('newsletter beats compose plain text', () => {
   const body = composeNewsletterBody({
     intro: 'Hi families.',

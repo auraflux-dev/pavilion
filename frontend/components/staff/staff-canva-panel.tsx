@@ -141,7 +141,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
         <h2 className="text-lg font-semibold text-[#1B2A4A]">Canva</h2>
         <p className="mt-1 max-w-2xl text-sm text-[#5A6070]">
           VP Marketing works in the designated PTO Canva folder (currently owned by{' '}
-          <strong>gregory.robert.c@gmail.com</strong>. Invite Marketing / Diane for access). Save
+          <strong>gregory.robert.c@gmail.com</strong>. Invite VP Marketing for access). Save
           designs there, then paste edit links into Comms & content or Social. Brand logos:{' '}
           <a href="/brand" className="underline" target="_blank" rel="noreferrer">
             /brand

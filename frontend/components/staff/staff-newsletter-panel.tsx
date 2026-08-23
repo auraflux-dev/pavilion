@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
@@ -26,6 +26,7 @@ import {
   type NewsletterBeatPreset,
 } from '@/lib/staff/newsletter-sections'
 import { buildWhatsAppGraphicShare } from '@/lib/staff/whatsapp-compose'
+import { uploadNewsletterPngFiles } from '@/lib/staff/newsletter-upload-client'
 import {
   StaffNewsletterTemplatesPanel,
   type NewsletterCanvaMeta,
@@ -83,6 +84,8 @@ export function StaffNewsletterPanel() {
   const [canvaMeta, setCanvaMeta] = useState<NewsletterCanvaMeta>({})
   const [alsoPortal, setAlsoPortal] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [beatUploadIdx, setBeatUploadIdx] = useState<number | null>(null)
+  const beatFileRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState('')
 
   const load = useCallback(async () => {
@@ -135,6 +138,41 @@ export function StaffNewsletterPanel() {
 
   function beatsPayload() {
     return useBeats ? stringifyBeatsJson({ intro, beats, signoff }) : undefined
+  }
+
+  function pickBeatImage(index: number) {
+    setBeatUploadIdx(index)
+    beatFileRef.current?.click()
+  }
+
+  async function onBeatImageSelected(files: FileList | null) {
+    const i = beatUploadIdx
+    if (i === null || !files?.length) return
+    setBusy(true)
+    setStatus('')
+    try {
+      const uploaded = await uploadNewsletterPngFiles(files)
+      const next = beats.slice()
+      next[i] = {
+        ...next[i],
+        imageUrl: uploaded.heroImageUrl,
+        imageKey: uploaded.heroImageKey,
+      }
+      setBeats(next)
+      setStatus('Section image uploaded. It appears in the email between heading and body.')
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Section image upload failed')
+    } finally {
+      setBusy(false)
+      setBeatUploadIdx(null)
+      if (beatFileRef.current) beatFileRef.current.value = ''
+    }
+  }
+
+  function clearBeatImage(index: number) {
+    const next = beats.slice()
+    next[index] = { ...next[index], imageUrl: '', imageKey: '' }
+    setBeats(next)
   }
 
   function canvaPngBlock(): string | null {
@@ -556,7 +594,7 @@ export function StaffNewsletterPanel() {
           {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
             <div className="mt-2 rounded-lg border border-[var(--brand-green)]/25 bg-[#E8F3E8] px-3 py-2.5 space-y-1">
               <p className="text-xs font-bold text-[#1A1A1A]">
-                Ready for review. Diane walkthrough (video + screenshots)
+                Ready for review. VP Marketing walkthrough (video + screenshots)
               </p>
               <p className="text-xs text-[#5A6070] leading-relaxed">
                 <Link
@@ -570,7 +608,8 @@ export function StaffNewsletterPanel() {
             </div>
           )}
           <p className="text-xs text-[#5A6070] mt-2 whitespace-pre-line">
-            No HTML coding required. Write plain text, attach a Canva design, Export PNG for email.
+            No HTML coding required. Write plain text, attach a Canva design or upload PNGs.
+            Top graphic optional. Each section can have its own image (social / event PNG).
             Sends include SHMS header/footer + your graphic + body.
             {'\n'}
             Paid members get the full email (plain text + Canva).
@@ -766,7 +805,7 @@ export function StaffNewsletterPanel() {
             checked={useBeats}
             onChange={(e) => setUseBeats(e.target.checked)}
           />
-          Write in sections (intro, beats, sign-off). Email shows labeled blocks with dividers.
+          Write in sections (intro, beats, sign-off). Optional PNG per section breaks up the text in email.
         </label>
         <p className="text-[11px] text-[#5A6070]">
           Header title and footer are one-time defaults in{' '}
@@ -786,6 +825,13 @@ export function StaffNewsletterPanel() {
               rows={2}
               onChange={setIntro}
               onCommit={(next) => setIntro(normalizePlainCopy(next))}
+            />
+            <input
+              ref={beatFileRef}
+              type="file"
+              accept="image/png"
+              className="hidden"
+              onChange={(e) => void onBeatImageSelected(e.target.files)}
             />
             {beats.map((beat, i) => {
               const preset = NEWSLETTER_BEAT_PRESETS.find((p) => p.id === beat.preset)
@@ -861,6 +907,41 @@ export function StaffNewsletterPanel() {
                       setBeats(next)
                     }}
                   />
+                  <div className="space-y-2 pt-1 border-t border-[var(--border)]">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={busy}
+                        onClick={() => pickBeatImage(i)}
+                      >
+                        {beat.imageUrl ? 'Replace section image' : 'Upload section image'}
+                      </Button>
+                      {beat.imageUrl ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={busy}
+                          onClick={() => clearBeatImage(i)}
+                        >
+                          Remove image
+                        </Button>
+                      ) : null}
+                    </div>
+                    <p className="text-[11px] text-[#5A6070]">
+                      Canva → Download PNG. Shows in email under the heading (social / event graphic).
+                    </p>
+                    {beat.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={beat.imageUrl}
+                        alt=""
+                        className="max-h-32 w-auto rounded border border-[var(--border)]"
+                      />
+                    ) : null}
+                  </div>
                 </div>
               )
             })}

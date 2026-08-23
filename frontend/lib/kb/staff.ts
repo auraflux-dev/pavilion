@@ -58,7 +58,7 @@ export const STAFF_KB: KbIndex = {
 - **Help**: this knowledge base
 - **Inbox / Calendar / Docs**: Connect Google once, then work stays in Staff
 - **Comms calendar**: plan parent / school / board messages and content
-- **Newsletter**: paid email and Weekly Scoop. Open Help → **Member newsletter (for Diane)**
+- **Newsletter**: paid email and Weekly Scoop. Open Help → **Member newsletter (VP Marketing)**
 - **The Cove**: register + products when you run the snack window
 
 ## Stay in Staff
@@ -363,7 +363,7 @@ Keep MoneyMinder / bank exports with Treasurer. Do not duplicate finance ledgers
     },
     {
       slug: 'member-newsletter-diane',
-      title: 'Member newsletter (for Diane)',
+      title: 'Member newsletter (VP Marketing)',
       categoryId: 'comms',
       summary: 'Plain text plus Canva. Paid email, Weekly Scoop, test sends, schedule, WhatsApp.',
       order: 3.5,
@@ -392,11 +392,13 @@ Open: https://www.shmspto.org/staff (Newsletter workspace)
 
 Do not paste HTML from Canva. Do not edit the design inside Staff. Use **Edit in Canva**, then re-attach or Export PNG again.
 
-## Attach Canva and export PNG
+## Attach Canva or upload PNG
 1. In Newsletter, paste a Canva view/edit link, or pick a recent design
-2. **Export PNG for email** (it also starts on attach if Canva is connected)
-3. Preview the graphic. Multi-page designs export **every page**: All pages stack in the email
+2. **Export PNG for email** if Canva API is connected, or **Upload PNG** after Canva → Download
+3. Preview the top graphic. Multi-page designs stack every page in the email
 4. **Save current as template** if you will reuse this
+
+Optional: skip the top graphic and use **section images** only (see Write the copy).
 
 ![Templates (Canva + copy). Attach link, export PNG, multi-page preview, save template](/help/staff-newsletter/01-templates-canva.png)
 
@@ -404,6 +406,8 @@ Do not paste HTML from Canva. Do not edit the design inside Staff. Use **Edit in
 Type in the subject and body like a normal email.
 
 Optional: check **Write in sections**: intro, Event, Question (reply prompt or poll link), CTA, sign-off. Add up to 8 sections. Email shows labeled blocks with dividers; headings are bold.
+
+Each section can have an **Upload section image** (social / event PNG from Canva Download). It appears in the email under the heading, above the body text.
 
 Header title and footer are **one-time** defaults under Staff → Site settings (you do not edit them each send). Every email also includes the school postal address and an **Unsubscribe** link automatically (CAN-SPAM).
 

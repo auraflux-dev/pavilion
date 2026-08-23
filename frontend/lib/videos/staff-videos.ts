@@ -18,7 +18,7 @@ export interface StaffVideo {
 export const STAFF_VIDEOS: StaffVideo[] = [
   {
     id: 'newsletter-diane',
-    title: 'Member newsletter walkthrough (for Diane)',
+    title: 'Member newsletter walkthrough (VP Marketing)',
     summary:
       'Plain text + Canva PNG. Paid email, Weekly Scoop link, test sends, schedule, WhatsApp.',
     src: '/help/staff-newsletter/newsletter-diane.mp4',
