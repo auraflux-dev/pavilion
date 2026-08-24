@@ -23,7 +23,7 @@ import { SpringCompanionOffer } from '@/components/programs/spring-companion-off
 import { resolveProgramSeason } from '@/lib/programs/season'
 import { programPublicPath } from '@/lib/programs/public-path'
 import { useCart } from '@/lib/cart/store'
-import { useProgramUiCopy, ui, CmsProgram } from '@/components/programs/program-ui-copy-context'
+import { useProgramUiCopy, ui } from '@/components/programs/program-ui-copy-context'
 import { MEMBERSHIP_CHOOSE_PATH } from '@/lib/membership-links'
 
 type Student = {
@@ -41,7 +41,7 @@ interface FormProps {
   onRegistered?: () => void
   /** Unique Square mount id when both modal and page can exist. */
   checkoutId: string
-  heading?: React.ReactNode
+  heading?: string
 }
 
 export function ProgramRegisterForm({
@@ -53,19 +53,6 @@ export function ProgramRegisterForm({
   heading,
 }: FormProps) {
   const uiCopy = useProgramUiCopy()
-  const P = ({
-    k,
-    vars,
-    className,
-    inlineTarget,
-  }: {
-    k: string
-    vars?: Record<string, string | number | undefined | null>
-    className?: string
-    inlineTarget?: boolean
-  }) => (
-    <CmsProgram k={k} fallback={ui(uiCopy, k, vars)} vars={vars} className={className} inlineTarget={inlineTarget} />
-  )
   const { hasPaidMembership } = useAuth()
   const [students, setStudents] = useState<Student[]>([])
   const [studentId, setStudentId] = useState('')
@@ -208,9 +195,7 @@ export function ProgramRegisterForm({
     }
   }
 
-  const title = heading ?? (
-    <P k="register.heading" vars={{ name: program.name }} />
-  )
+  const title = heading ?? ui(uiCopy, 'register.heading', { name: program.name })
 
   return (
     <>
@@ -222,15 +207,13 @@ export function ProgramRegisterForm({
               className="text-sm font-bold mt-1 whitespace-pre-line"
               style={{ color: 'var(--brand-green)' }}
             >
-              {feeTbd ? (
-                <P k="register.tuitionTbd" />
-              ) : fee <= 0 ? (
-                <P k="register.free" />
-              ) : springAddon ? (
-                <P k="register.fallPlusSpring" vars={{ total: `$${checkoutTotal.toFixed(2)}` }} />
-              ) : (
-                <P k="register.feeOnly" vars={{ total: `$${fee.toFixed(2)}` }} />
-              )}
+              {feeTbd
+                ? ui(uiCopy, 'register.tuitionTbd')
+                : fee <= 0
+                  ? ui(uiCopy, 'register.free')
+                  : springAddon
+                    ? ui(uiCopy, 'register.fallPlusSpring', { total: `$${checkoutTotal.toFixed(2)}` })
+                    : ui(uiCopy, 'register.feeOnly', { total: `$${fee.toFixed(2)}` })}
             </p>
             {!feeTbd && fee > 0 && String(program.memberDiscountNote ?? '').trim() ? (
               <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
@@ -251,22 +234,20 @@ export function ProgramRegisterForm({
         </div>
 
         {!program.registrationOpen ? (
-          <p className="text-sm text-[#5A6070]"><P k="register.notOpen" /></p>
+          <p className="text-sm text-[#5A6070]">{ui(uiCopy, 'register.notOpen')}</p>
         ) : null}
 
         {program.registrationOpen && priorityUntilLabel ? (
           <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-            {blockedByPriority ? (
-              <P k="register.priorityBlocked" vars={{ until: priorityUntilLabel }} />
-            ) : (
-              <P k="register.priorityWindow" vars={{ until: priorityUntilLabel }} />
-            )}
+            {blockedByPriority
+              ? ui(uiCopy, 'register.priorityBlocked', { until: priorityUntilLabel })
+              : ui(uiCopy, 'register.priorityWindow', { until: priorityUntilLabel })}
           </p>
         ) : null}
 
         {program.registrationOpen && loading ? (
           <div className="flex items-center gap-2 text-xs text-[#5A6070]">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" /> <P k="register.loading" />
+            <Loader2 className="w-3.5 h-3.5 animate-spin" /> {ui(uiCopy, 'register.loading')}
           </div>
         ) : null}
 
@@ -279,13 +260,13 @@ export function ProgramRegisterForm({
               window.location.href = MEMBERSHIP_CHOOSE_PATH
             }}
           >
-            <P k="register.viewMemberships" inlineTarget />
+            {ui(uiCopy, 'register.viewMemberships')}
           </Button>
         ) : null}
 
         {program.registrationOpen && !loading && !blockedByPriority && students.length === 0 ? (
           <p className="text-sm text-[#5A6070]">
-            <P k="register.addStudent" />
+            {ui(uiCopy, 'register.addStudent')}
           </p>
         ) : null}
 
@@ -293,7 +274,7 @@ export function ProgramRegisterForm({
           <>
             <div>
               <label className="block text-xs font-semibold text-[#5A6070] mb-1">
-                <P k="register.studentLabel" />
+                {ui(uiCopy, 'register.studentLabel')}
               </label>
               <select
                 value={studentId}
@@ -308,7 +289,8 @@ export function ProgramRegisterForm({
                 ))}
               </select>
               <p className="text-[11px] text-[#5A6070] mt-1.5">
-                <P k="register.profileHint" />
+                Registration needs parent phone, emergency contact, and authorized pick-up on the
+                student profile. Edit those in Member Portal → Edit student.
               </p>
             </div>
 
@@ -326,17 +308,19 @@ export function ProgramRegisterForm({
 
             {fee > 0 && !feeTbd ? (
               <label className="block text-xs font-semibold text-[#5A6070]">
-                <P k="register.couponLabel" />
+                Discount code
                 <input
                   type="text"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  placeholder={ui(uiCopy, 'register.couponPlaceholder')}
+                  placeholder="Optional override"
                   autoComplete="off"
                   className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-mono tracking-wide uppercase"
                 />
                 <span className="mt-1.5 block text-[11px] font-normal text-[#5A6070] whitespace-pre-line">
-                  <P k="register.discountHint" />
+                  {`Membership tier % applies automatically.
+Board 75% (one enrichment program per season) also applies automatically when unused.
+Only paste a code here if you need to override.`}
                 </span>
               </label>
             ) : null}
@@ -371,7 +355,7 @@ export function ProgramRegisterForm({
                   onClose?.()
                 }}
               >
-                <P k="register.addToCart" vars={{ total: `$${checkoutTotal.toFixed(2)}` }} inlineTarget />
+                {ui(uiCopy, 'register.addToCart', { total: `$${checkoutTotal.toFixed(2)}` })}
               </Button>
               <Button
                 type="button"
@@ -383,9 +367,9 @@ export function ProgramRegisterForm({
                 {busy ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : fee > 0 && !feeTbd ? (
-                  <P k="register.payNow" vars={{ total: `$${checkoutTotal.toFixed(2)}` }} inlineTarget />
+                  ui(uiCopy, 'register.payNow', { total: `$${checkoutTotal.toFixed(2)}` })
                 ) : (
-                  <P k="register.complete" inlineTarget />
+                  ui(uiCopy, 'register.complete')
                 )}
               </Button>
               {cartNote ? (
@@ -449,9 +433,6 @@ export function ProgramLandingCheckout({
 }) {
   const uiCopy = useProgramUiCopy()
   const comingSoon = !program.registrationOpen
-  const checkoutHeading = (
-    <CmsProgram k="register.checkoutHeading" fallback={ui(uiCopy, 'register.checkoutHeading')} />
-  )
   return (
     <div
       id="register"
@@ -463,13 +444,11 @@ export function ProgramLandingCheckout({
             program={program}
             companion={companion}
             checkoutId={`program-square-page-${program._id}`}
-            heading={checkoutHeading}
+            heading={ui(uiCopy, 'register.checkoutHeading')}
           />
           <div className="mt-4">
             <MemberGate label={ui(uiCopy, 'landing.checkoutComingSoonGate')}>
-              <p className="text-sm text-[#5A6070]">
-                <CmsProgram k="landing.checkoutSignedIn" fallback={ui(uiCopy, 'landing.checkoutSignedIn')} />
-              </p>
+              <p className="text-sm text-[#5A6070]">{ui(uiCopy, 'landing.checkoutSignedIn')}</p>
             </MemberGate>
           </div>
         </>
@@ -479,7 +458,7 @@ export function ProgramLandingCheckout({
             program={program}
             companion={companion}
             checkoutId={`program-square-page-${program._id}`}
-            heading={checkoutHeading}
+            heading={ui(uiCopy, 'register.checkoutHeading')}
           />
         </MemberGate>
       )}

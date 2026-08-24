@@ -7,12 +7,11 @@ import { getMembershipTiers } from '@/lib/api/membership'
 import { FacultyMembershipJoin } from '@/components/membership/faculty-membership-join'
 import { getFAQItems } from '@/lib/api/faq'
 import { getPageContent } from '@/lib/api/page-content'
-import { getVisitorVideoStrings, visitorString, getDonateFormStrings } from '@/lib/api/visitor-strings'
+import { getVisitorVideoStrings, visitorString } from '@/lib/api/visitor-strings'
 import { VISITOR_VIDEO_DEFAULTS } from '@/lib/defaults/visitor-string-defaults'
-import { formString } from '@/lib/copy/form-string'
 import { MembershipPortalCallouts } from '@/components/membership/membership-portal-callouts'
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
-import { MembershipSectionCopy } from '@/components/membership/membership-section-copy'
+import { EmphasizedCopy } from '@/components/emphasized-copy'
 import { DonateBlock } from '@/components/donate/donate-block'
 import { MembershipSectionNav } from '@/components/jump-nav/public-section-navs'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
@@ -23,13 +22,12 @@ export const revalidate = 60
 
 export default async function MembershipPage() {
   const commons = isCommonsPlatform()
-  const [settings, allTiers, faqItems, page, videoStrings, donateCopy] = await Promise.all([
+  const [settings, allTiers, faqItems, page, videoStrings] = await Promise.all([
     getSiteSettings(),
     getMembershipTiers(),
     getFAQItems('membership'),
     getPageContent('membership'),
     getVisitorVideoStrings(),
-    getDonateFormStrings(),
   ])
 
   const sharedBenefits = settings
@@ -47,7 +45,7 @@ export default async function MembershipPage() {
     )
   return (
     <VisitorChrome pageKey="membership">
-        <PageHero content={page} pageKey="membership" />
+        <PageHero content={page} />
         <MembershipSectionNav />
         {commons ? null : (
           <ParentVideoSection
@@ -74,11 +72,14 @@ export default async function MembershipPage() {
             side="right"
           />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <MembershipSectionCopy
-              headingId="membership-choose-heading"
-              sectionTitle={page.sectionTitle}
-              sectionBody={page.sectionBody}
-            />
+            <div className="text-center mb-12">
+              <h2 id="membership-choose-heading" className="text-3xl font-bold text-[#1A1A1A] mb-3">
+                {page.sectionTitle}
+              </h2>
+              <p className="text-[#5A6070] max-w-xl mx-auto">
+                <EmphasizedCopy text={page.sectionBody} />
+              </p>
+            </div>
             <MembershipCheckoutHandler />
             <MembershipTiers />
           </div>
@@ -112,21 +113,12 @@ export default async function MembershipPage() {
         </section>}
 
         <DonateBlock
-          copy={donateCopy}
-          title={
-            commons
-              ? 'Prefer to give directly?'
-              : vanillaizeIfDemo(formString(donateCopy, 'donate.membershipTitle', 'Not joining a paid tier? You can still donate'))
-          }
+          title={commons ? 'Prefer to give directly?' : 'Not joining a paid tier? You can still donate'}
           body={
             commons
               ? 'Membership is $25 for the year. Direct gifts also help programs and events.'
               : vanillaizeIfDemo(
-                  formString(
-                    donateCopy,
-                    'donate.membershipBody',
-                    'Reef, Lagoon, and Tide are optional. If paid membership is not for you right now, any gift still helps the PTO fund enrichment, The Cove, and events for Stone Hill students.',
-                  ),
+                  'Reef, Lagoon, and Tide are optional. If paid membership isn’t for you right now, any gift still helps the PTO fund enrichment, The Cove, and events for Stone Hill students.',
                 )
           }
         />

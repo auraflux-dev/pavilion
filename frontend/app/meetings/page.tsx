@@ -50,7 +50,7 @@ export default async function MeetingsPage() {
 
   return (
     <VisitorChrome pageKey="meetings">
-        <PageHero content={page} pageKey="meetings" />
+        <PageHero content={page} />
         <MeetingsSectionNav />
 
         {/* PTO Section */}
