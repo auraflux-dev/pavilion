@@ -55,10 +55,23 @@ export type PortalPayBody =
       studentId: string
       couponCode?: string | null
       addonProgramIds?: string[]
+      useCoveBalance?: boolean
       consents?: ConsentAck[]
     }
-  | { kind: 'event'; eventId: string; quantity: number; consents?: ConsentAck[] }
-  | { kind: 'donation'; amountCents: number; note?: string; consents?: ConsentAck[] }
+  | {
+      kind: 'event'
+      eventId: string
+      quantity: number
+      useCoveBalance?: boolean
+      consents?: ConsentAck[]
+    }
+  | {
+      kind: 'donation'
+      amountCents: number
+      note?: string
+      useCoveBalance?: boolean
+      consents?: ConsentAck[]
+    }
 
 interface Props {
   open: boolean
@@ -108,7 +121,8 @@ export function PortalCardCheckout({
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [couponCode, setCouponCode] = useState('')
-  const [useCove, setUseCove] = useState(true)
+  /** Opt-in only. never pre-check Cove. */
+  const [useCove, setUseCove] = useState(false)
   const [quote, setQuote] = useState<{
     amount: number
     listAmount?: number
@@ -129,11 +143,8 @@ export function PortalCardCheckout({
 
   useEffect(() => {
     if (!open) return
-    if (
-      payBody.kind !== 'product' &&
-      payBody.kind !== 'program' &&
-      payBody.kind !== 'membership'
-    ) {
+    const coveKinds = new Set(['product', 'program', 'membership', 'event', 'donation'])
+    if (!coveKinds.has(payBody.kind)) {
       setQuote({ amount })
       return
     }
@@ -145,8 +156,7 @@ export function PortalCardCheckout({
         body: JSON.stringify({
           ...payBody,
           couponCode: couponCode.trim() || undefined,
-          useCoveBalance:
-            payBody.kind === 'product' || payBody.kind === 'membership' ? useCove : false,
+          useCoveBalance: useCove,
         }),
       })
         .then(async (r) => {
@@ -195,7 +205,12 @@ export function PortalCardCheckout({
   const showConsentUi = needsConsent && !prefilledConsents?.length
   const due = quote?.amount ?? amount
   /** Wait for quote before mounting Square when Cove split can change cardDue. */
-  const coveSplitKind = payBody.kind === 'product' || payBody.kind === 'membership'
+  const coveSplitKind =
+    payBody.kind === 'product' ||
+    payBody.kind === 'membership' ||
+    payBody.kind === 'program' ||
+    payBody.kind === 'event' ||
+    payBody.kind === 'donation'
   const productAwaitingQuote = coveSplitKind && quote == null
   const cardDue = coveSplitKind
     ? Number(quote?.cardDollars ?? (productAwaitingQuote ? 0 : due))
@@ -346,8 +361,7 @@ export function PortalCardCheckout({
         body: JSON.stringify({
           ...payBody,
           couponCode: couponCode.trim() || undefined,
-          useCoveBalance:
-            payBody.kind === 'product' || payBody.kind === 'membership' ? useCove : false,
+          useCoveBalance: coveSplitKind ? useCove : false,
           firstName: firstName.trim() || undefined,
           lastName: lastName.trim() || undefined,
           consents: needsConsent ? consents : undefined,
@@ -462,8 +476,8 @@ export function PortalCardCheckout({
               className="mt-0.5"
             />
             <span className="whitespace-pre-line">
-              Apply Cove Digital Card balance first (${Number(quote?.coveBalance ?? 0).toFixed(2)} available).
-              Remaining amount uses your card or PayPal.
+              Optional. Apply Cove Digital Card balance (${Number(quote?.coveBalance ?? 0).toFixed(2)} available).
+              Check this only if you want to use Cove. Remaining amount uses your card or PayPal.
             </span>
           </label>
         ) : null}
@@ -586,25 +600,14 @@ export function PortalCardCheckout({
         {needsCard ? (
         <PortalPayPalButtons
           active={open && !busy && !success && nameReady && (!needsConsent || consentComplete)}
-          payBody={
-            payBody.kind === 'product' ||
-            payBody.kind === 'program' ||
-            payBody.kind === 'membership'
-              ? {
-                  ...payBody,
-                  ...(payBody.kind === 'product' || payBody.kind === 'program'
-                    ? { couponCode: couponCode.trim() || undefined }
-                    : {}),
-                  ...(payBody.kind === 'product' || payBody.kind === 'membership'
-                    ? { useCoveBalance: useCove }
-                    : {}),
-                  consents: needsConsent ? consents ?? undefined : undefined,
-                }
-              : {
-                  ...payBody,
-                  consents: needsConsent ? consents ?? undefined : undefined,
-                }
-          }
+          payBody={{
+            ...payBody,
+            ...(payBody.kind === 'product' || payBody.kind === 'program'
+              ? { couponCode: couponCode.trim() || undefined }
+              : {}),
+            ...(coveSplitKind ? { useCoveBalance: useCove } : {}),
+            consents: needsConsent ? consents ?? undefined : undefined,
+          }}
           onBeforePay={async () => {
             await ensureParentNameSaved()
           }}

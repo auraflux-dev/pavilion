@@ -60,7 +60,8 @@ export async function POST(req: NextRequest) {
       let coveBalance = 0
       if (session?.email) {
         const { withCoveSplit } = await import('@/lib/checkout-cove-split')
-        const useCoveBalance = body.useCoveBalance !== false
+        const { wantsCoveBalance } = await import('@/lib/checkout-cove-split')
+        const useCoveBalance = wantsCoveBalance(body.useCoveBalance)
         const split = await withCoveSplit(
           {
             kind: 'membership',
@@ -101,11 +102,11 @@ export async function POST(req: NextRequest) {
         ...effective.session.emails,
       ]
       const { resolveCheckoutIntent } = await import('@/lib/checkout-fulfill')
-      const { withCoveSplit } = await import('@/lib/checkout-cove-split')
+      const { withCoveSplit, wantsCoveBalance } = await import('@/lib/checkout-cove-split')
       const productId = String(body.productId ?? '').trim()
       const variantId = String(body.variantId ?? '').trim()
       const couponCode = String(body.couponCode ?? '').trim() || null
-      const useCoveBalance = body.useCoveBalance !== false
+      const useCoveBalance = wantsCoveBalance(body.useCoveBalance)
       let resolved = await resolveCheckoutIntent(
         { kind: 'product', productId, variantId, couponCode },
         parentEmail,
@@ -143,11 +144,19 @@ export async function POST(req: NextRequest) {
       const addonProgramIds = Array.isArray(body.addonProgramIds)
         ? body.addonProgramIds.map((id: unknown) => String(id ?? '').trim()).filter(Boolean)
         : []
-      const resolved = await resolveCheckoutIntent(
+      const { withCoveSplit, wantsCoveBalance } = await import('@/lib/checkout-cove-split')
+      let resolved = await resolveCheckoutIntent(
         { kind: 'program', programId, studentId, couponCode, addonProgramIds },
         parentEmail,
         accountEmails,
       )
+      resolved = await withCoveSplit(
+        resolved,
+        parentEmail,
+        wantsCoveBalance(body.useCoveBalance),
+      )
+      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
       return NextResponse.json({
         kind,
         programId,
@@ -159,10 +168,43 @@ export async function POST(req: NextRequest) {
         amount: resolved.amount,
         discountCode: resolved.meta.discountCode || '',
         discountPercent: Number(resolved.meta.memberDiscountPercent ?? 0) || 0,
+        coveDollars: coveCents / 100,
+        cardDollars: cardCents / 100,
+        coveBalance: Number(resolved.meta.coveBalance ?? 0) || 0,
+      })
+    }
+
+    if (kind === 'event') {
+      const session = await getMemberSession(req)
+      if (!session?.email) return NextResponse.json({ error: 'Log in to quote' }, { status: 401 })
+      const { resolveCheckoutIntent } = await import('@/lib/checkout-fulfill')
+      const { withCoveSplit, wantsCoveBalance } = await import('@/lib/checkout-cove-split')
+      const eventId = String(body.eventId ?? '').trim()
+      const quantity = Number(body.quantity ?? 1) || 1
+      let resolved = await resolveCheckoutIntent(
+        { kind: 'event', eventId, quantity },
+        session.email,
+      )
+      resolved = await withCoveSplit(
+        resolved,
+        session.email,
+        wantsCoveBalance(body.useCoveBalance),
+      )
+      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
+      return NextResponse.json({
+        kind,
+        eventId,
+        amount: resolved.amount,
+        name: resolved.meta.eventTitle || 'Event tickets',
+        coveDollars: coveCents / 100,
+        cardDollars: cardCents / 100,
+        coveBalance: Number(resolved.meta.coveBalance ?? 0) || 0,
       })
     }
 
     if (kind === 'donation') {
+      const session = await getMemberSession(req)
       const { isAllowedDonationAmount } = await import('@/lib/donation')
       const amountCents = Number(body.amountCents)
       const amount = amountCents / 100
@@ -172,10 +214,34 @@ export async function POST(req: NextRequest) {
           { status: 400 },
         )
       }
+      let coveDollars = 0
+      let cardDollars = amount
+      let coveBalance = 0
+      if (session?.email) {
+        const { withCoveSplit, wantsCoveBalance } = await import('@/lib/checkout-cove-split')
+        const split = await withCoveSplit(
+          {
+            kind: 'donation',
+            amount,
+            amountCents,
+            description: 'PTO Donation',
+            customId: `dn:${session.email.replace(/[^a-zA-Z0-9]/g, '').slice(0, 37)}`,
+            meta: {},
+          },
+          session.email,
+          wantsCoveBalance(body.useCoveBalance),
+        )
+        coveDollars = Math.round(Number(split.meta.coveCents ?? 0) || 0) / 100
+        cardDollars = Math.round(Number(split.meta.cardCents ?? split.amountCents) || 0) / 100
+        coveBalance = Number(split.meta.coveBalance ?? 0) || 0
+      }
       return NextResponse.json({
         kind,
         amount,
         name: 'PTO Donation',
+        coveDollars,
+        cardDollars,
+        coveBalance,
       })
     }
 

@@ -1,15 +1,28 @@
 /**
  * Live Cove Digital Card split on a resolved checkout quote.
- * Products (spirit / Cove shop) and membership upgrades can apply Cove first.
- * Store-card loads never use Cove (cannot pay a load with itself).
+ * Opt-in only (never assume). Store-card loads cannot use Cove to pay themselves.
  */
 import { getGiftCardBalance } from '@/lib/square'
 import { listFamilyStudents, resolveFamilyGiftCard } from '@/lib/family-store-card'
 import { splitCoveAndCard } from '@/lib/checkout-split-tender'
 import type { ResolvedCheckout } from '@/lib/checkout-fulfill'
 
+const COVE_SPLIT_KINDS = new Set([
+  'product',
+  'membership',
+  'program',
+  'event',
+  'donation',
+  'cart',
+])
+
 export function checkoutAllowsCoveSplit(kind: string): boolean {
-  return kind === 'product' || kind === 'membership'
+  return COVE_SPLIT_KINDS.has(String(kind ?? '').trim().toLowerCase())
+}
+
+/** Explicit opt-in. Missing or false means do not apply Cove. */
+export function wantsCoveBalance(raw: unknown): boolean {
+  return raw === true || raw === 'true' || raw === 1 || raw === '1'
 }
 
 export async function withCoveSplit(

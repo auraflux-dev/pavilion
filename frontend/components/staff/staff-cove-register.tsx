@@ -108,6 +108,8 @@ export function StaffCoveRegister() {
   const [demandQty, setDemandQty] = useState('1')
   const [demandEventNote, setDemandEventNote] = useState('')
   const [demandNotes, setDemandNotes] = useState('')
+  /** Opt-in when Cove balance is short: apply available Cove, then Stand for the rest. */
+  const [allowPartialCove, setAllowPartialCove] = useState(false)
   const codeRef = useRef<HTMLInputElement>(null)
 
   const [productQuery, setProductQuery] = useState('')
@@ -403,6 +405,12 @@ export function StaffCoveRegister() {
   async function chargeCove() {
     if (!family?.hasCard || !cart.length) return
     const short = remainingAfter < 0
+    if (short && !allowPartialCove) {
+      setError(
+        'Cove balance is short. Check “Apply available Cove, then collect the rest on Square Stand” to continue, or remove items.',
+      )
+      return
+    }
     setBusy(true)
     setError('')
     setStatus('')
@@ -413,7 +421,7 @@ export function StaffCoveRegister() {
         body: JSON.stringify({
           code: family.coveFamilyCode,
           lines: cartPayload(),
-          allowPartial: short,
+          allowPartial: short && allowPartialCove,
         }),
       })
       const d = await r.json()
@@ -579,6 +587,7 @@ export function StaffCoveRegister() {
     setProductQuery('')
     setLetterFilter('All')
     setCategoryFilter('All')
+    setAllowPartialCove(false)
     if (payLane === 'cove') codeRef.current?.focus()
   }
 
@@ -1126,20 +1135,37 @@ export function StaffCoveRegister() {
             ) : (
               <>
                 {payLane === 'cove' && canUseCove ? (
-                  <Button
-                    disabled={busy}
-                    onClick={() => void chargeCove()}
-                    className="text-white text-base px-8 py-6 font-bold w-full sm:w-auto"
-                    style={{ backgroundColor: 'var(--brand-green)' }}
-                  >
-                    {busy ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : remainingAfter < 0 ? (
-                      `Charge Cove $${balance.toFixed(2)}, then Stand $${Math.abs(remainingAfter).toFixed(2)}`
-                    ) : (
-                      `Charge Cove $${cartTotal.toFixed(2)}`
-                    )}
-                  </Button>
+                  <div className="space-y-2">
+                    {remainingAfter < 0 ? (
+                      <label className="flex items-start gap-2 text-xs text-[#1A1A1A]">
+                        <input
+                          type="checkbox"
+                          checked={allowPartialCove}
+                          onChange={(e) => setAllowPartialCove(e.target.checked)}
+                          className="mt-0.5"
+                        />
+                        <span className="whitespace-pre-line">
+                          Optional. Apply available Cove (${balance.toFixed(2)}), then collect $
+                          {Math.abs(remainingAfter).toFixed(2)} on Square Stand.
+                          Leave unchecked if you will use Stand only for the full cart.
+                        </span>
+                      </label>
+                    ) : null}
+                    <Button
+                      disabled={busy || (remainingAfter < 0 && !allowPartialCove)}
+                      onClick={() => void chargeCove()}
+                      className="text-white text-base px-8 py-6 font-bold w-full sm:w-auto"
+                      style={{ backgroundColor: 'var(--brand-green)' }}
+                    >
+                      {busy ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : remainingAfter < 0 ? (
+                        `Charge Cove $${balance.toFixed(2)}, then Stand $${Math.abs(remainingAfter).toFixed(2)}`
+                      ) : (
+                        `Charge Cove $${cartTotal.toFixed(2)}`
+                      )}
+                    </Button>
+                  </div>
                 ) : null}
 
                 {payLane === 'cove' && !canUseCove ? (

@@ -15,7 +15,6 @@ import {
 import { getCatalogConfig, isAllowedStoreCardLoadAmount } from '@/lib/api/catalog-config'
 import { getPaidMembershipTiers } from '@/lib/api/membership'
 
-import { applyPaidMembership } from '@/lib/membership-sync'
 import {
   listFamilyStudents,
   resolveFamilyGiftCard,
@@ -154,80 +153,132 @@ export async function POST(req: NextRequest) {
         ...session.emails,
       ]
       const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
+      const { withCoveSplit, wantsCoveBalance } = await import('@/lib/checkout-cove-split')
       const programId = String(body.programId ?? '').trim()
       const studentId = String(body.studentId ?? '').trim()
       const couponCode = String(body.couponCode ?? '').trim() || null
       const addonProgramIds = Array.isArray(body.addonProgramIds)
         ? body.addonProgramIds.map((id: unknown) => String(id ?? '').trim()).filter(Boolean)
         : []
-      const resolved = await resolveCheckoutIntent(
+      let resolved = await resolveCheckoutIntent(
         { kind: 'program', programId, studentId, couponCode, addonProgramIds },
         parentEmail,
         accountEmails,
       )
-      if (!paymentSource) {
+      resolved = await withCoveSplit(
+        resolved,
+        parentEmail,
+        wantsCoveBalance(body.useCoveBalance),
+      )
+      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
+      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+      if (cardCents > 0 && cardCents < 100) {
         return NextResponse.json(
-          { error: 'Enter your credit or debit card to pay' },
-          { status: 400 }
+          {
+            error:
+              'Remaining card amount is under $1. Pay the full amount by card, or load more on your Cove Digital Card.',
+          },
+          { status: 400 },
+        )
+      }
+      if (cardCents >= 100 && !paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card for the remaining balance.' },
+          { status: 400 },
         )
       }
       const paymentKey = randomUUID()
-      const payment = await chargePayment({
-        sourceId: paymentSource,
-        amountCents: resolved.amountCents,
-        idempotencyKey: paymentKey,
-        customerId,
-        referenceId: resolved.customId,
-        buyerEmailAddress: session.email,
-        note: resolved.description,
-      })
+      let paymentId = paymentKey
+      if (cardCents >= 100 && paymentSource) {
+        const payment = await chargePayment({
+          sourceId: paymentSource,
+          amountCents: cardCents,
+          idempotencyKey: paymentKey,
+          customerId,
+          referenceId: resolved.customId,
+          buyerEmailAddress: session.email,
+          note: resolved.description,
+        })
+        paymentId = payment.id ?? paymentKey
+      }
       const result = await fulfillPaidCheckout({
         resolved,
         parentEmail,
         parentName: name,
-        transactionId: payment.id ?? paymentKey,
-        paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
+        transactionId: paymentId,
+        paymentMethod:
+          cardCents <= 0
+            ? 'Cove Digital Card'
+            : useStoredCard || saveCard
+              ? 'Square Card on File'
+              : 'Square Card',
         sourcePrefix: 'square',
         consents: consentCheck.acks,
       })
-      return NextResponse.json({ ok: true, ...result })
+      return NextResponse.json({ ok: true, ...result, coveCents, cardCents })
     }
 
     // ── Event tickets ───────────────────────────────────────────
     if (kind === 'event') {
-      if (!paymentSource) {
-        return NextResponse.json(
-          { error: 'Enter your credit or debit card to pay' },
-          { status: 400 }
-        )
-      }
       const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
+      const { withCoveSplit, wantsCoveBalance } = await import('@/lib/checkout-cove-split')
       const eventId = String(body.eventId ?? '').trim()
       const quantity = Number(body.quantity ?? 1) || 1
-      const resolved = await resolveCheckoutIntent(
+      let resolved = await resolveCheckoutIntent(
         { kind: 'event', eventId, quantity },
         session.email,
       )
+      resolved = await withCoveSplit(
+        resolved,
+        session.email,
+        wantsCoveBalance(body.useCoveBalance),
+      )
+      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
+      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+      if (cardCents > 0 && cardCents < 100) {
+        return NextResponse.json(
+          {
+            error:
+              'Remaining card amount is under $1. Pay the full amount by card, or load more on your Cove Digital Card.',
+          },
+          { status: 400 },
+        )
+      }
+      if (cardCents >= 100 && !paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card for the remaining balance.' },
+          { status: 400 },
+        )
+      }
       const paymentKey = randomUUID()
-      const payment = await chargePayment({
-        sourceId: paymentSource,
-        amountCents: resolved.amountCents,
-        idempotencyKey: paymentKey,
-        customerId,
-        referenceId: resolved.customId,
-        buyerEmailAddress: session.email,
-        note: resolved.description,
-      })
+      let paymentId = paymentKey
+      if (cardCents >= 100 && paymentSource) {
+        const payment = await chargePayment({
+          sourceId: paymentSource,
+          amountCents: cardCents,
+          idempotencyKey: paymentKey,
+          customerId,
+          referenceId: resolved.customId,
+          buyerEmailAddress: session.email,
+          note: resolved.description,
+        })
+        paymentId = payment.id ?? paymentKey
+      }
       const result = await fulfillPaidCheckout({
         resolved,
         parentEmail: session.email,
         parentName: name,
-        transactionId: payment.id ?? paymentKey,
-        paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
+        transactionId: paymentId,
+        paymentMethod:
+          cardCents <= 0
+            ? 'Cove Digital Card'
+            : useStoredCard || saveCard
+              ? 'Square Card on File'
+              : 'Square Card',
         sourcePrefix: 'square',
         consents: consentCheck.acks,
       })
-      return NextResponse.json({ ok: true, ...result })
+      return NextResponse.json({ ok: true, ...result, coveCents, cardCents })
     }
 
     // ── Membership ──────────────────────────────────────────────
@@ -334,7 +385,8 @@ export async function POST(req: NextRequest) {
 
       const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
       const { withCoveSplit } = await import('@/lib/checkout-cove-split')
-      const useCoveBalance = body.useCoveBalance !== false
+      const { wantsCoveBalance } = await import('@/lib/checkout-cove-split')
+      const useCoveBalance = wantsCoveBalance(body.useCoveBalance)
       let resolved = await resolveCheckoutIntent(
         {
           kind: 'membership',
@@ -458,7 +510,8 @@ export async function POST(req: NextRequest) {
       const productId = String(body.productId ?? '').trim()
       const variantId = String(body.variantId ?? '').trim()
       const couponCode = String(body.couponCode ?? '').trim() || null
-      const useCoveBalance = body.useCoveBalance !== false
+      const { wantsCoveBalance } = await import('@/lib/checkout-cove-split')
+      const useCoveBalance = wantsCoveBalance(body.useCoveBalance)
       let resolved = await resolveCheckoutIntent(
         { kind: 'product', productId, variantId, couponCode },
         parentEmail,
@@ -537,13 +590,9 @@ export async function POST(req: NextRequest) {
 
     // ── PTO donation (any amount) ───────────────────────────────
     if (kind === 'donation') {
-      if (!paymentSource) {
-        return NextResponse.json(
-          { error: 'Enter your credit or debit card to pay' },
-          { status: 400 }
-        )
-      }
       const { isAllowedDonationAmount } = await import('@/lib/donation')
+      const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
+      const { withCoveSplit, wantsCoveBalance } = await import('@/lib/checkout-cove-split')
       const amountCents = Number(body.amountCents)
       const amount = amountCents / 100
       if (!Number.isInteger(amountCents) || !isAllowedDonationAmount(amount)) {
@@ -553,60 +602,71 @@ export async function POST(req: NextRequest) {
         )
       }
       const note = String(body.note ?? '').trim().slice(0, 120)
-      const paymentKey = randomUUID()
-      const payment = await chargePayment({
-        sourceId: paymentSource,
-        amountCents,
-        idempotencyKey: paymentKey,
-        customerId,
-        referenceId: `dn:${session.email.replace(/[^a-zA-Z0-9]/g, '').slice(0, 37)}`,
-        buyerEmailAddress: session.email,
- note: note ? `PTO donation: ${note}` : 'SHMS PTO donation',
-      })
-
-      await client.items.insert('Payments', {
-        programName: 'PTO Donation',
-        amount,
-        status: 'Paid',
-        paymentDate: new Date().toISOString(),
-        paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
-        transactionId: payment.id ?? paymentKey,
-        source: 'square_donation',
-        parentEmail: session.email,
-        notes: note || 'General PTO donation',
-      })
-
-      const { sendPurchaseConfirmation } = await import('@/lib/purchase-confirmation')
-      let confirmation: Record<string, unknown> | undefined
-      try {
-        const conf = await sendPurchaseConfirmation({
-          kind: 'donation',
-          parentEmail: session.email,
-          parentName: name,
-          amount,
-          description: 'SHMS PTO donation',
-          transactionId: payment.id ?? paymentKey,
-          meta: { note },
-        })
-        confirmation = {
-          subject: conf.subject,
-          nextSteps: conf.nextSteps,
-          portalHref: conf.portalHref,
-          emailed: conf.emailed,
-        }
-      } catch (err) {
-        console.warn('donation confirmation failed', err)
+      let resolved = await resolveCheckoutIntent(
+        { kind: 'donation', amountCents, note },
+        session.email,
+      )
+      resolved = await withCoveSplit(
+        resolved,
+        session.email,
+        wantsCoveBalance(body.useCoveBalance),
+      )
+      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
+      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+      if (cardCents > 0 && cardCents < 100) {
+        return NextResponse.json(
+          {
+            error:
+              'Remaining card amount is under $1. Pay the full amount by card, or load more on your Cove Digital Card.',
+          },
+          { status: 400 },
+        )
       }
-
+      if (cardCents >= 100 && !paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card for the remaining balance.' },
+          { status: 400 },
+        )
+      }
+      const paymentKey = randomUUID()
+      let paymentId = paymentKey
+      if (cardCents >= 100 && paymentSource) {
+        const payment = await chargePayment({
+          sourceId: paymentSource,
+          amountCents: cardCents,
+          idempotencyKey: paymentKey,
+          customerId,
+          referenceId: resolved.customId,
+          buyerEmailAddress: session.email,
+          note: note ? `PTO donation: ${note}` : 'SHMS PTO donation',
+        })
+        paymentId = payment.id ?? paymentKey
+      }
+      const result = await fulfillPaidCheckout({
+        resolved,
+        parentEmail: session.email,
+        parentName: name,
+        transactionId: paymentId,
+        paymentMethod:
+          cardCents <= 0
+            ? 'Cove Digital Card'
+            : useStoredCard || saveCard
+              ? 'Square Card on File'
+              : 'Square Card',
+        sourcePrefix: 'square',
+        consents: consentCheck.acks,
+      })
       return NextResponse.json({
         ok: true,
+        ...result,
         kind,
-        paymentId: payment.id,
+        paymentId,
         amount,
+        coveCents,
+        cardCents,
         paymentMethod: stored
           ? { brand: stored.brand, last4: stored.last4 }
           : null,
-        confirmation,
       })
     }
 

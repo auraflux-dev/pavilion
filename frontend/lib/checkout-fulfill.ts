@@ -507,6 +507,46 @@ export async function resolveCheckoutIntent(
   }
 }
 
+async function applyCoveTenderFromResolved(opts: {
+  resolved: ResolvedCheckout
+  parentEmail: string
+  transactionId: string
+  paymentMethod: string
+}): Promise<{
+  methodNote: string
+  coveCents: number
+  cardCents: number
+  coveNewBalance: string
+}> {
+  const coveCents = Math.round(Number(opts.resolved.meta.coveCents ?? 0) || 0)
+  const cardCents = Math.round(
+    Number(opts.resolved.meta.cardCents ?? opts.resolved.amountCents) || 0,
+  )
+  const gan = String(opts.resolved.meta.gan ?? '').trim()
+  let coveNewBalance = ''
+  if (coveCents > 0) {
+    if (!gan) throw new Error('Cove Digital Card is missing for this split payment')
+    const activity = await redeemGiftCard(gan, coveCents, `${opts.transactionId}-cove`)
+    const newBalance = activity?.giftCardBalanceMoney
+      ? Number(activity.giftCardBalanceMoney.amount) / 100
+      : 0
+    coveNewBalance = newBalance.toFixed(2)
+    await syncFamilyStoreCard({
+      parentEmail: opts.parentEmail,
+      gan,
+      giftCardId: opts.resolved.meta.giftCardId,
+      balanceDollars: newBalance,
+    })
+  }
+  const methodNote =
+    coveCents > 0 && cardCents > 0
+      ? `${opts.paymentMethod} + Cove Digital Card`
+      : coveCents > 0 && cardCents <= 0
+        ? 'Cove Digital Card'
+        : opts.paymentMethod
+  return { methodNote, coveCents, cardCents, coveNewBalance }
+}
+
 export async function fulfillPaidCheckout(opts: {
   resolved: ResolvedCheckout
   parentEmail: string
@@ -630,6 +670,12 @@ export async function fulfillPaidCheckout(opts: {
   }
 
   if (resolved.kind === 'program') {
+    const cove = await applyCoveTenderFromResolved({
+      resolved,
+      parentEmail,
+      transactionId,
+      paymentMethod,
+    })
     const enrolled = await enrollInProgram({
       parentEmail,
       programId: resolved.meta.programId,
@@ -661,7 +707,7 @@ export async function fulfillPaidCheckout(opts: {
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
-      paymentMethod,
+      paymentMethod: cove.methodNote,
       transactionId,
       source: `${sourcePrefix}_program`,
       parentEmail,
@@ -670,6 +716,9 @@ export async function fulfillPaidCheckout(opts: {
         resolved.meta.programId,
         resolved.meta.addonProgramIds,
         resolved.meta.discountCode,
+        cove.coveCents > 0 ? `Cove $${(cove.coveCents / 100).toFixed(2)}` : '',
+        cove.cardCents > 0 ? `card $${(cove.cardCents / 100).toFixed(2)}` : '',
+        cove.coveNewBalance ? `Cove balance $${cove.coveNewBalance}` : '',
       ]
         .filter(Boolean)
         .join(' · '),
@@ -847,6 +896,12 @@ export async function fulfillPaidCheckout(opts: {
   }
 
   if (resolved.kind === 'event') {
+    const cove = await applyCoveTenderFromResolved({
+      resolved,
+      parentEmail,
+      transactionId,
+      paymentMethod,
+    })
     const { recordEventTicketSale } = await import('@/lib/events/tickets')
     const quantity = Math.max(1, Number(resolved.meta.quantity ?? 1) || 1)
     await recordEventTicketSale({
@@ -858,15 +913,21 @@ export async function fulfillPaidCheckout(opts: {
       amount: resolved.amount,
     })
     await client.items.insert('Payments', {
- programName: `Event: ${resolved.meta.eventTitle}`,
+      programName: `Event: ${resolved.meta.eventTitle}`,
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
-      paymentMethod,
+      paymentMethod: cove.methodNote,
       transactionId,
       source: `${sourcePrefix}_event_ticket`,
       parentEmail,
-      notes: `${resolved.meta.eventId}|qty:${quantity}`,
+      notes: [
+        `${resolved.meta.eventId}|qty:${quantity}`,
+        cove.coveCents > 0 ? `Cove $${(cove.coveCents / 100).toFixed(2)}` : '',
+        cove.cardCents > 0 ? `card $${(cove.cardCents / 100).toFixed(2)}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · '),
     })
     return confirm(
       {
@@ -890,17 +951,29 @@ export async function fulfillPaidCheckout(opts: {
   }
 
   if (resolved.kind === 'donation') {
+    const cove = await applyCoveTenderFromResolved({
+      resolved,
+      parentEmail,
+      transactionId,
+      paymentMethod,
+    })
     const note = resolved.meta.note || ''
     await client.items.insert('Payments', {
       programName: 'PTO Donation',
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
-      paymentMethod,
+      paymentMethod: cove.methodNote,
       transactionId,
       source: `${sourcePrefix}_donation`,
       parentEmail,
-      notes: note || 'General PTO donation',
+      notes: [
+        note || 'General PTO donation',
+        cove.coveCents > 0 ? `Cove $${(cove.coveCents / 100).toFixed(2)}` : '',
+        cove.cardCents > 0 ? `card $${(cove.cardCents / 100).toFixed(2)}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · '),
     })
     return confirm(
       {
