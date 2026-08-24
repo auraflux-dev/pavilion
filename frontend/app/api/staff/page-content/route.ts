@@ -10,6 +10,7 @@ import type { StaffProfile } from '@/lib/staff/roles'
 import { vanillaizeCopy } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { revalidatePublicPage } from '@/lib/staff/revalidate-public'
+import { effectivePageContentRow } from '@/lib/copy/effective-staff-copy'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -29,7 +30,7 @@ function canEditPageCopy(staff: StaffProfile | null, page: string) {
 }
 
 function mapRow(item: Record<string, unknown>) {
-  return {
+  const raw = {
     id: String(item._id ?? ''),
     page: String(item.page ?? ''),
     eyebrow: String(item.eyebrow ?? ''),
@@ -43,6 +44,7 @@ function mapRow(item: Record<string, unknown>) {
     flyerImage: String(item.flyerImage ?? ''),
     active: item.active !== false,
   }
+  return effectivePageContentRow(raw.page, raw)
 }
 
 export async function GET(req: NextRequest) {
@@ -60,24 +62,7 @@ export async function GET(req: NextRequest) {
       : [...COVE_PAGE_CONTENT_KEYS]
     const missing = defaultKeys
       .filter((page) => !known.has(page))
-      .map((page) => {
-        const d = PAGE_CONTENT_DEFAULTS[page]
-        return {
-          id: '',
-          page,
-          eyebrow: d?.eyebrow ?? '',
-          title: d?.title ?? '',
-          body: d?.body ?? '',
-          sectionTitle: d?.sectionTitle ?? '',
-          sectionBody: d?.sectionBody ?? '',
-          bullets: (d?.bullets ?? []).join('\n'),
-          ctaLabel: d?.ctaLabel ?? '',
-          ctaHref: d?.ctaHref ?? '',
-          flyerImage: d?.flyerImage ?? '',
-          active: true,
-          fromDefault: true,
-        }
-      })
+      .map((page) => effectivePageContentRow(page, { page, active: true }))
     let merged = [...pages, ...missing]
     if (!allPages) {
       merged = merged.filter((p) => isCovePageContentKey(p.page))

@@ -1,6 +1,6 @@
 /**
  * POST /api/staff/cms/ensure-fields
- * Admin-only: create enrichment CMS fields if missing (Programs schedule + flyers, etc.).
+ * Admin or VP Marketing: create enrichment CMS fields if missing.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
@@ -66,7 +66,7 @@ async function ensureFields(
 
 export async function POST(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!requireStaffRole(session?.staff ?? null, ['admin'])) {
+  if (!requireStaffRole(session?.staff ?? null, ['admin', 'marketing'])) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

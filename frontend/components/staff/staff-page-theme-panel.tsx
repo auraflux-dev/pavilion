@@ -124,7 +124,8 @@ export function StaffPageThemePanel() {
         <div>
           <h2 className="text-lg font-bold">Page CSS &amp; strings</h2>
           <p className="text-xs text-[#5A6070] mt-1 leading-relaxed whitespace-pre-line">
-            Admin and VP Marketing only.
+            Admin and VP Marketing.
+            Fields show what families see today. Empty CMS values use code defaults until you Save.
             Per-page CSS injects on the live route after Save.
             Scope selectors with the page class shown below (example: .page-member-portal main).
             String overrides use key|text, one per line.
@@ -223,8 +224,8 @@ export function StaffPageThemePanel() {
               spellCheck={false}
             />
             <p className="text-[11px] text-[#5A6070] mt-1">
-              For portal-hub labels, you can also edit bullets in Page copy. Overrides here merge on
-              top when wired in code.
+              Pre-filled with live copy (CMS + code defaults). portal-hub labels can also be edited
+              under Page copy bullets. Overrides here apply on the live site.
             </p>
           </div>
 

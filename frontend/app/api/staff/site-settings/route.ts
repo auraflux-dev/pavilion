@@ -8,6 +8,13 @@ import {
 } from '@/lib/staff/cms-catalog'
 import type { StaffRole } from '@/lib/staff/roles'
 import { revalidatePublicSiteShell } from '@/lib/staff/revalidate-public'
+import { CONTACT_DEFAULTS } from '@/lib/defaults/page-content'
+
+/** Code fallbacks shown in Staff when SiteSettings row is empty (matches public site). */
+const SITE_SETTING_CODE_DEFAULTS: Record<string, string> = {
+  ...CONTACT_DEFAULTS,
+  storeHours: CONTACT_DEFAULTS.contactStoreHours,
+}
 
 function normalizeRetailValue(value: string) {
   return value
@@ -45,7 +52,8 @@ export async function GET(req: NextRequest) {
     const ids: Record<string, string> = {}
     for (const g of groups) {
       for (const k of g.keys) {
-        settings[k.key] = map[k.key]?.value ?? ''
+        const cms = map[k.key]?.value ?? ''
+        settings[k.key] = cms.trim() || (SITE_SETTING_CODE_DEFAULTS[k.key] ?? '')
         ids[k.key] = map[k.key]?.id ?? ''
       }
     }

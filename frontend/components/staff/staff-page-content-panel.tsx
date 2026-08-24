@@ -106,10 +106,10 @@ export function StaffPageContentPanel() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-lg font-bold">Page copy</h2>
-          <p className="text-xs text-[#5A6070]">
+          <p className="text-xs text-[#5A6070] whitespace-pre-line">
             {scope === 'cove'
-              ? 'Edit The Cove public page copy (store / how / CTA / spirit wear). Changes show after refresh / ~5 minutes.'
-              : 'Edit heroes and section copy without Wix CMS. For per-page CSS, use Page CSS & strings (admin + VP Marketing). Changes show after refresh / ~5 minutes.'}
+              ? 'Edit The Cove public page copy (store / how / CTA / spirit wear). Fields show what families see today.'
+              : 'Edit heroes and section copy without Wix CMS. Fields show what families see today (CMS + code defaults). For per-page CSS and string overrides, use Page CSS & strings (admin + VP Marketing).'}
           </p>
         </div>
         {canBrandFix ? (

@@ -67,7 +67,7 @@ export function StaffSiteSettingsPanel({
       <div>
         <h2 className="text-lg font-bold">{title}</h2>
         <p className="text-xs text-[#5A6070]">
-          Visitor-facing SiteSettings for your role. Click Save on each field. www updates within seconds.
+          Visitor-facing SiteSettings for your role. Empty fields show live code defaults until you Save.
         </p>
       </div>
       {groups.length > 1 ? (

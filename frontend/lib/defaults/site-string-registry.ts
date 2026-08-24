@@ -9,9 +9,12 @@ import { STAFF_PORTAL_DEFAULTS } from '@/lib/defaults/staff-portal-defaults'
 import {
   CURRICULUM_PAGE_DEFAULTS,
   DONATE_FORM_DEFAULTS,
+  LEGAL_SHELL_DEFAULTS,
   RFC_DEFAULTS,
+  SURVEY_DEFAULTS,
   VISITOR_VIDEO_DEFAULTS,
 } from '@/lib/defaults/visitor-string-defaults'
+import { PORTAL_COPY_DEFAULTS } from '@/lib/defaults/portal-copy'
 
 export type SiteStringSurface = 'visitor' | 'member' | 'staff' | 'legal'
 
@@ -52,21 +55,23 @@ export const SITE_PAGE_THEME_REGISTRY: SitePageThemeEntry[] = [
     surface: 'member',
     route: '/member-portal',
     fields: 'free/paid account blurbs',
-    stringKeys: ['paidTitle', 'paidBody', 'freeTitle', 'freeBody'],
+    stringKeys: ['paidTitle', 'paidBody', 'freeTitle', 'freeBody', 'emptyTitle', 'emptyBody', 'upgradeBody'],
   },
   {
     page: 'portal-hub',
     surface: 'member',
     route: '/member-portal',
     fields: 'quadrant titles, tabs, CTAs (~40 keys)',
-    stringKeys: ['studentsTitle', 'calendarTitle', 'addStudentCta', 'refresh'],
+    stringKeys: Object.keys(PORTAL_COPY_DEFAULTS).filter(
+      (k) => !['paidTitle', 'paidBody', 'freeTitle', 'freeBody', 'emptyTitle', 'emptyBody', 'upgradeBody'].includes(k),
+    ),
   },
   {
     page: 'portal-forms',
     surface: 'member',
     route: '/member-portal',
     fields: 'form labels, placeholders, validation, payment methods',
-    stringKeys: Object.keys(PORTAL_FORM_DEFAULTS).slice(0, 12),
+    stringKeys: Object.keys(PORTAL_FORM_DEFAULTS),
   },
   { page: 'portal-help', surface: 'member', route: '/member-portal/help', fields: 'FAQ accordion (question|answer bullets)' },
   {
@@ -74,7 +79,7 @@ export const SITE_PAGE_THEME_REGISTRY: SitePageThemeEntry[] = [
     surface: 'staff',
     route: '/staff',
     fields: 'staff shell chrome + workspace labels',
-    stringKeys: ['shell.staff', 'shell.viewSite', 'shell.signOut', 'workspace.home', 'workspace.programs'],
+    stringKeys: Object.keys(STAFF_PORTAL_DEFAULTS),
   },
   {
     page: 'programs-curriculum',
@@ -88,14 +93,14 @@ export const SITE_PAGE_THEME_REGISTRY: SitePageThemeEntry[] = [
     surface: 'visitor',
     route: '/membership, /board, /cove',
     fields: 'ParentVideoSection copy per page',
-    stringKeys: Object.keys(VISITOR_VIDEO_DEFAULTS).slice(0, 6),
+    stringKeys: Object.keys(VISITOR_VIDEO_DEFAULTS),
   },
   {
     page: 'donate-form',
     surface: 'visitor',
     route: '/fundraising, /',
     fields: 'donate block labels',
-    stringKeys: Object.keys(DONATE_FORM_DEFAULTS).slice(0, 8),
+    stringKeys: Object.keys(DONATE_FORM_DEFAULTS),
   },
   {
     page: 'rfc-promo',
@@ -103,6 +108,20 @@ export const SITE_PAGE_THEME_REGISTRY: SitePageThemeEntry[] = [
     route: '/',
     fields: 'Run for Charity home promo',
     stringKeys: Object.keys(RFC_DEFAULTS),
+  },
+  {
+    page: 'legal-shell',
+    surface: 'legal',
+    route: '/privacy, /terms, /data-security',
+    fields: 'legal page chrome',
+    stringKeys: Object.keys(LEGAL_SHELL_DEFAULTS),
+  },
+  {
+    page: 'survey-strings',
+    surface: 'visitor',
+    route: '/survey/[slug]',
+    fields: 'public survey submit copy',
+    stringKeys: Object.keys(SURVEY_DEFAULTS),
   },
 ]
 
