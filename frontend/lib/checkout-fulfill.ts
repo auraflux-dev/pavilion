@@ -700,6 +700,30 @@ export async function fulfillPaidCheckout(opts: {
   if (resolved.kind === 'membership') {
     const tier = resolved.meta.tier
     const studentId = resolved.meta.studentId || null
+    const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+    const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
+    const gan = String(resolved.meta.gan ?? '').trim()
+    let coveNewBalance = ''
+    if (coveCents > 0) {
+      if (!gan) throw new Error('Cove Digital Card is missing for this split payment')
+      const activity = await redeemGiftCard(gan, coveCents, `${transactionId}-cove`)
+      const newBalance = activity?.giftCardBalanceMoney
+        ? Number(activity.giftCardBalanceMoney.amount) / 100
+        : 0
+      coveNewBalance = newBalance.toFixed(2)
+      await syncFamilyStoreCard({
+        parentEmail,
+        gan,
+        giftCardId: resolved.meta.giftCardId,
+        balanceDollars: newBalance,
+      })
+    }
+    const methodNote =
+      coveCents > 0 && cardCents > 0
+        ? `${paymentMethod} + Cove Digital Card`
+        : coveCents > 0 && cardCents <= 0
+          ? 'Cove Digital Card'
+          : paymentMethod
     const applied = await applyPaidMembership({
       parentEmail,
       tier,
@@ -714,12 +738,12 @@ export async function fulfillPaidCheckout(opts: {
     })
     await client.items.insert('Payments', {
       programName: resolved.meta.isUpgrade === '1'
- ? `Membership upgrade: ${resolved.meta.currentTier} → ${resolved.meta.tierName}`
- : `Membership: ${resolved.meta.tierName}`,
+        ? `Membership upgrade: ${resolved.meta.currentTier} → ${resolved.meta.tierName}`
+        : `Membership: ${resolved.meta.tierName}`,
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
-      paymentMethod,
+      paymentMethod: methodNote,
       transactionId,
       source: `${sourcePrefix}_membership`,
       parentEmail,
@@ -727,9 +751,16 @@ export async function fulfillPaidCheckout(opts: {
       ...(applied.updatedStudentIds?.[0] && !studentId
         ? { studentId: applied.updatedStudentIds[0] }
         : {}),
+      notes: [
+        coveCents > 0 ? `Cove $${(coveCents / 100).toFixed(2)}` : '',
+        cardCents > 0 ? `card $${(cardCents / 100).toFixed(2)}` : '',
+        coveNewBalance ? `Cove balance $${coveNewBalance}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · '),
     })
     return confirm(
-      { kind: 'membership', tier, applied, paymentId: transactionId },
+      { kind: 'membership', tier, applied, paymentId: transactionId, coveCents, cardCents },
       {
         kind: 'membership',
         parentEmail,

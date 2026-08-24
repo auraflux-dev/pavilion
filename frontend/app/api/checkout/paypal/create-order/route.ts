@@ -23,32 +23,11 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const intent = body as CheckoutIntent & { consents?: ConsentAck[] }
-    if (
-      !intent.kind ||
-      !['membership', 'product', 'store-card', 'program', 'event', 'donation', 'cart'].includes(
-        intent.kind,
-      )
-    ) {
+    if (!intent.kind || !['membership', 'product', 'store-card', 'program', 'event', 'donation'].includes(intent.kind)) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
     }
 
-    const cartConsentKinds =
-      intent.kind === 'cart' && Array.isArray(intent.cartLines)
-        ? Array.from(
-            new Set(
-              intent.cartLines
-                .map((l) => String(l.kind ?? ''))
-                .filter((k): k is CheckoutConsentKind =>
-                  k === 'membership' || k === 'program' || k === 'event',
-                ),
-            ),
-          )
-        : undefined
-    const consentCheck = validateConsentAcks(
-      intent.kind as CheckoutConsentKind,
-      intent.consents,
-      cartConsentKinds,
-    )
+    const consentCheck = validateConsentAcks(intent.kind as CheckoutConsentKind, intent.consents)
     if (!consentCheck.ok) {
       return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }
@@ -61,8 +40,9 @@ export async function POST(req: NextRequest) {
     ]
     const resolved = await resolveCheckoutIntent(intent, parentEmail, accountEmails)
     const { withCoveSplit } = await import('@/lib/checkout-cove-split')
+    const { checkoutAllowsCoveSplit } = await import('@/lib/checkout-cove-split')
     const useCove =
-      (intent.kind === 'product' || intent.kind === 'cart') && intent.useCoveBalance !== false
+      checkoutAllowsCoveSplit(intent.kind) && intent.useCoveBalance !== false
     const split = await withCoveSplit(resolved, parentEmail, useCove)
     const cardCents = Math.round(Number(split.meta.cardCents ?? split.amountCents) || 0)
     if (cardCents <= 0) {

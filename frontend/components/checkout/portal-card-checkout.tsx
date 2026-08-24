@@ -9,10 +9,7 @@ import { CreditCard, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PortalPayPalButtons } from '@/components/checkout/portal-paypal-buttons'
 import { CheckoutConsent } from '@/components/checkout/checkout-consent'
-import { HelpTip } from '@/components/ui/help-tip'
 import type { ConsentAck, CheckoutConsentKind } from '@/lib/checkout-consent'
-import { tooltipCopy } from '@/lib/copy/tooltips'
-import { useDialogA11y } from '@/lib/hooks/use-dialog-a11y'
 import { itemsFromPayBody, trackBeginCheckout, trackCheckoutPurchase } from '@/lib/ga'
 import { getStoredCouponCode, setStoredCouponCode } from '@/lib/start-checkout'
 
@@ -47,6 +44,7 @@ export type PortalPayBody =
       shirtProductId?: string | null
       shirtVariantId?: string | null
       physicalPerk?: 'spirit_shirt' | 'magnet' | null
+      useCoveBalance?: boolean
       consents?: ConsentAck[]
     }
   | { kind: 'product'; productId: string; variantId?: string; couponCode?: string | null; useCoveBalance?: boolean; consents?: ConsentAck[] }
@@ -55,19 +53,12 @@ export type PortalPayBody =
       kind: 'program'
       programId: string
       studentId: string
-      addonProgramIds?: string[]
       couponCode?: string | null
+      addonProgramIds?: string[]
       consents?: ConsentAck[]
     }
   | { kind: 'event'; eventId: string; quantity: number; consents?: ConsentAck[] }
   | { kind: 'donation'; amountCents: number; note?: string; consents?: ConsentAck[] }
-  | {
-      kind: 'cart'
-      cartLines: Exclude<PortalPayBody, { kind: 'cart' | 'store-card' }>[]
-      couponCode?: string | null
-      useCoveBalance?: boolean
-      consents?: ConsentAck[]
-    }
 
 interface Props {
   open: boolean
@@ -117,14 +108,7 @@ export function PortalCardCheckout({
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [couponCode, setCouponCode] = useState('')
-  const [showCoupon, setShowCoupon] = useState(false)
-  const [showPayPal, setShowPayPal] = useState(false)
   const [useCove, setUseCove] = useState(true)
-  const panelRef = useRef<HTMLDivElement>(null)
-  const closeSafe = useCallback(() => {
-    if (!busy) onClose()
-  }, [busy, onClose])
-  useDialogA11y(open, closeSafe, panelRef)
   const [quote, setQuote] = useState<{
     amount: number
     listAmount?: number
@@ -140,16 +124,16 @@ export function PortalCardCheckout({
   useEffect(() => {
     if (!open) return
     const stored = getStoredCouponCode()
-    if (stored) {
-      setCouponCode(stored)
-      setShowCoupon(true)
-    }
-    setShowPayPal(false)
+    if (stored) setCouponCode(stored)
   }, [open])
 
   useEffect(() => {
     if (!open) return
-    if (payBody.kind !== 'product' && payBody.kind !== 'program' && payBody.kind !== 'cart') {
+    if (
+      payBody.kind !== 'product' &&
+      payBody.kind !== 'program' &&
+      payBody.kind !== 'membership'
+    ) {
       setQuote({ amount })
       return
     }
@@ -162,7 +146,7 @@ export function PortalCardCheckout({
           ...payBody,
           couponCode: couponCode.trim() || undefined,
           useCoveBalance:
-            payBody.kind === 'product' || payBody.kind === 'cart' ? useCove : false,
+            payBody.kind === 'product' || payBody.kind === 'membership' ? useCove : false,
         }),
       })
         .then(async (r) => {
@@ -202,44 +186,22 @@ export function PortalCardCheckout({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, amount, title, payBody.kind])
 
-  const cartConsentKinds: CheckoutConsentKind[] =
-    payBody.kind === 'cart'
-      ? Array.from(
-          new Set(
-            payBody.cartLines
-              .map((l) => l.kind)
-              .filter(
-                (k): k is 'membership' | 'program' | 'event' =>
-                  k === 'membership' || k === 'program' || k === 'event',
-              ),
-          ),
-        )
-      : []
   const consentKind: CheckoutConsentKind =
-    payBody.kind === 'cart'
-      ? 'cart'
-      : payBody.kind === 'membership' || payBody.kind === 'program' || payBody.kind === 'event'
-        ? payBody.kind
-        : 'product'
+    payBody.kind === 'membership' || payBody.kind === 'program' || payBody.kind === 'event'
+      ? payBody.kind
+      : 'product'
   const needsConsent =
-    payBody.kind === 'membership' ||
-    payBody.kind === 'program' ||
-    payBody.kind === 'event' ||
-    (payBody.kind === 'cart' && cartConsentKinds.length > 0)
+    payBody.kind === 'membership' || payBody.kind === 'program' || payBody.kind === 'event'
   const showConsentUi = needsConsent && !prefilledConsents?.length
   const due = quote?.amount ?? amount
-  /** Wait for product/bag quote before mounting Square; otherwise cardDue falls back to list price and attach races the DOM. */
-  const splitAwaitingQuote =
-    (payBody.kind === 'product' || payBody.kind === 'cart') && quote == null
-  const cardDue =
-    payBody.kind === 'product' || payBody.kind === 'cart'
-      ? Number(quote?.cardDollars ?? (splitAwaitingQuote ? 0 : due))
-      : due
-  const coveDue =
-    payBody.kind === 'product' || payBody.kind === 'cart'
-      ? Number(quote?.coveDollars ?? 0)
-      : 0
-  const needsCard = !splitAwaitingQuote && cardDue >= 1
+  /** Wait for quote before mounting Square when Cove split can change cardDue. */
+  const coveSplitKind = payBody.kind === 'product' || payBody.kind === 'membership'
+  const productAwaitingQuote = coveSplitKind && quote == null
+  const cardDue = coveSplitKind
+    ? Number(quote?.cardDollars ?? (productAwaitingQuote ? 0 : due))
+    : due
+  const coveDue = coveSplitKind ? Number(quote?.coveDollars ?? 0) : 0
+  const needsCard = !productAwaitingQuote && cardDue >= 1
   const nameReady = !needsName || (firstName.trim().length > 0 && lastName.trim().length > 0)
 
   const onConsentChange = useCallback((acks: ConsentAck[] | null, complete: boolean) => {
@@ -296,7 +258,6 @@ export function PortalCardCheckout({
   useEffect(() => {
     if (!open || !config?.configured || useStored || !needsCard) return
     let cancelled = false
-    let attached: SquareCard | null = null
 
     async function setup() {
       const src =
@@ -320,66 +281,26 @@ export function PortalCardCheckout({
       }
 
       if (cancelled || !window.Square || !config) return
-
-      // Wait for the card host to exist. Closing the modal mid-load must not attach.
-      for (let i = 0; i < 10; i++) {
-        if (cancelled) return
-        if (document.getElementById(containerId)) break
-        await new Promise<void>((r) => requestAnimationFrame(() => r()))
-      }
-      if (cancelled || !document.getElementById(containerId)) return
-
-      const prev = cardRef.current
-      cardRef.current = null
-      if (prev) await prev.destroy().catch(() => undefined)
-
+      await cardRef.current?.destroy().catch(() => undefined)
       const payments = await window.Square.payments(config.applicationId, config.locationId)
-      if (cancelled) return
       const card = await payments.card()
-      if (cancelled) {
-        await card.destroy().catch(() => undefined)
-        return
-      }
-      if (!document.getElementById(containerId)) {
-        await card.destroy().catch(() => undefined)
-        return
-      }
       await card.attach(`#${containerId}`)
-      if (cancelled) {
-        await card.destroy().catch(() => undefined)
-        return
-      }
-      attached = card
       cardRef.current = card
       setReady(true)
     }
 
-    setup().catch((err) => {
-      if (cancelled) return
-      const raw = err instanceof Error ? err.message : 'Payment form unavailable'
-      setError(
-        /container element removed/i.test(raw)
-          ? 'Card form needed a moment. Close and try again.'
-          : raw,
-      )
-    })
+    setup().catch((err) => setError(err instanceof Error ? err.message : 'Payment form unavailable'))
     return () => {
       cancelled = true
-      const card = attached || cardRef.current
-      attached = null
+      cardRef.current?.destroy().catch(() => undefined)
       cardRef.current = null
-      // Destroy while the host div is still mounted (cleanup runs before DOM removal).
-      void card?.destroy().catch(() => undefined)
+      setReady(false)
     }
   }, [open, config, useStored, containerId, needsCard])
 
   useEffect(() => {
     if (!needsCard) setError('')
   }, [needsCard])
-
-  useEffect(() => {
-    if (!open) setReady(false)
-  }, [open])
 
   async function ensureParentNameSaved() {
     if (!needsName) return
@@ -426,7 +347,7 @@ export function PortalCardCheckout({
           ...payBody,
           couponCode: couponCode.trim() || undefined,
           useCoveBalance:
-            payBody.kind === 'product' || payBody.kind === 'cart' ? useCove : false,
+            payBody.kind === 'product' || payBody.kind === 'membership' ? useCove : false,
           firstName: firstName.trim() || undefined,
           lastName: lastName.trim() || undefined,
           consents: needsConsent ? consents : undefined,
@@ -444,9 +365,7 @@ export function PortalCardCheckout({
       setNextSteps(Array.isArray(conf?.nextSteps) ? conf.nextSteps : [])
       setPortalHref(typeof conf?.portalHref === 'string' ? conf.portalHref : '/member-portal')
       setEmailed(Boolean(conf?.emailed))
-      setSuccess(
-        `Payment successful.\n${title}\n$${due.toFixed(2)}${subtitle ? `\n${subtitle}` : ''}`,
-      )
+      setSuccess('Payment successful. Thank you!')
       trackCheckoutPurchase({
         data,
         amount,
@@ -455,14 +374,9 @@ export function PortalCardCheckout({
         paymentType: useStored ? 'square_card_on_file' : 'square_card',
       })
       onPaid?.(data)
-      /* receipt stays open until parent closes */
+      setTimeout(() => onClose(), conf?.nextSteps?.length ? 6000 : 1400)
     } catch (err) {
-      const raw = err instanceof Error ? err.message : 'Payment failed.'
-      setError(
-        /container element removed/i.test(raw)
-          ? 'Card form needed a moment. Close and tap Continue to payment again.'
-          : raw,
-      )
+      setError(err instanceof Error ? err.message : 'Payment failed.')
     } finally {
       setBusy(false)
     }
@@ -470,85 +384,76 @@ export function PortalCardCheckout({
 
   if (!open) return null
 
-  const discountLine =
-    quote?.listAmount && quote.listAmount > due + 0.001
-      ? `Was $${quote.listAmount.toFixed(2)}${
-          quote.discountPercent
-            ? ` · ${quote.discountPercent}% off${quote.discountCode ? ` (${quote.discountCode})` : ''}`
-            : ''
-        }`
-      : ''
-
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-3 sm:p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby={`${containerId}-title`}
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !busy && !success) onClose()
-      }}
     >
-      <div
-        ref={panelRef}
-        className="w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl border border-[var(--border)] p-4 space-y-3"
-      >
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl border border-[var(--border)] p-5 space-y-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p id={`${containerId}-title`} className="text-sm font-bold text-[#1A1A1A] leading-snug line-clamp-2">
+          <div>
+            <p id={`${containerId}-title`} className="text-base font-bold text-[#1A1A1A]">
               {title}
             </p>
-            {subtitle ? <p className="text-xs text-[#5A6070] mt-0.5">{subtitle}</p> : null}
-            <p className="text-xl font-bold mt-1" style={{ color: 'var(--brand-green)' }}>
+            {subtitle ? <p className="text-xs text-[#5A6070] mt-1">{subtitle}</p> : null}
+            <p className="text-sm font-bold mt-2" style={{ color: 'var(--brand-green)' }}>
               ${due.toFixed(2)}
             </p>
-            {discountLine ? (
-              <p className="text-xs text-[#5A6070] mt-0.5">{discountLine}</p>
+            {quote?.listAmount && quote.listAmount > due + 0.001 ? (
+              <p className="text-xs text-[#5A6070] whitespace-pre-line">
+                List ${quote.listAmount.toFixed(2)}.
+                {quote.discountPercent
+                  ? `\n${quote.discountPercent}% off${quote.discountCode ? ` (${quote.discountCode})` : ''}.`
+                  : ''}
+              </p>
             ) : null}
-            {(payBody.kind === 'product' || payBody.kind === 'cart') && coveDue > 0 ? (
-              <p className="text-xs text-[#5A6070] mt-0.5">
-                Cove ${coveDue.toFixed(2)}
-                {cardDue > 0 ? ` · card $${cardDue.toFixed(2)}` : ''}
+            {coveSplitKind && coveDue > 0 ? (
+              <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
+                Cove Digital Card ${coveDue.toFixed(2)}.
+                {cardDue > 0 ? `\nCard remaining $${cardDue.toFixed(2)}.` : '\nNo card needed.'}
               </p>
             ) : null}
           </div>
-          <button type="button" onClick={onClose} aria-label="Close checkout" className="shrink-0 p-1">
+          <button type="button" onClick={onClose} aria-label="Close checkout">
             <X className="w-4 h-4 text-[#5A6070]" />
           </button>
         </div>
 
-        {(payBody.kind === 'product' || payBody.kind === 'program') &&
-          (showCoupon || couponCode ? (
-            <label className="block text-xs font-semibold text-[#5A6070]">
-              Discount code
-              <input
-                type="text"
-                value={couponCode}
-                onChange={(e) => {
-                  const next = e.target.value.toUpperCase()
-                  setCouponCode(next)
-                  setStoredCouponCode(next)
-                }}
-                placeholder="Code"
-                autoComplete="off"
-                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-mono font-normal tracking-wide uppercase"
-              />
-              {quote?.error ? (
-                <span className="mt-1 block text-[11px] text-red-600">{quote.error}</span>
-              ) : null}
-            </label>
-          ) : (
-            <button
-              type="button"
-              className="text-xs font-semibold text-[var(--brand-green)] hover:underline text-left"
-              onClick={() => setShowCoupon(true)}
-            >
-              Have a discount code?
-            </button>
-          ))}
+        <p className="text-xs text-[#5A6070] whitespace-pre-line">
+          {needsCard
+            ? 'Pay with your own credit or debit card. Free and paid parent accounts can checkout here.\nYou do not need a saved card.'
+            : 'This total is covered by your Cove Digital Card. Confirm to finish.'}
+        </p>
 
-        {(payBody.kind === 'product' || payBody.kind === 'cart') &&
-        (quote?.coveBalance ?? 0) > 0 ? (
+        {payBody.kind === 'product' || payBody.kind === 'program' ? (
+          <label className="block text-xs font-bold text-[#5A6070]">
+            Discount code
+            <input
+              type="text"
+              value={couponCode}
+              onChange={(e) => {
+                const next = e.target.value.toUpperCase()
+                setCouponCode(next)
+                setStoredCouponCode(next)
+              }}
+              placeholder="Optional"
+              autoComplete="off"
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-mono font-normal tracking-wide uppercase"
+            />
+            <span className="mt-1 block text-[11px] font-normal text-[#5A6070] whitespace-pre-line">
+              {payBody.kind === 'program'
+                ? 'Board 75% season codes and membership enrichment codes apply here.\nNot for membership dues or Cove Digital Card loads.'
+                : 'Spirit wear and Cove shop codes apply here.\nNot for membership or Cove Digital Card loads.'}
+            </span>
+            {quote?.error ? (
+              <span className="mt-1 block text-[11px] text-red-600">{quote.error}</span>
+            ) : null}
+          </label>
+        ) : null}
+
+        {coveSplitKind && (quote?.coveBalance ?? 0) > 0 ? (
           <label className="flex items-start gap-2 text-xs text-[#1A1A1A]">
             <input
               type="checkbox"
@@ -557,14 +462,14 @@ export function PortalCardCheckout({
               className="mt-0.5"
             />
             <span className="whitespace-pre-line">
-              {`Use Cove balance first ($${Number(quote?.coveBalance ?? 0).toFixed(2)}).
-Applies to this whole bag total.}`}
+              Apply Cove Digital Card balance first (${Number(quote?.coveBalance ?? 0).toFixed(2)} available).
+              Remaining amount uses your card or PayPal.
             </span>
           </label>
         ) : null}
 
         {needsName ? (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <label className="block text-xs text-[#5A6070]">
               First name
               <input
@@ -587,95 +492,72 @@ Applies to this whole bag total.}`}
                 className="mt-1 w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[#1A1A1A]"
               />
             </label>
+            <p className="col-span-2 text-[11px] text-[#5A6070]">
+              We need your name on the membership / purchase record.
+            </p>
           </div>
         ) : null}
 
         {needsCard && storedCard ? (
-          <div className="flex flex-wrap gap-3 text-xs text-[#1A1A1A]">
-            <label className="inline-flex items-center gap-1.5">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs text-[#1A1A1A]">
               <input type="radio" checked={!useStored} onChange={() => setUseStored(false)} />
-              New card
+              Enter a card
             </label>
-            <label className="inline-flex items-center gap-1.5">
+            <label className="flex items-center gap-2 text-xs text-[#1A1A1A]">
               <input type="radio" checked={useStored} onChange={() => setUseStored(true)} />
-              {storedCard.brand} ···· {storedCard.last4}
+              Use saved {storedCard.brand} ending in {storedCard.last4}
             </label>
           </div>
         ) : null}
 
         {needsCard && !useStored ? (
-          <div>
-            <p className="mb-1 text-[11px] text-[#5A6070] inline-flex items-center gap-1">
-              Card details
-              <HelpTip tipKey="checkout.card.security" label="Card security" />
-            </p>
-            <div
-              id={containerId}
-              className="min-h-[88px] rounded-lg border border-[var(--border)] bg-white px-2 py-2"
-            />
-            <label className="mt-2 flex items-start gap-2 text-[11px] text-[#5A6070]">
+          <>
+            <div id={containerId} className="min-h-12 rounded-lg border border-[var(--border)] bg-white px-2 py-1" />
+            <label className="flex items-start gap-2 text-xs text-[#5A6070]">
               <input
                 type="checkbox"
                 checked={saveCard}
                 onChange={(e) => setSaveCard(e.target.checked)}
                 className="mt-0.5"
               />
-              Save card for next time
+              {storedCard
+                ? 'Optionally save this card for faster checkout later (never required).'
+                : 'Save this card to Payment methods for faster checkout later (never required). Checked by default on your first card payment.'}
             </label>
-          </div>
+          </>
         ) : null}
 
         {showConsentUi ? (
-          <CheckoutConsent
-            kind={consentKind}
-            kinds={payBody.kind === 'cart' ? cartConsentKinds : undefined}
-            onChange={onConsentChange}
-          />
+          <CheckoutConsent kind={consentKind} onChange={onConsentChange} />
         ) : null}
 
         {config && !config.configured ? (
           <p className="text-xs text-amber-700">Card payments are temporarily unavailable.</p>
         ) : null}
-        {error ? (
-          <p className="text-xs text-red-600 whitespace-pre-line">
-            {/container element removed/i.test(error)
-              ? 'Card form needed a moment. Close and try again.'
-              : /could not confirm|ambiguous|network/i.test(error)
-                ? tooltipCopy('checkout.ambiguous.failure')
-                : error}
-          </p>
-        ) : null}
+        {error ? <p className="text-xs text-red-600">{error}</p> : null}
         {success ? (
           <div className="rounded-lg border border-green-200 bg-green-50 p-3 space-y-2">
-            <p className="text-xs font-semibold text-green-800 whitespace-pre-line">{success}</p>
+            <p className="text-xs font-semibold text-green-800">{success}</p>
             {emailed ? (
-              <p className="text-[11px] text-green-800">Confirmation email on the way.</p>
-            ) : null}
-            {nextSteps.length > 0 ? (
-              <ul className="text-[11px] text-green-900 list-disc pl-4 space-y-0.5">
+              <p className="text-[11px] text-green-800">A confirmation email is on its way.</p>
+            ) : (
+              <p className="text-[11px] text-green-800">
+                Confirmation is also in Member Portal → Messages.
+              </p>
+            )}
+            {nextSteps.length ? (
+              <ul className="text-[11px] text-green-900 space-y-1 list-disc pl-4">
                 {nextSteps.map((step) => (
                   <li key={step}>{step}</li>
                 ))}
               </ul>
             ) : null}
-            <div className="flex flex-wrap gap-2 pt-1">
-              {portalHref ? (
-                <a
-                  href={portalHref}
-                  className="inline-flex items-center rounded-lg px-3 py-1.5 text-[11px] font-bold text-white"
-                  style={{ backgroundColor: 'var(--brand-green)' }}
-                >
-                  Continue in portal
-                </a>
-              ) : null}
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-[11px] font-semibold underline text-green-900"
-              >
-                Close
-              </button>
-            </div>
+            {portalHref ? (
+              <a href={portalHref} className="text-[11px] font-semibold underline text-green-900">
+                Continue in portal
+              </a>
+            ) : null}
           </div>
         ) : null}
 
@@ -696,62 +578,61 @@ Applies to this whole bag total.}`}
           ) : (
             <>
               <CreditCard className="w-4 h-4 mr-2" />
-              {needsCard ? `Pay $${cardDue.toFixed(2)}` : `Pay $${due.toFixed(2)}`}
+              {needsCard ? `Pay $${cardDue.toFixed(2)}` : `Pay with Cove Digital Card $${due.toFixed(2)}`}
             </>
           )}
         </Button>
 
         {needsCard ? (
-          showPayPal ? (
-            <PortalPayPalButtons
-              active={open && !busy && !success && nameReady && (!needsConsent || consentComplete)}
-              payBody={{
-                ...payBody,
-                ...(payBody.kind === 'product' ||
-                payBody.kind === 'program' ||
-                payBody.kind === 'cart'
-                  ? { couponCode: couponCode.trim() || undefined }
-                  : {}),
-                ...(payBody.kind === 'product' || payBody.kind === 'cart'
-                  ? { useCoveBalance: useCove }
-                  : {}),
-                consents: needsConsent ? consents ?? undefined : undefined,
-              }}
-              onBeforePay={async () => {
-                await ensureParentNameSaved()
-              }}
-              onPaid={(data) => {
-                const conf = data.confirmation as
-                  | { nextSteps?: string[]; portalHref?: string; emailed?: boolean }
-                  | undefined
-                setNextSteps(Array.isArray(conf?.nextSteps) ? conf.nextSteps : [])
-                setPortalHref(typeof conf?.portalHref === 'string' ? conf.portalHref : '/member-portal')
-                setEmailed(Boolean(conf?.emailed))
-                setSuccess('PayPal payment successful. Thank you!')
-                trackCheckoutPurchase({
-                  data,
-                  amount,
-                  title,
-                  payBody,
-                  paymentType: 'paypal',
-                })
-                onPaid?.(data)
-                /* receipt stays open until parent closes */
-              }}
-              onError={(message) => setError(message)}
-            />
-          ) : (
-            <button
-              type="button"
-              className="w-full text-center text-xs font-semibold text-[#5A6070] hover:text-[var(--brand-green)] py-1"
-              onClick={() => setShowPayPal(true)}
-            >
-              Or pay with PayPal
-            </button>
-          )
+        <PortalPayPalButtons
+          active={open && !busy && !success && nameReady && (!needsConsent || consentComplete)}
+          payBody={
+            payBody.kind === 'product' ||
+            payBody.kind === 'program' ||
+            payBody.kind === 'membership'
+              ? {
+                  ...payBody,
+                  ...(payBody.kind === 'product' || payBody.kind === 'program'
+                    ? { couponCode: couponCode.trim() || undefined }
+                    : {}),
+                  ...(payBody.kind === 'product' || payBody.kind === 'membership'
+                    ? { useCoveBalance: useCove }
+                    : {}),
+                  consents: needsConsent ? consents ?? undefined : undefined,
+                }
+              : {
+                  ...payBody,
+                  consents: needsConsent ? consents ?? undefined : undefined,
+                }
+          }
+          onBeforePay={async () => {
+            await ensureParentNameSaved()
+          }}
+          onPaid={(data) => {
+            const conf = data.confirmation as
+              | { nextSteps?: string[]; portalHref?: string; emailed?: boolean }
+              | undefined
+            setNextSteps(Array.isArray(conf?.nextSteps) ? conf.nextSteps : [])
+            setPortalHref(typeof conf?.portalHref === 'string' ? conf.portalHref : '/member-portal')
+            setEmailed(Boolean(conf?.emailed))
+            setSuccess('PayPal payment successful. Thank you!')
+            trackCheckoutPurchase({
+              data,
+              amount,
+              title,
+              payBody,
+              paymentType: 'paypal',
+            })
+            onPaid?.(data)
+            setTimeout(() => onClose(), conf?.nextSteps?.length ? 6000 : 1400)
+          }}
+          onError={(message) => setError(message)}
+        />
         ) : null}
 
-        <p className="text-[10px] text-[#5A6070] text-center">Secured by Square</p>
+        <p className="text-[10px] text-[#5A6070] text-center">
+          Card secured by Square · PayPal processed by PayPal. Free and paid parents can use either.
+        </p>
       </div>
     </div>
   )

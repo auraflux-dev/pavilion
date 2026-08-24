@@ -11,19 +11,11 @@ import {
   membershipChargeDollars,
 } from '@/lib/membership-pricing'
 import { tierRank } from '@/lib/staff/members-roster'
-import { isSyntheticStagingMode } from '@/lib/fixtures/synthetic-mode'
-import { fixtureCheckoutQuote } from '@/lib/fixtures/stubs'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const kind = body.kind as string
-
-    if (isSyntheticStagingMode()) {
-      const quote = fixtureCheckoutQuote(String(kind ?? ''))
-      if (quote) return NextResponse.json(quote)
-      return NextResponse.json({ error: 'Unknown checkout kind (synthetic)' }, { status: 400 })
-    }
 
     if (kind === 'membership') {
       const tier = String(body.tier ?? '').trim().toLowerCase()
@@ -63,6 +55,29 @@ export async function POST(req: NextRequest) {
         )
       }
 
+      let coveDollars = 0
+      let cardDollars = charge.amount
+      let coveBalance = 0
+      if (session?.email) {
+        const { withCoveSplit } = await import('@/lib/checkout-cove-split')
+        const useCoveBalance = body.useCoveBalance !== false
+        const split = await withCoveSplit(
+          {
+            kind: 'membership',
+            amount: charge.amount,
+            amountCents: Math.round(charge.amount * 100),
+            description: match.name,
+            customId: `membership:${tier}`,
+            meta: { tier },
+          },
+          session.email,
+          useCoveBalance,
+        )
+        coveDollars = Math.round(Number(split.meta.coveCents ?? 0) || 0) / 100
+        cardDollars = Math.round(Number(split.meta.cardCents ?? split.amountCents) || 0) / 100
+        coveBalance = Number(split.meta.coveBalance ?? 0) || 0
+      }
+
       return NextResponse.json({
         kind,
         tier,
@@ -71,6 +86,9 @@ export async function POST(req: NextRequest) {
         listPrice: charge.listPrice,
         isUpgrade: charge.isUpgrade,
         currentTier: charge.currentTier,
+        coveDollars,
+        cardDollars,
+        coveBalance,
       })
     }
 
@@ -104,41 +122,6 @@ export async function POST(req: NextRequest) {
         amount: resolved.amount,
         discountCode: resolved.meta.discountCode || '',
         discountPercent: Number(resolved.meta.discountPercent ?? 0) || 0,
-        coveDollars: coveCents / 100,
-        cardDollars: cardCents / 100,
-        coveBalance: Number(resolved.meta.coveBalance ?? 0) || 0,
-      })
-    }
-
-    if (kind === 'cart') {
-      const effective = await getEffectiveParentEmail(req)
-      if (!effective) return NextResponse.json({ error: 'Log in to quote' }, { status: 401 })
-      const parentEmail = effective.parentEmail
-      const accountEmails = [
-        effective.actorEmail,
-        ...effective.session.emails,
-      ]
-      const { resolveCheckoutIntent } = await import('@/lib/checkout-fulfill')
-      const { withCoveSplit } = await import('@/lib/checkout-cove-split')
-      const couponCode = String(body.couponCode ?? '').trim() || null
-      const cartLines = Array.isArray(body.cartLines) ? body.cartLines : []
-      const useCoveBalance = body.useCoveBalance !== false
-      let resolved = await resolveCheckoutIntent(
-        { kind: 'cart', cartLines, couponCode, useCoveBalance },
-        parentEmail,
-        accountEmails,
-      )
-      resolved = await withCoveSplit(resolved, parentEmail, useCoveBalance)
-      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
-      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
-      return NextResponse.json({
-        kind,
-        name: resolved.description,
-        listAmount: resolved.amount,
-        amount: resolved.amount,
-        discountCode: resolved.meta.discountCode || '',
-        discountPercent: 0,
-        cartCount: Number(resolved.meta.cartCount ?? cartLines.length) || 0,
         coveDollars: coveCents / 100,
         cardDollars: cardCents / 100,
         coveBalance: Number(resolved.meta.coveBalance ?? 0) || 0,

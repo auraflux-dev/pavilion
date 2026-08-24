@@ -14,8 +14,6 @@ import {
 } from '@/lib/stored-payment-methods'
 import { getCatalogConfig, isAllowedStoreCardLoadAmount } from '@/lib/api/catalog-config'
 import { getPaidMembershipTiers } from '@/lib/api/membership'
-import { isSyntheticStagingMode } from '@/lib/fixtures/synthetic-mode'
-import { FIXTURE_CHECKOUT_PAY_BLOCKED } from '@/lib/fixtures/checkout'
 
 import { applyPaidMembership } from '@/lib/membership-sync'
 import {
@@ -45,7 +43,7 @@ import {
   type CheckoutConsentKind,
 } from '@/lib/checkout-consent'
 
-type Kind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation' | 'cart'
+type Kind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation'
 
 type StudentRow = {
   _id: string
@@ -57,10 +55,6 @@ type StudentRow = {
 }
 
 export async function POST(req: NextRequest) {
-  if (isSyntheticStagingMode()) {
-    return NextResponse.json(FIXTURE_CHECKOUT_PAY_BLOCKED, { status: 403 })
-  }
-
   const session = await getMemberSession(req)
   if (!session) return NextResponse.json({ error: 'Log in to pay' }, { status: 401 })
 
@@ -72,30 +66,11 @@ export async function POST(req: NextRequest) {
     const saveCard = Boolean(body.saveCard)
     const consents = body.consents as ConsentAck[] | undefined
 
-    if (
-      !kind ||
-      !['membership', 'product', 'store-card', 'program', 'event', 'donation', 'cart'].includes(kind)
-    ) {
+    if (!kind || !['membership', 'product', 'store-card', 'program', 'event', 'donation'].includes(kind)) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
     }
 
-    const cartConsentKinds =
-      kind === 'cart' && Array.isArray(body.cartLines)
-        ? Array.from(
-            new Set(
-              (body.cartLines as Array<{ kind?: string }>)
-                .map((l) => String(l.kind ?? ''))
-                .filter((k): k is CheckoutConsentKind =>
-                  k === 'membership' || k === 'program' || k === 'event',
-                ),
-            ),
-          )
-        : undefined
-    const consentCheck = validateConsentAcks(
-      kind as CheckoutConsentKind,
-      consents,
-      cartConsentKinds,
-    )
+    const consentCheck = validateConsentAcks(kind as CheckoutConsentKind, consents)
     if (!consentCheck.ok) {
       return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }
@@ -168,98 +143,6 @@ export async function POST(req: NextRequest) {
 
     if (!paymentSource) {
       paymentSource = undefined
-    }
-
-    // ── Bag (multi-line) ─────────────────────────────────────────
-    if (kind === 'cart') {
-      const effective = await getEffectiveParentEmail(req)
-      const parentEmail = effective?.parentEmail ?? session.email
-      const accountEmails = [
-        effective?.actorEmail ?? session.email,
-        ...session.emails,
-      ]
-      const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
-      const { withCoveSplit } = await import('@/lib/checkout-cove-split')
-      const couponCode = String(body.couponCode ?? '').trim() || null
-      const cartLines = Array.isArray(body.cartLines) ? body.cartLines : []
-      const useCoveBalance = body.useCoveBalance !== false
-      let resolved = await resolveCheckoutIntent(
-        { kind: 'cart', cartLines, couponCode, useCoveBalance },
-        parentEmail,
-        accountEmails,
-      )
-      resolved = await withCoveSplit(resolved, parentEmail, useCoveBalance)
-      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
-      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
-      if (cardCents > 0 && cardCents < 100) {
-        return NextResponse.json(
-          {
-            error:
-              'Remaining card amount is under $1. Pay the full amount by card, or load more on your Cove Digital Card.',
-          },
-          { status: 400 },
-        )
-      }
-      if (cardCents >= 100 && !paymentSource) {
-        return NextResponse.json(
-          { error: 'Enter your credit or debit card for the remaining balance.' },
-          { status: 400 },
-        )
-      }
-      const paymentKey = randomUUID()
-      let paymentId = paymentKey
-      if (cardCents >= 100 && paymentSource) {
-        try {
-          const payment = await chargePayment({
-            sourceId: paymentSource,
-            amountCents: cardCents,
-            idempotencyKey: paymentKey,
-            customerId,
-            referenceId: resolved.customId,
-            buyerEmailAddress: session.email,
-            note: resolved.description,
-          })
-          paymentId = payment.id ?? paymentKey
-        } catch (err) {
-          return NextResponse.json(
-            { error: err instanceof Error ? err.message : 'Card payment failed' },
-            { status: 400 },
-          )
-        }
-      }
-      try {
-        const result = await fulfillPaidCheckout({
-          resolved,
-          parentEmail,
-          parentName: name,
-          transactionId: paymentId,
-          paymentMethod:
-            cardCents <= 0
-              ? 'Cove Digital Card'
-              : useStoredCard || saveCard
-                ? 'Square Card on File'
-                : 'Square Card',
-          sourcePrefix: 'square',
-          consents: consentCheck.acks,
-        })
-        return NextResponse.json({
-          ok: true,
-          ...result,
-          coveCents,
-          cardCents,
-        })
-      } catch (err) {
-        if (cardCents >= 100) {
-          await refundPayment({
-            paymentId,
-            amountCents: cardCents,
-            idempotencyKey: `${paymentKey}-refund`.slice(0, 45),
-          }).catch((refundErr) => {
-            console.error('checkout/pay cart refund after fulfill fail', refundErr)
-          })
-        }
-        throw err
-      }
     }
 
     // ── Enrichment program ──────────────────────────────────────
@@ -349,12 +232,6 @@ export async function POST(req: NextRequest) {
 
     // ── Membership ──────────────────────────────────────────────
     if (kind === 'membership') {
-      if (!paymentSource) {
-        return NextResponse.json(
-          { error: 'Enter your credit or debit card to pay' },
-          { status: 400 }
-        )
-      }
       const tier = String(body.tier ?? '').trim().toLowerCase()
       const studentId = typeof body.studentId === 'string' ? body.studentId : null
       const shirtSize = typeof body.shirtSize === 'string' ? body.shirtSize.trim() : ''
@@ -455,109 +332,116 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      const amountCents = Math.round(charge.amount * 100)
+      const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
+      const { withCoveSplit } = await import('@/lib/checkout-cove-split')
+      const useCoveBalance = body.useCoveBalance !== false
+      let resolved = await resolveCheckoutIntent(
+        {
+          kind: 'membership',
+          tier,
+          studentId,
+          shirtSize: needsShirt ? shirtSize || null : null,
+          shirtDesign: needsShirt ? shirtDesign || null : null,
+          shirtProductId: needsShirt ? shirtProductId || null : null,
+          shirtVariantId: needsShirt ? shirtVariantId || null : null,
+          physicalPerk: physicalPerk || null,
+        },
+        session.email,
+        session.emails,
+      )
+      resolved = await withCoveSplit(resolved, session.email, useCoveBalance)
+      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
+      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+      if (cardCents > 0 && cardCents < 100) {
+        return NextResponse.json(
+          {
+            error:
+              'Remaining card amount is under $1. Pay the full amount by card, or load more on your Cove Digital Card.',
+          },
+          { status: 400 },
+        )
+      }
+      if (cardCents >= 100 && !paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card for the remaining balance.' },
+          { status: 400 },
+        )
+      }
+
       const paymentKey = randomUUID()
-      const payment = await chargePayment({
-        sourceId: paymentSource,
-        amountCents,
-        idempotencyKey: paymentKey,
-        customerId,
-        referenceId: `membership:${tier}`,
-        buyerEmailAddress: session.email,
-        note: charge.isUpgrade
-          ? `SHMS PTO membership upgrade: ${formatTierLabel(currentTier)} → ${match.name}`
-          : `SHMS PTO membership: ${match.name}`,
-      })
+      let paymentId = paymentKey
+      if (cardCents >= 100 && paymentSource) {
+        try {
+          const payment = await chargePayment({
+            sourceId: paymentSource,
+            amountCents: cardCents,
+            idempotencyKey: paymentKey,
+            customerId,
+            referenceId: `membership:${tier}`,
+            buyerEmailAddress: session.email,
+            note: charge.isUpgrade
+              ? `SHMS PTO membership upgrade: ${formatTierLabel(currentTier)} → ${match.name}`
+              : `SHMS PTO membership: ${match.name}`,
+          })
+          paymentId = payment.id ?? paymentKey
+        } catch (err) {
+          return NextResponse.json(
+            { error: err instanceof Error ? err.message : 'Card payment failed' },
+            { status: 400 },
+          )
+        }
+      }
 
-      const applied = await applyPaidMembership({
-        parentEmail: session.email,
-        tier,
-        studentId,
-        orderId: payment.id ?? paymentKey,
-        parentName: name || null,
-        shirtSize: needsShirt ? shirtSize || null : null,
-        shirtDesign: needsShirt ? shirtDesign || null : null,
-        shirtProductId: needsShirt ? shirtProductId || null : null,
-        shirtVariantId: needsShirt ? shirtVariantId || null : null,
-        physicalPerk: physicalPerk || null,
-      })
-
-      const membershipStudentId =
-        studentId ||
-        applied.updatedStudentIds?.[0] ||
-        applied.giftCard?.studentId ||
-        null
-
-      await client.items.insert('Payments', {
-        programName: charge.isUpgrade
-          ? `Membership upgrade: ${formatTierLabel(currentTier)} → ${match.name}`
-          : `Membership: ${match.name}`,
-        amount: charge.amount,
-        status: 'Paid',
-        paymentDate: new Date().toISOString(),
-        paymentMethod: useStoredCard || saveCard ? 'Square Card on File' : 'Square Card',
-        transactionId: payment.id ?? paymentKey,
-        source: 'square_membership',
-        parentEmail: session.email,
-        ...(membershipStudentId ? { studentId: membershipStudentId } : {}),
-        notes: charge.isUpgrade
-          ? `List $${charge.listPrice}; charged upgrade delta $${charge.amount}`
-          : undefined,
-      })
+      let result: Record<string, unknown>
+      try {
+        result = await fulfillPaidCheckout({
+          resolved,
+          parentEmail: session.email,
+          parentName: name,
+          transactionId: paymentId,
+          paymentMethod:
+            cardCents <= 0
+              ? 'Cove Digital Card'
+              : useStoredCard || saveCard
+                ? 'Square Card on File'
+                : 'Square Card',
+          sourcePrefix: 'square',
+          consents: consentCheck.acks,
+        })
+      } catch (err) {
+        if (cardCents >= 100) {
+          await refundPayment({
+            paymentId,
+            amountCents: cardCents,
+            idempotencyKey: `${paymentKey}-refund`.slice(0, 45),
+          }).catch((refundErr) => {
+            console.error('membership fulfill failed; refund also failed', refundErr)
+          })
+        }
+        throw err
+      }
 
       await recordConsentAcknowledgments({
         parentEmail: session.email,
         kind: 'membership',
-        transactionId: payment.id ?? paymentKey,
+        transactionId: paymentId,
         studentId,
         acks: consentCheck.acks,
       })
 
-      const { sendPurchaseConfirmation } = await import('@/lib/purchase-confirmation')
-      let confirmation: Record<string, unknown> | undefined
-      try {
-        const conf = await sendPurchaseConfirmation({
-          kind: 'membership',
-          parentEmail: session.email,
-          parentName: name,
-          amount: charge.amount,
-          description: charge.isUpgrade
-            ? `Membership upgrade: ${formatTierLabel(currentTier)} → ${match.name}`
-            : `Membership: ${match.name}`,
-          transactionId: payment.id ?? paymentKey,
-          meta: {
-            tier,
-            tierName: match.name,
-            ...(charge.isUpgrade ? { isUpgrade: '1', currentTier } : {}),
-            ...(shirtSize ? { shirtSize } : {}),
-            ...(shirtDesign ? { shirtDesign } : {}),
-            ...(shirtProductId ? { shirtProductId } : {}),
-            ...(shirtVariantId ? { shirtVariantId } : {}),
-            ...(physicalPerk ? { physicalPerk } : {}),
-          },
-        })
-        confirmation = {
-          subject: conf.subject,
-          nextSteps: conf.nextSteps,
-          portalHref: conf.portalHref,
-          emailed: conf.emailed,
-        }
-      } catch (err) {
-        console.warn('membership confirmation failed', err)
-      }
-
       return NextResponse.json({
         ok: true,
+        ...result,
         kind,
-        paymentId: payment.id,
+        paymentId,
         tier,
         amount: charge.amount,
         isUpgrade: charge.isUpgrade,
-        applied,
+        coveCents,
+        cardCents,
         paymentMethod: stored
           ? { brand: stored.brand, last4: stored.last4 }
           : null,
-        confirmation,
       })
     }
 

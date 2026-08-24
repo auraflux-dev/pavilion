@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     const orderId = String(body.orderId ?? '').trim()
     const intent = body as CheckoutIntent & { orderId?: string; consents?: ConsentAck[] }
     if (!orderId) return NextResponse.json({ error: 'Missing PayPal order' }, { status: 400 })
-    if (!intent.kind || !['membership', 'product', 'store-card', 'program', 'event', 'donation', 'cart'].includes(intent.kind)) {
+    if (!intent.kind || !['membership', 'product', 'store-card', 'program', 'event', 'donation'].includes(intent.kind)) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
     }
 
@@ -49,8 +49,9 @@ export async function POST(req: NextRequest) {
     ]
     const resolved0 = await resolveCheckoutIntent(intent, parentEmail, accountEmails)
     const { withCoveSplit } = await import('@/lib/checkout-cove-split')
+    const { checkoutAllowsCoveSplit } = await import('@/lib/checkout-cove-split')
     const useCove =
-      (intent.kind === 'product' || intent.kind === 'cart') && intent.useCoveBalance !== false
+      checkoutAllowsCoveSplit(intent.kind) && intent.useCoveBalance !== false
     const resolved = await withCoveSplit(resolved0, parentEmail, useCove)
     const cardDue = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0) / 100
     const captured = await capturePayPalOrder(orderId)
