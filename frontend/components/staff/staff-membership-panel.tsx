@@ -3,9 +3,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { displayMembershipTier } from '@/lib/demo/brand'
-import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
-import { HelpTip } from '@/components/ui/help-tip'
+import {
+  STAFF_FILTER_CARD,
+  STAFF_FILTER_CARD_TITLE,
+  STAFF_FILTER_INPUT,
+  STAFF_FILTER_LABEL,
+  STAFF_FILTER_SELECT,
+} from '@/lib/staff/staff-filter-ui'
 
 type StudentRow = {
   id: string
@@ -22,6 +27,7 @@ type ParentRow = {
   parentFirstName: string
   parentLastName: string
   parentPhone: string
+  accountNumber?: string
   membershipTier: string
   accountType: 'free' | 'paid'
   students: StudentRow[]
@@ -29,7 +35,6 @@ type ParentRow = {
 
 type Summary = {
   parents: number
-  byTier?: { reef: number; lagoon: number; tide: number; free: number; other?: number }
   paid: number
   free: number
   withPhone: number
@@ -134,38 +139,10 @@ export function StaffMembershipPanel() {
     }
   }
 
-  async function confirmAudience(channel: 'portal' | 'email') {
-    const r = await fetch('/api/staff/membership/outreach', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        channel: channel === 'email' ? 'email' : 'portal',
-        subject,
-        body,
-        tier,
-        grade,
-        dryRun: true,
-        alsoPortal: false,
-      }),
-    })
-    const d = await r.json()
-    if (!r.ok) throw new Error(d.error ?? 'Could not count recipients')
-    const count = Number(d.recipientCount ?? 0)
-    const label =
-      channel === 'email'
-        ? `Send real email to ${count} matching parent${count === 1 ? '' : 's'}?\nThere is no undo.`
-        : `Post to portal inbox for ${count} matching parent${count === 1 ? '' : 's'}?`
-    return window.confirm(label)
-  }
-
   async function sendPortal() {
     setBusy(true)
     setStatus('')
     try {
-      if (!(await confirmAudience('portal'))) {
-        setStatus('Send cancelled.')
-        return
-      }
       const r = await fetch('/api/staff/membership/outreach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -185,10 +162,6 @@ export function StaffMembershipPanel() {
     setBusy(true)
     setStatus('')
     try {
-      if (!(await confirmAudience('email'))) {
-        setStatus('Send cancelled.')
-        return
-      }
       const r = await fetch('/api/staff/membership/outreach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -318,9 +291,10 @@ export function StaffMembershipPanel() {
 
   function exportCsv() {
     const lines = [
-      ['email', 'first', 'last', 'phone', 'tier', 'account', 'students'].join(','),
+      ['accountNumber', 'email', 'first', 'last', 'phone', 'tier', 'account', 'students'].join(','),
       ...members.map((m) =>
         [
+          m.accountNumber ?? '',
           m.parentEmail,
           m.parentFirstName,
           m.parentLastName,
@@ -337,8 +311,7 @@ export function StaffMembershipPanel() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    const csvFilename = isPublicDemoInstance() ? `members-${tier}.csv` : `shmspto-members-${tier}.csv`
-    a.download = csvFilename
+    a.download = `shmspto-members-${tier}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -478,8 +451,8 @@ export function StaffMembershipPanel() {
           <div>
             <h1 className="text-xl font-bold">Membership roster</h1>
             <p className="text-xs text-[#5A6070] mt-1">
-              Parents from Students + Memberships. Email, phone, and paid tier ({displayMembershipTier('reef')} / {displayMembershipTier('lagoon')} /
-              {' '}{displayMembershipTier('tide')}). Paid count follows Memberships after checkout.
+              Parents from Students + Memberships. Email, phone, and paid tier (Reef / Lagoon /
+              Tide). Paid count follows Memberships after checkout.
             </p>
           </div>
           <Button
@@ -493,69 +466,63 @@ export function StaffMembershipPanel() {
           </Button>
         </div>
 
-        <div className="grid sm:grid-cols-4 gap-2">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search name, email, phone"
-            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm sm:col-span-2"
-          />
-          <select
-            value={tier}
-            onChange={(e) => setTier(e.target.value)}
-            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="all">All parents</option>
-            <option value="free">Free only</option>
-            <option value="paid">Paid only</option>
-            <option value="reef">{displayMembershipTier('reef')}</option>
-            <option value="lagoon">{displayMembershipTier('lagoon')}</option>
-            <option value="tide">{displayMembershipTier('tide')}</option>
-          </select>
-          <select
-            value={grade}
-            onChange={(e) => setGrade(e.target.value)}
-            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="">Any grade</option>
-            <option value="6">6th</option>
-            <option value="7">7th</option>
-            <option value="8">8th</option>
-          </select>
-        </div>
-
-        {summary ? (
-          <div className="text-xs text-[#5A6070] space-y-1">
-            <p>
-              {summary.parents} parents · {summary.paid} paid · {summary.free} free ·{' '}
-              {summary.withPhone} with phone
-              {busy ? ' · Loading…' : ''}
-            </p>
-            {summary.byTier ? (
-              <p className="whitespace-pre-line">
-                By type: {displayMembershipTier('reef')} {summary.byTier.reef}
-                {' · '}
-                {displayMembershipTier('lagoon')} {summary.byTier.lagoon}
-                {' · '}
-                {displayMembershipTier('tide')} {summary.byTier.tide}
-                {' · '}Free {summary.byTier.free}
-                {summary.byTier.other ? ` · Other ${summary.byTier.other}` : ''}
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-stretch">
+          <div className={`flex-1 ${STAFF_FILTER_CARD}`}>
+            <p className={STAFF_FILTER_CARD_TITLE}>Search</p>
+            <label className={STAFF_FILTER_LABEL}>
+              Lookup
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Account #, name, email, phone"
+                autoComplete="off"
+                name="staff-membership-lookup"
+                className={STAFF_FILTER_INPUT}
+              />
+            </label>
+            {summary ? (
+              <p className="text-[11px] text-[#5A6070]">
+                {summary.parents} parents · {summary.paid} paid · {summary.free} free ·{' '}
+                {summary.withPhone} with phone
+                {busy ? ' · Loading…' : ''}
               </p>
             ) : null}
-            <p>
-              Daily activity report (6am Eastern) includes these totals.
-              {' '}
-              <a
-                href="/staff?view=site"
-                className="font-semibold underline"
-                style={{ color: 'var(--brand-green)' }}
-              >
-                Site settings → Contact
-              </a>
-              {' '}for extra report emails.
-            </p>
           </div>
-        ) : null}
+          <div className="xl:w-48 shrink-0 space-y-3">
+            <div className={STAFF_FILTER_CARD}>
+              <label className={STAFF_FILTER_LABEL}>
+                Tier
+                <select
+                  value={tier}
+                  onChange={(e) => setTier(e.target.value)}
+                  className={STAFF_FILTER_SELECT}
+                >
+                  <option value="all">All parents</option>
+                  <option value="free">Free only</option>
+                  <option value="paid">Paid only</option>
+                  <option value="reef">Reef</option>
+                  <option value="lagoon">Lagoon</option>
+                  <option value="tide">Tide</option>
+                </select>
+              </label>
+            </div>
+            <div className={STAFF_FILTER_CARD}>
+              <label className={STAFF_FILTER_LABEL}>
+                Grade
+                <select
+                  value={grade}
+                  onChange={(e) => setGrade(e.target.value)}
+                  className={STAFF_FILTER_SELECT}
+                >
+                  <option value="">Any grade</option>
+                  <option value="6">6th</option>
+                  <option value="7">7th</option>
+                  <option value="8">8th</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </div>
 
         <div className="max-h-[420px] overflow-auto divide-y divide-[var(--border)] border border-[var(--border)] rounded-lg">
           {members.length === 0 ? (
@@ -565,6 +532,10 @@ export function StaffMembershipPanel() {
               <div key={m.parentEmail} className="p-3 flex flex-wrap gap-3 justify-between">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold">
+                    {m.accountNumber ? (
+                      <span className="tabular-nums">{m.accountNumber}</span>
+                    ) : null}
+                    {m.accountNumber ? ' · ' : ''}
                     {[m.parentFirstName, m.parentLastName].filter(Boolean).join(' ') ||
                       m.parentEmail}
                   </p>
@@ -641,7 +612,7 @@ export function StaffMembershipPanel() {
           />
           Also post to parent portal inbox when sending email
         </label>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             type="button"
             variant="outline"
@@ -650,7 +621,6 @@ export function StaffMembershipPanel() {
           >
             Preview audience
           </Button>
-          <HelpTip tipKey="staff.send.preview" label="About preview audience" />
           <Button
             type="button"
             disabled={busy || !subject || !body}
@@ -669,9 +639,6 @@ export function StaffMembershipPanel() {
           >
             {emailConfigured ? 'Send via Gmail' : 'Email via mail app (BCC)'}
           </Button>
-          {emailConfigured ? (
-            <HelpTip tipKey="staff.send.gmail" label="About Gmail send" />
-          ) : null}
         </div>
 
         <div className="border-t border-[var(--border)] pt-4 space-y-3">

@@ -5,7 +5,6 @@ import {
   applyMembershipsToRoster,
   buildParentRoster,
   filterParentRoster,
-  membershipTierTotals,
   type ParentRosterRow,
 } from '@/lib/staff/members-roster'
 
@@ -70,6 +69,7 @@ export async function GET(req: NextRequest) {
         parentFirstName: String(item.parentFirstName ?? item.firstName ?? ''),
         parentLastName: String(item.parentLastName ?? item.lastName ?? ''),
         parentPhone: String(item.parentPhone ?? item.phone ?? ''),
+        accountNumber: String(item.accountNumber ?? ''),
       })),
     )
 
@@ -105,21 +105,15 @@ export async function GET(req: NextRequest) {
           includeArchived,
         }),
       )
-      const byTier = membershipTierTotals(filtered)
+      const paid = filtered.filter((r) => r.accountType === 'paid').length
+      const free = filtered.filter((r) => r.accountType !== 'paid').length
       return NextResponse.json({
         members: filtered,
         summary: {
           parents: filtered.length,
-          paid: byTier.paid,
-          free: byTier.free,
+          paid,
+          free,
           withPhone: filtered.filter((r) => Boolean(r.parentPhone)).length,
-          byTier: {
-            reef: byTier.reef,
-            lagoon: byTier.lagoon,
-            tide: byTier.tide,
-            free: byTier.free,
-            other: byTier.other,
-          },
         },
       })
     }
@@ -143,6 +137,7 @@ export async function GET(req: NextRequest) {
         parentFirstName: m.parentFirstName,
         parentLastName: m.parentLastName,
         parentPhone: m.parentPhone,
+        accountNumber: m.accountNumber,
         membershipTier: m.membershipTier,
         accountType: m.accountType,
         students: m.students.map((s) => ({

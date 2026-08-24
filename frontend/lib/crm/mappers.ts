@@ -58,6 +58,7 @@ export function householdToRosterRow(
     parentFirstName: primary?.firstName ?? '',
     parentLastName: primary?.lastName ?? '',
     parentPhone: primary?.phone ?? '',
+    accountNumber: '',
     membershipTier: tier,
     accountType: accountTypeForTier(tier),
     students: kids.map((s) => ({

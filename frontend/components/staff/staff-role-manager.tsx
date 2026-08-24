@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { HelpTip } from '@/components/ui/help-tip'
 import type { StaffWorkspace } from '@/lib/audience'
 import {
   STAFF_ADMIN_WORKSPACES,
@@ -22,6 +21,12 @@ import {
   WORKSPACE_MAILBOXES,
   findWorkspaceMailbox,
 } from '@/lib/staff/workspace-mailboxes'
+import {
+  STAFF_FILTER_CARD,
+  STAFF_FILTER_CARD_TITLE,
+  STAFF_FILTER_INPUT,
+  STAFF_FILTER_LABEL,
+} from '@/lib/staff/staff-filter-ui'
 
 type StaffRow = {
   id: string
@@ -159,7 +164,7 @@ export function StaffRoleManager() {
         | undefined
       setStatus(
         perks?.fallCode
-          ? vanillaizeIfDemo(`Staff access saved. Board Reef + 75% codes: ${perks.fallCode} / ${perks.springCode}${perks.enrichmentCode ? ` · ${perks.enrichmentCode}` : ''}.`)
+          ? `Staff access saved. Board Reef + 75% codes: ${perks.fallCode} / ${perks.springCode}${perks.enrichmentCode ? ` · ${perks.enrichmentCode}` : ''}.`
           : 'Staff access saved.',
       )
     } catch (err) {
@@ -218,9 +223,9 @@ export function StaffRoleManager() {
               {syncBusy ? 'Syncing…' : 'Sync from Google Workspace'}
             </Button>
             <p className="text-[11px] text-[#5A6070] mt-1.5 whitespace-pre-line">
-              {vanillaizeIfDemo(`Pulls active @${isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org'} users into this list.
-New seats start with no roles. Assign role and programs here.
-Requires Connect Google as a Workspace admin (Staff → Inbox).`)}
+              {vanillaizeIfDemo(
+                `Pulls active @${isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org'} users into this list.\nNew seats start with no roles. Assign role and programs here.\nRequires Connect Google as a Workspace admin (Staff → Inbox).`,
+              )}
             </p>
           </div>
         ) : null}
@@ -313,7 +318,7 @@ Requires Connect Google as a Workspace admin (Staff → Inbox).`)}
                   type="checkbox"
                   checked={roles.includes(role)}
                   disabled={adminLocked}
-                  title={adminLocked ? vanillaizeIfDemo('Admin is only for president@shmspto.org') : undefined}
+                  title={adminLocked ? 'Admin is only for president@shmspto.org' : undefined}
                   onChange={(event) =>
                     setRoles((current) =>
                       event.target.checked ? [...current, role] : current.filter((item) => item !== role),
@@ -333,20 +338,25 @@ Requires Connect Google as a Workspace admin (Staff → Inbox).`)}
       </div>
 
       {scope === 'all' ? (
-      <div className="rounded-lg border border-[var(--border)] bg-[#FBF9F6] p-3 space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+      <div className={`${STAFF_FILTER_CARD} bg-[#FBF9F6]`}>
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3">
           <div className="flex-1">
-            <p className="text-[11px] font-bold uppercase tracking-wide text-[#5A6070]">Permissions</p>
-            <p className="text-[11px] text-[#5A6070]">
+            <p className={STAFF_FILTER_CARD_TITLE}>Permissions</p>
+            <p className="text-[11px] text-[#5A6070] mt-1">
               Everything is listed. Role boxes are already covered; tick extras to add.
             </p>
           </div>
-          <input
-            value={permissionQuery}
-            onChange={(event) => setPermissionQuery(event.target.value)}
-            placeholder="Find a permission…"
-            className="sm:w-56 border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm bg-white"
-          />
+          <label className={`${STAFF_FILTER_LABEL} sm:w-56 shrink-0`}>
+            Find
+            <input
+              value={permissionQuery}
+              onChange={(event) => setPermissionQuery(event.target.value)}
+              placeholder="Find a permission…"
+              autoComplete="off"
+              name="staff-permission-find"
+              className={STAFF_FILTER_INPUT}
+            />
+          </label>
         </div>
 
         {STAFF_PERMISSION_GROUPS.map((group) => {
@@ -407,12 +417,8 @@ Requires Connect Google as a Workspace admin (Staff → Inbox).`)}
         })}
 
         {moneyExtra ? (
-          <p className="text-[11px] text-[#8A4B00] inline-flex items-start gap-1">
-            <span>
-              Payments and Budget are workspace grants only. They do not grant the full Treasurer
-              role. Only tick for someone who handles money.
-            </span>
-            <HelpTip tipKey="staff.roles.money.extra" label="About money extras" />
+          <p className="text-[11px] text-[#8A4B00]">
+            Payments and Budget extras also unlock treasurer tools, including bank connections.
           </p>
         ) : null}
       </div>
@@ -441,9 +447,9 @@ Requires Connect Google as a Workspace admin (Staff → Inbox).`)}
           <span>
             <span className="font-medium">Grant board seat perks</span>
             <span className="block text-[11px] text-[#5A6070] whitespace-pre-line">
-              {vanillaizeIfDemo(`Complimentary Reef on the personal email above.
-Plus 75% off 1 enrichment program for Fall and 1 for Spring.
-Magnet fulfillment stays on Membership → Fulfillments.`)}
+              Complimentary Reef on the personal email above.
+              Plus 75% off 1 enrichment program for Fall and 1 for Spring.
+              Magnet fulfillment stays on Membership → Fulfillments.
             </span>
           </span>
         </label>

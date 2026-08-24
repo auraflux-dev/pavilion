@@ -3,8 +3,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Check, Loader2, Package, Truck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import {
+  STAFF_FILTER_CARD,
+  STAFF_FILTER_CARD_TITLE,
+  STAFF_FILTER_INPUT,
+  STAFF_FILTER_LABEL,
+} from '@/lib/staff/staff-filter-ui'
 
 type Item = {
   membershipId: string
@@ -45,7 +49,7 @@ function matchesLookup(item: Item, q: string) {
 }
 
 type Props = {
-  /** Compact copy for on-site handoff */
+  /** Compact copy for The Cove on-site handoff */
   variant?: 'membership' | 'cove'
 }
 
@@ -192,16 +196,21 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
       </div>
 
       {items.length > 0 ? (
-        <label className="block">
-          <span className="sr-only">Search by parent or student name</span>
-          <input
-            type="search"
-            value={lookup}
-            onChange={(e) => setLookup(e.target.value)}
-            placeholder="Lookup: parent name, student, email…"
-            className="w-full max-w-md rounded-lg border border-[var(--border)] px-3 py-2 text-sm"
-          />
-        </label>
+        <div className={STAFF_FILTER_CARD}>
+          <p className={STAFF_FILTER_CARD_TITLE}>Search</p>
+          <label className={STAFF_FILTER_LABEL}>
+            Lookup
+            <input
+              type="search"
+              value={lookup}
+              onChange={(e) => setLookup(e.target.value)}
+              placeholder="Parent name, student, or email"
+              autoComplete="off"
+              name="staff-fulfillment-lookup"
+              className={STAFF_FILTER_INPUT}
+            />
+          </label>
+        </div>
       ) : null}
 
       {busy && items.length === 0 ? (

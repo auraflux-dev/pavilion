@@ -4,6 +4,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CANVA_MARKETING_FOLDER_URL } from '@/lib/canva/config'
 import type { CanvaDesign } from '@/lib/canva/client'
+import {
+  STAFF_FILTER_CARD,
+  STAFF_FILTER_CARD_TITLE,
+  STAFF_FILTER_INPUT,
+  STAFF_FILTER_LABEL,
+} from '@/lib/staff/staff-filter-ui'
 
 type Status = {
   clientConfigured: boolean
@@ -141,7 +147,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
         <h2 className="text-lg font-semibold text-[#1B2A4A]">Canva</h2>
         <p className="mt-1 max-w-2xl text-sm text-[#5A6070]">
           VP Marketing works in the designated PTO Canva folder (currently owned by{' '}
-          <strong>gregory.robert.c@gmail.com</strong>. Invite VP Marketing for access). Save
+          <strong>gregory.robert.c@gmail.com</strong>. Invite Marketing / Diane for access). Save
           designs there, then paste edit links into Comms & content or Social. Brand logos:{' '}
           <a href="/brand" className="underline" target="_blank" rel="noreferrer">
             /brand
@@ -210,7 +216,7 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
           </div>
 
           <form
-            className="flex flex-wrap gap-2"
+            className={STAFF_FILTER_CARD}
             onSubmit={(e) => {
               e.preventDefault()
               void loadDesigns(query).catch((err) =>
@@ -218,15 +224,28 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
               )
             }}
           >
-            <input
-              className="min-w-[12rem] flex-1 rounded-lg border border-[var(--border)] px-3 py-2 text-sm"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search designs…"
-            />
-            <Button type="submit" variant="outline" disabled={busy}>
-              Search
-            </Button>
+            <p className={STAFF_FILTER_CARD_TITLE}>Search</p>
+            <div className="grid gap-3 sm:grid-cols-[1fr_auto] items-end">
+              <label className={STAFF_FILTER_LABEL}>
+                Designs
+                <input
+                  className={STAFF_FILTER_INPUT}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search designs…"
+                  autoComplete="off"
+                  name="staff-canva-search"
+                />
+              </label>
+              <Button
+                type="submit"
+                disabled={busy}
+                className="text-white h-10 px-5"
+                style={{ backgroundColor: 'var(--brand-green)' }}
+              >
+                Search
+              </Button>
+            </div>
           </form>
 
           {designs.length === 0 && !loading ? (
@@ -294,15 +313,12 @@ export function StaffCanvaPanel({ onOpenWorkspace }: Props) {
             <div className="space-y-3 pt-1">
               <p className="text-xs text-[#5A6070] leading-relaxed">
                 Optional later. Day-to-day Marketing only needs the folder link above. API Connect
-                uses a Public Canva integration (draft mode). See{' '}
+                can wait until a PTO-owned Canva app exists. See{' '}
                 <code className="text-[11px]">docs/CANVA-SETUP.md</code>.
               </p>
               {!status?.clientConfigured ? (
-                <p className="text-xs text-amber-900 whitespace-pre-line">
-                  Canva API credentials are not set on the server yet.
-                  {'\n'}
-                  Folder workflow still works. Rob must add CANVA_CLIENT_ID on Vercel and register
-                  https://www.shmspto.org/api/staff/canva/connect/callback in the Canva Developer Portal.
+                <p className="text-xs text-[#5A6070]">
+                  Client id/secret not configured yet. Folder workflow still works.
                 </p>
               ) : (
                 <Button

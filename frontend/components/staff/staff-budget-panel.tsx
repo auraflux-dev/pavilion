@@ -4,8 +4,12 @@ import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { StaffPlaidConnect } from '@/components/staff/staff-plaid-connect'
-import { HelpTip } from '@/components/ui/help-tip'
-import { isPublicDemoInstance } from '@/lib/demo/instance'
+import {
+  STAFF_FILTER_CARD,
+  STAFF_FILTER_CARD_TITLE,
+  STAFF_FILTER_INPUT,
+  STAFF_FILTER_LABEL,
+} from '@/lib/staff/staff-filter-ui'
 
 const DEFAULT_FISCAL_YEAR = '2026-27'
 const FISCAL_YEAR_LABEL = 'Jul 1, 2026 to Jun 30, 2027'
@@ -319,8 +323,7 @@ export function StaffBudgetPanel() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      const excelFilename = isPublicDemoInstance() ? `budget-${year}.xlsx` : `shms-pto-budget-${year}.xlsx`
-      a.download = excelFilename
+      a.download = `shms-pto-budget-${year}.xlsx`
       a.click()
       URL.revokeObjectURL(url)
       setStatusKind('ok')
@@ -430,10 +433,7 @@ export function StaffBudgetPanel() {
       ) : null}
 
       <div className="rounded-lg border border-[var(--border)] bg-[#F7F4EE] px-3 py-3 space-y-2">
-        <p className="text-sm font-bold inline-flex items-center gap-1">
-          Import Bank of America CSV
-          <HelpTip tipKey="staff.budget.bank" label="About bank import" />
-        </p>
+        <p className="text-sm font-bold">Import Bank of America CSV</p>
         <p className="text-xs text-[#5A6070]">
           Only CSV this page accepts. Bank of America checking → Activity → Download CSV. Only{' '}
           <strong>August 1 to July 31</strong> of this school year is used. Square and PayPal{' '}
@@ -593,7 +593,7 @@ export function StaffBudgetPanel() {
             onFocus={focusLine}
           />
 
-          <div id="budget-activity" className="space-y-2">
+          <div id="budget-activity" className="space-y-3">
             <div className="flex flex-wrap items-end justify-between gap-2">
               <h3 className="text-sm font-bold">
                 Activity log
@@ -603,23 +603,29 @@ export function StaffBudgetPanel() {
                   {filteredEntries.length !== entries.length ? ` of ${entries.length}` : ''}
                 </span>
               </h3>
-              <div className="flex flex-wrap gap-2">
+              {filterKey ? (
+                <button
+                  type="button"
+                  className="text-xs text-[var(--brand-green)] hover:underline"
+                  onClick={() => setFilterKey('')}
+                >
+                  Show all lines
+                </button>
+              ) : null}
+            </div>
+            <div className={STAFF_FILTER_CARD}>
+              <p className={STAFF_FILTER_CARD_TITLE}>Search</p>
+              <label className={STAFF_FILTER_LABEL}>
+                Memo
                 <input
-                  className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm"
+                  className={STAFF_FILTER_INPUT}
                   placeholder="Search memo…"
+                  autoComplete="off"
+                  name="staff-budget-memo"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
-                {filterKey ? (
-                  <button
-                    type="button"
-                    className="text-xs text-[var(--brand-green)] hover:underline"
-                    onClick={() => setFilterKey('')}
-                  >
-                    Show all lines
-                  </button>
-                ) : null}
-              </div>
+              </label>
             </div>
             {entries.length === 0 ? (
               <p className="text-sm text-[#5A6070]">

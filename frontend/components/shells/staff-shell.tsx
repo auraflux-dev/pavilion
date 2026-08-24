@@ -9,7 +9,7 @@ import { SocialFooterLinks } from '@/components/social-footer-links'
 import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 import { groupStaffNavItems } from '@/lib/staff/workspace-groups'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
-import { vanillaizeIfDemo, publicBrandFace } from '@/lib/demo/brand'
+import { publicBrandFace } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { DemoMark } from '@/components/demo/demo-mark'
 
@@ -42,13 +42,12 @@ function splitNav(items: NavItem[], active: StaffWorkspace) {
   if (items.length <= DESKTOP_VISIBLE) {
     return { primary: items, overflow: [] as NavItem[] }
   }
-  // Keep stable order. Prefer the first slots; if active is off-bar, swap it into the last primary slot.
-  let primary = items.slice(0, DESKTOP_VISIBLE)
-  const activeIdx = items.findIndex((i) => i.id === active)
-  if (activeIdx >= DESKTOP_VISIBLE && activeIdx >= 0) {
-    const activeItem = items[activeIdx]!
-    primary = [...items.slice(0, DESKTOP_VISIBLE - 1), activeItem]
-  }
+  const activeItem = items.find((i) => i.id === active)
+  const rest = items.filter((i) => i.id !== active)
+  // Keep current workspace on the bar; tuck the rest into More
+  const primary = activeItem
+    ? [...rest.slice(0, DESKTOP_VISIBLE - 1), activeItem]
+    : items.slice(0, DESKTOP_VISIBLE - 1)
   const primaryIds = new Set(primary.map((i) => i.id))
   const overflow = items.filter((i) => !primaryIds.has(i.id))
   return { primary, overflow }
@@ -102,7 +101,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-0.5 min-w-0" aria-label="Staff workspaces">
+          <nav className="hidden lg:flex items-center gap-0.5 min-w-0" aria-label="Staff workspaces">
             {primary.map((item) => (
               <button
                 key={item.id}
@@ -114,7 +113,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                     : 'text-white/85 hover:bg-white/10'
                 }`}
               >
-                {vanillaizeIfDemo(item.label)}
+                {item.label}
               </button>
             ))}
             {overflow.length > 0 ? (
@@ -141,7 +140,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                     {groupStaffNavItems(overflow).map(({ group, items: groupItems }) => (
                       <div key={group.id} className="py-1">
                         <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
-                          {vanillaizeIfDemo(group.label)}
+                          {group.label}
                         </p>
                         {groupItems.map((item) => (
                           <button
@@ -158,7 +157,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                                 : ''
                             }`}
                           >
-                            {vanillaizeIfDemo(item.label)}
+                            {item.label}
                           </button>
                         ))}
                       </div>
@@ -201,7 +200,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
 
           <button
             type="button"
-            className="md:hidden p-2 rounded-md hover:bg-white/10"
+            className="lg:hidden p-2 rounded-md hover:bg-white/10"
             onClick={() => setMenuOpen((o) => !o)}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           >
@@ -210,7 +209,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
         </div>
 
         {menuOpen ? (
-          <div className="md:hidden border-t border-white/15 bg-[var(--brand-dark)] px-4 py-3 space-y-3 max-h-[70vh] overflow-y-auto">
+          <div className="lg:hidden border-t border-white/15 bg-[var(--brand-dark)] px-4 py-3 space-y-3 max-h-[70vh] overflow-y-auto">
             {items.some((i) => i.id === 'home') ? (
               <button
                 type="button"
@@ -224,13 +223,13 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                   setMenuOpen(false)
                 }}
               >
-                {vanillaizeIfDemo(STAFF_WORKSPACE_LABEL.home)}
+                {STAFF_WORKSPACE_LABEL.home}
               </button>
             ) : null}
             {groupStaffNavItems(items).map(({ group, items: groupItems }) => (
               <div key={group.id} className="space-y-0.5">
                 <p className="px-3 pt-1 text-[10px] font-bold uppercase tracking-wider text-[var(--brand-gold)]">
-                  {vanillaizeIfDemo(group.label)}
+                  {group.label}
                 </p>
                 {groupItems.map((item) => (
                   <button
@@ -246,7 +245,7 @@ export function StaffShell({ name, boardTitle, email, items, active, onNavigate,
                       setMenuOpen(false)
                     }}
                   >
-                    {vanillaizeIfDemo(item.label)}
+                    {item.label}
                   </button>
                 ))}
               </div>

@@ -14,6 +14,13 @@ import { StaffProgramsPanel } from '@/components/staff/staff-programs-panel'
 import { StaffReportsPanel } from '@/components/staff/staff-reports-panel'
 import { StaffPaymentsPanel } from '@/components/staff/staff-payments-panel'
 import { StaffBudgetPanel } from '@/components/staff/staff-budget-panel'
+import {
+  STAFF_FILTER_CARD,
+  STAFF_FILTER_CARD_TITLE,
+  STAFF_FILTER_INPUT,
+  STAFF_FILTER_LABEL,
+  STAFF_FILTER_SELECT,
+} from '@/lib/staff/staff-filter-ui'
 import { StaffEventsPanel } from '@/components/staff/staff-events-panel'
 import { StaffRetailPanel } from '@/components/staff/staff-retail-panel'
 import { StaffDiscountsPanel } from '@/components/staff/staff-discounts-panel'
@@ -38,10 +45,9 @@ import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
 import { StaffNewsletterSendReportPanel } from '@/components/staff/staff-newsletter-send-report'
 import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
 import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
+import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-notice'
 import { StaffCoachTour } from '@/components/staff/staff-coach-tour'
 import { StaffDemoBanner } from '@/components/staff/staff-demo-banner'
-import { isPublicDemoInstance } from '@/lib/demo/instance'
-import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-notice'
 import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { StaffWhatsAppQueuePanel } from '@/components/staff/staff-whatsapp-queue-panel'
@@ -85,6 +91,7 @@ type MemberHit = {
   parentEmail: string
   parentFirstName?: string
   parentLastName?: string
+  accountNumber?: string
   membershipTier?: string
   accountType?: 'free' | 'paid'
   students: {
@@ -151,13 +158,6 @@ export function StaffDashboard() {
   const [lookupBusy, setLookupBusy] = useState(false)
   const [actAsStatus, setActAsStatus] = useState('')
   const [coachDone, setCoachDone] = useState(false)
-  useEffect(() => {
-    try {
-      if (window.localStorage.getItem('staff-coach-tour-v1') === 'done') setCoachDone(true)
-    } catch {
-      /* ignore */
-    }
-  }, [])
 
   const [msgSubject, setMsgSubject] = useState('')
   const [msgBody, setMsgBody] = useState('')
@@ -343,13 +343,12 @@ export function StaffDashboard() {
 
   useEffect(() => {
     if (!me?.isAdmin || active !== 'members') return
+    void fetch('/api/staff/members/account-numbers/setup', { method: 'POST' }).catch(() => null)
     void loadMembers({ q: query, sort: memberSort, tier: memberTier })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- open Members / sort·tier change; text filter is manual
   }, [me?.isAdmin, active, memberSort, memberTier])
 
   async function actAs(parentEmail: string) {
-    const { tooltipCopy } = await import('@/lib/copy/tooltips')
-    if (!window.confirm(tooltipCopy('staff.actas.confirm'))) return
     setActAsStatus('')
     const r = await fetch('/api/staff/act-as', {
       method: 'POST',
@@ -459,11 +458,13 @@ export function StaffDashboard() {
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
                 {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
                   ? `Private trial staff for your school.\nPick an area below, or use the top nav.\nStart with Membership, Events, or Site.`
-                  : `Roles: ${me.roles.join(', ')}.\nStaff login: ${me.email}.\nPick an area below, or use the top nav.\nOnly what you need for that job.`}
+                  : `Roles: ${me.roles.join(', ')}.\nStaff login: ${me.email}.\nPick an area below, or use the top nav.\nOnly what you need for that job.}`}
               </p>
-              <div className="mt-3">
-                <StaffSyncFreshnessChip />
-              </div>
+              {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
+                <div className="mt-3">
+                  <StaffSyncFreshnessChip />
+                </div>
+              )}
             </div>
             <>
               <StaffCoachTour
@@ -474,16 +475,18 @@ export function StaffDashboard() {
                 onDone={() => setCoachDone(true)}
               />
               {coachDone ? (
-                <>
-                  <StaffPersonalEmailPanel
-                    initialEmail={me.personalEmail ?? ''}
-                    onSaved={(email) =>
-                      setMe((current) => (current ? { ...current, personalEmail: email } : current))
-                    }
-                  />
-                  <StaffWalkthroughNotice roles={me.roles} email={me.email} />
-                  <StaffOnboardingPanel onOpenWorkspace={go} />
-                </>
+                process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
+                  <>
+                    <StaffPersonalEmailPanel
+                      initialEmail={me.personalEmail ?? ''}
+                      onSaved={(email) =>
+                        setMe((current) => (current ? { ...current, personalEmail: email } : current))
+                      }
+                    />
+                    <StaffWalkthroughNotice roles={me.roles} email={me.email} />
+                    <StaffOnboardingPanel onOpenWorkspace={go} />
+                  </>
+                )
               ) : null}
             </>
             {activityItems.length === 0 && active === 'home' ? (
@@ -533,8 +536,8 @@ export function StaffDashboard() {
               {groupStaffNavItems(navItems).map(({ group, items }) => (
                 <div key={group.id} className="space-y-2">
                   <div>
-                    <h2 className="text-sm font-bold text-[#1A1A1A]">{vanillaizeIfDemo(group.label)}</h2>
-                    <p className="text-xs text-[#5A6070] mt-0.5 whitespace-pre-line">{vanillaizeIfDemo(group.blurb)}</p>
+                    <h2 className="text-sm font-bold text-[#1A1A1A]">{group.label}</h2>
+                    <p className="text-xs text-[#5A6070] mt-0.5 whitespace-pre-line">{group.blurb}</p>
                   </div>
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {items.map((item) => (
@@ -586,74 +589,99 @@ export function StaffDashboard() {
             <div>
               <h1 className="text-xl font-bold">Members</h1>
               <p className="text-xs text-[#5A6070] mt-1">
-                All parents with students. Filter paid vs free, search by email or student name,
-                sort, act-as, or archive / restore a student.
+                Account number is the top line for each family. Search by account #, email, or student
+                name. Filter paid vs free, act-as, or archive / restore a student.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2 items-center">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') void loadMembers()
-                }}
-                placeholder="Filter by email or student name"
-                className="flex-1 min-w-[12rem] border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-              />
-              <select
-                value={memberTier}
-                onChange={(e) => {
-                  const v = e.target.value
-                  setMemberTier(v === 'paid' || v === 'free' ? v : 'all')
-                }}
-                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-                aria-label="Filter paid or free"
-              >
-                <option value="all">All accounts</option>
-                <option value="paid">Paid only</option>
-                <option value="free">Free only</option>
-              </select>
-              <select
-                value={memberSort}
-                onChange={(e) => setMemberSort(e.target.value === 'name' ? 'name' : 'email')}
-                className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-                aria-label="Sort members"
-              >
-                <option value="email">Sort by email</option>
-                <option value="name">Sort by name</option>
-              </select>
-              <Button
-                onClick={() => void loadMembers()}
-                disabled={lookupBusy}
-                variant="outline"
-              >
-                {lookupBusy ? '…' : 'Filter'}
-              </Button>
-              <Button
-                onClick={() => {
-                  setQuery('')
-                  setMemberTier('all')
-                  void loadMembers({ q: '', sort: memberSort, tier: 'all' })
-                }}
-                disabled={lookupBusy}
-                className="text-white"
-                style={{ backgroundColor: 'var(--brand-green)' }}
-              >
-                Show all
-              </Button>
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-stretch">
+              <div className={`flex-1 ${STAFF_FILTER_CARD}`}>
+                <p className={STAFF_FILTER_CARD_TITLE}>Search</p>
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto] items-end">
+                  <label className={STAFF_FILTER_LABEL}>
+                    Lookup
+                    <input
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') void loadMembers()
+                      }}
+                      placeholder="Account #, email, or student name"
+                      autoComplete="off"
+                      name="staff-members-lookup"
+                      className={STAFF_FILTER_INPUT}
+                    />
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      onClick={() => void loadMembers()}
+                      disabled={lookupBusy}
+                      className="text-white h-10 px-5"
+                      style={{ backgroundColor: 'var(--brand-green)' }}
+                    >
+                      {lookupBusy ? '…' : 'Search'}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setQuery('')
+                        setMemberTier('all')
+                        void loadMembers({ q: '', sort: memberSort, tier: 'all' })
+                      }}
+                      disabled={lookupBusy}
+                      variant="outline"
+                      className="h-10"
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-[11px] text-[#5A6070]">
+                  {lookupBusy
+                    ? 'Loading…'
+                    : `${members.length} parent${members.length === 1 ? '' : 's'}${
+                        memberTier === 'paid'
+                          ? ' · paid only'
+                          : memberTier === 'free'
+                            ? ' · free only'
+                            : ''
+                      }`}
+                  {actAsStatus ? ` · ${actAsStatus}` : ''}
+                </p>
+              </div>
+              <div className="xl:w-48 shrink-0 space-y-3">
+                <div className={STAFF_FILTER_CARD}>
+                  <label className={STAFF_FILTER_LABEL}>
+                    Filter
+                    <select
+                      value={memberTier}
+                      onChange={(e) => {
+                        const v = e.target.value
+                        setMemberTier(v === 'paid' || v === 'free' ? v : 'all')
+                      }}
+                      className={STAFF_FILTER_SELECT}
+                      aria-label="Filter paid or free"
+                    >
+                      <option value="all">All accounts</option>
+                      <option value="paid">Paid only</option>
+                      <option value="free">Free only</option>
+                    </select>
+                  </label>
+                </div>
+                <div className={STAFF_FILTER_CARD}>
+                  <label className={STAFF_FILTER_LABEL}>
+                    Sort
+                    <select
+                      value={memberSort}
+                      onChange={(e) => setMemberSort(e.target.value === 'name' ? 'name' : 'email')}
+                      className={STAFF_FILTER_SELECT}
+                      aria-label="Sort members"
+                    >
+                      <option value="email">By email</option>
+                      <option value="name">By name</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
             </div>
-            <p className="text-xs text-[#5A6070]">
-              {lookupBusy
-                ? 'Loading…'
-                : `${members.length} parent${members.length === 1 ? '' : 's'}${
-                    memberTier === 'paid'
-                      ? ' · paid only'
-                      : memberTier === 'free'
-                        ? ' · free only'
-                        : ''
-                  }`}
-              {actAsStatus ? ` · ${actAsStatus}` : ''}
-            </p>
             <div className="space-y-2 max-h-[70vh] overflow-y-auto">
               {members.map((m) => {
                 const parentName = `${m.parentFirstName ?? ''} ${m.parentLastName ?? ''}`.trim()
@@ -664,17 +692,18 @@ export function StaffDashboard() {
                   >
                     <div>
                       <p className="text-sm font-semibold">
-                        {parentName || m.parentEmail}
-                        {parentName ? (
-                          <span className="font-normal text-[#5A6070]"> · {m.parentEmail}</span>
+                        {m.accountNumber ? (
+                          <span className="tabular-nums">{m.accountNumber}</span>
                         ) : null}
+                        {m.accountNumber ? ' · ' : ''}
+                        {parentName || m.parentEmail}
                       </p>
-                      {m.accountType || m.membershipTier ? (
-                        <p className="text-[11px] text-[#5A6070] mt-0.5">
-                          {m.accountType === 'paid' ? 'Paid' : 'Free'}
-                          {m.membershipTier ? ` · ${displayMembershipTier(m.membershipTier)}` : ''}
-                        </p>
-                      ) : null}
+                      <p className="text-xs text-[#5A6070]">
+                        {m.parentEmail}
+                        {m.accountType || m.membershipTier
+                          ? ` · ${m.accountType === 'paid' ? 'Paid' : 'Free'}${m.membershipTier ? ` · ${displayMembershipTier(m.membershipTier)}` : ''}`
+                          : ''}
+                      </p>
                       <div className="mt-1 space-y-1">
                         {m.students.map((student) => (
                           <div
@@ -696,25 +725,19 @@ export function StaffDashboard() {
                         ))}
                       </div>
                     </div>
-                    {!isPublicDemoInstance() ? (
-                      <button
-                        type="button"
-                        onClick={() => void actAs(m.parentEmail)}
-                        className="text-xs font-bold px-3 py-1.5 rounded-lg text-white shrink-0"
-                        style={{ backgroundColor: 'var(--brand-green)' }}
-                      >
-                        Act as
-                      </button>
-                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => void actAs(m.parentEmail)}
+                      className="text-xs font-bold px-3 py-1.5 rounded-lg text-white shrink-0"
+                      style={{ backgroundColor: 'var(--brand-green)' }}
+                    >
+                      Act as
+                    </button>
                   </div>
                 )
               })}
               {!lookupBusy && members.length === 0 ? (
-                <p className="text-sm text-[#5A6070] py-4 whitespace-pre-line">
-                  No members match.
-                  {'\n'}
-                  Clear the search or tier filter, or try another sort.
-                </p>
+                <p className="text-sm text-[#5A6070] py-4">No members match.</p>
               ) : null}
             </div>
           </section>
@@ -783,7 +806,9 @@ export function StaffDashboard() {
         {active === 'minutes' && canMinutes ? <StaffMinutesPanel /> : null}
         {active === 'programs' && canPrograms ? <StaffProgramsPanel /> : null}
         {active === 'timesheets' && canTimesheets ? <StaffTimesheetsPanel /> : null}
-        {active === 'payments' && canPayments ? <StaffPaymentsPanel /> : null}
+        {active === 'payments' && canPayments ? (
+          <StaffPaymentsPanel isAdmin={Boolean(me?.isAdmin)} />
+        ) : null}
         {active === 'budget' && canPayments ? <StaffBudgetPanel /> : null}
         {active === 'reports' ? (
           <StaffReportsPanel
@@ -888,9 +913,14 @@ export function StaffDashboard() {
         ) : null}
         {active === 'newsletter' && canNewsletter ? (
           <div className="space-y-4">
-            <StaffNewsletterPanel />
             <StaffWhatsAppQueuePanel />
+            <StaffNewsletterPanel />
             <StaffNewsletterSendReportPanel />
+            <StaffCmsCollectionPanel
+              collection="Newsletters"
+              title="Newsletter archive → portal Messages"
+              sectionId="newsletter-archive"
+            />
           </div>
         ) : null}
         {active === 'expenses' ? (

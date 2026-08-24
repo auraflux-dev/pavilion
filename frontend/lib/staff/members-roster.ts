@@ -19,6 +19,8 @@ export type ParentRosterRow = {
   parentFirstName: string
   parentLastName: string
   parentPhone: string
+  /** Stable Staff account number (A10001+). */
+  accountNumber: string
   /** Highest paid tier among active students, else free */
   membershipTier: string
   accountType: 'free' | 'paid'
@@ -70,6 +72,7 @@ export function tierRank(tier: string | undefined | null): number {
   const n = normalizeMembershipTier(tier)
   return TIER_RANK[n] ?? (isPaidTier(n) ? 10 : 0)
 }
+
 
 export type MembershipTierTotals = {
   reef: number
@@ -156,6 +159,7 @@ export function buildParentRoster(items: RawStudent[]): ParentRosterRow[] {
         parentFirstName: String(item.parentFirstName ?? '').trim(),
         parentLastName: String(item.parentLastName ?? '').trim(),
         parentPhone: String(item.parentPhone ?? '').trim(),
+        accountNumber: '',
         membershipTier: 'free',
         accountType: 'free',
         students: [student],
@@ -201,6 +205,7 @@ export type MembershipRosterRow = {
   parentFirstName?: string
   parentLastName?: string
   parentPhone?: string
+  accountNumber?: string
 }
 
 /**
@@ -222,22 +227,29 @@ export function applyMembershipsToRoster(
     if (status === 'expired' || status === 'cancelled' || status === 'canceled') continue
 
     const tier = normalizeMembershipTier(m.tier)
-    // Do not let a free Memberships row wipe a paid Students tier
-    if (!isPaidTier(tier)) continue
+    const accountNumber = String(m.accountNumber ?? '').trim().toUpperCase()
 
     const existing = byEmail.get(email)
     if (!existing) {
+      // Memberships-only row (paid override, or free with account number)
+      if (!isPaidTier(tier) && !accountNumber) continue
       byEmail.set(email, {
         parentEmail: email,
         parentFirstName: String(m.parentFirstName ?? '').trim(),
         parentLastName: String(m.parentLastName ?? '').trim(),
         parentPhone: String(m.parentPhone ?? '').trim(),
-        membershipTier: tier,
-        accountType: 'paid',
+        accountNumber,
+        membershipTier: isPaidTier(tier) ? tier : 'free',
+        accountType: isPaidTier(tier) ? 'paid' : 'free',
         students: [],
       })
       continue
     }
+
+    if (accountNumber) existing.accountNumber = accountNumber
+
+    // Do not let a free Memberships row wipe a paid Students tier
+    if (!isPaidTier(tier)) continue
 
     const merged = pickHighestTier([existing.membershipTier, tier])
     existing.membershipTier = merged
@@ -297,6 +309,7 @@ export function filterParentRoster(
 
       if (q.length >= 1) {
         const hay = [
+          row.accountNumber,
           row.parentEmail,
           row.parentFirstName,
           row.parentLastName,

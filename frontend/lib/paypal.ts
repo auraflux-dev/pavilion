@@ -365,6 +365,42 @@ export async function deletePayPalPaymentToken(vaultId: string): Promise<void> {
 }
 
 /** Charge a vaulted PayPal account (create + capture). */
+export async function refundPayPalCapture(opts: {
+  captureId: string
+  amountCents?: number
+  idempotencyKey: string
+}): Promise<{ id: string; status?: string }> {
+  const captureId = opts.captureId.trim()
+  if (!captureId) throw new Error('Missing PayPal capture id')
+  const token = await getAccessToken()
+  const body: Record<string, unknown> = {}
+  if (opts.amountCents != null && opts.amountCents > 0) {
+    body.amount = {
+      value: (opts.amountCents / 100).toFixed(2),
+      currency_code: 'USD',
+    }
+  }
+  const res = await fetch(
+    `${paypalBaseUrl()}/v2/payments/captures/${encodeURIComponent(captureId)}/refund`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'PayPal-Request-Id': opts.idempotencyKey.slice(0, 45),
+      },
+      body: JSON.stringify(body),
+      cache: 'no-store',
+    },
+  )
+  const data = await res.json()
+  if (!res.ok || !data.id) {
+    console.error('PayPal refund failed', data)
+    throw new Error(data.message || data.details?.[0]?.description || 'PayPal refund failed')
+  }
+  return { id: data.id as string, status: data.status as string | undefined }
+}
+
 export async function chargePayPalVault(opts: {
   amount: number
   description: string
