@@ -12,8 +12,8 @@ Stone Hill (`www.shmspto.org`) deploys from **`auraflux-dev/shmspto`**, not this
 1. **Edit in `~/shmspto`** for school site, portal, and staff (see **`shms-edit-home.mdc`**). Prefer moving the agent root there when the task is Stone Hill.
 2. **Serena QA** on the changed files.
 3. **Commit** in the **`shmspto` repo** (local clone, e.g. `~/shmspto`).
-   - If you already edited `frontend/` here in `wix-shmspto`, port the same diff into `~/shmspto/frontend/` before commit.
-   - Do **not** treat `git push origin main` on `wix-shmspto` as a Stone Hill production deploy.
+   - If you already edited `frontend/` here in `pavilion`, port the same diff into `~/shmspto/frontend/` before commit.
+   - Do **not** treat `git push origin main` on `pavilion` as a Stone Hill production deploy.
 4. **`node scripts/shms-frontend-parity.mjs`**. Fix any school-facing “only in monorepo” hits.
 5. **`git push origin main`** on `auraflux-dev/shmspto`.
 6. Treasurer Vercel project **`frontend`** auto-builds Production from that push.
@@ -33,4 +33,4 @@ Staff-only (`/staff`, `app/api/staff`, staff components with no visitor copy cha
 
 ## Pavilion (this repo)
 
-Pavilion marketing/demo/trial still ship from **`wix-shmspto`** (`commons-site`, `commons-pto-demo`, `commons-pto`) per `commons-parity.mdc`. Never mix SHMS Wix env onto Pavilion.
+Pavilion marketing/demo/trial still ship from **`pavilion`** (`commons-site`, `commons-pto-demo`, `commons-pto`) per `commons-parity.mdc`. Never mix SHMS Wix env onto Pavilion.

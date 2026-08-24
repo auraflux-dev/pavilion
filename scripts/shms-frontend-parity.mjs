@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Compare Stone Hill frontend source trees:
- *   auraflux-dev/wix-shmspto/frontend  (Pavilion monorepo)
+ *   auraflux-dev/pavilion/frontend  (Pavilion monorepo)
  *   auraflux-dev/shmspto/frontend      (www.shmspto.org — source of truth for school)
  *
  * Why this exists: agents often edit the open Cursor workspace (monorepo) while
@@ -11,7 +11,7 @@
  * Usage:
  *   node scripts/shms-frontend-parity.mjs
  *   node scripts/shms-frontend-parity.mjs --json
- *   SHMS_ROOT=~/shmspto MONO_ROOT=~/wix-shmspto node scripts/shms-frontend-parity.mjs
+ *   SHMS_ROOT=~/shmspto MONO_ROOT=~/pavilion node scripts/shms-frontend-parity.mjs
  *
  * Exit 1 when school-facing paths exist only in the monorepo (missing from live ship repo).
  */
@@ -25,7 +25,7 @@ const repoRoot = resolve(__dirname, '..')
 
 const MONO =
   process.env.MONO_ROOT?.trim() ||
-  (existsSync(join(repoRoot, 'frontend', 'app')) ? repoRoot : join(homedir(), 'wix-shmspto'))
+  (existsSync(join(repoRoot, 'frontend', 'app')) ? repoRoot : join(homedir(), 'pavilion'))
 const SHMS =
   process.env.SHMS_ROOT?.trim() ||
   (existsSync(join(repoRoot, 'HANDOFF.md')) && !existsSync(join(repoRoot, 'commons-site'))

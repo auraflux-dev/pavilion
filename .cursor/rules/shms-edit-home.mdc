@@ -12,15 +12,15 @@ www.shmspto.org (visitor site, member portal, staff) deploys from **`auraflux-de
 | Surface | Edit and commit in |
 |---------|-------------------|
 | Stone Hill visitor, portal, staff, school APIs | **`~/shmspto`** (`auraflux-dev/shmspto`) |
-| Pavilion marketing / demo / trial | **`wix-shmspto`** (this monorepo) |
+| Pavilion marketing / demo / trial | **`pavilion`** (this monorepo) |
 
 **Do not** implement Stone Hill product in this monorepo's `frontend/` and hope a later port happens. That is how features look done in chat, then vanish from Staff / portal / www.
 
-If this Cursor workspace is `wix-shmspto` and the task is Stone Hill:
+If this Cursor workspace is `pavilion` and the task is Stone Hill:
 
 1. Prefer **`move_agent_to_root` → `/Users/robertgregory/shmspto`** (or the local `shmspto` clone) before editing.
 2. If you already edited monorepo `frontend/`, **port the same files into `~/shmspto/frontend/`** in the same turn, then commit/push **shmspto**.
-3. Pushing `wix-shmspto` `main` does **not** update www.
+3. Pushing `pavilion` `main` does **not** update www.
 
 ## After a Stone Hill application ship
 
@@ -35,6 +35,6 @@ node scripts/shms-frontend-parity.mjs
 
 ## Anti-patterns (forbidden)
 
-- Editing Staff / portal / school pages only under `wix-shmspto/frontend` and marking the task live.
+- Editing Staff / portal / school pages only under `pavilion/frontend` and marking the task live.
 - Treating monorepo history ("it was in staff") as proof it is on www.
 - Skipping parity after a multi-file Stone Hill change.

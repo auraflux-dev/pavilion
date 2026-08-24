@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Serena QA then ship (Staging-first — critical)
 
-This rule is **mandatory** for every agent on `wix-shmspto`. It overrides “only commit/push when asked” and overrides any habit of going straight to production.
+This rule is **mandatory** for every agent on `pavilion`. It overrides “only commit/push when asked” and overrides any habit of going straight to production.
 
 After a complete, shippable **application** change, run Serena QA.
 
@@ -19,7 +19,7 @@ Stone Hill production deploys from **`auraflux-dev/shmspto`** via treasurer Git 
 
 **Edit in `~/shmspto` first.** Do not leave school site / portal / staff changes only in this monorepo.
 
-1. **Commit** in the **`shmspto` repo**. Do **not** push `wix-shmspto` `main` for Stone Hill prod.
+1. **Commit** in the **`shmspto` repo**. Do **not** push `pavilion` `main` for Stone Hill prod.
 2. **`node scripts/shms-frontend-parity.mjs`**. If school-facing files are only in the monorepo, port them into `shmspto` before calling the ship done.
 3. **Staging review** (visitor-facing): confirm **https://shmspto.vercel.app** when staging is current. **STOP** for Rob OK (`looks good`, `ship it`, `go live`, `OK`, etc.).
 4. **`git push origin main`** on `auraflux-dev/shmspto`. Treasurer Vercel **`frontend`** auto-deploys. Agents do **not** run `vercel deploy --prod` locally (no treasurer login).
@@ -29,7 +29,7 @@ Stone Hill production deploys from **`auraflux-dev/shmspto`** via treasurer Git 
 
 ## Pavilion (this monorepo)
 
-- **Commit** task files on `wix-shmspto` (do not push Stone Hill via this repo).
+- **Commit** task files on `pavilion` (do not push Stone Hill via this repo).
 - Pavilion marketing → `commons-site` (`onpavilion.com`).
 - Pavilion demo/trial → `commons-pto-demo` / `commons-pto` as relevant.
 - Default: after a Stone Hill ship, also ship Pavilion from the same product change when it applies (vanilla only). Skip for clearly SHMS-only work or if Rob says skip.
@@ -37,14 +37,14 @@ Stone Hill production deploys from **`auraflux-dev/shmspto`** via treasurer Git 
 
 ## Exceptions
 
-- **Rules / docs / memories only** (no application runtime): commit on `wix-shmspto`, then push `wix-shmspto` `main`. Skip deploy checks.
+- **Rules / docs / memories only** (no application runtime): commit on `pavilion`, then push `pavilion` `main`. Skip deploy checks.
 - Never include unrelated WIP, secrets, Budget/Plaid/terminal/spirit-wear/`tmp` unless they are the task.
 - Never mix Stone Hill and Pavilion env (DATABASE_URL, Wix, Square, Stripe).
 
 ## Anti-patterns (forbidden)
 
-- Pushing `wix-shmspto` `main` and calling Stone Hill “shipped.”
-- Editing Stone Hill Staff / portal / site only under `wix-shmspto/frontend` without porting to `~/shmspto`.
+- Pushing `pavilion` `main` and calling Stone Hill “shipped.”
+- Editing Stone Hill Staff / portal / site only under `pavilion/frontend` without porting to `~/shmspto`.
 - `vercel deploy --prod` for Stone Hill from agent shells (`robert-4220` or treasurer).
 - Deploying Stone Hill from `robert-4220s-projects`.
 - Calling the task “live” when `check-prod-deploy.mjs` has not passed.
