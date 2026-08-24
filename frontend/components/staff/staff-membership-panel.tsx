@@ -544,7 +544,9 @@ export function StaffMembershipPanel() {
                     {m.parentPhone ? ` · ${m.parentPhone}` : ''}
                   </p>
                   <p className="text-[11px] mt-1 text-[var(--brand-green)] font-semibold uppercase tracking-wide">
-                    {m.accountType === 'paid' ? displayMembershipTier(m.membershipTier) : 'free'}
+                    {m.membershipTier && m.membershipTier !== 'free'
+                      ? displayMembershipTier(m.membershipTier)
+                      : 'free'}
                   </p>
                   <ul className="mt-1 text-xs text-[#5A6070] space-y-0.5">
                     {m.students.map((s) => (
