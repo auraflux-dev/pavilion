@@ -372,6 +372,11 @@ export async function applyPaidMembership(opts: {
   let enrichmentCode: string | null = null
   try {
     enrichmentCode = await assignEnrichmentCodeToFamily(email, tier)
+    // Faculty complimentary: clear any prior Reef/Lagoon/Tide shared code.
+    if (!enrichmentCode && (tier === 'faculty' || tier === 'staff')) {
+      const { clearEnrichmentCodeFromFamily } = await import('@/lib/staff/enrichment-codes')
+      await clearEnrichmentCodeFromFamily(email)
+    }
   } catch (err) {
     console.warn('assignEnrichmentCodeToFamily', err)
   }
@@ -431,7 +436,8 @@ export async function applyPaidMembership(opts: {
       shirtProductId: String(opts.shirtProductId ?? '').trim() || undefined,
       shirtVariantId: String(opts.shirtVariantId ?? '').trim() || undefined,
       entitlementsJson: JSON.stringify(entitlementsStored),
-      enrichmentCode: enrichmentCode || undefined,
+      // Empty string clears stale SHMSREEF10 on faculty upgrades/downgrades.
+      enrichmentCode: enrichmentCode || '',
     }
     if (row?._id) {
       await client.items.update('Memberships', {
@@ -452,6 +458,15 @@ export async function applyPaidMembership(opts: {
     await ensureCoveFamilyCode(email)
   } catch (err) {
     console.warn('ensureCoveFamilyCode after paid membership', err)
+  }
+
+  try {
+    const { ensureAccountNumberForEmail } = await import(
+      '@/lib/staff/membership-account-number'
+    )
+    await ensureAccountNumberForEmail(email)
+  } catch (err) {
+    console.warn('ensureAccountNumberForEmail after paid membership', err)
   }
 
   return {

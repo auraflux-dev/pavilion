@@ -20,12 +20,21 @@ const SHARED: Record<string, { code: string; percent: number; name: string }> = 
   trench: { code: 'SHMSTIDE30', percent: 30, name: 'Tide enrichment 30%' },
 }
 
+const SHARED_CODES = new Set(
+  Object.values(SHARED).map((s) => s.code.toUpperCase()),
+)
+
+export function isSharedMembershipEnrichmentCode(code: string): boolean {
+  return SHARED_CODES.has(String(code ?? '').trim().toUpperCase())
+}
+
 export function sharedEnrichmentCodeForTier(tier: string): {
   code: string
   percent: number
   name: string
 } | null {
   const t = tier.trim().toLowerCase()
+  if (t === 'faculty' || t === 'staff' || t === 'free' || t === 'none' || !t) return null
   const fixed = SHARED[t]
   if (fixed) return fixed
   const pct = enrichmentDiscountPercent(t)
@@ -94,11 +103,35 @@ export async function ensureSharedEnrichmentCode(tier: string): Promise<Discount
   }
 }
 
+/** Clear shared membership enrichment codes from student rows (faculty / free). */
+export async function clearEnrichmentCodeFromFamily(parentEmail: string): Promise<void> {
+  const email = parentEmail.trim().toLowerCase()
+  if (!email) return
+  const client = getWixClient()
+  const students = await client.items.query('Students').eq('parentEmail', email).find()
+  for (const student of students.items ?? []) {
+    if (!student._id) continue
+    if ((student as { archived?: boolean }).archived === true) continue
+    const code = String((student as { discountCode?: string }).discountCode ?? '').trim()
+    if (!code || !isSharedMembershipEnrichmentCode(code)) continue
+    await client.items.update('Students', {
+      ...student,
+      discountCode: '',
+    })
+  }
+}
+
 /** Attach shared enrichment code onto every active student for this parent. */
 export async function assignEnrichmentCodeToFamily(
   parentEmail: string,
   tier: string,
 ): Promise<string | null> {
+  const t = tier.trim().toLowerCase()
+  // Faculty complimentary: never attach SHMSREEF10 / Lagoon / Tide shared codes.
+  if (t === 'faculty' || t === 'staff' || t === 'free' || t === 'none' || !t) {
+    await clearEnrichmentCodeFromFamily(parentEmail)
+    return null
+  }
   const shared = await ensureSharedEnrichmentCode(tier)
   if (!shared?.code) return null
   const email = parentEmail.trim().toLowerCase()

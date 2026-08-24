@@ -92,6 +92,17 @@ type StudentRow = {
   archived?: boolean
 }
 
+/** Bag checkout: one staff/parent confirmation using the line kind(s), not hard-coded program. */
+function cartConfirmationKind(parts: ResolvedCheckout[]): PurchaseConfirmationInput['kind'] {
+  if (parts.length === 1) {
+    const k = parts[0].kind
+    if (k === 'membership' || k === 'program' || k === 'product' || k === 'store-card' || k === 'event' || k === 'donation') {
+      return k
+    }
+  }
+  return 'product'
+}
+
 async function attachPurchaseConfirmation(
   result: Record<string, unknown>,
   input: PurchaseConfirmationInput,
@@ -320,8 +331,29 @@ export async function resolveCheckoutIntent(
       parentEmail?: string
       discountCode?: string
     } | null
-    const tier = normalizeMembershipTier(String(student?.membershipTier ?? 'free'))
+    let tier = normalizeMembershipTier(String(student?.membershipTier ?? 'free'))
+    // Prefer Memberships.tier so faculty complimentary is not charged as Reef from a stale student row.
+    try {
+      const mem = await client.items
+        .query('Memberships')
+        .eq('email', parentEmail.trim().toLowerCase())
+        .limit(1)
+        .find()
+      const memTier = normalizeMembershipTier(String(mem.items?.[0]?.tier ?? ''))
+      if (memTier && memTier !== 'free' && memTier !== 'none') tier = memTier
+    } catch {
+      // optional
+    }
     const percent = enrichmentDiscountPercent(tier)
+    const typedCoupon = String(intent.couponCode ?? '').trim()
+    if (typedCoupon && (tier === 'faculty' || tier === 'staff')) {
+      const { isSharedMembershipEnrichmentCode } = await import('@/lib/staff/enrichment-codes')
+      if (isSharedMembershipEnrichmentCode(typedCoupon)) {
+        throw new Error(
+          'Faculty membership does not include enrichment program discounts. Upgrade to Lagoon or Tide for member rates.',
+        )
+      }
+    }
     // Board season codes apply to the primary class only. Add-ons get membership %.
     const primaryApplied = await applyCheckoutDiscount({
       scope: 'program',
@@ -539,7 +571,7 @@ export async function fulfillPaidCheckout(opts: {
         paymentMethod: methodNote,
         sourcePrefix,
         consents,
-        skipConfirmation,
+        skipConfirmation: true,
       })
       results.push(partResult)
     }
@@ -564,6 +596,9 @@ export async function fulfillPaidCheckout(opts: {
         .join(' · '),
     })
 
+    const notifyKind = cartConfirmationKind(parts)
+    const singlePart = parts.length === 1 ? parts[0] : null
+
     return confirm(
       {
         kind: 'cart',
@@ -574,13 +609,13 @@ export async function fulfillPaidCheckout(opts: {
         cardCents,
       },
       {
-        kind: 'program',
+        kind: notifyKind,
         parentEmail,
         parentName,
         amount: resolved.amount,
         description: resolved.description,
         transactionId,
-        meta: resolved.meta,
+        meta: singlePart?.meta ?? resolved.meta,
         extras: { lines: results, coveCents, cardCents } as Record<string, unknown>,
       },
     )

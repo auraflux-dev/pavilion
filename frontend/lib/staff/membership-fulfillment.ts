@@ -18,6 +18,8 @@ export type FulfillmentQueueItem = {
   parentEmail: string
   parentFirstName: string
   parentLastName: string
+  /** Membership account number (e.g. A10040) when set */
+  accountNumber: string
   /** Comma-separated student names for staff lookup */
   studentNames: string
   tier: string
@@ -30,7 +32,7 @@ export type FulfillmentQueueItem = {
   expiresAt: string
 }
 
-export type FulfillmentAction = 'ordered' | 'picked_up'
+export type FulfillmentAction = 'ordered' | 'picked_up' | 'reopen'
 
 function isFulfillable(kind: string) {
   return kind === 'spirit_shirt' || kind === 'magnet'
@@ -90,20 +92,37 @@ async function loadFamilyLookupByEmail(): Promise<Map<string, FamilyLookup>> {
 }
 
 export async function listOpenFulfillments(): Promise<FulfillmentQueueItem[]> {
-  const client = getWixClient()
-  const [res, familyByEmail] = await Promise.all([
-    client.items.query('Memberships').limit(200).find(),
-    loadFamilyLookupByEmail(),
-  ])
-  const out: FulfillmentQueueItem[] = []
+  const { open } = await listFulfillmentQueues()
+  return open
+}
 
-  for (const row of res.items ?? []) {
-    const rec = row as Record<string, unknown>
-    const id = String(row._id ?? '')
+/** Open queue + handed-out physical perks (for undo / reopen). */
+export async function listFulfillmentQueues(): Promise<{
+  open: FulfillmentQueueItem[]
+  handedOut: FulfillmentQueueItem[]
+}> {
+  const client = getWixClient()
+  const familyByEmail = await loadFamilyLookupByEmail()
+  const membershipRows: Record<string, unknown>[] = []
+  let skip = 0
+  for (let i = 0; i < 50; i += 1) {
+    const res = await client.items.query('Memberships').limit(100).skip(skip).find()
+    const batch = (res.items ?? []) as Record<string, unknown>[]
+    membershipRows.push(...batch)
+    if (batch.length < 100) break
+    skip += 100
+  }
+
+  const open: FulfillmentQueueItem[] = []
+  const handedOut: FulfillmentQueueItem[] = []
+
+  for (const rec of membershipRows) {
+    const id = String(rec._id ?? '')
     if (!id) continue
     const email = String(rec.email ?? '').trim().toLowerCase()
     const tier = String(rec.tier ?? '').trim().toLowerCase()
     const shirtSize = String(rec.shirtSize ?? '').trim()
+    const accountNumber = String(rec.accountNumber ?? '').trim()
     const family = familyByEmail.get(email)
     const parentFirstName =
       String(rec.parentFirstName ?? rec.firstName ?? '').trim() ||
@@ -115,12 +134,12 @@ export async function listOpenFulfillments(): Promise<FulfillmentQueueItem[]> {
     const entitlements = parseEntitlementsJson(rec.entitlementsJson)
     for (const e of entitlements) {
       if (!isFulfillable(e.kind)) continue
-      if (!isPhysicalPerkOpen(e.status)) continue
-      out.push({
+      const item: FulfillmentQueueItem = {
         membershipId: id,
         parentEmail: email,
         parentFirstName,
         parentLastName,
+        accountNumber,
         studentNames,
         tier,
         shirtSize: e.kind === 'spirit_shirt' ? e.detail || shirtSize : shirtSize,
@@ -130,22 +149,29 @@ export async function listOpenFulfillments(): Promise<FulfillmentQueueItem[]> {
         notes: e.notes || '',
         status: e.status,
         expiresAt: String(rec.expiresAt ?? ''),
-      })
+      }
+      if (isPhysicalPerkOpen(e.status)) open.push(item)
+      else if (isPhysicalPerkPickedUp(e.status)) handedOut.push(item)
     }
   }
 
-  out.sort((a, b) => {
-    // Ordered first (ready for pickup), then pending
-    if (a.status !== b.status) {
-      if (a.status === 'ordered') return -1
-      if (b.status === 'ordered') return 1
-    }
+  const byName = (a: FulfillmentQueueItem, b: FulfillmentQueueItem) => {
     const an = `${a.parentLastName} ${a.parentFirstName}`.trim().toLowerCase()
     const bn = `${b.parentLastName} ${b.parentFirstName}`.trim().toLowerCase()
     if (an && bn && an !== bn) return an.localeCompare(bn)
     return a.parentEmail.localeCompare(b.parentEmail) || a.kind.localeCompare(b.kind)
+  }
+
+  open.sort((a, b) => {
+    if (a.status !== b.status) {
+      if (a.status === 'ordered') return -1
+      if (b.status === 'ordered') return 1
+    }
+    return byName(a, b)
   })
-  return out
+  handedOut.sort(byName)
+
+  return { open, handedOut }
 }
 
 /** @deprecated use listOpenFulfillments */
@@ -166,14 +192,36 @@ export async function updateEntitlementFulfillment(opts: {
 
   const entitlements = parseEntitlementsJson(row.entitlementsJson)
   const now = new Date().toISOString().slice(0, 10)
-  const label = opts.action === 'ordered' ? 'Ordered' : 'Picked up'
-  const nextStatus: MembershipEntitlementStatus =
-    opts.action === 'ordered' ? 'ordered' : 'picked_up'
+
+  let nextStatus: MembershipEntitlementStatus
+  let label: string
+  if (opts.action === 'reopen') {
+    nextStatus = 'ordered'
+    label = 'Reopened (was handed out in error)'
+  } else if (opts.action === 'ordered') {
+    nextStatus = 'ordered'
+    label = 'Ordered'
+  } else {
+    nextStatus = 'picked_up'
+    label = 'Picked up'
+  }
 
   const next = entitlements.map((e) => {
     if (e.kind !== opts.kind) return e
+    if (opts.action === 'reopen') {
+      if (!isPhysicalPerkPickedUp(e.status)) {
+        throw new Error('Only handed-out items can be reopened')
+      }
+      return {
+        ...e,
+        status: nextStatus,
+        notes: [e.notes, `${label} ${now} by ${opts.byEmail}`, opts.note?.trim() || '']
+          .filter(Boolean)
+          .join(' · '),
+      }
+    }
     if (opts.action === 'ordered' && isPhysicalPerkPickedUp(e.status)) {
-      throw new Error('Already picked up. cannot mark ordered')
+      throw new Error('Already picked up. Use Reopen to put it back in the queue.')
     }
     if (opts.action === 'ordered' && e.status === 'ordered') {
       return e
@@ -233,10 +281,16 @@ export async function getMembershipEntitlements(
   )
 
   const tier = String(row.tier ?? '')
+  const tierNorm = tier.trim().toLowerCase()
+  const facultyComplimentary = tierNorm === 'faculty' || tierNorm === 'staff'
   const shirtSize = String(row.shirtSize ?? '')
   const stored = parseEntitlementsJson(row.entitlementsJson)
-  const { buildMembershipEntitlements } = await import('@/lib/membership-entitlements')
-  const enrichmentCode = String(row.enrichmentCode ?? '').trim() || discountCode || null
+  const { buildMembershipEntitlements, tierOffersEnrichmentDiscount } = await import(
+    '@/lib/membership-entitlements'
+  )
+  const rawEnrichment = String(row.enrichmentCode ?? '').trim() || discountCode || null
+  const enrichmentCode =
+    facultyComplimentary || !tierOffersEnrichmentDiscount(tier) ? null : rawEnrichment
   const fresh = buildMembershipEntitlements({
     tier,
     shirtSize,
@@ -245,13 +299,30 @@ export async function getMembershipEntitlements(
   const { appendBoardEntitlements } = await import('@/lib/staff/board-enrichment-discounts')
   let entitlements = appendBoardEntitlements(row, mergePortalEntitlements(stored, fresh))
 
-  // Board seat already includes 75% off enrichment (Fall + Spring). Do not also
-  // show the paid-tier code (e.g. SHMSREEF10) for those accounts.
-  const hasBoardEnrichment = entitlements.some(
-    (e) => e.kind === 'board_enrichment_fall' || e.kind === 'board_enrichment_spring',
-  )
-  if (hasBoardEnrichment) {
+  // Faculty / school staff: never surface Reef enrichment perk (strip leftovers).
+  if (facultyComplimentary) {
     entitlements = entitlements.filter((e) => e.kind !== 'enrichment_discount')
+    const dirtyStored = stored.some((e) => e.kind === 'enrichment_discount')
+    const dirtyCode = Boolean(String(row.enrichmentCode ?? '').trim() || discountCode)
+    if (dirtyStored || dirtyCode) {
+      try {
+        const { clearEnrichmentCodeFromFamily } = await import('@/lib/staff/enrichment-codes')
+        await clearEnrichmentCodeFromFamily(email)
+        const nextJson = JSON.stringify(
+          parseEntitlementsJson(row.entitlementsJson).filter(
+            (e) => e.kind !== 'enrichment_discount',
+          ),
+        )
+        await client.items.update('Memberships', {
+          ...row,
+          _id: String(row._id),
+          enrichmentCode: '',
+          entitlementsJson: nextJson,
+        })
+      } catch {
+        // best-effort cleanup
+      }
+    }
   }
 
   let coveFamilyCode = ''
@@ -270,7 +341,7 @@ export async function getMembershipEntitlements(
     tier,
     shirtSize,
     entitlements,
-    discountCode: hasBoardEnrichment ? '' : enrichmentCode || '',
+    discountCode: enrichmentCode || '',
     coveFamilyCode,
     paidMemberCode,
   }
