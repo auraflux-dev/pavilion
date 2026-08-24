@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { useFormString } from '@/components/member-portal/portal-form-copy-context'
 
 const TOPICS = [
   'Account & login',
@@ -22,6 +23,7 @@ type Props = {
 }
 
 export function PortalHelpForm({ memberName = '', compact = false }: Props) {
+  const t = useFormString
   const [topic, setTopic] = useState<(typeof TOPICS)[number]>('Account & login')
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
@@ -59,10 +61,9 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
         <div className="flex flex-col sm:flex-row sm:items-start gap-3">
           <CheckCircle2 className="w-6 h-6 shrink-0 mx-auto sm:mx-0" style={{ color: 'var(--brand-green)' }} />
           <div>
-            <p className="text-sm font-bold text-[#1A1A1A]">Message sent</p>
+            <p className="text-sm font-bold text-[#1A1A1A]">{t('helpForm.successTitle')}</p>
             <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
-              President, Membership Experience, and Marketing received your question. Reply will
-              come to your portal sign-in email.
+              {t('helpForm.successBody')}
             </p>
             <Button
               type="button"
@@ -71,7 +72,7 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
               className="mt-3"
               onClick={() => setStatus('idle')}
             >
-              Ask another question
+              {t('helpForm.askAnother')}
             </Button>
           </div>
         </div>
@@ -81,18 +82,17 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
 
   return (
     <form
+      noValidate
       onSubmit={(e) => void handleSubmit(e)}
       className={`rounded-xl border border-[var(--border)] bg-white space-y-4 ${compact ? 'p-4' : 'p-5 sm:p-6'}`}
     >
       <div>
-        <h3 className="text-sm font-bold text-[#1A1A1A]">Ask the PTO</h3>
-        <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
-          Signed-in help request. Goes to President, VP Membership Experience, and VP Marketing.
-        </p>
+        <h3 className="text-sm font-bold text-[#1A1A1A]">{t('helpForm.title')}</h3>
+        <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">{t('helpForm.body')}</p>
       </div>
 
       <label className="block text-sm">
-        <span className="font-medium text-[#1A1A1A]">Topic</span>
+        <span className="font-medium text-[#1A1A1A]">{t('helpForm.topic')}</span>
         <select
           className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm"
           value={topic}
@@ -107,18 +107,28 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
       </label>
 
       <label className="block text-sm">
-        <span className="font-medium text-[#1A1A1A]">Your question</span>
+        <span className="font-medium text-[#1A1A1A]">{t('helpForm.question')}</span>
         <textarea
           className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm min-h-[7rem]"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           required
           maxLength={4000}
-          placeholder="What do you need help with? Include student grade if it helps."
+          placeholder={t('helpForm.placeholder')}
         />
       </label>
 
-      {status === 'error' ? <p className="text-xs text-amber-900">{error}</p> : null}
+      {status === 'error' ? (
+        <p role="alert" className="text-xs font-medium text-red-700">
+          {error}
+        </p>
+      ) : null}
+
+      {message.trim().length > 0 && message.trim().length < 10 ? (
+        <p className="text-[11px] text-[#5A6070]">
+          {t('helpForm.errorShort')} ({message.trim().length}/10).
+        </p>
+      ) : null}
 
       <Button
         type="submit"
@@ -129,10 +139,10 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
         {status === 'loading' ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Sending…
+            {t('helpForm.submitting')}
           </>
         ) : (
-          'Send help request'
+          t('helpForm.submit')
         )}
       </Button>
     </form>

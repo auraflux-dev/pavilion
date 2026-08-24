@@ -48,6 +48,7 @@ import { PortalBusinessOwnerForm } from './portal-business-owner-form'
 import { PortalHelpForm } from '@/components/member-portal/portal-help-form'
 import { InviteCoParentPanel } from './invite-co-parent-panel'
 import { PortalActionNotice, usePortalNotice } from './portal-action-notice'
+import { useFormString } from './portal-form-copy-context'
 import { DeferredMount } from './deferred-mount'
 import {
   buildOnboardingChecklist,
@@ -163,6 +164,7 @@ export function MemberDashboard({
   copy = PORTAL_COPY_DEFAULTS,
   notices = {},
 }: Props) {
+  const t = useFormString
   const n = (key: keyof typeof PORTAL_NOTICE_DEFAULTS) =>
     pickString(notices, key, PORTAL_NOTICE_DEFAULTS[key] ?? '')
   const [member, setMember] = useState<MemberData['member'] | null>(null)
@@ -370,21 +372,15 @@ export function MemberDashboard({
     return (
       <div className="text-center py-24 max-w-md mx-auto">
         <p className="text-[#5A6070] mb-2">{copy.loadError}</p>
-        <p className="text-xs text-[#5A6070] mb-4 leading-relaxed">
-          Your session may have expired after sign out.
-          Sign in again with your personal email for family portal access.
-          Board staff tools use{' '}
-          <a href="/staff" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
-            /staff
-          </a>{' '}
-          with your @shmspto.org account.
+        <p className="text-xs text-[#5A6070] mb-4 leading-relaxed whitespace-pre-line">
+          {t('dashboard.sessionExpired')}
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           <Button onClick={redirectToLogin} variant="outline" size="sm">
-            Sign in again
+            {t('dashboard.signInAgain')}
           </Button>
           <Button onClick={() => void load()} variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4 mr-2" /> Retry
+            <RefreshCw className="w-4 h-4 mr-2" /> {t('dashboard.retry')}
           </Button>
         </div>
       </div>
@@ -419,7 +415,7 @@ export function MemberDashboard({
   // Title already names the tier. Body stays short. Upgrade lives in the CTA only.
   const accountBannerBody =
     accountType === 'paid' && householdTierRank > 0
-      ? 'Thanks for supporting SHMS PTO.'
+      ? t('dashboard.paidThanks')
       : accountType === 'paid'
         ? copy.paidBody
         : copy.freeBody
@@ -428,9 +424,9 @@ export function MemberDashboard({
     accountType === 'free'
       ? copy.viewMemberships
       : householdTier === 'reef'
-        ? 'Upgrade to Lagoon or Tide'
+        ? t('dashboard.upgradeLagoonTide')
         : householdTier === 'lagoon'
-          ? 'Upgrade to Tide'
+          ? t('dashboard.upgradeTide')
           : null
 
   const onboarding = buildOnboardingChecklist({ students, accountType })

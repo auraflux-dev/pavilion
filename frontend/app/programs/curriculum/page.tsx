@@ -8,6 +8,8 @@ import {
   type CurriculumShareSeason,
 } from '@/lib/programs/curriculum-share'
 import { getPageContent } from '@/lib/api/page-content'
+import { getCurriculumPageStrings, visitorString } from '@/lib/api/visitor-strings'
+import { CURRICULUM_PAGE_DEFAULTS } from '@/lib/defaults/visitor-string-defaults'
 import { PageThemeRoot, PageThemeStyles } from '@/components/site/page-theme'
 import type { Metadata } from 'next'
 
@@ -19,19 +21,20 @@ export const metadata: Metadata = {
 const SEASON_ORDER: CurriculumShareSeason[] = ['fall-2026', 'spring-2027']
 
 export default async function ProgramsCurriculumIndexPage() {
-  const [entries, theme] = await Promise.all([
+  const [entries, theme, strings] = await Promise.all([
     Promise.resolve(curriculumShareEntries()),
-    getPageContent('programs'),
+    getPageContent('programs-curriculum'),
+    getCurriculumPageStrings(),
   ])
   const bySeason = SEASON_ORDER.map((season) => ({
     season,
-    label: season === 'fall-2026' ? 'Fall 2026' : 'Spring 2027',
+    label: visitorString(strings, `season.${season}`, CURRICULUM_PAGE_DEFAULTS[`season.${season}`] ?? season),
     rows: entries.filter((e) => e.season === season),
   }))
 
   return (
-    <PageThemeRoot pageKey="programs" className="min-h-screen flex flex-col">
-      <PageThemeStyles pageKey="programs" css={theme.customCss ?? ''} />
+    <PageThemeRoot pageKey="programs-curriculum" className="min-h-screen flex flex-col">
+      <PageThemeStyles pageKey="programs-curriculum" css={theme.customCss ?? ''} />
       <div className="print:hidden">
         <AnnouncementBar />
         <Navbar />
@@ -40,11 +43,13 @@ export default async function ProgramsCurriculumIndexPage() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 space-y-8">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--brand-green)' }}>
-              Share by email
+              {visitorString(strings, 'index.eyebrow', CURRICULUM_PAGE_DEFAULTS['index.eyebrow'])}
             </p>
-            <h1 className="text-2xl font-bold text-[#1A1A1A]">Program curricula</h1>
+            <h1 className="text-2xl font-bold text-[#1A1A1A]">
+              {visitorString(strings, 'index.title', CURRICULUM_PAGE_DEFAULTS['index.title'])}
+            </h1>
             <p className="mt-2 text-sm text-[#5A6070] whitespace-pre-line">
-              {`Curriculum only. No registration copy.\nOpen a program, then Print / save PDF, or paste the link in your email.`}
+              {visitorString(strings, 'index.body', CURRICULUM_PAGE_DEFAULTS['index.body'])}
             </p>
           </div>
 

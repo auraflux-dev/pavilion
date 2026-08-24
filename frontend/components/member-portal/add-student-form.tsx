@@ -5,6 +5,7 @@ import { UserPlus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { trackEvent } from '@/lib/ga'
 import type { PortalCopy } from '@/lib/defaults/portal-copy'
+import { useFormString } from '@/components/member-portal/portal-form-copy-context'
 
 type FormLabels = Pick<
   PortalCopy,
@@ -49,6 +50,7 @@ export function AddStudentForm({
   onOpenChange,
   variant = 'card',
 }: Props) {
+  const t = useFormString
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
   const controlled = openProp !== undefined
   const open = controlled ? openProp : uncontrolledOpen
@@ -65,11 +67,11 @@ export function AddStudentForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!firstName.trim() || !lastName.trim()) {
-      setError('Enter first and last name.')
+      setError(t('addStudent.errorNames'))
       return
     }
     if (!grade) {
-      setError('Select a grade.')
+      setError(t('addStudent.errorGrade'))
       return
     }
     setSaving(true)

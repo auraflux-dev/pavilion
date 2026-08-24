@@ -4,6 +4,14 @@
  */
 
 import { HOME_STRING_DEFAULTS, PORTAL_NOTICE_DEFAULTS } from '@/lib/defaults/site-string-defaults'
+import { PORTAL_FORM_DEFAULTS } from '@/lib/defaults/portal-form-defaults'
+import { STAFF_PORTAL_DEFAULTS } from '@/lib/defaults/staff-portal-defaults'
+import {
+  CURRICULUM_PAGE_DEFAULTS,
+  DONATE_FORM_DEFAULTS,
+  RFC_DEFAULTS,
+  VISITOR_VIDEO_DEFAULTS,
+} from '@/lib/defaults/visitor-string-defaults'
 
 export type SiteStringSurface = 'visitor' | 'member' | 'staff' | 'legal'
 
@@ -53,13 +61,48 @@ export const SITE_PAGE_THEME_REGISTRY: SitePageThemeEntry[] = [
     fields: 'quadrant titles, tabs, CTAs (~40 keys)',
     stringKeys: ['studentsTitle', 'calendarTitle', 'addStudentCta', 'refresh'],
   },
+  {
+    page: 'portal-forms',
+    surface: 'member',
+    route: '/member-portal',
+    fields: 'form labels, placeholders, validation, payment methods',
+    stringKeys: Object.keys(PORTAL_FORM_DEFAULTS).slice(0, 12),
+  },
   { page: 'portal-help', surface: 'member', route: '/member-portal/help', fields: 'FAQ accordion (question|answer bullets)' },
   {
     page: 'staff-portal',
     surface: 'staff',
     route: '/staff',
-    fields: 'staff shell chrome',
-    stringKeys: ['home.title', 'content.label', 'help.title'],
+    fields: 'staff shell chrome + workspace labels',
+    stringKeys: ['shell.staff', 'shell.viewSite', 'shell.signOut', 'workspace.home', 'workspace.programs'],
+  },
+  {
+    page: 'programs-curriculum',
+    surface: 'visitor',
+    route: '/programs/curriculum',
+    fields: 'curriculum index + print doc chrome',
+    stringKeys: Object.keys(CURRICULUM_PAGE_DEFAULTS),
+  },
+  {
+    page: 'visitor-videos',
+    surface: 'visitor',
+    route: '/membership, /board, /cove',
+    fields: 'ParentVideoSection copy per page',
+    stringKeys: Object.keys(VISITOR_VIDEO_DEFAULTS).slice(0, 6),
+  },
+  {
+    page: 'donate-form',
+    surface: 'visitor',
+    route: '/fundraising, /',
+    fields: 'donate block labels',
+    stringKeys: Object.keys(DONATE_FORM_DEFAULTS).slice(0, 8),
+  },
+  {
+    page: 'rfc-promo',
+    surface: 'visitor',
+    route: '/',
+    fields: 'Run for Charity home promo',
+    stringKeys: Object.keys(RFC_DEFAULTS),
   },
 ]
 

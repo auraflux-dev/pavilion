@@ -220,6 +220,34 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     title: 'Member portal notices',
     body: 'Success banners, loading hints, and gate messages.',
   }),
+  'portal-forms': empty('portal-forms', {
+    title: 'Member portal forms',
+    body: 'Form labels, placeholders, validation messages, and payment methods copy.',
+  }),
+  'programs-curriculum': empty('programs-curriculum', {
+    title: 'Program curriculum pages',
+    body: 'Curriculum index and print doc chrome (key|text in stringOverrides).',
+  }),
+  'visitor-videos': empty('visitor-videos', {
+    title: 'Parent video sections',
+    body: 'Video block copy on membership, board, Cove, and portal videos pages.',
+  }),
+  'donate-form': empty('donate-form', {
+    title: 'Donate form labels',
+    body: 'Donate block field labels and thank-you copy.',
+  }),
+  'rfc-promo': empty('rfc-promo', {
+    title: 'Run for Charity promo',
+    body: 'Home page Run for Charity section headlines and CTAs.',
+  }),
+  'legal-shell': empty('legal-shell', {
+    title: 'Legal page shell',
+    body: 'Privacy, terms, and data security page chrome.',
+  }),
+  'survey-strings': empty('survey-strings', {
+    title: 'Survey forms',
+    body: 'Public survey submit and thank-you copy.',
+  }),
 }
 
 /** Contact detail fallbacks (SiteSettings keys preferred). */

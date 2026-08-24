@@ -60,7 +60,13 @@ import { StaffTrialBanner } from '@/components/staff/staff-trial-banner'
 import { StaffCustomDomainPanel } from '@/components/staff/staff-custom-domain-panel'
 import { filterCommonsDemoWorkspaces, filterHiddenStaffWorkspaces } from '@/lib/demo/commons-surface'
 import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
-import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
+import { type StaffWorkspace } from '@/lib/audience'
+import {
+  resolveStaffWorkspaceGroups,
+  staffCopy as staffStr,
+  staffWorkspaceLabel,
+} from '@/lib/api/staff-portal-copy'
+import { STAFF_PORTAL_DEFAULTS } from '@/lib/defaults/staff-portal-defaults'
 import {
   STAFF_WORKSPACE_BLURB,
   STAFF_WORKSPACE_GROUPS,
@@ -145,7 +151,9 @@ function parseWorkspace(raw: string | null): StaffWorkspace | null {
   return (WORKSPACE_IDS as string[]).includes(raw) ? (raw as StaffWorkspace) : null
 }
 
-export function StaffDashboard() {
+export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCopy?: Record<string, string> }) {
+  const wsLabel = (id: StaffWorkspace) => staffWorkspaceLabel(staffCopy, id)
+  const workspaceGroups = useMemo(() => resolveStaffWorkspaceGroups(staffCopy), [staffCopy])
   const router = useRouter()
   const searchParams = useSearchParams()
   const [me, setMe] = useState<StaffMe | null>(null)
@@ -218,48 +226,48 @@ export function StaffDashboard() {
   const navItems = useMemo(() => {
     if (!me) return []
     const items: { id: StaffWorkspace; label: string }[] = [
-      { id: 'home', label: STAFF_WORKSPACE_LABEL.home },
-      { id: 'inbox', label: STAFF_WORKSPACE_LABEL.inbox },
-      { id: 'calendar', label: STAFF_WORKSPACE_LABEL.calendar },
-      { id: 'docs', label: STAFF_WORKSPACE_LABEL.docs },
-      { id: 'projects', label: STAFF_WORKSPACE_LABEL.projects },
-      { id: 'expenses', label: STAFF_WORKSPACE_LABEL.expenses },
+      { id: 'home', label: wsLabel('home') },
+      { id: 'inbox', label: wsLabel('inbox') },
+      { id: 'calendar', label: wsLabel('calendar') },
+      { id: 'docs', label: wsLabel('docs') },
+      { id: 'projects', label: wsLabel('projects') },
+      { id: 'expenses', label: wsLabel('expenses') },
     ]
     if (me.isAdmin) {
-      items.push({ id: 'members', label: STAFF_WORKSPACE_LABEL.members })
+      items.push({ id: 'members', label: wsLabel('members') })
     }
     if (staffCanWorkspace(me, 'access')) {
-      items.push({ id: 'access', label: STAFF_WORKSPACE_LABEL.access })
+      items.push({ id: 'access', label: wsLabel('access') })
     }
-    if (canMarketing) items.push({ id: 'social', label: STAFF_WORKSPACE_LABEL.social })
-    if (canSurveys) items.push({ id: 'surveys', label: STAFF_WORKSPACE_LABEL.surveys })
-    if (canMessage) items.push({ id: 'messages', label: STAFF_WORKSPACE_LABEL.messages })
-    if (canMinutes) items.push({ id: 'minutes', label: STAFF_WORKSPACE_LABEL.minutes })
-    if (canPrograms) items.push({ id: 'programs', label: STAFF_WORKSPACE_LABEL.programs })
-    if (canTimesheets) items.push({ id: 'timesheets', label: STAFF_WORKSPACE_LABEL.timesheets })
-    if (canPayments) items.push({ id: 'payments', label: STAFF_WORKSPACE_LABEL.payments })
-    if (canPayments) items.push({ id: 'budget', label: STAFF_WORKSPACE_LABEL.budget })
-    if (canEvents) items.push({ id: 'events', label: STAFF_WORKSPACE_LABEL.events })
-    if (canRetail) items.push({ id: 'retail', label: STAFF_WORKSPACE_LABEL.retail })
-    if (canDiscounts) items.push({ id: 'discounts', label: STAFF_WORKSPACE_LABEL.discounts })
-    if (canMembership) items.push({ id: 'membership', label: STAFF_WORKSPACE_LABEL.membership })
-    if (canTiers) items.push({ id: 'tiers', label: STAFF_WORKSPACE_LABEL.tiers })
-    if (canContent) items.push({ id: 'content', label: STAFF_WORKSPACE_LABEL.content })
-    if (canPageTheme) items.push({ id: 'pagetheme', label: STAFF_WORKSPACE_LABEL.pagetheme })
-    if (canSite) items.push({ id: 'site', label: STAFF_WORKSPACE_LABEL.site })
-    if (canBoard) items.push({ id: 'board', label: STAFF_WORKSPACE_LABEL.board })
-    if (canNav) items.push({ id: 'nav', label: STAFF_WORKSPACE_LABEL.nav })
-    if (canFaq) items.push({ id: 'faq', label: STAFF_WORKSPACE_LABEL.faq })
-    if (canVolunteers) items.push({ id: 'volunteers', label: STAFF_WORKSPACE_LABEL.volunteers })
-    if (canFundraising) items.push({ id: 'fundraising', label: STAFF_WORKSPACE_LABEL.fundraising })
-    if (canWellness) items.push({ id: 'wellness', label: STAFF_WORKSPACE_LABEL.wellness })
-    if (canComms) items.push({ id: 'comms', label: STAFF_WORKSPACE_LABEL.comms })
-    if (canMarketing) items.push({ id: 'canva', label: STAFF_WORKSPACE_LABEL.canva })
-    if (canNewsletter) items.push({ id: 'newsletter', label: STAFF_WORKSPACE_LABEL.newsletter })
+    if (canMarketing) items.push({ id: 'social', label: wsLabel('social') })
+    if (canSurveys) items.push({ id: 'surveys', label: wsLabel('surveys') })
+    if (canMessage) items.push({ id: 'messages', label: wsLabel('messages') })
+    if (canMinutes) items.push({ id: 'minutes', label: wsLabel('minutes') })
+    if (canPrograms) items.push({ id: 'programs', label: wsLabel('programs') })
+    if (canTimesheets) items.push({ id: 'timesheets', label: wsLabel('timesheets') })
+    if (canPayments) items.push({ id: 'payments', label: wsLabel('payments') })
+    if (canPayments) items.push({ id: 'budget', label: wsLabel('budget') })
+    if (canEvents) items.push({ id: 'events', label: wsLabel('events') })
+    if (canRetail) items.push({ id: 'retail', label: wsLabel('retail') })
+    if (canDiscounts) items.push({ id: 'discounts', label: wsLabel('discounts') })
+    if (canMembership) items.push({ id: 'membership', label: wsLabel('membership') })
+    if (canTiers) items.push({ id: 'tiers', label: wsLabel('tiers') })
+    if (canContent) items.push({ id: 'content', label: wsLabel('content') })
+    if (canPageTheme) items.push({ id: 'pagetheme', label: wsLabel('pagetheme') })
+    if (canSite) items.push({ id: 'site', label: wsLabel('site') })
+    if (canBoard) items.push({ id: 'board', label: wsLabel('board') })
+    if (canNav) items.push({ id: 'nav', label: wsLabel('nav') })
+    if (canFaq) items.push({ id: 'faq', label: wsLabel('faq') })
+    if (canVolunteers) items.push({ id: 'volunteers', label: wsLabel('volunteers') })
+    if (canFundraising) items.push({ id: 'fundraising', label: wsLabel('fundraising') })
+    if (canWellness) items.push({ id: 'wellness', label: wsLabel('wellness') })
+    if (canComms) items.push({ id: 'comms', label: wsLabel('comms') })
+    if (canMarketing) items.push({ id: 'canva', label: wsLabel('canva') })
+    if (canNewsletter) items.push({ id: 'newsletter', label: wsLabel('newsletter') })
     if (staffCanWorkspace(me, 'reports')) {
-      items.push({ id: 'reports', label: STAFF_WORKSPACE_LABEL.reports })
+      items.push({ id: 'reports', label: wsLabel('reports') })
     }
-    items.push({ id: 'help', label: STAFF_WORKSPACE_LABEL.help })
+    items.push({ id: 'help', label: wsLabel('help') })
     const demoFiltered = filterCommonsDemoWorkspaces(items.map((i) => i.id))
     const allowed = new Set(filterHiddenStaffWorkspaces(demoFiltered, hiddenStaffWorkspaces))
     const filtered = items.filter((i) => allowed.has(i.id))
@@ -300,6 +308,7 @@ export function StaffDashboard() {
     canWellness,
     canComms,
     canNewsletter,
+    staffCopy,
   ])
 
   const active: StaffWorkspace = useMemo(() => {
@@ -367,9 +376,7 @@ export function StaffDashboard() {
   async function setStudentArchived(studentId: string, archived: boolean) {
     if (
       archived &&
-      !window.confirm(
-        'Archive this student? They will be hidden from the parent portal, but all history will be preserved.',
-      )
+      !window.confirm(staffStr(staffCopy, 'dashboard.archiveConfirm'))
     ) {
       return
     }
@@ -427,17 +434,17 @@ export function StaffDashboard() {
   if (error) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold text-[#1A1A1A] mb-2">Staff access required</h1>
+        <h1 className="text-2xl font-bold text-[#1A1A1A] mb-2">{staffStr(staffCopy, 'dashboard.accessRequired')}</h1>
         <p className="text-sm text-[#5A6070] mb-6">{vanillaizeIfDemo(error)}</p>
         <Link href="/member-portal" className="text-sm font-bold" style={{ color: 'var(--brand-green)' }}>
-          Back to member portal
+          {staffStr(staffCopy, 'dashboard.backToPortal')}
         </Link>
       </div>
     )
   }
 
   if (!me) {
-    return <p className="text-center py-16 text-sm text-[#5A6070]">Loading staff workspace…</p>
+    return <p className="text-center py-16 text-sm text-[#5A6070]">{staffStr(staffCopy, 'dashboard.loading')}</p>
   }
 
   return (
@@ -448,13 +455,15 @@ export function StaffDashboard() {
       items={navItems}
       active={active}
       onNavigate={go}
+      shellCopy={staffCopy}
+      workspaceGroups={workspaceGroups}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         <StaffTrialBanner />
         {active === 'home' ? (
           <section className="space-y-4">
             <div>
-              <h1 className="text-2xl font-bold text-[#1A1A1A]">Home</h1>
+              <h1 className="text-2xl font-bold text-[#1A1A1A]">{staffStr(staffCopy, 'dashboard.homeTitle')}</h1>
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
                 {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
                   ? `Private trial staff for your school.\nPick an area below, or use the top nav.\nStart with Membership, Events, or Site.`

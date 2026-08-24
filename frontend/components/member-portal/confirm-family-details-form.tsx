@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react'
 import { Loader2, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { useFormString } from '@/components/member-portal/portal-form-copy-context'
+import { interpolateCopy } from '@/lib/api/portal-form-copy'
 
 type StudentSeed = {
   parentFirstName?: string
@@ -46,6 +48,7 @@ function splitName(name: string | undefined): { first: string; last: string } {
 }
 
 export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSaved }: Props) {
+  const t = useFormString
   const seed = useMemo(() => {
     const fromStudent = students[0]
     const fromMember = splitName(member?.name)
@@ -73,23 +76,23 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSave
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!parentFirstName.trim() || !parentLastName.trim()) {
-      setError('Enter parent first and last name.')
+      setError(t('confirmFamily.errorNames'))
       return
     }
     if (!parentPhone.trim()) {
-      setError('Enter a parent phone number.')
+      setError(t('confirmFamily.errorPhone'))
       return
     }
     if (!emergencyContact.trim() || !emergencyPhone.trim()) {
-      setError('Enter emergency contact name and phone.')
+      setError(t('confirmFamily.errorEmergency'))
       return
     }
     if (!pickupAuthorized.trim()) {
-      setError('List who may pick up your student.')
+      setError(t('confirmFamily.errorPickup'))
       return
     }
     if (students.length === 0) {
-      setError('Add a student first, then confirm family details.')
+      setError(t('confirmFamily.errorNoStudents'))
       return
     }
     setSaving(true)
@@ -109,10 +112,10 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSave
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Could not save')
-      onSaved?.('Family details confirmed.\nCove Digital Card is unlocked for your household.')
+      onSaved?.(t('confirmFamily.successBanner'))
       onConfirmed({ students: data.students ?? [], member: data.member })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save. Please try again.')
+      setError(err instanceof Error ? err.message : t('confirmFamily.errorSave'))
     } finally {
       setSaving(false)
     }
@@ -126,28 +129,26 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSave
       <div className="flex items-start gap-3">
         <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5 text-[#8A6400]" aria-hidden />
         <div>
-          <p className="text-sm font-bold text-[#1A1A1A]">Confirm your family details</p>
+          <p className="text-sm font-bold text-[#1A1A1A]">{t('confirmFamily.title')}</p>
           <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed">
             {students.length > 0
               ? vanillaizeIfDemo(
-                  `We found ${students.length} student${students.length === 1 ? '' : 's'} on your account. Confirm or update the details below once. This unlocks the Cove Digital Card for your family.`,
+                  interpolateCopy(t('confirmFamily.bodyWithStudents'), { count: students.length }),
                 )
-              : vanillaizeIfDemo(
-                  'Add a student first, then confirm these details to unlock Cove.',
-                )}
+              : vanillaizeIfDemo(t('confirmFamily.bodyNoStudents'))}
           </p>
         </div>
       </div>
 
       <form noValidate onSubmit={handleSubmit} className="space-y-2.5 bg-white/70 rounded-lg border border-[#F0EDE8] p-3">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#5A6070]">
-          Parent / guardian
+          {t('confirmFamily.sectionParent')}
         </p>
         <div className="grid grid-cols-2 gap-2">
           <input
             value={parentFirstName}
             onChange={(e) => setParentFirstName(e.target.value)}
-            placeholder="First name"
+            placeholder={t('confirmFamily.parentFirstName')}
             required
             className={inputCls}
             autoComplete="given-name"
@@ -155,7 +156,7 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSave
           <input
             value={parentLastName}
             onChange={(e) => setParentLastName(e.target.value)}
-            placeholder="Last name"
+            placeholder={t('confirmFamily.parentLastName')}
             required
             className={inputCls}
             autoComplete="family-name"
@@ -164,27 +165,27 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSave
         <input
           value={parentPhone}
           onChange={(e) => setParentPhone(e.target.value)}
-          placeholder="Parent phone"
+          placeholder={t('confirmFamily.parentPhone')}
           required
           className={inputCls}
           autoComplete="tel"
         />
 
         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#5A6070] pt-1">
-          Emergency & pick-up (applies to all students)
+          {t('confirmFamily.sectionEmergency')}
         </p>
         <div className="grid grid-cols-2 gap-2">
           <input
             value={emergencyContact}
             onChange={(e) => setEmergencyContact(e.target.value)}
-            placeholder="Emergency contact name"
+            placeholder={t('confirmFamily.emergencyContact')}
             required
             className={inputCls}
           />
           <input
             value={emergencyPhone}
             onChange={(e) => setEmergencyPhone(e.target.value)}
-            placeholder="Emergency phone"
+            placeholder={t('confirmFamily.emergencyPhone')}
             required
             className={inputCls}
           />
@@ -192,7 +193,7 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSave
         <input
           value={pickupAuthorized}
           onChange={(e) => setPickupAuthorized(e.target.value)}
-          placeholder="Who may pick up (names)"
+          placeholder={t('confirmFamily.pickup')}
           required
           className={inputCls}
         />
@@ -207,10 +208,10 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSave
         >
           {saving ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving…
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('confirmFamily.submitSaving')}
             </>
           ) : (
-            vanillaizeIfDemo('Confirm and unlock Cove')
+            vanillaizeIfDemo(t('confirmFamily.submit'))
           )}
         </Button>
       </form>

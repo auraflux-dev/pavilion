@@ -12,6 +12,8 @@ import { getStoreCardBonusPercent } from '@/lib/store-card-bonus'
 import { SpiritWearBuyButton } from '@/components/spirit-wear/spirit-wear-buy-button'
 import { SpiritWearCouponBar } from '@/components/spirit-wear/spirit-wear-coupon-bar'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
+import { getVisitorVideoStrings, visitorString } from '@/lib/api/visitor-strings'
+import { VISITOR_VIDEO_DEFAULTS } from '@/lib/defaults/visitor-string-defaults'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export const revalidate = 300
@@ -43,7 +45,7 @@ function parseHowSteps(bullets: string[]) {
 }
 
 export default async function CovePage() {
-  const [allItems, featuredItems, spiritItems, catalog, storeCopy, howCopy, ctaCopy, spiritCopy, settings] =
+  const [allItems, featuredItems, spiritItems, catalog, storeCopy, howCopy, ctaCopy, spiritCopy, settings, videoStrings] =
     await Promise.all([
       getStoreItems(),
       getFeaturedItems(),
@@ -54,6 +56,7 @@ export default async function CovePage() {
       getPageContent('store-cta'),
       getPageContent('spirit-wear'),
       getSiteSettings(),
+      getVisitorVideoStrings(),
     ])
 
   const bonusPercent = getStoreCardBonusPercent(settings.get('storeCardBonusPercent', '10'))
@@ -83,11 +86,9 @@ export default async function CovePage() {
         <ParentVideoSection
           videoId="parent-tour"
           id="cove-card-video"
-          eyebrow="Watch"
-          title={vanillaizeIfDemo('See how the Cove Digital Card works')}
-          body={vanillaizeIfDemo(
-            'The website tour covers loading your family card and using it at The Cove.',
-          )}
+          eyebrow={visitorString(videoStrings, 'video.cove.eyebrow', VISITOR_VIDEO_DEFAULTS['video.cove.eyebrow'])}
+          title={vanillaizeIfDemo(visitorString(videoStrings, 'video.cove.title', VISITOR_VIDEO_DEFAULTS['video.cove.title']))}
+          body={vanillaizeIfDemo(visitorString(videoStrings, 'video.cove.body', VISITOR_VIDEO_DEFAULTS['video.cove.body']))}
           background="#FFFFFF"
         />
 

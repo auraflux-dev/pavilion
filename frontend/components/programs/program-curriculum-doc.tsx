@@ -1,8 +1,18 @@
 'use client'
 
 import type { CurriculumShareDoc } from '@/lib/programs/curriculum-share'
+import { CURRICULUM_PAGE_DEFAULTS } from '@/lib/defaults/visitor-string-defaults'
+import { visitorString } from '@/lib/api/visitor-strings'
 
-export function ProgramCurriculumDoc({ doc }: { doc: CurriculumShareDoc }) {
+export function ProgramCurriculumDoc({
+  doc,
+  strings = CURRICULUM_PAGE_DEFAULTS,
+}: {
+  doc: CurriculumShareDoc
+  strings?: Record<string, string>
+}) {
+  const s = (key: keyof typeof CURRICULUM_PAGE_DEFAULTS | string) =>
+    visitorString(strings, key, CURRICULUM_PAGE_DEFAULTS[key] ?? '')
   const { copy, programName, seasonLabel, vendor, dayOfWeek, classTime } = doc
 
   return (
@@ -24,13 +34,13 @@ export function ProgramCurriculumDoc({ doc }: { doc: CurriculumShareDoc }) {
           className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold print:hidden"
           onClick={() => window.print()}
         >
-          Print / save PDF
+          {s('doc.print')}
         </button>
       </div>
 
       <div className="rounded-xl border border-[var(--border)] bg-white p-6">
         <h2 className="text-lg font-bold text-[#1A1A1A]">{copy.curriculumTitle}</h2>
-        <p className="mt-1 text-sm text-[#5A6070]">Twelve weekly sessions. Curriculum only.</p>
+        <p className="mt-1 text-sm text-[#5A6070]">{s('doc.subtitle')}</p>
         <ol className="mt-4 space-y-3">
           {copy.curriculum.map((row) => (
             <li key={row.week} className="border-b border-[var(--border)] pb-3 last:border-0 last:pb-0">
@@ -43,9 +53,7 @@ export function ProgramCurriculumDoc({ doc }: { doc: CurriculumShareDoc }) {
         </ol>
       </div>
 
-      <p className="text-xs text-[#5A6070] print:mt-8">
-        Stone Hill Middle School PTO enrichment · www.shmspto.org
-      </p>
+      <p className="text-xs text-[#5A6070] print:mt-8">{s('doc.footer')}</p>
     </div>
   )
 }

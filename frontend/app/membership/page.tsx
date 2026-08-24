@@ -7,6 +7,8 @@ import { getMembershipTiers } from '@/lib/api/membership'
 import { FacultyMembershipJoin } from '@/components/membership/faculty-membership-join'
 import { getFAQItems } from '@/lib/api/faq'
 import { getPageContent } from '@/lib/api/page-content'
+import { getVisitorVideoStrings, visitorString } from '@/lib/api/visitor-strings'
+import { VISITOR_VIDEO_DEFAULTS } from '@/lib/defaults/visitor-string-defaults'
 import { MembershipPortalCallouts } from '@/components/membership/membership-portal-callouts'
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
 import { EmphasizedCopy } from '@/components/emphasized-copy'
@@ -20,11 +22,12 @@ export const revalidate = 60
 
 export default async function MembershipPage() {
   const commons = isCommonsPlatform()
-  const [settings, allTiers, faqItems, page] = await Promise.all([
+  const [settings, allTiers, faqItems, page, videoStrings] = await Promise.all([
     getSiteSettings(),
     getMembershipTiers(),
     getFAQItems('membership'),
     getPageContent('membership'),
+    getVisitorVideoStrings(),
   ])
 
   const sharedBenefits = settings
@@ -48,9 +51,9 @@ export default async function MembershipPage() {
           <ParentVideoSection
             videoId="membership-tiers"
             id="membership-video"
-            eyebrow="Watch"
-            title="Membership tiers in about 3 minutes"
-            body="Reef, Lagoon, and Tide explained before you choose a plan."
+            eyebrow={visitorString(videoStrings, 'video.membership.eyebrow', VISITOR_VIDEO_DEFAULTS['video.membership.eyebrow'])}
+            title={visitorString(videoStrings, 'video.membership.title', VISITOR_VIDEO_DEFAULTS['video.membership.title'])}
+            body={visitorString(videoStrings, 'video.membership.body', VISITOR_VIDEO_DEFAULTS['video.membership.body'])}
             background="#FFFFFF"
           />
         )}

@@ -4,6 +4,8 @@ import { Mail, ArrowRight, Users } from 'lucide-react'
 import { getBoardMembers, type BoardMember } from '@/lib/api/board'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
+import { getVisitorVideoStrings, visitorString } from '@/lib/api/visitor-strings'
+import { VISITOR_VIDEO_DEFAULTS } from '@/lib/defaults/visitor-string-defaults'
 import { BoardSectionNav } from '@/components/jump-nav/public-section-navs'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
 import { BoardMemberPhoto } from '@/components/board/board-member-photo'
@@ -21,10 +23,11 @@ export async function generateMetadata() {
 }
 
 export default async function BoardPage() {
-  const [members, settings, page] = await Promise.all([
+  const [members, settings, page, videoStrings] = await Promise.all([
     getBoardMembers(),
     getSiteSettings(),
     getPageContent('board'),
+    getVisitorVideoStrings(),
   ])
   const presidentEmail = settings.get('presidentEmail', 'president@shmspto.org')
 
@@ -38,9 +41,9 @@ export default async function BoardPage() {
         <ParentVideoSection
           videoId="board-recruit"
           id="board-video"
-          eyebrow="Watch"
-          title="Thinking about joining the board?"
-          body="A short look at why parents volunteer and how to get involved."
+          eyebrow={visitorString(videoStrings, 'video.board.eyebrow', VISITOR_VIDEO_DEFAULTS['video.board.eyebrow'])}
+          title={visitorString(videoStrings, 'video.board.title', VISITOR_VIDEO_DEFAULTS['video.board.title'])}
+          body={visitorString(videoStrings, 'video.board.body', VISITOR_VIDEO_DEFAULTS['video.board.body'])}
           background="#FFFFFF"
         />
 

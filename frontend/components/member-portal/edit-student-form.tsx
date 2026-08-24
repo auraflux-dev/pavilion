@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Pencil, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useFormString } from '@/components/member-portal/portal-form-copy-context'
 
 export interface Student {
   id: string
@@ -50,6 +51,7 @@ export function EditStudentForm({
   onOpenChange,
   hideTrigger = false,
 }: Props) {
+  const t = useFormString
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
   const open = openProp ?? uncontrolledOpen
   const setOpen = (next: boolean) => {
@@ -74,11 +76,11 @@ export function EditStudentForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!firstName.trim() || !lastName.trim()) {
-      setError('Enter first and last name.')
+      setError(t('editStudent.errorNames'))
       return
     }
     if (!grade) {
-      setError('Select a grade.')
+      setError(t('editStudent.errorGrade'))
       return
     }
     setSaving(true)
@@ -105,17 +107,17 @@ export function EditStudentForm({
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         throw new Error(
-          typeof data.error === 'string' ? data.error : 'Could not save. Please try again.',
+          typeof data.error === 'string' ? data.error : t('editStudent.errorSave'),
         )
       }
       if (!data.student) {
-        throw new Error('Save did not return updated student. Please refresh and try again.')
+        throw new Error(t('editStudent.errorNoStudent'))
       }
       onUpdated(data.student)
       onSaved?.(`${firstName.trim()} ${lastName.trim()}'s profile was saved.`)
       setOpen(false)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save. Please try again.')
+      setError(err instanceof Error ? err.message : t('editStudent.errorSave'))
     } finally {
       setSaving(false)
     }
@@ -129,7 +131,7 @@ export function EditStudentForm({
         onClick={() => setOpen(true)}
         className="text-xs font-semibold text-[var(--brand-green)] hover:underline inline-flex items-center gap-1"
       >
-        <Pencil className="w-3 h-3" /> Edit student
+        <Pencil className="w-3 h-3" /> {t('editStudent.trigger')}
       </button>
     )
   }
@@ -145,7 +147,7 @@ export function EditStudentForm({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelCls} htmlFor={`edit-student-first-${student.id}`}>
-            First name
+            {t('editStudent.firstName')}
           </label>
           <input
             id={`edit-student-first-${student.id}`}
@@ -157,7 +159,7 @@ export function EditStudentForm({
         </div>
         <div>
           <label className={labelCls} htmlFor={`edit-student-last-${student.id}`}>
-            Last name
+            {t('editStudent.lastName')}
           </label>
           <input
             id={`edit-student-last-${student.id}`}
@@ -169,7 +171,7 @@ export function EditStudentForm({
         </div>
       </div>
       <div>
-        <p className={labelCls}>Grade</p>
+        <p className={labelCls}>{t('editStudent.grade')}</p>
         <div className="flex gap-2">
           {grades.map((g) => (
             <button
@@ -188,18 +190,18 @@ export function EditStudentForm({
       </div>
 
       <p className="text-[11px] font-semibold uppercase tracking-wide text-[#5A6070] pt-1">
-        Safety & pick-up (required for enrichment)
+        {t('editStudent.safetyHeading')}
       </p>
       {!(parentPhone.trim() && emergencyContact.trim() && emergencyPhone.trim() && pickupAuthorized.trim()) ? (
         <p className="text-xs font-semibold text-amber-800">
-          Safety profile incomplete. Fill the fields below.
+          {t('editStudent.safetyIncomplete')}
         </p>
       ) : allergies.trim() ? (
-        <p className="text-xs text-[#5A6070]">Allergy: {allergies.trim()}</p>
+        <p className="text-xs text-[#5A6070]">{t('editStudent.allergyPrefix')} {allergies.trim()}</p>
       ) : null}
       <div>
         <label className={labelCls} htmlFor={`edit-student-phone-${student.id}`}>
-          Parent phone
+          {t('editStudent.parentPhone')}
         </label>
         <input
           id={`edit-student-phone-${student.id}`}
@@ -210,7 +212,7 @@ export function EditStudentForm({
       </div>
       <div>
         <label className={labelCls} htmlFor={`edit-student-secondary-${student.id}`}>
-          Secondary phone (optional)
+          {t('editStudent.secondaryPhone')}
         </label>
         <input
           id={`edit-student-secondary-${student.id}`}
@@ -222,7 +224,7 @@ export function EditStudentForm({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelCls} htmlFor={`edit-student-ec-name-${student.id}`}>
-            Emergency contact name
+            {t('editStudent.emergencyContact')}
           </label>
           <input
             id={`edit-student-ec-name-${student.id}`}
@@ -233,7 +235,7 @@ export function EditStudentForm({
         </div>
         <div>
           <label className={labelCls} htmlFor={`edit-student-ec-phone-${student.id}`}>
-            Emergency phone
+            {t('editStudent.emergencyPhone')}
           </label>
           <input
             id={`edit-student-ec-phone-${student.id}`}
@@ -245,19 +247,19 @@ export function EditStudentForm({
       </div>
       <div>
         <label className={labelCls} htmlFor={`edit-student-allergies-${student.id}`}>
-          Allergies
+          {t('editStudent.allergies')}
         </label>
         <input
           id={`edit-student-allergies-${student.id}`}
           value={allergies}
           onChange={(e) => setAllergies(e.target.value)}
-          placeholder="e.g. EpiPen"
+          placeholder={t('editStudent.allergiesPlaceholder')}
           className={inputCls}
         />
       </div>
       <div>
         <label className={labelCls} htmlFor={`edit-student-medical-${student.id}`}>
-          Medical conditions / accommodations
+          {t('editStudent.medical')}
         </label>
         <input
           id={`edit-student-medical-${student.id}`}
@@ -268,7 +270,7 @@ export function EditStudentForm({
       </div>
       <div>
         <label className={labelCls} htmlFor={`edit-student-meds-${student.id}`}>
-          Medications (optional)
+          {t('editStudent.medications')}
         </label>
         <input
           id={`edit-student-meds-${student.id}`}
@@ -279,13 +281,13 @@ export function EditStudentForm({
       </div>
       <div>
         <label className={labelCls} htmlFor={`edit-student-pickup-${student.id}`}>
-          Authorized pick-up list
+          {t('editStudent.pickup')}
         </label>
         <textarea
           id={`edit-student-pickup-${student.id}`}
           value={pickupAuthorized}
           onChange={(e) => setPickupAuthorized(e.target.value)}
-          placeholder="Names of people who may pick up"
+          placeholder={t('editStudent.pickupPlaceholder')}
           rows={2}
           className={inputCls}
         />
@@ -296,7 +298,7 @@ export function EditStudentForm({
           checked={selfRelease}
           onChange={(e) => setSelfRelease(e.target.checked)}
         />
-        Allow self-release after class (7th/8th, if program permits)
+        {t('editStudent.selfRelease')}
       </label>
 
       {error ? <p role="alert" className="text-xs font-medium text-red-700">{error}</p> : null}
@@ -307,7 +309,7 @@ export function EditStudentForm({
           className="text-white text-xs"
           style={{ backgroundColor: 'var(--brand-green)' }}
         >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : t('editStudent.save')}
         </Button>
         <Button
           type="button"
@@ -315,7 +317,7 @@ export function EditStudentForm({
           className="text-xs"
           onClick={() => setOpen(false)}
         >
-          Cancel
+          {t('editStudent.cancel')}
         </Button>
       </div>
     </form>
