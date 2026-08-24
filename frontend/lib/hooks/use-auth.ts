@@ -37,6 +37,12 @@ type AuthSnapshot = Omit<AuthInfo, 'refresh'>
 let cachedAuth: AuthSnapshot | null = null
 let inflight: Promise<AuthSnapshot> | null = null
 
+/** Call after login/logout so nav refetches instead of reusing visitor snapshot. */
+export function clearAuthCache() {
+  cachedAuth = null
+  inflight = null
+}
+
 async function fetchAuth(): Promise<AuthSnapshot> {
   const visitor: AuthSnapshot = {
     status: 'visitor',
@@ -54,7 +60,7 @@ async function fetchAuth(): Promise<AuthSnapshot> {
     viewingEmail: '',
   }
   try {
-    const r = await fetch('/api/auth/me', { credentials: 'include' })
+    const r = await fetch('/api/auth/me', { credentials: 'include', cache: 'no-store' })
     if (!r.ok) return visitor
     const data = await r.json()
     if (data.status === 'visitor' || !data.member) return visitor
@@ -118,7 +124,7 @@ export function useAuth(): AuthInfo {
   const [tick, setTick] = useState(0)
 
   const refresh = useCallback(() => {
-    cachedAuth = null
+    clearAuthCache()
     setTick((t) => t + 1)
   }, [])
 
@@ -132,6 +138,15 @@ export function useAuth(): AuthInfo {
       cancelled = true
     }
   }, [tick])
+
+  // Refetch when tab restores from bfcache (back button after login).
+  useEffect(() => {
+    function onPageShow(event: PageTransitionEvent) {
+      if (event.persisted) refresh()
+    }
+    window.addEventListener('pageshow', onPageShow)
+    return () => window.removeEventListener('pageshow', onPageShow)
+  }, [refresh])
 
   return { ...snap, refresh }
 }

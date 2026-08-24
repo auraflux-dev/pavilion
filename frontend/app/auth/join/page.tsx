@@ -9,6 +9,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { clearPendingAuth, markPendingAuth, trackLogin, trackSignUp } from '@/lib/ga'
+import { clearAuthCache } from '@/lib/hooks/use-auth'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type Mode = 'signup' | 'login'
@@ -47,18 +48,9 @@ function JoinInner() {
     setResetSent(null)
   }, [initialMode])
 
-  /** Show Google when enabled in env (OAuth client must be External, not Internal).
-   * Stable staging (shmspto.vercel.app) and ephemeral Previews show it too. */ 
-  const [onReviewHost, setOnReviewHost] = useState(false)
-  useEffect(() => {
-    const host = window.location.hostname.toLowerCase()
-    setOnReviewHost(
-      host === 'shmspto.vercel.app' ||
-        host.endsWith('-treasurer-4353s-projects.vercel.app'),
-    )
-  }, [])
+  /** Show Google when enabled in env (OAuth client must be External, not Internal). */
   const googleParentEnabled =
-    process.env.NEXT_PUBLIC_GOOGLE_PARENT_SIGNIN === 'true' || onReviewHost
+    process.env.NEXT_PUBLIC_GOOGLE_PARENT_SIGNIN === 'true'
 
   useEffect(() => {
     const code = searchParams.get('error')
@@ -207,6 +199,7 @@ function JoinInner() {
       if (mode === 'signup') trackSignUp('email', 'website')
       else trackLogin('email', 'website')
       clearPendingAuth()
+      clearAuthCache()
       window.location.href = data.redirectTo
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -222,16 +215,10 @@ function JoinInner() {
     'w-full inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60'
 
   return (
-    <div
-      id="main-content"
-      className="min-h-screen flex items-center justify-center px-4 py-12"
-      style={{ backgroundColor: 'var(--brand-warm)' }}
-    >
+    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: 'var(--brand-warm)' }}>
       <div className="w-full max-w-md bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6 sm:p-8">
         <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: 'var(--brand-green)' }}>
-          <a href="/" className="hover:underline" style={{ color: 'var(--brand-green)' }}>
-            {vanillaizeIfDemo('SHMS PTO')}
-          </a>
+          {vanillaizeIfDemo('SHMS PTO')}
         </p>
         <h1 className="text-2xl font-bold text-[#1A1A1A] mb-1">
           {isStaffReturn
@@ -240,11 +227,6 @@ function JoinInner() {
               ? 'Create Your Account'
               : 'Log In'}
         </h1>
-        <p className="text-xs text-[#5A6070] mb-4">
-          <a href="/" className="underline" style={{ color: 'var(--brand-green)' }}>
-            Back to site
-          </a>
-        </p>
         <p className="text-sm text-[#5A6070] mb-6">
           {isStaffReturn
             ? vanillaizeIfDemo(
@@ -295,6 +277,18 @@ function JoinInner() {
                   Staff tools
                 </a>
                 , not Member Portal.
+              </p>
+            ) : null}
+            {isStaffReturn ? (
+              <p className="text-xs text-[#5A6070] text-center pt-1">
+                Looking for family portal?{' '}
+                <a
+                  href="/auth/join?mode=login&returnTo=%2Fmember-portal"
+                  className="font-semibold underline"
+                  style={{ color: 'var(--brand-green)' }}
+                >
+                  Member Portal login
+                </a>
               </p>
             ) : null}
           </div>
@@ -357,7 +351,7 @@ function JoinInner() {
                   <input
                     type="password"
                     required
-                    minLength={8}
+                    minLength={6}
                     autoComplete={isSignup ? 'new-password' : 'current-password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -412,18 +406,7 @@ function JoinInner() {
         )}
 
         <p className="mt-6 text-sm text-center text-[#5A6070]">
-          {isStaffReturn ? (
-            <>
-              Looking for family portal?{' '}
-              <a
-                href="/auth/join?mode=login&returnTo=%2Fmember-portal"
-                className="font-semibold underline"
-                style={{ color: 'var(--brand-green)' }}
-              >
-                Member Portal login
-              </a>
-            </>
-          ) : isSignup ? (
+          {isSignup ? (
             <>
               Already have an account?{' '}
               <button
@@ -444,7 +427,7 @@ function JoinInner() {
                 style={{ color: 'var(--brand-green)' }}
                 onClick={() => switchMode('signup', { keepEmailPanel: panel === 'email' })}
               >
-                Sign Up free
+                Sign Up
               </button>
             </>
           )}

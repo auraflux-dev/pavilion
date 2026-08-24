@@ -6,13 +6,12 @@
  * in a secure httpOnly cookie via the API route, then redirects home.
  */
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
 import { OAUTH_DATA_COOKIE } from '@/lib/auth-cookies'
 import Cookies from 'js-cookie'
+import { clearAuthCache } from '@/lib/hooks/use-auth'
 
 export default function CallbackPage() {
-  const router = useRouter()
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -60,6 +59,8 @@ export default function CallbackPage() {
 
         if (!res.ok) throw new Error('Failed to save session')
 
+        clearAuthCache()
+
         // Redirect to original destination (keep query. e.g. ?checkout=ruby)
         let returnTo = '/member-portal'
         if (oAuthData.originalUri) {
@@ -70,7 +71,7 @@ export default function CallbackPage() {
             returnTo = '/member-portal'
           }
         }
-        router.replace(returnTo)
+        window.location.replace(returnTo)
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Authentication failed'
         setError(msg)
@@ -78,7 +79,7 @@ export default function CallbackPage() {
     }
 
     handleCallback()
-  }, [router])
+  }, [])
 
   if (error) {
     return (

@@ -3,11 +3,10 @@
  * Returns the current member's profile + free/paid membership summary.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { createOAuthClient } from '@/lib/wix-oauth-client'
-import { TOKENS_COOKIE } from '@/lib/auth-cookies'
-import { getWixClient } from '@/lib/wix-client'
+import { ACT_AS_COOKIE, TOKENS_COOKIE, isSecure } from '@/lib/auth-cookies'
 import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
-import { collectMemberEmails, pickSessionEmail } from '@/lib/member-emails'
+import { getMemberSession } from '@/lib/auth-member'
+import { pickSessionEmail } from '@/lib/member-emails'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
 import { resolveStaffForSession } from '@/lib/staff/roles'
 import { isDemoInstance } from '@/lib/demo/instance'
@@ -17,6 +16,36 @@ import {
   getDemoReviewSession,
 } from '@/lib/demo/session'
 import { demoReviewerStudents } from '@/lib/demo/seed'
+import { tryGetWixClient } from '@/lib/wix-admin-client'
+
+function noStoreJson(body: Record<string, unknown>, status = 200) {
+  return NextResponse.json(body, {
+    status,
+    headers: { 'Cache-Control': 'no-store' },
+  })
+}
+
+function visitorResponse(req: NextRequest) {
+  const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
+  const res = noStoreJson({ status: 'visitor', member: null })
+  if (tokens && isMemberTokens(tokens)) {
+    res.cookies.set(TOKENS_COOKIE, '', {
+      httpOnly: true,
+      secure: isSecure(),
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/',
+    })
+    res.cookies.set(ACT_AS_COOKIE, '', {
+      httpOnly: true,
+      secure: isSecure(),
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/',
+    })
+  }
+  return res
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -27,7 +56,7 @@ export async function GET(req: NextRequest) {
         const name = `${demo.firstName} ${demo.lastName}`.trim()
         const paid = demo.parentKind !== 'free'
         const students = demoReviewerStudents(demo)
-        return NextResponse.json({
+        return noStoreJson({
           member: {
             id: demoMemberId(demo.email),
             name,
@@ -62,68 +91,56 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const tokens = parseTokensCookie(req.cookies.get(TOKENS_COOKIE)?.value)
-    if (!tokens || !isMemberTokens(tokens)) {
-      return NextResponse.json(
-        { status: 'visitor', member: null },
-        {
-          status: 200,
-          headers: { 'Cache-Control': 'private, max-age=30' },
-        },
-      )
+    const session = await getMemberSession(req)
+    if (!session) {
+      return visitorResponse(req)
     }
 
-    const client = createOAuthClient(tokens)
-    const { member } = await client.members.getCurrentMember({
-      fieldsets: ['FULL'],
-    })
-
-    if (!member) {
-      return NextResponse.json({ error: 'Member not found' }, { status: 404 })
-    }
-
-    const memberEmails = collectMemberEmails(member)
-    const actorEmail = pickSessionEmail(memberEmails)
+    const { member, email: actorEmail, emails: memberEmails } = session
     const effective = await getEffectiveParentEmail(req)
     const email = effective?.parentEmail ?? actorEmail
     const actingAs = Boolean(effective?.actingAs)
     const linkedHousehold = Boolean(effective?.linkedHousehold)
     const staff =
       effective?.staff ?? (await resolveStaffForSession(actorEmail, memberEmails))
-    const adminClient = getWixClient()
+    const adminClient = tryGetWixClient()
 
     let storeCards: { balance: number; studentName: string }[] = []
-    try {
-      const cardsResult = await adminClient.items
-        .query('StoreCards')
-        .eq('parentEmail', email)
-        .find()
-      storeCards = (cardsResult.items ?? []).map((item) => ({
-        balance: (item as { balance?: number }).balance ?? 0,
-        studentName: (item as { studentName?: string }).studentName ?? '',
-      }))
-    } catch {
-      // optional collection
+    if (adminClient) {
+      try {
+        const cardsResult = await adminClient.items
+          .query('StoreCards')
+          .eq('parentEmail', email)
+          .find()
+        storeCards = (cardsResult.items ?? []).map((item) => ({
+          balance: (item as { balance?: number }).balance ?? 0,
+          studentName: (item as { studentName?: string }).studentName ?? '',
+        }))
+      } catch {
+        // optional collection
+      }
     }
 
     let membership: { tier: string; expiresAt: string; status?: string } | null = null
-    try {
-      const membershipResult = await adminClient.items
-        .query('Memberships')
-        .eq('email', email)
-        .find()
-      const m = membershipResult.items?.[0] as
-        | { tier?: string; expiresAt?: string; status?: string }
-        | undefined
-      if (m?.tier) {
-        membership = {
-          tier: m.tier,
-          expiresAt: m.expiresAt ?? '',
-          status: m.status,
+    if (adminClient) {
+      try {
+        const membershipResult = await adminClient.items
+          .query('Memberships')
+          .eq('email', email)
+          .find()
+        const m = membershipResult.items?.[0] as
+          | { tier?: string; expiresAt?: string; status?: string }
+          | undefined
+        if (m?.tier) {
+          membership = {
+            tier: m.tier,
+            expiresAt: m.expiresAt ?? '',
+            status: m.status,
+          }
         }
+      } catch {
+        // optional
       }
-    } catch {
-      // optional
     }
 
     let students: {
@@ -139,8 +156,7 @@ export async function GET(req: NextRequest) {
         '@/lib/family-guardians'
       )
       const householdEmail = await resolvePrimaryParentEmail(email)
-      // Membership benefits follow the primary (paying) household email
-      if (householdEmail !== email) {
+      if (adminClient && householdEmail !== email) {
         try {
           const membershipResult = await adminClient.items
             .query('Memberships')
@@ -184,7 +200,7 @@ export async function GET(req: NextRequest) {
     }
 
     const paidFromStudents = students.some(
-      (s) => s.membershipTier && s.membershipTier !== 'free'
+      (s) => s.membershipTier && s.membershipTier !== 'free',
     )
     const paidFromMemberships =
       !!membership?.tier &&
@@ -195,9 +211,9 @@ export async function GET(req: NextRequest) {
 
     const firstName = String(member.contact?.firstName ?? '').trim()
     const lastName = String(member.contact?.lastName ?? '').trim()
-    const name = `${firstName} ${lastName}`.trim()
+    const name = `${firstName} ${lastName}`.trim() || pickSessionEmail(memberEmails)
 
-    return NextResponse.json({
+    return noStoreJson({
       member: {
         id: member._id,
         name,
@@ -222,10 +238,11 @@ export async function GET(req: NextRequest) {
       staffName: staff?.name ?? '',
       personalEmail: staff?.personalEmail ?? '',
       needsPersonalEmail: Boolean(staff?.roles?.length) && !staff?.personalEmail,
-      isStaff: Boolean(staff?.roles?.length),
+      isStaff: Boolean(staff),
+      status: 'member',
     })
   } catch (err) {
     console.error('/api/auth/me error:', err)
-    return NextResponse.json({ error: 'Failed to load profile' }, { status: 500 })
+    return visitorResponse(req)
   }
 }

@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SocialFooterLinks } from '@/components/social-footer-links'
-import { useAuth } from '@/lib/hooks/use-auth'
+import { useAuth, clearAuthCache } from '@/lib/hooks/use-auth'
 import { publicBrandFace, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isCommonsPlatform } from '@/lib/crm/active-trial'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
@@ -18,6 +18,7 @@ type Props = {
 }
 
 async function signOut() {
+  clearAuthCache()
   await fetch('/api/auth/logout', { method: 'POST' })
   const client = createVisitorClient()
   const { logoutUrl } = await client.auth.logout(window.location.origin + '/')
@@ -232,9 +233,8 @@ export function MemberShell({ children }: Props) {
         <div className="border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-950">
           <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <p>
-              {vanillaizeIfDemo(
-                'Link your personal email in Staff → Home so Member view shows your family (students, store). Right now this board login has no household linked.',
-              )}
+              Link your personal email in Staff → Home so Member view shows your family (students,
+              Cove). Right now this board login has no household linked.
             </p>
             <Link href="/staff" className="font-semibold underline shrink-0">
               Open Staff to link

@@ -16,6 +16,7 @@ import { STAFF_PORTAL_DEFAULTS } from '@/lib/defaults/staff-portal-defaults'
 import type { StaffWorkspaceGroup } from '@/lib/staff/workspace-groups'
 import { groupStaffNavItems } from '@/lib/staff/workspace-groups'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
+import { clearAuthCache } from '@/lib/hooks/use-auth'
 import { publicBrandFace } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { DemoMark } from '@/components/demo/demo-mark'
@@ -41,6 +42,7 @@ type Props = {
 const DESKTOP_VISIBLE = 6
 
 async function signOut() {
+  clearAuthCache()
   await fetch('/api/auth/logout', { method: 'POST' })
   const client = createVisitorClient()
   const { logoutUrl } = await client.auth.logout(window.location.origin + '/')
