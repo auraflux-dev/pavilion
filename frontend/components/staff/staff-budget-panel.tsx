@@ -52,8 +52,9 @@ type Summary = {
 }
 
 function summarizeBudget(lines: BudgetLine[]): Summary {
-  const income = lines.filter((l) => l.kind === 'income')
-  const expense = lines.filter((l) => l.kind === 'expense')
+  const countable = lines.filter((l) => l.tracking !== 'skip')
+  const income = countable.filter((l) => l.kind === 'income')
+  const expense = countable.filter((l) => l.kind === 'expense')
   const sum = (rows: BudgetLine[], key: 'budgeted' | 'actual') =>
     Math.round(rows.reduce((n, r) => n + (Number(r[key]) || 0), 0) * 100) / 100
   return {
@@ -79,10 +80,13 @@ function originLabel(origin: string) {
   return 'Keyed'
 }
 
-function trackingLabel(tracking: BudgetTracking) {
+function trackingLabel(tracking: BudgetTracking, syncKey?: string) {
   if (tracking === 'bank') return 'Bank CSV'
   if (tracking === 'auto') return 'Staff + bank'
-  if (tracking === 'skip') return 'Skipped · Staff sales'
+  if (tracking === 'skip') {
+    if (syncKey === 'cash_box_deposits') return 'Ledger only · already in POS'
+    return 'Skipped · Staff sales'
+  }
   return 'You key'
 }
 
@@ -438,8 +442,9 @@ export function StaffBudgetPanel() {
           Only CSV this page accepts. Bank of America checking → Activity → Download CSV. Only{' '}
           <strong>August 1 to July 31</strong> of this school year is used. Square and PayPal{' '}
           <strong>payouts and transfers into checking are skipped</strong> so those sales are not counted
-          twice. Zelle, checks, ACH, Sam’s, and Amazon still import. Re-importing the same file will not
-          double-count.
+          twice. <strong>Counter Credit</strong> cash-box deposits land on a ledger-only line (not
+          fundraising or planning totals). Zelle, checks, ACH, Sam’s, and Amazon still import.
+          Re-importing the same file will not double-count.
         </p>
         <label className="inline-flex">
           <input
@@ -466,8 +471,9 @@ export function StaffBudgetPanel() {
           Planning worksheet. MoneyMinder stays the ledger. This is not a second set of books.
         </p>
         <p>
-          <strong>Bank CSV:</strong> checking activity except Square/PayPal payouts and transfers. Amazon lands
-          on spirit-wear restock; Sam’s / Costco on snack restock. Move a row if that guess is wrong.
+          <strong>Bank CSV:</strong> checking activity except Square/PayPal payouts and transfers. Counter
+          Credit cash-box deposits are ledger-only (already in POS). Amazon lands on spirit-wear restock;
+          Sam’s / Costco on snack restock. Move a row if that guess is wrong.
         </p>
         <p>
           <strong>Refresh:</strong> Square/PayPal <em>sales</em> (memberships, Cove, tickets) plus live PayPal
@@ -945,7 +951,7 @@ function BudgetRow({
                     : 'border-amber-200 bg-amber-50 text-amber-900'
           }`}
         >
-          {review ? 'Needs a line' : trackingLabel(row.tracking)}
+          {review ? 'Needs a line' : trackingLabel(row.tracking, row.syncKey)}
         </span>
       </td>
       <td className="py-2 pr-2">

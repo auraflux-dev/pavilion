@@ -11,6 +11,15 @@ export const BANK_BUDGET_LINES: Array<{
   {
     kind: 'income',
     category: 'Bank',
+    name: 'Cash box deposits (Counter Credit)',
+    sortOrder: 52,
+    syncKey: 'cash_box_deposits',
+    notes:
+      'BoA Counter Credit / mobile cash deposits. On the ledger for visibility. Not in planning totals or public fundraising. Cash already counted when rung at POS.',
+  },
+  {
+    kind: 'income',
+    category: 'Bank',
     name: 'Card processor deposits (Square / PayPal → BoA)',
     sortOrder: 55,
     syncKey: 'card_payouts',

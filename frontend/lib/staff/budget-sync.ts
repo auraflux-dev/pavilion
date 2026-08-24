@@ -50,6 +50,7 @@ export type BudgetEntryOrigin =
 
 const BANK_SYNC_KEYS = new Set([
   'card_payouts',
+  'cash_box_deposits',
   'website_tools',
   'processing',
   'insurance',
@@ -61,7 +62,7 @@ const BANK_SYNC_KEYS = new Set([
 export type BudgetTracking = 'auto' | 'bank' | 'keyed' | 'skip'
 
 export function trackingFor(syncKey: string): BudgetTracking {
-  if (syncKey === 'card_payouts') return 'skip'
+  if (syncKey === 'card_payouts' || syncKey === 'cash_box_deposits') return 'skip'
   if (BANK_SYNC_KEYS.has(syncKey)) return 'bank'
   if (AUTO_SYNC_KEYS.has(syncKey)) return 'auto'
   return 'keyed'
@@ -173,8 +174,11 @@ export function classifyPayment(source: string, programName: string, status: str
   const name = programName.toLowerCase()
   const st = status.toLowerCase()
   if (src.includes('load_failed') || st.includes('fail') || st.includes('reconcil')) return null
+  if (st.includes('refund')) return null
   if (src === 'membership_gift_card' || src === 'cove_register_redeem') return null
   if (st === 'spent') return null
+  // Bag summary row. per-line Payments already post. skip to avoid double P&L.
+  if (src.endsWith('_cart') || src.includes('_cart')) return null
 
   if (src.includes('membership')) return 'memberships'
   if (src.includes('store_card') || src.includes('auto_topoff')) return 'cove_loads'

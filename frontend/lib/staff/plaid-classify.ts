@@ -1,6 +1,9 @@
 /**
  * Map a Bank of America (Plaid) transaction onto a budget syncKey.
  * Plaid amounts: positive = money left the account, negative = money came in.
+ *
+ * Counter Credit / mobile cash deposits → cash_box_deposits (ledger only).
+ * Not public fundraising. POS cash already counted in Staff Payments.
  */
 export type ClassifiedBankTxn = {
   syncKey: string
@@ -63,8 +66,10 @@ export function classifyBankTransaction(input: {
       if (/event fee|ticket|dance/i.test(t)) return { syncKey: 'events_other', amount: abs, kind: 'income' }
       return { syncKey: 'cove_shop', amount: abs, kind: 'income' }
     }
+    // Full cash-box deposit at BoA. POS cash already counted in Staff Payments.
+    // Ledger-only line so cove_pos sales actuals are not doubled.
     if (/counter credit|mobile.*deposit|bkofamerica mobile/i.test(t)) {
-      return { syncKey: 'cove_pos', amount: abs, kind: 'income' }
+      return { syncKey: 'cash_box_deposits', amount: abs, kind: 'income' }
     }
     if (/cheddar/i.test(t)) return { syncKey: 'gifts', amount: abs, kind: 'income' }
     if (/best runner|run for charity/i.test(t)) {

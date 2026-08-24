@@ -1,13 +1,14 @@
 /**
  * Fundraising totals for the current school year (Aug 1 → Jul 31).
  *
- * Cove Digital Card bar = family paid to load the card (not window spend).
+ * Money in once (online and in person). See `fundraising-classify.ts`.
+ * Cove Digital Card bar = family paid to load/reload (not window spend).
  * Cove shop = spirit wear and snacks sold any other way (Stand, cash, Zelle, site).
  * Square / PayPal site checkout and Stand POS → Payments.
- * Bank of America CSV (Staff → Budget import) → PtoBudgetEntries.
+ * Bank of America CSV / Plaid (Staff → Budget) → PtoBudgetEntries.
  * Live PayPal Transaction Search (Refresh) → PtoBudgetEntries, skipping payouts to bank.
- * Only Aug 1 to Jul 31 of the current school year. Square/PayPal *payouts* in the
- * bank file are skipped so those sales are not counted twice.
+ * Counter Credit cash-box deposits → ledger only (cash_box_deposits), not fundraising.
+ * Only Aug 1 to Jul 31 of the current school year.
  *
  * Volunteer hours remain manual. SiteSettings volunteerHoursRaised/Goal.
  */
@@ -17,6 +18,16 @@ import { isDemoInstance } from '@/lib/demo/instance'
 import { listBudgetLines, money } from '@/lib/staff/budget'
 import { listBudgetEntries } from '@/lib/staff/budget-sync'
 import { DEFAULT_FISCAL_YEAR } from '@/lib/staff/budget'
+import {
+  classifyFundraisingPayment,
+  mapBankSyncKeyForFundraising,
+} from '@/lib/api/fundraising-classify'
+
+export {
+  classifyFundraisingPayment,
+  mapBankSyncKeyForFundraising,
+  FUNDRAISING_LEDGER_ONLY_BANK_KEYS,
+} from '@/lib/api/fundraising-classify'
 
 /** Year-end reserve on top of projected operating expenses (excludes contingency line). */
 export const FUNDRAISING_GOAL_LIFT = 0.1
@@ -70,84 +81,6 @@ function inWindow(iso: string, fromMs: number, toMs: number) {
   if (!iso) return false
   const t = new Date(iso).getTime()
   return Number.isFinite(t) && t >= fromMs && t <= toMs
-}
-
-function mapBankSyncKey(key: string): keyof InitiativeTotals | null {
-  if (key === 'memberships') return 'membership'
-  if (key === 'cove_loads') return 'store'
-  if (key === 'cove_shop') return 'spiritWear'
-  if (key === 'dance_night') return 'danceNight'
-  if (key === 'nova_math') return 'novaMath'
-  if (
-    key === 'events_other' ||
-    key === 'enrichment_fees' ||
-    key === 'gifts' ||
-    key === 'run_for_charity' ||
-    key === 'unclassified_income'
-  ) {
-    return 'other'
-  }
-  return null
-}
-
-/**
- * Public tracker split:
- * - Cove Digital Card = family paid to load the card (cash in). Window spend is not new money.
- * - Cove shop = spirit wear or snack/candy sold with Square, cash, Zelle, or the site.
- */
-function classifyFundraisingPayment(
-  source: string,
-  programName: string,
-  status: string,
-  paymentMethod: string,
-): keyof InitiativeTotals | null {
-  const src = source.toLowerCase()
-  const name = programName.toLowerCase()
-  const st = status.toLowerCase()
-  const method = paymentMethod.toLowerCase()
-  if (src.includes('load_failed') || st.includes('fail') || st.includes('reconcil')) return null
-  if (src === 'membership_gift_card') return null
-  if (src.includes('register_redeem') || method.includes('cove family')) return null
-  if (src.includes('store_card') || src.includes('auto_topoff')) return 'store'
-
-  if (src.includes('membership')) return 'membership'
-  if (
-    src.includes('cove_product') ||
-    src.includes('pos_stand') ||
-    src.includes('register_stand') ||
-    src.includes('terminal') ||
-    src.includes('register_cash') ||
-    src.includes('register_zelle') ||
-    src.includes('register_paypal') ||
-    src.includes('register_phone') ||
-    src.includes('register_other')
-  ) {
-    return 'spiritWear'
-  }
-  if (src.includes('event_ticket') || name.includes('ticket')) {
-    if (name.includes('dance')) return 'danceNight'
-    if (name.includes('nova')) return 'novaMath'
-    return 'other'
-  }
-  if (src.includes('_program') || src.endsWith('program') || src.includes('enrichment')) {
-    if (name.includes('nova')) return 'novaMath'
-    if (name.includes('dance')) return 'danceNight'
-    return 'other'
-  }
-  if (src.includes('donation') || src.includes('cheddarup') || name.includes('donation')) return 'other'
-  if (name.includes('membership')) return 'membership'
-  if (
-    name.includes('spirit') ||
-    name.includes('shop') ||
-    name.includes('vintage') ||
-    name.includes('hoodie') ||
-    name.includes('candy') ||
-    name.includes('snack') ||
-    name.includes('in-person')
-  ) {
-    return 'spiritWear'
-  }
-  return null
 }
 
 function schoolYearFiscalKey(now = new Date()) {
@@ -337,7 +270,7 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
       sponsorshipFromBank += entry.amount
       continue
     }
-    const bucket = mapBankSyncKey(entry.lineSyncKey)
+    const bucket = mapBankSyncKeyForFundraising(entry.lineSyncKey)
     if (!bucket) continue
     totals[bucket] += entry.amount
   }

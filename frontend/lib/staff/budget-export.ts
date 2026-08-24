@@ -136,7 +136,9 @@ export async function buildBudgetWorkbook(input: {
         : track === 'auto'
           ? 'Staff + bank'
           : track === 'skip'
-            ? 'Skipped · Staff sales'
+            ? line.syncKey === 'cash_box_deposits'
+              ? 'Ledger only · already in POS'
+              : 'Skipped · Staff sales'
             : 'You key'
     row.getCell(10).value = line.notes
     row.getCell(10).alignment = { wrapText: true }

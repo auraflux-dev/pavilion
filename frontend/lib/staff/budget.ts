@@ -54,6 +54,7 @@ const SYNC_KEY_BY_SORT: Record<number, string> = {
   30: 'cove_loads',
   40: 'cove_shop',
   50: 'cove_pos',
+  52: 'cash_box_deposits',
   55: 'card_payouts',
   60: 'dance_night',
   70: 'events_other',
@@ -108,10 +109,12 @@ function mapRow(row: Record<string, unknown>): BudgetLine {
   }
 }
 
-export function summarizeBudget(lines: BudgetLine[]) {
-  const income = lines.filter((l) => l.kind === 'income')
-  const expense = lines.filter((l) => l.kind === 'expense')
-  const sum = (rows: BudgetLine[], key: 'budgeted' | 'actual') =>
+/** Skip lines (card payouts, cash-box deposits) stay visible but do not inflate planning totals. */
+export function summarizeBudget(lines: Array<BudgetLine & { tracking?: string }>) {
+  const countable = lines.filter((l) => l.tracking !== 'skip')
+  const income = countable.filter((l) => l.kind === 'income')
+  const expense = countable.filter((l) => l.kind === 'expense')
+  const sum = (rows: typeof countable, key: 'budgeted' | 'actual') =>
     money(rows.reduce((n, r) => n + r[key], 0))
   return {
     incomeBudgeted: sum(income, 'budgeted'),
@@ -173,8 +176,20 @@ export function placeholderBudgetLines(_fiscalYear = DEFAULT_FISCAL_YEAR): SeedL
       budgeted: 1000,
       actual: 0,
       owner: 'Retail',
-      notes: 'Square Stand cash/card at events when not already counted in shop totals.',
+      notes:
+        'Square Stand cash/card and other non-Cove tenders at The Cove. Cove card spends do not count here (already counted at load).',
       sortOrder: 50,
+    },
+    {
+      kind: 'income',
+      category: 'Bank',
+      name: 'Cash box deposits (Counter Credit)',
+      budgeted: 0,
+      actual: 0,
+      owner: 'Treasurer',
+      notes:
+        'BoA Counter Credit deposits of the cash box. Ledger only. Not in planning totals or public fundraising.',
+      sortOrder: 52,
     },
     {
       kind: 'income',

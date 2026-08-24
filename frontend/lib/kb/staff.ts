@@ -58,7 +58,7 @@ export const STAFF_KB: KbIndex = {
 - **Help**: this knowledge base
 - **Inbox / Calendar / Docs**: Connect Google once, then work stays in Staff
 - **Comms calendar**: plan parent / school / board messages and content
-- **Newsletter**: paid email and Weekly Scoop. Open Help → **Member newsletter (VP Marketing)**
+- **Newsletter**: paid email and Weekly Scoop. Open Help → **Member newsletter (for Diane)**
 - **The Cove**: register + products when you run the snack window
 
 ## Stay in Staff
@@ -80,9 +80,7 @@ Day-to-day tools open inside Staff. The only intentional exits for money ops are
 - After a role change, sign out and back in so permissions refresh
 - **Admin** is only **president@shmspto.org** (Staff access UI and server enforce this)
 
-If tools are missing that your role should have, President (\`president@\`) can update StaffRoles.
-
-After creating users in Google Admin, open **Staff → Access → Sync from Google Workspace** so seats appear before first login. Assign roles there.`,
+If tools are missing that your role should have, President (\`president@\`) can update StaffRoles.`,
     },
     {
       slug: 'year-project-board',
@@ -357,13 +355,15 @@ Prefer portal messages + email for official notices so parents are not chased on
       need: 'membership',
       body: `**Memberships** shows paid/free roster status for outreach and support.
 
+Each family has a stable **account number** (A10001 style) as the top line. That is not the Cove 6-digit PIN. Use account number for Staff lookup; email still joins the household under the hood.
+
 Mass email and WhatsApp share actions open the compose/share flow for that campaign. WhatsApp may leave Staff briefly to the WhatsApp app. That is intentional for sharing, not a second CMS.
 
 Keep MoneyMinder / bank exports with Treasurer. Do not duplicate finance ledgers in the roster.`,
     },
     {
       slug: 'member-newsletter-diane',
-      title: 'Member newsletter (VP Marketing)',
+      title: 'Member newsletter (for Diane)',
       categoryId: 'comms',
       summary: 'Plain text plus Canva. Paid email, Weekly Scoop, test sends, schedule, WhatsApp.',
       order: 3.5,
@@ -392,27 +392,22 @@ Open: https://www.shmspto.org/staff (Newsletter workspace)
 
 Do not paste HTML from Canva. Do not edit the design inside Staff. Use **Edit in Canva**, then re-attach or Export PNG again.
 
-## Attach Canva or upload PNG
+## Attach Canva and export PNG
 1. In Newsletter, paste a Canva view/edit link, or pick a recent design
-2. **Export PNG for email** if Canva API is connected, or **Upload PNG** after Canva → Download
-3. Preview the top graphic. Multi-page designs stack every page in the email
+2. **Export PNG for email** (it also starts on attach if Canva is connected)
+3. Preview the graphic. Multi-page designs export **every page**: All pages stack in the email
 4. **Save current as template** if you will reuse this
-
-Optional: skip the top graphic and use **section images** only (see Write the copy).
 
 ![Templates (Canva + copy). Attach link, export PNG, multi-page preview, save template](/help/staff-newsletter/01-templates-canva.png)
 
 ## Write the copy
 Type in the subject and body like a normal email.
 
-Optional: check **Write in sections**: intro, Event, Question (reply prompt or poll link), CTA, sign-off. Add up to 8 sections. Email shows labeled blocks with dividers; headings are bold.
-
-Each section can have an **Upload section image** (social / event PNG from Canva Download). It appears in the email under the heading, above the body text.
-
-Header title and footer are **one-time** defaults under Staff → Site settings (you do not edit them each send). Every email also includes the school postal address and an **Unsubscribe** link automatically (CAN-SPAM).
+Optional: check **Write in beats**: Fill intro, Event, Ask, CTA, sign-off. Staff joins those into the body. You can still read the combined text.
 
 Personal bits you can type in subject or body:
-- {{firstName}} or {{first name}} · {{name}} · {{tier}} · {{grade}} · {{email}}
+- {{firstName}} {{lastName}} {{name}}
+- {{tier}} {{grade}} {{email}}
 
 Example: Hi {{firstName}}, your {{tier}} membership…
 
@@ -437,7 +432,7 @@ If a name is missing, it becomes “there”.
 
 ![Weekly Scoop. Link field and optional footer signups](/help/staff-newsletter/04-weekly-scoop.png)
 
-![Write in sections. Intro, Event, Question, CTA, sign-off](/help/staff-newsletter/05-beats.png)
+![Write in beats. Intro, Event, Ask, CTA, sign-off](/help/staff-newsletter/05-beats.png)
 
 ## Send paid email
 1. Confirm type is **Paid members**
@@ -568,9 +563,7 @@ All website and portal form mail sends from the shared SHMS PTO Gmail mailbox. *
 Household adult invites also send from that mailbox, so a mistyped invitee address can bounce to **president@**: The portal asks the owner to type the email twice, blocks common misspellings (gmial, etc.), skips domains with no mail server, emails **the owner** a copy with a share link, and posts the same note in portal messages. A cron also scans bounce notices and emails the owner plus a portal message (so president@ is not the only alert). If a bounce still arrives, reply to the owner (Reply-To) rather than chasing the bad address.
 
 ## Daily activity report
-Every morning at **6:00am Eastern during daylight time** (5:00am during standard time) president@ gets an email of **yesterday** (Eastern midnight-midnight): website forms and surveys, payments and event tickets, member portal students / memberships / enrollments / household invites / help / portal messages, staff tasks / minutes / outreach / audit, president inbox mail, and logged errors. The top of each email also lists **current membership totals by type** (Reef, Lagoon, Tide, Free). Yesterday’s membership updates include a by-type breakdown. Every report also includes **weekly traffic** (last 7 Eastern days ending yesterday): website vs member portal vs staff pageviews, unique-browser days, and top paths.
-
-Open the live roster anytime: **Staff → Membership**. Extra report recipients: **Staff → Site settings → Contact → Daily activity report extra emails**.
+Every morning at **6:00am Eastern during daylight time** (5:00am during standard time) president@ gets an email of **yesterday** (Eastern midnight-midnight): website forms and surveys, payments and event tickets, member portal students / memberships / enrollments / household invites / help / portal messages, staff tasks / minutes / outreach / audit, president inbox mail, and logged errors. Every report also includes **weekly traffic** (last 7 Eastern days ending yesterday): website vs member portal vs staff pageviews, unique-browser days, and top paths. Extra recipients: **Staff → Site settings → Contact → Daily activity report extra emails**.
 
 ## Member Portal → Help (Ask the PTO)
 Goes to **all three**:
@@ -632,7 +625,7 @@ Change one list at a time, save, then **View site** to confirm. Leave deep Wix E
       summary: 'CNAME and A records when you leave the trial URL.',
       order: 3,
       need: 'site',
-      body: `Your trial is private. Sign in at your temp host /login with the email and password Pavilion sent you (yourpto.commons-pto.org).
+      body: `Your trial is private. Sign in at your temp host /login with the email and password Auraflux sent you (yourpto.commons-pto.org).
 The public Riverside demo is not your school.
 
 When you want pto.yourschool.org (or yourpto.org):
@@ -647,7 +640,7 @@ When you want pto.yourschool.org (or yourpto.org):
 
 Wait for DNS (often under an hour). Tap Check DNS. HTTPS finishes after Vercel sees the records.
 
-If Add domain says Vercel is not connected, still create those records and send the hostname to Pavilion support. We attach it when the token is on the project.
+If Add domain says Vercel is not connected, still create those records and send the hostname to Auraflux. We attach it when the token is on the Commons project.
 
 Do not point Stone Hill (shmspto.org) here.`,
     },
@@ -683,12 +676,47 @@ If a parent paid but sees nothing:
 - Portal Membership benefits also shows the code for Lagoon/Tide members.`,
     },
     {
+      slug: 'family-account-numbers',
+      title: 'Family account numbers',
+      categoryId: 'admin',
+      summary: 'Stable A10001-style IDs for Staff lookup. Not the Cove PIN.',
+      order: 4,
+      body: `## Account number vs email vs Cove PIN
+
+- **Account number** (example A10042): stable family ID on Memberships. Top line in Staff → Members and Memberships. Searchable in Payments.
+- **Email**: still how the system joins students, payments, and guardians.
+- **Cove 6-digit PIN / word passcode**: snack window and Stand only. Can be reset. Lagoon/Tide PINs end in 9.
+
+President opening Staff → Members runs a one-time backfill so existing families get numbers. New families get one when membership or Cove setup runs.
+
+Do not confuse account number with Square gift-card GAN or transaction ids.`,
+    },
+    {
       slug: 'refunds-cancellations',
       title: 'Refunds & cancellations (online purchases)',
       categoryId: 'admin',
       summary: 'Square/PayPal money plus CMS or fulfill steps by product type.',
       order: 5,
-      body: `Online checkout (Square or PayPal) does **not** auto-refund. Treasurer/President refunds money in **Square** (or PayPal). Staff then fix the matching record so seats, tickets, and balances stay accurate.
+      body: `## Staff → Payments and Refunds (Square / PayPal)
+
+Use **Request refund** on a paid row in **Staff → Payments and Refunds** or **Cove retail → Today’s store pickups**.
+President approves pending requests at the top of **Staff → Payments and Refunds**.
+
+1. Parent requests a refund **in writing** (email or portal message).
+2. Staff picks **full or partial** amount, adjustment type (refund, exchange, store credit), and pastes the written request.
+3. **President** approves → money returns to **Square or PayPal**, or to **Cove Digital Card balance** when selected.
+4. Split Cove charges and store-card reloads are reversed proportionally when possible.
+5. Parent gets a portal message when the refund completes.
+
+**Exchange / upgrade:** staff notes what to swap; president may approve refund plus a separate rebill amount collected later.
+
+Program enrollments linked to a **full** refund are marked **Refunded** and waitlist may promote. Partial refunds leave enrollment active with a note.
+
+---
+
+Legacy manual steps still apply when a charge is not in **Payments** (Stand-only cash, etc.).
+
+Online checkout (Square or PayPal) does **not** auto-refund without president approval in Staff.
 
 Default contact for money issues: **treasurer@shmspto.org** (cc spiritwear or programs lead when relevant).
 
@@ -717,7 +745,7 @@ Square may keep a small processing fee on refunds. That is normal.
 - Store-card credit bundled with membership follows Cove Digital Card rules, not membership donation rules
 
 ### Enrichment programs
-- Parent emails Co-VP Fundraising & Programs (or uses the programs contact form). No self-serve refund/transfer buttons in the portal
+- Parent can **Request refund** in the member portal
 - Staff **Approve refund** in Programs (marks enrollment Refunded; may free a seat / promote waitlist)
 - Then Treasurer processes the Square/PayPal refund
 - Missed classes, weather, or dismissal for conduct are generally **not** refunded unless the board announces otherwise
@@ -729,10 +757,13 @@ Square may keep a small processing fee on refunds. That is normal.
 - If the sale is voided, adjust sold count / capacity so tickets are not oversold
 - Prefer a clear cutoff (example: no refunds after purchase, or only before a posted date). Follow whatever the event flyer states
 
+## Already refunded in Square / PayPal
+If money was already returned in Square or PayPal outside Staff, open the payment row and click **Already refunded**. That marks the CMS row Refunded so Staff will not refund again and fundraising totals drop. It does **not** call Square or PayPal.
+
 ## Quick checklist
 1. Confirm payment cleared (Square/PayPal)
 2. Decide refund vs deny per policy above
-3. Refund money in Square/PayPal when approved
+3. Refund money in Square/PayPal when approved (or use **Already refunded** if money already moved)
 4. Update enrollment / ticket / card / ship status
 5. Reply to the parent in portal message or email
 
@@ -792,6 +823,7 @@ In BoA: checking → Activity → Download → **CSV** (not PDF). Upload it on t
 
 - Checks, ACH, Zelle, Sam’s, Amazon, Jumbula, insurance, and tools **do** import
 - Square and PayPal **payouts / transfers into checking are skipped** (same dollars as memberships / Cove / tickets, or the live PayPal feed)
+- **Counter Credit** (cash-box deposits) import to a **ledger-only** line. Visible in activity. Not in planning income totals or public fundraising (cash already counted when rung at POS)
 - Processor **fees** and card purchases (Apple, Square hardware, Adobe) still import
 - Debit charges on our own Square terminal (SQ *SHMSPTO) are skipped. Those sales already live in Staff Payments
 - Internal transfers are skipped
@@ -803,6 +835,14 @@ In BoA: checking → Activity → Download → **CSV** (not PDF). Upload it on t
 Pulls Square/PayPal **sales** already in Staff: memberships, Cove Digital loads, shop, in-person POS, tickets, and **paid** reimbursements. Also pulls **live PayPal** activity via Transaction Search (no PayPal CSV). PayPal withdrawals to BoA are skipped so they are not counted twice.
 
 Typical month: download a fresh BoA CSV → import → **Refresh**.
+
+### Public fundraising (money in once)
+Same rule online and in person.
+
+- Count membership **dues** once. Bundled Cove credit does **not** count again.
+- Count parent-paid Cove **loads and reloads**. Do **not** count Cove card **spends** after any load (that would double-count).
+- Count POS sales paid with cash, Stand card, Zelle, etc. Do **not** count POS when tender is the Cove card.
+- Do **not** count BoA Counter Credit cash-box deposits toward fundraising.
 
 ## Using the page
 - Totals at the top: income, expense, net. Budgeted vs actual, and remaining
