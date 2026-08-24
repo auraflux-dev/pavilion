@@ -128,7 +128,7 @@ const FALL: Record<string, ProgramLandingCopy> = {
       'Sprint, Target, Team, and Countdown practice every arc.',
       'Twelve Thursday nights. Cap 10 to 30.',
     ],
-    curriculumTitle: 'Fall curriculum — Foundations & speed mechanics',
+    curriculumTitle: 'Fall curriculum. Foundations & speed mechanics',
     curriculum: [
       {
         week: 1,
@@ -279,7 +279,7 @@ const SPRING: Record<string, ProgramLandingCopy> = {
       'Sprint, Target, Team, and Countdown under time.',
       'Full mock competitions and a Spring showcase.',
     ],
-    curriculumTitle: 'Spring curriculum — Advanced systems & scrimmages',
+    curriculumTitle: 'Spring curriculum. Advanced systems & scrimmages',
     curriculum: [
       {
         week: 1,
