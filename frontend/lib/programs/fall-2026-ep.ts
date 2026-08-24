@@ -3,6 +3,8 @@
  * Public /programs/fall-2026 + staff Programs use this. Do not feed member portal from here.
  */
 
+import { resolveProgramSeason } from '@/lib/programs/season'
+
 export const FALL_2026_EP_LOCATION = 'SHMS Library'
 
 /** LCPS student/named holidays only (end-of-quarter kept). Source: LCPS ICS 2026-08-18. */
@@ -201,6 +203,19 @@ function hasFall2026SeasonStart(program: { startDate?: string }): boolean {
   return Boolean(start && start >= '2026-08-01' && start < '2027-01-01')
 }
 
+type SeasonPickFields = {
+  season?: string
+  tags?: string
+  name: string
+  fallEpClassId?: string
+  startDate?: string
+  endDate?: string
+}
+
+function isFall2026CatalogRow(program: SeasonPickFields): boolean {
+  return resolveProgramSeason(program) === 'fall-2026'
+}
+
 /**
  * Staff default list: current Fall 2026 season programs.
  * Keeps at most one row per packet class when names collide, and also keeps
@@ -215,6 +230,8 @@ export function selectCurrentFall2026Programs<
     endDate?: string
     registrationOpen?: boolean
     featured?: boolean
+    season?: string
+    tags?: string
   },
 >(programs: T[]): T[] {
   const picked: T[] = []
@@ -222,6 +239,7 @@ export function selectCurrentFall2026Programs<
   for (const klass of FALL_2026_EP_CLASSES) {
     const candidates = programs.filter((p) => {
       if (used.has(p.id)) return false
+      if (!isFall2026CatalogRow(p)) return false
       const byId = String(p.fallEpClassId ?? '').trim() === klass.id
       const byName = matchFall2026EpClass(p.name)?.id === klass.id
       return byId || byName
@@ -246,6 +264,7 @@ export function selectCurrentFall2026Programs<
   // Current-season rows that are not one of the four packet name matches.
   for (const p of programs) {
     if (used.has(p.id)) continue
+    if (!isFall2026CatalogRow(p)) continue
     if (matchFall2026EpClass(p.name)) continue
     if (String(p.fallEpClassId ?? '').trim()) continue
     if (!hasFall2026SeasonStart(p)) continue

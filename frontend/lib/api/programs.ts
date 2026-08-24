@@ -17,8 +17,13 @@ import {
   matchFall2026EpClass,
   selectCurrentFall2026Programs,
 } from '@/lib/programs/fall-2026-ep'
+import {
+  matchSpring2027EpClass,
+  selectCurrentSpring2027Programs,
+  spring2027CatalogPickerScore,
+  spring2027StagingCatalogPrograms,
+} from '@/lib/programs/spring-2027-ep'
 import { programPublicSlug } from '@/lib/programs/public-path'
-import { spring2027StagingCatalogPrograms } from '@/lib/programs/spring-2027-ep'
 
 export interface Program {
   _id: string;
@@ -216,7 +221,7 @@ function withReviewHostCheckout(program: Program, reviewHost?: boolean): Program
 }
 
 /** Bump when catalog dedupe logic changes (deploy verification). */
-export const PUBLIC_CATALOG_DEDUPE_VERSION = 2
+export const PUBLIC_CATALOG_DEDUPE_VERSION = 3
 
 function fallCatalogPickerScore(program: Program): number {
   let score = 0
@@ -233,42 +238,71 @@ function fallCatalogPickerScore(program: Program): number {
   return score
 }
 
-/** One CMS row per Fall 2026 packet class (drops duplicate Robotics/Math rows). */
+function mapSeasonPickRow(p: Program) {
+  return {
+    id: p._id,
+    name: p.name,
+    fallEpClassId: p.fallEpClassId,
+    startDate: p.startDate,
+    endDate: p.endDate,
+    registrationOpen: p.registrationOpen,
+    featured: p.featured,
+    season: p.season,
+    tags: p.tags,
+  }
+}
+
+/** One CMS row per Fall / Spring packet class (season-scoped; Spring cannot steal Fall slots). */
 function dedupePublicCatalogPrograms(programs: Program[]): Program[] {
-  const pickedIds = new Set(
-    selectCurrentFall2026Programs(
-      programs.map((p) => ({
-        id: p._id,
-        name: p.name,
-        fallEpClassId: p.fallEpClassId,
-        startDate: p.startDate,
-        endDate: p.endDate,
-        registrationOpen: p.registrationOpen,
-        featured: p.featured,
-      })),
-    ).map((p) => p.id),
+  const seasonRows = programs.map(mapSeasonPickRow)
+  const fallPickedIds = new Set(
+    selectCurrentFall2026Programs(seasonRows).map((p) => p.id),
   )
+  const springPickedIds = new Set(
+    selectCurrentSpring2027Programs(seasonRows).map((p) => p.id),
+  )
+
   const epFiltered = programs.filter((p) => {
-    const packetMatch =
-      Boolean(String(p.fallEpClassId ?? '').trim()) || Boolean(matchFall2026EpClass(p.name))
-    if (!packetMatch) return true
-    return pickedIds.has(p._id)
+    const season = resolveProgramSeason(p)
+    const fallPacketMatch =
+      season === 'fall-2026' &&
+      (Boolean(String(p.fallEpClassId ?? '').trim()) || Boolean(matchFall2026EpClass(p.name)))
+    const springPacketMatch =
+      season === 'spring-2027' &&
+      (Boolean(String(p.fallEpClassId ?? '').trim()) || Boolean(matchSpring2027EpClass(p.name)))
+    if (!fallPacketMatch && !springPacketMatch) return true
+    if (fallPacketMatch) return fallPickedIds.has(p._id)
+    if (springPacketMatch) return springPickedIds.has(p._id)
+    return true
   })
 
   const fallBySlug = new Map<string, Program>()
+  const springBySlug = new Map<string, Program>()
   const other: Program[] = []
   for (const program of epFiltered) {
-    if (resolveProgramSeason(program) !== 'fall-2026') {
-      other.push(program)
+    const season = resolveProgramSeason(program)
+    if (season === 'fall-2026') {
+      const slug = programPublicSlug(program)
+      const existing = fallBySlug.get(slug)
+      if (!existing || fallCatalogPickerScore(program) > fallCatalogPickerScore(existing)) {
+        fallBySlug.set(slug, program)
+      }
       continue
     }
-    const slug = programPublicSlug(program)
-    const existing = fallBySlug.get(slug)
-    if (!existing || fallCatalogPickerScore(program) > fallCatalogPickerScore(existing)) {
-      fallBySlug.set(slug, program)
+    if (season === 'spring-2027') {
+      const slug = programPublicSlug(program)
+      const existing = springBySlug.get(slug)
+      if (
+        !existing ||
+        spring2027CatalogPickerScore(program) > spring2027CatalogPickerScore(existing)
+      ) {
+        springBySlug.set(slug, program)
+      }
+      continue
     }
+    other.push(program)
   }
-  return [...other, ...fallBySlug.values()]
+  return [...other, ...fallBySlug.values(), ...springBySlug.values()]
 }
 
 /** EP packet Spring cards when the tab is on but CMS has no spring-2027 rows yet. */

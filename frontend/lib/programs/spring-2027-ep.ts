@@ -5,6 +5,7 @@
  */
 
 import type { Program } from '@/lib/api/programs'
+import { resolveProgramSeason } from '@/lib/programs/season'
 
 export const SPRING_2027_EP_LOCATION = 'SHMS Library'
 
@@ -345,6 +346,31 @@ function hasSpring2027SeasonStart(program: { startDate?: string }): boolean {
   return Boolean(start && start >= '2027-01-15' && start < '2027-07-01')
 }
 
+type SeasonPickFields = {
+  season?: string
+  tags?: string
+  name: string
+  fallEpClassId?: string
+  startDate?: string
+  endDate?: string
+}
+
+function isSpring2027CatalogRow(program: SeasonPickFields): boolean {
+  return resolveProgramSeason(program) === 'spring-2027'
+}
+
+/** Public catalog tie-break when multiple Spring rows share a slug. */
+export function spring2027CatalogPickerScore(program: {
+  name: string
+  fallEpClassId?: string
+  startDate?: string
+  endDate?: string
+  registrationOpen?: boolean
+  featured?: boolean
+}): number {
+  return spring2027CandidateScore(program)
+}
+
 /** Staff default list: current Spring 2027 season programs. */
 export function selectCurrentSpring2027Programs<
   T extends {
@@ -355,6 +381,8 @@ export function selectCurrentSpring2027Programs<
     endDate?: string
     registrationOpen?: boolean
     featured?: boolean
+    season?: string
+    tags?: string
   },
 >(programs: T[]): T[] {
   const picked: T[] = []
@@ -362,6 +390,7 @@ export function selectCurrentSpring2027Programs<
   for (const klass of SPRING_2027_EP_CLASSES) {
     const candidates = programs.filter((p) => {
       if (used.has(p.id)) return false
+      if (!isSpring2027CatalogRow(p)) return false
       const byId = String(p.fallEpClassId ?? '').trim() === klass.id
       const byName = matchSpring2027EpClass(p.name)?.id === klass.id
       return byId || byName
@@ -385,6 +414,7 @@ export function selectCurrentSpring2027Programs<
 
   for (const p of programs) {
     if (used.has(p.id)) continue
+    if (!isSpring2027CatalogRow(p)) continue
     if (matchSpring2027EpClass(p.name)) continue
     if (String(p.fallEpClassId ?? '').trim()) continue
     if (!hasSpring2027SeasonStart(p)) continue
