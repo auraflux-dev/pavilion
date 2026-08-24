@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   LogOut,
   Loader2,
@@ -15,9 +15,10 @@ import {
   ArrowRight,
   ShoppingBag,
   Star,
+  HelpCircle,
 } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { tooltipCopy } from '@/lib/copy/tooltips'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
 import {
   PORTAL_COPY_DEFAULTS,
@@ -42,7 +43,10 @@ import {
 } from './onboarding-checklist'
 import { ConfirmFamilyDetailsForm } from './confirm-family-details-form'
 import { PortalBusinessOwnerForm } from './portal-business-owner-form'
+import { PortalHelpForm } from '@/components/member-portal/portal-help-form'
 import { InviteCoParentPanel } from './invite-co-parent-panel'
+import { PortalActionNotice, usePortalNotice } from './portal-action-notice'
+import { DeferredMount } from './deferred-mount'
 import {
   buildOnboardingChecklist,
   coveFeaturesUnlocked,
@@ -53,11 +57,11 @@ interface MemberData {
     id: string
     name: string
     email: string
+    phone?: string
     profileImage: string | null
     memberSince: string | null
     firstName?: string
     lastName?: string
-    phone?: string
   }
   accountType?: 'free' | 'paid'
 }
@@ -160,29 +164,22 @@ export function MemberDashboard({
   const [students, setStudents] = useState<Student[]>([])
   const [calendar, setCalendar] = useState<CalendarItem[]>([])
   const [messages, setMessages] = useState<MessageItem[]>([])
-  const [boardPosts, setBoardPosts] = useState<
-    {
-      id: string
-      programId: string
-      programName: string
-      subject: string
-      body: string
-      fromName: string
-      sentAt: string | null
-    }[]
-  >([])
   const [purchases, setPurchases] = useState<PurchaseItem[]>([])
   const [status, setStatus] = useState<'loading' | 'error' | 'ok'>('loading')
-  const [authExpired, setAuthExpired] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [hasLoaded, setHasLoaded] = useState(false)
   const [familyTab, setFamilyTab] = useState<'calendar' | 'messages'>('calendar')
   const [messagesSeenAt, setMessagesSeenAt] = useState(0)
+  const [dismissedActivity, setDismissedActivity] = useState(false)
   const [membershipSuccessNudge, setMembershipSuccessNudge] = useState(false)
-  const [membershipReceipt, setMembershipReceipt] = useState<{
-    tier?: string
-    amount?: number | null
-  } | null>(null)
   const [addStudentOpen, setAddStudentOpen] = useState(false)
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null)
+  const [hydratingExtras, setHydratingExtras] = useState(false)
+  const loadGen = useRef(0)
+  const portalNoticeRef = useRef<HTMLDivElement>(null)
+  const { notice: portalNotice, showSuccess: showPortalSuccess, clear: clearPortalNotice } =
+    usePortalNotice()
+  const { allowed: liveCommerce } = useLiveCommerceGate()
 
   const sortedStudents = useMemo(
     () =>
@@ -208,37 +205,60 @@ export function MemberDashboard({
       return sortedStudents[0]!.id
     })
   }, [sortedStudents])
-  const { allowed: liveCommerce } = useLiveCommerceGate()
 
-  async function load() {
-    setStatus('loading')
+  useEffect(() => {
+    if (!portalNotice) return
+    window.requestAnimationFrame(() => {
+      portalNoticeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    })
+  }, [portalNotice])
+
+  function redirectToLogin() {
+    const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`
+    window.location.href = `/auth/join?mode=login&returnTo=${encodeURIComponent(returnTo)}`
+  }
+
+  async function load(opts?: { soft?: boolean }) {
+    const gen = ++loadGen.current
+    if (!opts?.soft) setStatus('loading')
+    else setRefreshing(true)
     try {
-      const [meRes, studentsRes, familyRes] = await Promise.all([
-        fetch('/api/auth/me'),
-        fetch('/api/students'),
-        fetch('/api/portal/family'),
-      ])
-      if (!meRes.ok) {
-        setAuthExpired(meRes.status === 401 || meRes.status === 403)
-        throw new Error('auth')
+      // Lite first: member + students only (usually under ~1s). Paint portal shell ASAP.
+      const liteRes = await fetch('/api/portal/family?lite=1', { credentials: 'include' })
+      const liteData = await liteRes.json().catch(() => ({}))
+      if (gen !== loadGen.current) return
+      if (!liteRes.ok || !liteData.member) {
+        redirectToLogin()
+        return
       }
-      setAuthExpired(false)
-      const meData = await meRes.json()
-      const studentsData = studentsRes.ok ? await studentsRes.json() : { students: [] }
-      const familyData = familyRes.ok
-        ? await familyRes.json()
-        : { calendar: [], messages: [], purchases: [], boardPosts: [] }
 
-      setMember(meData.member)
-      setAccountType(meData.accountType === 'paid' ? 'paid' : 'free')
-      setStudents(studentsData.students ?? [])
+      setMember(liteData.member)
+      setAccountType(liteData.accountType === 'paid' ? 'paid' : 'free')
+      setStudents(liteData.students ?? [])
+      setStatus('ok')
+      setHasLoaded(true)
+      setRefreshing(false)
+
+      // Full hydrate in background: calendar, messages, purchases.
+      setHydratingExtras(true)
+      const familyRes = await fetch('/api/portal/family', { credentials: 'include' })
+      const familyData = await familyRes.json().catch(() => ({}))
+      if (gen !== loadGen.current) return
+      if (!familyRes.ok || !familyData.member) return
+
+      setMember(familyData.member)
+      setAccountType(familyData.accountType === 'paid' ? 'paid' : 'free')
+      setStudents(familyData.students ?? [])
       setCalendar(familyData.calendar ?? [])
       setMessages(familyData.messages ?? [])
       setPurchases(familyData.purchases ?? [])
-      setBoardPosts(familyData.boardPosts ?? [])
-      setStatus('ok')
     } catch {
-      setStatus('error')
+      if (gen === loadGen.current && !hasLoaded) setStatus('error')
+    } finally {
+      if (gen === loadGen.current) {
+        setRefreshing(false)
+        setHydratingExtras(false)
+      }
     }
   }
 
@@ -249,29 +269,15 @@ export function MemberDashboard({
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    const fromQuery = params.get('membership') === 'success'
-    try {
-      const raw = sessionStorage.getItem('membershipReceipt')
-      if (raw) {
-        const parsed = JSON.parse(raw) as { tier?: string; amount?: number | null }
-        setMembershipReceipt(parsed)
-        setMembershipSuccessNudge(true)
-        sessionStorage.removeItem('membershipReceipt')
-      } else if (fromQuery) {
-        setMembershipSuccessNudge(true)
-      }
-    } catch {
-      if (fromQuery) setMembershipSuccessNudge(true)
-    }
-    if (fromQuery) {
-      params.delete('membership')
-      const qs = params.toString()
-      window.history.replaceState(
-        {},
-        '',
-        window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash,
-      )
-    }
+    if (params.get('membership') !== 'success') return
+    setMembershipSuccessNudge(true)
+    params.delete('membership')
+    const qs = params.toString()
+    window.history.replaceState(
+      {},
+      '',
+      window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash,
+    )
   }, [])
 
   // #store scrolls here; Help opens /member-portal/help.
@@ -301,6 +307,14 @@ export function MemberDashboard({
     setMessagesSeenAt(Date.now())
   }, [messagesSeenAt, status])
 
+  function openMessages() {
+    setFamilyTab('messages')
+    markMessagesSeen()
+    setMessagesSeenAt(Date.now())
+    setDismissedActivity(true)
+    document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   useEffect(() => {
     if (familyTab !== 'messages') return
     markMessagesSeen()
@@ -319,47 +333,26 @@ export function MemberDashboard({
   }
 
   function handleStudentAdded(student: Student) {
-    // Keep the dashboard mounted. Full load() sets status=loading and can
-    // overwrite this with a stale Wix GET before the insert is visible.
     setStudents((prev) => {
       if (student.id && prev.some((s) => s.id === student.id)) return prev
       return [...prev, student]
     })
     if (student.id) setSelectedStudentId(student.id)
     setAddStudentOpen(false)
-    void (async () => {
-      try {
-        const r = await fetch('/api/students')
-        if (!r.ok) return
-        const data = await r.json()
-        const next = Array.isArray(data.students) ? (data.students as Student[]) : []
-        setStudents((prev) => {
-          const byId = new Map<string, Student>()
-          for (const s of next) {
-            if (s?.id) byId.set(s.id, s)
-          }
-          for (const s of prev) {
-            if (s?.id && !byId.has(s.id)) byId.set(s.id, s)
-          }
-          if (student.id && !byId.has(student.id)) byId.set(student.id, student)
-          if (byId.size > 0) return Array.from(byId.values())
-          return prev.length ? prev : next
-        })
-      } catch {
-        /* keep optimistic row */
-      }
-    })()
+    void load({ soft: true })
   }
 
   function handleStudentUpdated(student: Student) {
     setStudents((prev) => prev.map((s) => (s.id === student.id ? student : s)))
   }
 
-  function handleMemberUpdated(name: string) {
-    setMember((prev) => (prev ? { ...prev, name } : prev))
+  function handleMemberUpdated(payload: { name: string; phone?: string }) {
+    setMember((prev) =>
+      prev ? { ...prev, name: payload.name, phone: payload.phone ?? prev.phone } : prev,
+    )
   }
 
-  if (status === 'loading') {
+  if (status === 'loading' && !hasLoaded) {
     return (
       <div className="flex items-center justify-center py-24">
         <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand-green)' }} />
@@ -369,32 +362,37 @@ export function MemberDashboard({
 
   if (status === 'error' || !member) {
     return (
-      <div className="text-center py-24 space-y-4">
-        <p className="text-[#5A6070] whitespace-pre-line">
-          {authExpired ? tooltipCopy('portal.session.expired') : copy.loadError}
+      <div className="text-center py-24 max-w-md mx-auto">
+        <p className="text-[#5A6070] mb-2">{copy.loadError}</p>
+        <p className="text-xs text-[#5A6070] mb-4 leading-relaxed">
+          Your session may have expired after sign out.
+          Sign in again with your personal email for family portal access.
+          Board staff tools use{' '}
+          <a href="/staff" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
+            /staff
+          </a>{' '}
+          with your @shmspto.org account.
         </p>
-        {authExpired ? (
-          <a
-            href="/auth/join?mode=login&returnTo=%2Fmember-portal"
-            className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-bold text-white"
-            style={{ backgroundColor: 'var(--brand-green)' }}
-          >
-            Log in again
-          </a>
-        ) : (
-          <Button onClick={load} variant="outline" size="sm">
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button onClick={redirectToLogin} variant="outline" size="sm">
+            Sign in again
+          </Button>
+          <Button onClick={() => void load()} variant="outline" size="sm">
             <RefreshCw className="w-4 h-4 mr-2" /> Retry
           </Button>
-        )}
+        </div>
       </div>
     )
   }
 
+  const studentGradeKeys = new Set(
+    students.map((s) => String(s.grade ?? '').replace(/th$/i, '').trim()).filter(Boolean),
+  )
   const gradeLinks = [
-    { grade: '6th', href: link6 },
-    { grade: '7th', href: link7 },
-    { grade: '8th', href: link8 },
-  ].filter((g) => g.href)
+    { grade: '6th', key: '6', href: link6 },
+    { grade: '7th', key: '7', href: link7 },
+    { grade: '8th', key: '8', href: link8 },
+  ].filter((g) => g.href && studentGradeKeys.has(g.key))
 
   const storeBalanceTotal = students.reduce(
     (max, s) => Math.max(max, Number(s.storeCardBalance) || 0),
@@ -412,16 +410,13 @@ export function MemberDashboard({
       : accountType === 'paid'
         ? copy.paidTitle
         : copy.freeTitle
+  // Title already names the tier. Body stays short. Upgrade lives in the CTA only.
   const accountBannerBody =
-    accountType === 'paid' && householdTier === 'reef'
-      ? `You're on Reef.\nUpgrade anytime for more perks.`
-      : accountType === 'paid' && householdTier === 'lagoon'
-        ? `You're on Lagoon.\nUpgrade to Tide anytime.`
-        : accountType === 'paid' && householdTier === 'tide'
-          ? `You're on Tide.\nBenefits apply to your students below.`
-          : accountType === 'paid'
-            ? copy.paidBody
-            : copy.freeBody
+    accountType === 'paid' && householdTierRank > 0
+      ? 'Thanks for supporting SHMS PTO.'
+      : accountType === 'paid'
+        ? copy.paidBody
+        : copy.freeBody
   const membershipCtaHref = '/membership'
   const membershipCtaLabel =
     accountType === 'free'
@@ -440,39 +435,57 @@ export function MemberDashboard({
   const showConfirmFamily = students.length > 0 && !coveGate.ok
 
   return (
-    <div className="space-y-3">
-      <PortalSectionNav setupIncomplete={!onboarding.complete || showConfirmFamily} />
+    <div className="space-y-4">
+      <PortalSectionNav />
+
+      {portalNotice ? (
+        <div ref={portalNoticeRef}>
+          <PortalActionNotice
+            tone={portalNotice.tone}
+            message={portalNotice.message}
+            onDismiss={clearPortalNotice}
+          />
+        </div>
+      ) : null}
 
       {membershipSuccessNudge ? (
-        <div className="rounded-xl border border-[var(--brand-line)] bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-[var(--brand-green)]">Membership confirmed. Thank you!</p>
-            {membershipReceipt?.tier || membershipReceipt?.amount != null ? (
-              <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
-                {[membershipReceipt.tier, membershipReceipt.amount != null ? `$${Number(membershipReceipt.amount).toFixed(2)}` : null]
-                  .filter(Boolean)
-                  .join('\n')}
-              </p>
-            ) : null}
+        <div className="rounded-xl border border-[var(--brand-line)] bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-start justify-between gap-3">
+          <div>
+ <p className="text-sm font-bold text-[var(--brand-green)]">Membership confirmed. Thank you!</p>
+            <p className="text-xs text-[#1A1A1A]/80 mt-0.5 leading-relaxed">
+              {onboarding.complete
+                ? vanillaizeIfDemo('Your Cove Digital Card and perks are ready below.')
+                : vanillaizeIfDemo(
+                    'Finish confirming your family details so Cove Digital Card credit and your QR attach to your students.',
+                  )}
+            </p>
           </div>
           <button
             type="button"
             className="text-xs font-semibold text-[#5A6070] underline shrink-0"
-            onClick={() => {
-              setMembershipSuccessNudge(false)
-              setMembershipReceipt(null)
-            }}
+            onClick={() => setMembershipSuccessNudge(false)}
           >
             Dismiss
           </button>
         </div>
       ) : null}
 
+      <OnboardingChecklist
+        items={onboarding.items}
+        requiredDone={onboarding.requiredDone}
+        requiredTotal={onboarding.requiredTotal}
+        complete={onboarding.complete}
+        coveUnlocked={onboarding.coveUnlocked}
+        highlight={Boolean(highlightChecklist && !onboarding.complete)}
+        onJumpStudents={() => setMembershipSuccessNudge(false)}
+      />
+
       {showConfirmFamily ? (
         <ConfirmFamilyDetailsForm
           key={`confirm-${students.map((s) => s.id).join('-')}`}
           students={students}
           member={member}
+          onSaved={showPortalSuccess}
           onConfirmed={({ students: next, member: nextMember }) => {
             setStudents(next as Student[])
             if (nextMember && member) {
@@ -486,20 +499,45 @@ export function MemberDashboard({
             }
           }}
         />
-      ) : (
-        <OnboardingChecklist
-          items={onboarding.items}
-          requiredDone={onboarding.requiredDone}
-          requiredTotal={onboarding.requiredTotal}
-          complete={onboarding.complete}
-          coveUnlocked={onboarding.coveUnlocked}
-          highlight={Boolean(highlightChecklist && !onboarding.complete)}
-          onJumpStudents={() => setMembershipSuccessNudge(false)}
-        />
-      )}
+      ) : null}
+      {!dismissedActivity && newMessageCount > 0 ? (
+        <div className="rounded-xl border border-[var(--brand-green)]/30 bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-start gap-2 min-w-0">
+            <Mail className="w-4 h-4 mt-0.5 shrink-0 text-[var(--brand-green)]" aria-hidden />
+            <div>
+              <p className="text-sm font-bold text-[var(--brand-green)]">
+                {newMessageCount === 1
+                  ? 'You have a new message'
+                  : `You have ${newMessageCount} new messages`}
+              </p>
+              <p className="text-xs text-[#1A1A1A]/80 mt-0.5">
+                Purchase confirmations, class notes, and PTO updates land here.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              type="button"
+              size="sm"
+              className="text-white"
+              style={{ backgroundColor: 'var(--brand-green)' }}
+              onClick={openMessages}
+            >
+              View messages
+            </Button>
+            <button
+              type="button"
+              className="text-xs font-semibold text-[#5A6070] underline"
+              onClick={() => setDismissedActivity(true)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {/* 2×2 quadrants. D (calendar/messages) first on mobile */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* D. Calendar & Messages (priority) */}
         <PortalQuadrant
           id="calendar"
@@ -547,10 +585,12 @@ export function MemberDashboard({
               <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
                 <CalendarDays className="w-8 h-8 mb-2 text-[#C4C0B8]" />
                 <p className="text-sm font-semibold text-[#1A1A1A] mb-1">
-                  {copy.calendarEmptyTitle}
+                  {hydratingExtras ? 'Updating calendar…' : copy.calendarEmptyTitle}
                 </p>
                 <p className="text-xs text-[#5A6070] max-w-xs mb-4">
-                  {copy.calendarEmptyBody}
+                  {hydratingExtras
+                    ? 'Programs and events load right after your students.'
+                    : copy.calendarEmptyBody}
                 </p>
                 <a
                   href="/programs"
@@ -600,9 +640,13 @@ export function MemberDashboard({
             <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
               <Mail className="w-8 h-8 mb-2 text-[#C4C0B8]" />
               <p className="text-sm font-semibold text-[#1A1A1A] mb-1">
-                {copy.messagesEmptyTitle}
+                {hydratingExtras ? 'Updating messages…' : copy.messagesEmptyTitle}
               </p>
-              <p className="text-xs text-[#5A6070] max-w-xs">{copy.messagesEmptyBody}</p>
+              <p className="text-xs text-[#5A6070] max-w-xs">
+                {hydratingExtras
+                  ? 'Instructor notes and newsletters load in a moment.'
+                  : copy.messagesEmptyBody}
+              </p>
             </div>
           ) : (
             <ul className="space-y-3 flex-1 overflow-y-auto max-h-[360px] pr-1">
@@ -687,7 +731,9 @@ export function MemberDashboard({
           <EditAccountForm
             initialName={member.name}
             email={member.email}
+            phone={member.phone}
             onUpdated={handleMemberUpdated}
+            onSaved={showPortalSuccess}
           />
 
           <div
@@ -741,21 +787,20 @@ export function MemberDashboard({
             </div>
           </dl>
 
-          <div className="mb-3">
-            <a
-              href="/member-portal/payment-methods"
-              className="text-xs font-bold inline-flex items-center gap-1"
-              style={{ color: 'var(--brand-green)' }}
-            >
-              {copy.paymentMethodsTitle} <ArrowRight className="w-3 h-3" />
-            </a>
-          </div>
+          <DeferredMount>
+            <MembershipBenefitsCard />
+          </DeferredMount>
 
           {gradeLinks.length > 0 && (
             <div className="mt-auto pt-2 border-t border-[#F0EDE8]">
               <p className="text-[11px] font-bold text-[#1A1A1A] mb-1 flex items-center gap-1.5">
                 <MessageCircle className="w-3.5 h-3.5" style={{ color: '#25D366' }} />
                 {copy.whatsappHeading}
+              </p>
+              <p className="text-[11px] text-[#5A6070] mb-2 leading-relaxed whitespace-pre-line">
+                {gradeLinks.length === 1
+                  ? `Join the ${gradeLinks[0]!.grade} WhatsApp for reminders and PTO updates.`
+                  : 'Join each student’s grade WhatsApp for reminders and PTO updates.'}
               </p>
               <div className="flex flex-wrap gap-2">
                 {gradeLinks.map(({ grade, href }) => (
@@ -792,10 +837,11 @@ export function MemberDashboard({
               </button>
               <button
                 type="button"
-                onClick={load}
-                className="text-xs font-semibold text-[#5A6070] hover:text-[var(--brand-green)] inline-flex items-center gap-1"
+                onClick={() => void load({ soft: true })}
+                disabled={refreshing}
+                className="text-xs font-semibold text-[#5A6070] hover:text-[var(--brand-green)] inline-flex items-center gap-1 disabled:opacity-60"
               >
-                <RefreshCw className="w-3.5 h-3.5" /> {copy.refresh}
+                <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> {copy.refresh}
               </button>
             </div>
           }
@@ -812,6 +858,7 @@ export function MemberDashboard({
                   onOpenChange={setAddStudentOpen}
                   variant="header"
                   onAdded={handleStudentAdded}
+                  onSaved={showPortalSuccess}
                   grades={grades}
                   labels={copy}
                 />
@@ -824,6 +871,7 @@ export function MemberDashboard({
                 onOpenChange={setAddStudentOpen}
                 variant="header"
                 onAdded={handleStudentAdded}
+                onSaved={showPortalSuccess}
                 grades={grades}
                 labels={copy}
               />
@@ -873,14 +921,39 @@ export function MemberDashboard({
                     student={selected}
                     defaultOpen
                     grades={grades}
-                    boardPosts={boardPosts}
                     onUpdated={handleStudentUpdated}
+                    onSaved={showPortalSuccess}
                   />
                 )
               })()}
               <InviteCoParentPanel />
             </div>
           )}
+
+          <div
+            id="help"
+            className="mt-4 pt-4 border-t border-[#F0EDE8] space-y-3 scroll-mt-28"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-[#1A1A1A] flex items-center gap-1.5">
+                  <HelpCircle className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
+                  Member Help
+                </p>
+                <p className="text-[11px] text-[#5A6070] mt-1 leading-relaxed">
+                  Ask a question here, or open the full knowledge base.
+                </p>
+              </div>
+              <Link
+                href="/member-portal/help"
+                className="shrink-0 text-xs font-bold inline-flex items-center gap-1"
+                style={{ color: 'var(--brand-green)' }}
+              >
+                Knowledge base <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <PortalHelpForm memberName={member.name} compact />
+          </div>
         </PortalQuadrant>
 
         {/* C. Store & Purchases */}
@@ -909,14 +982,29 @@ export function MemberDashboard({
             </div>
           </div>
 
-          <MembershipBenefitsCard />
           {commons ? null : coveGate.ok ? (
-            <CoveFamilyCodeCard refreshKey={students.length} />
+            <DeferredMount>
+              <CoveFamilyCodeCard refreshKey={students.length} />
+            </DeferredMount>
           ) : (
             <CoveFeatureLockBanner reason={coveGate.error ?? 'Complete family setup first.'} />
           )}
 
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="rounded-xl px-4 py-3 border border-[var(--border)] mb-4 bg-[#FAFCF9]">
+            <p className="text-xs font-bold text-[#1A1A1A] mb-1">{copy.paymentMethodsTitle}</p>
+            <p className="text-[11px] text-[#5A6070] leading-relaxed whitespace-pre-line">
+              {copy.paymentMethodsBody}
+            </p>
+            <a
+              href="/member-portal/payment-methods"
+              className="mt-2 inline-flex items-center gap-1 text-xs font-bold"
+              style={{ color: 'var(--brand-green)' }}
+            >
+              Payment methods <ArrowRight className="w-3 h-3" />
+            </a>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-4">
             {!commons && coveGate.ok ? (
               <StoreCardReload
                 students={students.map(({ id, firstName, lastName }) => ({ id, firstName, lastName }))}
@@ -941,10 +1029,26 @@ export function MemberDashboard({
               <ShoppingBag className="w-3.5 h-3.5" /> {copy.ctaSpiritWear}
             </a>
             ) : null}
+            <a
+              href={onboarding.complete ? '/programs' : '#portal-onboarding'}
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#1A1A1A]"
+              title={
+                onboarding.complete
+                  ? undefined
+                  : 'Complete student safety profiles before program registration'
+              }
+            >
+              {copy.ctaPrograms}
+              {!onboarding.complete ? ' (setup needed)' : ''}
+            </a>
           </div>
 
+          <p className="text-[11px] text-[#5A6070] leading-relaxed mb-4 px-1">{copy.loadCardHelp}</p>
+
           {purchases.length === 0 ? (
-            <p className="text-xs text-[#5A6070] mt-auto">{copy.purchasesEmpty}</p>
+            <p className="text-xs text-[#5A6070] mt-auto">
+              {hydratingExtras ? 'Updating purchases…' : copy.purchasesEmpty}
+            </p>
           ) : (
             <ul className="space-y-2 flex-1 overflow-y-auto max-h-[220px] pr-3">
               {purchases.map((p) => (
@@ -978,11 +1082,13 @@ export function MemberDashboard({
         </PortalQuadrant>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-6">
         <PortalBusinessOwnerForm memberName={member.name} memberEmail={member.email} />
       </div>
 
-      <PortalSurveys />
+      <DeferredMount>
+        <PortalSurveys />
+      </DeferredMount>
     </div>
   )
 }

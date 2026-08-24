@@ -29,6 +29,8 @@ interface Props {
     discountCode: string | null
     storeCardBalance: number
   }) => void
+  /** Parent dashboard banner after a successful add. */
+  onSaved?: (message: string) => void
   grades?: string[]
   labels: FormLabels
   /** Controlled open (header CTA). When set, no dashed trigger is rendered. */
@@ -40,6 +42,7 @@ interface Props {
 
 export function AddStudentForm({
   onAdded,
+  onSaved,
   grades = ['6', '7', '8'],
   labels,
   open: openProp,
@@ -61,7 +64,14 @@ export function AddStudentForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!firstName.trim() || !lastName.trim() || !grade) return
+    if (!firstName.trim() || !lastName.trim()) {
+      setError('Enter first and last name.')
+      return
+    }
+    if (!grade) {
+      setError('Select a grade.')
+      return
+    }
     setSaving(true)
     setError('')
     try {
@@ -70,23 +80,31 @@ export function AddStudentForm({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ firstName, lastName, grade }),
       })
-      if (!res.ok) throw new Error(await res.text())
-      const { student } = await res.json()
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        throw new Error(
+          typeof data.error === 'string' ? data.error : labels.addStudentError,
+        )
+      }
+      if (!data.student) {
+        throw new Error('Student was not returned after save. Please refresh and try again.')
+      }
+      const { student } = data
       trackEvent('add_student', { surface: 'member', grade: String(grade) })
       onAdded(student)
+      onSaved?.(`Added ${student.firstName} ${student.lastName} to your account.`)
       setFirstName('')
       setLastName('')
       setGrade('')
       setOpen(false)
-    } catch {
-      setError(labels.addStudentError)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : labels.addStudentError)
     } finally {
       setSaving(false)
     }
   }
 
   if (!open) {
-    // Header CTA lives in the quadrant bar; form only mounts when open.
     if (controlled || variant === 'header') return null
     return (
       <button
@@ -104,7 +122,7 @@ export function AddStudentForm({
   return (
     <div className="bg-white rounded-2xl border border-[var(--border)] p-5 shadow-sm">
       <h3 className="font-bold text-[#1A1A1A] mb-4">{labels.addStudentTitle}</h3>
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form noValidate onSubmit={handleSubmit} className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-semibold text-[#5A6070] mb-1">
@@ -158,8 +176,11 @@ export function AddStudentForm({
               </button>
             ))}
           </div>
+          {!grade ? (
+            <p className="text-[11px] text-[#5A6070]">Select a grade, then tap Add student.</p>
+          ) : null}
         </div>
-        {error && <p className="text-red-600 text-xs">{error}</p>}
+        {error ? <p role="alert" className="text-red-600 text-xs font-medium">{error}</p> : null}
         <div className="flex gap-2 pt-1">
           <Button
             type="submit"

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChevronDown, ChevronUp, BookOpen, Pencil, Loader2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, BookOpen, Pencil } from 'lucide-react'
 import { EditStudentForm } from './edit-student-form'
 
 interface Enrollment {
@@ -72,6 +72,7 @@ interface Props {
   grades?: string[]
   boardPosts?: BoardPost[]
   onUpdated?: (student: Student) => void
+  onSaved?: (message: string) => void
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -114,6 +115,7 @@ export function StudentCard({
   grades = ['6', '7', '8'],
   boardPosts = [],
   onUpdated,
+  onSaved,
 }: Props) {
   const [open, setOpen] = useState(defaultOpen)
   const [history, setHistory] = useState<{
@@ -192,16 +194,15 @@ export function StudentCard({
               student={student}
               grades={grades}
               onUpdated={onUpdated}
+              onSaved={onSaved}
               open={editOpen}
               onOpenChange={setEditOpen}
               hideTrigger
             />
           ) : null}
-          {loading && (
-            <div className="flex items-center justify-center py-6">
-              <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'var(--brand-green)' }} />
-            </div>
-          )}
+          {loading ? (
+            <p className="text-xs text-[#5A6070] py-2">Loading programs and attendance…</p>
+          ) : null}
 
           {!loading && history && (
             <>

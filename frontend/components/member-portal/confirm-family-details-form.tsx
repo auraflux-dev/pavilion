@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react'
 import { Loader2, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { HelpTip } from '@/components/ui/help-tip'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type StudentSeed = {
@@ -29,6 +28,8 @@ type Props = {
     students: unknown[]
     member?: { name: string; firstName: string; lastName: string; phone: string }
   }) => void
+  /** Parent dashboard banner after a successful confirm. */
+  onSaved?: (message: string) => void
 }
 
 const inputCls =
@@ -44,7 +45,7 @@ function splitName(name: string | undefined): { first: string; last: string } {
   return { first: parts[0], last: parts.slice(1).join(' ') }
 }
 
-export function ConfirmFamilyDetailsForm({ students, member, onConfirmed }: Props) {
+export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSaved }: Props) {
   const seed = useMemo(() => {
     const fromStudent = students[0]
     const fromMember = splitName(member?.name)
@@ -71,6 +72,26 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed }: Prop
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!parentFirstName.trim() || !parentLastName.trim()) {
+      setError('Enter parent first and last name.')
+      return
+    }
+    if (!parentPhone.trim()) {
+      setError('Enter a parent phone number.')
+      return
+    }
+    if (!emergencyContact.trim() || !emergencyPhone.trim()) {
+      setError('Enter emergency contact name and phone.')
+      return
+    }
+    if (!pickupAuthorized.trim()) {
+      setError('List who may pick up your student.')
+      return
+    }
+    if (students.length === 0) {
+      setError('Add a student first, then confirm family details.')
+      return
+    }
     setSaving(true)
     setError('')
     try {
@@ -88,6 +109,7 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed }: Prop
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Could not save')
+      onSaved?.('Family details confirmed.\nCove Digital Card is unlocked for your household.')
       onConfirmed({ students: data.students ?? [], member: data.member })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save. Please try again.')
@@ -104,10 +126,7 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed }: Prop
       <div className="flex items-start gap-3">
         <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5 text-[#8A6400]" aria-hidden />
         <div>
-          <p className="text-sm font-bold text-[#1A1A1A] inline-flex items-center gap-1">
-            Confirm your family details
-            <HelpTip tipKey="portal.household.confirm" label="About family confirm" />
-          </p>
+          <p className="text-sm font-bold text-[#1A1A1A]">Confirm your family details</p>
           <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed">
             {students.length > 0
               ? vanillaizeIfDemo(
@@ -120,7 +139,7 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed }: Prop
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-2.5 bg-white/70 rounded-lg border border-[#F0EDE8] p-3">
+      <form noValidate onSubmit={handleSubmit} className="space-y-2.5 bg-white/70 rounded-lg border border-[#F0EDE8] p-3">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#5A6070]">
           Parent / guardian
         </p>
@@ -178,7 +197,7 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed }: Prop
           className={inputCls}
         />
 
-        {error ? <p className="text-xs text-red-700">{error}</p> : null}
+        {error ? <p role="alert" className="text-xs text-red-700 font-medium">{error}</p> : null}
 
         <Button
           type="submit"
