@@ -12,6 +12,7 @@ import {
   reviewTimesheet,
 } from '@/lib/staff/timesheets'
 import { getWixClient } from '@/lib/wix-client'
+import { selectCurrentFall2026Programs } from '@/lib/programs/fall-2026-ep'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,12 +44,30 @@ export async function GET(req: NextRequest) {
     // Programs list for the submit form (scoped)
     const client = getWixClient()
     const programs = await client.items.query('Programs').ascending('name').limit(100).find()
-    let programOptions = (programs.items ?? []).map((p) => ({
-      id: String((p as { _id?: string })._id ?? ''),
-      name: String((p as { name?: string }).name ?? ''),
-    }))
+    let programOptions = (programs.items ?? []).map((p) => {
+      const row = p as {
+        _id?: string
+        name?: string
+        fallEpClassId?: string
+        startDate?: string
+        endDate?: string
+        registrationOpen?: boolean
+        featured?: boolean
+      }
+      return {
+        id: String(row._id ?? ''),
+        name: String(row.name ?? ''),
+        fallEpClassId: String(row.fallEpClassId ?? ''),
+        startDate: String(row.startDate ?? '').slice(0, 10),
+        endDate: String(row.endDate ?? '').slice(0, 10),
+        registrationOpen: row.registrationOpen === true,
+        featured: row.featured === true,
+      }
+    })
     if (!canManageAllPrograms(session.staff)) {
       programOptions = programOptions.filter((p) => canAccessProgram(session.staff, p.id))
+    } else {
+      programOptions = selectCurrentFall2026Programs(programOptions)
     }
 
     return NextResponse.json({

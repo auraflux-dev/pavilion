@@ -15,7 +15,7 @@ import {
 import type { StaffRole } from '@/lib/staff/roles'
 import { DEMO_BRAND, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
-import { FALL_2026_EP_CLASSES } from '@/lib/programs/fall-2026-ep'
+import { FALL_2026_EP_CLASSES, selectCurrentFall2026Programs } from '@/lib/programs/fall-2026-ep'
 import {
   EP_INSTRUCTOR_MAILBOXES,
   WORKSPACE_MAILBOXES,
@@ -42,6 +42,16 @@ type StaffRow = {
 
 type ProgramOption = { id: string; name: string }
 
+type ProgramPickerRow = {
+  id: string
+  name: string
+  fallEpClassId?: string
+  startDate?: string
+  endDate?: string
+  registrationOpen?: boolean
+  featured?: boolean
+}
+
 function roleLabel(role: string) {
   return STAFF_ROLE_LABEL[role as StaffRole] ?? role
 }
@@ -56,7 +66,8 @@ export function StaffRoleManager() {
   const [staff, setStaff] = useState<StaffRow[]>([])
   const [availableRoles, setAvailableRoles] = useState<string[]>([])
   const [scope, setScope] = useState<'all' | 'instructors'>('all')
-  const [programs, setPrograms] = useState<ProgramOption[]>([])
+  const [allPrograms, setAllPrograms] = useState<ProgramPickerRow[]>([])
+  const [showOlderPrograms, setShowOlderPrograms] = useState(false)
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
   const [boardTitle, setBoardTitle] = useState('')
@@ -73,6 +84,12 @@ export function StaffRoleManager() {
 
   const implied = useMemo(() => workspacesFromRoles(roles), [roles])
   const q = permissionQuery.trim().toLowerCase()
+  const programs = useMemo(() => {
+    const list = showOlderPrograms
+      ? allPrograms
+      : selectCurrentFall2026Programs(allPrograms)
+    return list.map(({ id, name }) => ({ id, name }))
+  }, [allPrograms, showOlderPrograms])
 
   const load = useCallback(async () => {
     const response = await fetch('/api/staff/roles')
@@ -85,18 +102,27 @@ export function StaffRoleManager() {
     const programsData = await programsRes.json().catch(() => ({}))
     if (programsRes.ok) {
       const mapped = (programsData.programs ?? [])
-        .map((p: { id?: string; name?: string; tags?: string; featured?: boolean }) => ({
-          id: String(p.id ?? ''),
-          name: String(p.name ?? ''),
-          tags: String(p.tags ?? ''),
-          featured: p.featured === true,
-        }))
-        .filter((p: { id: string }) => p.id)
-      const fall = mapped.filter(
-        (p: { name: string; tags: string; featured: boolean }) =>
-          /fall 2026/i.test(p.name) || p.featured || /fall-2026/i.test(p.tags),
-      )
-      setPrograms((fall.length ? fall : mapped).map(({ id, name }: ProgramOption) => ({ id, name })))
+        .map(
+          (p: {
+            id?: string
+            name?: string
+            fallEpClassId?: string
+            startDate?: string
+            endDate?: string
+            registrationOpen?: boolean
+            featured?: boolean
+          }) => ({
+            id: String(p.id ?? ''),
+            name: String(p.name ?? ''),
+            fallEpClassId: String(p.fallEpClassId ?? ''),
+            startDate: String(p.startDate ?? ''),
+            endDate: String(p.endDate ?? ''),
+            registrationOpen: p.registrationOpen === true,
+            featured: p.featured === true,
+          }),
+        )
+        .filter((p: ProgramPickerRow) => p.id)
+      setAllPrograms(mapped)
     }
   }, [])
 
@@ -457,7 +483,17 @@ export function StaffRoleManager() {
 
       {programs.length ? (
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-wide text-[#5A6070] mb-1.5">Class assignment</p>
+          <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-[#5A6070]">Class assignment</p>
+            <label className="inline-flex items-center gap-1.5 text-[11px] text-[#5A6070]">
+              <input
+                type="checkbox"
+                checked={showOlderPrograms}
+                onChange={(e) => setShowOlderPrograms(e.target.checked)}
+              />
+              Show older programs
+            </label>
+          </div>
           <div className="flex flex-wrap gap-2">
             {programs.map((program) => {
               const selected = assignedProgramIds
