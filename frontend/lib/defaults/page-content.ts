@@ -233,6 +233,22 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body:
       'Catalog cards, landing pages, registration form, Spring companion blocks, and program contact forms (key|text in stringOverrides).',
   }),
+  'newsletter-signup': empty('newsletter-signup', {
+    title: 'Newsletter signup form',
+    body: 'Subscribe block on /newsletter and related CTAs (key|text in stringOverrides).',
+  }),
+  'contact-form': empty('contact-form', {
+    title: 'Contact form',
+    body: 'General inquiry form on /contact (key|text in stringOverrides).',
+  }),
+  'events-strings': empty('events-strings', {
+    title: 'Events page shell',
+    body: 'Empty states, event ideas section, and newsletter CTA below the hero (key|text in stringOverrides).',
+  }),
+  'fundraising-strings': empty('fundraising-strings', {
+    title: 'Fundraising page shell',
+    body: 'Hero progress labels and section headings below PageHero (key|text in stringOverrides).',
+  }),
   'visitor-videos': empty('visitor-videos', {
     title: 'Parent video sections',
     body: 'Video block copy on membership, board, Cove, and portal videos pages.',

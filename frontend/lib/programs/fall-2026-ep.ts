@@ -229,9 +229,16 @@ export function selectCurrentFall2026Programs<
     if (!candidates.length) continue
     candidates.sort((a, b) => fall2026CandidateScore(b) - fall2026CandidateScore(a))
     const winner = candidates[0]
-    // Need Fall 2026 dates, or linked id plus open/featured (not id alone on an old row).
     const score = fall2026CandidateScore(winner)
-    if (score < 50) continue
+    const linkedId =
+      Boolean(String(winner.fallEpClassId ?? '').trim()) ||
+      Boolean(matchFall2026EpClass(winner.name))
+    const seasonRow =
+      hasFall2026SeasonStart(winner) ||
+      score >= 50 ||
+      (linkedId && (winner.featured || winner.registrationOpen)) ||
+      winner.featured
+    if (!seasonRow) continue
     picked.push(winner)
     used.add(winner.id)
   }

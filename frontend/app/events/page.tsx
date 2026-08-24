@@ -5,6 +5,8 @@ import { DepartmentContactForm } from '@/components/programs/programs-contact-fo
 import { ProgramUiCopyBoundary } from '@/components/programs/program-ui-copy-boundary'
 import { getUpcomingEvents, type WixEvent } from '@/lib/api/events'
 import { getPageContent } from '@/lib/api/page-content'
+import { getEventsPageCopy } from '@/lib/api/visitor-forms-copy'
+import { formString } from '@/lib/copy/form-string'
 import { Calendar, ArrowRight } from 'lucide-react'
 import { EventsSectionNav } from '@/components/jump-nav/public-section-navs'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
@@ -14,10 +16,12 @@ export const revalidate = 300
 export default async function EventsPage() {
   let events: WixEvent[] = []
   let error = false
-  const [{ getSiteSettings }, page] = await Promise.all([
+  const [{ getSiteSettings }, page, eventsCopy] = await Promise.all([
     import('@/lib/api/site-settings'),
     getPageContent('events'),
+    getEventsPageCopy(),
   ])
+  const es = (key: string) => vanillaizeIfDemo(formString(eventsCopy, key, key))
   const settings = await getSiteSettings()
   const inSession = settings.getBool('schoolInSession', false)
   const eventsEmail = settings.get('contactEmailEvents', 'vp-community-events@shmspto.org')
@@ -55,12 +59,12 @@ export default async function EventsPage() {
           aria-labelledby="events-list-heading"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 id="events-list-heading" className="sr-only">All Events</h2>
+            <h2 id="events-list-heading" className="sr-only">{es('list.heading')}</h2>
 
             {error && (
               <div className="text-center py-16">
-                <p className="text-[#5A6070] text-lg">
-                  Unable to load events right now. Please try again later.
+                <p className="text-[#5A6070] text-lg whitespace-pre-line">
+                  {es('list.loadError')}
                 </p>
               </div>
             )}
@@ -68,8 +72,8 @@ export default async function EventsPage() {
             {!error && events.length === 0 && (
               <div className="text-center py-16">
                 <Calendar className="w-12 h-12 mx-auto mb-4 text-[#C4BAA8]" />
-                <p className="text-[#5A6070] text-lg font-medium">No upcoming events scheduled.</p>
-                <p className="text-[#5A6070] text-sm mt-2">Check back soon. Events are added regularly.</p>
+                <p className="text-[#5A6070] text-lg font-medium whitespace-pre-line">{es('list.emptyTitle')}</p>
+                <p className="text-[#5A6070] text-sm mt-2 whitespace-pre-line">{es('list.emptyBody')}</p>
               </div>
             )}
 
@@ -88,11 +92,10 @@ export default async function EventsPage() {
                 id="event-ideas-heading"
                 className="mb-3 text-2xl font-bold text-[#1A1A1A] sm:text-3xl"
               >
-                Have an event idea?
+                {es('ideas.title')}
               </h2>
-              <p className="mx-auto max-w-xl text-[#5A6070]">
-                Parents and community members can suggest celebrations, family nights, and fundraisers.
-                Ideas go to the VP of Events.
+              <p className="mx-auto max-w-xl text-[#5A6070] whitespace-pre-line">
+                {es('ideas.intro')}
               </p>
             </div>
             <ProgramUiCopyBoundary>
@@ -104,17 +107,17 @@ export default async function EventsPage() {
         <section id="newsletter" className="scroll-mt-28 py-14 bg-white border-t border-[var(--border)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">
-              Never miss an event
+              {es('newsletter.title')}
             </h2>
-            <p className="text-[#5A6070] mb-6 max-w-xl mx-auto">
-              Subscribe to our newsletter and get event reminders delivered straight to your inbox.
+            <p className="text-[#5A6070] mb-6 max-w-xl mx-auto whitespace-pre-line">
+              {es('newsletter.body')}
             </p>
             <a
               href="/newsletter"
               className="inline-flex items-center gap-2 font-semibold text-white px-6 py-3 rounded-lg transition-opacity hover:opacity-90"
               style={{ backgroundColor: 'var(--brand-green)' }}
             >
-              Subscribe to Newsletter
+              {es('newsletter.cta')}
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </a>
           </div>

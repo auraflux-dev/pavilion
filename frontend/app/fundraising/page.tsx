@@ -4,6 +4,8 @@ import { getFundraisingAnnualGoal, getFundraisingTotals } from '@/lib/api/fundra
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getFundraisingCTAs } from '@/lib/api/fundraising-ctas'
 import { getPageContent } from '@/lib/api/page-content'
+import { getFundraisingPageCopy } from '@/lib/api/visitor-forms-copy'
+import { formString } from '@/lib/copy/form-string'
 import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
 import { ProgramUiCopyBoundary } from '@/components/programs/program-ui-copy-boundary'
 import { PortalBusinessOwnerForm } from '@/components/member-portal/portal-business-owner-form'
@@ -45,7 +47,7 @@ function fmtDollars(n: number) {
 }
 
 export default async function FundraisingPage() {
-  const [data, settings, ctas, page, sponsors, allocations, annualGoal] = await Promise.all([
+  const [data, settings, ctas, page, sponsors, allocations, annualGoal, shellCopy] = await Promise.all([
     getFundraisingTotals(),
     getSiteSettings(),
     getFundraisingCTAs(),
@@ -53,7 +55,10 @@ export default async function FundraisingPage() {
     getActiveSponsors(),
     getFundAllocationActuals(),
     getFundraisingAnnualGoal(),
+    getFundraisingPageCopy(),
   ])
+  const fs = (key: string, vars?: Record<string, string | number | undefined | null>) =>
+    vanillaizeIfDemo(formString(shellCopy, key, key, vars))
   const { totals, goals, volunteerHoursRaised, volunteerHoursGoal, sponsorshipFromBank } = data
   const sponsorshipRaised =
     settings.getNumber('sponsorshipRaised', 0) + (sponsorshipFromBank ?? 0)
@@ -183,12 +188,12 @@ export default async function FundraisingPage() {
             >
               <div className="flex items-end gap-6 mb-4">
                 <div>
-                  <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-0.5">Total Raised</p>
+                  <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-0.5">{fs('hero.totalLabel')}</p>
                   <p className="text-4xl font-bold text-white">{fmtDollars(totalRaised)}</p>
                 </div>
-                <div className="pb-1 text-white/40 text-lg">of</div>
+                <div className="pb-1 text-white/40 text-lg">{fs('hero.of')}</div>
                 <div>
-                  <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-0.5">Annual Goal</p>
+                  <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-0.5">{fs('hero.goalLabel')}</p>
                   <p className="text-4xl font-bold" style={{ color: 'var(--brand-gold)' }}>{fmtDollars(ANNUAL_GOAL)}</p>
                 </div>
               </div>
@@ -203,7 +208,7 @@ export default async function FundraisingPage() {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-white/70 text-sm font-medium">{overallPct}% of annual goal</p>
+                <p className="text-white/70 text-sm font-medium">{fs('hero.goalPct', { pct: overallPct })}</p>
                 <p className="text-white/40 text-xs flex items-center gap-1">
                   <RefreshCw className="w-3 h-3" aria-hidden="true" />
                   {data.fetchedAt
@@ -232,15 +237,13 @@ export default async function FundraisingPage() {
                 className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
                 style={{ backgroundColor: 'var(--brand-green)', color: 'white' }}
               >
-                By Initiative
+                {fs('initiatives.eyebrow')}
               </div>
               <h2 className="text-3xl font-bold" style={{ color: '#1A1A1A' }}>
-                Every Way You Can Help
+                {fs('initiatives.title')}
               </h2>
-              <p className="text-[#5A6070] mt-3 max-w-xl mx-auto">
-                {vanillaizeIfDemo(
-                  'Memberships, Cove Digital Cards, event tickets, and volunteering. It all adds up.',
-                )}
+              <p className="text-[#5A6070] mt-3 max-w-xl mx-auto whitespace-pre-line">
+                {fs('initiatives.body')}
               </p>
             </div>
 
@@ -309,15 +312,13 @@ export default async function FundraisingPage() {
                 className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
                 style={{ backgroundColor: 'var(--brand-soft)', color: 'var(--brand-green)' }}
               >
-                Transparency
+                {fs('allocations.eyebrow')}
               </div>
               <h2 className="text-3xl font-bold" style={{ color: '#1A1A1A' }}>
-                Where the Funds Go
+                {fs('allocations.title')}
               </h2>
-              <p className="text-[#5A6070] mt-3">
-                {vanillaizeIfDemo(
-                  '100% of gifts support SHMS PTO programs for Stone Hill students, not the school district.',
-                )}
+              <p className="text-[#5A6070] mt-3 whitespace-pre-line">
+                {fs('allocations.body')}
               </p>
             </div>
 

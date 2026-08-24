@@ -16,6 +16,12 @@ import {
 } from '@/lib/defaults/visitor-string-defaults'
 import { PORTAL_COPY_DEFAULTS } from '@/lib/defaults/portal-copy'
 import { PROGRAM_UI_DEFAULTS } from '@/lib/defaults/program-ui-defaults'
+import {
+  CONTACT_FORM_DEFAULTS,
+  EVENTS_PAGE_DEFAULTS,
+  FUNDRAISING_PAGE_DEFAULTS,
+  NEWSLETTER_SIGNUP_DEFAULTS,
+} from '@/lib/defaults/visitor-forms-defaults'
 
 export type SiteStringSurface = 'visitor' | 'member' | 'staff' | 'legal'
 
@@ -95,6 +101,34 @@ export const SITE_PAGE_THEME_REGISTRY: SitePageThemeEntry[] = [
     route: '/programs',
     fields: 'catalog, landing, registration, Spring companion, contact forms',
     stringKeys: Object.keys(PROGRAM_UI_DEFAULTS),
+  },
+  {
+    page: 'newsletter-signup',
+    surface: 'visitor',
+    route: '/newsletter',
+    fields: 'newsletter signup form labels and messages',
+    stringKeys: Object.keys(NEWSLETTER_SIGNUP_DEFAULTS),
+  },
+  {
+    page: 'contact-form',
+    surface: 'visitor',
+    route: '/contact',
+    fields: 'contact form labels, topics, and thank-you copy',
+    stringKeys: Object.keys(CONTACT_FORM_DEFAULTS),
+  },
+  {
+    page: 'events-strings',
+    surface: 'visitor',
+    route: '/events',
+    fields: 'list empty states, event ideas, newsletter CTA',
+    stringKeys: Object.keys(EVENTS_PAGE_DEFAULTS),
+  },
+  {
+    page: 'fundraising-strings',
+    surface: 'visitor',
+    route: '/fundraising',
+    fields: 'hero progress labels and section headings',
+    stringKeys: Object.keys(FUNDRAISING_PAGE_DEFAULTS),
   },
   {
     page: 'visitor-videos',

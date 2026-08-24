@@ -1,23 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react'
-import { HelpTip } from '@/components/ui/help-tip'
 import { trackGenerateLead } from '@/lib/ga'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { CONTACT_FORM_DEFAULTS } from '@/lib/defaults/visitor-forms-defaults'
+import { formString } from '@/lib/copy/form-string'
 
-const TOPICS = [
-  'General Question',
-  'Programs & Registration',
-  vanillaizeIfDemo('The Cove / store card'),
-  'Volunteer Opportunities',
-  'Membership',
-  'Fundraising',
-  'Event Information',
-  'Board / Governance',
-  'Other',
-]
+const TOPIC_KEYS = [
+  'form.topic.general',
+  'form.topic.programs',
+  'form.topic.cove',
+  'form.topic.volunteer',
+  'form.topic.membership',
+  'form.topic.fundraising',
+  'form.topic.events',
+  'form.topic.board',
+  'form.topic.other',
+] as const
 
 interface FormState {
   name: string
@@ -26,7 +27,20 @@ interface FormState {
   message: string
 }
 
-export function ContactForm() {
+type Props = {
+  copy?: Record<string, string>
+}
+
+export function ContactForm({ copy }: Props) {
+  const strings = { ...CONTACT_FORM_DEFAULTS, ...copy }
+  const t = (key: string) => vanillaizeIfDemo(formString(strings, key, key))
+
+  const topics = useMemo(
+    () => TOPIC_KEYS.map((key) => ({ key, label: t(key) })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- copy prop is stable per page load
+    [copy],
+  )
+
   const [form, setForm] = useState<FormState>({ name: '', email: '', topic: '', message: '' })
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'preview' | 'error'>('idle')
 
@@ -63,12 +77,10 @@ export function ContactForm() {
           <CheckCircle2 className="w-8 h-8" style={{ color: 'var(--brand-green)' }} />
         </div>
         <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">
-          {status === 'preview' ? 'Preview only' : 'Message sent!'}
+          {status === 'preview' ? t('form.previewTitle') : t('form.successTitle')}
         </h3>
-        <p className="text-[#5A6070] text-sm max-w-xs mx-auto">
-          {status === 'preview'
-            ? 'This demo does not send mail. On a live school, a board member would reply within one business day.'
-            : 'Thank you for reaching out. A PTO board member will get back to you within one business day.'}
+        <p className="text-[#5A6070] text-sm max-w-xs mx-auto whitespace-pre-line">
+          {status === 'preview' ? t('form.previewBody') : t('form.successBody')}
         </p>
       </div>
     )
@@ -76,13 +88,12 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 lg:p-8 shadow-sm space-y-5">
-      <h2 className="text-xl font-bold text-[#1A1A1A]">Send us a message</h2>
+      <h2 className="text-xl font-bold text-[#1A1A1A]">{t('form.title')}</h2>
 
-      {/* Name + Email */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="contact-name" className="block text-sm font-medium text-[#1A1A1A] mb-1.5">
-            Your name <span className="text-red-500">*</span>
+            {t('form.nameLabel')} <span className="text-red-500">*</span>
           </label>
           <input
             id="contact-name"
@@ -96,7 +107,7 @@ export function ContactForm() {
         </div>
         <div>
           <label htmlFor="contact-email" className="block text-sm font-medium text-[#1A1A1A] mb-1.5">
-            Email address <span className="text-red-500">*</span>
+            {t('form.emailLabel')} <span className="text-red-500">*</span>
           </label>
           <input
             id="contact-email"
@@ -110,10 +121,9 @@ export function ContactForm() {
         </div>
       </div>
 
-      {/* Topic */}
       <div>
         <label htmlFor="contact-topic" className="block text-sm font-medium text-[#1A1A1A] mb-1.5">
-          Topic <span className="text-red-500">*</span>
+          {t('form.topicLabel')} <span className="text-red-500">*</span>
         </label>
         <select
           id="contact-topic"
@@ -123,34 +133,29 @@ export function ContactForm() {
           className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20 focus:border-[var(--brand-green)] transition-colors bg-white"
         >
           <option value="" disabled>Select a topic…</option>
-          {TOPICS.map((t) => (
-            <option key={t} value={t}>{t}</option>
+          {topics.map(({ key, label }) => (
+            <option key={key} value={label}>{label}</option>
           ))}
         </select>
       </div>
 
-      {/* Message */}
       <div>
         <label htmlFor="contact-message" className="block text-sm font-medium text-[#1A1A1A] mb-1.5">
-          Message <span className="text-red-500">*</span>{' '}
-          <HelpTip tipKey="contact.response.time" label="Response time" />
+          {t('form.messageLabel')} <span className="text-red-500">*</span>
         </label>
         <textarea
           id="contact-message"
           required
-          minLength={10}
-          maxLength={4000}
           rows={5}
           value={form.message}
           onChange={update('message')}
-          placeholder="How can we help?"
+          placeholder={t('form.messagePlaceholder')}
           className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20 focus:border-[var(--brand-green)] transition-colors resize-none"
         />
-        <p className="mt-1 text-[11px] text-[#5A6070]">At least 10 characters.</p>
       </div>
 
       {status === 'error' && (
-        <p className="text-sm text-red-600">Something went wrong. Please try again or email us directly.</p>
+        <p className="text-sm text-red-600">{t('form.error')}</p>
       )}
 
       <Button
@@ -161,9 +166,9 @@ export function ContactForm() {
         style={{ backgroundColor: 'var(--brand-green)' }}
       >
         {status === 'loading' ? (
-          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending…</>
+          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('form.sending')}</>
         ) : (
-          <>Send Message <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5" /></>
+          <>{t('form.submit')} <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5" /></>
         )}
       </Button>
 

@@ -32,6 +32,12 @@ export const PORTAL_NOTICE_DEFAULTS: Record<string, string> = {
 }
 
 import { PROGRAM_UI_DEFAULTS } from '@/lib/defaults/program-ui-defaults'
+import {
+  CONTACT_FORM_DEFAULTS,
+  EVENTS_PAGE_DEFAULTS,
+  FUNDRAISING_PAGE_DEFAULTS,
+  NEWSLETTER_SIGNUP_DEFAULTS,
+} from '@/lib/defaults/visitor-forms-defaults'
 import { PORTAL_FORM_DEFAULTS } from '@/lib/defaults/portal-form-defaults'
 import { STAFF_PORTAL_DEFAULTS } from '@/lib/defaults/staff-portal-defaults'
 import {
@@ -50,6 +56,10 @@ export const SITE_STRING_DEFAULTS: Record<string, Record<string, string>> = {
   'staff-portal': STAFF_PORTAL_DEFAULTS,
   'programs-curriculum': CURRICULUM_PAGE_DEFAULTS,
   'program-strings': PROGRAM_UI_DEFAULTS,
+  'newsletter-signup': NEWSLETTER_SIGNUP_DEFAULTS,
+  'contact-form': CONTACT_FORM_DEFAULTS,
+  'events-strings': EVENTS_PAGE_DEFAULTS,
+  'fundraising-strings': FUNDRAISING_PAGE_DEFAULTS,
   'visitor-videos': VISITOR_VIDEO_DEFAULTS,
   'donate-form': DONATE_FORM_DEFAULTS,
   'rfc-promo': RFC_DEFAULTS,

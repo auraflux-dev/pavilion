@@ -2,6 +2,7 @@ import { PageHero } from '@/components/page-hero'
 import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { NewsletterSignup } from '@/components/newsletter/newsletter-signup'
 import { getPageContent } from '@/lib/api/page-content'
+import { getNewsletterSignupCopy } from '@/lib/api/visitor-forms-copy'
 import { Mail, Bell, Calendar, BookOpen } from 'lucide-react'
 
 const NEWSLETTER_PERKS = [
@@ -28,7 +29,10 @@ const NEWSLETTER_PERKS = [
 ]
 
 export default async function NewsletterPage() {
-  const page = await getPageContent('newsletter')
+  const [page, signupCopy] = await Promise.all([
+    getPageContent('newsletter'),
+    getNewsletterSignupCopy(),
+  ])
 
   return (
     <VisitorChrome pageKey="newsletter">
@@ -67,7 +71,7 @@ export default async function NewsletterPage() {
 
               {/* Right: form */}
               <div>
-                <NewsletterSignup />
+                <NewsletterSignup copy={signupCopy} />
               </div>
             </div>
           </div>

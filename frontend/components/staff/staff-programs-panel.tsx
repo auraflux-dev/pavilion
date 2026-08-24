@@ -171,14 +171,42 @@ export function StaffProgramsPanel() {
   const [attDraft, setAttDraft] = useState<Record<string, { status: string; notes: string }>>({})
 
   const visiblePrograms = useMemo(() => {
-    if (showOlderPrograms) return sortProgramsByDisplayOrder(programs)
-    if (visibleIdOrder.length === 0) {
-      return sortProgramsByDisplayOrder(selectCurrentFall2026Programs(programs))
+    const pool = showOlderPrograms
+      ? sortProgramsByDisplayOrder(programs)
+      : sortProgramsByDisplayOrder(selectCurrentFall2026Programs(programs))
+
+    if (visibleIdOrder.length === 0) return pool
+
+    const poolById = new Map(pool.map((p) => [p.id, p]))
+    const ordered = visibleIdOrder.map((id) => poolById.get(id)).filter(Boolean) as Program[]
+    // Stale order (e.g. before programs finished loading): show the current pool.
+    if (ordered.length === 0) return pool
+    for (const p of pool) {
+      if (!ordered.some((row) => row.id === p.id)) ordered.push(p)
     }
-    const byId = new Map(programs.map((p) => [p.id, p]))
-    return visibleIdOrder.map((id) => byId.get(id)).filter(Boolean) as Program[]
+    return ordered
   }, [programs, showOlderPrograms, visibleIdOrder])
 
+  useEffect(() => {
+    if (programs.length === 0 || dragId) return
+    const pool = showOlderPrograms
+      ? sortProgramsByDisplayOrder(programs)
+      : sortProgramsByDisplayOrder(selectCurrentFall2026Programs(programs))
+    if (pool.length === 0) {
+      setVisibleIdOrder([])
+      return
+    }
+    setVisibleIdOrder((prev) => {
+      if (prev.length === 0) return pool.map((p) => p.id)
+      const poolIds = new Set(pool.map((p) => p.id))
+      const kept = prev.filter((id) => poolIds.has(id))
+      if (kept.length === 0) return pool.map((p) => p.id)
+      for (const p of pool) {
+        if (!kept.includes(p.id)) kept.push(p.id)
+      }
+      return kept
+    })
+  }, [programs, showOlderPrograms, dragId])
 
   const load = useCallback(async () => {
     try {

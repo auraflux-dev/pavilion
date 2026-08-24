@@ -4,6 +4,7 @@ import { PageHero } from '@/components/page-hero'
 import { Mail, MapPin, Clock } from 'lucide-react'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
+import { getContactFormCopy } from '@/lib/api/visitor-forms-copy'
 import { CONTACT_DEFAULTS } from '@/lib/defaults/page-content'
 import { normalizeStaffInbox, resolveTreasurerInboxes } from '@/lib/staff/inbox'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
@@ -18,9 +19,10 @@ export async function generateMetadata() {
 export const revalidate = 300
 
 export default async function ContactPage() {
-  const [settings, page] = await Promise.all([
+  const [settings, page, formCopy] = await Promise.all([
     getSiteSettings(),
     getPageContent('contact'),
+    getContactFormCopy(),
   ])
 
   const general = normalizeStaffInbox(
@@ -109,7 +111,7 @@ export default async function ContactPage() {
               </div>
 
               <div className="lg:col-span-3">
-                <ContactForm />
+                <ContactForm copy={formCopy} />
               </div>
             </div>
           </div>
