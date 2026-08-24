@@ -5,6 +5,7 @@ import { getSiteSettings } from '@/lib/api/site-settings'
 import { getFundraisingCTAs } from '@/lib/api/fundraising-ctas'
 import { getPageContent } from '@/lib/api/page-content'
 import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
+import { ProgramUiCopyBoundary } from '@/components/programs/program-ui-copy-boundary'
 import { PortalBusinessOwnerForm } from '@/components/member-portal/portal-business-owner-form'
 import { getActiveSponsors } from '@/lib/api/sponsors'
 import { DEFAULT_SPONSORSHIP_INBOXES, parseStaffInboxes } from '@/lib/staff/inbox'
@@ -427,7 +428,9 @@ export default async function FundraisingPage() {
             )}
 
             <div id="become-a-sponsor" className="scroll-mt-28">
+            <ProgramUiCopyBoundary>
               <DepartmentContactForm toEmail={sponsorshipEmail} variant="sponsorship" />
+            </ProgramUiCopyBoundary>
             </div>
 
             <div className="mt-12 max-w-xl mx-auto">

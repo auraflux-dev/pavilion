@@ -16,6 +16,7 @@ import { fallEpClassById, matchFall2026EpClass } from '@/lib/programs/fall-2026-
 import { resolveProgramLandingCopy } from '@/lib/programs/resolve-landing-copy'
 import type { ProgramLandingCopy } from '@/lib/programs/landing-copy'
 import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
+import { useProgramUiCopy, ui } from '@/components/programs/program-ui-copy-context'
 import {
   CATALOG_SEASON_LABELS,
   resolveProgramSeason,
@@ -41,6 +42,7 @@ export function ProgramLanding({
   /** Server-resolved CMS + fallback copy */
   landingCopy?: ProgramLandingCopy | null
 }) {
+  const uiCopy = useProgramUiCopy()
   const [copied, setCopied] = useState(false)
   const [curriculumOpen, setCurriculumOpen] = useState(false)
   const title = displayProgramName(program.name)
@@ -48,7 +50,7 @@ export function ProgramLanding({
     fallEpClassById(String(program.fallEpClassId ?? '').trim()) ||
     matchFall2026EpClass(program.name)
   const season = resolveProgramSeason(program)
-  const copy =
+  const landingCopy =
     landingCopyProp ??
     resolveProgramLandingCopy(program, ep?.id, season)
   const seasonLabel =
@@ -68,9 +70,9 @@ export function ProgramLanding({
   const lastNight = meetingDates[meetingDates.length - 1] || program.endDate
   const badge = programDateBadge(firstNight)
   const feeLabel = feeTbd
-    ? 'Tuition TBD'
+    ? ui(uiCopy, 'register.tuitionTbd')
     : program.fee === 0
-      ? 'Free'
+      ? ui(uiCopy, 'register.free')
       : program.fee != null
         ? `$${program.fee}`
         : null
@@ -82,10 +84,10 @@ export function ProgramLanding({
   const sessionCount = meetingDates.length || Number(program.durationWeeks ?? 0) || 0
   const memberDiscountNote = String(program.memberDiscountNote ?? '').trim()
   const flyer = program.image || ''
-  const landingVideo = resolveLandingVideo(copy?.videoUrl)
-  const pitch = copy?.pitch ?? ''
-  const highlights = copy?.highlights ?? []
-  const curriculum = copy?.curriculum ?? []
+  const landingVideo = resolveLandingVideo(landingCopy?.videoUrl)
+  const pitch = landingCopy?.pitch ?? ''
+  const highlights = landingCopy?.highlights ?? []
+  const curriculum = landingCopy?.curriculum ?? []
 
   async function copyShareLink() {
     if (typeof window === 'undefined') return
@@ -113,14 +115,14 @@ export function ProgramLanding({
             className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--brand-green)] hover:opacity-80"
           >
             <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-            All programs
+            {ui(uiCopy, 'landing.backLink')}
           </Link>
 
           <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
             <div className="lg:col-span-5 space-y-5">
               <header className="space-y-3">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--brand-green)]">
-                  {copy?.eyebrow ||
+                  {landingCopy?.eyebrow ||
                     `${seasonLabel}${program.category ? ` · ${program.category}` : ''}`}
                 </p>
                 <h1 className="text-3xl sm:text-4xl font-bold text-[#1A1A1A] tracking-tight text-balance leading-[1.15]">
@@ -135,7 +137,7 @@ export function ProgramLanding({
 
               <aside
                 className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5 space-y-3 shadow-sm"
-                aria-label="Class summary"
+                aria-label={ui(uiCopy, 'landing.classSummary')}
               >
                 <div className="flex items-start gap-3">
                   {badge ? (
@@ -182,19 +184,19 @@ export function ProgramLanding({
                 <dl className="grid grid-cols-2 gap-2 text-sm border-t border-[var(--border)] pt-3">
                   {instructor ? (
                     <>
-                      <dt className="text-[#5A6070]">Instructor</dt>
+                      <dt className="text-[#5A6070]">{ui(uiCopy, 'landing.instructor')}</dt>
                       <dd className="font-semibold text-[#1A1A1A] text-right">{instructor}</dd>
                     </>
                   ) : null}
                   {program.grades ? (
                     <>
-                      <dt className="text-[#5A6070]">Grades</dt>
+                      <dt className="text-[#5A6070]">{ui(uiCopy, 'landing.grades')}</dt>
                       <dd className="font-semibold text-[#1A1A1A] text-right">{program.grades}</dd>
                     </>
                   ) : null}
                   {feeLabel ? (
                     <>
-                      <dt className="text-[#5A6070]">Tuition</dt>
+                      <dt className="text-[#5A6070]">{ui(uiCopy, 'landing.tuition')}</dt>
                       <dd className="font-semibold text-[#1A1A1A] text-right whitespace-pre-line">
                         {feeLabel}
                         {memberDiscountNote ? `\n${memberDiscountNote}` : ''}
@@ -205,7 +207,7 @@ export function ProgramLanding({
                     <>
                       <dt className="text-[#5A6070] flex items-center gap-1">
                         <Users className="w-3.5 h-3.5" aria-hidden="true" />
-                        Spots
+                        {ui(uiCopy, 'landing.spots')}
                       </dt>
                       <dd className="font-semibold text-[#1A1A1A] text-right">{program.capacity}</dd>
                     </>
@@ -223,8 +225,7 @@ export function ProgramLanding({
 
               {priorityUntilLabel ? (
                 <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-                  Open to paid PTO members only until {priorityUntilLabel}. Then registration opens
-                  to all signed-in parents.
+                  {ui(uiCopy, 'catalog.priorityBanner', { until: priorityUntilLabel })}
                 </p>
               ) : null}
 
@@ -235,7 +236,9 @@ export function ProgramLanding({
                   asChild
                 >
                   <a href="#register">
-                    {program.registrationOpen ? 'Register now' : 'Registration opens soon'}
+                    {program.registrationOpen
+                      ? ui(uiCopy, 'landing.registerNow')
+                      : ui(uiCopy, 'landing.registrationOpensSoon')}
                   </a>
                 </Button>
                 {curriculum.length > 0 ? (
@@ -246,7 +249,9 @@ export function ProgramLanding({
                     onClick={() => setCurriculumOpen((v) => !v)}
                     aria-expanded={curriculumOpen}
                   >
-                    {curriculumOpen ? 'Hide curriculum' : 'View curriculum'}
+                    {curriculumOpen
+                      ? ui(uiCopy, 'landing.hideCurriculum')
+                      : ui(uiCopy, 'landing.viewCurriculum')}
                   </Button>
                 ) : null}
                 <Button
@@ -256,14 +261,16 @@ export function ProgramLanding({
                   onClick={copyShareLink}
                 >
                   <Link2 className="w-4 h-4 mr-2" aria-hidden="true" />
-                  {copied ? 'Link copied' : 'Copy class link'}
+                  {copied ? ui(uiCopy, 'landing.linkCopied') : ui(uiCopy, 'landing.copyLink')}
                 </Button>
                 <p className="text-center">
                   <Link
                     href={scheduleHref}
                     className="text-sm font-semibold text-[var(--brand-green)] hover:underline underline-offset-2"
                   >
-                    {season === 'spring-2027' ? 'Spring 2027 schedule' : 'Fall 2026 schedule'}
+                    {season === 'spring-2027'
+                      ? ui(uiCopy, 'landing.springScheduleLink')
+                      : ui(uiCopy, 'landing.fallScheduleLink')}
                   </Link>
                 </p>
               </div>
@@ -274,7 +281,7 @@ export function ProgramLanding({
                   className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5"
                 >
                   <h2 className="text-sm font-bold text-[#1A1A1A] mb-3">
-                    {copy?.curriculumTitle || 'Curriculum'}
+                    {landingCopy?.curriculumTitle || ui(uiCopy, 'landing.curriculumHeading')}
                   </h2>
                   <ol className="space-y-2 text-sm text-[#5A6070]">
                     {curriculum.map((row) => (
@@ -318,7 +325,7 @@ export function ProgramLanding({
                       title={`${title} video`}
                     >
                       <source src={landingVideo.src} />
-                      Your browser does not support embedded video.
+                      {ui(uiCopy, 'landing.videoUnsupported')}
                     </video>
                   </div>
                 ) : (
@@ -333,10 +340,11 @@ export function ProgramLanding({
                     >
                       <Play className="w-6 h-6 ml-0.5" />
                     </div>
-                    <p className="text-sm font-semibold text-[#1A1A1A]">Class video coming soon</p>
+                    <p className="text-sm font-semibold text-[#1A1A1A]">
+                      {ui(uiCopy, 'landing.noVideoTitle')}
+                    </p>
                     <p className="text-xs text-[#5A6070] max-w-sm whitespace-pre-line">
-                      {`A short intro from the instructor will land here.
-Until then, use the summary and curriculum on the left.`}
+                      {ui(uiCopy, 'landing.noVideoBody')}
                     </p>
                   </div>
                 )}

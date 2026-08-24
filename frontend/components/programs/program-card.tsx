@@ -17,6 +17,7 @@ import {
 import { MemberGate } from '@/components/member-gate'
 import { ProgramRegisterModal } from '@/components/programs/program-register-modal'
 import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
+import { useProgramUiCopy, ui } from '@/components/programs/program-ui-copy-context'
 
 interface ProgramCardProps {
   program: Program
@@ -82,6 +83,7 @@ function programCopy(html: string): { lead: string; bullets: string[] } {
 }
 
 export function ProgramCard({ program, companion = null }: ProgramCardProps) {
+  const uiCopy = useProgramUiCopy()
   const colors = getColors(program.category)
   const [registerOpen, setRegisterOpen] = useState(false)
   const comingSoon = !program.registrationOpen && (program.featured || hasTag(program, 'coming-soon'))
@@ -89,12 +91,12 @@ export function ProgramCard({ program, companion = null }: ProgramCardProps) {
   const phase = getRegistrationPhase(program)
   const statusLabel =
     phase === 'member_priority'
-      ? 'Paid members first'
+      ? ui(uiCopy, 'catalog.paidMembersFirst')
       : phase === 'open'
-        ? 'Open'
+        ? ui(uiCopy, 'catalog.open')
         : comingSoon
-          ? 'Coming Soon'
-          : 'Closed'
+          ? ui(uiCopy, 'catalog.comingSoon')
+          : ui(uiCopy, 'catalog.closed')
   const priorityUntilLabel =
     phase === 'member_priority' ? formatMemberPriorityUntil(program.memberPriorityUntil) : ''
   const { lead, bullets } = programCopy(program.description || '')
@@ -251,7 +253,7 @@ export function ProgramCard({ program, companion = null }: ProgramCardProps) {
           {program.capacity > 0 ? (
             <div className="flex items-center gap-2 text-sm text-[#5A6070]">
               <Users className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-              <span>{program.capacity} spots</span>
+              <span>{ui(uiCopy, 'catalog.spots', { count: program.capacity })}</span>
             </div>
           ) : null}
         </div>
@@ -275,8 +277,7 @@ export function ProgramCard({ program, companion = null }: ProgramCardProps) {
 
         {priorityUntilLabel ? (
           <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-4">
-            Open to paid PTO members only until {priorityUntilLabel}. Then registration opens to all
-            signed-in parents.
+            {ui(uiCopy, 'catalog.priorityBanner', { until: priorityUntilLabel })}
           </p>
         ) : null}
 
@@ -290,7 +291,7 @@ export function ProgramCard({ program, companion = null }: ProgramCardProps) {
                 style={{ backgroundColor: colors.accent }}
                 onClick={() => setRegisterOpen(true)}
               >
-                Register Now
+                {ui(uiCopy, 'catalog.registerNow')}
                 <ArrowRight
                   className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
                   aria-hidden="true"
@@ -298,7 +299,7 @@ export function ProgramCard({ program, companion = null }: ProgramCardProps) {
               </Button>
             </MemberGate>
             <Button className="w-full font-semibold mt-2" variant="outline" asChild>
-              <Link href={programPublicPath(program)}>Learn more</Link>
+              <Link href={programPublicPath(program)}>{ui(uiCopy, 'catalog.learnMore')}</Link>
             </Button>
           </>
         ) : (
@@ -309,12 +310,14 @@ export function ProgramCard({ program, companion = null }: ProgramCardProps) {
               asChild
             >
               <Link href={programPublicPath(program)} className="inline-flex items-center justify-center">
-                Learn more
+                {ui(uiCopy, 'catalog.learnMore')}
                 <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
               </Link>
             </Button>
             <Button className="w-full font-semibold mt-2" variant="outline" disabled>
-              {comingSoon ? 'Registration opens soon' : 'Registration closed'}
+              {comingSoon
+                ? ui(uiCopy, 'catalog.registrationOpensSoon')
+                : ui(uiCopy, 'catalog.registrationClosed')}
             </Button>
           </>
         )}

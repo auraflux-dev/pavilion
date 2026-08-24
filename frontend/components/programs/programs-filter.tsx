@@ -11,6 +11,7 @@ import {
   type PublicCatalogSeasonId,
 } from '@/lib/programs/season'
 import { findFallCompanion, findSpringCompanion } from '@/lib/programs/season-companion'
+import { useProgramUiCopy, ui } from '@/components/programs/program-ui-copy-context'
 
 interface ProgramsFilterProps {
   programs: Program[]
@@ -19,6 +20,7 @@ interface ProgramsFilterProps {
 }
 
 export function ProgramsFilter({ programs, springCatalogVisible }: ProgramsFilterProps) {
+  const uiCopy = useProgramUiCopy()
   const seasonTabs = visibleCatalogSeasonTabs({ reviewHost: springCatalogVisible })
   const [activeSeason, setActiveSeason] = useState<PublicCatalogSeasonId>(
     seasonTabs[0] ?? 'fall-2026',
@@ -153,7 +155,7 @@ export function ProgramsFilter({ programs, springCatalogVisible }: ProgramsFilte
       {filtered.length === 0 && (
         <div className="text-center py-16">
           <p className="text-[#5A6070] whitespace-pre-line">
-            {`No ${seasonLabel} programs listed yet.\nCheck back soon.`}
+            {ui(uiCopy, 'filter.empty', { season: seasonLabel })}
           </p>
         </div>
       )}

@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react'
 import { trackGenerateLead } from '@/lib/ga'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
-import { isPublicDemoInstance } from '@/lib/demo/instance'
-import { sponsorshipPackageSelectOptions } from '@/lib/sponsorships'
+import { useProgramUiCopy, ui } from '@/components/programs/program-ui-copy-context'
 
 type Variant = 'programs' | 'events' | 'sponsorship'
 
@@ -14,6 +13,18 @@ type Props = {
   /** Destination inbox (CMS contactEmail*) */
   toEmail: string
   variant: Variant
+}
+
+const VARIANT_PREFIX: Record<Variant, string> = {
+  programs: 'contact.programs',
+  events: 'contact.events',
+  sponsorship: 'contact.sponsorship',
+}
+
+const VARIANT_META: Record<Variant, { department: string; topic: string; messagePrefix: string }> = {
+  programs: { department: 'programs', topic: 'Programs & Registration', messagePrefix: 'Program' },
+  events: { department: 'events', topic: 'Event idea', messagePrefix: 'Event idea' },
+  sponsorship: { department: 'sponsorship', topic: 'Sponsorship inquiry', messagePrefix: 'Organization' },
 }
 
 function formatInboxList(raw: string): string {
@@ -26,71 +37,10 @@ function formatInboxList(raw: string): string {
   return `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`
 }
 
-const COPY: Record<
-  Variant,
-  {
-    department: string
-    topic: string
-    eyebrow: string
-    title: string
-    intro: string
-    optionalLabel: string
-    optionalPlaceholder: string
-    messagePlaceholder: string
-    submitLabel: string
-    successBody: string
-  }
-> = {
-  programs: {
-    department: 'programs',
-    topic: 'Programs & Registration',
-    eyebrow: 'Co-VP Fundraising & Programs',
-    title: 'Ask about a program',
-    intro: 'Questions go to',
-    optionalLabel: 'Program name',
-    optionalPlaceholder: isPublicDemoInstance()
-      ? 'e.g. Chess, Science Lab, Creative Writing'
-      : 'e.g. Robotics Foundations & Coding Mechanics, Competitive Math Prep, Young Entrepreneurs, Essay Writing',
-    messagePlaceholder: 'What would you like to know?',
-    submitLabel: 'Send question',
-    successBody:
-      'Thanks. Co-VP Fundraising & Programs will follow up within one business day during the school year.',
-  },
-  events: {
-    department: 'events',
-    topic: 'Event idea',
-    eyebrow: 'VP of Events',
-    title: 'Share an event idea',
-    intro: 'Ideas go to',
-    optionalLabel: 'Event name or theme',
-    optionalPlaceholder: isPublicDemoInstance()
-      ? 'e.g. Spring Carnival, Book Fair Night, Field Day'
-      : 'e.g. Family Fun Night, Dance Night theme',
-    messagePlaceholder: 'Tell us your idea, preferred timing, and how you might help.',
-    submitLabel: 'Send to VP of Events',
-    successBody:
-      'Thanks. Our VP of Events will review your idea and follow up within one business day during the school year.',
-  },
-  sponsorship: {
-    department: 'sponsorship',
-    topic: 'Sponsorship inquiry',
-    eyebrow: 'VP of Sponsorships',
-    title: 'Become a sponsor',
-    intro: 'Sponsorship requests go to',
-    optionalLabel: 'Business or organization',
-    optionalPlaceholder: 'e.g. Local restaurant, family business',
-    messagePlaceholder:
-      vanillaizeIfDemo(
-        'Tell us about your business, how you would like to support SHMS PTO, and the best way to reach you.',
-      ),
-    submitLabel: 'Send sponsorship request',
-    successBody:
-      'Thanks. Our VP of Sponsorships and the president will review your interest and follow up soon.',
-  },
-}
-
 export function DepartmentContactForm({ toEmail, variant }: Props) {
-  const copy = COPY[variant]
+  const uiCopy = useProgramUiCopy()
+  const prefix = VARIANT_PREFIX[variant]
+  const meta = VARIANT_META[variant]
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [optional, setOptional] = useState('')
@@ -98,36 +48,35 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
+  const messagePlaceholder =
+    variant === 'sponsorship'
+      ? vanillaizeIfDemo(ui(uiCopy, `${prefix}.messagePlaceholder`))
+      : ui(uiCopy, `${prefix}.messagePlaceholder`)
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setStatus('loading')
     try {
-      const prefix =
-        variant === 'programs'
-          ? 'Program'
-          : variant === 'events'
-            ? 'Event idea'
-            : 'Organization'
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
           email,
-          topic: copy.topic,
+          topic: meta.topic,
           message: [
-            optional.trim() ? `${prefix}: ${optional.trim()}` : '',
+            optional.trim() ? `${meta.messagePrefix}: ${optional.trim()}` : '',
             variant === 'sponsorship' && packageChoice ? `Package: ${packageChoice}` : '',
             message,
           ]
             .filter(Boolean)
             .join('\n\n'),
-          department: copy.department,
+          department: meta.department,
           assignedTo: toEmail,
         }),
       })
       if (!res.ok) throw new Error()
-      trackGenerateLead({ formId: `contact_${variant}`, leadType: copy.topic })
+      trackGenerateLead({ formId: `contact_${variant}`, leadType: meta.topic })
       setStatus('success')
     } catch {
       setStatus('error')
@@ -143,8 +92,10 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
         >
           <CheckCircle2 className="h-7 w-7" style={{ color: 'var(--brand-green)' }} aria-hidden="true" />
         </div>
-        <h3 className="mb-2 text-xl font-bold text-[#1A1A1A]">Message sent</h3>
-        <p className="text-sm text-[#5A6070]">{copy.successBody}</p>
+        <h3 className="mb-2 text-xl font-bold text-[#1A1A1A]">
+          {ui(uiCopy, 'contact.successTitle')}
+        </h3>
+        <p className="text-sm text-[#5A6070]">{ui(uiCopy, `${prefix}.success`)}</p>
       </div>
     )
   }
@@ -158,18 +109,19 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
     >
       <div className="text-left">
         <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--brand-green)' }}>
-          {copy.eyebrow}
+          {ui(uiCopy, `${prefix}.eyebrow`)}
         </p>
-        <h3 className="mt-1 text-xl font-bold text-[#1A1A1A]">{copy.title}</h3>
+        <h3 className="mt-1 text-xl font-bold text-[#1A1A1A]">{ui(uiCopy, `${prefix}.title`)}</h3>
         <p className="mt-1 text-sm text-[#5A6070]">
-          {copy.intro} {formatInboxList(toEmail)}. We usually reply within one business day.
+          {ui(uiCopy, `${prefix}.intro`)} {formatInboxList(toEmail)}.{' '}
+          {ui(uiCopy, 'contact.introSuffix')}
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor={`${idPrefix}-name`} className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
-            Your name <span className="text-red-500">*</span>
+            {ui(uiCopy, 'contact.nameLabel')} <span className="text-red-500">*</span>
           </label>
           <input
             id={`${idPrefix}-name`}
@@ -182,7 +134,7 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
         </div>
         <div>
           <label htmlFor={`${idPrefix}-email`} className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
-            Email <span className="text-red-500">*</span>
+            {ui(uiCopy, 'contact.emailLabel')} <span className="text-red-500">*</span>
           </label>
           <input
             id={`${idPrefix}-email`}
@@ -197,14 +149,15 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
 
       <div>
         <label htmlFor={`${idPrefix}-optional`} className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
-          {copy.optionalLabel} <span className="text-[#5A6070]">(optional)</span>
+          {ui(uiCopy, `${prefix}.optionalLabel`)}{' '}
+          <span className="text-[#5A6070]">{ui(uiCopy, 'contact.optionalSuffix')}</span>
         </label>
         <input
           id={`${idPrefix}-optional`}
           type="text"
           value={optional}
           onChange={(e) => setOptional(e.target.value)}
-          placeholder={copy.optionalPlaceholder}
+          placeholder={ui(uiCopy, `${prefix}.optionalPlaceholder`)}
           className="w-full rounded-lg border border-[var(--border)] px-3.5 py-2.5 text-sm focus:border-[var(--brand-green)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20"
         />
       </div>
@@ -212,7 +165,8 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
       {variant === 'sponsorship' ? (
         <div>
           <label htmlFor={`${idPrefix}-package`} className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
-            Package of interest <span className="text-[#5A6070]">(optional)</span>
+            {ui(uiCopy, 'contact.packageLabel')}{' '}
+            <span className="text-[#5A6070]">{ui(uiCopy, 'contact.optionalSuffix')}</span>
           </label>
           <select
             id={`${idPrefix}-package`}
@@ -220,19 +174,17 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
             onChange={(e) => setPackageChoice(e.target.value)}
             className="w-full rounded-lg border border-[var(--border)] px-3.5 py-2.5 text-sm bg-white focus:border-[var(--brand-green)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20"
           >
-            <option value="">Not sure yet</option>
-            {sponsorshipPackageSelectOptions(isPublicDemoInstance()).map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
+            <option value="">{ui(uiCopy, 'contact.packageNotSure')}</option>
+            <option value="Platinum: $2,500">Platinum: $2,500</option>
+            <option value="Gold: $1,500">Gold: $1,500</option>
+            <option value="Silver: $500">Silver: $500</option>
           </select>
         </div>
       ) : null}
 
       <div>
         <label htmlFor={`${idPrefix}-message`} className="mb-1.5 block text-sm font-medium text-[#1A1A1A]">
-          Message <span className="text-red-500">*</span>
+          {ui(uiCopy, 'contact.messageLabel')} <span className="text-red-500">*</span>
         </label>
         <textarea
           id={`${idPrefix}-message`}
@@ -240,14 +192,14 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
           rows={4}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder={copy.messagePlaceholder}
+          placeholder={messagePlaceholder}
           className="w-full resize-none rounded-lg border border-[var(--border)] px-3.5 py-2.5 text-sm focus:border-[var(--brand-green)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/20"
         />
       </div>
 
       {status === 'error' ? (
         <p className="text-sm text-red-600">
-          Something went wrong. Please try again or email{' '}
+          {ui(uiCopy, 'contact.err.failed')}{' '}
           <a href={`mailto:${toEmail}`} className="underline">
             {toEmail}
           </a>
@@ -264,11 +216,11 @@ export function DepartmentContactForm({ toEmail, variant }: Props) {
       >
         {status === 'loading' ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {ui(uiCopy, 'contact.sending')}
           </>
         ) : (
           <>
-            {copy.submitLabel}
+            {ui(uiCopy, `${prefix}.submit`)}
             <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
           </>
         )}

@@ -15,6 +15,7 @@ import {
   VISITOR_VIDEO_DEFAULTS,
 } from '@/lib/defaults/visitor-string-defaults'
 import { PORTAL_COPY_DEFAULTS } from '@/lib/defaults/portal-copy'
+import { PROGRAM_UI_DEFAULTS } from '@/lib/defaults/program-ui-defaults'
 
 export type SiteStringSurface = 'visitor' | 'member' | 'staff' | 'legal'
 
@@ -87,6 +88,13 @@ export const SITE_PAGE_THEME_REGISTRY: SitePageThemeEntry[] = [
     route: '/programs/curriculum',
     fields: 'curriculum index + print doc chrome',
     stringKeys: Object.keys(CURRICULUM_PAGE_DEFAULTS),
+  },
+  {
+    page: 'program-strings',
+    surface: 'visitor',
+    route: '/programs',
+    fields: 'catalog, landing, registration, Spring companion, contact forms',
+    stringKeys: Object.keys(PROGRAM_UI_DEFAULTS),
   },
   {
     page: 'visitor-videos',

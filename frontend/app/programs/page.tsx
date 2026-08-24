@@ -5,6 +5,7 @@ import { DepartmentContactForm } from '@/components/programs/programs-contact-fo
 import { getAllPrograms, type Program } from '@/lib/api/programs'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
+import { getProgramUiCopy, programUiString } from '@/lib/api/program-ui-copy'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
 import {
@@ -32,7 +33,11 @@ export default async function ProgramsPage({
   const access = await canViewProgramsCatalogNow({ previewToken })
   const reviewHost = await isProgramsReviewHost()
 
-  const [settings, page] = await Promise.all([getSiteSettings(), getPageContent('programs')])
+  const [settings, page, programUi] = await Promise.all([
+    getSiteSettings(),
+    getPageContent('programs'),
+    getProgramUiCopy(),
+  ])
   const programsEmail =
     parseStaffInboxes(
       settings.get('contactEmailPrograms', DEFAULT_PROGRAMS_INBOXES),
@@ -91,13 +96,13 @@ export default async function ProgramsPage({
             <BrandImageWash src="/home/hero-a.jpg" side="left" />
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <h2 id="programs-list-heading" className="sr-only">
-                Enrichment by season
+                {programUiString(programUi, 'page.listHeading')}
               </h2>
 
               {error && (
                 <div className="text-center py-16">
                   <p className="text-[#5A6070] text-lg">
-                    Unable to load programs right now. Please try again later.
+                    {programUiString(programUi, 'page.loadError')}
                   </p>
                 </div>
               )}
@@ -105,7 +110,7 @@ export default async function ProgramsPage({
               {!error && programs.length === 0 && (
                 <div className="text-center py-16">
                   <p className="text-[#5A6070] text-lg">
-                    No programs are currently listed. Check back soon!
+                    {programUiString(programUi, 'page.emptyList')}
                   </p>
                 </div>
               )}
@@ -145,11 +150,10 @@ export default async function ProgramsPage({
                 id="programs-contact-heading"
                 className="mb-3 text-2xl font-bold text-[#1A1A1A] sm:text-3xl"
               >
-                Questions about a program?
+                {programUiString(programUi, 'page.contactTitle')}
               </h2>
               <p className="mx-auto max-w-xl text-[#5A6070] whitespace-pre-line">
-                {`Message Co-VP Fundraising & Programs.
-The president is copied so your note is not sitting in one inbox alone.`}
+                {programUiString(programUi, 'page.contactIntro')}
               </p>
             </div>
             <DepartmentContactForm toEmail={programsEmail} variant="programs" />

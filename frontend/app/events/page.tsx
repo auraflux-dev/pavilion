@@ -2,6 +2,7 @@ import { EventsFilter } from '@/components/events/events-filter'
 import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { PageHero } from '@/components/page-hero'
 import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
+import { ProgramUiCopyBoundary } from '@/components/programs/program-ui-copy-boundary'
 import { getUpcomingEvents, type WixEvent } from '@/lib/api/events'
 import { getPageContent } from '@/lib/api/page-content'
 import { Calendar, ArrowRight } from 'lucide-react'
@@ -94,7 +95,9 @@ export default async function EventsPage() {
                 Ideas go to the VP of Events.
               </p>
             </div>
-            <DepartmentContactForm toEmail={eventsEmail} variant="events" />
+            <ProgramUiCopyBoundary>
+              <DepartmentContactForm toEmail={eventsEmail} variant="events" />
+            </ProgramUiCopyBoundary>
           </div>
         </section>
 

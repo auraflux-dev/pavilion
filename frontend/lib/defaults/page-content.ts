@@ -228,6 +228,11 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     title: 'Program curriculum pages',
     body: 'Curriculum index and print doc chrome (key|text in stringOverrides).',
   }),
+  'program-strings': empty('program-strings', {
+    title: 'Programs UI copy',
+    body:
+      'Catalog cards, landing pages, registration form, Spring companion blocks, and program contact forms (key|text in stringOverrides).',
+  }),
   'visitor-videos': empty('visitor-videos', {
     title: 'Parent video sections',
     body: 'Video block copy on membership, board, Cove, and portal videos pages.',

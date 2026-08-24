@@ -31,6 +31,7 @@ export const PORTAL_NOTICE_DEFAULTS: Record<string, string> = {
   safetyGateHint: 'Complete student safety profiles before program registration',
 }
 
+import { PROGRAM_UI_DEFAULTS } from '@/lib/defaults/program-ui-defaults'
 import { PORTAL_FORM_DEFAULTS } from '@/lib/defaults/portal-form-defaults'
 import { STAFF_PORTAL_DEFAULTS } from '@/lib/defaults/staff-portal-defaults'
 import {
@@ -48,6 +49,7 @@ export const SITE_STRING_DEFAULTS: Record<string, Record<string, string>> = {
   'portal-forms': PORTAL_FORM_DEFAULTS,
   'staff-portal': STAFF_PORTAL_DEFAULTS,
   'programs-curriculum': CURRICULUM_PAGE_DEFAULTS,
+  'program-strings': PROGRAM_UI_DEFAULTS,
   'visitor-videos': VISITOR_VIDEO_DEFAULTS,
   'donate-form': DONATE_FORM_DEFAULTS,
   'rfc-promo': RFC_DEFAULTS,
