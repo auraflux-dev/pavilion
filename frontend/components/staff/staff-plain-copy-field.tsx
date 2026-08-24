@@ -8,6 +8,8 @@ type StaffPlainCopyFieldProps = {
   onChange: (next: string) => void
   /** Called with normalized plain text (HTML stripped, newlines kept). */
   onCommit?: (normalized: string) => void
+  /** When false, blur only normalizes locally; parent Save button persists. */
+  saveOnBlur?: boolean
   rows?: number
   placeholder?: string
   hint?: string
@@ -25,6 +27,7 @@ export function StaffPlainCopyField({
   value,
   onChange,
   onCommit,
+  saveOnBlur = true,
   rows = 4,
   placeholder = 'Press Enter for a new line. Start bullets with • or -.',
   hint,
@@ -58,7 +61,10 @@ export function StaffPlainCopyField({
           'w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#1A1A1A] whitespace-pre-wrap'
         }
         onChange={(e) => onChange(e.target.value)}
-        onBlur={commit}
+        onBlur={saveOnBlur ? commit : () => {
+          const next = normalizePlainCopy(value)
+          if (next !== value) onChange(next)
+        }}
       />
     </div>
   )

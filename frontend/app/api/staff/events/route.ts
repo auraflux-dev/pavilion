@@ -9,6 +9,7 @@ import {
   wixEventsErrorMessage,
 } from '@/lib/wix/events-api'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
+import { revalidatePublicEvents } from '@/lib/staff/revalidate-public'
 
 const STAFF_EVENTS_API_VERSION = 3
 
@@ -108,6 +109,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    revalidatePublicEvents()
     return NextResponse.json({
       ok: true,
       id,
@@ -195,6 +197,7 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
+    revalidatePublicEvents()
     return NextResponse.json({ ok: true, id, action: 'update' })
   } catch (err) {
     console.error('/api/staff/events PATCH', err)

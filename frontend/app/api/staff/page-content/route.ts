@@ -6,21 +6,21 @@ import {
   isCovePageContentKey,
   PAGE_CONTENT_DEFAULTS,
 } from '@/lib/defaults/page-content'
-import { STAFF_ROLES, type StaffProfile } from '@/lib/staff/roles'
+import type { StaffProfile } from '@/lib/staff/roles'
 import { vanillaizeCopy } from '@/lib/demo/brand'
-import { DEMO_PAGES } from '@/lib/demo/content'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { revalidatePublicPage } from '@/lib/staff/revalidate-public'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
-  if (!requireStaffRole(session?.staff ?? null, [...STAFF_ROLES])) {
+  if (!requireStaffRole(session?.staff ?? null, ['marketing', 'secretary', 'admin', 'retail'])) {
     return null
   }
   return session
 }
 
 function canEditAllPageCopy(staff: StaffProfile | null) {
-  return requireStaffRole(staff, [...STAFF_ROLES])
+  return requireStaffRole(staff, ['marketing', 'secretary', 'admin'])
 }
 
 function canEditPageCopy(staff: StaffProfile | null, page: string) {
@@ -45,64 +45,44 @@ function mapRow(item: Record<string, unknown>) {
   }
 }
 
-function pageRowFromFields(
-  page: string,
-  fields: {
-    eyebrow?: string
-    title?: string
-    body?: string
-    sectionTitle?: string
-    sectionBody?: string
-    bullets?: string[] | string
-    ctaLabel?: string
-    ctaHref?: string
-    flyerImage?: string
-  },
-  fromDefault = false,
-) {
-  const bullets = Array.isArray(fields.bullets)
-    ? fields.bullets.join('\n')
-    : String(fields.bullets ?? '')
-  return {
-    id: '',
-    page,
-    eyebrow: fields.eyebrow ?? '',
-    title: fields.title ?? '',
-    body: fields.body ?? '',
-    sectionTitle: fields.sectionTitle ?? '',
-    sectionBody: fields.sectionBody ?? '',
-    bullets,
-    ctaLabel: fields.ctaLabel ?? '',
-    ctaHref: fields.ctaHref ?? '',
-    flyerImage: fields.flyerImage ?? '',
-    active: true,
-    ...(fromDefault ? { fromDefault: true } : {}),
-  }
-}
-
 export async function GET(req: NextRequest) {
   const session = await gate(req)
   if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   try {
     const staff = session.staff
     const allPages = canEditAllPageCopy(staff)
+    const client = getWixClient()
+    const result = await client.items.query('PageContent').ascending('page').limit(100).find()
+    let pages = (result.items ?? []).map((i) => mapRow(i as Record<string, unknown>))
+    const known = new Set(pages.map((p) => p.page))
     const defaultKeys = allPages
       ? Object.keys(PAGE_CONTENT_DEFAULTS)
       : [...COVE_PAGE_CONTENT_KEYS]
-
-    let merged
+    const missing = defaultKeys
+      .filter((page) => !known.has(page))
+      .map((page) => {
+        const d = PAGE_CONTENT_DEFAULTS[page]
+        return {
+          id: '',
+          page,
+          eyebrow: d?.eyebrow ?? '',
+          title: d?.title ?? '',
+          body: d?.body ?? '',
+          sectionTitle: d?.sectionTitle ?? '',
+          sectionBody: d?.sectionBody ?? '',
+          bullets: (d?.bullets ?? []).join('\n'),
+          ctaLabel: d?.ctaLabel ?? '',
+          ctaHref: d?.ctaHref ?? '',
+          flyerImage: d?.flyerImage ?? '',
+          active: true,
+          fromDefault: true,
+        }
+      })
+    let merged = [...pages, ...missing]
+    if (!allPages) {
+      merged = merged.filter((p) => isCovePageContentKey(p.page))
+    }
     if (isDemoInstance()) {
-      const known = new Set(Object.keys(DEMO_PAGES))
-      const fromDemo = Object.entries(DEMO_PAGES).map(([page, fields]) =>
-        pageRowFromFields(page, fields),
-      )
-      const missing = defaultKeys
-        .filter((page) => !known.has(page))
-        .map((page) => pageRowFromFields(page, PAGE_CONTENT_DEFAULTS[page] ?? {}, true))
-      merged = [...fromDemo, ...missing]
-      if (!allPages) {
-        merged = merged.filter((p) => isCovePageContentKey(p.page))
-      }
       merged = merged.map((p) => ({
         ...p,
         eyebrow: vanillaizeCopy(p.eyebrow),
@@ -113,20 +93,7 @@ export async function GET(req: NextRequest) {
         bullets: vanillaizeCopy(p.bullets),
         ctaLabel: vanillaizeCopy(p.ctaLabel),
       }))
-    } else {
-      const client = getWixClient()
-      const result = await client.items.query('PageContent').ascending('page').limit(100).find()
-      const pages = (result.items ?? []).map((i) => mapRow(i as Record<string, unknown>))
-      const known = new Set(pages.map((p) => p.page))
-      const missing = defaultKeys
-        .filter((page) => !known.has(page))
-        .map((page) => pageRowFromFields(page, PAGE_CONTENT_DEFAULTS[page] ?? {}, true))
-      merged = [...pages, ...missing]
-      if (!allPages) {
-        merged = merged.filter((p) => isCovePageContentKey(p.page))
-      }
     }
-
     return NextResponse.json({
       pages: merged,
       scope: allPages ? 'all' : 'cove',
@@ -178,6 +145,7 @@ export async function PATCH(req: NextRequest) {
         ...row,
         _id: id,
       } as Parameters<typeof client.items.update>[1])
+      revalidatePublicPage(page)
       return NextResponse.json({ ok: true, id })
     }
 
@@ -189,10 +157,12 @@ export async function PATCH(req: NextRequest) {
         ...row,
         _id: existing._id,
       } as Parameters<typeof client.items.update>[1])
+      revalidatePublicPage(page)
       return NextResponse.json({ ok: true, id: existing._id })
     }
 
     const inserted = await client.items.insert('PageContent', row)
+    revalidatePublicPage(page)
     return NextResponse.json({ ok: true, id: (inserted as { _id?: string })._id })
   } catch (err) {
     console.error('/api/staff/page-content PATCH', err)

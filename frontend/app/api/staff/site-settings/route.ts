@@ -7,8 +7,7 @@ import {
   upsertSiteSetting,
 } from '@/lib/staff/cms-catalog'
 import type { StaffRole } from '@/lib/staff/roles'
-import { DEMO_SETTINGS } from '@/lib/demo/content'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { revalidatePublicSiteShell } from '@/lib/staff/revalidate-public'
 
 function normalizeRetailValue(value: string) {
   return value
@@ -34,38 +33,21 @@ export async function GET(req: NextRequest) {
   if (!groups.length) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   try {
+    const client = getWixClient()
+    const result = await client.items.query('SiteSettings').limit(200).find()
+    const map: Record<string, { id: string; value: string }> = {}
+    for (const item of result.items ?? []) {
+      const row = item as { _id?: string; key?: string; value?: string }
+      if (row.key) map[row.key] = { id: row._id ?? '', value: String(row.value ?? '') }
+    }
+
     const settings: Record<string, string> = {}
     const ids: Record<string, string> = {}
-    let storeProductIds = ''
-    let spiritWearProductIds = ''
-
-    if (isDemoInstance()) {
-      for (const g of groups) {
-        for (const k of g.keys) {
-          settings[k.key] = DEMO_SETTINGS[k.key] ?? ''
-          ids[k.key] = ''
-        }
+    for (const g of groups) {
+      for (const k of g.keys) {
+        settings[k.key] = map[k.key]?.value ?? ''
+        ids[k.key] = map[k.key]?.id ?? ''
       }
-      storeProductIds = settings.storeProductIds ?? DEMO_SETTINGS.storeProductIds ?? ''
-      spiritWearProductIds =
-        settings.spiritWearProductIds ?? DEMO_SETTINGS.spiritWearProductIds ?? ''
-    } else {
-      const client = getWixClient()
-      const result = await client.items.query('SiteSettings').limit(200).find()
-      const map: Record<string, { id: string; value: string }> = {}
-      for (const item of result.items ?? []) {
-        const row = item as { _id?: string; key?: string; value?: string }
-        if (row.key) map[row.key] = { id: row._id ?? '', value: String(row.value ?? '') }
-      }
-      for (const g of groups) {
-        for (const k of g.keys) {
-          settings[k.key] = map[k.key]?.value ?? ''
-          ids[k.key] = map[k.key]?.id ?? ''
-        }
-      }
-      storeProductIds = settings.storeProductIds ?? map.storeProductIds?.value ?? ''
-      spiritWearProductIds =
-        settings.spiritWearProductIds ?? map.spiritWearProductIds?.value ?? ''
     }
 
     return NextResponse.json({
@@ -73,9 +55,8 @@ export async function GET(req: NextRequest) {
       settings,
       ids,
       // back-compat for retail panel
-      storeProductIds,
-      spiritWearProductIds,
-      demo: isDemoInstance(),
+      storeProductIds: settings.storeProductIds ?? map.storeProductIds?.value ?? '',
+      spiritWearProductIds: settings.spiritWearProductIds ?? map.spiritWearProductIds?.value ?? '',
     })
   } catch (err) {
     console.error('/api/staff/site-settings GET', err)
@@ -100,6 +81,7 @@ export async function PATCH(req: NextRequest) {
       value = normalizeRetailValue(value)
     }
     await upsertSiteSetting(key, value)
+    revalidatePublicSiteShell()
     return NextResponse.json({ ok: true, key, value })
   } catch (err) {
     console.error('/api/staff/site-settings PATCH', err)

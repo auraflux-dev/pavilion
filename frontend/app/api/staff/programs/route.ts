@@ -14,6 +14,7 @@ import {
   normalizeMemberPriorityUntilInput,
 } from '@/lib/programs/registration-access'
 import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
+import { revalidatePublicPrograms } from '@/lib/staff/revalidate-public'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -244,6 +245,7 @@ export async function POST(req: NextRequest) {
         season: String(body.season ?? 'fall-2026').trim() || 'fall-2026',
       }
       const inserted = await client.items.insert('Programs', row)
+      revalidatePublicPrograms()
       return NextResponse.json({ ok: true, id: (inserted as { _id?: string })._id })
     }
 
@@ -392,6 +394,7 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
+    revalidatePublicPrograms()
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('/api/staff/programs PATCH', err)
@@ -430,6 +433,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Not assigned to this program' }, { status: 403 })
     }
     await client.items.remove('Programs', id)
+    revalidatePublicPrograms()
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('/api/staff/programs DELETE', err)

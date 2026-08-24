@@ -57,22 +57,31 @@ export function overlayFall2026PacketProgram(program: Program): Program {
     endDate,
   })
   const catalogDesc = fallCatalogDescription(klass.id)
+  const cmsDesc = String(program.description ?? '').trim()
+  const cmsSchedule = String(program.schedule ?? '').trim()
+  const cmsDay = String(program.dayOfWeek ?? '').trim()
+  const cmsTime = String(program.classTime ?? '').trim()
+  const cmsInstructor = String(program.instructorName ?? '').trim()
+  const cmsLocation = String(program.location ?? '').trim()
+  const cmsMeetingDates = String(program.meetingDates ?? '').trim()
+  const cmsSkips = String(program.skipsNote ?? '').trim()
+  const cmsSeason = String(program.season ?? '').trim()
 
   return {
     ...program,
     fallEpClassId: klass.id,
-    season: 'fall-2026',
-    dayOfWeek: klass.dayOfWeek,
-    classTime: klass.classTime,
-    instructorName: klass.vendor,
-    location: FALL_2026_EP_LOCATION,
-    startDate,
-    endDate,
-    durationWeeks: dates.length,
-    meetingDates: serializeMeetingDates(dates),
-    skipsNote: klass.skips,
-    schedule,
-    description: catalogDesc ?? program.description,
+    season: cmsSeason || 'fall-2026',
+    dayOfWeek: cmsDay || klass.dayOfWeek,
+    classTime: cmsTime || klass.classTime,
+    instructorName: cmsInstructor || klass.vendor,
+    location: cmsLocation || FALL_2026_EP_LOCATION,
+    startDate: program.startDate || startDate,
+    endDate: program.endDate || endDate,
+    durationWeeks: program.durationWeeks || dates.length,
+    meetingDates: cmsMeetingDates || serializeMeetingDates(dates),
+    skipsNote: cmsSkips || klass.skips,
+    schedule: cmsSchedule || schedule,
+    description: cmsDesc || catalogDesc || program.description,
   }
 }
 

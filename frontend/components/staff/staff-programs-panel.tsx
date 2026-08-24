@@ -26,6 +26,11 @@ import {
   STAFF_SEASON_OPTIONS,
   type CatalogSeasonId,
 } from '@/lib/programs/season'
+import {
+  isProgramDraftDirty,
+  mergeProgramDraft,
+  programDraftPatch,
+} from '@/lib/staff/program-draft'
 
 type Program = {
   id: string
@@ -140,6 +145,7 @@ export function StaffProgramsPanel() {
   const [status, setStatus] = useState('')
   const [busy, setBusy] = useState(false)
   const [savingProgramId, setSavingProgramId] = useState<string | null>(null)
+  const [programDrafts, setProgramDrafts] = useState<Record<string, Partial<Program>>>({})
   const [showOlderPrograms, setShowOlderPrograms] = useState(false)
   /** Frozen while editing so filter/sort cannot yank the focused field away. */
   const [visibleIdOrder, setVisibleIdOrder] = useState<string[]>([])
@@ -197,6 +203,7 @@ export function StaffProgramsPanel() {
         }
       }
       setPrograms(list)
+      setProgramDrafts({})
       setVisibleIdOrder(
         sortProgramsByDisplayOrder(selectCurrentFall2026Programs(list)).map((p) => p.id),
       )
@@ -301,15 +308,58 @@ export function StaffProgramsPanel() {
     if (tab === 'attendance') void loadAttendance(attProgramId, attDate)
   }, [tab, attProgramId, attDate, loadAttendance])
 
+  function displayProgram(saved: Program): Program {
+    return mergeProgramDraft(saved, programDrafts[saved.id]) as Program
+  }
+
+  function patchProgramDraft(id: string, patch: Partial<Program>) {
+    setProgramDrafts((prev) => ({
+      ...prev,
+      [id]: { ...(prev[id] ?? {}), ...patch },
+    }))
+  }
+
+  function discardProgramDraft(id: string) {
+    setProgramDrafts((prev) => {
+      if (!prev[id]) return prev
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
+  }
+
   function changeProgramLocal(id: string, body: Record<string, unknown>) {
     setPrograms((list) =>
       list.map((p) => (p.id === id ? ({ ...p, ...body } as Program) : p)),
     )
   }
 
+  async function saveProgramDraft(id: string) {
+    const saved = programs.find((p) => p.id === id)
+    if (!saved) return
+    const draft = programDrafts[id]
+    if (!draft) return
+    const normalized = { ...draft }
+    if (typeof normalized.description === 'string') {
+      normalized.description = normalizePlainCopy(normalized.description)
+    }
+    if (typeof normalized.detail === 'string') {
+      normalized.detail = normalizePlainCopy(normalized.detail)
+    }
+    if (normalized.memberPriorityUntil === '') {
+      normalized.memberPriorityUntil = ''
+    }
+    const patch = programDraftPatch(saved, normalized)
+    if ('memberPriorityUntil' in patch && patch.memberPriorityUntil === '') {
+      patch.memberPriorityUntil = null as unknown as string
+    }
+    if (Object.keys(patch).length === 0) return
+    await saveProgram(id, patch as Record<string, unknown>)
+  }
+
   async function saveProgram(id: string, body: Record<string, unknown>) {
-    changeProgramLocal(id, body)
     setSavingProgramId(id)
+    setStatus('')
     try {
       const r = await fetch('/api/staff/programs', {
         method: 'PATCH',
@@ -318,6 +368,10 @@ export function StaffProgramsPanel() {
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Update failed')
+      setPrograms((list) =>
+        list.map((p) => (p.id === id ? ({ ...p, ...body } as Program) : p)),
+      )
+      discardProgramDraft(id)
       setStatus('Saved.')
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Update failed')
@@ -650,7 +704,8 @@ export function StaffProgramsPanel() {
         <p className="text-xs text-[#5A6070] whitespace-pre-line">
           {`Programs = public catalog cards.
 Calendar = season schedule table plus school calendar overlays for planning.
-Roster / Attendance = enrolled families.`}
+Roster / Attendance = enrolled families.
+Edit fields, then click Save program. www updates within seconds after Save.`}
         </p>
         <p className="text-[11px] text-[#5A6070] mt-1 min-h-[1.25rem]" aria-live="polite">
           {savingProgramId ? 'Saving…' : status || '\u00a0'}
@@ -758,7 +813,11 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                 : 'No Fall 2026 programs in this list yet.\nTurn on “Show older programs” for prior seasons.\nCurrent season: Fall 2026 start date, plus featured and/or registration open.'}
             </p>
           ) : null}
-          {visiblePrograms.map((p, index) => (
+          {visiblePrograms.map((p, index) => {
+            const row = displayProgram(p)
+            const dirty = isProgramDraftDirty(p, programDrafts[p.id])
+            const saving = savingProgramId === p.id
+            return (
             <div
               key={p.id}
               className={`border border-[var(--border)] rounded-lg p-3 space-y-2 ${
@@ -807,22 +866,19 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                     Position {index + 1} of {visiblePrograms.length}
                   </p>
                   <input
-                    value={p.name}
+                    value={row.name}
                     aria-label="Program name"
                     className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm font-bold"
-                    onChange={(e) => changeProgramLocal(p.id, { name: e.target.value })}
-                    onBlur={(e) => {
-                      const next = e.target.value.trim()
-                      if (next) void saveProgram(p.id, { name: next })
-                    }}
+                    onChange={(e) => patchProgramDraft(p.id, { name: e.target.value })}
                   />
                   <p className="text-xs text-[#5A6070] mt-1">
                     Seats{' '}
-                    {p.capacity
-                      ? `${p.seatsTaken ?? 0}/${p.capacity}${
+                    {row.capacity
+                      ? `${p.seatsTaken ?? 0}/${row.capacity}${
                           p.seatsRemaining != null ? ` (${p.seatsRemaining} open)` : ''
                         }`
                       : 'unlimited'}
+                    {dirty ? ' · Unsaved changes' : ''}
                   </p>
                   </div>
                 </div>
@@ -830,16 +886,18 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                   <label className="inline-flex items-center gap-1">
                     <input
                       type="checkbox"
-                      checked={p.registrationOpen}
-                      onChange={(e) => void saveProgram(p.id, { registrationOpen: e.target.checked })}
+                      checked={row.registrationOpen}
+                      onChange={(e) =>
+                        patchProgramDraft(p.id, { registrationOpen: e.target.checked })
+                      }
                     />
                     Registration open (checkout)
                   </label>
                   <label className="inline-flex items-center gap-1">
                     <input
                       type="checkbox"
-                      checked={p.featured}
-                      onChange={(e) => void saveProgram(p.id, { featured: e.target.checked })}
+                      checked={row.featured}
+                      onChange={(e) => patchProgramDraft(p.id, { featured: e.target.checked })}
                     />
                     Featured
                   </label>
@@ -848,16 +906,16 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                     <input
                       type="datetime-local"
                       className="border border-[var(--border)] rounded px-1.5 py-1 text-xs text-[#1A1A1A]"
-                      value={toDatetimeLocalValue(p.memberPriorityUntil)}
+                      value={toDatetimeLocalValue(row.memberPriorityUntil)}
                       onChange={(e) =>
-                        void saveProgram(p.id, {
-                          memberPriorityUntil: e.target.value || null,
+                        patchProgramDraft(p.id, {
+                          memberPriorityUntil: e.target.value || '',
                         })
                       }
                     />
                     <span className="text-[10px] leading-snug max-w-xs">
-                      {p.memberPriorityUntil
-                        ? `Opens to all after ${formatMemberPriorityUntil(p.memberPriorityUntil)}`
+                      {row.memberPriorityUntil
+                        ? `Opens to all after ${formatMemberPriorityUntil(row.memberPriorityUntil)}`
                         : 'Leave blank = open to all signed-in parents when registration is on'}
                     </span>
                   </label>
@@ -895,11 +953,34 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
               </div>
               <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-2">
                 <p className="text-xs text-[#5A6070]">
-                  {[p.dayOfWeek, p.classTime, p.fee > 0 ? `$${p.fee}` : null, CATALOG_SEASON_LABELS[resolveProgramSeason(p)]]
+                  {[row.dayOfWeek, row.classTime, row.fee > 0 ? `$${row.fee}` : null, CATALOG_SEASON_LABELS[resolveProgramSeason(row)]]
                     .filter(Boolean)
                     .join(' · ') || 'No schedule yet'}
                 </p>
-                <button
+                <div className="flex flex-wrap items-center gap-2">
+                  {dirty ? (
+                    <>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={busy || saving}
+                        onClick={() => void saveProgramDraft(p.id)}
+                        className="text-white text-xs h-8"
+                        style={{ backgroundColor: 'var(--brand-green)' }}
+                      >
+                        {saving ? 'Saving…' : 'Save program'}
+                      </Button>
+                      <button
+                        type="button"
+                        className="text-xs underline text-[#5A6070]"
+                        disabled={busy || saving}
+                        onClick={() => discardProgramDraft(p.id)}
+                      >
+                        Discard
+                      </button>
+                    </>
+                  ) : null}
+                  <button
                   type="button"
                   className="inline-flex items-center gap-1 text-xs font-semibold"
                   style={{ color: 'var(--brand-green)' }}
@@ -914,7 +995,8 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                     <ChevronRight className="h-3.5 w-3.5" aria-hidden />
                   )}
                   {expandedIds[p.id] ? 'Hide details' : 'Edit details'}
-                </button>
+                  </button>
+                </div>
               </div>
               {expandedIds[p.id] ? (
               <>
@@ -922,11 +1004,11 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                 <div className="sm:col-span-2">
                   <StaffPlainCopyField
                     label="Description"
-                    value={p.description}
+                    value={row.description}
                     rows={5}
+                    saveOnBlur={false}
                     textareaClassName="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                    onChange={(next) => changeProgramLocal(p.id, { description: next })}
-                    onCommit={(next) => void saveProgram(p.id, { description: normalizePlainCopy(next) })}
+                    onChange={(next) => patchProgramDraft(p.id, { description: next })}
                   />
                 </div>
                 <label className="text-[11px] text-[#5A6070] space-y-0.5">
@@ -935,10 +1017,9 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                     type="number"
                     min={0}
                     step={1}
-                    value={p.fee}
+                    value={row.fee}
                     className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                    onChange={(e) => changeProgramLocal(p.id, { fee: Number(e.target.value) || 0 })}
-                    onBlur={(e) => void saveProgram(p.id, { fee: Number(e.target.value) || 0 })}
+                    onChange={(e) => patchProgramDraft(p.id, { fee: Number(e.target.value) || 0 })}
                   />
                 </label>
                 <label className="text-[11px] text-[#5A6070] space-y-0.5">
@@ -946,43 +1027,38 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                   <input
                     type="number"
                     min={0}
-                    value={p.capacity}
+                    value={row.capacity}
                     className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
                     onChange={(e) =>
-                      changeProgramLocal(p.id, { capacity: Number(e.target.value) || 0 })
+                      patchProgramDraft(p.id, { capacity: Number(e.target.value) || 0 })
                     }
-                    onBlur={(e) => void saveProgram(p.id, { capacity: Number(e.target.value) || 0 })}
                   />
                 </label>
                 <label className="text-[11px] text-[#5A6070] space-y-0.5">
                   <span>Grades</span>
                   <input
-                    value={p.grades}
+                    value={row.grades}
                     placeholder="e.g. 6-8"
                     className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                    onChange={(e) => changeProgramLocal(p.id, { grades: e.target.value })}
-                    onBlur={(e) => void saveProgram(p.id, { grades: e.target.value })}
+                    onChange={(e) => patchProgramDraft(p.id, { grades: e.target.value })}
                   />
                 </label>
                 <label className="text-[11px] text-[#5A6070] space-y-0.5">
                   <span>Category</span>
                   <input
-                    value={p.category}
+                    value={row.category}
                     placeholder="e.g. Enrichment"
                     className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                    onChange={(e) => changeProgramLocal(p.id, { category: e.target.value })}
-                    onBlur={(e) => void saveProgram(p.id, { category: e.target.value })}
+                    onChange={(e) => patchProgramDraft(p.id, { category: e.target.value })}
                   />
                 </label>
                 <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
                   <span>Catalog season</span>
                   <select
-                    value={resolveProgramSeason(p)}
+                    value={resolveProgramSeason(row)}
                     className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A] bg-white"
                     onChange={(e) => {
-                      const season = e.target.value as CatalogSeasonId
-                      changeProgramLocal(p.id, { season })
-                      void saveProgram(p.id, { season })
+                      patchProgramDraft(p.id, { season: e.target.value as CatalogSeasonId })
                     }}
                   >
                     {STAFF_SEASON_OPTIONS.map((opt) => (
@@ -996,82 +1072,67 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
               </div>
               <div className="grid sm:grid-cols-2 gap-2 pt-1">
                 <input
-                  value={p.instructorName}
+                  value={row.instructorName}
                   placeholder="Instructor / vendor"
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
-                  onChange={(e) => changeProgramLocal(p.id, { instructorName: e.target.value })}
-                  onBlur={(e) => void saveProgram(p.id, { instructorName: e.target.value })}
+                  onChange={(e) => patchProgramDraft(p.id, { instructorName: e.target.value })}
                 />
                 <input
-                  value={p.location}
+                  value={row.location}
                   placeholder="Room / location"
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
-                  onChange={(e) => changeProgramLocal(p.id, { location: e.target.value })}
-                  onBlur={(e) => void saveProgram(p.id, { location: e.target.value })}
+                  onChange={(e) => patchProgramDraft(p.id, { location: e.target.value })}
                 />
                 <input
-                  value={p.dayOfWeek}
+                  value={row.dayOfWeek}
                   placeholder="Day of week (e.g. Tuesdays)"
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                  onChange={(e) => changeProgramLocal(p.id, { dayOfWeek: e.target.value })}
-                  onBlur={(e) => void saveProgram(p.id, { dayOfWeek: e.target.value })}
+                  onChange={(e) => patchProgramDraft(p.id, { dayOfWeek: e.target.value })}
                 />
                 <input
-                  value={p.classTime}
+                  value={row.classTime}
                   placeholder="Class time (e.g. 3:30 to 4:30 PM)"
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                  onChange={(e) => changeProgramLocal(p.id, { classTime: e.target.value })}
-                  onBlur={(e) => void saveProgram(p.id, { classTime: e.target.value })}
+                  onChange={(e) => patchProgramDraft(p.id, { classTime: e.target.value })}
                 />
                 <input
                   type="number"
                   min={0}
-                  value={p.durationWeeks || ''}
+                  value={row.durationWeeks || ''}
                   placeholder="Weeks"
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
                   onChange={(e) =>
-                    changeProgramLocal(p.id, { durationWeeks: Number(e.target.value) || 0 })
-                  }
-                  onBlur={(e) =>
-                    void saveProgram(p.id, { durationWeeks: Number(e.target.value) || 0 })
+                    patchProgramDraft(p.id, { durationWeeks: Number(e.target.value) || 0 })
                   }
                 />
                 <input
                   type="date"
-                  value={p.startDate || ''}
+                  value={row.startDate || ''}
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                  onChange={(e) => {
-                    changeProgramLocal(p.id, { startDate: e.target.value })
-                    void saveProgram(p.id, { startDate: e.target.value })
-                  }}
+                  onChange={(e) => patchProgramDraft(p.id, { startDate: e.target.value })}
                 />
                 <input
                   type="date"
-                  value={p.endDate || ''}
+                  value={row.endDate || ''}
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs"
-                  onChange={(e) => {
-                    changeProgramLocal(p.id, { endDate: e.target.value })
-                    void saveProgram(p.id, { endDate: e.target.value })
-                  }}
+                  onChange={(e) => patchProgramDraft(p.id, { endDate: e.target.value })}
                 />
                 <input
-                  value={p.skipsNote}
+                  value={row.skipsNote}
                   placeholder="Skip / holiday note"
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
-                  onChange={(e) => changeProgramLocal(p.id, { skipsNote: e.target.value })}
-                  onBlur={(e) => void saveProgram(p.id, { skipsNote: e.target.value })}
+                  onChange={(e) => patchProgramDraft(p.id, { skipsNote: e.target.value })}
                 />
                 <input
-                  value={p.memberDiscountNote}
+                  value={row.memberDiscountNote}
                   placeholder="Member discount note (under fee on /programs cards)"
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
-                  onChange={(e) => changeProgramLocal(p.id, { memberDiscountNote: e.target.value })}
-                  onBlur={(e) => void saveProgram(p.id, { memberDiscountNote: e.target.value })}
+                  onChange={(e) => patchProgramDraft(p.id, { memberDiscountNote: e.target.value })}
                 />
               </div>
               <StaffFlyerUpload
                 label="Program flyer"
-                currentUrl={p.image}
+                currentUrl={row.image}
                 disabled={false}
                 onUploaded={(media) => void saveProgram(p.id, { image: media.url })}
               />
@@ -1100,59 +1161,57 @@ Leave blank for normal in-app Square checkout.`}
                     <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
                       <span>Cheddar Up / external checkout URL</span>
                       <input
-                        value={p.cheddarupUrl}
+                        value={row.cheddarupUrl}
                         placeholder="Leave blank unless using Cheddar Up"
                         className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                        onChange={(e) => changeProgramLocal(p.id, { cheddarupUrl: e.target.value })}
-                        onBlur={(e) => void saveProgram(p.id, { cheddarupUrl: e.target.value })}
+                        onChange={(e) => patchProgramDraft(p.id, { cheddarupUrl: e.target.value })}
                       />
                     </label>
                     <label className="text-[11px] text-[#5A6070] space-y-0.5">
                       <span>Payment type</span>
                       <input
-                        value={p.paymentType}
+                        value={row.paymentType}
                         placeholder="wix / cheddarup_installment / cheddarup_p2p"
                         className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                        onChange={(e) => changeProgramLocal(p.id, { paymentType: e.target.value })}
-                        onBlur={(e) => void saveProgram(p.id, { paymentType: e.target.value })}
+                        onChange={(e) => patchProgramDraft(p.id, { paymentType: e.target.value })}
                       />
                     </label>
                     <label className="text-[11px] text-[#5A6070] space-y-0.5">
                       <span>Sort order number</span>
                       <input
                         type="number"
-                        value={p.sortOrder}
+                        value={row.sortOrder}
                         className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
                         onChange={(e) =>
-                          changeProgramLocal(p.id, { sortOrder: Number(e.target.value) || 0 })
+                          patchProgramDraft(p.id, { sortOrder: Number(e.target.value) || 0 })
                         }
-                        onBlur={(e) => void saveProgram(p.id, { sortOrder: Number(e.target.value) || 0 })}
                       />
                     </label>
                     <label className="text-[11px] text-[#5A6070] space-y-0.5 sm:col-span-2">
                       <span>Tags (comma-separated)</span>
                       <input
-                        value={p.tags}
+                        value={row.tags}
                         className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                        onChange={(e) => changeProgramLocal(p.id, { tags: e.target.value })}
-                        onBlur={(e) => void saveProgram(p.id, { tags: e.target.value })}
+                        onChange={(e) => patchProgramDraft(p.id, { tags: e.target.value })}
                       />
                     </label>
                     <div className="sm:col-span-2">
                       <StaffPlainCopyField
                         label="Detail (extra copy)"
-                        value={p.detail}
+                        value={row.detail}
                         rows={4}
+                        saveOnBlur={false}
                         textareaClassName="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
-                        onChange={(next) => changeProgramLocal(p.id, { detail: next })}
-                        onCommit={(next) => void saveProgram(p.id, { detail: normalizePlainCopy(next) })}
+                        onChange={(next) => patchProgramDraft(p.id, { detail: next })}
                       />
                     </div>
                     <label className="inline-flex items-center gap-1 text-xs sm:col-span-2">
                       <input
                         type="checkbox"
-                        checked={p.requiresWaiver}
-                        onChange={(e) => void saveProgram(p.id, { requiresWaiver: e.target.checked })}
+                        checked={row.requiresWaiver}
+                        onChange={(e) =>
+                          patchProgramDraft(p.id, { requiresWaiver: e.target.checked })
+                        }
                       />
                       Requires waiver CMS flag (checkout still always asks waiver, medical, photo)
                     </label>
@@ -1176,7 +1235,8 @@ Leave blank for normal in-app Square checkout.`}
               </>
               ) : null}
             </div>
-          ))}
+            )
+          })}
           {dragId && visiblePrograms.length > 0 ? (
             <div
               className={`h-10 rounded-lg border border-dashed text-center text-xs leading-10 ${
