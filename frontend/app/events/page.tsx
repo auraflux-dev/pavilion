@@ -1,7 +1,5 @@
-import { AnnouncementBar } from '@/components/announcement-bar'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
 import { EventsFilter } from '@/components/events/events-filter'
+import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { PageHero } from '@/components/page-hero'
 import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
 import { getUpcomingEvents, type WixEvent } from '@/lib/api/events'
@@ -30,11 +28,7 @@ export default async function EventsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Navbar />
-
-      <main id="main-content">
+    <VisitorChrome pageKey="events">
         <PageHero
           content={{
             ...page,
@@ -122,9 +116,6 @@ export default async function EventsPage() {
             </a>
           </div>
         </section>
-      </main>
-
-      <Footer />
-    </div>
+    </VisitorChrome>
   )
 }

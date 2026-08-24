@@ -1,6 +1,4 @@
-import { AnnouncementBar } from '@/components/announcement-bar'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
+import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { ProgramsFilter } from '@/components/programs/programs-filter'
 import { PageHero } from '@/components/page-hero'
 import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
@@ -50,11 +48,7 @@ export default async function ProgramsPage({
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Navbar />
-
-      <main id="main-content">
+    <VisitorChrome pageKey="programs">
         <PageHero
           content={{
             ...page,
@@ -161,9 +155,6 @@ The president is copied so your note is not sitting in one inbox alone.`}
             <DepartmentContactForm toEmail={programsEmail} variant="programs" />
           </div>
         </section>
-      </main>
-
-      <Footer />
-    </div>
+    </VisitorChrome>
   )
 }

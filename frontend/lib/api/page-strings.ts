@@ -1,0 +1,22 @@
+import { getPageContent } from '@/lib/api/page-content'
+import { parseStringOverrides, mergeStringOverrides } from '@/lib/copy/string-overrides'
+import { parseKeyedLines } from '@/lib/defaults/portal-copy'
+import { SITE_STRING_DEFAULTS } from '@/lib/defaults/site-string-defaults'
+
+/** Granular copy for a PageContent row (stringOverrides + keyed bullets + code defaults). */
+export async function getPageStrings(page: string): Promise<Record<string, string>> {
+  const content = await getPageContent(page)
+  const defaults = SITE_STRING_DEFAULTS[page] ?? {}
+  const fromBullets = parseKeyedLines(content.bullets)
+  const fromOverrides = parseStringOverrides(content.stringOverrides)
+  return mergeStringOverrides(mergeStringOverrides(defaults, fromBullets), fromOverrides)
+}
+
+export function pickString(
+  map: Record<string, string>,
+  key: string,
+  fallback: string,
+): string {
+  const value = map[key]?.trim()
+  return value || fallback
+}

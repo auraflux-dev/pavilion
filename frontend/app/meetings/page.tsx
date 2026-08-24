@@ -1,7 +1,5 @@
-import { AnnouncementBar } from '@/components/announcement-bar'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
 import { PageHero } from '@/components/page-hero'
+import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { getMeetingsByCommittee } from '@/lib/api/meetings'
 import { getPageContent } from '@/lib/api/page-content'
 import { MeetingMonthFilter } from '@/components/meetings/meeting-month-filter'
@@ -50,11 +48,7 @@ export default async function MeetingsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Navbar />
-
-      <main id="main-content">
+    <VisitorChrome pageKey="meetings">
         <PageHero content={page} />
         <MeetingsSectionNav />
 
@@ -137,9 +131,6 @@ export default async function MeetingsPage() {
             </a>
           </div>
         </section>
-      </main>
-
-      <Footer />
-    </div>
+    </VisitorChrome>
   )
 }

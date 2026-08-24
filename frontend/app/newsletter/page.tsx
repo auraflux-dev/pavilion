@@ -1,19 +1,14 @@
-import { AnnouncementBar } from '@/components/announcement-bar'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
 import { PageHero } from '@/components/page-hero'
+import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { NewsletterSignup } from '@/components/newsletter/newsletter-signup'
 import { getPageContent } from '@/lib/api/page-content'
 import { Mail, Bell, Calendar, BookOpen } from 'lucide-react'
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 const NEWSLETTER_PERKS = [
   {
     icon: Bell,
     title: 'Event Reminders',
-    description: vanillaizeIfDemo(
-      'Never miss Dance Night, NOVA Math, PTO meetings, or any school event.',
-    ),
+    description: 'Never miss Dance Night, NOVA Math, PTO meetings, or any school event.',
   },
   {
     icon: BookOpen,
@@ -36,11 +31,7 @@ export default async function NewsletterPage() {
   const page = await getPageContent('newsletter')
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Navbar />
-
-      <main id="main-content">
+    <VisitorChrome pageKey="newsletter">
         <PageHero content={page} />
 
         {/* Sign up + perks */}
@@ -81,9 +72,6 @@ export default async function NewsletterPage() {
             </div>
           </div>
         </section>
-      </main>
-
-      <Footer />
-    </div>
+    </VisitorChrome>
   )
 }

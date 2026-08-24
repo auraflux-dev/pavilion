@@ -1,7 +1,7 @@
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
-import { getWixClient } from "@/lib/wix-client";
+import { tryGetWixClient } from "@/lib/wix-client";
 import { formatProgramSchedule } from "@/lib/programs/schedule";
 import { memberPriorityUntilIso } from '@/lib/programs/registration-access'
 import {
@@ -66,6 +66,15 @@ export interface Program {
   fallEpClassId?: string;
   /** Catalog season: fall-2026 | spring-2027 | full-year */
   season?: string;
+  /** Parent-facing landing page (Staff → Programs → Landing page) */
+  landingEyebrow?: string;
+  landingPitch?: string;
+  /** One highlight per line */
+  landingHighlights?: string;
+  landingVideoUrl?: string;
+  landingCurriculumTitle?: string;
+  /** week|title|focus one per line */
+  landingCurriculum?: string;
 }
 
 function normalizeImage(raw: unknown): string | undefined {
@@ -131,6 +140,12 @@ function mapProgramItem(item: Record<string, unknown>): Program {
     memberDiscountNote: String(item.memberDiscountNote ?? '').trim() || undefined,
     fallEpClassId: String(item.fallEpClassId ?? '').trim() || undefined,
     season: String(item.season ?? '').trim() || undefined,
+    landingEyebrow: String(item.landingEyebrow ?? '').trim() || undefined,
+    landingPitch: String(item.landingPitch ?? '').trim() || undefined,
+    landingHighlights: String(item.landingHighlights ?? '').trim() || undefined,
+    landingVideoUrl: String(item.landingVideoUrl ?? '').trim() || undefined,
+    landingCurriculumTitle: String(item.landingCurriculumTitle ?? '').trim() || undefined,
+    landingCurriculum: String(item.landingCurriculum ?? '').trim() || undefined,
   }
 }
 
@@ -140,7 +155,8 @@ export async function getPrograms(): Promise<Program[]> {
     return DEMO_PROGRAMS.filter((p) => p.registrationOpen)
   }
   if (process.env.COMMONS_PLATFORM === 'true') return []
-  const client = getWixClient();
+  const client = tryGetWixClient();
+  if (!client) return []
   const result = await client.items
     .query("Programs")
     .eq("registrationOpen", true)
@@ -163,7 +179,8 @@ export async function getAllPrograms(opts?: {
     return appendSpringPacketIfNeeded(listed, opts)
   }
   if (process.env.COMMONS_PLATFORM === 'true') return []
-  const client = getWixClient();
+  const client = tryGetWixClient();
+  if (!client) return []
   const result = await client.items.query("Programs").find();
   return publicPrograms(result.items as Record<string, unknown>[], opts);
 }
@@ -179,7 +196,8 @@ export async function getFeaturedPrograms(opts?: {
     )
   }
   if (process.env.COMMONS_PLATFORM === 'true') return []
-  const client = getWixClient();
+  const client = tryGetWixClient();
+  if (!client) return []
   const result = await client.items
     .query("Programs")
     .eq("featured", true)
@@ -197,7 +215,6 @@ function withReviewHostCheckout(program: Program, reviewHost?: boolean): Program
   return { ...program, registrationOpen: true }
 }
 
-/** One CMS row per Fall 2026 packet class (drops duplicate Robotics/Math rows). */
 /** Bump when catalog dedupe logic changes (deploy verification). */
 export const PUBLIC_CATALOG_DEDUPE_VERSION = 2
 
@@ -238,7 +255,6 @@ function dedupePublicCatalogPrograms(programs: Program[]): Program[] {
     return pickedIds.has(p._id)
   })
 
-  // Belt-and-suspenders: duplicate CMS rows often share the same public slug.
   const fallBySlug = new Map<string, Program>()
   const other: Program[] = []
   for (const program of epFiltered) {
@@ -294,7 +310,8 @@ export async function getProgramById(id: string): Promise<Program | null> {
     const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
     return DEMO_PROGRAMS.find((p) => p._id === id) ?? null
   }
-  const client = getWixClient();
+  const client = tryGetWixClient();
+  if (!client) return null
   try {
     const item = await client.items.get("Programs", id);
     return mapProgramItem(item as Record<string, unknown>);

@@ -1,6 +1,4 @@
-import { AnnouncementBar } from '@/components/announcement-bar'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
+import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { MembershipTiers } from '@/components/membership/membership-tiers'
 import { MembershipCheckoutHandler } from '@/components/membership/membership-checkout-handler'
 import { PageHero } from '@/components/page-hero'
@@ -43,11 +41,7 @@ export default async function MembershipPage() {
       'Faculty and staff memberships are $20 for the school year. We appreciate everything SHMS PTO educators do for our students.',
     )
   return (
-    <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Navbar />
-
-      <main id="main-content">
+    <VisitorChrome pageKey="membership">
         <PageHero content={page} />
         <MembershipSectionNav />
         {commons ? null : (
@@ -133,15 +127,12 @@ export default async function MembershipPage() {
               {faqItems.map((item) => (
                 <div key={item.id} className="border-b border-[var(--border)] pb-6 last:border-0">
                   <h3 className="font-bold text-[#1A1A1A] mb-2">{item.question}</h3>
-                  <p className="text-[#5A6070] text-sm leading-relaxed whitespace-pre-line">{item.answer}</p>
+                  <p className="text-[#5A6070] text-sm leading-relaxed">{item.answer}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
-      </main>
-
-      <Footer />
-    </div>
+    </VisitorChrome>
   )
 }

@@ -1,7 +1,5 @@
-import { AnnouncementBar } from '@/components/announcement-bar'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
 import { getFundAllocationActuals } from '@/lib/api/fund-allocation'
+import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { getFundraisingAnnualGoal, getFundraisingTotals } from '@/lib/api/fundraising'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getFundraisingCTAs } from '@/lib/api/fundraising-ctas'
@@ -14,16 +12,16 @@ import { ArrowRight, Heart, TrendingUp, Users, ShoppingBag, Ticket, Star, Refres
 import { DonateBlock } from '@/components/donate/donate-block'
 import { SponsorshipPackages } from '@/components/fundraising/sponsorship-packages'
 import { FundraisingSectionNav } from '@/components/jump-nav/public-section-navs'
+import { rollForwardSchoolYearCopy } from '@/lib/copy/roll-forward-school-year'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
-import {
-  showSponsorshipFlyerDownload,
-  sponsorshipEmptySponsorsCopy,
-  sponsorshipInitiativeBlurb,
-  sponsorshipIntroCopy,
-} from '@/lib/sponsorships'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Star, ShoppingBag, Users, Heart, TrendingUp, Ticket, ArrowRight, RefreshCw,
+}
+
+function normalizeFundraisingEyebrow(raw: string) {
+  const text = rollForwardSchoolYearCopy(String(raw ?? '').trim())
+  return text || '2026-27 School Year · Live'
 }
 
 export const revalidate = 60
@@ -38,8 +36,6 @@ export async function generateMetadata() {
 }
 
 function pct(raised: number, goal: number) {
-  if (!goal || !Number.isFinite(goal) || goal <= 0) return 0
-  if (!Number.isFinite(raised)) return 0
   return Math.min(100, Math.round((raised / goal) * 100))
 }
 
@@ -140,7 +136,7 @@ export default async function FundraisingPage() {
       id: 'sponsorship',
       icon: Handshake,
       label: 'Sponsorships',
-      description: sponsorshipInitiativeBlurb(),
+      description: 'Platinum $2,500, Gold $1,500, or Silver $500. One payment for the 2026-27 school year.',
       raised: sponsorshipRaised,
       goal: sponsorshipGoal,
       href: '/fundraising#sponsorship',
@@ -160,11 +156,7 @@ export default async function FundraisingPage() {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Navbar />
-
-      <main id="main-content" className="flex-1">
+    <VisitorChrome pageKey="fundraising" mainClassName="flex-1">
 
         {/* Hero. overall progress */}
         <section className="py-16 md:py-24" style={{ backgroundColor: 'var(--brand-green)' }}>
@@ -174,7 +166,7 @@ export default async function FundraisingPage() {
               style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'var(--brand-gold)' }}
             >
               <TrendingUp className="w-3.5 h-3.5" aria-hidden="true" />
-              {page.eyebrow}
+              {normalizeFundraisingEyebrow(page.eyebrow)}
             </div>
             <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
               {page.title}
@@ -375,22 +367,22 @@ export default async function FundraisingPage() {
                 Sponsorships
               </h2>
               <p className="text-[#5A6070] mt-3 max-w-2xl mx-auto whitespace-pre-line">
-                {sponsorshipIntroCopy()}
+                {vanillaizeIfDemo(
+                  'One payment for the 2026-27 school year.\nChoose Platinum, Gold, or Silver below.',
+                )}
               </p>
-              {showSponsorshipFlyerDownload() ? (
-                <p className="mt-4">
-                  <a
-                    href="/fundraising/sponsorship-packages-2026-27.pdf"
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold"
-                    style={{ color: 'var(--brand-green)' }}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Download the 2026-27 sponsorship flyer (PDF)
-                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                  </a>
-                </p>
-              ) : null}
+              <p className="mt-4">
+                <a
+                  href="/fundraising/sponsorship-packages-2026-27.pdf"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold"
+                  style={{ color: 'var(--brand-green)' }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download the 2026-27 sponsorship flyer (PDF)
+                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </a>
+              </p>
             </div>
 
             <SponsorshipPackages />
@@ -428,7 +420,9 @@ export default async function FundraisingPage() {
               </ul>
             ) : (
               <p className="text-center text-sm text-[#5A6070] mb-10">
-                {sponsorshipEmptySponsorsCopy()}
+                {vanillaizeIfDemo(
+                  'Future sponsors will appear here. Be the first to partner with SHMS PTO.',
+                )}
               </p>
             )}
 
@@ -485,9 +479,6 @@ export default async function FundraisingPage() {
           </div>
         </section>
 
-      </main>
-
-      <Footer />
-    </div>
+    </VisitorChrome>
   )
 }

@@ -1,7 +1,5 @@
-import { AnnouncementBar } from '@/components/announcement-bar'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
 import { CoveSectionNav } from '@/components/store/cove-section-nav'
+import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { StoreCardHero } from '@/components/store/store-card-hero'
 import { DealsStrip } from '@/components/store/deals-strip'
 import { StoreGrid } from '@/components/store/store-grid'
@@ -20,21 +18,17 @@ export const revalidate = 300
 
 export async function generateMetadata() {
   const { isDemoInstance } = await import('@/lib/demo/instance')
-  const { DEMO_BRAND, isPavilionSurface, publicBrandFace, vanillaizeIfDemo } = await import(
-    '@/lib/demo/brand'
-  )
-  if (isDemoInstance() || isPavilionSurface()) {
-    const brand = publicBrandFace()
+  const { DEMO_BRAND } = await import('@/lib/demo/brand')
+  if (isDemoInstance()) {
     return {
-      title: brand.store,
-      description: `${brand.store}: ${brand.card}, snack window, and spirit wear for ${brand.school}.`,
+      title: DEMO_BRAND.store,
+      description: `${DEMO_BRAND.store}: ${DEMO_BRAND.card}, snack window, and spirit wear for ${DEMO_BRAND.school}.`,
     }
   }
   return {
     title: 'The Cove',
-    description: vanillaizeIfDemo(
+    description:
       'The Cove: SHMS PTO Cove Digital Card, snack window menu, and spirit wear in one place.',
-    ),
   }
 }
 
@@ -65,11 +59,7 @@ export default async function CovePage() {
   const bonusPercent = getStoreCardBonusPercent(settings.get('storeCardBonusPercent', '10'))
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Navbar />
-
-      <main id="main-content">
+    <VisitorChrome pageKey="store">
         <CoveSectionNav />
 
         <StoreCardHero
@@ -197,9 +187,6 @@ export default async function CovePage() {
           bonusPercent={bonusPercent}
           maxAmount={catalog.storeCardMaxAmount}
         />
-      </main>
-
-      <Footer />
-    </div>
+    </VisitorChrome>
   )
 }

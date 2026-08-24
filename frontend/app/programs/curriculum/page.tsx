@@ -7,6 +7,8 @@ import {
   curriculumSharePath,
   type CurriculumShareSeason,
 } from '@/lib/programs/curriculum-share'
+import { getPageContent } from '@/lib/api/page-content'
+import { PageThemeRoot, PageThemeStyles } from '@/components/site/page-theme'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -16,8 +18,11 @@ export const metadata: Metadata = {
 
 const SEASON_ORDER: CurriculumShareSeason[] = ['fall-2026', 'spring-2027']
 
-export default function ProgramsCurriculumIndexPage() {
-  const entries = curriculumShareEntries()
+export default async function ProgramsCurriculumIndexPage() {
+  const [entries, theme] = await Promise.all([
+    Promise.resolve(curriculumShareEntries()),
+    getPageContent('programs'),
+  ])
   const bySeason = SEASON_ORDER.map((season) => ({
     season,
     label: season === 'fall-2026' ? 'Fall 2026' : 'Spring 2027',
@@ -25,7 +30,8 @@ export default function ProgramsCurriculumIndexPage() {
   }))
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <PageThemeRoot pageKey="programs" className="min-h-screen flex flex-col">
+      <PageThemeStyles pageKey="programs" css={theme.customCss ?? ''} />
       <div className="print:hidden">
         <AnnouncementBar />
         <Navbar />
@@ -70,6 +76,6 @@ export default function ProgramsCurriculumIndexPage() {
       <div className="print:hidden">
         <Footer />
       </div>
-    </div>
+    </PageThemeRoot>
   )
 }

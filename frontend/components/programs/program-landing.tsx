@@ -13,7 +13,8 @@ import {
   getRegistrationPhase,
 } from '@/lib/programs/registration-access'
 import { fallEpClassById, matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
-import { programLandingCopy } from '@/lib/programs/landing-copy'
+import { resolveProgramLandingCopy } from '@/lib/programs/resolve-landing-copy'
+import type { ProgramLandingCopy } from '@/lib/programs/landing-copy'
 import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
 import {
   CATALOG_SEASON_LABELS,
@@ -53,9 +54,12 @@ function youtubeEmbedSrc(url: string): string | null {
 export function ProgramLanding({
   program,
   companion = null,
+  landingCopy: landingCopyProp = null,
 }: {
   program: Program
   companion?: Program | null
+  /** Server-resolved CMS + fallback copy */
+  landingCopy?: ProgramLandingCopy | null
 }) {
   const [copied, setCopied] = useState(false)
   const [curriculumOpen, setCurriculumOpen] = useState(false)
@@ -64,7 +68,9 @@ export function ProgramLanding({
     fallEpClassById(String(program.fallEpClassId ?? '').trim()) ||
     matchFall2026EpClass(program.name)
   const season = resolveProgramSeason(program)
-  const copy = programLandingCopy(ep?.id, season)
+  const copy =
+    landingCopyProp ??
+    resolveProgramLandingCopy(program, ep?.id, season)
   const seasonLabel =
     CATALOG_SEASON_LABELS[season as CatalogSeasonId] ||
     (season === 'spring-2027' ? 'Spring 2027' : 'Fall 2026')

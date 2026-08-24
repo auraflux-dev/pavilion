@@ -93,16 +93,46 @@ export function StaffPageThemePanel() {
     }
   }
 
+  async function ensureCmsFields() {
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/cms/ensure-fields', { method: 'POST' })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Could not ensure CMS fields')
+      setStatus('CMS fields ready (PageContent CSS + program landing fields).')
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Could not ensure CMS fields')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function insertStringKey(key: string) {
+    if (!form) return
+    const line = `${key}|`
+    const current = form.stringOverrides.trim()
+    setForm({
+      ...form,
+      stringOverrides: current ? `${current}\n${line}` : line,
+    })
+  }
+
   return (
     <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
-      <div>
-        <h2 className="text-lg font-bold">Page CSS &amp; strings</h2>
-        <p className="text-xs text-[#5A6070] mt-1 leading-relaxed whitespace-pre-line">
-          Admin and VP Marketing only.
-          Per-page CSS injects on the live route after Save.
-          Scope selectors with the page class shown below (example: .page-member-portal main).
-          String overrides use key|text, one per line.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="text-lg font-bold">Page CSS &amp; strings</h2>
+          <p className="text-xs text-[#5A6070] mt-1 leading-relaxed whitespace-pre-line">
+            Admin and VP Marketing only.
+            Per-page CSS injects on the live route after Save.
+            Scope selectors with the page class shown below (example: .page-member-portal main).
+            String overrides use key|text, one per line.
+          </p>
+        </div>
+        <Button type="button" variant="outline" disabled={busy} onClick={() => void ensureCmsFields()}>
+          Ensure CMS fields
+        </Button>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -150,10 +180,21 @@ export function StaffPageThemePanel() {
               <code className="text-[11px]">.{form.scopeClass}</code>
             </p>
             {form.stringKeys?.length ? (
-              <p>
-                <span className="font-semibold text-[#1A1A1A]">Example string keys:</span>{' '}
-                {form.stringKeys.join(', ')}
-              </p>
+              <div className="space-y-1">
+                <p className="font-semibold text-[#1A1A1A]">String keys (click to insert)</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {form.stringKeys.map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => insertStringKey(key)}
+                      className="text-[10px] font-mono px-2 py-0.5 rounded border border-[var(--border)] bg-white hover:border-[var(--brand-green)]"
+                    >
+                      {key}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ) : null}
           </div>
 

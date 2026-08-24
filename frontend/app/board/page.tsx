@@ -1,6 +1,4 @@
-import { AnnouncementBar } from '@/components/announcement-bar'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
+import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { PageHero } from '@/components/page-hero'
 import { Mail, ArrowRight, Users } from 'lucide-react'
 import { getBoardMembers, type BoardMember } from '@/lib/api/board'
@@ -17,7 +15,7 @@ export async function generateMetadata() {
   return {
     title: 'Board',
     description: vanillaizeIfDemo(
-      'Meet the 2025-26 Stone Hill Middle School PTO Board, the parent volunteers who make it all happen.',
+      'Meet the 2026-27 Stone Hill Middle School PTO Board, the parent volunteers who make it all happen.',
     ),
   }
 }
@@ -34,11 +32,7 @@ export default async function BoardPage() {
   const committeeMembers = members.filter((m) => !m.isExec)
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Navbar />
-
-      <main id="main-content" className="flex-1">
+    <VisitorChrome pageKey="board" mainClassName="flex-1">
         <PageHero content={page} />
         <BoardSectionNav />
         <ParentVideoSection
@@ -143,10 +137,7 @@ export default async function BoardPage() {
           </div>
         </section>
 
-      </main>
-
-      <Footer />
-    </div>
+    </VisitorChrome>
   )
 }
 

@@ -1,7 +1,5 @@
-import { AnnouncementBar } from '@/components/announcement-bar'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
 import { VolunteerForm } from '@/components/volunteer/volunteer-form'
+import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { PageHero } from '@/components/page-hero'
 import { CheckCircle2 } from 'lucide-react'
 import { getVolunteerOpportunities } from '@/lib/api/volunteers'
@@ -24,11 +22,7 @@ export default async function VolunteerPage() {
     .map(b => b.trim())
     .filter(Boolean)
   return (
-    <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Navbar />
-
-      <main id="main-content">
+    <VisitorChrome pageKey="volunteer">
         <PageHero content={page} />
         <VolunteerSectionNav />
 
@@ -95,9 +89,6 @@ export default async function VolunteerPage() {
             </div>
           </div>
         </section>
-      </main>
-
-      <Footer />
-    </div>
+    </VisitorChrome>
   )
 }

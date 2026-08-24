@@ -1,10 +1,12 @@
+import { notFound } from 'next/navigation'
 import { AnnouncementBar } from '@/components/announcement-bar'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { notFound } from 'next/navigation'
 import { Fall2026EpSchedule } from '@/components/programs/fall-2026-ep-schedule'
 import { getAllPrograms } from '@/lib/api/programs'
 import { selectCurrentFall2026Programs } from '@/lib/programs/fall-2026-ep'
+import { getPageContent } from '@/lib/api/page-content'
+import { PageThemeRoot, PageThemeStyles } from '@/components/site/page-theme'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -27,7 +29,10 @@ export default async function Fall2026EpSchedulePage({
   if (!access.allowed) notFound()
   const { isProgramsReviewHost } = await import('@/lib/programs/public-access')
   const reviewHost = await isProgramsReviewHost()
-  const all = await getAllPrograms({ reviewHost }).catch(() => [])
+  const [all, theme] = await Promise.all([
+    getAllPrograms({ reviewHost }).catch(() => []),
+    getPageContent('programs'),
+  ])
   const current = selectCurrentFall2026Programs(
     all.map((p) => ({
       id: p._id,
@@ -47,7 +52,8 @@ export default async function Fall2026EpSchedulePage({
   )
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <PageThemeRoot pageKey="programs" className="min-h-screen flex flex-col">
+      <PageThemeStyles pageKey="programs" css={theme.customCss ?? ''} />
       <div className="print:hidden">
         <AnnouncementBar />
         <Navbar />
@@ -60,6 +66,6 @@ export default async function Fall2026EpSchedulePage({
       <div className="print:hidden">
         <Footer />
       </div>
-    </div>
+    </PageThemeRoot>
   )
 }

@@ -24,6 +24,8 @@ import {
   PORTAL_COPY_DEFAULTS,
   type PortalCopy,
 } from '@/lib/defaults/portal-copy'
+import { pickString } from '@/lib/api/page-strings'
+import { PORTAL_NOTICE_DEFAULTS } from '@/lib/defaults/site-string-defaults'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isCommonsPlatform } from '@/lib/crm/active-trial'
 import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
@@ -123,6 +125,7 @@ interface Props {
   link8?: string
   grades?: string[]
   copy?: PortalCopy
+  notices?: Record<string, string>
 }
 
 function fmtMoney(n: number) {
@@ -158,7 +161,10 @@ export function MemberDashboard({
   link8 = '',
   grades = ['6', '7', '8'],
   copy = PORTAL_COPY_DEFAULTS,
+  notices = {},
 }: Props) {
+  const n = (key: keyof typeof PORTAL_NOTICE_DEFAULTS) =>
+    pickString(notices, key, PORTAL_NOTICE_DEFAULTS[key] ?? '')
   const [member, setMember] = useState<MemberData['member'] | null>(null)
   const [accountType, setAccountType] = useState<'free' | 'paid'>('free')
   const [students, setStudents] = useState<Student[]>([])
@@ -451,13 +457,11 @@ export function MemberDashboard({
       {membershipSuccessNudge ? (
         <div className="rounded-xl border border-[var(--brand-line)] bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-start justify-between gap-3">
           <div>
- <p className="text-sm font-bold text-[var(--brand-green)]">Membership confirmed. Thank you!</p>
+ <p className="text-sm font-bold text-[var(--brand-green)]">{n('membershipSuccessTitle')}</p>
             <p className="text-xs text-[#1A1A1A]/80 mt-0.5 leading-relaxed">
               {onboarding.complete
-                ? vanillaizeIfDemo('Your Cove Digital Card and perks are ready below.')
-                : vanillaizeIfDemo(
-                    'Finish confirming your family details so Cove Digital Card credit and your QR attach to your students.',
-                  )}
+                ? vanillaizeIfDemo(n('membershipSuccessBodyComplete'))
+                : vanillaizeIfDemo(n('membershipSuccessBodyPending'))}
             </p>
           </div>
           <button
@@ -507,7 +511,7 @@ export function MemberDashboard({
             <div>
               <p className="text-sm font-bold text-[var(--brand-green)]">
                 {newMessageCount === 1
-                  ? 'You have a new message'
+                  ? n('newMessageBanner')
                   : `You have ${newMessageCount} new messages`}
               </p>
               <p className="text-xs text-[#1A1A1A]/80 mt-0.5">
@@ -585,11 +589,11 @@ export function MemberDashboard({
               <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
                 <CalendarDays className="w-8 h-8 mb-2 text-[#C4C0B8]" />
                 <p className="text-sm font-semibold text-[#1A1A1A] mb-1">
-                  {hydratingExtras ? 'Updating calendar…' : copy.calendarEmptyTitle}
+                  {hydratingExtras ? n('calendarHydrating') : copy.calendarEmptyTitle}
                 </p>
                 <p className="text-xs text-[#5A6070] max-w-xs mb-4">
                   {hydratingExtras
-                    ? 'Programs and events load right after your students.'
+                    ? n('calendarHydratingBody')
                     : copy.calendarEmptyBody}
                 </p>
                 <a
@@ -640,11 +644,11 @@ export function MemberDashboard({
             <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
               <Mail className="w-8 h-8 mb-2 text-[#C4C0B8]" />
               <p className="text-sm font-semibold text-[#1A1A1A] mb-1">
-                {hydratingExtras ? 'Updating messages…' : copy.messagesEmptyTitle}
+                {hydratingExtras ? n('messagesHydrating') : copy.messagesEmptyTitle}
               </p>
               <p className="text-xs text-[#5A6070] max-w-xs">
                 {hydratingExtras
-                  ? 'Instructor notes and newsletters load in a moment.'
+                  ? n('messagesHydratingBody')
                   : copy.messagesEmptyBody}
               </p>
             </div>
@@ -800,7 +804,7 @@ export function MemberDashboard({
               <p className="text-[11px] text-[#5A6070] mb-2 leading-relaxed whitespace-pre-line">
                 {gradeLinks.length === 1
                   ? `Join the ${gradeLinks[0]!.grade} WhatsApp for reminders and PTO updates.`
-                  : 'Join each student’s grade WhatsApp for reminders and PTO updates.'}
+                  : n('whatsappFallbackBody')}
               </p>
               <div className="flex flex-wrap gap-2">
                 {gradeLinks.map(({ grade, href }) => (
@@ -1018,7 +1022,7 @@ export function MemberDashboard({
                 className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#8A8F9C] cursor-not-allowed"
                 title={coveGate.error}
               >
-                {vanillaizeIfDemo('Load Cove Digital Card (locked)')}
+                {vanillaizeIfDemo(n('coveLockedLabel'))}
               </button>
             ) : null}
             {liveCommerce && !commons ? (
@@ -1035,7 +1039,7 @@ export function MemberDashboard({
               title={
                 onboarding.complete
                   ? undefined
-                  : 'Complete student safety profiles before program registration'
+                  : n('safetyGateHint')
               }
             >
               {copy.ctaPrograms}
@@ -1047,7 +1051,7 @@ export function MemberDashboard({
 
           {purchases.length === 0 ? (
             <p className="text-xs text-[#5A6070] mt-auto">
-              {hydratingExtras ? 'Updating purchases…' : copy.purchasesEmpty}
+              {hydratingExtras ? n('purchasesHydrating') : copy.purchasesEmpty}
             </p>
           ) : (
             <ul className="space-y-2 flex-1 overflow-y-auto max-h-[220px] pr-3">

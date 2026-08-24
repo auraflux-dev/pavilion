@@ -26,6 +26,12 @@ export const PROGRAM_DRAFT_KEYS = [
   'sortOrder',
   'tags',
   'requiresWaiver',
+  'landingEyebrow',
+  'landingPitch',
+  'landingHighlights',
+  'landingVideoUrl',
+  'landingCurriculumTitle',
+  'landingCurriculum',
 ] as const
 
 export type ProgramDraftKey = (typeof PROGRAM_DRAFT_KEYS)[number]

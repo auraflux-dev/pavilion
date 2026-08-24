@@ -179,6 +179,30 @@ export function formatSpring2027EpDate(iso: string): string {
   })
 }
 
+function formatMakeupList(dates: readonly string[]): string {
+  return dates
+    .map((iso) => {
+      const [y, m, d] = iso.split('-').map(Number)
+      const dt = new Date(Date.UTC(y, m - 1, d, 16))
+      return dt.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'America/New_York',
+      })
+    })
+    .join(', ')
+}
+
+/** Weather makeup nights by cohort (derived from packet constants). */
+export function spring2027WeatherMakeupFootnote(): string {
+  return [
+    `Weather makeups if a night is cancelled: Tue ${formatMakeupList(SPRING_2027_TUESDAY_SNOW_BUFFER)}.`,
+    `Wed ${formatMakeupList(SPRING_2027_WEDNESDAY_SNOW_BUFFER)}.`,
+    `Thu ${formatMakeupList(SPRING_2027_THURSDAY_SNOW_BUFFER)}.`,
+    'Last day of school Jun 11.',
+  ].join('\n')
+}
+
 export type Spring2027ScheduleRow = {
   id: string
   name: string

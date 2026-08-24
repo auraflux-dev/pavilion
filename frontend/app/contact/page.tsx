@@ -1,6 +1,4 @@
-import { AnnouncementBar } from '@/components/announcement-bar'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
+import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { ContactForm } from '@/components/contact/contact-form'
 import { PageHero } from '@/components/page-hero'
 import { Mail, MapPin, Clock } from 'lucide-react'
@@ -66,11 +64,7 @@ export default async function ContactPage() {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Navbar />
-
-      <main id="main-content">
+    <VisitorChrome pageKey="contact">
         <PageHero content={page} />
 
         <section className="py-16 md:py-24" style={{ backgroundColor: 'var(--brand-warm)' }}>
@@ -120,9 +114,6 @@ export default async function ContactPage() {
             </div>
           </div>
         </section>
-      </main>
-
-      <Footer />
-    </div>
+    </VisitorChrome>
   )
 }

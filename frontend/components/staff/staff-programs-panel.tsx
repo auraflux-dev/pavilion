@@ -64,6 +64,12 @@ type Program = {
   meetingDates: string
   skipsNote: string
   memberDiscountNote: string
+  landingEyebrow: string
+  landingPitch: string
+  landingHighlights: string
+  landingVideoUrl: string
+  landingCurriculumTitle: string
+  landingCurriculum: string
   seatsTaken?: number
   seatsRemaining?: number | null
 }
@@ -1129,6 +1135,59 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                   className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
                   onChange={(e) => patchProgramDraft(p.id, { memberDiscountNote: e.target.value })}
                 />
+              </div>
+              <div className="border-t border-[var(--border)] pt-3 space-y-2">
+                <p className="text-[11px] font-semibold text-[#1A1A1A]">Landing page (/programs/slug)</p>
+                <p className="text-[10px] text-[#5A6070] whitespace-pre-line">
+                  {`Overrides code defaults in landing-copy.ts when filled.
+Curriculum: one week|title|focus per line.`}
+                </p>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  <input
+                    value={row.landingEyebrow}
+                    placeholder="Landing eyebrow"
+                    className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
+                    onChange={(e) => patchProgramDraft(p.id, { landingEyebrow: e.target.value })}
+                  />
+                  <StaffPlainCopyField
+                    label="Landing pitch"
+                    value={row.landingPitch}
+                    rows={3}
+                    saveOnBlur={false}
+                    textareaClassName="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A] sm:col-span-2"
+                    onChange={(next) => patchProgramDraft(p.id, { landingPitch: next })}
+                  />
+                  <StaffPlainCopyField
+                    label="Highlights (one per line)"
+                    value={row.landingHighlights}
+                    rows={4}
+                    saveOnBlur={false}
+                    textareaClassName="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A] sm:col-span-2"
+                    onChange={(next) => patchProgramDraft(p.id, { landingHighlights: next })}
+                  />
+                  <input
+                    value={row.landingVideoUrl}
+                    placeholder="YouTube / Vimeo URL"
+                    className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
+                    onChange={(e) => patchProgramDraft(p.id, { landingVideoUrl: e.target.value })}
+                  />
+                  <input
+                    value={row.landingCurriculumTitle}
+                    placeholder="Curriculum section title"
+                    className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
+                    onChange={(e) =>
+                      patchProgramDraft(p.id, { landingCurriculumTitle: e.target.value })
+                    }
+                  />
+                  <StaffPlainCopyField
+                    label="Curriculum weeks"
+                    value={row.landingCurriculum}
+                    rows={6}
+                    saveOnBlur={false}
+                    textareaClassName="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs font-mono text-[#1A1A1A] sm:col-span-2"
+                    onChange={(next) => patchProgramDraft(p.id, { landingCurriculum: next })}
+                  />
+                </div>
               </div>
               <StaffFlyerUpload
                 label="Program flyer"

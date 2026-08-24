@@ -6,6 +6,7 @@ import { PageHero } from '@/components/page-hero'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 import { getPortalCopy } from '@/lib/api/portal-copy'
+import { getPageStrings } from '@/lib/api/page-strings'
 import { CONTACT_DEFAULTS } from '@/lib/defaults/page-content'
 import { PageThemeRoot, PageThemeStyles } from '@/components/site/page-theme'
 
@@ -19,10 +20,11 @@ export const metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function MemberPortalPage() {
-  const [settings, hero, copy] = await Promise.all([
+  const [settings, hero, copy, notices] = await Promise.all([
     getSiteSettings(),
     getPageContent('member-portal'),
     getPortalCopy(),
+    getPageStrings('portal-notices'),
   ])
   const link6 = settings.get('announcement6thLink', '')
   const link7 = settings.get('announcement7thLink', '')
@@ -51,6 +53,7 @@ export default async function MemberPortalPage() {
               link8={link8}
               grades={grades}
               copy={copy}
+              notices={notices}
             />
           </div>
         </section>

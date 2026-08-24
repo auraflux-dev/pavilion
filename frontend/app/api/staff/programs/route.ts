@@ -66,6 +66,12 @@ function mapProgram(item: Record<string, unknown>) {
     skipsNote: String(item.skipsNote ?? ''),
     memberDiscountNote: String(item.memberDiscountNote ?? ''),
     season: String(item.season ?? ''),
+    landingEyebrow: String(item.landingEyebrow ?? ''),
+    landingPitch: String(item.landingPitch ?? ''),
+    landingHighlights: String(item.landingHighlights ?? ''),
+    landingVideoUrl: String(item.landingVideoUrl ?? ''),
+    landingCurriculumTitle: String(item.landingCurriculumTitle ?? ''),
+    landingCurriculum: String(item.landingCurriculum ?? ''),
   }
 }
 
@@ -127,6 +133,30 @@ function schedulePatchFromBody(body: Record<string, unknown>, existing: Record<s
       body.memberDiscountNote != null
         ? String(body.memberDiscountNote).trim()
         : String(existing.memberDiscountNote ?? ''),
+    landingEyebrow:
+      body.landingEyebrow != null
+        ? normalizePlainCopy(String(body.landingEyebrow))
+        : String(existing.landingEyebrow ?? ''),
+    landingPitch:
+      body.landingPitch != null
+        ? normalizePlainCopy(String(body.landingPitch))
+        : String(existing.landingPitch ?? ''),
+    landingHighlights:
+      body.landingHighlights != null
+        ? normalizePlainCopy(String(body.landingHighlights))
+        : String(existing.landingHighlights ?? ''),
+    landingVideoUrl:
+      body.landingVideoUrl != null
+        ? String(body.landingVideoUrl).trim()
+        : String(existing.landingVideoUrl ?? ''),
+    landingCurriculumTitle:
+      body.landingCurriculumTitle != null
+        ? normalizePlainCopy(String(body.landingCurriculumTitle))
+        : String(existing.landingCurriculumTitle ?? ''),
+    landingCurriculum:
+      body.landingCurriculum != null
+        ? normalizePlainCopy(String(body.landingCurriculum))
+        : String(existing.landingCurriculum ?? ''),
   }
 }
 
@@ -243,6 +273,12 @@ export async function POST(req: NextRequest) {
         memberDiscountNote: String(body.memberDiscountNote ?? '').trim(),
         fallEpClassId: String(body.fallEpClassId ?? '').trim(),
         season: String(body.season ?? 'fall-2026').trim() || 'fall-2026',
+        landingEyebrow: normalizePlainCopy(String(body.landingEyebrow ?? '')),
+        landingPitch: normalizePlainCopy(String(body.landingPitch ?? '')),
+        landingHighlights: normalizePlainCopy(String(body.landingHighlights ?? '')),
+        landingVideoUrl: String(body.landingVideoUrl ?? '').trim(),
+        landingCurriculumTitle: normalizePlainCopy(String(body.landingCurriculumTitle ?? '')),
+        landingCurriculum: normalizePlainCopy(String(body.landingCurriculum ?? '')),
       }
       const inserted = await client.items.insert('Programs', row)
       revalidatePublicPrograms()

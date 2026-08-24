@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { AnnouncementBar } from '@/components/announcement-bar'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
+import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { ProgramLanding } from '@/components/programs/program-landing'
 import { getAllPrograms } from '@/lib/api/programs'
 import { displayProgramName } from '@/lib/programs/display-name'
@@ -12,6 +10,9 @@ import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { isProgramsReviewHost } from '@/lib/programs/public-access'
 import { isProgramsCatalogListed } from '@/lib/programs/public-catalog'
+import { fallEpClassById, matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
+import { resolveProgramLandingCopy } from '@/lib/programs/resolve-landing-copy'
+import { resolveProgramSeason } from '@/lib/programs/season'
 
 export const revalidate = 300
 
@@ -23,11 +24,12 @@ export function generateStaticParams() {
   return [
     ...FALL_2026_EP_CLASSES.map((c) => ({ slug: c.publicSlug })),
     ...FALL_2026_EP_CLASSES.map((c) => ({ slug: `${c.publicSlug}-spring` })),
-    // Legacy Competitive Math slug (redirect also in next.config)
     { slug: 'mathcounts' },
     { slug: 'mathcounts-spring' },
   ]
 }
+
+const RESERVED_PROGRAM_SLUGS = new Set(['curriculum', 'fall-2026', 'spring-2027'])
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -58,6 +60,7 @@ export default async function ProgramLandingPage({
   searchParams,
 }: Props & { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
   const { slug } = await params
+  if (RESERVED_PROGRAM_SLUGS.has(slug)) notFound()
   const sp = searchParams ? await searchParams : {}
   const previewToken = typeof sp.programsPreview === 'string' ? sp.programsPreview : null
   const { canViewProgramsCatalogNow } = await import('@/lib/programs/public-access')
@@ -71,7 +74,6 @@ export default async function ProgramLandingPage({
   const program = findProgramBySlug(programs, slug)
   if (!program) notFound()
   const { findSpringCompanion, findFallCompanion } = await import('@/lib/programs/season-companion')
-  const { resolveProgramSeason } = await import('@/lib/programs/season')
   const companion =
     resolveProgramSeason(program) === 'fall-2026'
       ? findSpringCompanion(program, programs)
@@ -79,14 +81,14 @@ export default async function ProgramLandingPage({
         ? findFallCompanion(program, programs)
         : null
 
+  const ep =
+    fallEpClassById(String(program.fallEpClassId ?? '').trim()) ||
+    matchFall2026EpClass(program.name)
+  const landingCopy = resolveProgramLandingCopy(program, ep?.id, resolveProgramSeason(program))
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Navbar />
-      <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
-        <ProgramLanding program={program} companion={companion} />
-      </main>
-      <Footer />
-    </div>
+    <VisitorChrome pageKey={`program-${slug}`} mainStyle={{ backgroundColor: 'var(--brand-warm)' }}>
+      <ProgramLanding program={program} companion={companion} landingCopy={landingCopy} />
+    </VisitorChrome>
   )
 }

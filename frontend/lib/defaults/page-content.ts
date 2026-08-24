@@ -212,6 +212,14 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body: 'Keyed stringOverrides drive staff UI labels when wired in code.',
     bullets: [],
   }),
+  'home-strings': empty('home-strings', {
+    title: 'Home page strings',
+    body: 'Video tour and donate block copy (key|text in stringOverrides).',
+  }),
+  'portal-notices': empty('portal-notices', {
+    title: 'Member portal notices',
+    body: 'Success banners, loading hints, and gate messages.',
+  }),
 }
 
 /** Contact detail fallbacks (SiteSettings keys preferred). */

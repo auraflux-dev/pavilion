@@ -87,6 +87,12 @@ export async function POST(req: NextRequest) {
           displayName: 'Paid members only until (then open to all)',
           type: 'DATETIME',
         },
+        { key: 'landingEyebrow', displayName: 'Landing eyebrow', type: 'TEXT' },
+        { key: 'landingPitch', displayName: 'Landing pitch', type: 'TEXT' },
+        { key: 'landingHighlights', displayName: 'Landing highlights (one per line)', type: 'TEXT' },
+        { key: 'landingVideoUrl', displayName: 'Landing video URL', type: 'TEXT' },
+        { key: 'landingCurriculumTitle', displayName: 'Landing curriculum title', type: 'TEXT' },
+        { key: 'landingCurriculum', displayName: 'Landing curriculum (week|title|focus)', type: 'TEXT' },
       ]),
     )
     results.push(

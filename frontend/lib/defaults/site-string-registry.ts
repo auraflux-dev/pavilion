@@ -3,6 +3,8 @@
  * Staff → Page CSS & strings uses this list. Code defaults remain the fallback.
  */
 
+import { HOME_STRING_DEFAULTS, PORTAL_NOTICE_DEFAULTS } from '@/lib/defaults/site-string-defaults'
+
 export type SiteStringSurface = 'visitor' | 'member' | 'staff' | 'legal'
 
 export type SitePageThemeEntry = {
@@ -34,6 +36,8 @@ export const SITE_PAGE_THEME_REGISTRY: SitePageThemeEntry[] = [
   { page: 'store-how', surface: 'visitor', route: '/cove', fields: 'how it works' },
   { page: 'store-cta', surface: 'visitor', route: '/cove', fields: 'store CTA strip' },
   { page: 'spirit-wear', surface: 'visitor', route: '/cove/spirit-wear', fields: 'spirit wear hero' },
+  { page: 'home-strings', surface: 'visitor', route: '/', fields: 'video + donate promos', stringKeys: Object.keys(HOME_STRING_DEFAULTS) },
+  { page: 'portal-notices', surface: 'member', route: '/member-portal', fields: 'banners and loading hints', stringKeys: Object.keys(PORTAL_NOTICE_DEFAULTS) },
   { page: 'member-portal', surface: 'member', route: '/member-portal', fields: 'portal hero' },
   {
     page: 'portal',
