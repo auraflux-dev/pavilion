@@ -141,6 +141,20 @@ export function PortalCardCheckout({
     if (stored) setCouponCode(stored)
   }, [open])
 
+  const quotePayKey = [
+    payBody.kind,
+    'tier' in payBody ? payBody.tier : '',
+    'productId' in payBody ? payBody.productId : '',
+    'variantId' in payBody ? payBody.variantId : '',
+    'programId' in payBody ? payBody.programId : '',
+    'studentId' in payBody ? payBody.studentId : '',
+    'eventId' in payBody ? payBody.eventId : '',
+    'amountCents' in payBody ? payBody.amountCents : '',
+    'addonProgramIds' in payBody && Array.isArray(payBody.addonProgramIds)
+      ? payBody.addonProgramIds.join(',')
+      : '',
+  ].join('|')
+
   useEffect(() => {
     if (!open) return
     const coveKinds = new Set(['product', 'program', 'membership', 'event', 'donation'])
@@ -184,7 +198,8 @@ export function PortalCardCheckout({
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [open, amount, couponCode, useCove, payBody])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- payBody object identity changes every parent render
+  }, [open, amount, couponCode, useCove, quotePayKey])
 
   useEffect(() => {
     if (!open) return
@@ -599,7 +614,8 @@ export function PortalCardCheckout({
 
         {needsCard ? (
         <PortalPayPalButtons
-          active={open && !busy && !success && nameReady && (!needsConsent || consentComplete)}
+          active={open && !busy && !success && nameReady}
+          requireConsent={needsConsent && !consentComplete}
           payBody={{
             ...payBody,
             ...(payBody.kind === 'product' || payBody.kind === 'program'

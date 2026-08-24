@@ -27,18 +27,41 @@ interface Props {
   onBeforePay?: () => Promise<void>
   /** Remount key when modal opens */
   active: boolean
+  /** Membership/program terms still unchecked. SDK can load; pay is blocked. */
+  requireConsent?: boolean
 }
 
 type PayPalMethod = { payerEmail: string }
 
-export function PortalPayPalButtons({ payBody, onPaid, onError, onBeforePay, active }: Props) {
+export function PortalPayPalButtons({
+  payBody,
+  onPaid,
+  onError,
+  onBeforePay,
+  active,
+  requireConsent = false,
+}: Props) {
   const hostRef = useRef<HTMLDivElement>(null)
+  const requireConsentRef = useRef(requireConsent)
+  requireConsentRef.current = requireConsent
+  const payBodyRef = useRef(payBody)
+  payBodyRef.current = payBody
   const [ready, setReady] = useState(false)
   const [missing, setMissing] = useState(false)
   const [savedPayPal, setSavedPayPal] = useState<PayPalMethod | null>(null)
   const [savePayPal, setSavePayPal] = useState(false)
   const [useSaved, setUseSaved] = useState(false)
   const [busyVault, setBusyVault] = useState(false)
+  const savePayPalRef = useRef(savePayPal)
+  savePayPalRef.current = savePayPal
+  const savedPayPalRef = useRef(savedPayPal)
+  savedPayPalRef.current = savedPayPal
+
+  // Remount only when checkout intent changes. not when consents toggle.
+  const payIntentKey = JSON.stringify({
+    ...payBody,
+    consents: undefined,
+  })
 
   useEffect(() => {
     if (!active) return
@@ -58,6 +81,8 @@ export function PortalPayPalButtons({ payBody, onPaid, onError, onBeforePay, act
     let cancelled = false
 
     async function boot() {
+      setReady(false)
+      setMissing(false)
       const cfgRes = await fetch('/api/checkout/paypal/config')
       const cfg = await cfgRes.json()
       if (!cfg.configured || !cfg.clientId) {
@@ -67,7 +92,7 @@ export function PortalPayPalButtons({ payBody, onPaid, onError, onBeforePay, act
 
       const src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
         cfg.clientId,
-      )}&currency=USD&intent=capture&components=buttons&vault=true&enable-funding=paypal&disable-funding=credit,card,paylater`
+      )}&currency=USD&intent=capture&components=buttons&vault=true&enable-funding=paypal`
       let script = document.querySelector<HTMLScriptElement>(`script[src^="https://www.paypal.com/sdk/js"]`)
       if (!script) {
         script = document.createElement('script')
@@ -88,13 +113,19 @@ export function PortalPayPalButtons({ payBody, onPaid, onError, onBeforePay, act
       hostRef.current.innerHTML = ''
       await window.paypal
         .Buttons({
-          style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal' },
+          style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
           createOrder: async () => {
+            if (requireConsentRef.current) {
+              throw new Error('Please review and accept the required terms before paying.')
+            }
             if (onBeforePay) await onBeforePay()
             const res = await fetch('/api/checkout/paypal/create-order', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ ...payBody, savePayPal: !savedPayPal && savePayPal }),
+              body: JSON.stringify({
+                ...payBodyRef.current,
+                savePayPal: !savedPayPalRef.current && savePayPalRef.current,
+              }),
             })
             const data = await res.json()
             if (!res.ok || !data.orderId) {
@@ -107,9 +138,9 @@ export function PortalPayPalButtons({ payBody, onPaid, onError, onBeforePay, act
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                ...payBody,
+                ...payBodyRef.current,
                 orderId: data.orderID,
-                savePayPal: !savedPayPal && savePayPal,
+                savePayPal: !savedPayPalRef.current && savePayPalRef.current,
               }),
             })
             const result = await res.json()
@@ -130,24 +161,29 @@ export function PortalPayPalButtons({ payBody, onPaid, onError, onBeforePay, act
 
     boot().catch((err) => {
       console.error(err)
+      setReady(false)
       onError?.(err instanceof Error ? err.message : 'PayPal unavailable')
     })
 
     return () => {
       cancelled = true
+      setReady(false)
       if (hostRef.current) hostRef.current.innerHTML = ''
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- payBody serialized below
-  }, [active, useSaved, savePayPal, savedPayPal, JSON.stringify(payBody)])
+  }, [active, useSaved, payIntentKey])
 
   async function payWithSaved() {
     setBusyVault(true)
     try {
+      if (requireConsentRef.current) {
+        throw new Error('Please review and accept the required terms before paying.')
+      }
       if (onBeforePay) await onBeforePay()
       const res = await fetch('/api/checkout/paypal/pay-with-vault', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payBody),
+        body: JSON.stringify(payBodyRef.current),
       })
       const result = await res.json()
       if (!res.ok) {
@@ -208,8 +244,17 @@ export function PortalPayPalButtons({ payBody, onPaid, onError, onBeforePay, act
 
       {!useSaved ? (
         <>
-          {!ready ? <p className="text-[11px] text-[#5A6070] text-center">Loading PayPal…</p> : null}
-          <div ref={hostRef} />
+          {!ready ? (
+            <p className="text-[11px] text-[#5A6070] text-center">Loading PayPal…</p>
+          ) : requireConsent ? (
+            <p className="text-[11px] text-[#5A6070] text-center">
+              Accept the required terms above to pay with PayPal.
+            </p>
+          ) : null}
+          <div
+            ref={hostRef}
+            className={requireConsent ? 'pointer-events-none opacity-50' : undefined}
+          />
         </>
       ) : null}
     </div>

@@ -58,9 +58,10 @@ export async function POST(req: NextRequest) {
       let coveDollars = 0
       let cardDollars = charge.amount
       let coveBalance = 0
-      if (session?.email) {
-        const { withCoveSplit } = await import('@/lib/checkout-cove-split')
-        const { wantsCoveBalance } = await import('@/lib/checkout-cove-split')
+      const effective = await getEffectiveParentEmail(req)
+      const coveEmail = effective?.parentEmail ?? session?.email
+      if (coveEmail) {
+        const { withCoveSplit, wantsCoveBalance } = await import('@/lib/checkout-cove-split')
         const useCoveBalance = wantsCoveBalance(body.useCoveBalance)
         const split = await withCoveSplit(
           {
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
             customId: `membership:${tier}`,
             meta: { tier },
           },
-          session.email,
+          coveEmail,
           useCoveBalance,
         )
         coveDollars = Math.round(Number(split.meta.coveCents ?? 0) || 0) / 100
