@@ -3,9 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CreditCard, Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { GiftCardSettings } from './gift-card-settings'
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
-import { HelpTip } from '@/components/ui/help-tip'
+import { useFormString } from '@/components/member-portal/portal-form-copy-context'
 
 type StoredCard = {
   brand: string
@@ -40,6 +38,7 @@ type PayPalButtonsApi = {
 }
 
 export function PaymentMethodsPanel() {
+  const t = useFormString
   const [busy, setBusy] = useState(true)
   const [removing, setRemoving] = useState<'card' | 'paypal' | null>(null)
   const [card, setCard] = useState<StoredCard | null>(null)
@@ -52,7 +51,6 @@ export function PaymentMethodsPanel() {
   const [squareConfig, setSquareConfig] = useState<SquareConfig | null>(null)
   const [squareReady, setSquareReady] = useState(false)
   const [savingCard, setSavingCard] = useState(false)
-  const [students, setStudents] = useState<{ id: string; firstName: string }[]>([])
   const paypalHostRef = useRef<HTMLDivElement>(null)
   const squareCardRef = useRef<SquareCard | null>(null)
 
@@ -60,10 +58,7 @@ export function PaymentMethodsPanel() {
     setBusy(true)
     setError('')
     try {
-      const [r, studentsRes] = await Promise.all([
-        fetch('/api/gift-card/payment-method'),
-        fetch('/api/students'),
-      ])
+      const r = await fetch('/api/gift-card/payment-method')
       const data = await r.json()
       if (!r.ok) {
         setError(data.error || 'Could not load payment methods.')
@@ -84,16 +79,6 @@ export function PaymentMethodsPanel() {
       )
       setCard(data.paymentMethod ?? null)
       setPaypal(data.paypalMethod ?? null)
-      if (studentsRes.ok) {
-        const sd = await studentsRes.json()
-        const list = Array.isArray(sd.students) ? sd.students : []
-        setStudents(
-          list.map((s: { id: string; firstName?: string }) => ({
-            id: String(s.id),
-            firstName: String(s.firstName || 'Student'),
-          })),
-        )
-      }
     } catch {
       setError('Could not load payment methods.')
       setCard(null)
@@ -324,14 +309,11 @@ export function PaymentMethodsPanel() {
           <CreditCard className="h-4 w-4" style={{ color: 'var(--brand-green)' }} />
         </div>
         <div className="min-w-0">
-          <h2 className="text-base font-bold text-[#1A1A1A] inline-flex items-center gap-2">
-            Cards and PayPal on file
-            <HelpTip tipKey="portal.paymentmethods.why" label="Why save a payment method" />
-          </h2>
+          <h2 className="text-base font-bold text-[#1A1A1A]">{t('paymentPanel.title')}</h2>
           <p className="mt-1 text-sm text-[#5A6070] whitespace-pre-line">
-            {vanillaizeIfDemo(`Square stores your card securely for Cove Digital reloads, membership, spirit wear, and enrichment.
+            {`Square stores your card securely for Cove reloads, membership, spirit wear, and enrichment.
 Save a card or PayPal here for one-tap checkout.
-SHMS PTO never keeps the full card number.`)}
+SHMS PTO never keeps the full card number.`}
           </p>
         </div>
       </div>
@@ -339,7 +321,7 @@ SHMS PTO never keeps the full card number.`)}
       {busy ? (
         <div className="flex items-center gap-2 text-sm text-[#5A6070]">
           <Loader2 className="h-4 w-4 animate-spin" style={{ color: 'var(--brand-green)' }} />
-          Loading…
+          {t('paymentPanel.loading')}
         </div>
       ) : null}
 
@@ -384,10 +366,9 @@ SHMS PTO never keeps the full card number.`)}
 
       {!busy && configured && !card ? (
         <div className="rounded-lg border border-dashed border-[var(--border)] px-3 py-4 space-y-3">
-          <h3 className="text-sm font-bold text-[#1A1A1A]">Add a card</h3>
+          <h3 className="text-sm font-bold text-[#1A1A1A]">{t('paymentPanel.addCard')}</h3>
           <p className="text-sm text-[#5A6070] whitespace-pre-line">
-            {`No card saved yet.
-Enter a debit or credit card here. Square stores it for later checkouts. This does not charge you.`}
+            {t('paymentPanel.noCard')}
           </p>
           <div
             id="payment-methods-square-card"
@@ -461,25 +442,6 @@ Or check “Save this PayPal…” the next time you pay with PayPal.`}
           <p className="text-sm text-amber-800">PayPal save is temporarily unavailable.</p>
         ) : null}
       </div>
-
-      {!busy && students.length > 0 ? (
-        <div className="space-y-3 pt-2 border-t border-[var(--border)]">
-          <div>
-            <h3 className="text-sm font-bold text-[#1A1A1A]">Auto Top-Off</h3>
-            <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
-              {vanillaizeIfDemo(
-                `Reload the Cove Digital Card when the balance is low.\nUses the card saved above.`,
-              )}
-            </p>
-          </div>
-          {students.map((s) => (
-            <div key={s.id} className="space-y-1">
-              <p className="text-xs font-semibold text-[#5A6070]">{s.firstName}</p>
-              <GiftCardSettings studentId={s.id} />
-            </div>
-          ))}
-        </div>
-      ) : null}
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {success ? <p className="text-sm font-semibold text-green-700">{success}</p> : null}

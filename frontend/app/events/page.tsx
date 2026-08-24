@@ -35,6 +35,7 @@ export default async function EventsPage() {
   return (
     <VisitorChrome pageKey="events">
         <PageHero
+          pageKey="events"
           content={{
             ...page,
             ...(inSession

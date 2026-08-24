@@ -1,13 +1,39 @@
 import type { PageContentFields } from '@/lib/api/page-content'
+import { EditableCopy } from '@/components/cms/editable-copy'
 
 type Props = {
   content: Pick<PageContentFields, 'eyebrow' | 'title' | 'body' | 'flyerImage'>
+  /** When set, admins can inline-edit hero copy for this PageContent page key. */
+  pageKey?: string
   /** Tighter padding for portal-style pages */
   compact?: boolean
 }
 
+function HeroText({
+  pageKey,
+  field,
+  value,
+  className,
+}: {
+  pageKey?: string
+  field: 'eyebrow' | 'title' | 'body'
+  value: string
+  className?: string
+}) {
+  if (pageKey) {
+    return (
+      <EditableCopy
+        target={{ type: 'pageField', page: pageKey, field }}
+        value={value}
+        className={className}
+      />
+    )
+  }
+  return <span className={`whitespace-pre-line ${className ?? ''}`}>{value}</span>
+}
+
 /** Shared green marketing hero driven by PageContent / defaults. */
-export function PageHero({ content, compact }: Props) {
+export function PageHero({ content, pageKey, compact }: Props) {
   const flyer = content.flyerImage?.trim()
 
   return (
@@ -21,7 +47,7 @@ export function PageHero({ content, compact }: Props) {
             className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
             style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'white' }}
           >
-            {content.eyebrow}
+            <HeroText pageKey={pageKey} field="eyebrow" value={content.eyebrow} className="text-white" />
           </div>
         ) : null}
         <h1
@@ -29,7 +55,7 @@ export function PageHero({ content, compact }: Props) {
             compact ? 'text-3xl sm:text-4xl mb-2' : 'text-4xl sm:text-5xl lg:text-6xl mb-6'
           }`}
         >
-          {content.title}
+          <HeroText pageKey={pageKey} field="title" value={content.title} className="text-white" />
         </h1>
         {content.body ? (
           <p
@@ -37,7 +63,7 @@ export function PageHero({ content, compact }: Props) {
               compact ? 'text-base text-white/70' : 'text-lg'
             }`}
           >
-            {content.body}
+            <HeroText pageKey={pageKey} field="body" value={content.body} className="text-white/80" />
           </p>
         ) : null}
         {flyer ? (

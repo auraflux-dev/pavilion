@@ -48,6 +48,46 @@ export const STAFF_PORTAL_DEFAULTS: Record<string, string> = {
   'dashboard.filterByName': 'By name',
   'dashboard.archiveConfirm':
     'Archive this student? They will be hidden from the roster but records stay in Wix.',
+  'dashboard.introCommons':
+    'Open a workspace from the top nav.\nStart with Membership, Events, or Site.',
+  'dashboard.introShms':
+    'Your role cards below show what needs attention this week.',
+  'dashboard.statusArchived': 'Student archived.',
+  'dashboard.statusRestored': 'Student restored.',
+  'members.title': 'Members',
+  'members.body':
+    'Account number is the top line for each family.\nSearch by account #, email, or student name.\nFilter paid vs free, act-as, or archive / restore a student.',
+  'members.searchTitle': 'Search',
+  'members.lookupLabel': 'Lookup',
+  'members.actAsTitle': 'Act as parent',
+  'members.actAsBody':
+    'Open the member portal as a parent for support.\nUse only for legitimate board support.',
+  'members.actAsEmail': 'Parent email',
+  'members.actAsButton': 'Act as parent',
+  'messages.title': 'Messages',
+  'messages.body':
+    'Send a note to one parent or a grade/program cohort.\nMessages land in the parent inbox.',
+  'messages.subject': 'Subject',
+  'messages.bodyLabel': 'Message',
+  'messages.recipientEmail': 'Parent email (one family)',
+  'messages.gradeFilter': 'Grade filter (optional)',
+  'messages.programFilter': 'Program filter (optional)',
+  'messages.send': 'Send message',
+  'messages.sent': 'Message sent to parent inbox.',
+  'messages.sending': 'Sending…',
+  'messages.sendInbox': 'Send to inbox',
+  'messages.subjectPlaceholder': 'Subject',
+  'messages.bodyPlaceholder': 'Message body',
+  'messages.emailPlaceholder': 'Parent email (optional)',
+  'messages.gradePlaceholder': 'Grade e.g. 6',
+  'messages.programPlaceholder': 'Program name',
+  'members.filterLabel': 'Filter',
+  'members.sortLabel': 'Sort',
+  'shell.siteHome': 'Site home',
+  'shell.privacy': 'Privacy',
+  'shell.terms': 'Terms',
+  'shell.dataSecurity': 'Data security',
+  'shell.docsHint': 'Drive docs 26 to 40 for how-tos',
 }
 
 export function defaultStaffWorkspaceLabel(id: StaffWorkspace): string {

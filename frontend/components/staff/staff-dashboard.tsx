@@ -153,6 +153,7 @@ function parseWorkspace(raw: string | null): StaffWorkspace | null {
 
 export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCopy?: Record<string, string> }) {
   const wsLabel = (id: StaffWorkspace) => staffWorkspaceLabel(staffCopy, id)
+  const sc = (key: string, fallback?: string) => staffStr(staffCopy, key, fallback)
   const workspaceGroups = useMemo(() => resolveStaffWorkspaceGroups(staffCopy), [staffCopy])
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -489,7 +490,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
             )}
             {activityItems.length > 0 ? (
               <div className="rounded-xl border border-[var(--brand-green)]/25 bg-[#E8F3E8] p-4 space-y-2">
-                <p className="text-sm font-bold text-[var(--brand-green)]">Needs your attention</p>
+                <p className="text-sm font-bold text-[var(--brand-green)]">{sc('dashboard.needsAttention')}</p>
                 <ul className="space-y-1.5">
                   {activityItems.map((item) => (
                     <li key={item.id}>
@@ -539,7 +540,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
                           {vanillaizeIfDemo(item.label)}
                         </p>
                         <p className="text-xs text-[#5A6070] mt-0.5">
-                          {vanillaizeIfDemo(STAFF_WORKSPACE_BLURB[item.id] ?? 'Open workspace')}
+                          {vanillaizeIfDemo(sc(`blurb.${item.id}`, STAFF_WORKSPACE_BLURB[item.id] ?? 'Open workspace'))}
                         </p>
                       </button>
                     ))}
@@ -553,7 +554,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
                   <h2 className="text-base font-bold text-[#1A1A1A]">{vanillaizeIfDemo(home.title)}</h2>
                   <p className="text-xs text-[#5A6070] mt-1 mb-2">{vanillaizeIfDemo(home.owns)}</p>
                   <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--brand-green)] mb-1.5">
-                    This week
+                    {sc('dashboard.thisWeek')}
                   </p>
                   <ul className="space-y-1">
                     {home.thisWeek.map((item) => (
@@ -575,25 +576,24 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
         {active === 'members' && me.isAdmin ? (
           <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
             <div>
-              <h1 className="text-xl font-bold">Members</h1>
-              <p className="text-xs text-[#5A6070] mt-1">
-                Account number is the top line for each family. Search by account #, email, or student
-                name. Filter paid vs free, act-as, or archive / restore a student.
+              <h1 className="text-xl font-bold">{sc('members.title')}</h1>
+              <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
+                {sc('members.body')}
               </p>
             </div>
             <div className="flex flex-col gap-3 xl:flex-row xl:items-stretch">
               <div className={`flex-1 ${STAFF_FILTER_CARD}`}>
-                <p className={STAFF_FILTER_CARD_TITLE}>Search</p>
+                <p className={STAFF_FILTER_CARD_TITLE}>{sc('members.searchTitle')}</p>
                 <div className="grid gap-3 sm:grid-cols-[1fr_auto] items-end">
                   <label className={STAFF_FILTER_LABEL}>
-                    Lookup
+                    {sc('members.lookupLabel')}
                     <input
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') void loadMembers()
                       }}
-                      placeholder="Account #, email, or student name"
+                      placeholder={sc('dashboard.searchPlaceholder')}
                       autoComplete="off"
                       name="staff-members-lookup"
                       className={STAFF_FILTER_INPUT}
@@ -606,7 +606,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
                       className="text-white h-10 px-5"
                       style={{ backgroundColor: 'var(--brand-green)' }}
                     >
-                      {lookupBusy ? '…' : 'Search'}
+                      {lookupBusy ? '…' : sc('dashboard.search')}
                     </Button>
                     <Button
                       onClick={() => {
@@ -618,7 +618,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
                       variant="outline"
                       className="h-10"
                     >
-                      Clear
+                      {sc('dashboard.clear')}
                     </Button>
                   </div>
                 </div>
@@ -648,9 +648,9 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
                       className={STAFF_FILTER_SELECT}
                       aria-label="Filter paid or free"
                     >
-                      <option value="all">All accounts</option>
-                      <option value="paid">Paid only</option>
-                      <option value="free">Free only</option>
+                      <option value="all">{sc('dashboard.filterAll')}</option>
+                      <option value="paid">{sc('dashboard.filterPaid')}</option>
+                      <option value="free">{sc('dashboard.filterFree')}</option>
                     </select>
                   </label>
                 </div>
@@ -663,8 +663,8 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
                       className={STAFF_FILTER_SELECT}
                       aria-label="Sort members"
                     >
-                      <option value="email">By email</option>
-                      <option value="name">By name</option>
+                      <option value="email">{sc('dashboard.filterByEmail')}</option>
+                      <option value="name">{sc('dashboard.filterByName')}</option>
                     </select>
                   </label>
                 </div>
@@ -740,42 +740,41 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
         {active === 'messages' && canMessage ? (
           <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
             <div>
-              <h1 className="text-xl font-bold">Messages</h1>
-              <p className="text-xs text-[#5A6070] mt-1">
-                Appear in the parent portal inbox. Leave email blank and set grade or program to
-                broadcast.
+              <h1 className="text-xl font-bold">{sc('messages.title')}</h1>
+              <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
+                {sc('messages.body')}
               </p>
             </div>
             <input
               value={msgSubject}
               onChange={(e) => setMsgSubject(e.target.value)}
-              placeholder="Subject"
+              placeholder={sc('messages.subjectPlaceholder')}
               className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             />
             <textarea
               value={msgBody}
               onChange={(e) => setMsgBody(e.target.value)}
               rows={4}
-              placeholder="Message body"
+              placeholder={sc('messages.bodyPlaceholder')}
               className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
             />
             <div className="grid sm:grid-cols-3 gap-2">
               <input
                 value={msgEmail}
                 onChange={(e) => setMsgEmail(e.target.value)}
-                placeholder="Parent email (optional)"
+                placeholder={sc('messages.emailPlaceholder')}
                 className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
               <input
                 value={msgGrade}
                 onChange={(e) => setMsgGrade(e.target.value)}
-                placeholder="Grade e.g. 6"
+                placeholder={sc('messages.gradePlaceholder')}
                 className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
               <input
                 value={msgProgram}
                 onChange={(e) => setMsgProgram(e.target.value)}
-                placeholder="Program name"
+                placeholder={sc('messages.programPlaceholder')}
                 className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
             </div>
@@ -785,7 +784,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
               className="text-white"
               style={{ backgroundColor: 'var(--brand-green)' }}
             >
-              {msgBusy ? 'Sending…' : 'Send to inbox'}
+              {msgBusy ? sc('messages.sending') : sc('messages.sendInbox')}
             </Button>
             {msgStatus ? <p className="text-xs text-[#5A6070]">{msgStatus}</p> : null}
           </section>

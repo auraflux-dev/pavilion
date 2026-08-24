@@ -305,6 +305,7 @@ export function spring2027StagingCatalogPrograms(): Program[] {
       season: 'spring-2027',
       tags: 'coming-soon,spring-2027,fee-tbd',
       schedule: `${c.dayOfWeek}s ${c.classTime}, 12 sessions`,
+      fallEpClassId: c.id,
     }
   })
 }

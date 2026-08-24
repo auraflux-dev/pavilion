@@ -55,6 +55,7 @@ export default async function ProgramsPage({
   return (
     <VisitorChrome pageKey="programs">
         <PageHero
+          pageKey="programs"
           content={{
             ...page,
             // Keep hero short. Class names live on the cards below, not in a duplicate list.

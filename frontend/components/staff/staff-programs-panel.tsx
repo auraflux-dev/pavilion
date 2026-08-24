@@ -928,6 +928,33 @@ Edit fields, then click Save program. www updates within seconds after Save.`}
             >
               Add program
             </Button>
+            {canManageAll && staffCatalogSeason === 'spring-2027' ? (
+              <Button
+                type="button"
+                disabled={busy}
+                variant="outline"
+                className="text-sm"
+                onClick={() => {
+                  void (async () => {
+                    setBusy(true)
+                    setStatus('')
+                    try {
+                      const r = await fetch('/api/staff/programs/seed-spring', { method: 'POST' })
+                      const d = await r.json()
+                      if (!r.ok) throw new Error(d.error ?? 'Seed failed')
+                      setStatus(String(d.message ?? 'Spring programs seeded.'))
+                      await load()
+                    } catch (err) {
+                      setStatus(err instanceof Error ? err.message : 'Seed failed')
+                    } finally {
+                      setBusy(false)
+                    }
+                  })()
+                }}
+              >
+                Seed Spring 2027 classes
+              </Button>
+            ) : null}
           </div>
           {visiblePrograms.length > 0 ? (
             <p className="text-xs text-[#5A6070] whitespace-pre-line">

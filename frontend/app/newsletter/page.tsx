@@ -36,7 +36,7 @@ export default async function NewsletterPage() {
 
   return (
     <VisitorChrome pageKey="newsletter">
-        <PageHero content={page} />
+        <PageHero content={page} pageKey="newsletter" />
 
         {/* Sign up + perks */}
         <section className="py-16 md:py-24" style={{ backgroundColor: 'var(--brand-warm)' }}>

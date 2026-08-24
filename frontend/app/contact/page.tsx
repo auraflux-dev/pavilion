@@ -67,7 +67,7 @@ export default async function ContactPage() {
 
   return (
     <VisitorChrome pageKey="contact">
-        <PageHero content={page} />
+        <PageHero content={page} pageKey="contact" />
 
         <section className="py-16 md:py-24" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

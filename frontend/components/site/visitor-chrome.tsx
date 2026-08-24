@@ -3,6 +3,7 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { getPageContent } from '@/lib/api/page-content'
 import { PageThemeRoot, PageThemeStyles } from '@/components/site/page-theme'
+import { VisitorInlineEdit } from '@/components/site/visitor-inline-edit'
 
 type Props = {
   /** PageContent.page key for CSS + string overrides */
@@ -23,16 +24,18 @@ export async function VisitorChrome({
 }: Props) {
   const content = await getPageContent(pageKey)
   return (
-    <div className="min-h-screen flex flex-col">
-      <PageThemeStyles pageKey={pageKey} css={content.customCss ?? ''} />
-      <AnnouncementBar />
-      <Navbar />
-      <PageThemeRoot pageKey={pageKey} className="flex-1 flex flex-col">
-        <main id="main-content" className={mainClassName} style={mainStyle}>
-          {children}
-        </main>
-      </PageThemeRoot>
-      {showFooter ? <Footer /> : null}
-    </div>
+    <VisitorInlineEdit>
+      <div className="min-h-screen flex flex-col">
+        <PageThemeStyles pageKey={pageKey} css={content.customCss ?? ''} />
+        <AnnouncementBar />
+        <Navbar />
+        <PageThemeRoot pageKey={pageKey} className="flex-1 flex flex-col">
+          <main id="main-content" className={mainClassName} style={mainStyle}>
+            {children}
+          </main>
+        </PageThemeRoot>
+        {showFooter ? <Footer /> : null}
+      </div>
+    </VisitorInlineEdit>
   )
 }

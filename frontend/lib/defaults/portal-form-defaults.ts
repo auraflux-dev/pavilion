@@ -119,6 +119,8 @@ export const PORTAL_FORM_DEFAULTS: Record<string, string> = {
   'paymentPanel.loading': 'Loading…',
   'paymentPanel.addCard': 'Add a card',
   'paymentPanel.noCard': 'No card saved yet. Add one for faster reloads.',
+  'paymentPanel.noCardBody':
+    'Enter a debit or credit card here.\nSquare stores it for later checkouts.\nThis does not charge you.',
   'paymentPanel.saveCard': 'Save card',
   'paymentPanel.saving': 'Saving…',
   'paymentPanel.remove': 'Remove',
