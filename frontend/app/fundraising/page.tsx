@@ -5,6 +5,7 @@ import { getSiteSettings } from '@/lib/api/site-settings'
 import { getFundraisingCTAs } from '@/lib/api/fundraising-ctas'
 import { getPageContent } from '@/lib/api/page-content'
 import { getFundraisingPageCopy } from '@/lib/api/visitor-forms-copy'
+import { getDonateFormStrings } from '@/lib/api/visitor-strings'
 import { formString } from '@/lib/copy/form-string'
 import { DepartmentContactForm } from '@/components/programs/programs-contact-form'
 import { ProgramUiCopyBoundary } from '@/components/programs/program-ui-copy-boundary'
@@ -13,6 +14,13 @@ import { getActiveSponsors } from '@/lib/api/sponsors'
 import { DEFAULT_SPONSORSHIP_INBOXES, parseStaffInboxes } from '@/lib/staff/inbox'
 import { ArrowRight, Heart, TrendingUp, Users, ShoppingBag, Ticket, Star, RefreshCw, Handshake, type LucideIcon } from 'lucide-react'
 import { DonateBlock } from '@/components/donate/donate-block'
+import { MEMBERSHIP_CHOOSE_PATH } from '@/lib/membership-links'
+import {
+  FundraisingAllocationsHeader,
+  FundraisingGoalPct,
+  FundraisingHeroAmountRow,
+  FundraisingInitiativesHeader,
+} from '@/components/fundraising/fundraising-page-copy'
 import { SponsorshipPackages } from '@/components/fundraising/sponsorship-packages'
 import { FundraisingSectionNav } from '@/components/jump-nav/public-section-navs'
 import { rollForwardSchoolYearCopy } from '@/lib/copy/roll-forward-school-year'
@@ -47,7 +55,7 @@ function fmtDollars(n: number) {
 }
 
 export default async function FundraisingPage() {
-  const [data, settings, ctas, page, sponsors, allocations, annualGoal, shellCopy] = await Promise.all([
+  const [data, settings, ctas, page, sponsors, allocations, annualGoal, shellCopy, donateCopy] = await Promise.all([
     getFundraisingTotals(),
     getSiteSettings(),
     getFundraisingCTAs(),
@@ -56,9 +64,8 @@ export default async function FundraisingPage() {
     getFundAllocationActuals(),
     getFundraisingAnnualGoal(),
     getFundraisingPageCopy(),
+    getDonateFormStrings(),
   ])
-  const fs = (key: string, vars?: Record<string, string | number | undefined | null>) =>
-    vanillaizeIfDemo(formString(shellCopy, key, key, vars))
   const { totals, goals, volunteerHoursRaised, volunteerHoursGoal, sponsorshipFromBank } = data
   const sponsorshipRaised =
     settings.getNumber('sponsorshipRaised', 0) + (sponsorshipFromBank ?? 0)
@@ -93,7 +100,7 @@ export default async function FundraisingPage() {
       description: vanillaizeIfDemo('Annual PTO memberships (Reef, Lagoon, Tide) are our largest revenue source, funding enrichment programs directly.'),
       raised: totals.membership,
       goal:   goals.membership,
-      href: '/membership',
+      href: MEMBERSHIP_CHOOSE_PATH,
       cta: 'Join Now',
     },
     {
@@ -186,17 +193,11 @@ export default async function FundraisingPage() {
               className="inline-block rounded-2xl px-8 py-6 text-left w-full max-w-lg"
               style={{ backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
             >
-              <div className="flex items-end gap-6 mb-4">
-                <div>
-                  <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-0.5">{fs('hero.totalLabel')}</p>
-                  <p className="text-4xl font-bold text-white">{fmtDollars(totalRaised)}</p>
-                </div>
-                <div className="pb-1 text-white/40 text-lg">{fs('hero.of')}</div>
-                <div>
-                  <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-0.5">{fs('hero.goalLabel')}</p>
-                  <p className="text-4xl font-bold" style={{ color: 'var(--brand-gold)' }}>{fmtDollars(ANNUAL_GOAL)}</p>
-                </div>
-              </div>
+              <FundraisingHeroAmountRow
+                copy={shellCopy}
+                totalRaised={fmtDollars(totalRaised)}
+                goal={fmtDollars(ANNUAL_GOAL)}
+              />
               <div className="w-full bg-white/20 rounded-full h-3 mb-2">
                 <div
                   className="h-3 rounded-full transition-all duration-700"
@@ -208,7 +209,7 @@ export default async function FundraisingPage() {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-white/70 text-sm font-medium">{fs('hero.goalPct', { pct: overallPct })}</p>
+                <FundraisingGoalPct copy={shellCopy} overallPct={overallPct} />
                 <p className="text-white/40 text-xs flex items-center gap-1">
                   <RefreshCw className="w-3 h-3" aria-hidden="true" />
                   {data.fetchedAt
@@ -223,9 +224,14 @@ export default async function FundraisingPage() {
         <FundraisingSectionNav />
 
         <DonateBlock
-          title={vanillaizeIfDemo('Make a gift to SHMS PTO')}
+          copy={donateCopy}
+          title={vanillaizeIfDemo(formString(donateCopy, 'donate.fundraisingTitle', 'Make a gift to SHMS PTO'))}
           body={vanillaizeIfDemo(
-            'Choose any amount. Your gift goes to the PTO: enrichment, The Cove, teacher support, and events for Stone Hill students. Not a donation to the school district.',
+            formString(
+              donateCopy,
+              'donate.fundraisingBody',
+              'Choose any amount. Your gift goes to the PTO: enrichment, The Cove, teacher support, and events for Stone Hill students. Not a donation to the school district.',
+            ),
           )}
         />
 
@@ -233,18 +239,7 @@ export default async function FundraisingPage() {
         <section id="initiatives" className="scroll-mt-28 py-14 md:py-20" style={{ backgroundColor: 'var(--brand-warm)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <div
-                className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
-                style={{ backgroundColor: 'var(--brand-green)', color: 'white' }}
-              >
-                {fs('initiatives.eyebrow')}
-              </div>
-              <h2 className="text-3xl font-bold" style={{ color: '#1A1A1A' }}>
-                {fs('initiatives.title')}
-              </h2>
-              <p className="text-[#5A6070] mt-3 max-w-xl mx-auto whitespace-pre-line">
-                {fs('initiatives.body')}
-              </p>
+              <FundraisingInitiativesHeader copy={shellCopy} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -308,18 +303,7 @@ export default async function FundraisingPage() {
         <section id="allocations" className="scroll-mt-28 py-14 md:py-20 bg-white border-t border-[var(--border)]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
-              <div
-                className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
-                style={{ backgroundColor: 'var(--brand-soft)', color: 'var(--brand-green)' }}
-              >
-                {fs('allocations.eyebrow')}
-              </div>
-              <h2 className="text-3xl font-bold" style={{ color: '#1A1A1A' }}>
-                {fs('allocations.title')}
-              </h2>
-              <p className="text-[#5A6070] mt-3 whitespace-pre-line">
-                {fs('allocations.body')}
-              </p>
+              <FundraisingAllocationsHeader copy={shellCopy} />
             </div>
 
             <div className="space-y-5">

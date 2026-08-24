@@ -12,6 +12,7 @@ import { isCommonsPlatform } from '@/lib/crm/active-trial'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { DemoMark } from '@/components/demo/demo-mark'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
+import { MEMBERSHIP_CHOOSE_PATH, MEMBERSHIP_PATH } from '@/lib/membership-links'
 
 type Props = {
   children: React.ReactNode
@@ -56,7 +57,10 @@ export function MemberShell({ children }: Props) {
 
   const links = [
     { href: '/member-portal', label: 'Portal' },
-    { href: '/membership', label: status === 'loading' || isPaid ? 'Membership' : 'Upgrade' },
+    {
+      href: status === 'loading' || isPaid ? MEMBERSHIP_PATH : MEMBERSHIP_CHOOSE_PATH,
+      label: status === 'loading' || isPaid ? 'Membership' : 'Upgrade',
+    },
     ...(commons ? [] : [{ href: '/cove', label: vanillaizeIfDemo('The Cove') }]),
     ...(commons ? [] : [{ href: '/programs', label: 'Programs' }]),
     {

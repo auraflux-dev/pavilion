@@ -131,8 +131,8 @@ export function MembershipSectionNav() {
       ariaLabel="Membership page sections"
       items={[
         {
-          href: '#tiers',
-          label: commons ? 'Join' : 'Tiers',
+          href: '#choose',
+          label: commons ? 'Join' : 'Choose',
           hint: tierHint,
           icon: Gift,
         },

@@ -56,7 +56,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     title: 'Welcome to Stone Hill Middle School PTO',
     body: 'An active volunteer organization committed to enriching the academic and social experience for all SHMS PTO students and families. Go Stingrays!',
     ctaLabel: 'Join the PTO',
-    ctaHref: '/membership',
+    ctaHref: '/membership#choose',
   }),
   /** Home page block below programs. Wix PageContent page = home-volunteer */
   'home-volunteer': empty('home-volunteer', {

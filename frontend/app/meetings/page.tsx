@@ -7,6 +7,7 @@ import { MeetingsSectionNav } from '@/components/jump-nav/public-section-navs'
 import { Users } from 'lucide-react'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { MEMBERSHIP_CHOOSE_PATH } from '@/lib/membership-links'
 
 export const revalidate = 300
 
@@ -49,7 +50,7 @@ export default async function MeetingsPage() {
 
   return (
     <VisitorChrome pageKey="meetings">
-        <PageHero content={page} />
+        <PageHero content={page} pageKey="meetings" />
         <MeetingsSectionNav />
 
         {/* PTO Section */}
@@ -123,7 +124,7 @@ export default async function MeetingsPage() {
               )}
             </p>
             <a
-              href="/membership"
+              href={MEMBERSHIP_CHOOSE_PATH}
               className="inline-flex items-center gap-2 font-semibold text-white px-6 py-3 rounded-lg transition-opacity hover:opacity-90"
               style={{ backgroundColor: 'var(--brand-green)' }}
             >

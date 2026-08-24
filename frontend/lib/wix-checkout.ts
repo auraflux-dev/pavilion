@@ -48,5 +48,5 @@ export function storeCardCheckoutUrl(amount: number | null): string {
 export function membershipCheckoutUrl(tierId: 'ruby' | 'supreme' | string): string {
  if (tierId === 'supreme') return productPageUrl(MEMBERSHIP_SUPREME_SLUG)
  if (tierId === 'ruby') return productPageUrl(MEMBERSHIP_RUBY_SLUG)
-  return '/membership'
+  return '/membership#choose'
 }

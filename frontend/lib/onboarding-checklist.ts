@@ -9,6 +9,7 @@ import {
   type StudentSafety,
 } from '@/lib/program-enroll'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { MEMBERSHIP_CHOOSE_PATH } from '@/lib/membership-links'
 
 export type OnboardingStudent = Omit<StudentSafety, '_id'> & {
   id?: string
@@ -170,7 +171,7 @@ export function buildOnboardingChecklist(opts: {
             ),
       done: accountType === 'paid',
       required: false,
-      href: accountType === 'paid' ? undefined : '/membership',
+      href: accountType === 'paid' ? undefined : MEMBERSHIP_CHOOSE_PATH,
       actionLabel: accountType === 'paid' ? undefined : 'View membership',
     },
   ]
