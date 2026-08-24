@@ -70,6 +70,10 @@ export async function GET(req: NextRequest) {
         parentLastName: String(item.parentLastName ?? item.lastName ?? ''),
         parentPhone: String(item.parentPhone ?? item.phone ?? ''),
         accountNumber: String(item.accountNumber ?? ''),
+        boardComplimentary: Boolean(
+          String(item.boardDiscountFallCode ?? '').trim() ||
+            String(item.boardDiscountSpringCode ?? '').trim(),
+        ),
       })),
     )
 

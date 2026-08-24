@@ -21,16 +21,18 @@ export type ParentRosterRow = {
   parentPhone: string
   /** Stable Staff account number (A10001+). */
   accountNumber: string
-  /** Highest tier among active students, else free (faculty complimentary included) */
+  /** Highest tier among active students, else free */
   membershipTier: string
-  /** Revenue paid (reef/lagoon/tide). Faculty counts as free unless upgraded. */
+  /** Paid family/faculty. Board gifted Reef counts as free. */
   accountType: 'free' | 'paid'
+  /** Board seat complimentary Reef (75% EP codes, no SHMSREEF10). */
+  boardComplimentary?: boolean
   students: StudentRosterRow[]
 }
 
 export type RosterFilters = {
   q?: string
-  /** free | paid | reef | lagoon | tide | all */
+  /** free | paid | reef | lagoon | tide | faculty | all */
   tier?: string
   grade?: string
   includeArchived?: boolean
@@ -64,14 +66,23 @@ export function isPaidTier(tier: string): boolean {
 }
 
 /**
- * Staff roster paid/free counts: Reef / Lagoon / Tide only.
- * Faculty complimentary seats stay in the parent total as free
- * unless they upgrade to a paid family tier.
- * Keep isPaidTier for registration priority (faculty still counts as paid there).
+ * Staff roster paid/free counts.
+ * Faculty (paid) + Reef / Lagoon / Tide count as paid.
+ * Board gifted Reef is marked free separately via boardComplimentary.
  */
 export function isPaidAccountType(tier: string): boolean {
   const n = normalizeMembershipTier(tier)
-  return n === 'reef' || n === 'lagoon' || n === 'tide'
+  return n === 'reef' || n === 'lagoon' || n === 'tide' || n === 'faculty'
+}
+
+/** Board seat gift: Reef comps count free unless they upgrade to Lagoon/Tide. */
+export function accountTypeForMembership(opts: {
+  tier: string
+  boardComplimentary?: boolean
+}): 'free' | 'paid' {
+  const n = normalizeMembershipTier(opts.tier)
+  if (opts.boardComplimentary && (n === 'reef' || n === 'ruby')) return 'free'
+  return isPaidAccountType(n) ? 'paid' : 'free'
 }
 
 /** Lagoon / Tide: Cove code ends in 9 for event refreshments. Reef is paid but does not get this perk. */
@@ -84,7 +95,6 @@ export function tierRank(tier: string | undefined | null): number {
   const n = normalizeMembershipTier(tier)
   return TIER_RANK[n] ?? (isPaidTier(n) ? 10 : 0)
 }
-
 
 export type MembershipTierTotals = {
   reef: number
@@ -114,7 +124,7 @@ export function membershipTierTotals(rows: ParentRosterRow[]): MembershipTierTot
     else if (n === 'tide') out.tide += 1
     else if (!isPaidAccountType(n)) out.free += 1
     else out.other += 1
-    if (row.accountType === 'paid' || isPaidAccountType(n)) out.paid += 1
+    if (row.accountType === 'paid') out.paid += 1
   }
   return out
 }
@@ -200,7 +210,10 @@ export function buildParentRoster(items: RawStudent[]): ParentRosterRow[] {
       ? activeTiers
       : row.students.map((s: StudentRosterRow) => s.membershipTier)
     row.membershipTier = pickHighestTier(tiers)
-    row.accountType = isPaidAccountType(row.membershipTier) ? 'paid' : 'free'
+    row.accountType = accountTypeForMembership({
+      tier: row.membershipTier,
+      boardComplimentary: row.boardComplimentary,
+    })
     row.students.sort((a: StudentRosterRow, b: StudentRosterRow) =>
       `${a.lastName}${a.firstName}`.localeCompare(`${b.lastName}${b.firstName}`),
     )
@@ -218,6 +231,8 @@ export type MembershipRosterRow = {
   parentLastName?: string
   parentPhone?: string
   accountNumber?: string
+  /** True when Memberships has board season EP codes (gifted board seat). */
+  boardComplimentary?: boolean
 }
 
 /**
@@ -252,20 +267,34 @@ export function applyMembershipsToRoster(
         parentPhone: String(m.parentPhone ?? '').trim(),
         accountNumber,
         membershipTier: isPaidTier(tier) ? tier : 'free',
-        accountType: isPaidAccountType(tier) ? 'paid' : 'free',
+        boardComplimentary: m.boardComplimentary === true,
+        accountType: accountTypeForMembership({
+          tier,
+          boardComplimentary: m.boardComplimentary === true,
+        }),
         students: [],
       })
       continue
     }
 
     if (accountNumber) existing.accountNumber = accountNumber
+    if (m.boardComplimentary === true) existing.boardComplimentary = true
 
     // Do not let a free Memberships row wipe a paid Students tier
-    if (!isPaidTier(tier)) continue
+    if (!isPaidTier(tier)) {
+      existing.accountType = accountTypeForMembership({
+        tier: existing.membershipTier,
+        boardComplimentary: existing.boardComplimentary,
+      })
+      continue
+    }
 
     const merged = pickHighestTier([existing.membershipTier, tier])
     existing.membershipTier = merged
-    existing.accountType = isPaidAccountType(merged) ? 'paid' : 'free'
+    existing.accountType = accountTypeForMembership({
+      tier: merged,
+      boardComplimentary: existing.boardComplimentary,
+    })
     if (!existing.parentFirstName && m.parentFirstName) {
       existing.parentFirstName = String(m.parentFirstName).trim()
     }
@@ -299,10 +328,10 @@ export function filterParentRoster(
       return { ...row, students }
     })
     .filter((row) => {
-      // Keep Memberships-only paid parents and faculty seats (no student rows yet)
+      // Keep Memberships-only paid parents, faculty, and board seats (no student rows yet)
       if (!includeArchived && row.students.length === 0) {
         const t = normalizeMembershipTier(row.membershipTier)
-        if (row.accountType !== 'paid' && t !== 'faculty') return false
+        if (row.accountType !== 'paid' && t !== 'faculty' && !row.boardComplimentary) return false
       }
 
       if (tier === 'free' && row.accountType !== 'free') return false

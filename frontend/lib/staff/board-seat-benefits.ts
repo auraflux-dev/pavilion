@@ -1,5 +1,6 @@
 /**
  * Board seat package: complimentary Reef + 75% off one enrichment program per season.
+ * No SHMSREEF10 (that is for paying Reef families).
  * Applied to the board member's personal (parent portal) email. not @shmspto.org.
  */
 import { applyPaidMembership } from '@/lib/membership-sync'
@@ -35,7 +36,32 @@ export async function grantBoardSeatBenefits(opts: {
     tier: 'reef',
     parentName: displayName,
     orderId,
+    skipEnrichmentCode: true,
   })
+
+  // Board seat: complimentary Reef for portal access/perks, but not SHMSREEF10.
+  // Season 75% codes are the enrichment benefit.
+  try {
+    const { clearEnrichmentCodeFromFamily } = await import('@/lib/staff/enrichment-codes')
+    await clearEnrichmentCodeFromFamily(parentEmail)
+    const client = (await import('@/lib/wix-client')).getWixClient()
+    const res = await client.items.query('Memberships').eq('email', parentEmail).limit(1).find()
+    const row = res.items?.[0] as Record<string, unknown> | undefined
+    if (row?._id) {
+      const { parseEntitlementsJson } = await import('@/lib/membership-entitlements')
+      const ents = parseEntitlementsJson(row.entitlementsJson).filter(
+        (e) => e.kind !== 'enrichment_discount',
+      )
+      await client.items.update('Memberships', {
+        ...row,
+        _id: String(row._id),
+        enrichmentCode: '',
+        entitlementsJson: JSON.stringify(ents),
+      })
+    }
+  } catch {
+    // best-effort
+  }
 
   const codes = await issueBoardEnrichmentDiscounts({
     parentEmail,
@@ -48,6 +74,6 @@ export async function grantBoardSeatBenefits(opts: {
     fallCode: codes.fallCode,
     springCode: codes.springCode,
     membershipUpserted: membership.membershipUpserted,
-    enrichmentCode: membership.enrichmentCode ?? null,
+    enrichmentCode: null,
   }
 }

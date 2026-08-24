@@ -114,18 +114,16 @@ export function tierNeedsEventRefreshments(tier: string): boolean {
   )
 }
 
-/** Paid family tiers only. Faculty complimentary seats do not get enrichment %. */
 export function tierOffersEnrichmentDiscount(tier: string): boolean {
   return enrichmentDiscountPercent(tier) > 0
 }
 
 export function enrichmentDiscountPercent(tier: string): number {
   const t = tier.trim().toLowerCase()
-  // Faculty / school staff complimentary: no SHMSREEF10 (or higher). Lagoon/Tide upgrades do.
-  if (t === 'faculty' || t === 'staff') return 0
   if (t === 'tide' || t === 'pearl' || t === 'trench') return 30
   if (t === 'lagoon' || t === 'supreme') return 15
   if (t === 'reef' || t === 'ruby') return 10
+  // Faculty paid membership does not include a shared enrichment % (magnet/shirt perk instead).
   return 0
 }
 

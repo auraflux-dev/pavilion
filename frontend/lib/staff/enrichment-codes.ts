@@ -34,7 +34,7 @@ export function sharedEnrichmentCodeForTier(tier: string): {
   name: string
 } | null {
   const t = tier.trim().toLowerCase()
-  if (t === 'faculty' || t === 'staff' || t === 'free' || t === 'none' || !t) return null
+  if (t === 'free' || t === 'none' || !t) return null
   const fixed = SHARED[t]
   if (fixed) return fixed
   const pct = enrichmentDiscountPercent(t)
@@ -127,8 +127,7 @@ export async function assignEnrichmentCodeToFamily(
   tier: string,
 ): Promise<string | null> {
   const t = tier.trim().toLowerCase()
-  // Faculty complimentary: never attach SHMSREEF10 / Lagoon / Tide shared codes.
-  if (t === 'faculty' || t === 'staff' || t === 'free' || t === 'none' || !t) {
+  if (t === 'free' || t === 'none' || !t) {
     await clearEnrichmentCodeFromFamily(parentEmail)
     return null
   }

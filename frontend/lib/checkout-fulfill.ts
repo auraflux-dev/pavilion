@@ -332,25 +332,33 @@ export async function resolveCheckoutIntent(
       discountCode?: string
     } | null
     let tier = normalizeMembershipTier(String(student?.membershipTier ?? 'free'))
-    // Prefer Memberships.tier so faculty complimentary is not charged as Reef from a stale student row.
+    let boardComplimentary = false
     try {
       const mem = await client.items
         .query('Memberships')
         .eq('email', parentEmail.trim().toLowerCase())
         .limit(1)
         .find()
-      const memTier = normalizeMembershipTier(String(mem.items?.[0]?.tier ?? ''))
+      const memRow = mem.items?.[0] as Record<string, unknown> | undefined
+      const memTier = normalizeMembershipTier(String(memRow?.tier ?? ''))
       if (memTier && memTier !== 'free' && memTier !== 'none') tier = memTier
+      boardComplimentary = Boolean(
+        String(memRow?.boardDiscountFallCode ?? '').trim() ||
+          String(memRow?.boardDiscountSpringCode ?? '').trim(),
+      )
     } catch {
       // optional
     }
-    const percent = enrichmentDiscountPercent(tier)
+    // Board gifted Reef: no auto SHMSREEF10 (they use 75% season board codes). Lagoon/Tide upgrades keep %.
+    const stripShared =
+      boardComplimentary && (tier === 'reef' || tier === 'ruby')
+    const percent = stripShared ? 0 : enrichmentDiscountPercent(tier)
     const typedCoupon = String(intent.couponCode ?? '').trim()
-    if (typedCoupon && (tier === 'faculty' || tier === 'staff')) {
+    if (typedCoupon && stripShared) {
       const { isSharedMembershipEnrichmentCode } = await import('@/lib/staff/enrichment-codes')
       if (isSharedMembershipEnrichmentCode(typedCoupon)) {
         throw new Error(
-          'Faculty membership does not include enrichment program discounts. Upgrade to Lagoon or Tide for member rates.',
+          'Board complimentary Reef does not include SHMSREEF10. Use your board season enrichment code, or upgrade to Lagoon or Tide.',
         )
       }
     }

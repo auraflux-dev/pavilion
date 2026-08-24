@@ -282,7 +282,16 @@ export async function getMembershipEntitlements(
 
   const tier = String(row.tier ?? '')
   const tierNorm = tier.trim().toLowerCase()
-  const facultyComplimentary = tierNorm === 'faculty' || tierNorm === 'staff'
+  const boardComplimentary = Boolean(
+    String(row.boardDiscountFallCode ?? '').trim() ||
+      String(row.boardDiscountSpringCode ?? '').trim() ||
+      parseEntitlementsJson(row.entitlementsJson).some(
+        (e) => e.kind === 'board_enrichment_fall' || e.kind === 'board_enrichment_spring',
+      ),
+  )
+  // Gifted board Reef: no SHMSREEF10. Lagoon/Tide upgrades keep member rates.
+  const stripSharedEnrichment =
+    boardComplimentary && (tierNorm === 'reef' || tierNorm === 'ruby' || !tierNorm)
   const shirtSize = String(row.shirtSize ?? '')
   const stored = parseEntitlementsJson(row.entitlementsJson)
   const { buildMembershipEntitlements, tierOffersEnrichmentDiscount } = await import(
@@ -290,7 +299,7 @@ export async function getMembershipEntitlements(
   )
   const rawEnrichment = String(row.enrichmentCode ?? '').trim() || discountCode || null
   const enrichmentCode =
-    facultyComplimentary || !tierOffersEnrichmentDiscount(tier) ? null : rawEnrichment
+    stripSharedEnrichment || !tierOffersEnrichmentDiscount(tier) ? null : rawEnrichment
   const fresh = buildMembershipEntitlements({
     tier,
     shirtSize,
@@ -299,8 +308,7 @@ export async function getMembershipEntitlements(
   const { appendBoardEntitlements } = await import('@/lib/staff/board-enrichment-discounts')
   let entitlements = appendBoardEntitlements(row, mergePortalEntitlements(stored, fresh))
 
-  // Faculty / school staff: never surface Reef enrichment perk (strip leftovers).
-  if (facultyComplimentary) {
+  if (stripSharedEnrichment) {
     entitlements = entitlements.filter((e) => e.kind !== 'enrichment_discount')
     const dirtyStored = stored.some((e) => e.kind === 'enrichment_discount')
     const dirtyCode = Boolean(String(row.enrichmentCode ?? '').trim() || discountCode)

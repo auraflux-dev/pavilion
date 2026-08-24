@@ -130,6 +130,8 @@ export async function applyPaidMembership(opts: {
   shirtVariantId?: string | null
   /** Lagoon/Tide: magnet OR spirit_shirt */
   physicalPerk?: 'spirit_shirt' | 'magnet' | null
+  /** Board seat gift: no SHMSREEF10 (board already gets 75% season codes). */
+  skipEnrichmentCode?: boolean
 }): Promise<{
   updatedStudentIds: string[]
   membershipUpserted: boolean
@@ -370,12 +372,16 @@ export async function applyPaidMembership(opts: {
   const fullCredit = await resolveGiftCardCredit(tier)
 
   let enrichmentCode: string | null = null
+  const skipEnrichment =
+    opts.skipEnrichmentCode === true ||
+    String(opts.orderId ?? '').startsWith('board-seat-')
   try {
-    enrichmentCode = await assignEnrichmentCodeToFamily(email, tier)
-    // Faculty complimentary: clear any prior Reef/Lagoon/Tide shared code.
-    if (!enrichmentCode && (tier === 'faculty' || tier === 'staff')) {
+    if (skipEnrichment) {
       const { clearEnrichmentCodeFromFamily } = await import('@/lib/staff/enrichment-codes')
       await clearEnrichmentCodeFromFamily(email)
+      enrichmentCode = null
+    } else {
+      enrichmentCode = await assignEnrichmentCodeToFamily(email, tier)
     }
   } catch (err) {
     console.warn('assignEnrichmentCodeToFamily', err)
@@ -417,11 +423,15 @@ export async function applyPaidMembership(opts: {
     enrichmentCode,
   })
   // Mark cove credit fulfilled when Square load succeeded (or skipped because already applied)
-  const entitlementsStored = entitlementsWithHold.map((e) =>
+  let entitlementsStored = entitlementsWithHold.map((e) =>
     e.kind === 'cove_credit' && giftCardResult?.status === 'failed'
       ? { ...e, status: 'pending' as const, notes: giftCardResult.error || e.notes }
       : e
   )
+  // Board seat gift: complimentary Reef without SHMSREEF10 entitlement row.
+  if (skipEnrichment) {
+    entitlementsStored = entitlementsStored.filter((e) => e.kind !== 'enrichment_discount')
+  }
 
   try {
     const existing = await client.items.query('Memberships').eq('email', email).find()
