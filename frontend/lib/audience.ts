@@ -46,6 +46,7 @@ export type StaffWorkspace =
  | 'timesheets'
  | 'reports'
  | 'help'
+ | 'pagetheme'
 
 export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
  home: 'Home',
@@ -57,7 +58,7 @@ export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
  messages: 'Messages',
  minutes: 'Minutes',
  programs: 'Programs',
- payments: 'Payments',
+ payments: 'Payments and Refunds',
  budget: 'Budget',
  events: 'Events',
  retail: isDemoInstance() ? DEMO_BRAND.store : 'The Cove',
@@ -82,4 +83,5 @@ export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
  timesheets: 'Timesheets',
  reports: 'Reports',
  help: 'Help',
+ pagetheme: 'Page CSS & strings',
 }

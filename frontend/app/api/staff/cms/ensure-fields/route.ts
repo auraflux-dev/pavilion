@@ -4,6 +4,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRole } from '@/lib/staff/session'
+import { PAYMENTS_REFUND_FIELDS } from '@/lib/staff/payments-refund-fields'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -81,39 +82,18 @@ export async function POST(req: NextRequest) {
         { key: 'image', displayName: 'Flyer / Image URL', type: 'TEXT' },
         { key: 'schedule', displayName: 'Schedule Summary', type: 'TEXT' },
         { key: 'detail', displayName: 'Detail', type: 'TEXT' },
-        { key: 'instructorName', displayName: 'Instructor / Vendor', type: 'TEXT' },
-        {
-          key: 'fallEpClassId',
-          displayName: 'Fall EP class id (ye/essay/mathcounts/robotics)',
-          type: 'TEXT',
-        },
-        { key: 'location', displayName: 'Room / Location', type: 'TEXT' },
-        {
-          key: 'meetingDates',
-          displayName: 'Meeting dates (YYYY-MM-DD, comma-separated)',
-          type: 'TEXT',
-        },
-        { key: 'skipsNote', displayName: 'Skip / holiday note', type: 'TEXT' },
-        {
-          key: 'memberDiscountNote',
-          displayName: 'Member discount note (under fee on cards)',
-          type: 'TEXT',
-        },
         {
           key: 'memberPriorityUntil',
           displayName: 'Paid members only until (then open to all)',
           type: 'DATETIME',
-        },
-        {
-          key: 'season',
-          displayName: 'Catalog season (fall-2026 | spring-2027 | full-year)',
-          type: 'TEXT',
         },
       ]),
     )
     results.push(
       await ensureFields('PageContent', [
         { key: 'flyerImage', displayName: 'Flyer / Hero Image URL', type: 'TEXT' },
+        { key: 'customCss', displayName: 'Per-page custom CSS', type: 'TEXT' },
+        { key: 'stringOverrides', displayName: 'String overrides (key|text)', type: 'TEXT' },
       ]),
     )
     results.push(
@@ -204,60 +184,12 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Create ProgramBoardPosts if missing, else ensure fields
-    const boardGet = await fetch('https://www.wixapis.com/wix-data/v2/collections/ProgramBoardPosts', {
-      method: 'GET',
-      headers,
-    })
-    if (boardGet.status === 404 || !boardGet.ok) {
-      const createBoard = await fetch('https://www.wixapis.com/wix-data/v2/collections', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          collection: {
-            id: 'ProgramBoardPosts',
-            displayName: 'Program Board Posts',
-            fields: [
-              { key: 'programId', displayName: 'Program ID', type: 'TEXT' },
-              { key: 'programName', displayName: 'Program Name', type: 'TEXT' },
-              { key: 'subject', displayName: 'Subject', type: 'TEXT' },
-              { key: 'body', displayName: 'Body', type: 'TEXT' },
-              { key: 'fromName', displayName: 'From Name', type: 'TEXT' },
-              { key: 'fromEmail', displayName: 'From Email', type: 'TEXT' },
-              { key: 'sentAt', displayName: 'Sent At', type: 'DATETIME' },
-              { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
-            ],
-            permissions: {
-              insert: 'ADMIN',
-              update: 'ADMIN',
-              remove: 'ADMIN',
-              read: 'ADMIN',
-            },
-          },
-        }),
-      })
-      const createBoardBody = await createBoard.json().catch(() => ({}))
-      results.push({
-        collectionId: 'ProgramBoardPosts',
-        ok: createBoard.ok,
-        created: createBoard.ok ? ['(collection)'] : [],
-        existing: [],
-        error: createBoard.ok ? undefined : JSON.stringify(createBoardBody).slice(0, 200),
-      })
-    } else {
-      results.push(
-        await ensureFields('ProgramBoardPosts', [
-          { key: 'programId', displayName: 'Program ID', type: 'TEXT' },
-          { key: 'programName', displayName: 'Program Name', type: 'TEXT' },
-          { key: 'subject', displayName: 'Subject', type: 'TEXT' },
-          { key: 'body', displayName: 'Body', type: 'TEXT' },
-          { key: 'fromName', displayName: 'From Name', type: 'TEXT' },
-          { key: 'fromEmail', displayName: 'From Email', type: 'TEXT' },
-          { key: 'sentAt', displayName: 'Sent At', type: 'DATETIME' },
-          { key: 'active', displayName: 'Active', type: 'BOOLEAN' },
-        ]),
-      )
-    }
+    results.push(
+      await ensureFields(
+        'Payments',
+        PAYMENTS_REFUND_FIELDS.map((f) => ({ key: f.key, displayName: f.displayName, type: f.type })),
+      ),
+    )
 
     // Create ContractorTimesheets if missing
     const tsGet = await fetch('https://www.wixapis.com/wix-data/v2/collections/ContractorTimesheets', {

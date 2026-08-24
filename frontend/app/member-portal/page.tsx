@@ -7,6 +7,7 @@ import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 import { getPortalCopy } from '@/lib/api/portal-copy'
 import { CONTACT_DEFAULTS } from '@/lib/defaults/page-content'
+import { PageThemeRoot, PageThemeStyles } from '@/components/site/page-theme'
 
 export const metadata = {
   title: 'Member Portal',
@@ -34,9 +35,11 @@ export default async function MemberPortalPage() {
 
   return (
     <MemberShell>
+      <PageThemeStyles pageKey="member-portal" css={hero.customCss ?? ''} />
       <AnnouncementBar />
       <ActAsBanner />
 
+      <PageThemeRoot pageKey="member-portal" className="flex-1 flex flex-col">
       <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
         <PageHero content={hero} compact />
 
@@ -52,6 +55,7 @@ export default async function MemberPortalPage() {
           </div>
         </section>
       </main>
+      </PageThemeRoot>
     </MemberShell>
   )
 }

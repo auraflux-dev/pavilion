@@ -31,8 +31,6 @@ export const STAFF_BASE_WORKSPACES: StaffWorkspace[] = [
   'projects',
   'expenses',
   'help',
-  'programs',
-  'content',
 ]
 
 /** Admin-only. Not assignable as extras. */
@@ -59,6 +57,7 @@ export const STAFF_PERMISSION_GROUPS: { id: string; label: string; items: StaffW
     label: 'Site & comms',
     items: [
       'content',
+      'pagetheme',
       'site',
       'board',
       'nav',
@@ -111,7 +110,7 @@ export const WORKSPACE_ROLES: Record<StaffWorkspace, StaffRole[]> = {
   surveys: ['marketing', 'secretary', 'wellness', 'admin'],
   messages: ['membership', 'secretary', 'programs', 'instructor', 'coordinator', 'admin'],
   minutes: ['secretary', 'admin'],
-  programs: ALL_ROLES,
+  programs: ['programs', 'instructor', 'coordinator', 'admin'],
   timesheets: ['programs', 'instructor', 'coordinator', 'admin'],
   payments: ['treasurer', 'admin'],
   budget: ['treasurer', 'admin'],
@@ -120,8 +119,19 @@ export const WORKSPACE_ROLES: Record<StaffWorkspace, StaffRole[]> = {
   discounts: ['retail', 'membership', 'admin'],
   membership: ['membership', 'secretary', 'admin'],
   tiers: ['membership', 'secretary', 'admin'],
-  content: ALL_ROLES,
-  site: ['marketing', 'admin'],
+  content: ['marketing', 'secretary', 'retail', 'admin'],
+  pagetheme: ['marketing', 'admin'],
+  site: [
+    'marketing',
+    'secretary',
+    'membership',
+    'programs',
+    'treasurer',
+    'events',
+    'retail',
+    'wellness',
+    'admin',
+  ],
   board: ['secretary', 'admin'],
   nav: ['marketing', 'secretary', 'admin'],
   faq: ['marketing', 'membership', 'secretary', 'admin'],
@@ -183,20 +193,20 @@ export function extrasBeyondRoles(
   return selected.filter((ws) => ASSIGNABLE.has(ws) && !implied.has(ws))
 }
 
-/**
- * Roles from the StaffRoles row only.
- * Extra workspaces must NOT synthesize a primary role (that previously opened
- * every API gated by that role, e.g. Discounts extra → full retail POS).
- */
 export function effectiveStaffRoles(
   roles: string[],
-  _extraWorkspaces: string[] = [],
+  extraWorkspaces: string[] = [],
 ): StaffRole[] {
   const set = new Set<StaffRole>()
   for (const role of roles) {
     if (role in STAFF_ROLE_LABEL) set.add(role as StaffRole)
   }
   if (set.has('admin')) return [...ALL_ROLES]
+  for (const ws of extraWorkspaces) {
+    if (!ASSIGNABLE.has(ws)) continue
+    const primary = primaryRoleForWorkspace(ws as StaffWorkspace)
+    if (primary) set.add(primary)
+  }
   return Array.from(set)
 }
 
@@ -218,16 +228,4 @@ export function staffCanWorkspace(
     return staff.roles.length > 0 || extras.length > 0
   }
   return WORKSPACE_ROLES[workspace].some((r) => staff.roles.includes(r))
-}
-
-/** Role OR explicit workspace extra. Use on API routes instead of role-only checks when extras matter. */
-export function staffCanRoleOrWorkspace(
-  staff: { roles: string[]; extraWorkspaces?: string[] } | null,
-  roles: string[],
-  workspaces: StaffWorkspace[],
-): boolean {
-  if (!staff) return false
-  if (staff.roles.includes('admin')) return true
-  if (roles.some((r) => staff.roles.includes(r))) return true
-  return workspaces.some((ws) => staffCanWorkspace(staff, ws))
 }

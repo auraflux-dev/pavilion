@@ -16,6 +16,10 @@ export type PageContentFields = {
   ctaHref: string
   /** Optional flyer / hero image URL (staff upload) */
   flyerImage?: string
+  /** Per-page CSS (admin + VP Marketing only in Staff → Page CSS) */
+  customCss?: string
+  /** Granular strings: one key|text per line */
+  stringOverrides?: string
 }
 
 /** PageContent.page keys that power public /cove (retail may edit only these). */
@@ -41,6 +45,8 @@ const empty = (page: string, partial: Partial<PageContentFields>): PageContentFi
   ctaLabel: '',
   ctaHref: '',
   flyerImage: '',
+  customCss: '',
+  stringOverrides: '',
   ...partial,
 })
 
@@ -67,7 +73,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     ctaHref: '/volunteer',
     sectionTitle:
       'Volunteering with SHMS PTO has been one of the most rewarding experiences of our family\'s school year.',
-    sectionBody: '.  SHMS PTO Parent, 2025 to 2026',
+    sectionBody: 'SHMS PTO Parent, 2026 to 2027',
   }),
   /** Home page community strip. Wix PageContent page = home-community */
   'home-community': empty('home-community', {
@@ -144,7 +150,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body: 'Show your Stingrays pride. Order online year round. Pick up at school when the window is open.',
   }),
   fundraising: empty('fundraising', {
-    eyebrow: 'Goals · Live',
+    eyebrow: '2026-27 School Year · Live',
     title: 'Fundraising Tracker',
     body: 'Membership, The Cove, and event purchases count here automatically.',
   }),
@@ -199,6 +205,12 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
       'Where do surveys appear?|Active surveys list under Surveys for you on this portal. You will get the same branded form by email, text, or WhatsApp. Always on shmspto.org, never an outside link.',
       'Can I remove a student from my account?|Parents can add and edit students. To archive or remove a student, email vp-membershipexperience@shmspto.org so staff can update the record safely.',
     ],
+  }),
+  /** Staff shell labels + optional CSS. Admin + VP Marketing edit in Page CSS workspace. */
+  'staff-portal': empty('staff-portal', {
+    title: 'Staff workspace',
+    body: 'Keyed stringOverrides drive staff UI labels when wired in code.',
+    bullets: [],
   }),
 }
 

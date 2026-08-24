@@ -52,7 +52,7 @@ export const STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
     id: 'site',
     label: 'Website',
     blurb: 'Page copy, settings, board, nav, FAQ, minutes.',
-    workspaces: ['content', 'site', 'board', 'nav', 'faq', 'wellness', 'minutes'],
+    workspaces: ['content', 'pagetheme', 'site', 'board', 'nav', 'faq', 'wellness', 'minutes'],
   },
   {
     id: 'help',
@@ -83,6 +83,7 @@ export const STAFF_WORKSPACE_BLURB: Partial<Record<StaffWorkspace, string>> = {
   membership: 'Roster, email, WhatsApp groups',
   tiers: 'Tier map & Catalog product IDs',
   content: 'Page heroes & Cove / marketing copy',
+  pagetheme: 'Per-page CSS & string overrides (admin + VP Marketing)',
   site: 'Announcement, contact, goals…',
   board: 'Public /board roster',
   nav: 'Top nav & footer links',

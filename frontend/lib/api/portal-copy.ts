@@ -9,6 +9,7 @@ import {
   parseKeyedLines,
   type PortalCopy,
 } from '@/lib/defaults/portal-copy'
+import { parseStringOverrides } from '@/lib/copy/string-overrides'
 
 function preferDefault(
   key: keyof PortalCopy,
@@ -33,7 +34,10 @@ export async function getPortalCopy(): Promise<PortalCopy> {
     getPageContent('portal-hub'),
   ])
 
-  const keyed = parseKeyedLines(hub.bullets)
+  const keyed = {
+    ...parseKeyedLines(hub.bullets),
+    ...parseStringOverrides(hub.stringOverrides),
+  }
   const pick = (key: keyof PortalCopy) =>
     portalText(keyed[key] || '') || vanillaizeIfDemo(PORTAL_COPY_DEFAULTS[key])
 
@@ -88,7 +92,6 @@ export async function getPortalCopy(): Promise<PortalCopy> {
     memberSince: pick('memberSince'),
     studentsLabel: pick('studentsLabel'),
     paidMembershipsLabel: pick('paidMembershipsLabel'),
-    whatsappHeading: pick('whatsappHeading'),
     storeCardsLabel: pick('storeCardsLabel'),
  // Always prefer Current Balance. CMS still has "CMS balance total" from an old seed.
     storeCardsHint: preferDefault('storeCardsHint', pick('storeCardsHint'), [
@@ -117,16 +120,18 @@ export async function getPortalCopy(): Promise<PortalCopy> {
       /choose a student/i,
       /—|–/,
     ]),
-    paymentMethodsTitle: preferDefault('paymentMethodsTitle', pick('paymentMethodsTitle'), [
-      /how you pay/i,
-      /manage payment methods/i,
-      /—|–/,
-    ]),
+    paymentMethodsTitle: pick('paymentMethodsTitle'),
     paymentMethodsBody: preferDefault('paymentMethodsBody', pick('paymentMethodsBody'), [
       /—|–/,
       /Square-secured/i,
       /optional Square/i,
       /prepaid student store card/i,
+      /Snack window: prepaid family/i,
+      /membership, The Cove, and Cove Digital Card reloads/i,
+    ]),
+    whatsappHeading: preferDefault('whatsappHeading', pick('whatsappHeading'), [
+      /Don’t forget/i,
+      /Don't forget/i,
     ]),
   }
 }

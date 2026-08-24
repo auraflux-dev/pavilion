@@ -13,6 +13,7 @@ import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { brandifyCoveDigitalCard } from '@/lib/copy/brandify-cove-digital-card'
 import { brandifyShmsPto } from '@/lib/copy/brandify-shms-pto'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
+import { rollForwardSchoolYearCopy } from '@/lib/copy/roll-forward-school-year'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { fetchWithRetry } from '@/lib/fetch-with-retry'
@@ -30,6 +31,8 @@ interface WixDataItem {
     ctaLabel?: string
     ctaHref?: string
     flyerImage?: string
+    customCss?: string
+    stringOverrides?: string
     active?: boolean
   }
 }
@@ -57,6 +60,8 @@ function merge(
     ctaLabel: '',
     ctaHref: '',
     flyerImage: '',
+    customCss: '',
+    stringOverrides: '',
   }
   const merged = !cms
     ? { ...fallback }
@@ -71,6 +76,8 @@ function merge(
         ctaLabel: cms.ctaLabel || fallback.ctaLabel,
         ctaHref: cms.ctaHref || fallback.ctaHref,
         flyerImage: cms.flyerImage || fallback.flyerImage || '',
+        customCss: cms.customCss ?? fallback.customCss ?? '',
+        stringOverrides: cms.stringOverrides ?? fallback.stringOverrides ?? '',
       }
 
   const pub = (text: string) =>
@@ -78,13 +85,17 @@ function merge(
 
   return {
     ...merged,
-    eyebrow: vanillaizeIfDemo(brandifyCoveDigitalCard(brandifyShmsPto(merged.eyebrow))),
+    eyebrow: vanillaizeIfDemo(
+      rollForwardSchoolYearCopy(brandifyCoveDigitalCard(brandifyShmsPto(merged.eyebrow))),
+    ),
     title: pub(merged.title),
     body: pub(merged.body),
     sectionTitle: pub(merged.sectionTitle),
     sectionBody: pub(merged.sectionBody),
     bullets: merged.bullets.map((b) => pub(b)),
-    ctaLabel: vanillaizeIfDemo(brandifyCoveDigitalCard(brandifyShmsPto(merged.ctaLabel))),
+    ctaLabel: vanillaizeIfDemo(
+      rollForwardSchoolYearCopy(brandifyCoveDigitalCard(brandifyShmsPto(merged.ctaLabel))),
+    ),
   }
 }
 
@@ -130,6 +141,8 @@ async function fetchPageRow(page: string): Promise<Partial<PageContentFields> | 
       ctaLabel: item.data.ctaLabel ?? '',
       ctaHref: item.data.ctaHref ?? '',
       flyerImage: item.data.flyerImage ?? '',
+      customCss: item.data.customCss ?? '',
+      stringOverrides: item.data.stringOverrides ?? '',
     }
   } catch {
     return null
