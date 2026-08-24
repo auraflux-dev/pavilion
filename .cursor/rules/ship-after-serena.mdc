@@ -15,12 +15,15 @@ If Serena passes (diagnostics clean, scoped to the task), do this **exact** orde
 
 ## Stone Hill (`www.shmspto.org`)
 
-Stone Hill production deploys from **`auraflux-dev/shmspto`** via treasurer Git integration. See **`shms-deploy-git.mdc`**.
+Stone Hill production deploys from **`auraflux-dev/shmspto`** via treasurer Git integration. See **`shms-deploy-git.mdc`** and **`shms-edit-home.mdc`**.
 
-1. **Commit** in the **`shmspto` repo** (port `frontend/` diffs from this monorepo if needed). Do **not** push `wix-shmspto` `main` for Stone Hill prod.
-2. **Staging review** (visitor-facing): confirm **https://shmspto.vercel.app** when staging is current. **STOP** for Rob OK (`looks good`, `ship it`, `go live`, `OK`, etc.).
-3. **`git push origin main`** on `auraflux-dev/shmspto`. Treasurer Vercel **`frontend`** auto-deploys. Agents do **not** run `vercel deploy --prod` locally (no treasurer login).
-4. **`node scripts/check-prod-deploy.mjs`** from the `shmspto` repo. Done means checks pass on https://www.shmspto.org, not just GitHub green.
+**Edit in `~/shmspto` first.** Do not leave school site / portal / staff changes only in this monorepo.
+
+1. **Commit** in the **`shmspto` repo**. Do **not** push `wix-shmspto` `main` for Stone Hill prod.
+2. **`node scripts/shms-frontend-parity.mjs`**. If school-facing files are only in the monorepo, port them into `shmspto` before calling the ship done.
+3. **Staging review** (visitor-facing): confirm **https://shmspto.vercel.app** when staging is current. **STOP** for Rob OK (`looks good`, `ship it`, `go live`, `OK`, etc.).
+4. **`git push origin main`** on `auraflux-dev/shmspto`. Treasurer Vercel **`frontend`** auto-deploys. Agents do **not** run `vercel deploy --prod` locally (no treasurer login).
+5. **`node scripts/check-prod-deploy.mjs`** from the `shmspto` repo. Done means checks pass on https://www.shmspto.org, not just GitHub green.
 
 **Staff-only** Stone Hill (`/staff`, `app/api/staff`, staff UI with no visitor copy change): skip Rob wait. Push `shmspto` `main` after Serena QA, then run the check script.
 
@@ -41,6 +44,7 @@ Stone Hill production deploys from **`auraflux-dev/shmspto`** via treasurer Git 
 ## Anti-patterns (forbidden)
 
 - Pushing `wix-shmspto` `main` and calling Stone Hill “shipped.”
+- Editing Stone Hill Staff / portal / site only under `wix-shmspto/frontend` without porting to `~/shmspto`.
 - `vercel deploy --prod` for Stone Hill from agent shells (`robert-4220` or treasurer).
 - Deploying Stone Hill from `robert-4220s-projects`.
 - Calling the task “live” when `check-prod-deploy.mjs` has not passed.

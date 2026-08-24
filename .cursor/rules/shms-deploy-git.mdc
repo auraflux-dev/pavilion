@@ -9,13 +9,15 @@ Stone Hill (`www.shmspto.org`) deploys from **`auraflux-dev/shmspto`**, not this
 
 ## Agent ship path (required)
 
-1. **Serena QA** on the changed files.
-2. **Commit** in the **`shmspto` repo** (local clone, e.g. `~/shmspto`).
-   - If you edited `frontend/` here in `wix-shmspto`, port the same diff into `~/shmspto/frontend/` before commit.
+1. **Edit in `~/shmspto`** for school site, portal, and staff (see **`shms-edit-home.mdc`**). Prefer moving the agent root there when the task is Stone Hill.
+2. **Serena QA** on the changed files.
+3. **Commit** in the **`shmspto` repo** (local clone, e.g. `~/shmspto`).
+   - If you already edited `frontend/` here in `wix-shmspto`, port the same diff into `~/shmspto/frontend/` before commit.
    - Do **not** treat `git push origin main` on `wix-shmspto` as a Stone Hill production deploy.
-3. **`git push origin main`** on `auraflux-dev/shmspto`.
-4. Treasurer Vercel project **`frontend`** auto-builds Production from that push.
-5. **`node scripts/check-prod-deploy.mjs`** from the `shmspto` repo. Git push alone is not done until this passes on https://www.shmspto.org.
+4. **`node scripts/shms-frontend-parity.mjs`**. Fix any school-facing “only in monorepo” hits.
+5. **`git push origin main`** on `auraflux-dev/shmspto`.
+6. Treasurer Vercel project **`frontend`** auto-builds Production from that push.
+7. **`node scripts/check-prod-deploy.mjs`** from the `shmspto` repo. Git push alone is not done until this passes on https://www.shmspto.org.
 
 ## Agents cannot CLI-deploy Stone Hill
 

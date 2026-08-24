@@ -31,12 +31,15 @@ Unrelated keep (not Pavilion/SHMS): `gig-finder` if still in use.
 - No Pavilion Stripe / commons-prod DB
 - Never set `COMMONS_VERCEL_PROJECT_ID` (domain attach is Pavilion-only)
 - See `HANDOFF.md` and `COST-WALL.md` in that repo
+- **Edit home:** Stone Hill visitor, member portal, and staff code is edited and committed in **`shmspto`**, not in this monorepo's `frontend/`. Port both ways only when Pavilion needs the same product (vanilla).
+- **Drift check:** `node scripts/shms-frontend-parity.mjs` (compares sibling `~/wix-shmspto` and `~/shmspto` trees). Fail means school-facing files exist only in the monorepo and will not ship to www.
 
 ## This (Pavilion) repo
 - Multi-tenant `frontend/` for demo/trials
 - `commons-site/` marketing
 - After an SHMS deploy elsewhere: ask before deploying Pavilion from a related change
 - Set `COMMONS_VERCEL_TEAM_ID` + `COMMONS_VERCEL_PROJECT_ID` explicitly on trial/demo when using custom domains
+- Do not treat this `frontend/` as the live Stone Hill tree. www ships from `shmspto`.
 
 ## Names
 Vercel still says `commons-*`. Product is Pavilion. Rename later if you want; domains matter more than project slugs.

@@ -33,7 +33,7 @@ export const STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
   {
     id: 'money',
     label: 'Money',
-    blurb: 'Payments, budget, discounts, fundraising, reports.',
+    blurb: 'Payments, refunds, budget, discounts, fundraising, reports.',
     workspaces: ['payments', 'budget', 'discounts', 'fundraising', 'reports'],
   },
   {
@@ -75,7 +75,7 @@ export const STAFF_WORKSPACE_BLURB: Partial<Record<StaffWorkspace, string>> = {
   minutes: 'Publish meeting minutes',
   programs: 'Your class: roster, attendance, nights',
   timesheets: 'Submit or approve teaching hours',
-  payments: 'Needs Reconciliation',
+  payments: 'Payments, refunds, and reconciliation',
   budget: 'BoA CSV · Staff sales · Excel',
   events: 'Create, edit, cancel events',
   retail: 'The Cove product lists',

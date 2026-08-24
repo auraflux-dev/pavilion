@@ -6,7 +6,7 @@ alwaysApply: true
 # Two repos
 
 - **SHMS school:** `auraflux-dev/shmspto` → Vercel `frontend` (team **treasurer-4353s-projects**) → www.shmspto.org  
-  Do school work and ships in that repo (or ask to clone it). Forbids Commons/Pavilion env.
+  **Edit home is `~/shmspto`.** Site, member portal, and staff changes go there first. This monorepo is not live Stone Hill. Run `node scripts/shms-frontend-parity.mjs` after school ships. Forbids Commons/Pavilion env.
 
 ## SHMS deploy path (agents)
 
