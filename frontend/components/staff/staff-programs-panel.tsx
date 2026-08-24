@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight, GripVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StaffFlyerUpload } from '@/components/staff/staff-flyer-upload'
+import { StaffVideoUpload } from '@/components/staff/staff-video-upload'
 import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
 import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
@@ -26,6 +27,10 @@ import {
   STAFF_SEASON_OPTIONS,
   type CatalogSeasonId,
 } from '@/lib/programs/season'
+import {
+  codeLandingDefaults,
+  effectiveLandingFields,
+} from '@/lib/programs/landing-fields'
 import {
   isProgramDraftDirty,
   mergeProgramDraft,
@@ -190,7 +195,15 @@ export function StaffProgramsPanel() {
             matchFall2026EpClass(p.name)
           if (!matched) continue
           const defaults = fall2026PacketCmsDefaults(matched)
-          const patch = mergeEmptyProgramFields(p as unknown as Record<string, unknown>, defaults)
+          const schedulePatch = mergeEmptyProgramFields(
+            p as unknown as Record<string, unknown>,
+            defaults,
+          )
+          const landingPatch = mergeEmptyProgramFields(
+            p as unknown as Record<string, unknown>,
+            codeLandingDefaults(p),
+          )
+          const patch = { ...schedulePatch, ...landingPatch }
           if (Object.keys(patch).length === 0) continue
           try {
             const linkRes = await fetch('/api/staff/programs', {
@@ -201,6 +214,31 @@ export function StaffProgramsPanel() {
             if (linkRes.ok) {
               list = list.map((row) =>
                 row.id === p.id ? ({ ...row, ...patch } as Program) : row,
+              )
+            }
+          } catch {
+            /* non-blocking */
+          }
+        }
+      }
+      if (d.canManageAll !== false) {
+        const fallIds = new Set(selectCurrentFall2026Programs(list).map((row) => row.id))
+        for (const p of list) {
+          if (fallIds.has(p.id)) continue
+          const landingPatch = mergeEmptyProgramFields(
+            p as unknown as Record<string, unknown>,
+            codeLandingDefaults(p),
+          )
+          if (Object.keys(landingPatch).length === 0) continue
+          try {
+            const linkRes = await fetch('/api/staff/programs', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ kind: 'program', id: p.id, ...landingPatch }),
+            })
+            if (linkRes.ok) {
+              list = list.map((row) =>
+                row.id === p.id ? ({ ...row, ...landingPatch } as Program) : row,
               )
             }
           } catch {
@@ -821,6 +859,7 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
           ) : null}
           {visiblePrograms.map((p, index) => {
             const row = displayProgram(p)
+            const landing = effectiveLandingFields(row)
             const dirty = isProgramDraftDirty(p, programDrafts[p.id])
             const saving = savingProgramId === p.id
             return (
@@ -1139,19 +1178,19 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
               <div className="border-t border-[var(--border)] pt-3 space-y-2">
                 <p className="text-[11px] font-semibold text-[#1A1A1A]">Landing page (/programs/slug)</p>
                 <p className="text-[10px] text-[#5A6070] whitespace-pre-line">
-                  {`Overrides code defaults in landing-copy.ts when filled.
+                  {`Shows what families see today. Empty CMS fields use code defaults until you Save.
 Curriculum: one week|title|focus per line.`}
                 </p>
                 <div className="grid sm:grid-cols-2 gap-2">
                   <input
-                    value={row.landingEyebrow}
+                    value={landing.landingEyebrow}
                     placeholder="Landing eyebrow"
                     className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
                     onChange={(e) => patchProgramDraft(p.id, { landingEyebrow: e.target.value })}
                   />
                   <StaffPlainCopyField
                     label="Landing pitch"
-                    value={row.landingPitch}
+                    value={landing.landingPitch}
                     rows={3}
                     saveOnBlur={false}
                     textareaClassName="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A] sm:col-span-2"
@@ -1159,20 +1198,19 @@ Curriculum: one week|title|focus per line.`}
                   />
                   <StaffPlainCopyField
                     label="Highlights (one per line)"
-                    value={row.landingHighlights}
+                    value={landing.landingHighlights}
                     rows={4}
                     saveOnBlur={false}
                     textareaClassName="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A] sm:col-span-2"
                     onChange={(next) => patchProgramDraft(p.id, { landingHighlights: next })}
                   />
-                  <input
-                    value={row.landingVideoUrl}
-                    placeholder="YouTube / Vimeo URL"
-                    className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
-                    onChange={(e) => patchProgramDraft(p.id, { landingVideoUrl: e.target.value })}
+                  <StaffVideoUpload
+                    currentUrl={landing.landingVideoUrl}
+                    onUploaded={({ url }) => patchProgramDraft(p.id, { landingVideoUrl: url })}
+                    onClear={() => patchProgramDraft(p.id, { landingVideoUrl: '' })}
                   />
                   <input
-                    value={row.landingCurriculumTitle}
+                    value={landing.landingCurriculumTitle}
                     placeholder="Curriculum section title"
                     className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs sm:col-span-2"
                     onChange={(e) =>
@@ -1181,7 +1219,7 @@ Curriculum: one week|title|focus per line.`}
                   />
                   <StaffPlainCopyField
                     label="Curriculum weeks"
-                    value={row.landingCurriculum}
+                    value={landing.landingCurriculum}
                     rows={6}
                     saveOnBlur={false}
                     textareaClassName="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs font-mono text-[#1A1A1A] sm:col-span-2"

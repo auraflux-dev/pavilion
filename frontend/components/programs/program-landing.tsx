@@ -29,27 +29,7 @@ function hasTag(program: Program, tag: string) {
     .includes(tag.toLowerCase())
 }
 
-function youtubeEmbedSrc(url: string): string | null {
-  const raw = String(url ?? '').trim()
-  if (!raw) return null
-  try {
-    const u = new URL(raw)
-    if (u.hostname.includes('youtu.be')) {
-      const id = u.pathname.replace(/^\//, '').split('/')[0]
-      return id ? `https://www.youtube.com/embed/${id}` : null
-    }
-    if (u.hostname.includes('youtube.com')) {
-      const id = u.searchParams.get('v')
-      if (id) return `https://www.youtube.com/embed/${id}`
-      const parts = u.pathname.split('/').filter(Boolean)
-      const emb = parts[0] === 'embed' ? parts[1] : parts[0] === 'shorts' ? parts[1] : null
-      return emb ? `https://www.youtube.com/embed/${emb}` : null
-    }
-  } catch {
-    return null
-  }
-  return null
-}
+import { resolveLandingVideo } from '@/lib/programs/landing-video'
 
 export function ProgramLanding({
   program,
@@ -102,7 +82,7 @@ export function ProgramLanding({
   const sessionCount = meetingDates.length || Number(program.durationWeeks ?? 0) || 0
   const memberDiscountNote = String(program.memberDiscountNote ?? '').trim()
   const flyer = program.image || ''
-  const videoEmbed = youtubeEmbedSrc(copy?.videoUrl ?? '')
+  const landingVideo = resolveLandingVideo(copy?.videoUrl)
   const pitch = copy?.pitch ?? ''
   const highlights = copy?.highlights ?? []
   const curriculum = copy?.curriculum ?? []
@@ -318,15 +298,28 @@ export function ProgramLanding({
 
             <div className="lg:col-span-7 space-y-5">
               <div className="overflow-hidden rounded-2xl shadow-[0_24px_48px_-28px_rgba(11,61,11,0.45)] ring-1 ring-[var(--border)] bg-white">
-                {videoEmbed ? (
+                {landingVideo?.kind === 'youtube' ? (
                   <div className="aspect-video bg-black">
                     <iframe
                       title={`${title} video`}
-                      src={videoEmbed}
+                      src={landingVideo.embedSrc}
                       className="w-full h-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     />
+                  </div>
+                ) : landingVideo?.kind === 'file' ? (
+                  <div className="aspect-video bg-black">
+                    <video
+                      className="w-full h-full"
+                      controls
+                      playsInline
+                      preload="metadata"
+                      title={`${title} video`}
+                    >
+                      <source src={landingVideo.src} />
+                      Your browser does not support embedded video.
+                    </video>
                   </div>
                 ) : (
                   <div

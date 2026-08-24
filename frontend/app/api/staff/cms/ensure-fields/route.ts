@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         { key: 'landingEyebrow', displayName: 'Landing eyebrow', type: 'TEXT' },
         { key: 'landingPitch', displayName: 'Landing pitch', type: 'TEXT' },
         { key: 'landingHighlights', displayName: 'Landing highlights (one per line)', type: 'TEXT' },
-        { key: 'landingVideoUrl', displayName: 'Landing video URL', type: 'TEXT' },
+        { key: 'landingVideoUrl', displayName: 'Landing video (upload MP4)', type: 'TEXT' },
         { key: 'landingCurriculumTitle', displayName: 'Landing curriculum title', type: 'TEXT' },
         { key: 'landingCurriculum', displayName: 'Landing curriculum (week|title|focus)', type: 'TEXT' },
       ]),

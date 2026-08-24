@@ -16,7 +16,7 @@ export type ProgramLandingCopy = {
   pitch: string
   /** Max three conversion highlights. */
   highlights: string[]
-  /** Optional YouTube / Vimeo embed URL. Empty = video placeholder. */
+  /** Optional YouTube embed or uploaded MP4 URL (Wix Media). */
   videoUrl?: string
   curriculumTitle: string
   curriculum: ProgramCurriculumWeek[]
