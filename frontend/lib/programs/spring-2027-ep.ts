@@ -308,3 +308,113 @@ export function spring2027StagingCatalogPrograms(): Program[] {
     }
   })
 }
+
+export function matchSpring2027EpClass(programName: string): Spring2027EpClass | undefined {
+  const n = programName.toLowerCase()
+  return SPRING_2027_EP_CLASSES.find((c) => c.cmsNameIncludes.some((part) => n.includes(part)))
+}
+
+export function springEpClassById(id: string): Spring2027EpClass | undefined {
+  return SPRING_2027_EP_CLASSES.find((c) => c.id === id)
+}
+
+function spring2027CandidateScore(program: {
+  name: string
+  fallEpClassId?: string
+  startDate?: string
+  endDate?: string
+  registrationOpen?: boolean
+  featured?: boolean
+}): number {
+  let score = 0
+  const start = String(program.startDate ?? '').slice(0, 10)
+  const end = String(program.endDate ?? '').slice(0, 10)
+  if (String(program.fallEpClassId ?? '').trim()) score += 40
+  if (program.registrationOpen) score += 25
+  if (program.featured) score += 15
+  if (start >= '2027-01-15' && start < '2027-07-01') score += 100
+  else if (start.startsWith('2027')) score += 50
+  if (end >= '2027-01-15' && end < '2027-07-01') score += 30
+  if (start && start < '2027-01-15') score -= 200
+  return score
+}
+
+function hasSpring2027SeasonStart(program: { startDate?: string }): boolean {
+  const start = String(program.startDate ?? '').slice(0, 10)
+  return Boolean(start && start >= '2027-01-15' && start < '2027-07-01')
+}
+
+/** Staff default list: current Spring 2027 season programs. */
+export function selectCurrentSpring2027Programs<
+  T extends {
+    id: string
+    name: string
+    fallEpClassId?: string
+    startDate?: string
+    endDate?: string
+    registrationOpen?: boolean
+    featured?: boolean
+  },
+>(programs: T[]): T[] {
+  const picked: T[] = []
+  const used = new Set<string>()
+  for (const klass of SPRING_2027_EP_CLASSES) {
+    const candidates = programs.filter((p) => {
+      if (used.has(p.id)) return false
+      const byId = String(p.fallEpClassId ?? '').trim() === klass.id
+      const byName = matchSpring2027EpClass(p.name)?.id === klass.id
+      return byId || byName
+    })
+    if (!candidates.length) continue
+    candidates.sort((a, b) => spring2027CandidateScore(b) - spring2027CandidateScore(a))
+    const winner = candidates[0]
+    const score = spring2027CandidateScore(winner)
+    const linkedId =
+      Boolean(String(winner.fallEpClassId ?? '').trim()) ||
+      Boolean(matchSpring2027EpClass(winner.name))
+    const seasonRow =
+      hasSpring2027SeasonStart(winner) ||
+      score >= 50 ||
+      (linkedId && (winner.featured || winner.registrationOpen)) ||
+      winner.featured
+    if (!seasonRow) continue
+    picked.push(winner)
+    used.add(winner.id)
+  }
+
+  for (const p of programs) {
+    if (used.has(p.id)) continue
+    if (matchSpring2027EpClass(p.name)) continue
+    if (String(p.fallEpClassId ?? '').trim()) continue
+    if (!hasSpring2027SeasonStart(p)) continue
+    if (spring2027CandidateScore(p) < 50) continue
+    picked.push(p)
+    used.add(p.id)
+  }
+
+  return picked.sort((a, b) => {
+    const ai = programs.findIndex((p) => p.id === a.id)
+    const bi = programs.findIndex((p) => p.id === b.id)
+    return ai - bi
+  })
+}
+
+/** CMS field defaults from the Spring 2027 packet (staff seed only). */
+export function spring2027PacketCmsDefaults(klass: Spring2027EpClass): Record<string, string | number> {
+  return {
+    fallEpClassId: klass.id,
+    season: 'spring-2027',
+    dayOfWeek: klass.dayOfWeek,
+    classTime: klass.classTime,
+    location: SPRING_2027_EP_LOCATION,
+    instructorName: klass.vendor,
+    startDate: klass.dates[0],
+    endDate: klass.dates[klass.dates.length - 1],
+    durationWeeks: klass.dates.length,
+    meetingDates: klass.dates.join(','),
+    skipsNote: klass.skips,
+    fee: 0,
+    tags: 'fee-tbd,spring-2027',
+    memberDiscountNote: '',
+  }
+}

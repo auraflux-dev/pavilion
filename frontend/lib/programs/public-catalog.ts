@@ -41,6 +41,7 @@ function joinTags(tags: Set<string>): string {
 
 /** Fall 2026 packet wins over stale CMS schedule/vendor fields until staff edits CMS. */
 export function overlayFall2026PacketProgram(program: Program): Program {
+  if (resolveProgramSeason(program) === 'spring-2027') return program
   const klass =
     (program.fallEpClassId ? fallEpClassById(program.fallEpClassId) : undefined) ??
     matchFall2026EpClass(program.name)

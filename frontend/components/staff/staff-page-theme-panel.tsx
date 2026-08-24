@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import type { SiteStringSurface } from '@/lib/defaults/site-string-registry'
+import {
+  PROGRAM_UI_FALL_KEYS,
+  PROGRAM_UI_SHARED_KEYS,
+  PROGRAM_UI_SPRING_KEYS,
+  type ProgramUiStringScope,
+} from '@/lib/defaults/program-ui-defaults'
 
 type ThemeRow = {
   id: string
@@ -32,6 +38,7 @@ export function StaffPageThemePanel() {
   const [form, setForm] = useState<ThemeRow | null>(null)
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
+  const [programStringScope, setProgramStringScope] = useState<ProgramUiStringScope>('shared')
 
   const load = useCallback(async () => {
     try {
@@ -63,6 +70,7 @@ export function StaffPageThemePanel() {
 
   function pick(page: string) {
     setSelected(page)
+    if (page !== 'program-strings') setProgramStringScope('shared')
     const row = pages.find((p) => p.page === page)
     if (row) setForm({ ...row })
   }
@@ -107,6 +115,13 @@ export function StaffPageThemePanel() {
       setBusy(false)
     }
   }
+
+  const programStringKeys = useMemo(() => {
+    if (form?.page !== 'program-strings') return form?.stringKeys ?? []
+    if (programStringScope === 'fall') return PROGRAM_UI_FALL_KEYS
+    if (programStringScope === 'spring') return PROGRAM_UI_SPRING_KEYS
+    return PROGRAM_UI_SHARED_KEYS
+  }, [form, programStringScope])
 
   function insertStringKey(key: string) {
     if (!form) return
@@ -180,11 +195,29 @@ export function StaffPageThemePanel() {
               <span className="font-semibold text-[#1A1A1A]">CSS scope class:</span>{' '}
               <code className="text-[11px]">.{form.scopeClass}</code>
             </p>
-            {form.stringKeys?.length ? (
+            {form.page === 'program-strings' ? (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {(['shared', 'fall', 'spring'] as const).map((scope) => (
+                  <button
+                    key={scope}
+                    type="button"
+                    onClick={() => setProgramStringScope(scope)}
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
+                      programStringScope === scope
+                        ? 'border-[var(--brand-green)] text-[var(--brand-green)]'
+                        : 'border-[var(--border)] text-[#5A6070]'
+                    }`}
+                  >
+                    {scope === 'shared' ? 'Shared catalog + registration' : scope === 'fall' ? 'Fall companion only' : 'Spring companion only'}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            {programStringKeys.length ? (
               <div className="space-y-1">
                 <p className="font-semibold text-[#1A1A1A]">String keys (click to insert)</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {form.stringKeys.map((key) => (
+                  {programStringKeys.map((key) => (
                     <button
                       key={key}
                       type="button"

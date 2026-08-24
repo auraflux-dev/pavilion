@@ -22,10 +22,19 @@ import {
   selectCurrentFall2026Programs,
 } from '@/lib/programs/fall-2026-ep'
 import {
+  matchSpring2027EpClass,
+  selectCurrentSpring2027Programs,
+  spring2027PacketCmsDefaults,
+  springEpClassById,
+} from '@/lib/programs/spring-2027-ep'
+import { programPublicPath } from '@/lib/programs/public-path'
+import {
   CATALOG_SEASON_LABELS,
+  filterProgramsBySeason,
   resolveProgramSeason,
   STAFF_SEASON_OPTIONS,
   type CatalogSeasonId,
+  type PublicCatalogSeasonId,
 } from '@/lib/programs/season'
 import {
   codeLandingDefaults,
@@ -113,6 +122,17 @@ type AttendanceStudent = {
 
 const ATT_STATUSES = ['Present', 'Absent', 'Late', 'CheckedOut'] as const
 
+function selectStaffSeasonPrograms<T extends { id: string; name: string; fallEpClassId?: string; startDate?: string; endDate?: string; registrationOpen?: boolean; featured?: boolean; season?: string; tags?: string }>(
+  programs: T[],
+  season: PublicCatalogSeasonId,
+  showOlder: boolean,
+): T[] {
+  if (showOlder) return filterProgramsBySeason(programs, season)
+  return season === 'spring-2027'
+    ? selectCurrentSpring2027Programs(programs)
+    : selectCurrentFall2026Programs(programs)
+}
+
 function todayYmd() {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -158,6 +178,7 @@ export function StaffProgramsPanel() {
   const [savingProgramId, setSavingProgramId] = useState<string | null>(null)
   const [programDrafts, setProgramDrafts] = useState<Record<string, Partial<Program>>>({})
   const [showOlderPrograms, setShowOlderPrograms] = useState(false)
+  const [staffCatalogSeason, setStaffCatalogSeason] = useState<PublicCatalogSeasonId>('fall-2026')
   /** Frozen while editing so filter/sort cannot yank the focused field away. */
   const [visibleIdOrder, setVisibleIdOrder] = useState<string[]>([])
   const [dragId, setDragId] = useState<string | null>(null)
@@ -172,8 +193,8 @@ export function StaffProgramsPanel() {
 
   const visiblePrograms = useMemo(() => {
     const pool = showOlderPrograms
-      ? sortProgramsByDisplayOrder(programs)
-      : sortProgramsByDisplayOrder(selectCurrentFall2026Programs(programs))
+      ? sortProgramsByDisplayOrder(filterProgramsBySeason(programs, staffCatalogSeason))
+      : sortProgramsByDisplayOrder(selectStaffSeasonPrograms(programs, staffCatalogSeason, false))
 
     if (visibleIdOrder.length === 0) return pool
 
@@ -185,13 +206,13 @@ export function StaffProgramsPanel() {
       if (!ordered.some((row) => row.id === p.id)) ordered.push(p)
     }
     return ordered
-  }, [programs, showOlderPrograms, visibleIdOrder])
+  }, [programs, showOlderPrograms, staffCatalogSeason, visibleIdOrder])
 
   useEffect(() => {
     if (programs.length === 0 || dragId) return
     const pool = showOlderPrograms
-      ? sortProgramsByDisplayOrder(programs)
-      : sortProgramsByDisplayOrder(selectCurrentFall2026Programs(programs))
+      ? sortProgramsByDisplayOrder(filterProgramsBySeason(programs, staffCatalogSeason))
+      : sortProgramsByDisplayOrder(selectStaffSeasonPrograms(programs, staffCatalogSeason, false))
     if (pool.length === 0) {
       setVisibleIdOrder([])
       return
@@ -206,7 +227,7 @@ export function StaffProgramsPanel() {
       }
       return kept
     })
-  }, [programs, showOlderPrograms, dragId])
+  }, [programs, showOlderPrograms, staffCatalogSeason, dragId])
 
   const load = useCallback(async () => {
     try {
@@ -248,11 +269,45 @@ export function StaffProgramsPanel() {
             /* non-blocking */
           }
         }
+        for (const p of selectCurrentSpring2027Programs(list)) {
+          const matched =
+            springEpClassById(String(p.fallEpClassId ?? '').trim()) ||
+            matchSpring2027EpClass(p.name)
+          if (!matched) continue
+          const defaults = spring2027PacketCmsDefaults(matched)
+          const schedulePatch = mergeEmptyProgramFields(
+            p as unknown as Record<string, unknown>,
+            defaults,
+          )
+          const landingPatch = mergeEmptyProgramFields(
+            p as unknown as Record<string, unknown>,
+            codeLandingDefaults(p),
+          )
+          const patch = { ...schedulePatch, ...landingPatch }
+          if (Object.keys(patch).length === 0) continue
+          try {
+            const linkRes = await fetch('/api/staff/programs', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ kind: 'program', id: p.id, ...patch }),
+            })
+            if (linkRes.ok) {
+              list = list.map((row) =>
+                row.id === p.id ? ({ ...row, ...patch } as Program) : row,
+              )
+            }
+          } catch {
+            /* non-blocking */
+          }
+        }
       }
       if (d.canManageAll !== false) {
-        const fallIds = new Set(selectCurrentFall2026Programs(list).map((row) => row.id))
+        const packetIds = new Set([
+          ...selectCurrentFall2026Programs(list).map((row) => row.id),
+          ...selectCurrentSpring2027Programs(list).map((row) => row.id),
+        ])
         for (const p of list) {
-          if (fallIds.has(p.id)) continue
+          if (packetIds.has(p.id)) continue
           const landingPatch = mergeEmptyProgramFields(
             p as unknown as Record<string, unknown>,
             codeLandingDefaults(p),
@@ -277,7 +332,9 @@ export function StaffProgramsPanel() {
       setPrograms(list)
       setProgramDrafts({})
       setVisibleIdOrder(
-        sortProgramsByDisplayOrder(selectCurrentFall2026Programs(list)).map((p) => p.id),
+        sortProgramsByDisplayOrder(selectStaffSeasonPrograms(list, 'fall-2026', false)).map(
+          (p) => p.id,
+        ),
       )
       const firstId = list[0]?.id as string | undefined
       if (firstId) {
@@ -530,14 +587,18 @@ export function StaffProgramsPanel() {
           name: name.trim(),
           featured: true,
           registrationOpen: false,
-          startDate: seed?.startDate || '2026-09-15',
-          endDate: seed?.endDate || '2026-12-08',
+          startDate:
+            seed?.startDate ||
+            (staffCatalogSeason === 'spring-2027' ? '2027-02-02' : '2026-09-15'),
+          endDate:
+            seed?.endDate ||
+            (staffCatalogSeason === 'spring-2027' ? '2027-05-04' : '2026-12-08'),
           dayOfWeek: seed?.dayOfWeek || '',
           classTime: seed?.classTime || '',
           location: seed?.location || vanillaizeIfDemo('School library'),
           grades: seed?.grades || '6-8',
           category: seed?.category || 'Enrichment',
-          season: seed?.season || 'fall-2026',
+          season: seed?.season || staffCatalogSeason,
           memberDiscountNote: seed?.memberDiscountNote || 'Members 10 / 15 / 30% off',
           description: seed?.description || '',
           fee: seed?.fee ?? 0,
@@ -822,30 +883,41 @@ Edit fields, then click Save program. www updates within seconds after Save.`}
             </button>
           ))}
         </div>
-        <label className="inline-flex items-center gap-1.5 text-[11px] text-[#5A6070]">
-          <input
-            type="checkbox"
-            checked={showOlderPrograms}
-            onChange={(e) => {
-              const next = e.target.checked
-              setShowOlderPrograms(next)
-              if (!next) {
-                setVisibleIdOrder(
-                  sortProgramsByDisplayOrder(selectCurrentFall2026Programs(programs)).map(
-                    (p) => p.id,
-                  ),
-                )
-              } else {
-                setVisibleIdOrder(sortProgramsByDisplayOrder(programs).map((p) => p.id))
-              }
-            }}
-          />
-          Show older programs
-        </label>
       </div>
 
       {tab === 'programs' ? (
         <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="inline-flex flex-wrap rounded-lg border border-[var(--border)] overflow-hidden text-sm">
+              {(['fall-2026', 'spring-2027'] as const).map((season) => (
+                <button
+                  key={season}
+                  type="button"
+                  className={`px-3 py-1.5 text-xs ${
+                    staffCatalogSeason === season ? 'bg-[var(--brand-green)] text-white' : 'bg-white'
+                  }`}
+                  onClick={() => {
+                    setStaffCatalogSeason(season)
+                    setShowOlderPrograms(false)
+                    setVisibleIdOrder([])
+                  }}
+                >
+                  {CATALOG_SEASON_LABELS[season]} copy
+                </button>
+              ))}
+            </div>
+            <label className="inline-flex items-center gap-1.5 text-[11px] text-[#5A6070]">
+              <input
+                type="checkbox"
+                checked={showOlderPrograms}
+                onChange={(e) => {
+                  setShowOlderPrograms(e.target.checked)
+                  setVisibleIdOrder([])
+                }}
+              />
+              Show all {CATALOG_SEASON_LABELS[staffCatalogSeason]} rows
+            </label>
+          </div>
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
@@ -881,8 +953,8 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
           {visiblePrograms.length === 0 ? (
             <p className="text-sm text-[#5A6070] whitespace-pre-line">
               {showOlderPrograms
-                ? 'No programs in your scope. Ask an admin to assign program IDs on your StaffRoles row.'
-                : 'No Fall 2026 programs in this list yet.\nTurn on “Show older programs” for prior seasons.\nCurrent season: Fall 2026 start date, plus featured and/or registration open.'}
+                ? `No ${CATALOG_SEASON_LABELS[staffCatalogSeason]} programs in your scope.`
+                : `No current ${CATALOG_SEASON_LABELS[staffCatalogSeason]} programs yet.\nTurn on “Show all rows” for every CMS row in this season.\nEach season has its own landing page and copy.`}
             </p>
           ) : null}
           {visiblePrograms.map((p, index) => {
@@ -1204,9 +1276,11 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                 />
               </div>
               <div className="border-t border-[var(--border)] pt-3 space-y-2">
-                <p className="text-[11px] font-semibold text-[#1A1A1A]">Landing page (/programs/slug)</p>
+                <p className="text-[11px] font-semibold text-[#1A1A1A]">
+                  Landing page ({programPublicPath(row)})
+                </p>
                 <p className="text-[10px] text-[#5A6070] whitespace-pre-line">
-                  {`Shows what families see today. Empty CMS fields use code defaults until you Save.
+                  {`${CATALOG_SEASON_LABELS[resolveProgramSeason(row)]} only. Empty CMS fields use code defaults until Save.
 Curriculum: one week|title|focus per line.`}
                 </p>
                 <div className="grid sm:grid-cols-2 gap-2">

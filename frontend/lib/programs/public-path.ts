@@ -1,15 +1,16 @@
 import type { Program } from '@/lib/api/programs'
 import { displayProgramName } from '@/lib/programs/display-name'
+import { FALL_2026_EP_CLASSES, matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
+import { matchSpring2027EpClass } from '@/lib/programs/spring-2027-ep'
 import {
-  FALL_2026_EP_CLASSES,
-  fallEpClassById,
-  matchFall2026EpClass,
-} from '@/lib/programs/fall-2026-ep'
-import { resolveProgramSeason } from '@/lib/programs/season'
-import { programEpClassId } from '@/lib/programs/season-companion'
+  CURRENT_FALL_SEASON,
+  CURRENT_SPRING_SEASON,
+  resolveProgramSeason,
+  type CatalogSeasonId,
+  type PublicCatalogSeasonId,
+} from '@/lib/programs/season'
 
 export const FALL_2026_PROGRAM_SLUGS = FALL_2026_EP_CLASSES.map((c) => c.publicSlug)
-export const SPRING_2027_PROGRAM_SLUGS = FALL_2026_EP_CLASSES.map((c) => `${c.publicSlug}-spring`)
 
 function slugify(name: string) {
   return displayProgramName(name)
@@ -20,33 +21,59 @@ function slugify(name: string) {
     .slice(0, 80)
 }
 
-export function programPublicSlug(
-  program: Pick<Program, 'name' | 'season' | 'fallEpClassId'>,
-): string {
+export function programPublicSlug(program: Pick<Program, 'name' | 'fallEpClassId'>): string {
   const ep =
-    fallEpClassById(programEpClassId(program)) || matchFall2026EpClass(program.name)
-  const base = ep?.publicSlug || slugify(program.name)
-  if (resolveProgramSeason(program) === 'spring-2027') return `${base}-spring`
-  return base
+    matchFall2026EpClass(program.name) ??
+    matchSpring2027EpClass(program.name)
+  if (ep) return ep.publicSlug
+  return slugify(program.name)
 }
 
+/** Canonical season-scoped landing URL. Fall and Spring are separate products. */
 export function programPublicPath(
-  program: Pick<Program, 'name' | 'season' | 'fallEpClassId'>,
+  program: Pick<Program, 'name' | 'fallEpClassId' | 'season' | 'tags' | 'startDate' | 'endDate'>,
 ): string {
-  return `/programs/${programPublicSlug(program)}`
+  const season = resolveProgramSeason(program)
+  const slug = programPublicSlug(program)
+  if (season === CURRENT_SPRING_SEASON) return `/programs/spring-2027/${slug}`
+  if (season === CURRENT_FALL_SEASON) return `/programs/fall-2026/${slug}`
+  return `/programs/fall-2026/${slug}`
 }
 
-const PROGRAM_SLUG_ALIASES: Record<string, string> = {
-  mathcounts: 'competitive-math',
-  'mathcounts-spring': 'competitive-math-spring',
+export function programPublicPathForSeason(
+  program: Pick<Program, 'name' | 'fallEpClassId'>,
+  season: PublicCatalogSeasonId,
+): string {
+  const slug = programPublicSlug(program)
+  return season === 'spring-2027' ? `/programs/spring-2027/${slug}` : `/programs/fall-2026/${slug}`
 }
 
-export function normalizeProgramSlug(slug: string): string {
+export function findProgramBySlug(
+  programs: Program[],
+  slug: string,
+  season?: CatalogSeasonId,
+): Program | undefined {
   const want = String(slug ?? '').trim().toLowerCase()
-  return PROGRAM_SLUG_ALIASES[want] ?? want
+  const matches = programs.filter((p) => programPublicSlug(p) === want)
+  if (!matches.length) return undefined
+  if (season) {
+    return matches.find((p) => resolveProgramSeason(p) === season)
+  }
+  return (
+    matches.find((p) => resolveProgramSeason(p) === CURRENT_FALL_SEASON) ??
+    matches.find((p) => resolveProgramSeason(p) === CURRENT_SPRING_SEASON) ??
+    matches[0]
+  )
 }
 
-export function findProgramBySlug(programs: Program[], slug: string): Program | undefined {
-  const want = normalizeProgramSlug(slug)
-  return programs.find((p) => programPublicSlug(p) === want)
+/** Legacy /programs/robotics-spring → season + slug. */
+export function parseLegacyProgramSlug(raw: string): {
+  slug: string
+  season?: PublicCatalogSeasonId
+} {
+  const slug = String(raw ?? '').trim().toLowerCase()
+  if (slug.endsWith('-spring')) {
+    return { slug: slug.slice(0, -'-spring'.length), season: 'spring-2027' }
+  }
+  return { slug }
 }

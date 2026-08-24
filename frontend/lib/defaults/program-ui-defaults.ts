@@ -39,40 +39,40 @@ export const PROGRAM_UI_DEFAULTS: Record<string, string> = {
   'landing.noVideoBody':
     'A short intro from the instructor will land here.\nUntil then, use the summary and curriculum on the left.',
 
-  // Spring / Fall companion (landing sidebar)
-  'companion.spring.landing.eyebrow': 'Optional Spring 2027',
+  // Spring companion on Fall landing / catalog / checkout (optional add-on)
+  'companion.spring.landing.eyebrow': 'Spring 2027',
   'companion.spring.landing.body':
-    'This page is Fall registration.\nSpring continues the same night and instructor.\nAdd Spring at checkout if you want both semesters{feeLine}',
+    'Spring is its own semester with a separate landing page.\nSame night and instructor as Fall.\nAdd Spring at Fall checkout, or register Spring later{feeLine}',
   'companion.spring.landing.feeLine': '\n{fee}',
-  'companion.spring.landing.link': 'Preview Spring class',
-  'companion.fall.landing.eyebrow': 'Fall 2026 is primary',
+  'companion.spring.landing.link': 'View Spring 2027 class',
+  'companion.fall.landing.eyebrow': 'Fall 2026',
   'companion.fall.landing.body':
-    'You are on the Spring page.\nMost families register Fall first, then add Spring.\nStart on Fall to check out both together{feeLine}',
+    'Fall is its own semester with a separate landing page.\nRegister Fall first to add Spring in one checkout{feeLine}',
   'companion.fall.landing.feeLine': '\n{fee}',
-  'companion.fall.landing.link': 'Register Fall (recommended)',
+  'companion.fall.landing.link': 'View Fall 2026 class',
 
   // Companion catalog card
-  'companion.spring.card.eyebrow': 'Optional Spring 2027',
+  'companion.spring.card.eyebrow': 'Spring 2027',
   'companion.spring.card.body':
-    'Same night and instructor.\nAdd Spring when you register for Fall{feeLine}',
+    'Full Spring program.\nSame night and instructor.\nAdd at Fall checkout or register Spring on its own{feeLine}',
   'companion.spring.card.feeLine': '\n{fee}',
-  'companion.spring.card.link': 'Spring details',
-  'companion.fall.card.eyebrow': 'Start with Fall 2026',
+  'companion.spring.card.link': 'Spring 2027 details',
+  'companion.fall.card.eyebrow': 'Fall 2026',
   'companion.fall.card.body':
-    'Fall is the main semester.\nRegister Fall first, then add Spring at checkout{feeLine}',
+    'Full Fall program.\nRegister Fall first to bundle Spring at checkout{feeLine}',
   'companion.fall.card.feeLine': '\n{fee}',
-  'companion.fall.card.link': 'Fall details',
+  'companion.fall.card.link': 'Fall 2026 details',
 
   // Companion checkout
-  'companion.checkout.fallTitle': 'Fall is the main registration',
+  'companion.checkout.fallTitle': 'Registering for Fall',
   'companion.checkout.fallBody':
-    'Most families register Fall first.\nYou can add Spring on the Fall checkout.\n{name}{feeLine}',
+    'You are on a Spring checkout.\nMost families start on Fall and add Spring here.\n{name}{feeLine}',
   'companion.checkout.fallFeeLine': '\n{fee}',
-  'companion.checkout.fallLink': 'Go to Fall class',
+  'companion.checkout.fallLink': 'Go to Fall 2026 class',
   'companion.checkout.springLabel': 'Also add Spring 2027{feeSuffix}',
   'companion.checkout.springFeeSuffix': ' · {fee}',
   'companion.checkout.springBody':
-    '{name}\nOptional. Same night.\nOne checkout covers Fall and Spring.',
+    '{name}\nOptional add-on.\nSame night.\nOne checkout for Fall and Spring.',
 
   // Registration form
   'register.heading': 'Register for {name}',
@@ -174,3 +174,21 @@ export const PROGRAM_UI_DEFAULTS: Record<string, string> = {
   'contact.packageNotSure': 'Not sure yet',
   'contact.err.failed': 'Something went wrong. Please try again or email',
 }
+
+export type ProgramUiStringScope = 'shared' | 'fall' | 'spring'
+
+export function programUiStringScope(key: string): ProgramUiStringScope {
+  if (key.startsWith('companion.fall.') || key.startsWith('companion.checkout.fall')) return 'fall'
+  if (key.startsWith('companion.spring.') || key.startsWith('companion.checkout.spring')) return 'spring'
+  return 'shared'
+}
+
+export const PROGRAM_UI_SHARED_KEYS = Object.keys(PROGRAM_UI_DEFAULTS).filter(
+  (key) => programUiStringScope(key) === 'shared',
+)
+export const PROGRAM_UI_FALL_KEYS = Object.keys(PROGRAM_UI_DEFAULTS).filter(
+  (key) => programUiStringScope(key) === 'fall',
+)
+export const PROGRAM_UI_SPRING_KEYS = Object.keys(PROGRAM_UI_DEFAULTS).filter(
+  (key) => programUiStringScope(key) === 'spring',
+)
