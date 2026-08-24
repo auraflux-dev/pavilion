@@ -21,8 +21,9 @@ export type ParentRosterRow = {
   parentPhone: string
   /** Stable Staff account number (A10001+). */
   accountNumber: string
-  /** Highest paid tier among active students, else free */
+  /** Highest tier among active students, else free (faculty complimentary included) */
   membershipTier: string
+  /** Revenue paid (reef/lagoon/tide). Faculty counts as free unless upgraded. */
   accountType: 'free' | 'paid'
   students: StudentRosterRow[]
 }
@@ -60,6 +61,17 @@ export function normalizeMembershipTier(raw: string | undefined | null): string 
 export function isPaidTier(tier: string): boolean {
   const n = normalizeMembershipTier(tier)
   return n !== 'free' && n !== 'none' && n !== ''
+}
+
+/**
+ * Staff roster paid/free counts: Reef / Lagoon / Tide only.
+ * Faculty complimentary seats stay in the parent total as free
+ * unless they upgrade to a paid family tier.
+ * Keep isPaidTier for registration priority (faculty still counts as paid there).
+ */
+export function isPaidAccountType(tier: string): boolean {
+  const n = normalizeMembershipTier(tier)
+  return n === 'reef' || n === 'lagoon' || n === 'tide'
 }
 
 /** Lagoon / Tide: Cove code ends in 9 for event refreshments. Reef is paid but does not get this perk. */
@@ -100,9 +112,9 @@ export function membershipTierTotals(rows: ParentRosterRow[]): MembershipTierTot
     if (n === 'reef') out.reef += 1
     else if (n === 'lagoon') out.lagoon += 1
     else if (n === 'tide') out.tide += 1
-    else if (!isPaidTier(n)) out.free += 1
+    else if (!isPaidAccountType(n)) out.free += 1
     else out.other += 1
-    if (row.accountType === 'paid' || isPaidTier(n)) out.paid += 1
+    if (row.accountType === 'paid' || isPaidAccountType(n)) out.paid += 1
   }
   return out
 }
@@ -188,7 +200,7 @@ export function buildParentRoster(items: RawStudent[]): ParentRosterRow[] {
       ? activeTiers
       : row.students.map((s: StudentRosterRow) => s.membershipTier)
     row.membershipTier = pickHighestTier(tiers)
-    row.accountType = isPaidTier(row.membershipTier) ? 'paid' : 'free'
+    row.accountType = isPaidAccountType(row.membershipTier) ? 'paid' : 'free'
     row.students.sort((a: StudentRosterRow, b: StudentRosterRow) =>
       `${a.lastName}${a.firstName}`.localeCompare(`${b.lastName}${b.firstName}`),
     )
@@ -240,7 +252,7 @@ export function applyMembershipsToRoster(
         parentPhone: String(m.parentPhone ?? '').trim(),
         accountNumber,
         membershipTier: isPaidTier(tier) ? tier : 'free',
-        accountType: isPaidTier(tier) ? 'paid' : 'free',
+        accountType: isPaidAccountType(tier) ? 'paid' : 'free',
         students: [],
       })
       continue
@@ -253,7 +265,7 @@ export function applyMembershipsToRoster(
 
     const merged = pickHighestTier([existing.membershipTier, tier])
     existing.membershipTier = merged
-    existing.accountType = isPaidTier(merged) ? 'paid' : 'free'
+    existing.accountType = isPaidAccountType(merged) ? 'paid' : 'free'
     if (!existing.parentFirstName && m.parentFirstName) {
       existing.parentFirstName = String(m.parentFirstName).trim()
     }
@@ -287,9 +299,10 @@ export function filterParentRoster(
       return { ...row, students }
     })
     .filter((row) => {
-      // Keep Memberships-only paid parents (no student rows yet)
-      if (!includeArchived && row.students.length === 0 && row.accountType !== 'paid') {
-        return false
+      // Keep Memberships-only paid parents and faculty seats (no student rows yet)
+      if (!includeArchived && row.students.length === 0) {
+        const t = normalizeMembershipTier(row.membershipTier)
+        if (row.accountType !== 'paid' && t !== 'faculty') return false
       }
 
       if (tier === 'free' && row.accountType !== 'free') return false
