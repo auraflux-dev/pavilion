@@ -3,6 +3,7 @@ import { Users, BookOpen, Heart } from 'lucide-react'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 import { demoStorePath, vanillaizeIfDemo } from '@/lib/demo/brand'
+import { EditableHomeField } from '@/components/home/editable-home-field'
 
 function resolveHomeImage(raw: string, fallback: string): string {
   const url = (raw || '').trim()
@@ -74,16 +75,16 @@ export async function Hero() {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 mb-6">
               <span className="w-2 h-2 rounded-full bg-[var(--brand-gold)] animate-pulse" aria-hidden="true" />
               <span className="text-white/90 text-xs font-semibold tracking-wider uppercase">
-                {content.eyebrow}
+                <EditableHomeField field="eyebrow" value={content.eyebrow} className="text-white/90" />
               </span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight text-balance mb-5">
-              {content.title}
+              <EditableHomeField field="title" value={content.title} className="text-white" />
             </h1>
 
             <p className="text-lg sm:text-xl text-white/85 leading-relaxed mb-8 max-w-2xl text-pretty">
-              {content.body}
+              <EditableHomeField field="body" value={content.body} className="text-white/85" />
             </p>
 
             <div className="flex flex-wrap gap-3 sm:gap-4">
@@ -93,20 +94,13 @@ export async function Hero() {
                 style={{ backgroundColor: 'var(--brand-dark)' }}
                 asChild
               >
-                <a href={content.ctaHref || '/auth/join?mode=signup&returnTo=%2Fmember-portal'}>
+                <a href={content.ctaHref || '/membership'}>
                   <Users className="w-4 h-4 mr-2" aria-hidden="true" />
-                  {content.ctaLabel || 'Create free account'}
-                </a>
-              </Button>
-
-              <Button
-                size="lg"
-                variant="outline"
-                className="font-bold px-6 sm:px-8 border-2 border-white text-white bg-transparent hover:bg-white hover:text-[var(--brand-green)] transition-colors"
-                asChild
-              >
-                <a href="/membership">
-                  See membership tiers
+                  <EditableHomeField
+                    field="ctaLabel"
+                    value={content.ctaLabel || 'Become a member'}
+                    className="text-white"
+                  />
                 </a>
               </Button>
 

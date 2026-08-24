@@ -11,6 +11,7 @@ import { getPortalFormCopy } from '@/lib/api/portal-form-copy'
 import { CONTACT_DEFAULTS } from '@/lib/defaults/page-content'
 import { PageThemeRoot, PageThemeStyles } from '@/components/site/page-theme'
 import { PortalFormCopyProvider } from '@/components/member-portal/portal-form-copy-context'
+import { MemberInlineEdit } from '@/components/site/member-inline-edit'
 
 export const metadata = {
   title: 'Member Portal',
@@ -39,6 +40,7 @@ export default async function MemberPortalPage() {
     .filter(Boolean)
 
   return (
+    <MemberInlineEdit>
     <MemberShell>
       <PageThemeStyles pageKey="member-portal" css={hero.customCss ?? ''} />
       <AnnouncementBar />
@@ -46,7 +48,7 @@ export default async function MemberPortalPage() {
 
       <PageThemeRoot pageKey="member-portal" className="flex-1 flex flex-col">
       <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
-        <PageHero content={hero} compact />
+        <PageHero content={hero} pageKey="member-portal" compact />
 
         <section className="py-10 md:py-14">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,5 +67,6 @@ export default async function MemberPortalPage() {
       </main>
       </PageThemeRoot>
     </MemberShell>
+    </MemberInlineEdit>
   )
 }

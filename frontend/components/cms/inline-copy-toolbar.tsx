@@ -16,19 +16,26 @@ export function InlineCopyToolbar() {
           {status}
         </p>
       ) : null}
-      <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-[var(--border)] bg-white shadow-lg px-3 py-2">
-        <span className="text-xs font-semibold text-[#5A6070]">Admin copy edit</span>
-        <button
-          type="button"
-          disabled={saving}
-          className={`text-xs font-bold px-3 py-1.5 rounded-full ${
-            editMode ? 'text-white' : 'border border-[var(--border)] bg-[var(--brand-warm)]'
-          }`}
-          style={editMode ? { backgroundColor: 'var(--brand-green)' } : undefined}
-          onClick={() => setEditMode(!editMode)}
-        >
-          {editMode ? 'Done editing' : 'Edit copy on page'}
-        </button>
+      <div className="pointer-events-auto flex flex-col items-center gap-1.5 rounded-full border border-[var(--border)] bg-white shadow-lg px-3 py-2">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-[#5A6070]">Admin copy edit</span>
+          <button
+            type="button"
+            disabled={saving}
+            className={`text-xs font-bold px-3 py-1.5 rounded-full ${
+              editMode ? 'text-white' : 'border border-[var(--border)] bg-[var(--brand-warm)]'
+            }`}
+            style={editMode ? { backgroundColor: 'var(--brand-green)' } : undefined}
+            onClick={() => setEditMode(!editMode)}
+          >
+            {editMode ? 'Done editing' : 'Edit copy on page'}
+          </button>
+        </div>
+        {editMode ? (
+          <p className="text-[10px] font-medium text-[#5A6070] px-1">
+            Click gold-outlined text to edit. Save each field, then refresh if needed.
+          </p>
+        ) : null}
       </div>
     </div>
   )

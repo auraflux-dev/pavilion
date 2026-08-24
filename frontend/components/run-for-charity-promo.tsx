@@ -9,6 +9,9 @@ import {
   RUN_FOR_CHARITY_REGISTER_PATH,
 } from '@/lib/run-for-charity'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { formString } from '@/lib/copy/form-string'
+import { RFC_DEFAULTS } from '@/lib/defaults/visitor-string-defaults'
+import { EditableStringField } from '@/components/cms/editable-string-field'
 
 /** Hide after race day (America/New_York calendar date). */
 const RACE_DATE = '2026-09-13'
@@ -39,8 +42,19 @@ function isEarlyBird(now = new Date()): boolean {
  * Home promo for Best Runners Run for Charity (Sun 9/13).
  * One job: get families to register. The Best Runners link already applies SHMS.
  */
-export function RunForCharityPromo() {
+export function RunForCharityPromo({ copy = {} }: { copy?: Record<string, string> }) {
   const earlyBird = isEarlyBird()
+  const merged = { ...RFC_DEFAULTS, ...copy }
+  const s = (key: string, fallback: string) => formString(merged, key, fallback)
+  const E = (key: string, fallback: string, className?: string, inlineTarget?: boolean) => (
+    <EditableStringField
+      page="rfc-promo"
+      stringKey={key}
+      value={vanillaizeIfDemo(s(key, fallback))}
+      className={className}
+      inlineTarget={inlineTarget}
+    />
+  )
 
   if (!stillShowingPromo()) return null
 
@@ -70,18 +84,20 @@ export function RunForCharityPromo() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
         <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#98C818] mb-3">
           {earlyBird
-            ? 'Early bird through Aug 15 · Race day Sun Sep 13'
-            : 'Race day · Sunday Sep 13'}
+            ? E('rfc.earlyBirdBadge', 'Early bird through Aug 15 · Race day Sun Sep 13')
+            : E('rfc.raceDayBadge', 'Race day · Sunday Sep 13')}
         </p>
         <h2
           id="run-for-charity-heading"
           className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white text-balance max-w-3xl"
         >
-          Run for Charity 1K &amp; 5K
+          {E('rfc.title', 'Run for Charity 1K & 5K', 'text-white')}
         </h2>
         <p className="mt-4 text-base sm:text-lg text-white/85 leading-relaxed max-w-2xl text-pretty">
-          {vanillaizeIfDemo(
+          {E(
+            'rfc.body',
             'Best Runners hosts the race. Our register link applies school code SHMS so Stone Hill receives 100% of your registration fee.',
+            'text-white/85',
           )}
         </p>
 
@@ -133,9 +149,7 @@ export function RunForCharityPromo() {
               className="rounded-2xl border-2 border-[#98C818]/60 bg-black/15 p-6 text-center space-y-3"
             >
               <p className="text-sm text-white/80 leading-relaxed">
-                {vanillaizeIfDemo(
-                  'Tap register. Best Runners fills in SHMS for you.',
-                )}
+                {E('rfc.registerHint', 'Tap register. Best Runners fills in SHMS for you.', 'text-white/80')}
               </p>
               <button
                 type="button"
@@ -143,7 +157,7 @@ export function RunForCharityPromo() {
                 className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3.5 text-base font-bold text-[var(--brand-green)] bg-[var(--brand-gold)] hover:bg-[#ffe44d] transition-colors"
               >
                 <ExternalLink className="w-4 h-4" aria-hidden />
-                Register on Best Runners
+                {E('rfc.register', 'Register on Best Runners', undefined, true)}
               </button>
               <a
                 href={RUN_FOR_CHARITY_FLYER_PDF_URL}
@@ -151,7 +165,7 @@ export function RunForCharityPromo() {
                 rel="noopener noreferrer"
                 className="block text-sm font-semibold text-white/80 hover:text-white underline underline-offset-2"
               >
-                Download flyer
+                {E('rfc.flyer', 'Download flyer', 'text-white/80', true)}
               </a>
             </div>
 
@@ -160,7 +174,7 @@ export function RunForCharityPromo() {
                 href={RUN_FOR_CHARITY_REGISTER_PATH}
                 className="underline underline-offset-2 hover:text-white transition-colors"
               >
-                Full event details
+                {E('rfc.details', 'Full event details', 'text-white/65', true)}
               </Link>
             </p>
           </div>
@@ -173,7 +187,7 @@ export function RunForCharityPromo() {
             >
               <p className="px-4 py-4 text-center text-base sm:text-lg font-bold tracking-wide text-[var(--brand-dark)] bg-[var(--brand-gold)] flex items-center justify-center gap-2">
                 <ExternalLink className="w-5 h-5 shrink-0" aria-hidden />
-                Official flyer · tap to register on Best Runners
+                {E('rfc.flyerTap', 'Official flyer · tap to register on Best Runners')}
               </p>
               <Image
                 src="/events/run-for-charity-2026.jpg"

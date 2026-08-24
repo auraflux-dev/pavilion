@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { InlineEditTarget } from '@/lib/cms/inline-edit-target'
 import { useInlineCopy } from '@/components/cms/inline-copy-context'
 
@@ -10,34 +10,70 @@ type Props = {
   className?: string
   /** Block vs inline wrapper */
   block?: boolean
+  /** Span click target when nested inside buttons or links */
+  inlineTarget?: boolean
 }
 
-export function EditableCopy({ target, value, className = '', block = true }: Props) {
+export function EditableCopy({ target, value, className = '', block = true, inlineTarget = false }: Props) {
   const { canEdit, editMode, saving, saveCopy } = useInlineCopy()
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(value)
+  const [display, setDisplay] = useState(value)
+
+  useEffect(() => {
+    setDisplay(value)
+    if (!editing) setDraft(value)
+  }, [value, editing])
+
+  const shown = display
 
   if (!canEdit || !editMode) {
     const Tag = block ? 'span' : 'span'
     return (
       <Tag className={`whitespace-pre-line ${className}`}>
-        {value}
+        {shown}
       </Tag>
     )
   }
 
   if (!editing) {
+    const editClass = `text-left whitespace-pre-line rounded-md ring-2 ring-[var(--brand-gold)]/70 bg-white/10 hover:ring-[var(--brand-gold)] hover:bg-white/15 transition-shadow cursor-pointer ${className}`
+    const open = () => {
+      setDraft(shown)
+      setEditing(true)
+    }
+    if (inlineTarget) {
+      return (
+        <span
+          role="button"
+          tabIndex={0}
+          className={editClass}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            open()
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              e.stopPropagation()
+              open()
+            }
+          }}
+          title="Click to edit copy"
+        >
+          {shown || '(empty — click to add)'}
+        </span>
+      )
+    }
     return (
       <button
         type="button"
-        className={`text-left whitespace-pre-line rounded-md ring-2 ring-transparent hover:ring-[var(--brand-gold)] hover:bg-white/10 transition-shadow ${className}`}
-        onClick={() => {
-          setDraft(value)
-          setEditing(true)
-        }}
+        className={editClass}
+        onClick={open}
         title="Click to edit copy"
       >
-        {value || '(empty — click to add)'}
+        {shown || '(empty — click to add)'}
       </button>
     )
   }
@@ -60,7 +96,10 @@ export function EditableCopy({ target, value, className = '', block = true }: Pr
           onClick={() => {
             void (async () => {
               const ok = await saveCopy(target, draft)
-              if (ok) setEditing(false)
+              if (ok) {
+                setDisplay(draft)
+                setEditing(false)
+              }
             })()
           }}
         >

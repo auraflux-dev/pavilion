@@ -9,13 +9,15 @@ import { Heart } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
 import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { formString } from '@/lib/copy/form-string'
+import { DONATE_FORM_DEFAULTS } from '@/lib/defaults/visitor-string-defaults'
+import { EditableStringField } from '@/components/cms/editable-string-field'
 import {
   DONATION_MAX_DOLLARS,
   DONATION_MIN_DOLLARS,
   DONATION_PRESETS,
   isAllowedDonationAmount,
 } from '@/lib/donation'
-import { useCart } from '@/lib/cart/store'
 
 type Props = {
   /** Page section id for deep links (#donate) */
@@ -23,20 +25,34 @@ type Props = {
   eyebrow?: string
   title?: string
   body?: string
+  /** CMS stringOverrides from donate-form PageContent */
+  copy?: Record<string, string>
   /** Compact layout for home / narrow columns */
   compact?: boolean
 }
 
 export function DonateBlock({
   id = 'donate',
-  eyebrow = 'Support SHMS PTO',
-  title = 'Donate to the PTO',
-  body = 'Give any amount to SHMS PTO. Every dollar funds enrichment, The Cove, and events for Stone Hill students.',
+  eyebrow,
+  title,
+  body,
+  copy = {},
   compact = false,
 }: Props) {
-  eyebrow = vanillaizeIfDemo(eyebrow)
-  title = vanillaizeIfDemo(title)
-  body = vanillaizeIfDemo(body)
+  const merged = { ...DONATE_FORM_DEFAULTS, ...copy }
+  const s = (key: string, fallback: string, vars?: Record<string, string | number | undefined | null>) =>
+    formString(merged, key, fallback, vars)
+
+  const resolvedEyebrow = vanillaizeIfDemo(eyebrow ?? s('donate.defaultEyebrow', 'Support SHMS PTO'))
+  const resolvedTitle = vanillaizeIfDemo(title ?? s('donate.defaultTitle', 'Donate to the PTO'))
+  const resolvedBody = vanillaizeIfDemo(
+    body ??
+      s(
+        'donate.defaultBody',
+        'Give any amount to SHMS PTO. Every dollar funds enrichment, The Cove, and events for Stone Hill students.',
+      ),
+  )
+
   const [amount, setAmount] = useState<number>(DONATION_PRESETS[0] ?? 5)
   const [other, setOther] = useState(false)
   const [custom, setCustom] = useState('')
@@ -44,7 +60,6 @@ export function DonateBlock({
   const [open, setOpen] = useState(false)
   const [error, setError] = useState('')
   const [thanks, setThanks] = useState('')
-  const cart = useCart()
 
   const effectiveAmount = useMemo(() => {
     if (other) {
@@ -54,11 +69,21 @@ export function DonateBlock({
     return amount
   }, [amount, other, custom])
 
+  const amountLabel =
+    effectiveAmount > 0
+      ? effectiveAmount.toFixed(effectiveAmount % 1 ? 2 : 0)
+      : '-'
+
   function startCheckout() {
     setError('')
     setThanks('')
     if (!isAllowedDonationAmount(effectiveAmount)) {
-      setError(`Enter an amount between $${DONATION_MIN_DOLLARS} and $${DONATION_MAX_DOLLARS.toLocaleString()}.`)
+      setError(
+        s('donate.amountError', `Enter an amount between $${DONATION_MIN_DOLLARS} and $${DONATION_MAX_DOLLARS.toLocaleString()}.`, {
+          min: DONATION_MIN_DOLLARS,
+          max: DONATION_MAX_DOLLARS.toLocaleString(),
+        }),
+      )
       return
     }
     setOpen(true)
@@ -81,17 +106,44 @@ export function DonateBlock({
               : { backgroundColor: 'rgba(255,255,255,0.15)', color: '#FFFFFF' }
           }
         >
-          {eyebrow}
+          {eyebrow != null ? (
+            resolvedEyebrow
+          ) : (
+            <EditableStringField
+              page="donate-form"
+              stringKey="donate.defaultEyebrow"
+              value={resolvedEyebrow}
+              className={compact ? 'text-white' : 'text-white'}
+            />
+          )}
         </div>
         <h2
           className={`font-bold mb-3 ${compact ? 'text-2xl md:text-3xl text-[#1A1A1A]' : 'text-3xl md:text-4xl text-white'}`}
         >
-          {title}
+          {title != null ? (
+            resolvedTitle
+          ) : (
+            <EditableStringField
+              page="donate-form"
+              stringKey="donate.defaultTitle"
+              value={resolvedTitle}
+              className={compact ? 'text-[#1A1A1A]' : 'text-white'}
+            />
+          )}
         </h2>
         <p
           className={`mb-8 max-w-xl ${compact ? 'text-[#5A6070]' : 'text-white/85 mx-auto'}`}
         >
-          {body}
+          {body != null ? (
+            resolvedBody
+          ) : (
+            <EditableStringField
+              page="donate-form"
+              stringKey="donate.defaultBody"
+              value={resolvedBody}
+              className={compact ? 'text-[#5A6070]' : 'text-white/85'}
+            />
+          )}
         </p>
 
         <div
@@ -101,7 +153,7 @@ export function DonateBlock({
         >
           <div className="flex items-center gap-2 mb-4">
             <Heart className="w-5 h-5" style={{ color: 'var(--brand-green)' }} aria-hidden />
-            <p className="text-sm font-bold text-[#1A1A1A]">Choose an amount</p>
+            <p className="text-sm font-bold text-[#1A1A1A]">{s('donate.chooseAmount', 'Choose an amount')}</p>
           </div>
 
           <div className="flex flex-wrap gap-2 mb-4">
@@ -141,14 +193,14 @@ export function DonateBlock({
                   : { backgroundColor: 'var(--brand-warm)', color: '#1A1A1A', borderColor: 'var(--border)' }
               }
             >
-              Other
+              {s('donate.other', 'Other')}
             </button>
           </div>
 
           {other ? (
             <>
               <label className="block text-sm text-[#5A6070] mb-1" htmlFor={`${id}-custom`}>
-                Amount ($)
+                {s('donate.amountLabel', 'Amount ($)')}
               </label>
               <input
                 id={`${id}-custom`}
@@ -157,7 +209,7 @@ export function DonateBlock({
                 max={DONATION_MAX_DOLLARS}
                 step="0.01"
                 inputMode="decimal"
-                placeholder="Enter any amount"
+                placeholder={s('donate.amountPlaceholder', 'Enter any amount')}
                 autoFocus
                 value={custom}
                 onChange={(e) => {
@@ -170,57 +222,42 @@ export function DonateBlock({
           ) : null}
 
           <label className="block text-sm text-[#5A6070] mb-1" htmlFor={`${id}-note`}>
-            Optional note
+            {s('donate.noteLabel', 'Optional note')}
           </label>
           <input
             id={`${id}-note`}
             type="text"
             maxLength={120}
-            placeholder="In honor of a teacher, class gift to the PTO…"
+            placeholder={s('donate.notePlaceholder', 'Add a note if you like')}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             className="w-full mb-5 rounded-lg border border-[var(--border)] px-3 py-2.5 text-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-[var(--brand-green)]/40"
           />
 
           {error ? <p className="text-sm text-red-700 mb-3">{error}</p> : null}
-          {thanks ? <p className="text-sm font-semibold mb-3" style={{ color: 'var(--brand-green)' }}>{thanks}</p> : null}
+          {thanks ? (
+            <p className="text-sm font-semibold mb-3" style={{ color: 'var(--brand-green)' }}>
+              {thanks}
+            </p>
+          ) : null}
 
-          <button
-            type="button"
-            onClick={() => {
-              if (!isAllowedDonationAmount(effectiveAmount)) {
-                setError('Enter a donation between $1 and $10,000')
-                return
-              }
-              cart.add({
-                kind: 'donation',
-                title: 'PTO Donation',
-                amount: effectiveAmount,
-                href: '/donate',
-                amountCents: Math.round(effectiveAmount * 100),
-              })
-            }}
-            className="w-full inline-flex items-center justify-center font-bold text-sm px-4 py-3 rounded-lg border-2 mb-2"
-            style={{ borderColor: 'var(--brand-green)', color: 'var(--brand-green)' }}
-          >
-            {`Add to cart · $${effectiveAmount > 0 ? effectiveAmount.toFixed(effectiveAmount % 1 ? 2 : 0) : '-'}`}
-          </button>
-          <MemberGate label="Sign in to donate" returnToQuery={`${id}=1`}>
+          <MemberGate label={s('donate.signIn', 'Sign in to donate')} returnToQuery={`${id}=1`}>
             <button
               type="button"
               onClick={startCheckout}
               className="w-full inline-flex items-center justify-center font-bold text-sm px-4 py-3 rounded-lg text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: 'var(--brand-green)' }}
             >
-              Donate ${
-                effectiveAmount > 0 ? effectiveAmount.toFixed(effectiveAmount % 1 ? 2 : 0) : '-'
-              }
+              {s('donate.button', `Donate $${amountLabel}`, { amount: amountLabel })}
             </button>
           </MemberGate>
 
-          <p className="text-xs text-[#5A6070] mt-3">
+          <p className="text-xs text-[#5A6070] mt-3 whitespace-pre-line">
             {vanillaizeIfDemo(
-              'Gifts go to SHMS PTO (501(c)(3)), not Loudoun County Public Schools. You will receive a receipt. Consult your tax advisor about deductibility.',
+              s(
+                'donate.giftNote',
+                'Gifts go to SHMS PTO (501(c)(3)), not Loudoun County Public Schools. You will receive a receipt. Consult your tax advisor about deductibility.',
+              ),
             )}
           </p>
         </div>
@@ -230,8 +267,8 @@ export function DonateBlock({
         open={open}
         onClose={() => setOpen(false)}
         amount={effectiveAmount}
-        title="PTO Donation"
-        subtitle={note ? `Note: ${note}` : vanillaizeIfDemo('Thank you for supporting SHMS PTO.')}
+        title={s('donate.checkoutTitle', 'PTO Donation')}
+        subtitle={note ? `Note: ${note}` : vanillaizeIfDemo(s('donate.thankYou', 'Thank you for supporting SHMS PTO.'))}
         containerId={`donate-pay-${id}`}
         payBody={{
           kind: 'donation',
@@ -240,7 +277,11 @@ export function DonateBlock({
         }}
         onPaid={() => {
           setOpen(false)
- setThanks(`Thank you. Your $${effectiveAmount.toFixed(2)} donation is complete.`)
+          setThanks(
+            s('donate.thanksComplete', `Thank you. Your $${effectiveAmount.toFixed(2)} donation is complete.`, {
+              amount: effectiveAmount.toFixed(2),
+            }),
+          )
         }}
       />
     </section>
