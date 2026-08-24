@@ -35,8 +35,10 @@ export async function getGiftCardById(id: string) {
 /** Get balance in dollars for a gift card by GAN. Returns 0 if not found. */
 export async function getGiftCardBalance(gan: string): Promise<number> {
   const card = await getGiftCardByGan(gan)
-  if (!card?.balanceMoney?.amount) return 0
-  return Number(card.balanceMoney.amount) / 100
+  const raw = card?.balanceMoney?.amount
+  // Square uses 0 for empty; do not treat 0 as "missing".
+  if (raw == null || raw === '') return 0
+  return Number(raw) / 100
 }
 
 /** Get full activity history for a gift card. */

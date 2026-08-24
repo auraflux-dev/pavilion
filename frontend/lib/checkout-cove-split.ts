@@ -34,9 +34,20 @@ export async function withCoveSplit(
     return resolved
   }
 
-  const family = await listFamilyStudents(parentEmail)
+  // Co-parents share the primary household Cove card (same as portal / family-code).
+  const { resolvePrimaryParentEmail } = await import('@/lib/family-guardians')
+  const householdEmail = await resolvePrimaryParentEmail(parentEmail)
+
+  const family = await listFamilyStudents(householdEmail)
   const card = resolveFamilyGiftCard(family)
-  const live = card.gan ? await getGiftCardBalance(card.gan) : 0
+  let live = Number(card.balance) || 0
+  if (card.gan) {
+    try {
+      live = await getGiftCardBalance(card.gan)
+    } catch {
+      // Keep CMS balance so checkout still offers the opt-in.
+    }
+  }
 
   if (!useCove) {
     return {
@@ -47,6 +58,21 @@ export async function withCoveSplit(
         cardCents: String(resolved.amountCents),
         gan: '',
         coveBalance: String(live),
+        householdEmail,
+      },
+    }
+  }
+
+  if (!card.gan || live <= 0) {
+    return {
+      ...resolved,
+      meta: {
+        ...resolved.meta,
+        coveCents: '0',
+        cardCents: String(resolved.amountCents),
+        gan: '',
+        coveBalance: String(live),
+        householdEmail,
       },
     }
   }
@@ -66,6 +92,7 @@ export async function withCoveSplit(
       gan: card.gan,
       giftCardId: card.giftCardId,
       coveBalance: live.toFixed(2),
+      householdEmail,
     },
   }
 }
