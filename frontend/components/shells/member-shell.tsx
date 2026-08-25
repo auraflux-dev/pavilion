@@ -155,24 +155,16 @@ export function MemberShell({ children }: Props) {
               className="hidden lg:flex items-center justify-center gap-0.5 xl:gap-1 min-w-0 col-start-2 row-start-1"
               aria-label="Member portal"
             >
-              {links.map((link) => {
-                const upgradeCta = link.label === 'Upgrade'
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    title={'title' in link ? link.title : undefined}
-                    className={
-                      upgradeCta
-                        ? 'px-2.5 xl:px-3 py-1.5 rounded-md text-[11px] xl:text-xs font-bold text-white whitespace-nowrap'
-                        : 'px-2 xl:px-2.5 py-1.5 rounded-md text-[11px] xl:text-xs font-semibold text-[#1A1A1A] hover:bg-[var(--brand-soft)] whitespace-nowrap'
-                    }
-                    style={upgradeCta ? { backgroundColor: 'var(--brand-green)' } : undefined}
-                  >
-                    {link.label}
-                  </Link>
-                )
-              })}
+              {links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  title={'title' in link ? link.title : undefined}
+                  className="px-2 xl:px-2.5 py-1.5 rounded-md text-[11px] xl:text-xs font-semibold text-[#1A1A1A] hover:bg-[var(--brand-soft)] whitespace-nowrap"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </nav>
 
             <div className="hidden lg:flex items-center gap-2 shrink-0 col-start-3 row-start-1">
@@ -195,25 +187,17 @@ export function MemberShell({ children }: Props) {
             {signedInEmail ? (
               <p className="px-3 pb-2 text-[11px] text-[#5A6070] truncate">{signedInEmail}</p>
             ) : null}
-            {links.map((link) => {
-              const upgradeCta = link.label === 'Upgrade'
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  title={'title' in link ? link.title : undefined}
-                  className={
-                    upgradeCta
-                      ? 'block px-3 py-2.5 rounded-md text-sm font-bold text-white text-center'
-                      : 'block px-3 py-2.5 rounded-md text-sm font-semibold hover:bg-[var(--brand-soft)]'
-                  }
-                  style={upgradeCta ? { backgroundColor: 'var(--brand-green)' } : undefined}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {link.label === 'Payments' ? 'Saved payment methods' : link.label}
-                </Link>
-              )
-            })}
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                title={'title' in link ? link.title : undefined}
+                className="block px-3 py-2.5 rounded-md text-sm font-semibold hover:bg-[var(--brand-soft)]"
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label === 'Payments' ? 'Saved payment methods' : link.label}
+              </Link>
+            ))}
             <div className="pt-2 mt-2 border-t border-[var(--border)] space-y-2">
               {staffChrome ? (
                 <div className="grid grid-cols-2 gap-2">
