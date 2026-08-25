@@ -455,24 +455,49 @@ export function PortalCardCheckout({
               <p id={`${containerId}-title`} className="text-base font-bold text-[#1A1A1A] leading-snug">
                 {title}
               </p>
-              <p className="text-lg font-bold mt-1" style={{ color: 'var(--brand-green)' }}>
-                ${due.toFixed(2)}
-                {coveDue > 0 ? (
-                  <span className="ml-2 text-xs font-semibold text-[#5A6070]">
+              {/* When Cove splits payment, hero = card charge (what parents pay). Total stays secondary. */}
+              {coveDue > 0 ? (
+                <>
+                  <p className="text-lg font-bold mt-1" style={{ color: 'var(--brand-green)' }}>
+                    {needsCard ? `$${cardDue.toFixed(2)}` : '$0.00'}
+                    <span className="ml-1.5 text-xs font-semibold text-[#5A6070]">
+                      {needsCard ? 'on card' : 'card · Cove covers it'}
+                    </span>
+                  </p>
+                  <p className="text-[11px] text-[#5A6070] mt-0.5">
                     Cove ${coveDue.toFixed(2)}
-                    {needsCard ? ` · card $${cardDue.toFixed(2)}` : ''}
-                  </span>
-                ) : null}
-              </p>
-              {quote?.listAmount && quote.listAmount > due + 0.001 ? (
-                <p className="text-[11px] text-[#5A6070] mt-0.5">
-                  List ${quote.listAmount.toFixed(2)}
-                  {payBody.kind === 'membership' ? ' · upgrade credit applied' : ''}
-                  {quote.discountPercent
-                    ? ` · ${quote.discountPercent}% off${quote.discountCode ? ` (${quote.discountCode})` : ''}`
-                    : ''}
-                </p>
-              ) : null}
+                    {' · '}
+                    order ${due.toFixed(2)}
+                    {quote?.listAmount && quote.listAmount > due + 0.001
+                      ? ` · list $${quote.listAmount.toFixed(2)}${
+                          payBody.kind === 'membership' ? ' with upgrade credit' : ''
+                        }`
+                      : ''}
+                    {quote?.discountPercent
+                      ? ` · ${quote.discountPercent}% off${
+                          quote.discountCode ? ` (${quote.discountCode})` : ''
+                        }`
+                      : ''}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg font-bold mt-1" style={{ color: 'var(--brand-green)' }}>
+                    ${due.toFixed(2)}
+                  </p>
+                  {quote?.listAmount && quote.listAmount > due + 0.001 ? (
+                    <p className="text-[11px] text-[#5A6070] mt-0.5">
+                      List ${quote.listAmount.toFixed(2)}
+                      {payBody.kind === 'membership' ? ' · upgrade credit applied' : ''}
+                      {quote.discountPercent
+                        ? ` · ${quote.discountPercent}% off${
+                            quote.discountCode ? ` (${quote.discountCode})` : ''
+                          }`
+                        : ''}
+                    </p>
+                  ) : null}
+                </>
+              )}
               <p className="text-[10px] font-semibold uppercase tracking-wide text-[#5A6070] mt-2">
                 {step === 'review' ? 'Step 1 of 2 · Review' : 'Step 2 of 2 · Pay'}
               </p>
