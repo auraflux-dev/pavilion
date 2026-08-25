@@ -255,7 +255,20 @@ export async function acceptGuardianInvite(opts: {
     inviteTokenHash: '',
     active: true,
   })
-  return { primaryParentEmail: norm(String(row.primaryParentEmail ?? '')) }
+
+  const primary = norm(String(row.primaryParentEmail ?? ''))
+  // Co-parent shares the primary household account number (A#####).
+  try {
+    const { ensureAccountNumberForEmail } = await import(
+      '@/lib/staff/membership-account-number'
+    )
+    if (primary) await ensureAccountNumberForEmail(primary)
+    await ensureAccountNumberForEmail(email)
+  } catch (err) {
+    console.warn('ensureAccountNumberForEmail after guardian accept', err)
+  }
+
+  return { primaryParentEmail: primary }
 }
 
 export async function revokeGuardianLink(opts: {

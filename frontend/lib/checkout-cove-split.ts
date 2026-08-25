@@ -34,11 +34,19 @@ export async function withCoveSplit(
     return resolved
   }
 
-  // Co-parents share the primary household Cove card (same as portal / family-code).
-  const { resolvePrimaryParentEmail } = await import('@/lib/family-guardians')
-  const householdEmail = await resolvePrimaryParentEmail(parentEmail)
+  // Household truth is Memberships.accountNumber (A#####), not login email.
+  let accountNumber = ''
+  try {
+    const { resolveHouseholdMembershipContext } = await import(
+      '@/lib/staff/membership-account-number'
+    )
+    const ctx = await resolveHouseholdMembershipContext(parentEmail)
+    accountNumber = ctx.accountNumber
+  } catch {
+    // Account numbers optional until backfill.
+  }
 
-  const family = await listFamilyStudents(householdEmail)
+  const family = await listFamilyStudents(parentEmail)
   const card = resolveFamilyGiftCard(family)
   let live = Number(card.balance) || 0
   if (card.gan) {
@@ -49,16 +57,20 @@ export async function withCoveSplit(
     }
   }
 
+  const baseMeta = {
+    ...resolved.meta,
+    coveBalance: String(live),
+    accountNumber,
+  }
+
   if (!useCove) {
     return {
       ...resolved,
       meta: {
-        ...resolved.meta,
+        ...baseMeta,
         coveCents: '0',
         cardCents: String(resolved.amountCents),
         gan: '',
-        coveBalance: String(live),
-        householdEmail,
       },
     }
   }
@@ -67,12 +79,10 @@ export async function withCoveSplit(
     return {
       ...resolved,
       meta: {
-        ...resolved.meta,
+        ...baseMeta,
         coveCents: '0',
         cardCents: String(resolved.amountCents),
         gan: '',
-        coveBalance: String(live),
-        householdEmail,
       },
     }
   }
@@ -86,13 +96,12 @@ export async function withCoveSplit(
   return {
     ...resolved,
     meta: {
-      ...resolved.meta,
+      ...baseMeta,
       coveCents: String(split.coveCents),
       cardCents: String(split.cardCents),
       gan: card.gan,
       giftCardId: card.giftCardId,
       coveBalance: live.toFixed(2),
-      householdEmail,
     },
   }
 }

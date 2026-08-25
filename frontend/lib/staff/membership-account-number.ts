@@ -157,21 +157,20 @@ export async function allocateNextAccountNumber(): Promise<string> {
   throw new Error('Could not allocate account number')
 }
 
-/**
- * Ensure Memberships row for email has an account number. Returns the number.
- * Creates a minimal Memberships row if missing.
- */
-export async function ensureAccountNumberForEmail(parentEmail: string): Promise<string> {
-  const email = parentEmail.trim().toLowerCase()
-  if (!email) throw new Error('parentEmail required')
-
+async function findMembershipRowByEmail(
+  email: string,
+): Promise<Record<string, unknown> | undefined> {
   const client = getWixClient()
   const found = await client.items.query('Memberships').eq('email', email).limit(1).find()
-  const row = found.items?.[0] as Record<string, unknown> | undefined
-  const existing = normalizeAccountNumber(row?.accountNumber)
-  if (existing) return existing
+  return found.items?.[0] as Record<string, unknown> | undefined
+}
 
-  const accountNumber = await allocateNextAccountNumber()
+async function writeAccountNumberOnMembershipRow(
+  row: Record<string, unknown> | undefined,
+  email: string,
+  accountNumber: string,
+) {
+  const client = getWixClient()
   if (row?._id) {
     await client.items.update('Memberships', {
       ...row,
@@ -186,11 +185,58 @@ export async function ensureAccountNumberForEmail(parentEmail: string): Promise<
       accountNumber,
     } as never)
   }
+}
+
+/**
+ * Prefer the primary parent's account number when this login is a co-parent/guardian.
+ */
+async function inheritAccountNumberFromPrimary(email: string): Promise<string> {
+  try {
+    const { resolvePrimaryParentEmail } = await import('@/lib/family-guardians')
+    const primary = (await resolvePrimaryParentEmail(email)).trim().toLowerCase()
+    if (!primary || primary === email) return ''
+    const primaryRow = await findMembershipRowByEmail(primary)
+    const primaryNum = normalizeAccountNumber(primaryRow?.accountNumber)
+    if (primaryNum) return primaryNum
+    // Allocate on the primary first so the household number is stable.
+    return ensureAccountNumberForEmail(primary)
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * Ensure Memberships row for email has an account number. Returns the number.
+ * Co-parents inherit the primary household account number (never mint a second one).
+ * Creates a minimal Memberships row if missing.
+ */
+export async function ensureAccountNumberForEmail(parentEmail: string): Promise<string> {
+  const email = parentEmail.trim().toLowerCase()
+  if (!email) throw new Error('parentEmail required')
+
+  const row = await findMembershipRowByEmail(email)
+  const existing = normalizeAccountNumber(row?.accountNumber)
+
+  // Co-parent must share the primary's A##### even if they already had a solo number.
+  const inherited = await inheritAccountNumberFromPrimary(email)
+  if (inherited) {
+    if (existing !== inherited) {
+      await writeAccountNumberOnMembershipRow(row, email, inherited)
+    }
+    return inherited
+  }
+
+  if (existing) return existing
+
+  const accountNumber = await allocateNextAccountNumber()
+  await writeAccountNumberOnMembershipRow(row, email, accountNumber)
   return accountNumber
 }
 
-/** Resolve account number → parent emails (usually one). */
-export async function lookupEmailsByAccountNumber(raw: string): Promise<string[]> {
+/** All Memberships rows sharing an account number. */
+export async function listMembershipsByAccountNumber(
+  raw: string,
+): Promise<Record<string, unknown>[]> {
   const accountNumber = normalizeAccountNumber(raw)
   if (!accountNumber) return []
   const client = getWixClient()
@@ -198,19 +244,75 @@ export async function lookupEmailsByAccountNumber(raw: string): Promise<string[]
     const found = await client.items
       .query('Memberships')
       .eq('accountNumber', accountNumber)
-      .limit(10)
+      .limit(50)
       .find()
-    return (found.items ?? [])
-      .map((item) => String((item as { email?: string }).email ?? '').trim().toLowerCase())
-      .filter(Boolean)
+    return (found.items ?? []) as Record<string, unknown>[]
   } catch {
-    // Field may not exist yet; scan
     const rows = await loadAllMemberships()
-    return rows
-      .filter((r) => normalizeAccountNumber(r.accountNumber) === accountNumber)
-      .map((r) => String(r.email ?? '').trim().toLowerCase())
-      .filter(Boolean)
+    return rows.filter((r) => normalizeAccountNumber(r.accountNumber) === accountNumber)
   }
+}
+
+/** Resolve account number → parent emails (usually one; co-parents share the number). */
+export async function lookupEmailsByAccountNumber(raw: string): Promise<string[]> {
+  const rows = await listMembershipsByAccountNumber(raw)
+  return [
+    ...new Set(
+      rows
+        .map((r) => String(r.email ?? '').trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ]
+}
+
+export type HouseholdMembershipContext = {
+  /** Authoritative household id (A#####). */
+  accountNumber: string
+  /** All Memberships emails on this account number. */
+  emails: string[]
+  /** Membership + student tiers under the account (for pickHighestTier). */
+  tierCandidates: string[]
+  memberships: Array<{ email: string; tier: string; accountNumber: string }>
+}
+
+/**
+ * Login email → account number → household membership details.
+ * Account number is authoritative; email is only the entry key.
+ */
+export async function resolveHouseholdMembershipContext(
+  viewerEmail: string,
+): Promise<HouseholdMembershipContext> {
+  const email = viewerEmail.trim().toLowerCase()
+  if (!email) {
+    return { accountNumber: '', emails: [], tierCandidates: [], memberships: [] }
+  }
+
+  const accountNumber = await ensureAccountNumberForEmail(email)
+  const rows = await listMembershipsByAccountNumber(accountNumber)
+  const memberships = rows.map((r) => ({
+    email: String(r.email ?? '').trim().toLowerCase(),
+    tier: String(r.tier ?? 'free'),
+    accountNumber: normalizeAccountNumber(r.accountNumber) || accountNumber,
+  })).filter((m) => m.email)
+
+  const emails = [...new Set([email, ...memberships.map((m) => m.email)])]
+  const tierCandidates = memberships.map((m) => m.tier)
+
+  const client = getWixClient()
+  for (const e of emails) {
+    try {
+      const students = await client.items.query('Students').eq('parentEmail', e).limit(100).find()
+      for (const s of students.items ?? []) {
+        tierCandidates.push(
+          String((s as { membershipTier?: string }).membershipTier ?? 'free'),
+        )
+      }
+    } catch {
+      // Students query may fail for a single email; keep going.
+    }
+  }
+
+  return { accountNumber, emails, tierCandidates, memberships }
 }
 
 /**
