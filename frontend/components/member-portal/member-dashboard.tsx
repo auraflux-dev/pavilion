@@ -49,9 +49,7 @@ import { PortalBusinessOwnerForm } from './portal-business-owner-form'
 import { PortalHelpForm } from '@/components/member-portal/portal-help-form'
 import { InviteCoParentPanel } from './invite-co-parent-panel'
 import { PortalActionNotice, usePortalNotice } from './portal-action-notice'
-import { CmsPortal, usePortalFormCopy } from './portal-form-copy-context'
-import { CmsHub, CmsNotice } from '@/components/cms/cms-portal-strings'
-import { formString } from '@/lib/copy/form-string'
+import { useFormString } from './portal-form-copy-context'
 import { DeferredMount } from './deferred-mount'
 import {
   buildOnboardingChecklist,
@@ -167,15 +165,9 @@ export function MemberDashboard({
   copy = PORTAL_COPY_DEFAULTS,
   notices = {},
 }: Props) {
-  const forms = usePortalFormCopy()
-  const t = (
-    key: string,
-    fallback?: string,
-    vars?: Record<string, string | number | undefined | null>,
-  ) => formString(forms, key, fallback ?? key, vars)
-  const noticeFallback = (key: keyof typeof PORTAL_NOTICE_DEFAULTS) =>
-    PORTAL_NOTICE_DEFAULTS[key] ?? ''
-  const safetyGateHint = pickString(notices, 'safetyGateHint', noticeFallback('safetyGateHint'))
+  const t = useFormString
+  const n = (key: keyof typeof PORTAL_NOTICE_DEFAULTS) =>
+    pickString(notices, key, PORTAL_NOTICE_DEFAULTS[key] ?? '')
   const [member, setMember] = useState<MemberData['member'] | null>(null)
   const [accountType, setAccountType] = useState<'free' | 'paid'>('free')
   const [students, setStudents] = useState<Student[]>([])
@@ -380,19 +372,16 @@ export function MemberDashboard({
   if (status === 'error' || !member) {
     return (
       <div className="text-center py-24 max-w-md mx-auto">
-        <p className="text-[#5A6070] mb-2">
-          <CmsHub k="loadError" fallback={copy.loadError} />
-        </p>
+        <p className="text-[#5A6070] mb-2">{copy.loadError}</p>
         <p className="text-xs text-[#5A6070] mb-4 leading-relaxed whitespace-pre-line">
-          <CmsPortal k="dashboard.sessionExpired" fallback={t('dashboard.sessionExpired')} />
+          {t('dashboard.sessionExpired')}
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           <Button onClick={redirectToLogin} variant="outline" size="sm">
-            <CmsPortal k="dashboard.signInAgain" fallback={t('dashboard.signInAgain')} />
+            {t('dashboard.signInAgain')}
           </Button>
           <Button onClick={() => void load()} variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4 mr-2" />{' '}
-            <CmsPortal k="dashboard.retry" fallback={t('dashboard.retry')} />
+            <RefreshCw className="w-4 h-4 mr-2" /> {t('dashboard.retry')}
           </Button>
         </div>
       </div>
@@ -418,7 +407,28 @@ export function MemberDashboard({
   const householdTier = pickHighestTier(students.map((s) => s.membershipTier))
   const householdTierRank = tierRank(householdTier)
   const tierDisplay = displayMembershipTier(householdTier)
+  const accountBannerTitle =
+    accountType === 'paid' && householdTierRank > 0
+      ? `${tierDisplay} membership active`
+      : accountType === 'paid'
+        ? copy.paidTitle
+        : copy.freeTitle
+  // Title already names the tier. Body stays short. Upgrade lives in the CTA only.
+  const accountBannerBody =
+    accountType === 'paid' && householdTierRank > 0
+      ? t('dashboard.paidThanks')
+      : accountType === 'paid'
+        ? copy.paidBody
+        : copy.freeBody
   const membershipCtaHref = MEMBERSHIP_CHOOSE_PATH
+  const membershipCtaLabel =
+    accountType === 'free'
+      ? copy.viewMemberships
+      : householdTier === 'reef'
+        ? t('dashboard.upgradeLagoonTide')
+        : householdTier === 'lagoon'
+          ? t('dashboard.upgradeTide')
+          : null
 
   const onboarding = buildOnboardingChecklist({ students, accountType })
   const commons = isCommonsPlatform()
@@ -444,27 +454,11 @@ export function MemberDashboard({
       {membershipSuccessNudge ? (
         <div className="rounded-xl border border-[var(--brand-line)] bg-[#E8F3E8] px-4 py-3 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-bold text-[var(--brand-green)]">
-              <CmsNotice
-                k="membershipSuccessTitle"
-                fallback={noticeFallback('membershipSuccessTitle')}
-                copy={notices}
-              />
-            </p>
+ <p className="text-sm font-bold text-[var(--brand-green)]">{n('membershipSuccessTitle')}</p>
             <p className="text-xs text-[#1A1A1A]/80 mt-0.5 leading-relaxed">
-              {onboarding.complete ? (
-                <CmsNotice
-                  k="membershipSuccessBodyComplete"
-                  fallback={vanillaizeIfDemo(noticeFallback('membershipSuccessBodyComplete'))}
-                  copy={notices}
-                />
-              ) : (
-                <CmsNotice
-                  k="membershipSuccessBodyPending"
-                  fallback={vanillaizeIfDemo(noticeFallback('membershipSuccessBodyPending'))}
-                  copy={notices}
-                />
-              )}
+              {onboarding.complete
+                ? vanillaizeIfDemo(n('membershipSuccessBodyComplete'))
+                : vanillaizeIfDemo(n('membershipSuccessBodyPending'))}
             </p>
           </div>
           <button
@@ -513,15 +507,9 @@ export function MemberDashboard({
             <Mail className="w-4 h-4 mt-0.5 shrink-0 text-[var(--brand-green)]" aria-hidden />
             <div>
               <p className="text-sm font-bold text-[var(--brand-green)]">
-                {newMessageCount === 1 ? (
-                  <CmsNotice
-                    k="newMessageBanner"
-                    fallback={noticeFallback('newMessageBanner')}
-                    copy={notices}
-                  />
-                ) : (
-                  `You have ${newMessageCount} new messages`
-                )}
+                {newMessageCount === 1
+                  ? n('newMessageBanner')
+                  : `You have ${newMessageCount} new messages`}
               </p>
               <p className="text-xs text-[#1A1A1A]/80 mt-0.5">
                 Purchase confirmations, class notes, and PTO updates land here.
@@ -554,7 +542,7 @@ export function MemberDashboard({
         {/* D. Calendar & Messages (priority) */}
         <PortalQuadrant
           id="calendar"
-          title={<CmsHub k="calendarTitle" fallback={copy.calendarTitle} />}
+          title={copy.calendarTitle}
           icon={CalendarDays}
           className="order-1 lg:order-4 lg:col-start-2 lg:row-start-2"
           action={
@@ -569,7 +557,7 @@ export function MemberDashboard({
                   familyTab === 'calendar' ? { backgroundColor: 'var(--brand-green)' } : undefined
                 }
               >
-                <CmsHub k="tabCalendar" fallback={copy.tabCalendar} />
+                {copy.tabCalendar}
               </button>
               <button
                 type="button"
@@ -581,7 +569,7 @@ export function MemberDashboard({
                   familyTab === 'messages' ? { backgroundColor: 'var(--brand-green)' } : undefined
                 }
               >
-                <CmsHub k="tabMessages" fallback={copy.tabMessages} />
+                {copy.tabMessages}
                 {newMessageCount > 0 ? (
                   <span className="ml-1 rounded-full bg-white/25 px-1.5 py-0.5 text-[10px] tabular-nums">
                     {newMessageCount}
@@ -598,34 +586,19 @@ export function MemberDashboard({
               <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
                 <CalendarDays className="w-8 h-8 mb-2 text-[#C4C0B8]" />
                 <p className="text-sm font-semibold text-[#1A1A1A] mb-1">
-                  {hydratingExtras ? (
-                    <CmsNotice
-                      k="calendarHydrating"
-                      fallback={noticeFallback('calendarHydrating')}
-                      copy={notices}
-                    />
-                  ) : (
-                    <CmsHub k="calendarEmptyTitle" fallback={copy.calendarEmptyTitle} />
-                  )}
+                  {hydratingExtras ? n('calendarHydrating') : copy.calendarEmptyTitle}
                 </p>
                 <p className="text-xs text-[#5A6070] max-w-xs mb-4">
-                  {hydratingExtras ? (
-                    <CmsNotice
-                      k="calendarHydratingBody"
-                      fallback={noticeFallback('calendarHydratingBody')}
-                      copy={notices}
-                    />
-                  ) : (
-                    <CmsHub k="calendarEmptyBody" fallback={copy.calendarEmptyBody} />
-                  )}
+                  {hydratingExtras
+                    ? n('calendarHydratingBody')
+                    : copy.calendarEmptyBody}
                 </p>
                 <a
                   href="/programs"
                   className="inline-flex items-center gap-1.5 text-sm font-bold"
                   style={{ color: 'var(--brand-green)' }}
                 >
-                  <CmsHub k="calendarEmptyCta" fallback={copy.calendarEmptyCta} />{' '}
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  {copy.calendarEmptyCta} <ArrowRight className="w-3.5 h-3.5" />
                 </a>
               </div>
             ) : (
@@ -668,26 +641,12 @@ export function MemberDashboard({
             <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
               <Mail className="w-8 h-8 mb-2 text-[#C4C0B8]" />
               <p className="text-sm font-semibold text-[#1A1A1A] mb-1">
-                {hydratingExtras ? (
-                  <CmsNotice
-                    k="messagesHydrating"
-                    fallback={noticeFallback('messagesHydrating')}
-                    copy={notices}
-                  />
-                ) : (
-                  <CmsHub k="messagesEmptyTitle" fallback={copy.messagesEmptyTitle} />
-                )}
+                {hydratingExtras ? n('messagesHydrating') : copy.messagesEmptyTitle}
               </p>
               <p className="text-xs text-[#5A6070] max-w-xs">
-                {hydratingExtras ? (
-                  <CmsNotice
-                    k="messagesHydratingBody"
-                    fallback={noticeFallback('messagesHydratingBody')}
-                    copy={notices}
-                  />
-                ) : (
-                  <CmsHub k="messagesEmptyBody" fallback={copy.messagesEmptyBody} />
-                )}
+                {hydratingExtras
+                  ? n('messagesHydratingBody')
+                  : copy.messagesEmptyBody}
               </p>
             </div>
           ) : (
@@ -736,7 +695,7 @@ export function MemberDashboard({
         {/* A. My Account */}
         <PortalQuadrant
           id="account"
-          title={<CmsHub k="accountTitle" fallback={copy.accountTitle} />}
+          title={copy.accountTitle}
           icon={User}
           className="order-2 lg:order-1 lg:col-start-1 lg:row-start-1"
           action={
@@ -745,7 +704,7 @@ export function MemberDashboard({
               onClick={handleLogout}
               className="text-xs font-semibold text-[#5A6070] hover:text-red-600 inline-flex items-center gap-1"
             >
-              <LogOut className="w-3.5 h-3.5" /> <CmsHub k="signOut" fallback={copy.signOut} />
+              <LogOut className="w-3.5 h-3.5" /> {copy.signOut}
             </button>
           }
         >
@@ -787,42 +746,18 @@ export function MemberDashboard({
           >
             <p className="text-sm font-bold text-[#1A1A1A] flex items-center gap-1.5">
               {accountType === 'paid' && <Star className="w-3.5 h-3.5" style={{ color: 'var(--brand-green)' }} />}
-              {accountType === 'paid' && householdTierRank > 0 ? (
-                vanillaizeIfDemo(`${tierDisplay} membership active`)
-              ) : accountType === 'paid' ? (
-                <CmsHub k="paidTitle" fallback={vanillaizeIfDemo(copy.paidTitle)} />
-              ) : (
-                <CmsHub k="freeTitle" fallback={vanillaizeIfDemo(copy.freeTitle)} />
-              )}
+              {vanillaizeIfDemo(accountBannerTitle)}
             </p>
             <p className="text-xs text-[#5A6070] mt-1 leading-relaxed whitespace-pre-line">
-              {accountType === 'paid' && householdTierRank > 0 ? (
-                <CmsPortal k="dashboard.paidThanks" fallback={t('dashboard.paidThanks')} />
-              ) : accountType === 'paid' ? (
-                <CmsHub k="paidBody" fallback={vanillaizeIfDemo(copy.paidBody)} />
-              ) : (
-                <CmsHub k="freeBody" fallback={vanillaizeIfDemo(copy.freeBody)} />
-              )}
+              {vanillaizeIfDemo(accountBannerBody)}
             </p>
-            {accountType === 'free' || householdTier === 'reef' || householdTier === 'lagoon' ? (
+            {membershipCtaLabel ? (
               <a
                 href={membershipCtaHref}
                 className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
                 style={{ backgroundColor: 'var(--brand-green)' }}
               >
-                {accountType === 'free' ? (
-                  <CmsHub k="viewMemberships" fallback={vanillaizeIfDemo(copy.viewMemberships)} />
-                ) : householdTier === 'reef' ? (
-                  <CmsPortal
-                    k="dashboard.upgradeLagoonTide"
-                    fallback={vanillaizeIfDemo(t('dashboard.upgradeLagoonTide'))}
-                  />
-                ) : (
-                  <CmsPortal
-                    k="dashboard.upgradeTide"
-                    fallback={vanillaizeIfDemo(t('dashboard.upgradeTide'))}
-                  />
-                )}
+                {vanillaizeIfDemo(membershipCtaLabel)}
                 <ArrowRight className="w-4 h-4" aria-hidden />
               </a>
             ) : null}
@@ -831,9 +766,7 @@ export function MemberDashboard({
           <dl className="space-y-3 text-sm mb-4">
             {member.memberSince && (
               <div className="flex items-center justify-between gap-4">
-                <dt className="text-[#5A6070] m-0">
-                  <CmsHub k="memberSince" fallback={copy.memberSince} />
-                </dt>
+                <dt className="text-[#5A6070] m-0">{copy.memberSince}</dt>
                 <dd className="font-semibold text-[#1A1A1A] m-0 text-right">
                   {new Date(member.memberSince).toLocaleDateString('en-US', {
                     month: 'long',
@@ -843,17 +776,13 @@ export function MemberDashboard({
               </div>
             )}
             <div className="flex items-center justify-between gap-4">
-              <dt className="text-[#5A6070] m-0">
-                <CmsHub k="studentsLabel" fallback={copy.studentsLabel} />
-              </dt>
+              <dt className="text-[#5A6070] m-0">{copy.studentsLabel}</dt>
               <dd className="font-semibold text-[#1A1A1A] m-0 text-right">
                 {students.length}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <dt className="text-[#5A6070] m-0">
-                <CmsHub k="paidMembershipsLabel" fallback={copy.paidMembershipsLabel} />
-              </dt>
+              <dt className="text-[#5A6070] m-0">{copy.paidMembershipsLabel}</dt>
               <dd className="font-semibold text-[#1A1A1A] m-0 text-right">
                 {paidStudents}
               </dd>
@@ -868,22 +797,12 @@ export function MemberDashboard({
             <div className="mt-auto pt-2 border-t border-[#F0EDE8]">
               <p className="text-[11px] font-bold text-[#1A1A1A] mb-1 flex items-center gap-1.5">
                 <MessageCircle className="w-3.5 h-3.5" style={{ color: '#25D366' }} />
-                <CmsHub k="whatsappHeading" fallback={copy.whatsappHeading} />
+                {copy.whatsappHeading}
               </p>
               <p className="text-[11px] text-[#5A6070] mb-2 leading-relaxed whitespace-pre-line">
-                {gradeLinks.length === 1 ? (
-                  <CmsPortal
-                    k="dashboard.whatsappSingle"
-                    fallback={t('dashboard.whatsappSingle')}
-                    vars={{ grade: gradeLinks[0]!.grade }}
-                  />
-                ) : (
-                  <CmsNotice
-                    k="whatsappFallbackBody"
-                    fallback={noticeFallback('whatsappFallbackBody')}
-                    copy={notices}
-                  />
-                )}
+                {gradeLinks.length === 1
+                  ? `Join the ${gradeLinks[0]!.grade} WhatsApp for reminders and PTO updates.`
+                  : n('whatsappFallbackBody')}
               </p>
               <div className="flex flex-wrap gap-2">
                 {gradeLinks.map(({ grade, href }) => (
@@ -894,11 +813,7 @@ export function MemberDashboard({
                     rel="noopener noreferrer"
                     className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-[var(--border)] hover:border-[#25D366] hover:bg-green-50"
                   >
-                    <CmsPortal
-                      k="dashboard.whatsappJoinGrade"
-                      fallback={t('dashboard.whatsappJoinGrade')}
-                      vars={{ grade }}
-                    />
+                    Join {grade}
                   </a>
                 ))}
               </div>
@@ -909,7 +824,7 @@ export function MemberDashboard({
         {/* B. My Students */}
         <PortalQuadrant
           id="portal-students"
-          title={<CmsHub k="studentsTitle" fallback={copy.studentsTitle} />}
+          title={copy.studentsTitle}
           icon={Users}
           className="order-3 lg:order-2 lg:col-start-2 lg:row-start-1"
           action={
@@ -920,7 +835,7 @@ export function MemberDashboard({
                 className="text-xs font-semibold inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[var(--border)] hover:border-[var(--brand-green)] hover:bg-[var(--brand-soft)] text-[var(--brand-green)]"
               >
                 <UserPlus className="w-3.5 h-3.5" aria-hidden />
-                <CmsHub k="addStudentCta" fallback={copy.addStudentCta} />
+                {copy.addStudentCta}
               </button>
               <button
                 type="button"
@@ -928,8 +843,7 @@ export function MemberDashboard({
                 disabled={refreshing}
                 className="text-xs font-semibold text-[#5A6070] hover:text-[var(--brand-green)] inline-flex items-center gap-1 disabled:opacity-60"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />{' '}
-                <CmsHub k="refresh" fallback={copy.refresh} />
+                <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> {copy.refresh}
               </button>
             </div>
           }
@@ -937,12 +851,8 @@ export function MemberDashboard({
           {students.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center py-2 space-y-3">
               <div>
-                <p className="font-bold text-[#1A1A1A] mb-1">
-                  <CmsHub k="emptyTitle" fallback={copy.emptyTitle} />
-                </p>
-                <p className="text-xs text-[#5A6070] max-w-sm">
-                  <CmsHub k="emptyBody" fallback={copy.emptyBody} />
-                </p>
+                <p className="font-bold text-[#1A1A1A] mb-1">{copy.emptyTitle}</p>
+                <p className="text-xs text-[#5A6070] max-w-sm">{copy.emptyBody}</p>
               </div>
               <div className="w-full text-left">
                 <AddStudentForm
@@ -1030,10 +940,10 @@ export function MemberDashboard({
               <div className="min-w-0">
                 <p className="text-sm font-bold text-[#1A1A1A] flex items-center gap-1.5">
                   <HelpCircle className="w-4 h-4 shrink-0" style={{ color: 'var(--brand-green)' }} />
-                  <CmsPortal k="dashboard.helpTitle" fallback={t('dashboard.helpTitle')} />
+                  Member Help
                 </p>
-                <p className="text-[11px] text-[#5A6070] mt-1 leading-relaxed whitespace-pre-line">
-                  <CmsPortal k="dashboard.helpBody" fallback={t('dashboard.helpBody')} />
+                <p className="text-[11px] text-[#5A6070] mt-1 leading-relaxed">
+                  Ask a question here, or open the full knowledge base.
                 </p>
               </div>
               <Link
@@ -1041,8 +951,7 @@ export function MemberDashboard({
                 className="shrink-0 text-xs font-bold inline-flex items-center gap-1"
                 style={{ color: 'var(--brand-green)' }}
               >
-                <CmsPortal k="dashboard.helpKbLink" fallback={t('dashboard.helpKbLink')} />{' '}
-                <ArrowRight className="w-3 h-3" />
+                Knowledge base <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
             <PortalHelpForm memberName={member.name} compact />
@@ -1052,30 +961,26 @@ export function MemberDashboard({
         {/* C. Store & Purchases */}
         <PortalQuadrant
           id="store"
-          title={<CmsHub k="storeTitle" fallback={copy.storeTitle} />}
+          title={copy.storeTitle}
           icon={CreditCard}
           className="order-4 lg:order-3 lg:col-start-1 lg:row-start-2"
         >
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="rounded-xl px-3 py-3" style={{ backgroundColor: 'var(--brand-soft)' }}>
               <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
-                <CmsHub k="storeCardsLabel" fallback={copy.storeCardsLabel} />
+                {copy.storeCardsLabel}
               </p>
               <p className="text-xl font-bold text-[#1A1A1A] mt-0.5">
                 {fmtMoney(storeBalanceTotal)}
               </p>
-              <p className="text-[11px] text-[#5A6070]">
-                <CmsHub k="storeCardsHint" fallback={copy.storeCardsHint} />
-              </p>
+              <p className="text-[11px] text-[#5A6070]">{copy.storeCardsHint}</p>
             </div>
             <div className="rounded-xl px-3 py-3 border border-[var(--border)]">
               <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
-                <CmsHub k="recentBuysLabel" fallback={copy.recentBuysLabel} />
+                {copy.recentBuysLabel}
               </p>
               <p className="text-xl font-bold text-[#1A1A1A] mt-0.5">{purchases.length}</p>
-              <p className="text-[11px] text-[#5A6070]">
-                <CmsHub k="recentBuysHint" fallback={copy.recentBuysHint} />
-              </p>
+              <p className="text-[11px] text-[#5A6070]">{copy.recentBuysHint}</p>
             </div>
           </div>
 
@@ -1088,11 +993,9 @@ export function MemberDashboard({
           )}
 
           <div className="rounded-xl px-4 py-3 border border-[var(--border)] mb-4 bg-[#FAFCF9]">
-            <p className="text-xs font-bold text-[#1A1A1A] mb-1">
-              <CmsHub k="paymentMethodsTitle" fallback={copy.paymentMethodsTitle} />
-            </p>
+            <p className="text-xs font-bold text-[#1A1A1A] mb-1">{copy.paymentMethodsTitle}</p>
             <p className="text-[11px] text-[#5A6070] leading-relaxed whitespace-pre-line">
-              <CmsHub k="paymentMethodsBody" fallback={copy.paymentMethodsBody} />
+              {copy.paymentMethodsBody}
             </p>
             <a
               href="/member-portal/payment-methods"
@@ -1117,11 +1020,7 @@ export function MemberDashboard({
                 className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#8A8F9C] cursor-not-allowed"
                 title={coveGate.error}
               >
-                <CmsNotice
-                  k="coveLockedLabel"
-                  fallback={vanillaizeIfDemo(noticeFallback('coveLockedLabel'))}
-                  copy={notices}
-                />
+                {vanillaizeIfDemo(n('coveLockedLabel'))}
               </button>
             ) : null}
             {liveCommerce && !commons ? (
@@ -1129,35 +1028,28 @@ export function MemberDashboard({
               href="/cove#shop"
               className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#1A1A1A]"
             >
-              <ShoppingBag className="w-3.5 h-3.5" />{' '}
-              <CmsHub k="ctaSpiritWear" fallback={copy.ctaSpiritWear} />
+              <ShoppingBag className="w-3.5 h-3.5" /> {copy.ctaSpiritWear}
             </a>
             ) : null}
             <a
               href={onboarding.complete ? '/programs' : '#portal-onboarding'}
               className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-[var(--border)] text-[#1A1A1A]"
-              title={onboarding.complete ? undefined : safetyGateHint}
+              title={
+                onboarding.complete
+                  ? undefined
+                  : n('safetyGateHint')
+              }
             >
-              <CmsHub k="ctaPrograms" fallback={copy.ctaPrograms} />
+              {copy.ctaPrograms}
               {!onboarding.complete ? ' (setup needed)' : ''}
             </a>
           </div>
 
-          <p className="text-[11px] text-[#5A6070] leading-relaxed mb-4 px-1">
-            <CmsHub k="loadCardHelp" fallback={copy.loadCardHelp} />
-          </p>
+          <p className="text-[11px] text-[#5A6070] leading-relaxed mb-4 px-1">{copy.loadCardHelp}</p>
 
           {purchases.length === 0 ? (
             <p className="text-xs text-[#5A6070] mt-auto">
-              {hydratingExtras ? (
-                <CmsNotice
-                  k="purchasesHydrating"
-                  fallback={noticeFallback('purchasesHydrating')}
-                  copy={notices}
-                />
-              ) : (
-                <CmsHub k="purchasesEmpty" fallback={copy.purchasesEmpty} />
-              )}
+              {hydratingExtras ? n('purchasesHydrating') : copy.purchasesEmpty}
             </p>
           ) : (
             <ul className="space-y-2 flex-1 overflow-y-auto max-h-[220px] pr-3">
