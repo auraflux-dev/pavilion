@@ -102,24 +102,12 @@ function randomCode(paidMember: boolean): string {
 
 async function resolveParentPaidMember(email: string): Promise<boolean> {
   const { isCovePaidMemberTier } = await import('@/lib/staff/members-roster')
-  const client = getWixClient()
   try {
-    const membership = await client.items.query('Memberships').eq('email', email).limit(1).find()
-    const tier = String((membership.items?.[0] as { tier?: string } | undefined)?.tier ?? '')
-    if (isCovePaidMemberTier(tier)) return true
+    const { getParentHighestTier } = await import('@/lib/membership-pricing')
+    return isCovePaidMemberTier(await getParentHighestTier(email))
   } catch {
-    // fall through
+    return false
   }
-  try {
-    const students = await client.items.query('Students').eq('parentEmail', email).limit(20).find()
-    for (const row of students.items ?? []) {
-      const tier = String((row as { membershipTier?: string }).membershipTier ?? '')
-      if (isCovePaidMemberTier(tier)) return true
-    }
-  } catch {
-    // ignore
-  }
-  return false
 }
 
 async function codeTaken(code: string, exceptEmail?: string): Promise<boolean> {
@@ -216,6 +204,15 @@ function codeMatchesPaidClass(code: string, paidMember: boolean): boolean {
 export async function ensureCoveFamilyCode(parentEmail: string): Promise<string> {
   const email = parentEmail.trim().toLowerCase()
   if (!email) throw new Error('parentEmail required')
+
+  try {
+    const { ensureAccountNumberForEmail } = await import(
+      '@/lib/staff/membership-account-number'
+    )
+    await ensureAccountNumberForEmail(email)
+  } catch {
+    // Account numbers are best-effort alongside Cove PIN
+  }
 
   const paidMember = await resolveParentPaidMember(email)
   const client = getWixClient()

@@ -34,19 +34,18 @@ export async function withCoveSplit(
     return resolved
   }
 
-  // Household truth is Memberships.accountNumber (A#####), not login email.
+  // Household truth starts at Memberships.accountNumber (A#####).
   let accountNumber = ''
+  let family: Awaited<ReturnType<typeof listFamilyStudents>> = []
   try {
-    const { resolveHouseholdMembershipContext } = await import(
-      '@/lib/staff/membership-account-number'
-    )
-    const ctx = await resolveHouseholdMembershipContext(parentEmail)
-    accountNumber = ctx.accountNumber
+    const { resolveHousehold } = await import('@/lib/staff/membership-account-number')
+    const household = await resolveHousehold({ email: parentEmail })
+    accountNumber = household.accountNumber
+    family = household.students as typeof family
   } catch {
-    // Account numbers optional until backfill.
+    family = await listFamilyStudents(parentEmail)
   }
 
-  const family = await listFamilyStudents(parentEmail)
   const card = resolveFamilyGiftCard(family)
   let live = Number(card.balance) || 0
   if (card.gan) {

@@ -19,29 +19,17 @@ export async function listFamilyStudents(parentEmail: string): Promise<FamilyStu
   const email = parentEmail.trim().toLowerCase()
   if (!email) return []
 
-  let emails = [email]
   try {
-    const { resolveHouseholdMembershipContext } = await import(
-      '@/lib/staff/membership-account-number'
-    )
-    const ctx = await resolveHouseholdMembershipContext(email)
-    if (ctx.emails.length) emails = ctx.emails
+    const { resolveHousehold } = await import('@/lib/staff/membership-account-number')
+    const household = await resolveHousehold({ email })
+    return household.students as FamilyStudentCardRow[]
   } catch {
     // Account numbers optional; fall back to viewer email only.
   }
 
   const client = getWixClient()
-  const byId = new Map<string, FamilyStudentCardRow>()
-  for (const e of emails) {
-    const result = await client.items.query('Students').eq('parentEmail', e).limit(100).find()
-    for (const item of (result.items ?? []) as FamilyStudentCardRow[]) {
-      if (item.archived === true) continue
-      const id = String(item._id ?? '')
-      if (id) byId.set(id, item)
-      else byId.set(`${e}:${item.firstName}:${item.lastName}`, item)
-    }
-  }
-  return [...byId.values()]
+  const result = await client.items.query('Students').eq('parentEmail', email).limit(100).find()
+  return ((result.items ?? []) as FamilyStudentCardRow[]).filter((s) => s.archived !== true)
 }
 
 /** Prefer an existing GAN already on any sibling in the family. */

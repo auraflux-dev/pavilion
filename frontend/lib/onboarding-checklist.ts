@@ -3,7 +3,6 @@
  * Account creation and membership payment stay open; Cove / programs stay locked
  * until required student profile fields are filled.
  */
-import { getWixClient } from '@/lib/wix-client'
 import {
   studentSafetyComplete,
   type StudentSafety,
@@ -188,24 +187,22 @@ export function buildOnboardingChecklist(opts: {
   }
 }
 
-/** Server-side student rows for Cove / onboarding gates. */
+/** Server-side student rows for Cove / onboarding gates (account-number household). */
 export async function loadFamilyOnboardingStudents(
   parentEmail: string,
 ): Promise<OnboardingStudent[]> {
   const email = parentEmail.trim().toLowerCase()
   if (!email) return []
-  const client = getWixClient()
-  const result = await client.items.query('Students').eq('parentEmail', email).limit(100).find()
-    return ((result.items ?? []) as OnboardingStudent[])
-    .filter((s) => (s as { archived?: boolean }).archived !== true)
-    .map((s) => ({
-      ...s,
-      _id: String(s._id ?? s.id ?? ''),
-      id: String(s.id ?? s._id ?? ''),
-      parentFirstName: String(s.parentFirstName ?? ''),
-      parentLastName: String(s.parentLastName ?? ''),
-      familyProfileConfirmedAt: String(s.familyProfileConfirmedAt ?? ''),
-    }))
+  const { listFamilyStudents } = await import('@/lib/family-store-card')
+  const rows = await listFamilyStudents(email)
+  return (rows as OnboardingStudent[]).map((s) => ({
+    ...s,
+    _id: String(s._id ?? s.id ?? ''),
+    id: String(s.id ?? s._id ?? ''),
+    parentFirstName: String(s.parentFirstName ?? ''),
+    parentLastName: String(s.parentLastName ?? ''),
+    familyProfileConfirmedAt: String(s.familyProfileConfirmedAt ?? ''),
+  }))
 }
 
 export async function requireCoveUnlocked(parentEmail: string): Promise<

@@ -103,9 +103,20 @@ export async function listActiveGuardianLinksForEmail(
 export async function resolvePrimaryParentEmail(viewerEmail: string): Promise<string> {
   const email = norm(viewerEmail)
   if (!email) return ''
+  // Explicit co-parent link still wins for write ownership.
   const links = await listActiveGuardianLinksForEmail(email)
-  const primary = norm(String(links[0]?.primaryParentEmail ?? ''))
-  return primary || email
+  const linked = norm(String(links[0]?.primaryParentEmail ?? ''))
+  if (linked) return linked
+
+  // Otherwise household account number picks the primary under A#####.
+  try {
+    const { resolveHousehold } = await import('@/lib/staff/membership-account-number')
+    const household = await resolveHousehold({ email })
+    if (household.primaryEmail) return household.primaryEmail
+  } catch {
+    // fall through
+  }
+  return email
 }
 
 /** All household primary emails this viewer can see (own + guardianships). */
@@ -121,7 +132,19 @@ export async function listVisiblePrimaryEmails(viewerEmail: string): Promise<str
 }
 
 export async function listStudentsForViewer(viewerEmail: string): Promise<FamilyStudentCardRow[]> {
-  const primaries = await listVisiblePrimaryEmails(viewerEmail)
+  const email = norm(viewerEmail)
+  if (!email) return []
+
+  // Account number hierarchy is authoritative for reads.
+  try {
+    const { listFamilyStudents } = await import('@/lib/family-store-card')
+    const fromAccount = await listFamilyStudents(email)
+    if (fromAccount.length) return fromAccount
+  } catch {
+    // fall through to guardian-primary scan
+  }
+
+  const primaries = await listVisiblePrimaryEmails(email)
   const client = getWixClient()
   const byId = new Map<string, FamilyStudentCardRow>()
   for (const primary of primaries) {

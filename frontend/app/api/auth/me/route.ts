@@ -121,28 +121,8 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    let membership: { tier: string; expiresAt: string; status?: string } | null = null
-    if (adminClient) {
-      try {
-        const membershipResult = await adminClient.items
-          .query('Memberships')
-          .eq('email', email)
-          .find()
-        const m = membershipResult.items?.[0] as
-          | { tier?: string; expiresAt?: string; status?: string }
-          | undefined
-        if (m?.tier) {
-          membership = {
-            tier: m.tier,
-            expiresAt: m.expiresAt ?? '',
-            status: m.status,
-          }
-        }
-      } catch {
-        // optional
-      }
-    }
-
+    let membership: { tier: string; expiresAt: string; status?: string; accountNumber?: string } | null =
+      null
     let students: {
       id: string
       firstName: string
@@ -151,33 +131,32 @@ export async function GET(req: NextRequest) {
       membershipTier: string
       membershipStatus: string
     }[] = []
+    let accountNumber = ''
     try {
-      const { listStudentsForViewer, resolvePrimaryParentEmail } = await import(
-        '@/lib/family-guardians'
-      )
-      const householdEmail = await resolvePrimaryParentEmail(email)
-      if (adminClient && householdEmail !== email) {
-        try {
-          const membershipResult = await adminClient.items
-            .query('Memberships')
-            .eq('email', householdEmail)
-            .find()
-          const hm = membershipResult.items?.[0] as
-            | { tier?: string; expiresAt?: string; status?: string }
-            | undefined
-          if (hm?.tier && !membership) {
-            membership = {
-              tier: hm.tier,
-              expiresAt: hm.expiresAt ?? '',
-              status: hm.status,
-            }
-          }
-        } catch {
-          // ignore
+      const { resolveHousehold } = await import('@/lib/staff/membership-account-number')
+      const { pickHighestTier } = await import('@/lib/staff/members-roster')
+      const household = await resolveHousehold({ email })
+      accountNumber = household.accountNumber
+      const highest = pickHighestTier(household.tierCandidates)
+      const paidRow =
+        household.memberships.find((m) => m.tier === highest) ||
+        household.memberships.find((m) => m.tier && m.tier !== 'free') ||
+        household.memberships[0]
+      if (paidRow?.tier) {
+        membership = {
+          tier: paidRow.tier,
+          expiresAt: String(paidRow.raw.expiresAt ?? ''),
+          status: paidRow.status || undefined,
+          accountNumber: household.accountNumber,
+        }
+      } else if (highest && highest !== 'free') {
+        membership = {
+          tier: highest,
+          expiresAt: '',
+          accountNumber: household.accountNumber,
         }
       }
-      const rows = await listStudentsForViewer(email)
-      students = rows.map((item) => {
+      students = household.students.map((item) => {
         const s = item as {
           _id?: string
           firstName?: string
@@ -196,7 +175,34 @@ export async function GET(req: NextRequest) {
         }
       })
     } catch {
-      // optional
+      // optional — fall back below
+    }
+
+    if (!students.length) {
+      try {
+        const { listStudentsForViewer } = await import('@/lib/family-guardians')
+        const rows = await listStudentsForViewer(email)
+        students = rows.map((item) => {
+          const s = item as {
+            _id?: string
+            firstName?: string
+            lastName?: string
+            grade?: string
+            membershipTier?: string
+            membershipStatus?: string
+          }
+          return {
+            id: s._id ?? '',
+            firstName: s.firstName ?? '',
+            lastName: s.lastName ?? '',
+            grade: s.grade ?? '',
+            membershipTier: s.membershipTier ?? 'free',
+            membershipStatus: s.membershipStatus ?? 'active',
+          }
+        })
+      } catch {
+        // optional
+      }
     }
 
     const paidFromStudents = students.some(
@@ -226,6 +232,7 @@ export async function GET(req: NextRequest) {
       },
       storeCards,
       membership,
+      accountNumber: accountNumber || membership?.accountNumber || '',
       students,
       studentCount: students.length,
       hasPaidMembership,

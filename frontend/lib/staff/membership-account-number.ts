@@ -1,5 +1,12 @@
 /**
- * Stable family account numbers on Memberships (A10001+).
+ * Household account numbers (A10001+) — root of the family hierarchy.
+ *
+ * Lookup order for any household read/validate:
+ *   1. Entry key (login email or staff A#####)
+ *   2. accountNumber
+ *   3. Memberships / Students / Cove / tiers under that number
+ *
+ * Email alone is never authoritative for household reads.
  * Separate from Cove PIN. Never reset when PIN changes.
  */
 import { getWixClient } from '@/lib/wix-client'
@@ -265,54 +272,206 @@ export async function lookupEmailsByAccountNumber(raw: string): Promise<string[]
   ]
 }
 
-export type HouseholdMembershipContext = {
-  /** Authoritative household id (A#####). */
+export type HouseholdStudentRow = {
+  _id: string
+  parentEmail?: string
+  firstName?: string
+  lastName?: string
+  membershipTier?: string
+  membershipStatus?: string
+  squareGiftCardGan?: string
+  squareGiftCardId?: string
+  storeCardBalance?: number
+  archived?: boolean
+  [key: string]: unknown
+}
+
+export type HouseholdMembershipRow = {
+  email: string
+  tier: string
   accountNumber: string
-  /** All Memberships emails on this account number. */
+  status?: string
+  raw: Record<string, unknown>
+}
+
+/**
+ * Authoritative household hierarchy.
+ *
+ *   accountNumber (A#####)
+ *     └─ Memberships (all emails sharing this number)
+ *         └─ Students (parentEmail in those emails)
+ *         └─ Cove / tier / entitlements / fulfillment
+ *
+ * Login email or staff-entered A##### is only the entry key.
+ * Never treat a single email as the household without going through accountNumber first.
+ */
+export type Household = {
+  accountNumber: string
+  /** Entry used to open the household (email or account number). */
+  entryEmail: string
   emails: string[]
-  /** Membership + student tiers under the account (for pickHighestTier). */
+  memberships: HouseholdMembershipRow[]
+  students: HouseholdStudentRow[]
+  tierCandidates: string[]
+  /** Best email for write ownership when no guardian primary is set. */
+  primaryEmail: string
+}
+
+export type HouseholdMembershipContext = {
+  accountNumber: string
+  emails: string[]
   tierCandidates: string[]
   memberships: Array<{ email: string; tier: string; accountNumber: string }>
 }
 
+async function loadStudentsForEmails(emails: string[]): Promise<HouseholdStudentRow[]> {
+  const client = getWixClient()
+  const byId = new Map<string, HouseholdStudentRow>()
+  for (const e of emails) {
+    try {
+      const result = await client.items.query('Students').eq('parentEmail', e).limit(100).find()
+      for (const item of (result.items ?? []) as HouseholdStudentRow[]) {
+        if (item.archived === true) continue
+        const id = String(item._id ?? '')
+        if (id) byId.set(id, item)
+        else byId.set(`${e}:${item.firstName}:${item.lastName}`, item)
+      }
+    } catch {
+      // continue
+    }
+  }
+  return [...byId.values()]
+}
+
+function pickPrimaryEmail(
+  entryEmail: string,
+  emails: string[],
+  memberships: HouseholdMembershipRow[],
+  students: HouseholdStudentRow[],
+): string {
+  const counts = new Map<string, number>()
+  for (const s of students) {
+    const pe = String(s.parentEmail ?? '').trim().toLowerCase()
+    if (!pe) continue
+    counts.set(pe, (counts.get(pe) ?? 0) + 1)
+  }
+  let bestStudentOwner = ''
+  let bestCount = 0
+  for (const [pe, n] of counts) {
+    if (n > bestCount) {
+      bestCount = n
+      bestStudentOwner = pe
+    }
+  }
+  if (bestStudentOwner) return bestStudentOwner
+
+  const paid = memberships.find((m) => {
+    const t = String(m.tier ?? '').trim().toLowerCase()
+    return t && t !== 'free'
+  })
+  if (paid?.email) return paid.email
+
+  if (entryEmail && emails.includes(entryEmail)) return entryEmail
+  return emails[0] || entryEmail || ''
+}
+
+/** Open household from account number (staff / already-known A#####). */
+export async function resolveHouseholdByAccountNumber(
+  rawAccountNumber: string,
+  entryEmail = '',
+): Promise<Household> {
+  const accountNumber = normalizeAccountNumber(rawAccountNumber)
+  if (!accountNumber) {
+    return {
+      accountNumber: '',
+      entryEmail: entryEmail.trim().toLowerCase(),
+      emails: entryEmail ? [entryEmail.trim().toLowerCase()] : [],
+      memberships: [],
+      students: [],
+      tierCandidates: [],
+      primaryEmail: entryEmail.trim().toLowerCase(),
+    }
+  }
+
+  const rows = await listMembershipsByAccountNumber(accountNumber)
+  const memberships: HouseholdMembershipRow[] = rows
+    .map((r) => ({
+      email: String(r.email ?? '').trim().toLowerCase(),
+      tier: String(r.tier ?? 'free'),
+      accountNumber: normalizeAccountNumber(r.accountNumber) || accountNumber,
+      status: String(r.status ?? ''),
+      raw: r,
+    }))
+    .filter((m) => m.email)
+
+  const entry = entryEmail.trim().toLowerCase()
+  const emails = [...new Set([...(entry ? [entry] : []), ...memberships.map((m) => m.email)])]
+  const students = await loadStudentsForEmails(emails)
+  const tierCandidates = [
+    ...memberships.map((m) => m.tier),
+    ...students.map((s) => String(s.membershipTier ?? 'free')),
+  ]
+  const primaryEmail = pickPrimaryEmail(entry, emails, memberships, students)
+
+  return {
+    accountNumber,
+    entryEmail: entry,
+    emails,
+    memberships,
+    students,
+    tierCandidates,
+    primaryEmail,
+  }
+}
+
 /**
- * Login email → account number → household membership details.
- * Account number is authoritative; email is only the entry key.
+ * Canonical household open: email or account number → A##### → everything underneath.
+ */
+export async function resolveHousehold(opts: {
+  email?: string
+  accountNumber?: string
+}): Promise<Household> {
+  const email = String(opts.email ?? '').trim().toLowerCase()
+  const direct = normalizeAccountNumber(opts.accountNumber)
+
+  if (direct) {
+    return resolveHouseholdByAccountNumber(direct, email)
+  }
+
+  if (!email) {
+    return {
+      accountNumber: '',
+      entryEmail: '',
+      emails: [],
+      memberships: [],
+      students: [],
+      tierCandidates: [],
+      primaryEmail: '',
+    }
+  }
+
+  const accountNumber = await ensureAccountNumberForEmail(email)
+  return resolveHouseholdByAccountNumber(accountNumber, email)
+}
+
+/**
+ * Login email → account number → household membership summary.
+ * Prefer `resolveHousehold` when you need students or primaryEmail too.
  */
 export async function resolveHouseholdMembershipContext(
   viewerEmail: string,
 ): Promise<HouseholdMembershipContext> {
-  const email = viewerEmail.trim().toLowerCase()
-  if (!email) {
-    return { accountNumber: '', emails: [], tierCandidates: [], memberships: [] }
+  const h = await resolveHousehold({ email: viewerEmail })
+  return {
+    accountNumber: h.accountNumber,
+    emails: h.emails,
+    tierCandidates: h.tierCandidates,
+    memberships: h.memberships.map((m) => ({
+      email: m.email,
+      tier: m.tier,
+      accountNumber: m.accountNumber,
+    })),
   }
-
-  const accountNumber = await ensureAccountNumberForEmail(email)
-  const rows = await listMembershipsByAccountNumber(accountNumber)
-  const memberships = rows.map((r) => ({
-    email: String(r.email ?? '').trim().toLowerCase(),
-    tier: String(r.tier ?? 'free'),
-    accountNumber: normalizeAccountNumber(r.accountNumber) || accountNumber,
-  })).filter((m) => m.email)
-
-  const emails = [...new Set([email, ...memberships.map((m) => m.email)])]
-  const tierCandidates = memberships.map((m) => m.tier)
-
-  const client = getWixClient()
-  for (const e of emails) {
-    try {
-      const students = await client.items.query('Students').eq('parentEmail', e).limit(100).find()
-      for (const s of students.items ?? []) {
-        tierCandidates.push(
-          String((s as { membershipTier?: string }).membershipTier ?? 'free'),
-        )
-      }
-    } catch {
-      // Students query may fail for a single email; keep going.
-    }
-  }
-
-  return { accountNumber, emails, tierCandidates, memberships }
 }
 
 /**

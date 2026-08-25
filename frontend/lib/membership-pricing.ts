@@ -59,11 +59,9 @@ export async function getParentHighestTier(email: string): Promise<string> {
   if (!normalized) return 'free'
 
   try {
-    const { resolveHouseholdMembershipContext } = await import(
-      '@/lib/staff/membership-account-number'
-    )
-    const ctx = await resolveHouseholdMembershipContext(normalized)
-    if (ctx.tierCandidates.length) return pickHighestTier(ctx.tierCandidates)
+    const { resolveHousehold } = await import('@/lib/staff/membership-account-number')
+    const household = await resolveHousehold({ email: normalized })
+    if (household.tierCandidates.length) return pickHighestTier(household.tierCandidates)
   } catch (err) {
     console.warn('getParentHighestTier account-number path failed; email fallback', err)
   }

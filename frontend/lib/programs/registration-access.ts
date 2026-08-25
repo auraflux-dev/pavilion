@@ -6,7 +6,6 @@
  * only paid members (Reef / Lagoon / Tide / faculty / other non-free tiers) may enroll.
  * Empty / past until = general open (same as today whenever registrationOpen).
  */
-import { getWixClient } from '@/lib/wix-client'
 import { isPaidTier } from '@/lib/staff/members-roster'
 
 export type RegistrationPhase = 'closed' | 'member_priority' | 'open'
@@ -103,39 +102,12 @@ export function toDatetimeLocalValue(until: unknown): string {
 export async function parentHasPaidMembership(email: string): Promise<boolean> {
   const normalized = email.trim().toLowerCase()
   if (!normalized) return false
-  const client = getWixClient()
-
   try {
-    const membership = await client.items
-      .query('Memberships')
-      .eq('email', normalized)
-      .limit(5)
-      .find()
-    for (const row of membership.items ?? []) {
-      const tier = String((row as { tier?: string }).tier ?? '')
-      const status = String((row as { status?: string }).status ?? '').toLowerCase()
-      if (status === 'expired') continue
-      if (isPaidTier(tier)) return true
-    }
+    const { getParentHighestTier } = await import('@/lib/membership-pricing')
+    return isPaidTier(await getParentHighestTier(normalized))
   } catch {
-    // collection / field may be missing
+    return false
   }
-
-  try {
-    const students = await client.items
-      .query('Students')
-      .eq('parentEmail', normalized)
-      .limit(50)
-      .find()
-    for (const row of students.items ?? []) {
-      const tier = String((row as { membershipTier?: string }).membershipTier ?? '')
-      if (isPaidTier(tier)) return true
-    }
-  } catch {
-    // ignore
-  }
-
-  return false
 }
 
 export function memberPriorityDeniedMessage(until: unknown): string {

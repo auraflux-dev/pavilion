@@ -28,10 +28,15 @@ export async function GET(req: NextRequest) {
 
   try {
     const viewerHousehold = effective.parentEmail.trim().toLowerCase()
-    const householdEmail = await resolvePrimaryParentEmail(viewerHousehold)
+    const { resolveHousehold } = await import('@/lib/staff/membership-account-number')
+    const household = await resolveHousehold({ email: viewerHousehold })
+    const householdEmail = household.primaryEmail || (await resolvePrimaryParentEmail(viewerHousehold))
     const isPrimary = householdEmail === viewerHousehold
 
-    const family = await listFamilyStudents(householdEmail)
+    const family =
+      household.students.length > 0
+        ? (household.students as Awaited<ReturnType<typeof listFamilyStudents>>)
+        : await listFamilyStudents(householdEmail)
     if (family.length === 0) {
       return NextResponse.json({
         coveFamilyCode: null,
