@@ -103,20 +103,12 @@ export async function listActiveGuardianLinksForEmail(
 export async function resolvePrimaryParentEmail(viewerEmail: string): Promise<string> {
   const email = norm(viewerEmail)
   if (!email) return ''
-  // Explicit co-parent link still wins for write ownership.
+  // Explicit co-parent link wins for write ownership.
+  // Do not call resolveHousehold here — that path ensures/allocates account numbers
+  // and used to recurse with ensureAccountNumberForEmail.
   const links = await listActiveGuardianLinksForEmail(email)
   const linked = norm(String(links[0]?.primaryParentEmail ?? ''))
-  if (linked) return linked
-
-  // Otherwise household account number picks the primary under A#####.
-  try {
-    const { resolveHousehold } = await import('@/lib/staff/membership-account-number')
-    const household = await resolveHousehold({ email })
-    if (household.primaryEmail) return household.primaryEmail
-  } catch {
-    // fall through
-  }
-  return email
+  return linked || email
 }
 
 /** All household primary emails this viewer can see (own + guardianships). */

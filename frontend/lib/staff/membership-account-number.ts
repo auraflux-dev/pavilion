@@ -196,17 +196,22 @@ async function writeAccountNumberOnMembershipRow(
 
 /**
  * Prefer the primary parent's account number when this login is a co-parent/guardian.
+ * Uses guardian links only — never resolvePrimaryParentEmail / resolveHousehold
+ * (those call ensureAccountNumberForEmail and would recurse forever).
  */
 async function inheritAccountNumberFromPrimary(email: string): Promise<string> {
   try {
-    const { resolvePrimaryParentEmail } = await import('@/lib/family-guardians')
-    const primary = (await resolvePrimaryParentEmail(email)).trim().toLowerCase()
+    const { listActiveGuardianLinksForEmail } = await import('@/lib/family-guardians')
+    const links = await listActiveGuardianLinksForEmail(email)
+    const primary = String(links[0]?.primaryParentEmail ?? '')
+      .trim()
+      .toLowerCase()
     if (!primary || primary === email) return ''
     const primaryRow = await findMembershipRowByEmail(primary)
     const primaryNum = normalizeAccountNumber(primaryRow?.accountNumber)
     if (primaryNum) return primaryNum
-    // Allocate on the primary first so the household number is stable.
-    return ensureAccountNumberForEmail(primary)
+    // Allocate on the primary without re-entering inherit (avoids A↔B link cycles).
+    return ensureAccountNumberForEmail(primary, { skipInherit: true })
   } catch {
     return ''
   }
@@ -217,20 +222,25 @@ async function inheritAccountNumberFromPrimary(email: string): Promise<string> {
  * Co-parents inherit the primary household account number (never mint a second one).
  * Creates a minimal Memberships row if missing.
  */
-export async function ensureAccountNumberForEmail(parentEmail: string): Promise<string> {
+export async function ensureAccountNumberForEmail(
+  parentEmail: string,
+  opts?: { skipInherit?: boolean },
+): Promise<string> {
   const email = parentEmail.trim().toLowerCase()
   if (!email) throw new Error('parentEmail required')
 
   const row = await findMembershipRowByEmail(email)
   const existing = normalizeAccountNumber(row?.accountNumber)
 
-  // Co-parent must share the primary's A##### even if they already had a solo number.
-  const inherited = await inheritAccountNumberFromPrimary(email)
-  if (inherited) {
-    if (existing !== inherited) {
-      await writeAccountNumberOnMembershipRow(row, email, inherited)
+  if (!opts?.skipInherit) {
+    // Co-parent must share the primary's A##### even if they already had a solo number.
+    const inherited = await inheritAccountNumberFromPrimary(email)
+    if (inherited) {
+      if (existing !== inherited) {
+        await writeAccountNumberOnMembershipRow(row, email, inherited)
+      }
+      return inherited
     }
-    return inherited
   }
 
   if (existing) return existing
@@ -424,12 +434,36 @@ export async function resolveHouseholdByAccountNumber(
   }
 }
 
+/** Read-only: find A##### for an email without allocating or writing. */
+export async function findAccountNumberForEmail(parentEmail: string): Promise<string> {
+  const email = parentEmail.trim().toLowerCase()
+  if (!email) return ''
+  const row = await findMembershipRowByEmail(email)
+  const existing = normalizeAccountNumber(row?.accountNumber)
+  if (existing) return existing
+  try {
+    const { listActiveGuardianLinksForEmail } = await import('@/lib/family-guardians')
+    const links = await listActiveGuardianLinksForEmail(email)
+    const primary = String(links[0]?.primaryParentEmail ?? '')
+      .trim()
+      .toLowerCase()
+    if (!primary || primary === email) return ''
+    const primaryRow = await findMembershipRowByEmail(primary)
+    return normalizeAccountNumber(primaryRow?.accountNumber)
+  } catch {
+    return ''
+  }
+}
+
 /**
  * Canonical household open: email or account number → A##### → everything underneath.
+ * Default is read-only (no allocate). Pass `ensure: true` on checkout / membership sync.
  */
 export async function resolveHousehold(opts: {
   email?: string
   accountNumber?: string
+  /** When true, mint/share A##### if missing. Never use on portal first paint. */
+  ensure?: boolean
 }): Promise<Household> {
   const email = String(opts.email ?? '').trim().toLowerCase()
   const direct = normalizeAccountNumber(opts.accountNumber)
@@ -450,7 +484,42 @@ export async function resolveHousehold(opts: {
     }
   }
 
-  const accountNumber = await ensureAccountNumberForEmail(email)
+  const accountNumber = opts.ensure
+    ? await ensureAccountNumberForEmail(email)
+    : await findAccountNumberForEmail(email)
+
+  if (!accountNumber) {
+    const students = await loadStudentsForEmails([email])
+    const memberships: HouseholdMembershipRow[] = []
+    try {
+      const row = await findMembershipRowByEmail(email)
+      if (row) {
+        memberships.push({
+          email,
+          tier: String(row.tier ?? 'free'),
+          accountNumber: '',
+          status: String(row.status ?? ''),
+          raw: row,
+        })
+      }
+    } catch {
+      // ignore
+    }
+    const tierCandidates = [
+      ...memberships.map((m) => m.tier),
+      ...students.map((s) => String(s.membershipTier ?? 'free')),
+    ]
+    return {
+      accountNumber: '',
+      entryEmail: email,
+      emails: [email],
+      memberships,
+      students,
+      tierCandidates,
+      primaryEmail: email,
+    }
+  }
+
   return resolveHouseholdByAccountNumber(accountNumber, email)
 }
 
