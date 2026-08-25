@@ -139,8 +139,8 @@ export function CheckoutConsent({ kind, kinds, onChange }: Props) {
   if (!items.length) return null
 
   return (
-    <div className="space-y-3 rounded-xl border border-[var(--border)] bg-[#FAFCF9] p-3">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-[#5A6070]">
+    <div className="space-y-2 rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-2.5">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-[#5A6070]">
         Required terms
       </p>
       {items.map((item) => (
