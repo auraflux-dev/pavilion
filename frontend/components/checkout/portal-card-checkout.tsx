@@ -72,6 +72,13 @@ export type PortalPayBody =
       useCoveBalance?: boolean
       consents?: ConsentAck[]
     }
+  | {
+      kind: 'cart'
+      cartLines: Exclude<PortalPayBody, { kind: 'cart' }>[]
+      useCoveBalance?: boolean
+      consents?: ConsentAck[]
+      couponCode?: string | null
+    }
 
 interface Props {
   open: boolean
