@@ -20,15 +20,19 @@ export async function POST(req: NextRequest) {
     if (kind === 'membership') {
       const tier = String(body.tier ?? '').trim().toLowerCase()
       const tiers = await getPaidMembershipTiers()
-      const match = tiers.find((t) => t.tierId === tier && t.active)
+      const { normalizeMembershipTier } = await import('@/lib/staff/members-roster')
+      const targetNorm = normalizeMembershipTier(tier)
+      const match = tiers.find(
+        (t) => normalizeMembershipTier(t.tierId) === targetNorm && t.active,
+      )
       if (!match || match.price <= 0) {
         return NextResponse.json({ error: 'Unknown tier' }, { status: 404 })
       }
 
       const session = await getMemberSession(req)
-      const currentTier = session?.email
-        ? await getParentHighestTier(session.email)
-        : 'free'
+      const effectiveForTier = await getEffectiveParentEmail(req)
+      const tierEmail = effectiveForTier?.parentEmail ?? session?.email
+      const currentTier = tierEmail ? await getParentHighestTier(tierEmail) : 'free'
 
       if (
         tierRank(currentTier) >= tierRank(tier) &&
@@ -86,6 +90,7 @@ export async function POST(req: NextRequest) {
         name: match.name,
         amount: charge.amount,
         listPrice: charge.listPrice,
+        currentListPrice: charge.currentListPrice,
         isUpgrade: charge.isUpgrade,
         currentTier: charge.currentTier,
         coveDollars,

@@ -358,7 +358,9 @@ export async function POST(req: NextRequest) {
       const { tierRank, normalizeMembershipTier } = await import(
         '@/lib/staff/members-roster'
       )
-      const currentTier = await getParentHighestTier(session.email)
+      const effectiveForTier = await getEffectiveParentEmail(req)
+      const tierEmail = effectiveForTier?.parentEmail ?? session.email
+      const currentTier = await getParentHighestTier(tierEmail)
       if (
         tierRank(currentTier) >= tierRank(normalizeMembershipTier(tier)) &&
         tierRank(currentTier) > 0

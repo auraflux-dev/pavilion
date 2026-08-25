@@ -10,10 +10,19 @@ import {
 
 export type PricedTier = { tierId: string; price: number; name?: string; active?: boolean }
 
+/** When CMS/catalog omits a paid tier price, still credit upgrades correctly. */
+export const MEMBERSHIP_LIST_PRICE_FALLBACK: Record<string, number> = {
+  reef: 49,
+  lagoon: 149,
+  tide: 249,
+  faculty: 20,
+}
+
 export function listPriceForTier(tiers: PricedTier[], tierId: string): number {
   const id = normalizeMembershipTier(tierId)
   const match = tiers.find((t) => normalizeMembershipTier(t.tierId) === id)
-  return match && match.price > 0 ? match.price : 0
+  if (match && match.price > 0) return match.price
+  return MEMBERSHIP_LIST_PRICE_FALLBACK[id] ?? 0
 }
 
 /** Dollars to charge: full list price for new paid, or list(target) − list(current) on upgrade. */
@@ -41,22 +50,40 @@ export function membershipChargeDollars(opts: {
   return { amount, listPrice, currentListPrice, isUpgrade, currentTier, targetTier }
 }
 
-/** Highest paid tier for a parent across Students + Memberships rows. */
+/**
+ * Highest paid tier for the household (primary parent Students + Memberships).
+ * Co-parent logins resolve to the primary so upgrades credit prior Reef/Lagoon.
+ */
 export async function getParentHighestTier(email: string): Promise<string> {
   const normalized = email.trim().toLowerCase()
   if (!normalized) return 'free'
+
+  let household = normalized
+  try {
+    const { resolvePrimaryParentEmail } = await import('@/lib/family-guardians')
+    household = (await resolvePrimaryParentEmail(normalized)) || normalized
+  } catch {
+    household = normalized
+  }
+
+  const emails = [...new Set([normalized, household].filter(Boolean))]
   const client = getWixClient()
-  const [studentsRes, membershipsRes] = await Promise.all([
-    client.items.query('Students').eq('parentEmail', normalized).limit(50).find(),
-    client.items.query('Memberships').eq('email', normalized).limit(5).find(),
-  ])
-  const studentTiers = (studentsRes.items ?? []).map((s) =>
-    String((s as { membershipTier?: string }).membershipTier ?? 'free'),
+  const rows = await Promise.all(
+    emails.flatMap((e) => [
+      client.items.query('Students').eq('parentEmail', e).limit(50).find(),
+      client.items.query('Memberships').eq('email', e).limit(5).find(),
+    ]),
   )
-  const membershipTiers = (membershipsRes.items ?? []).map((m) =>
-    String((m as { tier?: string }).tier ?? 'free'),
-  )
-  return pickHighestTier([...studentTiers, ...membershipTiers])
+
+  const tiers: string[] = []
+  for (const res of rows) {
+    for (const item of res.items ?? []) {
+      const row = item as { membershipTier?: string; tier?: string }
+      if (row.membershipTier != null) tiers.push(String(row.membershipTier))
+      if (row.tier != null) tiers.push(String(row.tier))
+    }
+  }
+  return pickHighestTier(tiers)
 }
 
 export function formatTierLabel(tier: string): string {

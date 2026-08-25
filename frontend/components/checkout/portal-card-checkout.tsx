@@ -182,7 +182,7 @@ export function PortalCardCheckout({
           }
           setQuote({
             amount: Number(data.amount) || amount,
-            listAmount: Number(data.listAmount) || undefined,
+            listAmount: Number(data.listAmount ?? data.listPrice) || undefined,
             discountPercent: Number(data.discountPercent) || 0,
             discountCode: String(data.discountCode || ''),
             coveDollars: Number(data.coveDollars) || 0,
@@ -433,9 +433,11 @@ export function PortalCardCheckout({
             {quote?.listAmount && quote.listAmount > due + 0.001 ? (
               <p className="text-xs text-[#5A6070] whitespace-pre-line">
                 List ${quote.listAmount.toFixed(2)}.
-                {quote.discountPercent
-                  ? `\n${quote.discountPercent}% off${quote.discountCode ? ` (${quote.discountCode})` : ''}.`
-                  : ''}
+                {payBody.kind === 'membership'
+                  ? `\nUpgrade credit applied. you pay $${due.toFixed(2)}.`
+                  : quote.discountPercent
+                    ? `\n${quote.discountPercent}% off${quote.discountCode ? ` (${quote.discountCode})` : ''}.`
+                    : ''}
               </p>
             ) : null}
             {coveSplitKind && coveDue > 0 ? (

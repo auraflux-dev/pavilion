@@ -4,7 +4,6 @@ import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { MemberGate } from '@/components/member-gate'
 import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
-import { HelpTip } from '@/components/ui/help-tip'
 import {
   normalizeMembershipTier,
   pickHighestTier,
@@ -18,7 +17,6 @@ import { tierNeedsShirtSize } from '@/lib/membership-entitlements'
 import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
-import { useCart } from '@/lib/cart/store'
 
 interface Props {
   tierId: string
@@ -32,12 +30,14 @@ function JoinInner({ tierId, tierName, price }: Props) {
   const [open, setOpen] = useState(false)
   const [currentTier, setCurrentTier] = useState<string | null>(null)
   const [chargeAmount, setChargeAmount] = useState(price)
+  const [listPrice, setListPrice] = useState(price)
+  const [currentListPrice, setCurrentListPrice] = useState(0)
+  const [quotedCurrentTier, setQuotedCurrentTier] = useState<string | null>(null)
   const [isUpgrade, setIsUpgrade] = useState(false)
   const [quoteError, setQuoteError] = useState<string | null>(null)
   const [shirt, setShirt] = useState<MembershipShirtSelection | null>(null)
   const needsShirt = tierNeedsShirtSize(tierId)
   const { allowed, loading: commerceLoading, note } = useLiveCommerceGate()
-  const cart = useCart()
 
   useEffect(() => {
     let cancelled = false
@@ -48,6 +48,9 @@ function JoinInner({ tierId, tierName, price }: Props) {
           if (!cancelled) {
             setCurrentTier('free')
             setChargeAmount(price)
+            setListPrice(price)
+            setCurrentListPrice(0)
+            setQuotedCurrentTier(null)
             setIsUpgrade(false)
           }
           return
@@ -73,6 +76,9 @@ function JoinInner({ tierId, tierName, price }: Props) {
         })
         const quote = (await quoteRes.json().catch(() => ({}))) as {
           amount?: number
+          listPrice?: number
+          currentListPrice?: number
+          currentTier?: string
           isUpgrade?: boolean
           error?: string
         }
@@ -81,15 +87,24 @@ function JoinInner({ tierId, tierName, price }: Props) {
           setQuoteError(quote.error || null)
           setChargeAmount(price)
           setIsUpgrade(false)
+          setListPrice(price)
+          setCurrentListPrice(0)
+          setQuotedCurrentTier(null)
           return
         }
         setQuoteError(null)
         setChargeAmount(Number(quote.amount ?? price))
+        setListPrice(Number(quote.listPrice ?? price))
+        setCurrentListPrice(Number(quote.currentListPrice ?? 0))
+        setQuotedCurrentTier(quote.currentTier ? String(quote.currentTier) : null)
         setIsUpgrade(Boolean(quote.isUpgrade))
       } catch {
         if (!cancelled) {
           setCurrentTier('free')
           setChargeAmount(price)
+          setListPrice(price)
+          setCurrentListPrice(0)
+          setQuotedCurrentTier(null)
           setIsUpgrade(false)
         }
       }
@@ -131,18 +146,19 @@ function JoinInner({ tierId, tierName, price }: Props) {
     )
   }
 
-  const label =
-    relation === 'upgrade' || isUpgrade
-      ? `Upgrade to ${tierName} · $${chargeAmount.toFixed(0)}`
-      : `Join ${tierName} · $${chargeAmount.toFixed(0)}`
-  const title =
-    relation === 'upgrade' || isUpgrade
-      ? `Upgrade to ${tierName}`
-      : `Join ${tierName}`
-  const subtitle =
-    relation === 'upgrade' || isUpgrade
-      ? `Pays the upgrade difference ($${chargeAmount.toFixed(0)}). Full ${tierName} list price is $${price.toFixed(0)}.`
-      : 'Pay with your own card on this page. Free parent accounts can upgrade here.'
+  const showUpgrade = isUpgrade || (relation === 'upgrade' && currentListPrice > 0)
+  const creditTierLabel = quotedCurrentTier
+    ? quotedCurrentTier.charAt(0).toUpperCase() + quotedCurrentTier.slice(1)
+    : currentTier && currentTier !== 'free'
+      ? currentTier.charAt(0).toUpperCase() + currentTier.slice(1)
+      : 'current'
+  const label = showUpgrade
+    ? `Upgrade to ${tierName} · $${chargeAmount.toFixed(0)}`
+    : `Join ${tierName} · $${chargeAmount.toFixed(0)}`
+  const title = showUpgrade ? `Upgrade to ${tierName}` : `Join ${tierName}`
+  const subtitle = showUpgrade
+    ? `Pays the upgrade difference ($${chargeAmount.toFixed(0)}) after crediting your $${currentListPrice.toFixed(0)} ${creditTierLabel}. Full ${tierName} list price is $${listPrice.toFixed(0)}.`
+    : 'Pay with your own card on this page. Free parent accounts can upgrade here.'
 
   function startCheckout() {
     if (needsShirt && !shirt) return
@@ -155,40 +171,7 @@ function JoinInner({ tierId, tierName, price }: Props) {
       returnToQuery={`checkout=${tierId}${studentId ? `&studentId=${studentId}` : ''}`}
     >
       <div className="space-y-2">
-        <p className="text-[11px] text-[#5A6070] flex items-center gap-1">
-          {relation === 'upgrade' || isUpgrade
-            ? 'You pay the difference, not the full price again.'
-            : 'Free accounts can upgrade here anytime.'}
-          <HelpTip
-            tipKey={relation === 'upgrade' || isUpgrade ? 'membership.tier.upgrade' : 'membership.free.vs.paid'}
-            label="About membership"
-          />
-        </p>
         <MembershipShirtPicker required={needsShirt} value={shirt} onChange={setShirt} />
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full font-bold"
-          disabled={relation === 'loading' || (needsShirt && !shirt)}
-          onClick={() => {
-            if (needsShirt && !shirt) return
-            cart.add({
-              kind: 'membership',
-              title: tierName,
-              amount: chargeAmount,
-              href: '/membership',
-              tier: tierId,
-              studentId: studentId || undefined,
-              shirtSize: shirt?.size ?? null,
-              shirtDesign: shirt?.design ?? null,
-              shirtProductId: shirt?.productId ?? null,
-              shirtVariantId: shirt?.variantId ?? null,
-              physicalPerk: shirt ? 'spirit_shirt' : null,
-            })
-          }}
-        >
-          {`Add to cart · $${chargeAmount.toFixed(0)}`}
-        </Button>
         <Button
           className="w-full font-bold text-white group"
           style={{ backgroundColor: 'var(--brand-green)' }}
@@ -224,21 +207,9 @@ function JoinInner({ tierId, tierName, price }: Props) {
             shirtVariantId: needsShirt ? shirt?.variantId : undefined,
           }}
           containerId={`membership-pay-${tierId}`}
-          onPaid={(data) => {
+          onPaid={() => {
             sessionStorage.removeItem('pendingMembership')
-            try {
-              sessionStorage.setItem(
-                'membershipReceipt',
-                JSON.stringify({
-                  tier: title,
-                  amount: typeof data?.amount === 'number' ? data.amount : chargeAmount,
-                  at: new Date().toISOString(),
-                }),
-              )
-            } catch {
-              /* ignore */
-            }
-            // Stay on the receipt. Parent taps Continue in portal when ready.
+            window.location.href = '/member-portal?membership=success'
           }}
         />
       </div>
