@@ -22,13 +22,12 @@ import {
   STAFF_FILTER_SELECT,
 } from '@/lib/staff/staff-filter-ui'
 import { StaffEventsPanel } from '@/components/staff/staff-events-panel'
-import { StaffRetailPanel } from '@/components/staff/staff-retail-panel'
+import { StaffCoveStockAdmin, StaffRetailPanel } from '@/components/staff/staff-retail-panel'
 import { StaffDiscountsPanel } from '@/components/staff/staff-discounts-panel'
 import { StaffMembershipPanel } from '@/components/staff/staff-membership-panel'
 import { StaffFulfillmentsPanel } from '@/components/staff/staff-fulfillments-panel'
 import { StaffStorePickupsPanel } from '@/components/staff/staff-store-pickups-panel'
 import { StaffSpiritWearDemandPanel } from '@/components/staff/staff-spirit-wear-demand-panel'
-import { StaffMembershipShirtDesignsPanel } from '@/components/staff/staff-membership-shirt-designs-panel'
 import {
   StaffDiscountsSectionNav,
   StaffEventsSectionNav,
@@ -41,7 +40,9 @@ import { StaffWorkspaceHub } from '@/components/staff/staff-workspace-hub'
 import { StaffPageContentPanel } from '@/components/staff/staff-page-content-panel'
 import { StaffPageThemePanel } from '@/components/staff/staff-page-theme-panel'
 import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-panel'
+import { StaffMembershipShirtDesignsPanel } from '@/components/staff/staff-membership-shirt-designs-panel'
 import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection-panel'
+import { StaffReveal } from '@/components/staff/staff-reveal'
 import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
 import { StaffNewsletterSendReportPanel } from '@/components/staff/staff-newsletter-send-report'
 import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
@@ -733,7 +734,24 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
 
         {active === 'access' && staffCanWorkspace(me, 'access') ? <StaffRoleManager /> : null}
 
-        {active === 'social' && canMarketing ? <SocialComposePanel enabled /> : null}
+        {active === 'social' && canMarketing ? (
+          <div className="space-y-4">
+            <SocialComposePanel enabled />
+            <StaffReveal
+              storageKey="staff-reveal-social-urls"
+              id="social-urls"
+              title="Public social URLs & publish flags"
+              hint="Footer links and Wix account IDs — not day-to-day posting"
+            >
+              <StaffSiteSettingsPanel
+                title="Public social URLs"
+                groupIds={['social']}
+                sectionId="social-urls"
+                bare
+              />
+            </StaffReveal>
+          </div>
+        ) : null}
 
         {active === 'surveys' && canSurveys ? <SurveyResultsPanel /> : null}
 
@@ -791,7 +809,22 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
         ) : null}
 
         {active === 'minutes' && canMinutes ? <StaffMinutesPanel /> : null}
-        {active === 'programs' && canPrograms ? <StaffProgramsPanel /> : null}
+        {active === 'programs' && canPrograms ? (
+          <div className="space-y-4">
+            <StaffProgramsPanel />
+            <StaffReveal
+              storageKey="staff-reveal-programs-settings"
+              title="Enrichment program settings"
+              hint="Publish EP meeting nights to parents — occasional"
+            >
+              <StaffSiteSettingsPanel
+                title="Enrichment program settings"
+                groupIds={['programs']}
+                bare
+              />
+            </StaffReveal>
+          </div>
+        ) : null}
         {active === 'timesheets' && canTimesheets ? <StaffTimesheetsPanel /> : null}
         {active === 'payments' && canPayments ? (
           <StaffPaymentsPanel isAdmin={Boolean(me?.isAdmin)} />
@@ -813,21 +846,41 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
             <StaffEventsSectionNav />
             <StaffEventsPanel />
             <StaffSpiritWearDemandPanel context="events" />
-            <StaffCmsCollectionPanel
-              collection="PortalCalendarEvents"
-              title="Portal calendar events (member portal)"
-              sectionId="portal-calendar-events"
-            />
+            <StaffReveal
+              storageKey="staff-reveal-portal-calendar"
+              id="portal-calendar-events"
+              title="Portal calendar events"
+              hint="Member portal calendar rows — not day-of event ops"
+            >
+              <StaffCmsCollectionPanel
+                collection="PortalCalendarEvents"
+                title="Portal calendar events (member portal)"
+                sectionId="portal-calendar-events"
+                bare
+              />
+            </StaffReveal>
           </div>
         ) : null}
         {active === 'retail' && canRetail ? (
           <div className="space-y-4">
             <StaffRetailSectionNav />
             <StaffRetailPanel />
-            <StaffMembershipShirtDesignsPanel />
-            <StaffSpiritWearDemandPanel />
             <StaffStorePickupsPanel />
-            <StaffFulfillmentsPanel variant="cove" />
+            <StaffSpiritWearDemandPanel />
+            <StaffCoveStockAdmin />
+            <StaffReveal
+              storageKey="staff-reveal-cove-card"
+              id="cove-digital-card"
+              title="Cove Digital Card settings"
+              hint="Bonus %, presets, min/max load — change rarely"
+            >
+              <StaffSiteSettingsPanel
+                title="Cove Digital Card"
+                groupIds={['cove-card']}
+                sectionId="cove-digital-card"
+                bare
+              />
+            </StaffReveal>
           </div>
         ) : null}
         {active === 'discounts' && canDiscounts ? (
@@ -840,19 +893,83 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
           <div className="space-y-4">
             <StaffMembershipSectionNav />
             <StaffMembershipPanel />
-            <StaffSpiritWearDemandPanel context="membership" />
             <StaffFulfillmentsPanel />
+            <StaffReveal
+              storageKey="staff-reveal-membership-copy"
+              id="membership-shared-benefits"
+              title="Shared benefits copy"
+              hint="Join-page shared benefits list — edit when copy changes"
+            >
+              <StaffSiteSettingsPanel
+                title="Membership shared benefits"
+                groupIds={['membership']}
+                sectionId="membership-shared-benefits"
+                bare
+              />
+            </StaffReveal>
+            <StaffReveal
+              storageKey="staff-reveal-membership-shirt"
+              id="membership-perk-tee"
+              title="Perk tee & shirt designs"
+              hint="Product ID, design×size stock — not daily fulfillments"
+            >
+              <div className="space-y-4">
+                <StaffSiteSettingsPanel
+                  title="Membership perk tee"
+                  groupIds={['membership-shirt']}
+                  sectionId="membership-perk-tee"
+                  bare
+                />
+                <StaffMembershipShirtDesignsPanel />
+              </div>
+            </StaffReveal>
           </div>
         ) : null}
         {active === 'inbox' ? <StaffWorkspaceHub tab="inbox" /> : null}
         {active === 'calendar' ? <StaffWorkspaceHub tab="calendar" /> : null}
         {active === 'docs' ? <StaffWorkspaceHub tab="docs" /> : null}
-        {active === 'content' && canContent ? <StaffPageContentPanel /> : null}
+        {active === 'content' && canContent ? (
+          <div className="space-y-4">
+            <StaffPageContentPanel />
+            <StaffReveal
+              storageKey="staff-reveal-content-announcement"
+              id="content-announcement"
+              title="Announcement bar & WhatsApp links"
+              hint="Site-wide banner and grade WhatsApp invites"
+            >
+              <StaffSiteSettingsPanel
+                title="Announcement bar & WhatsApp grade links"
+                groupIds={['announcement']}
+                sectionId="content-announcement"
+                bare
+              />
+            </StaffReveal>
+            <StaffReveal
+              storageKey="staff-reveal-content-home"
+              id="content-home"
+              title="Home hero stats & images"
+              hint="Visitor home numbers and photos"
+            >
+              <StaffSiteSettingsPanel
+                title="Home hero stats & images"
+                groupIds={['home']}
+                sectionId="content-home"
+                bare
+              />
+            </StaffReveal>
+          </div>
+        ) : null}
         {active === 'pagetheme' && canPageTheme ? <StaffPageThemePanel /> : null}
         {active === 'site' && canSite ? (
           <div className="space-y-4">
-            <StaffCustomDomainPanel />
             <StaffSiteSettingsPanel />
+            <StaffReveal
+              storageKey="staff-reveal-custom-domain"
+              title="Custom domain / DNS"
+              hint="Point pto.yourschool.org off the trial host — rare"
+            >
+              <StaffCustomDomainPanel />
+            </StaffReveal>
           </div>
         ) : null}
         {active === 'board' && canBoard ? (
@@ -865,7 +982,22 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
           <StaffCmsCollectionPanel collection="FAQItems" title="FAQs" />
         ) : null}
         {active === 'volunteers' && canVolunteers ? (
-          <StaffCmsCollectionPanel collection="VolunteerOpportunities" title="Volunteer opportunities" />
+          <div className="space-y-4">
+            <StaffCmsCollectionPanel collection="VolunteerOpportunities" title="Volunteer opportunities" />
+            <StaffReveal
+              storageKey="staff-reveal-volunteer-benefits"
+              id="volunteer-benefits"
+              title="Volunteer page benefits copy"
+              hint="Bullet list on the public volunteer page"
+            >
+              <StaffSiteSettingsPanel
+                title="Volunteer page benefits"
+                groupIds={['volunteer']}
+                sectionId="volunteer-benefits"
+                bare
+              />
+            </StaffReveal>
+          </div>
         ) : null}
         {active === 'fundraising' && canFundraising ? (
           <div className="space-y-4">
@@ -880,11 +1012,19 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
               title="Sponsors (public list)"
               sectionId="fundraising-sponsors"
             />
-            <StaffSiteSettingsPanel
-              title="Fundraising goals (Site settings)"
-              groupIds={['fundraising']}
-              sectionId="fundraising-goals"
-            />
+            <StaffReveal
+              storageKey="staff-reveal-fundraising-goals"
+              id="fundraising-goals"
+              title="Fundraising goals & hours"
+              hint="Internal dollar/hour targets — not CTAs or sponsors"
+            >
+              <StaffSiteSettingsPanel
+                title="Fundraising goals (Site settings)"
+                groupIds={['fundraising']}
+                sectionId="fundraising-goals"
+                bare
+              />
+            </StaffReveal>
           </div>
         ) : null}
         {active === 'tiers' && canTiers ? (
@@ -904,11 +1044,19 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
             <StaffWhatsAppQueuePanel />
             <StaffNewsletterPanel />
             <StaffNewsletterSendReportPanel />
-            <StaffCmsCollectionPanel
-              collection="Newsletters"
+            <StaffReveal
+              storageKey="staff-reveal-newsletter-archive"
+              id="newsletter-archive"
               title="Newsletter archive → portal Messages"
-              sectionId="newsletter-archive"
-            />
+              hint="Published archive rows for the member portal"
+            >
+              <StaffCmsCollectionPanel
+                collection="Newsletters"
+                title="Newsletter archive → portal Messages"
+                sectionId="newsletter-archive"
+                bare
+              />
+            </StaffReveal>
           </div>
         ) : null}
         {active === 'expenses' ? (

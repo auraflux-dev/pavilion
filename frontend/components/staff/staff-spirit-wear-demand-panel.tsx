@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ClipboardList, Loader2, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { StaffReveal } from '@/components/staff/staff-reveal'
 import type { SpiritDemandRollup, SpiritWearDemand } from '@/lib/staff/spirit-wear-demand'
 
 /**
@@ -116,9 +117,15 @@ export function StaffSpiritWearDemandPanel({
   }
 
   return (
-    <section
+    <StaffReveal
+      storageKey={`staff-reveal-demand-${context}`}
       id="cove-demand"
-      className="scroll-mt-28 rounded-2xl border border-[var(--border)] bg-white shadow-sm overflow-hidden"
+      title="Size demand"
+      hint="Log OOS shirts/hoodies for restock · open when a parent needs a size"
+      badge={openCount > 0 ? `${openCount} open` : undefined}
+    >
+    <section
+      className="rounded-2xl border border-[var(--border)] bg-white shadow-sm overflow-hidden"
     >
       <div
         className="flex flex-wrap items-start justify-between gap-3 border-b border-[#F0EDE8] px-5 py-4"
@@ -132,15 +139,15 @@ export function StaffSpiritWearDemandPanel({
           />
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-[#5A6070]">
-              In-person events
+              Restock list
             </p>
           <h2 className="mt-0.5 text-lg font-bold text-[#1A1A1A]">
-            Size demand (shirts / hoodies)
+            Size demand
           </h2>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
             {context === 'retail'
-              ? 'When a parent wants spirit wear but their size is out, log it here (or from the register size picker). Use the rollup below to place a restock order.'
-              : 'No Cove register needed. If a parent wants a shirt or hoodie and the size is out (or you are not on the register), log name + size here so retail can reorder.'}
+              ? 'Size out at the table or window? Log it here (or from the register size picker). Use the rollup to place a restock order.'
+              : 'No Cove register needed. Log name + size when spirit wear is out so Cove can reorder.'}
           </p>
           </div>
         </div>
@@ -373,5 +380,6 @@ export function StaffSpiritWearDemandPanel({
         {status ? <p className="text-sm font-semibold text-green-700">{status}</p> : null}
       </div>
     </section>
+    </StaffReveal>
   )
 }

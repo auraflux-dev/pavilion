@@ -11,6 +11,16 @@ import {
   STAFF_FILTER_LABEL,
   STAFF_FILTER_SELECT,
 } from '@/lib/staff/staff-filter-ui'
+import {
+  StaffSectionTab,
+  useStaffExclusiveSection,
+} from '@/components/staff/staff-exclusive-section'
+
+const MEMBERSHIP_SECTIONS = [
+  'membership-invite',
+  'membership-roster',
+  'membership-outreach',
+] as const
 
 type StudentRow = {
   id: string
@@ -50,6 +60,7 @@ export function StaffMembershipPanel() {
   const [q, setQ] = useState('')
   const [tier, setTier] = useState('all')
   const [grade, setGrade] = useState('')
+  const [sort, setSort] = useState<'email' | 'name'>('name')
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
 
@@ -82,7 +93,7 @@ export function StaffMembershipPanel() {
     setBusy(true)
     setStatus('')
     try {
-      const params = new URLSearchParams({ mode: 'list', tier })
+      const params = new URLSearchParams({ mode: 'list', tier, sort })
       if (q.trim()) params.set('q', q.trim())
       if (grade.trim()) params.set('grade', grade.trim())
       const r = await fetch(`/api/staff/members?${params}`)
@@ -95,7 +106,7 @@ export function StaffMembershipPanel() {
     } finally {
       setBusy(false)
     }
-  }, [q, tier, grade])
+  }, [q, tier, grade, sort])
 
   useEffect(() => {
     void loadChannels().catch((err) =>
@@ -322,8 +333,37 @@ export function StaffMembershipPanel() {
       : 'https://www.shmspto.org/join'
   const joinQrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&ecc=M&margin=6&data=${encodeURIComponent(publicJoinUrl)}`
 
+  const { setOpenId, isOpen } = useStaffExclusiveSection(
+    'staff-membership-section',
+    MEMBERSHIP_SECTIONS,
+    'membership-roster',
+  )
+
   return (
     <div className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <StaffSectionTab
+          active={isOpen('membership-invite')}
+          title="Invite"
+          hint="Free parent at the table"
+          onSelect={() => setOpenId('membership-invite')}
+        />
+        <StaffSectionTab
+          active={isOpen('membership-roster')}
+          title="Roster"
+          hint="Parents · paid · free"
+          badge={summary ? `${summary.parents}` : undefined}
+          onSelect={() => setOpenId('membership-roster')}
+        />
+        <StaffSectionTab
+          active={isOpen('membership-outreach')}
+          title="Outreach"
+          hint="Email · WhatsApp · portal"
+          onSelect={() => setOpenId('membership-outreach')}
+        />
+      </div>
+
+      {isOpen('membership-invite') ? (
       <section
         id="membership-invite"
         className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
@@ -442,7 +482,11 @@ export function StaffMembershipPanel() {
           </div>
         </div>
       </section>
+      ) : (
+        <div id="membership-invite" className="scroll-mt-28" />
+      )}
 
+      {isOpen('membership-roster') ? (
       <section
         id="membership-roster"
         className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
@@ -452,7 +496,8 @@ export function StaffMembershipPanel() {
             <h1 className="text-xl font-bold">Membership roster</h1>
             <p className="text-xs text-[#5A6070] mt-1">
               Parents from Students + Memberships. Email, phone, and paid tier (Reef / Lagoon /
-              Tide). Paid count follows Memberships after checkout.
+              Tide / faculty / board-seat Reef). Paid count is everyone who gets paid-tier perks
+              (including board seats that need magnets).
             </p>
           </div>
           <Button
@@ -489,6 +534,20 @@ export function StaffMembershipPanel() {
             ) : null}
           </div>
           <div className="xl:w-48 shrink-0 space-y-3">
+            <div className={STAFF_FILTER_CARD}>
+              <label className={STAFF_FILTER_LABEL}>
+                Sort
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value === 'email' ? 'email' : 'name')}
+                  className={STAFF_FILTER_SELECT}
+                  aria-label="Sort parents"
+                >
+                  <option value="name">Name A to Z</option>
+                  <option value="email">Email A to Z</option>
+                </select>
+              </label>
+            </div>
             <div className={STAFF_FILTER_CARD}>
               <label className={STAFF_FILTER_LABEL}>
                 Tier
@@ -579,7 +638,11 @@ export function StaffMembershipPanel() {
           )}
         </div>
       </section>
+      ) : (
+        <div id="membership-roster" className="scroll-mt-28" />
+      )}
 
+      {isOpen('membership-outreach') ? (
       <section
         id="membership-outreach"
         className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
@@ -675,6 +738,9 @@ export function StaffMembershipPanel() {
 
         {status ? <p className="text-xs text-[#5A6070]">{status}</p> : null}
       </section>
+      ) : (
+        <div id="membership-outreach" className="scroll-mt-28" />
+      )}
     </div>
   )
 }

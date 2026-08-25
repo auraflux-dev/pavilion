@@ -15,17 +15,10 @@ import {
 import { Fall2026EpSchedule } from '@/components/programs/fall-2026-ep-schedule'
 import { StaffProgramsCalendarPlanner } from '@/components/staff/staff-programs-calendar-planner'
 import {
-  fall2026PacketCmsDefaults,
-  fallEpClassById,
-  matchFall2026EpClass,
-  mergeEmptyProgramFields,
   selectCurrentFall2026Programs,
 } from '@/lib/programs/fall-2026-ep'
 import {
-  matchSpring2027EpClass,
   selectCurrentSpring2027Programs,
-  spring2027PacketCmsDefaults,
-  springEpClassById,
 } from '@/lib/programs/spring-2027-ep'
 import { programPublicPath } from '@/lib/programs/public-path'
 import {
@@ -37,7 +30,6 @@ import {
   type PublicCatalogSeasonId,
 } from '@/lib/programs/season'
 import {
-  codeLandingDefaults,
   effectiveLandingFields,
 } from '@/lib/programs/landing-fields'
 import {
@@ -45,6 +37,10 @@ import {
   mergeProgramDraft,
   programDraftPatch,
 } from '@/lib/staff/program-draft'
+import {
+  EP_MEETING_DATES_APPROVED_KEY,
+  EP_MEETING_DATES_PROPOSED_LABEL,
+} from '@/lib/programs/ep-meeting-dates'
 
 type Program = {
   id: string
@@ -179,6 +175,7 @@ export function StaffProgramsPanel() {
   const [programDrafts, setProgramDrafts] = useState<Record<string, Partial<Program>>>({})
   const [showOlderPrograms, setShowOlderPrograms] = useState(false)
   const [staffCatalogSeason, setStaffCatalogSeason] = useState<PublicCatalogSeasonId>('fall-2026')
+  const [meetingDatesApproved, setMeetingDatesApproved] = useState(false)
   /** Frozen while editing so filter/sort cannot yank the focused field away. */
   const [visibleIdOrder, setVisibleIdOrder] = useState<string[]>([])
   const [dragId, setDragId] = useState<string | null>(null)
@@ -229,107 +226,61 @@ export function StaffProgramsPanel() {
     })
   }, [programs, showOlderPrograms, staffCatalogSeason, dragId])
 
+  const loadMeetingDatesFlag = useCallback(async () => {
+    try {
+      const r = await fetch('/api/staff/site-settings')
+      const d = await r.json()
+      if (!r.ok) return
+      const raw = String(d.settings?.[EP_MEETING_DATES_APPROVED_KEY] ?? 'false')
+        .trim()
+        .toLowerCase()
+      setMeetingDatesApproved(raw !== '' && raw !== 'false' && raw !== '0' && raw !== 'no')
+    } catch {
+      /* optional when role cannot read SiteSettings */
+    }
+  }, [])
+
+  const saveMeetingDatesApproved = useCallback(
+    async (next: boolean) => {
+      setBusy(true)
+      setStatus('')
+      const previous = meetingDatesApproved
+      setMeetingDatesApproved(next)
+      try {
+        const r = await fetch('/api/staff/site-settings', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            key: EP_MEETING_DATES_APPROVED_KEY,
+            value: next ? 'true' : 'false',
+          }),
+        })
+        const d = await r.json()
+        if (!r.ok) throw new Error(d.error ?? 'Could not save meeting-dates flag')
+        setStatus(
+          next
+            ? 'EP meeting nights are published on public pages.'
+            : `EP meeting nights set to ${EP_MEETING_DATES_PROPOSED_LABEL}.`,
+        )
+      } catch (err) {
+        setMeetingDatesApproved(previous)
+        setStatus(err instanceof Error ? err.message : 'Could not save meeting-dates flag')
+      } finally {
+        setBusy(false)
+      }
+    },
+    [meetingDatesApproved],
+  )
+
   const load = useCallback(async () => {
     try {
       const r = await fetch('/api/staff/programs')
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Load failed')
-      let list = (d.programs ?? []) as Program[]
+      const list = (d.programs ?? []) as Program[]
       setCanManageAll(d.canManageAll !== false)
-      // Link + seed empty CMS fields from Fall packet so the public site reads CMS only.
-      if (d.canManageAll !== false) {
-        for (const p of selectCurrentFall2026Programs(list)) {
-          const matched =
-            fallEpClassById(String(p.fallEpClassId ?? '').trim()) ||
-            matchFall2026EpClass(p.name)
-          if (!matched) continue
-          const defaults = fall2026PacketCmsDefaults(matched)
-          const schedulePatch = mergeEmptyProgramFields(
-            p as unknown as Record<string, unknown>,
-            defaults,
-          )
-          const landingPatch = mergeEmptyProgramFields(
-            p as unknown as Record<string, unknown>,
-            codeLandingDefaults(p),
-          )
-          const patch = { ...schedulePatch, ...landingPatch }
-          if (Object.keys(patch).length === 0) continue
-          try {
-            const linkRes = await fetch('/api/staff/programs', {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ kind: 'program', id: p.id, ...patch }),
-            })
-            if (linkRes.ok) {
-              list = list.map((row) =>
-                row.id === p.id ? ({ ...row, ...patch } as Program) : row,
-              )
-            }
-          } catch {
-            /* non-blocking */
-          }
-        }
-        for (const p of selectCurrentSpring2027Programs(list)) {
-          const matched =
-            springEpClassById(String(p.fallEpClassId ?? '').trim()) ||
-            matchSpring2027EpClass(p.name)
-          if (!matched) continue
-          const defaults = spring2027PacketCmsDefaults(matched)
-          const schedulePatch = mergeEmptyProgramFields(
-            p as unknown as Record<string, unknown>,
-            defaults,
-          )
-          const landingPatch = mergeEmptyProgramFields(
-            p as unknown as Record<string, unknown>,
-            codeLandingDefaults(p),
-          )
-          const patch = { ...schedulePatch, ...landingPatch }
-          if (Object.keys(patch).length === 0) continue
-          try {
-            const linkRes = await fetch('/api/staff/programs', {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ kind: 'program', id: p.id, ...patch }),
-            })
-            if (linkRes.ok) {
-              list = list.map((row) =>
-                row.id === p.id ? ({ ...row, ...patch } as Program) : row,
-              )
-            }
-          } catch {
-            /* non-blocking */
-          }
-        }
-      }
-      if (d.canManageAll !== false) {
-        const packetIds = new Set([
-          ...selectCurrentFall2026Programs(list).map((row) => row.id),
-          ...selectCurrentSpring2027Programs(list).map((row) => row.id),
-        ])
-        for (const p of list) {
-          if (packetIds.has(p.id)) continue
-          const landingPatch = mergeEmptyProgramFields(
-            p as unknown as Record<string, unknown>,
-            codeLandingDefaults(p),
-          )
-          if (Object.keys(landingPatch).length === 0) continue
-          try {
-            const linkRes = await fetch('/api/staff/programs', {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ kind: 'program', id: p.id, ...landingPatch }),
-            })
-            if (linkRes.ok) {
-              list = list.map((row) =>
-                row.id === p.id ? ({ ...row, ...landingPatch } as Program) : row,
-              )
-            }
-          } catch {
-            /* non-blocking */
-          }
-        }
-      }
       setPrograms(list)
+      void loadMeetingDatesFlag()
       setProgramDrafts({})
       setVisibleIdOrder(
         sortProgramsByDisplayOrder(selectStaffSeasonPrograms(list, 'fall-2026', false)).map(
@@ -344,7 +295,7 @@ export function StaffProgramsPanel() {
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Load failed')
     }
-  }, [])
+  }, [loadMeetingDatesFlag])
 
   const loadRoster = useCallback(async (programId: string) => {
     if (!programId) {
@@ -928,40 +879,92 @@ Edit fields, then click Save program. www updates within seconds after Save.`}
             >
               Add program
             </Button>
-            {canManageAll && staffCatalogSeason === 'spring-2027' ? (
+            {canManageAll ? (
+              <label className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="rounded border-[var(--border)]"
+                  checked={meetingDatesApproved}
+                  disabled={busy}
+                  onChange={(e) => void saveMeetingDatesApproved(e.target.checked)}
+                />
+                <span className="leading-snug">
+                  <span className="font-semibold text-[#1A1A1A]">Publish EP meeting nights</span>
+                  <span className="block text-xs text-[#5A6070]">
+                    {meetingDatesApproved
+                      ? 'Parents see concrete calendar dates.'
+                      : `Parents see “${EP_MEETING_DATES_PROPOSED_LABEL}”.`}
+                  </span>
+                </span>
+              </label>
+            ) : null}
+            {canManageAll ? (
               <Button
                 type="button"
                 disabled={busy}
                 variant="outline"
                 className="text-sm"
                 onClick={() => {
+                  const label = CATALOG_SEASON_LABELS[staffCatalogSeason]
+                  if (
+                    !window.confirm(
+                      `Ensure ${label} packet?\nCreates any missing classes, then writes locked LCPS meeting dates into CMS.\nDoes not change fees, registration, names, or landing copy.`,
+                    )
+                  ) {
+                    return
+                  }
                   void (async () => {
                     setBusy(true)
                     setStatus('')
                     try {
-                      const r = await fetch('/api/staff/programs/seed-spring', { method: 'POST' })
+                      const r = await fetch('/api/staff/programs/ensure-packet', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ season: staffCatalogSeason }),
+                      })
                       const d = await r.json()
-                      if (!r.ok) throw new Error(d.error ?? 'Seed failed')
-                      setStatus(String(d.message ?? 'Spring programs seeded.'))
+                      if (!r.ok) throw new Error(d.error ?? 'Ensure packet failed')
+                      setStatus(String(d.message ?? `${label} packet ready.`))
                       await load()
                     } catch (err) {
-                      setStatus(err instanceof Error ? err.message : 'Seed failed')
+                      setStatus(err instanceof Error ? err.message : 'Ensure packet failed')
                     } finally {
                       setBusy(false)
                     }
                   })()
                 }}
               >
-                Seed Spring 2027 classes
+                Ensure {CATALOG_SEASON_LABELS[staffCatalogSeason]} packet
               </Button>
             ) : null}
           </div>
+          {visiblePrograms.length === 0 ? (
+            <p className="text-sm text-[#5A6070] whitespace-pre-line">
+              {(() => {
+                const seasonCount = filterProgramsBySeason(programs, staffCatalogSeason).length
+                const label = CATALOG_SEASON_LABELS[staffCatalogSeason]
+                if (programs.length === 0) {
+                  return `No programs loaded from CMS.\nUse Ensure ${label} packet to create the four class rows.`
+                }
+                if (seasonCount === 0) {
+                  return `CMS has ${programs.length} program${programs.length === 1 ? '' : 's'}, but none resolve as ${label}.\nUse Ensure ${label} packet to create missing class rows.`
+                }
+                return showOlderPrograms
+                  ? `No ${label} programs in your scope.`
+                  : `No current ${label} programs yet.\nTurn on “Show all rows” for every CMS row in this season.`
+              })()}
+            </p>
+          ) : null}
           {visiblePrograms.length > 0 ? (
             <p className="text-xs text-[#5A6070] whitespace-pre-line">
               {`Drag the grip to set public catalog order.
 There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' : 's'} in this list.`}
             </p>
           ) : null}
+          <p className="text-xs text-[#5A6070]">
+            Compact list · open <strong>Show editor</strong> on one class at a time (editor replaces the
+            previous open row).
+          </p>
           {dragId && dropIndex != null ? (
             <div
               className="sticky top-2 z-10 rounded-lg border px-3 py-2 text-sm font-semibold shadow-sm"
@@ -976,13 +979,6 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                 ? `Drop as position ${visiblePrograms.length} of ${visiblePrograms.length}`
                 : `Drop as position ${dropIndex + 1} of ${visiblePrograms.length}`}
             </div>
-          ) : null}
-          {visiblePrograms.length === 0 ? (
-            <p className="text-sm text-[#5A6070] whitespace-pre-line">
-              {showOlderPrograms
-                ? `No ${CATALOG_SEASON_LABELS[staffCatalogSeason]} programs in your scope.`
-                : `No current ${CATALOG_SEASON_LABELS[staffCatalogSeason]} programs yet.\nTurn on “Show all rows” for every CMS row in this season.\nEach season has its own landing page and copy.`}
-            </p>
           ) : null}
           {visiblePrograms.map((p, index) => {
             const row = displayProgram(p)
@@ -1036,13 +1032,10 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                   <div className="min-w-0 flex-1">
                   <p className="mb-1 text-[11px] font-semibold text-[#5A6070]">
                     Position {index + 1} of {visiblePrograms.length}
+                    {row.registrationOpen ? ' · Reg open' : ' · Reg closed'}
+                    {row.featured ? ' · Featured' : ''}
                   </p>
-                  <input
-                    value={row.name}
-                    aria-label="Program name"
-                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm font-bold"
-                    onChange={(e) => patchProgramDraft(p.id, { name: e.target.value })}
-                  />
+                  <p className="text-sm font-bold text-[#1A1A1A] truncate">{row.name || 'Untitled'}</p>
                   <p className="text-xs text-[#5A6070] mt-1">
                     Seats{' '}
                     {row.capacity
@@ -1055,42 +1048,6 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs">
-                  <label className="inline-flex items-center gap-1">
-                    <input
-                      type="checkbox"
-                      checked={row.registrationOpen}
-                      onChange={(e) =>
-                        patchProgramDraft(p.id, { registrationOpen: e.target.checked })
-                      }
-                    />
-                    Registration open (checkout)
-                  </label>
-                  <label className="inline-flex items-center gap-1">
-                    <input
-                      type="checkbox"
-                      checked={row.featured}
-                      onChange={(e) => patchProgramDraft(p.id, { featured: e.target.checked })}
-                    />
-                    Featured
-                  </label>
-                  <label className="inline-flex flex-col gap-0.5 text-[11px] text-[#5A6070] w-full sm:w-auto">
-                    <span>Paid members only until</span>
-                    <input
-                      type="datetime-local"
-                      className="border border-[var(--border)] rounded px-1.5 py-1 text-xs text-[#1A1A1A]"
-                      value={toDatetimeLocalValue(row.memberPriorityUntil)}
-                      onChange={(e) =>
-                        patchProgramDraft(p.id, {
-                          memberPriorityUntil: e.target.value || '',
-                        })
-                      }
-                    />
-                    <span className="text-[10px] leading-snug max-w-xs">
-                      {row.memberPriorityUntil
-                        ? `Opens to all after ${formatMemberPriorityUntil(row.memberPriorityUntil)}`
-                        : 'Leave blank = open to all signed-in parents when registration is on'}
-                    </span>
-                  </label>
                   <button
                     type="button"
                     className="underline font-semibold"
@@ -1158,7 +1115,7 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                   style={{ color: 'var(--brand-green)' }}
                   aria-expanded={Boolean(expandedIds[p.id])}
                   onClick={() =>
-                    setExpandedIds((prev) => ({ ...prev, [p.id]: !prev[p.id] }))
+                    setExpandedIds((prev) => (prev[p.id] ? {} : { [p.id]: true }))
                   }
                 >
                   {expandedIds[p.id] ? (
@@ -1166,13 +1123,58 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                   ) : (
                     <ChevronRight className="h-3.5 w-3.5" aria-hidden />
                   )}
-                  {expandedIds[p.id] ? 'Hide details' : 'Edit details'}
+                  {expandedIds[p.id] ? 'Hide editor' : 'Show editor'}
                   </button>
                 </div>
               </div>
               {expandedIds[p.id] ? (
               <>
               <div className="grid sm:grid-cols-2 gap-2 pt-1 border-t border-[var(--border)]">
+                <label className="sm:col-span-2 text-[11px] text-[#5A6070] space-y-0.5">
+                  <span>Program name</span>
+                  <input
+                    value={row.name}
+                    aria-label="Program name"
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm font-bold text-[#1A1A1A]"
+                    onChange={(e) => patchProgramDraft(p.id, { name: e.target.value })}
+                  />
+                </label>
+                <label className="inline-flex items-center gap-1 text-xs text-[#1A1A1A]">
+                  <input
+                    type="checkbox"
+                    checked={row.registrationOpen}
+                    onChange={(e) =>
+                      patchProgramDraft(p.id, { registrationOpen: e.target.checked })
+                    }
+                  />
+                  Registration open (checkout)
+                </label>
+                <label className="inline-flex items-center gap-1 text-xs text-[#1A1A1A]">
+                  <input
+                    type="checkbox"
+                    checked={row.featured}
+                    onChange={(e) => patchProgramDraft(p.id, { featured: e.target.checked })}
+                  />
+                  Featured
+                </label>
+                <label className="sm:col-span-2 inline-flex flex-col gap-0.5 text-[11px] text-[#5A6070]">
+                  <span>Paid members only until</span>
+                  <input
+                    type="datetime-local"
+                    className="border border-[var(--border)] rounded px-1.5 py-1 text-xs text-[#1A1A1A] max-w-xs"
+                    value={toDatetimeLocalValue(row.memberPriorityUntil)}
+                    onChange={(e) =>
+                      patchProgramDraft(p.id, {
+                        memberPriorityUntil: e.target.value || '',
+                      })
+                    }
+                  />
+                  <span className="text-[10px] leading-snug max-w-md">
+                    {row.memberPriorityUntil
+                      ? `Opens to all after ${formatMemberPriorityUntil(row.memberPriorityUntil)}`
+                      : 'Leave blank = open to all signed-in parents when registration is on'}
+                  </span>
+                </label>
                 <div className="sm:col-span-2">
                   <StaffPlainCopyField
                     label="Description"

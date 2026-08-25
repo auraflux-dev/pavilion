@@ -462,16 +462,38 @@ export const STAFF_CMS_COLLECTIONS: Record<string, CmsCollectionConfig> = {
 }
 
 /** SiteSettings keys grouped for role-scoped editing (visitor-facing). */
+export type SiteSettingPlacement = 'workspace' | 'site' | 'advanced'
+
 export const SITE_SETTING_GROUPS: {
   id: string
   label: string
   roles: StaffRole[]
+  /**
+   * workspace — primary UI lives in a Staff workspace (hide from Site hub catch-all)
+   * site — primary home is Staff → Site settings
+   * advanced — rare / backup; Site hub only
+   */
+  placement: SiteSettingPlacement
   keys: { key: string; label: string; multiline?: boolean }[]
 }[] = [
+  {
+    id: 'programs',
+    label: 'Enrichment programs',
+    roles: ['programs', 'admin'],
+    placement: 'workspace',
+    keys: [
+      {
+        key: 'epMeetingDatesApproved',
+        label:
+          'Publish EP meeting nights to parents (true/false). false = Proposed — pending approval on public pages.',
+      },
+    ],
+  },
   {
     id: 'announcement',
     label: 'Announcement bar & WhatsApp grade links',
     roles: ['marketing', 'secretary', 'membership', 'admin'],
+    placement: 'workspace',
     keys: [
  { key: 'schoolInSession', label: 'School in session (true/false). shows Programs & Events' },
       { key: 'announcementEnabled', label: 'Enabled (true/false)' },
@@ -485,6 +507,7 @@ export const SITE_SETTING_GROUPS: {
     id: 'contact',
     label: 'Contact & store hours',
     roles: ['marketing', 'secretary', 'admin'],
+    placement: 'site',
     keys: [
       { key: 'contactEmailGeneral', label: 'General email (contact form inbox)' },
       {
@@ -552,6 +575,7 @@ export const SITE_SETTING_GROUPS: {
     id: 'newsletter-branding',
     label: 'Newsletter email branding',
     roles: ['marketing', 'admin'],
+    placement: 'workspace',
     keys: [
       {
         key: 'newsletterHeaderTitle',
@@ -582,18 +606,21 @@ export const SITE_SETTING_GROUPS: {
     id: 'membership',
     label: 'Membership shared benefits',
     roles: ['membership', 'marketing', 'secretary', 'admin'],
+    placement: 'workspace',
     keys: [{ key: 'membershipSharedBenefits', label: 'Shared benefits (one per line)', multiline: true }],
   },
   {
     id: 'volunteer',
     label: 'Volunteer page benefits',
     roles: ['events', 'secretary', 'marketing', 'admin'],
+    placement: 'workspace',
     keys: [{ key: 'volunteerBenefits', label: 'Benefits (one per line)', multiline: true }],
   },
   {
     id: 'fundraising',
     label: 'Fundraising goals & hours',
     roles: ['programs', 'treasurer', 'admin'],
+    placement: 'workspace',
     keys: [
       {
         key: 'goalMembership',
@@ -631,6 +658,7 @@ export const SITE_SETTING_GROUPS: {
     id: 'home',
     label: 'Home hero stats & images',
     roles: ['marketing', 'secretary', 'admin'],
+    placement: 'workspace',
     keys: [
  { key: 'heroStatFamilies', label: 'Hero stat. families' },
  { key: 'heroStatPrograms', label: 'Hero stat. programs' },
@@ -649,6 +677,7 @@ export const SITE_SETTING_GROUPS: {
     id: 'social',
     label: 'Public social URLs',
     roles: ['marketing', 'admin'],
+    placement: 'workspace',
     keys: [
       { key: 'socialFacebook', label: 'Facebook URL' },
       { key: 'socialInstagram', label: 'Instagram URL' },
@@ -676,6 +705,7 @@ export const SITE_SETTING_GROUPS: {
     id: 'wellness',
     label: 'Teacher & staff wellness',
     roles: ['wellness', 'events', 'admin'],
+    placement: 'workspace',
     keys: [
       { key: 'wellnessWishList', label: 'Classroom / staff wish list (one item per line)', multiline: true },
       { key: 'wellnessNotes', label: 'Internal notes for this week', multiline: true },
@@ -683,37 +713,64 @@ export const SITE_SETTING_GROUPS: {
     ],
   },
   {
-    id: 'retail',
-    label: 'The Cove product allowlists',
+    id: 'retail-allowlists',
+    label: 'Cove / Spirit allowlists (advanced)',
     roles: ['retail', 'admin'],
+    placement: 'advanced',
     keys: [
-      { key: 'storeProductIds', label: 'Store product IDs (comma or newline)', multiline: true },
-      { key: 'spiritWearProductIds', label: 'Spirit wear product IDs (comma or newline)', multiline: true },
+      {
+        key: 'storeProductIds',
+        label:
+          'Store / Cove snack IDs (advanced). Prefer Staff → Cove → products · On Cove snacks toggle.',
+        multiline: true,
+      },
+      {
+        key: 'spiritWearProductIds',
+        label:
+          'Spirit wear IDs (advanced). Prefer Staff → Cove → products · On Spirit Wear toggle.',
+        multiline: true,
+      },
+    ],
+  },
+  {
+    id: 'cove-card',
+    label: 'Cove Digital Card',
+    roles: ['retail', 'treasurer', 'admin'],
+    placement: 'workspace',
+    keys: [
+      {
+        key: 'storeCardBonusPercent',
+        label:
+          'First-load / membership bonus % (not on reloads; e.g. 10 = pay $50, load $55)',
+      },
+      {
+        key: 'storeCardAmounts',
+        label: 'Preset amounts (comma-separated, e.g. 20,40,75)',
+      },
+      {
+        key: 'storeCardMinAmount',
+        label: 'Minimum load ($)',
+      },
+      {
+        key: 'storeCardMaxAmount',
+        label: 'Maximum load ($)',
+      },
+    ],
+  },
+  {
+    id: 'membership-shirt',
+    label: 'Membership perk tee',
+    roles: ['membership', 'retail', 'admin'],
+    placement: 'workspace',
+    keys: [
       {
         key: 'membershipShirtProductId',
-        label: 'Membership perk tee product ID (Design · Size variants)',
+        label: 'Perk tee product ID (Design · Size variants)',
       },
       {
         key: 'membershipShirtDesignsEnabled',
         label:
-          'Membership checkout: require design + size (and hold inventory). Set true when all styles are ready; leave false/empty for size-only.',
-      },
-      {
-        key: 'storeCardBonusPercent',
-        label:
-          'Cove Digital Card first-load / membership bonus % (not on reloads; e.g. 10 = pay $50, load $55)',
-      },
-      {
-        key: 'storeCardAmounts',
-        label: 'Cove Digital Card preset amounts (comma-separated, e.g. 20,40,75)',
-      },
-      {
-        key: 'storeCardMinAmount',
-        label: 'Cove Digital Card minimum load ($)',
-      },
-      {
-        key: 'storeCardMaxAmount',
-        label: 'Cove Digital Card maximum load ($)',
+          'Require design + size at checkout (and hold inventory). true when styles are ready; empty/false = size-only.',
       },
     ],
   },

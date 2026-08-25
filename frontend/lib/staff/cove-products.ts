@@ -1,9 +1,9 @@
 /**
  * Staff Cove catalog. create/update Wix Stores products from /staff
- * so retail does not need the Wix Dashboard for snack items.
+ * so retail does not need the Wix Dashboard for snacks or spirit wear.
  *
  * Supports: photos (Media Manager), single-option variants (Flavor/Size),
- * Cove allowlist, and CoveInventory qty/SKU per variant.
+ * Cove + Spirit allowlists, and CoveInventory qty/SKU per variant.
  */
 import { getCatalogConfig } from '@/lib/api/catalog-config'
 import { CATALOG_DEFAULTS } from '@/lib/defaults/catalog'
@@ -42,7 +42,10 @@ export type StaffCoveProduct = {
  price: number
  sku: string
  visible: boolean
+ /** On /cove snack & store menu (storeProductIds). */
  onCove: boolean
+ /** On /cove/spirit-wear + Spirit register lane (spiritWearProductIds). */
+ onSpirit: boolean
  quantity: number | null
  wixInStock: boolean
  image?: string
@@ -146,6 +149,16 @@ async function writeAllowlist(ids: string[]): Promise<void> {
  await upsertSiteSetting('storeProductIds', unique.join(','))
 }
 
+async function readSpiritAllowlist(): Promise<string[]> {
+ const cfg = await getCatalogConfig()
+ return Array.from(cfg.spiritWearProductIds)
+}
+
+async function writeSpiritAllowlist(ids: string[]): Promise<void> {
+ const unique = Array.from(new Set(ids.map((id) => id.trim()).filter(Boolean)))
+ await upsertSiteSetting('spiritWearProductIds', unique.join(','))
+}
+
 export async function addToCoveAllowlist(productId: string): Promise<void> {
  const ids = await readAllowlist()
  if (!ids.includes(productId)) {
@@ -157,6 +170,19 @@ export async function addToCoveAllowlist(productId: string): Promise<void> {
 export async function removeFromCoveAllowlist(productId: string): Promise<void> {
  const ids = await readAllowlist()
  await writeAllowlist(ids.filter((id) => id !== productId))
+}
+
+export async function addToSpiritAllowlist(productId: string): Promise<void> {
+ const ids = await readSpiritAllowlist()
+ if (!ids.includes(productId)) {
+ ids.push(productId)
+ await writeSpiritAllowlist(ids)
+ }
+}
+
+export async function removeFromSpiritAllowlist(productId: string): Promise<void> {
+ const ids = await readSpiritAllowlist()
+ await writeSpiritAllowlist(ids.filter((id) => id !== productId))
 }
 
 async function upsertCoveInventoryRow(opts: {
@@ -251,6 +277,7 @@ function mapVariants(
 function mapProduct(
  raw: Record<string, unknown>,
  allow: Set<string>,
+ spirit: Set<string>,
  invByKey: Map<string, { quantity: number; sku: string }>
 ): StaffCoveProduct | null {
  const id = String(raw.id ?? '')
@@ -285,6 +312,7 @@ function mapProduct(
  sku: primary?.sku ?? '',
  visible: raw.visible !== false,
  onCove: allow.has(id),
+ onSpirit: spirit.has(id),
  quantity: primary?.quantity ?? null,
  wixInStock: availability === 'IN_STOCK' || raw.visible === true,
  image: getProductImage(raw),
@@ -347,6 +375,7 @@ function inventoryKeyMap(
 
 export async function listStaffCoveProducts(): Promise<StaffCoveProduct[]> {
  const allow = new Set(await readAllowlist())
+ const spirit = new Set(await readSpiritAllowlist())
  const inventory = await listCoveInventory()
  const invByKey = inventoryKeyMap(inventory)
  const ids = await listProductIds()
@@ -359,7 +388,7 @@ export async function listStaffCoveProducts(): Promise<StaffCoveProduct[]> {
  slice.map(async (id) => {
  try {
  const raw = await getProductRaw(id)
- return mapProduct(raw, allow, invByKey)
+ return mapProduct(raw, allow, spirit, invByKey)
  } catch {
  return null
  }
@@ -371,6 +400,10 @@ export async function listStaffCoveProducts(): Promise<StaffCoveProduct[]> {
  }
 
  return products.sort((a, b) => {
+ const aListed = a.onCove || a.onSpirit
+ const bListed = b.onCove || b.onSpirit
+ if (aListed !== bListed) return aListed ? -1 : 1
+ if (a.onSpirit !== b.onSpirit) return a.onSpirit ? -1 : 1
  if (a.onCove !== b.onCove) return a.onCove ? -1 : 1
  return a.name.localeCompare(b.name)
  })
@@ -653,6 +686,7 @@ export async function createStaffCoveProduct(input: {
  quantity: number
  sku?: string
  showOnCove?: boolean
+ showOnSpirit?: boolean
  imageUrl?: string
  imageMediaId?: string
  optionName?: string
@@ -740,6 +774,9 @@ export async function createStaffCoveProduct(input: {
  if (input.showOnCove !== false) {
  await addToCoveAllowlist(productId)
  }
+ if (input.showOnSpirit === true) {
+ await addToSpiritAllowlist(productId)
+ }
 
  for (let i = 0; i < multi.length; i++) {
  const v = multi[i]
@@ -770,6 +807,7 @@ export async function updateStaffCoveProduct(input: {
  quantity?: number
  sku?: string
  showOnCove?: boolean
+ showOnSpirit?: boolean
  visible?: boolean
  imageUrl?: string
  imageMediaId?: string
@@ -925,9 +963,16 @@ export async function updateStaffCoveProduct(input: {
 
  if (input.showOnCove === true) await addToCoveAllowlist(id)
  if (input.showOnCove === false) await removeFromCoveAllowlist(id)
+ if (input.showOnSpirit === true) await addToSpiritAllowlist(id)
+ if (input.showOnSpirit === false) await removeFromSpiritAllowlist(id)
 
  const refreshed = await getProductRaw(id)
- const mapped = mapProduct(refreshed, new Set(await readAllowlist()), invByKey)
+ const mapped = mapProduct(
+ refreshed,
+ new Set(await readAllowlist()),
+ new Set(await readSpiritAllowlist()),
+ invByKey,
+ )
  if (!mapped) throw new Error('Product updated but could not be reloaded')
 
  for (const v of mapped.variants) {
@@ -954,6 +999,42 @@ export async function updateStaffCoveProduct(input: {
  const updated = listed.find((p) => p.id === id)
  if (!updated) throw new Error('Product updated but could not be reloaded')
  return updated
+}
+
+async function removeCoveInventoryForProduct(productId: string): Promise<void> {
+  const client = getWixClient()
+  try {
+    const existing = await client.items
+      .query('CoveInventory')
+      .eq('productId', productId)
+      .limit(100)
+      .find()
+    for (const row of existing.items ?? []) {
+      const id = String((row as { _id?: string })._id ?? '')
+      if (id) await client.items.remove('CoveInventory', id)
+    }
+  } catch (err) {
+    console.warn('CoveInventory cleanup skipped:', err)
+  }
+}
+
+/** Permanently delete a Cove catalog product (Wix + allowlist + inventory rows). */
+export async function deleteStaffCoveProduct(productId: string): Promise<void> {
+  const id = productId.trim()
+  if (!id) throw new Error('Product id required')
+
+  await removeFromCoveAllowlist(id)
+  await removeFromSpiritAllowlist(id)
+  await removeCoveInventoryForProduct(id)
+
+  const res = await fetch(`${WIX_PRODUCTS}/${id}`, {
+    method: 'DELETE',
+    headers: wixHeaders(),
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Delete failed: ${text.slice(0, 300)}`)
+  }
 }
 
 /** Assign unique SKUs to every Cove catalog variant that is still blank. */

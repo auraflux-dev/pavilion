@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
-import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
 
 type Field = {
   key: string
@@ -31,11 +29,14 @@ export function StaffCmsCollectionPanel({
   collection,
   title,
   sectionId,
+  bare = false,
 }: {
   collection: string
   title?: string
   /** Anchor for Jump to links on multi-section staff views. */
   sectionId?: string
+  /** Inside StaffReveal — skip outer title card. */
+  bare?: boolean
 }) {
   const [fields, setFields] = useState<Field[]>([])
   const [items, setItems] = useState<Row[]>([])
@@ -73,16 +74,10 @@ export function StaffCmsCollectionPanel({
     setStatus('')
     try {
       const isNew = !form.id
-      const payload: Row = { ...form }
-      for (const f of fields) {
-        if (f.type === 'textarea') {
-          payload[f.key] = normalizePlainCopy(String(payload[f.key] ?? ''))
-        }
-      }
       const r = await fetch(`/api/staff/cms/${encodeURIComponent(collection)}`, {
         method: isNew ? 'POST' : 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(form),
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Save failed')
@@ -126,15 +121,23 @@ export function StaffCmsCollectionPanel({
   return (
     <section
       id={sectionId}
-      className={`rounded-xl border border-[var(--border)] bg-white p-5 space-y-4${sectionId ? ' scroll-mt-28' : ''}`}
+      className={
+        bare
+          ? `space-y-4${sectionId ? ' scroll-mt-28' : ''}`
+          : `rounded-xl border border-[var(--border)] bg-white p-5 space-y-4${sectionId ? ' scroll-mt-28' : ''}`
+      }
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <h2 className="text-lg font-bold">{label}</h2>
-          <p className="text-xs text-[#5A6070]">
-            Add, edit, and deactivate visitor-facing site content without opening Wix.
-          </p>
-        </div>
+        {!bare ? (
+          <div>
+            <h2 className="text-lg font-bold">{label}</h2>
+            <p className="text-xs text-[#5A6070]">
+              Add, edit, and deactivate visitor-facing site content without opening Wix.
+            </p>
+          </div>
+        ) : (
+          <p className="text-xs font-bold text-[#5A6070]">{label}</p>
+        )}
         <Button type="button" className="text-white" style={{ backgroundColor: 'var(--brand-green)' }} onClick={startNew}>
           Add new
         </Button>
@@ -195,13 +198,11 @@ export function StaffCmsCollectionPanel({
                     ))}
                   </select>
                 ) : f.type === 'textarea' ? (
-                  <StaffPlainCopyField
+                  <textarea
                     value={String(form[f.key] ?? '')}
+                    onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
                     rows={4}
-                    onChange={(next) => setForm({ ...form, [f.key]: next })}
-                    onCommit={(next) =>
-                      setForm((prev) => (prev ? { ...prev, [f.key]: normalizePlainCopy(next) } : prev))
-                    }
+                    className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
                   />
                 ) : (
                   <input

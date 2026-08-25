@@ -448,9 +448,11 @@ export function StaffTasksPanel({ myRoles, isAdmin, myEmail: myEmailProp }: Prop
       </div>
 
       {/* Add project */}
-      <details className="rounded-lg border border-[var(--border)] p-3 bg-[#FAFAF8]">
-        <summary className="text-xs font-bold text-[#5A6070] cursor-pointer">
-          Add a project (your swimlane on the year board)
+      <details className="rounded-lg border border-[var(--border)] p-3 bg-white group">
+        <summary className="text-xs font-bold text-[#5A6070] cursor-pointer list-none flex items-center justify-between gap-2">
+          <span>Show add a project (year-board swimlane)</span>
+          <span className="font-bold group-open:hidden">Show</span>
+          <span className="font-bold hidden group-open:inline">Hide</span>
         </summary>
         <div className="mt-3 space-y-2">
           <input

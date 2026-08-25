@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { KnowledgeBase, type KbGroup } from '@/components/kb/knowledge-base'
 import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection-panel'
+import { StaffReveal } from '@/components/staff/staff-reveal'
 import { Button } from '@/components/ui/button'
 import {
   articlesByCategoryWithExtras,
@@ -151,38 +152,42 @@ export function StaffHelpPanel({
       />
 
       {canEditKb ? (
-        <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-3">
-          <div>
-            <h2 className="text-base font-bold text-[#1A1A1A]">Edit help articles</h2>
-            <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
-              Change Member Help and Staff Help here. Saves go live without a code deploy. First time:
-              create the collection, then seed starter articles, then edit titles and full article text.
+        <StaffReveal
+          storageKey="staff-reveal-help-kb-edit"
+          title="Edit help articles"
+          hint="Create/seed KbArticles and edit member + staff Help copy"
+        >
+          <div className="space-y-3 rounded-xl border border-[var(--border)] bg-white p-4">
+            <p className="text-xs text-[#5A6070] leading-relaxed">
+              Saves go live without a code deploy. First time: create the collection, seed starter
+              articles, then edit titles and full article text.
             </p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={ensureBusy}
+                onClick={() => void ensureCollection()}
+              >
+                {ensureBusy ? 'Creating…' : '1. Create KbArticles collection'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={seedBusy}
+                onClick={() => void seedDefaults()}
+              >
+                {seedBusy ? 'Seeding…' : '2. Seed starter articles'}
+              </Button>
+            </div>
+            {seedNote ? <p className="text-xs text-[#5A6070]">{seedNote}</p> : null}
+            <StaffCmsCollectionPanel
+              collection="KbArticles"
+              title="Knowledge base articles (member + staff)"
+              bare
+            />
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={ensureBusy}
-              onClick={() => void ensureCollection()}
-            >
-              {ensureBusy ? 'Creating…' : '1. Create KbArticles collection'}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={seedBusy}
-              onClick={() => void seedDefaults()}
-            >
-              {seedBusy ? 'Seeding…' : '2. Seed starter articles'}
-            </Button>
-          </div>
-          {seedNote ? <p className="text-xs text-[#5A6070]">{seedNote}</p> : null}
-          <StaffCmsCollectionPanel
-            collection="KbArticles"
-            title="Knowledge base articles (member + staff)"
-          />
-        </section>
+        </StaffReveal>
       ) : null}
     </div>
   )

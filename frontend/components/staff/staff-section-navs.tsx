@@ -10,8 +10,6 @@ import {
   Newspaper,
   Package,
   Percent,
-  Shirt,
-  ShoppingCart,
   Store,
   Tag,
   Users,
@@ -30,12 +28,6 @@ export function StaffMembershipSectionNav() {
         { href: '#membership-roster', label: 'Roster', hint: 'Parents & tiers', icon: Users },
         { href: '#membership-outreach', label: 'Outreach', hint: 'Email & WhatsApp', icon: Mail },
         {
-          href: '#cove-demand',
-          label: 'Size demand',
-          hint: 'OOS shirts/hoodies',
-          icon: ClipboardList,
-        },
-        {
           href: '#membership-fulfillment',
           label: 'Fulfillment',
           hint: 'Shirts & magnets',
@@ -51,35 +43,27 @@ export function StaffMembershipSectionNav() {
 export function StaffRetailSectionNav() {
   return (
     <SectionJumpNav
-      eyebrow="Jump to"
+      eyebrow="Table ops"
       ariaLabel="Cove retail sections"
       items={[
-        { href: '#cove-register', label: 'In-person', hint: 'Any table sale', icon: ShoppingCart },
         {
           href: '#cove-store-pickups',
-          label: 'Store pickups',
-          hint: 'Window · handed out',
+          label: 'Pickups',
+          hint: 'Portal paid · hand out',
           icon: Package,
-        },
-        {
-          href: '#cove-membership-shirts',
-          label: 'Shirt designs',
-          hint: 'Membership perk',
-          icon: Shirt,
         },
         {
           href: '#cove-demand',
-          label: 'Size demand',
-          hint: 'OOS shirts/hoodies',
+          label: 'Demand',
+          hint: 'OOS size log',
           icon: ClipboardList,
         },
         {
-          href: '#cove-fulfillment',
-          label: 'Shirts/magnets',
-          hint: 'Membership perks',
-          icon: Package,
+          href: '#cove-stock-admin',
+          label: 'Admin',
+          hint: 'Stock · backup register',
+          icon: Store,
         },
-        { href: '#cove-stock-admin', label: 'Stock setup', hint: 'Admin · not sales', icon: Store },
       ]}
       variant="card"
     />

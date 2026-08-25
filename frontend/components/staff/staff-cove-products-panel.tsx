@@ -1,8 +1,15 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-import { ImagePlus, Loader2, Plus, Save, Trash2 } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ChevronDown, ChevronRight, ImagePlus, Loader2, Plus, Save, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  STAFF_FILTER_CARD,
+  STAFF_FILTER_CARD_TITLE,
+  STAFF_FILTER_INPUT,
+  STAFF_FILTER_LABEL,
+  STAFF_FILTER_SELECT,
+} from '@/lib/staff/staff-filter-ui'
 
 type Variant = {
   id: string
@@ -19,6 +26,7 @@ type Product = {
   sku: string
   quantity: number | null
   onCove: boolean
+  onSpirit: boolean
   visible: boolean
   image?: string
   optionName?: string
@@ -39,6 +47,7 @@ type ProductEdit = {
   quantity: string
   sku: string
   onCove: boolean
+  onSpirit: boolean
   optionName: string
   variants: VariantEdit[]
   showVariants: boolean
@@ -50,15 +59,54 @@ const emptyForm = {
   quantity: '',
   sku: '',
   showOnCove: true,
+  showOnSpirit: false,
   optionName: 'Flavor',
   variants: [] as VariantEdit[],
   useVariants: false,
 }
 
 /**
- * Manage Cove snack products entirely from Staff. Creates/updates Wix Catalog
- * (including photos + flavor/size variants) and keeps /cove allowlist + inventory in sync.
+ * Manage Cove snacks and Spirit Wear from one Staff catalog. Creates/updates Wix
+ * Catalog (photos, variants) and keeps storeProductIds + spiritWearProductIds + inventory in sync.
  */
+type ProductSort = 'name-asc' | 'name-desc' | 'qty-asc' | 'qty-desc' | 'price-asc' | 'price-desc'
+type ProductScope = 'all' | 'on-cove' | 'spirit' | 'off-menus' | 'low-stock'
+
+function productSortQty(p: Product): number | null {
+  const fromVariants = (p.variants ?? [])
+    .map((v) => v.quantity)
+    .filter((q): q is number => q != null && Number.isFinite(q))
+  if (fromVariants.length > 0) return fromVariants.reduce((sum, n) => sum + n, 0)
+  return p.quantity != null && Number.isFinite(p.quantity) ? p.quantity : null
+}
+
+function compareNullableNumber(a: number | null, b: number | null, dir: 1 | -1): number {
+  if (a == null && b == null) return 0
+  if (a == null) return 1
+  if (b == null) return -1
+  return (a - b) * dir
+}
+
+function compareProducts(a: Product, b: Product, sort: ProductSort): number {
+  const byName = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+  switch (sort) {
+    case 'name-asc':
+      return byName || a.id.localeCompare(b.id)
+    case 'name-desc':
+      return -byName || a.id.localeCompare(b.id)
+    case 'price-asc':
+      return a.price - b.price || byName
+    case 'price-desc':
+      return b.price - a.price || byName
+    case 'qty-asc':
+      return compareNullableNumber(productSortQty(a), productSortQty(b), 1) || byName
+    case 'qty-desc':
+      return compareNullableNumber(productSortQty(a), productSortQty(b), -1) || byName
+    default:
+      return byName
+  }
+}
+
 export function StaffCoveProductsPanel() {
   const [products, setProducts] = useState<Product[]>([])
   const [form, setForm] = useState(emptyForm)
@@ -67,6 +115,12 @@ export function StaffCoveProductsPanel() {
   const [error, setError] = useState('')
   const [edits, setEdits] = useState<Record<string, ProductEdit>>({})
   const [uploadingId, setUploadingId] = useState<string | null>(null)
+  const [q, setQ] = useState('')
+  const [sort, setSort] = useState<ProductSort>('name-asc')
+  const [scope, setScope] = useState<ProductScope>('all')
+  /** One open editor at a time (same Staff collapse rule as Programs). */
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
     setError('')
@@ -101,6 +155,7 @@ export function StaffCoveProductsPanel() {
         quantity: p.quantity == null ? '' : String(p.quantity),
         sku: p.sku ?? '',
         onCove: p.onCove,
+        onSpirit: Boolean(p.onSpirit),
         optionName: p.optionName || 'Flavor',
         variants,
         showVariants: (p.variants?.length ?? 0) > 1 || Boolean(p.optionName),
@@ -121,6 +176,7 @@ export function StaffCoveProductsPanel() {
       const payload: Record<string, unknown> = {
         name: form.name,
         showOnCove: form.showOnCove,
+        showOnSpirit: form.showOnSpirit,
       }
       if (form.useVariants && form.variants.length > 0) {
         payload.optionName = form.optionName || 'Flavor'
@@ -177,6 +233,7 @@ export function StaffCoveProductsPanel() {
         id,
         name: e.name,
         showOnCove: e.onCove,
+        showOnSpirit: e.onSpirit,
       }
       if (e.showVariants) {
         const variants = e.variants.filter((v) => v.label.trim() || e.variants.length === 1)
@@ -214,6 +271,35 @@ export function StaffCoveProductsPanel() {
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function removeProduct(id: string, name: string) {
+    if (
+      !window.confirm(
+        `Remove “${name}” from the Cove catalog?\n\nThis deletes it from Wix and Staff. Square Stand may still show it until you remove it in Square Library.`
+      )
+    ) {
+      return
+    }
+    setBusy(true)
+    setError('')
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/cove/products', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Remove failed')
+      if (expandedId === id) setExpandedId(null)
+      setStatus(`Removed “${name}”.`)
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Remove failed')
     } finally {
       setBusy(false)
     }
@@ -269,6 +355,34 @@ export function StaffCoveProductsPanel() {
     }
   }
 
+  const filteredProducts = useMemo(() => {
+    const needle = q.trim().toLowerCase()
+    const list = products.filter((p) => {
+      if (scope === 'on-cove' && !p.onCove) return false
+      if (scope === 'spirit' && !p.onSpirit) return false
+      if (scope === 'off-menus' && (p.onCove || p.onSpirit)) return false
+      if (scope === 'low-stock') {
+        const qty = productSortQty(p)
+        const low =
+          qty == null
+            ? (p.variants ?? []).some((v) => v.quantity != null && v.quantity <= 5)
+            : qty <= 5
+        if (!low) return false
+      }
+      if (!needle) return true
+      const hay = [p.name, p.sku, ...(p.variants ?? []).flatMap((v) => [v.label, v.sku])]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+      return hay.includes(needle)
+    })
+    return [...list].sort((a, b) => compareProducts(a, b, sort))
+  }, [products, q, sort, scope])
+
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: 0 })
+  }, [sort, scope, q])
+
   return (
     <section
       id="cove-products"
@@ -276,11 +390,12 @@ export function StaffCoveProductsPanel() {
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold">Cove products</h2>
+          <h2 className="text-lg font-bold">Cove catalog · snacks &amp; spirit wear</h2>
           <p className="text-xs text-[#5A6070] mt-1">
-            Add snacks, photos, flavors/sizes, and restock here. No Wix Dashboard needed. “On Cove”
-            controls the visitor menu. Leave SKU blank. We generate one from the name so Square Stand
-            can track inventory.
+            One list for store snacks and spirit wear. Open <strong>Show editor</strong> to change
+            price, photo, variants, and where it appears: <strong>On Cove</strong> (/cove snacks) and{' '}
+            <strong>On Spirit Wear</strong> (/cove/spirit-wear + Spirit register). Leave SKU blank;
+            we generate one from the name for Square Stand.
           </p>
         </div>
         <Button
@@ -295,8 +410,76 @@ export function StaffCoveProductsPanel() {
         </Button>
       </div>
 
-      <div className="rounded-xl border border-[var(--brand-line)] bg-[#FAFCF9] p-4 space-y-3">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#5A6070]">Add product</p>
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-stretch">
+        <div className={`flex-1 ${STAFF_FILTER_CARD}`}>
+          <p className={STAFF_FILTER_CARD_TITLE}>Search</p>
+          <label className={STAFF_FILTER_LABEL}>
+            Lookup
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Name, SKU, flavor / size"
+              autoComplete="off"
+              name="staff-cove-product-lookup"
+              className={STAFF_FILTER_INPUT}
+            />
+          </label>
+          <p className="text-[11px] text-[#5A6070]">
+            {filteredProducts.length}
+            {filteredProducts.length !== products.length ? ` of ${products.length}` : ''} products
+            {busy ? ' · Loading…' : ''}
+          </p>
+        </div>
+        <div className="xl:w-52 shrink-0 space-y-3">
+          <div className={STAFF_FILTER_CARD}>
+            <label className={STAFF_FILTER_LABEL}>
+              Sort
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as ProductSort)}
+                className={STAFF_FILTER_SELECT}
+                aria-label="Sort products"
+              >
+                <option value="name-asc">Name A to Z</option>
+                <option value="name-desc">Name Z to A</option>
+                <option value="qty-asc">Qty low to high</option>
+                <option value="qty-desc">Qty high to low</option>
+                <option value="price-asc">Price low to high</option>
+                <option value="price-desc">Price high to low</option>
+              </select>
+            </label>
+          </div>
+          <div className={STAFF_FILTER_CARD}>
+            <label className={STAFF_FILTER_LABEL}>
+              Filter
+              <select
+                value={scope}
+                onChange={(e) => setScope(e.target.value as ProductScope)}
+                className={STAFF_FILTER_SELECT}
+                aria-label="Filter products"
+              >
+                <option value="all">All products</option>
+                <option value="on-cove">On Cove snacks</option>
+                <option value="spirit">On Spirit Wear</option>
+                <option value="off-menus">Not on either menu</option>
+                <option value="low-stock">Low stock (5 or fewer)</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <details className="rounded-xl border border-[var(--brand-line)] bg-white group">
+        <summary className="cursor-pointer list-none px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#5A6070] flex items-center justify-between gap-2">
+          <span className="normal-case tracking-normal">Show add product</span>
+          <span className="text-[11px] font-bold normal-case tracking-normal group-open:hidden">
+            Show
+          </span>
+          <span className="text-[11px] font-bold normal-case tracking-normal hidden group-open:inline">
+            Hide
+          </span>
+        </summary>
+        <div className="border-t border-[var(--border)] px-4 pb-4 pt-3 space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
           <input
             value={form.name}
@@ -447,14 +630,24 @@ export function StaffCoveProductsPanel() {
           </div>
         ) : null}
 
-        <label className="flex items-center gap-2 text-xs text-[#1A1A1A]">
-          <input
-            type="checkbox"
-            checked={form.showOnCove}
-            onChange={(e) => setForm((f) => ({ ...f, showOnCove: e.target.checked }))}
-          />
-          Show on /cove (visitor menu)
-        </label>
+        <div className="flex flex-wrap gap-4">
+          <label className="flex items-center gap-2 text-xs text-[#1A1A1A]">
+            <input
+              type="checkbox"
+              checked={form.showOnCove}
+              onChange={(e) => setForm((f) => ({ ...f, showOnCove: e.target.checked }))}
+            />
+            On Cove snacks (/cove)
+          </label>
+          <label className="flex items-center gap-2 text-xs text-[#1A1A1A]">
+            <input
+              type="checkbox"
+              checked={form.showOnSpirit}
+              onChange={(e) => setForm((f) => ({ ...f, showOnSpirit: e.target.checked }))}
+            />
+            On Spirit Wear
+          </label>
+        </div>
         <Button
           disabled={
             busy ||
@@ -470,18 +663,85 @@ export function StaffCoveProductsPanel() {
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4 mr-1" />}
           Add product
         </Button>
-      </div>
+        </div>
+      </details>
 
-      <div className="space-y-4">
-        {products.map((p) => {
+      <div ref={listRef} className="max-h-[480px] overflow-auto space-y-3 pr-1">
+        <p className="text-xs text-[#5A6070]">
+          Compact list · open <strong>Show editor</strong> on one product at a time.
+        </p>
+        {filteredProducts.length === 0 ? (
+          <p className="p-4 text-sm text-[#5A6070] border border-[var(--border)] rounded-lg">
+            No products match these filters.
+          </p>
+        ) : null}
+        {filteredProducts.map((p) => {
           const e = edits[p.id]
           if (!e) return null
+          const open = expandedId === p.id
+          const qtyLabel =
+            p.quantity == null ? 'qty —' : `qty ${p.quantity}`
           return (
             <div
               key={p.id}
-              className="rounded-xl border border-[#F0EDE8] p-4 space-y-3"
+              className="rounded-xl border border-[var(--border)] bg-white p-3 space-y-3"
             >
-              <div className="flex flex-wrap gap-3 items-start">
+              <div className="flex flex-wrap items-center gap-2 justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#F5F3EF] border border-[var(--border)] shrink-0">
+                    {p.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.image} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[9px] text-[#5A6070]">
+                        No photo
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-[#1A1A1A] truncate">{p.name}</p>
+                    <p className="text-[11px] text-[#5A6070] flex flex-wrap gap-x-2">
+                      <span>${p.price.toFixed(2)}</span>
+                      <span>{qtyLabel}</span>
+                      <span>{p.onCove ? 'Cove' : null}</span>
+                      <span>{p.onSpirit ? 'Spirit' : null}</span>
+                      {!p.onCove && !p.onSpirit ? <span>Off menus</span> : null}
+                      {(p.variants?.length ?? 0) > 1 ? (
+                        <span>{p.variants.length} variants</span>
+                      ) : null}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-xs font-bold"
+                    style={{ color: 'var(--brand-green)' }}
+                    aria-expanded={open}
+                    onClick={() => setExpandedId(open ? null : p.id)}
+                  >
+                    {open ? (
+                      <ChevronDown className="h-3.5 w-3.5" aria-hidden />
+                    ) : (
+                      <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                    )}
+                    {open ? 'Hide editor' : 'Show editor'}
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-red-600"
+                    disabled={busy}
+                    onClick={() => void removeProduct(p.id, p.name)}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" aria-hidden />
+                    Remove
+                  </button>
+                </div>
+              </div>
+
+              {open ? (
+              <>
+              <div className="flex flex-wrap gap-3 items-start border-t border-[var(--border)] pt-3">
                 <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-[#F5F3EF] border border-[var(--border)] shrink-0">
                   {p.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -493,7 +753,7 @@ export function StaffCoveProductsPanel() {
                   )}
                 </div>
                 <label className="text-xs cursor-pointer">
-                  <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-2 py-1.5 hover:bg-[#FAFCF9]">
+                  <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-2 py-1.5 hover:bg-white">
                     {uploadingId === p.id ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
@@ -534,7 +794,20 @@ export function StaffCoveProductsPanel() {
                       }))
                     }
                   />
-                  On Cove
+                  On Cove snacks
+                </label>
+                <label className="flex items-center gap-2 text-xs whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    checked={e.onSpirit}
+                    onChange={(ev) =>
+                      setEdits((prev) => ({
+                        ...prev,
+                        [p.id]: { ...e, onSpirit: ev.target.checked },
+                      }))
+                    }
+                  />
+                  On Spirit Wear
                 </label>
                 <label className="flex items-center gap-2 text-xs whitespace-nowrap">
                   <input
@@ -730,6 +1003,8 @@ export function StaffCoveProductsPanel() {
                   </Button>
                 </div>
               )}
+              </>
+              ) : null}
             </div>
           )
         })}

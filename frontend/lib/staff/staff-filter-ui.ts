@@ -1,4 +1,8 @@
-/** Shared Staff search / filter field styling (Payments filter bar pattern). */
+/**
+ * Shared Staff search / filter / sort field styling.
+ * Use the same card + label + input/select classes on any Staff list
+ * (memberships, Cove products, budget, fulfillments, …) so lookup UX matches.
+ */
 
 export const STAFF_FILTER_LABEL = 'text-xs font-semibold text-[#5A6070] block'
 

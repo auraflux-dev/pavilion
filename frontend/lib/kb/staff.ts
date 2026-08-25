@@ -239,8 +239,9 @@ Printable: **/staff/in-person**
 | Cash or card / wallet | **Stand** → Cash or Card → stop |
 | Cove **Photos QR** | **Stand** → Gift card → scan → stop |
 | Cove **6-digit or word passcode** | **Stand** → search Customer → **Card on File** → stop |
-| Unable to load cards | No Cove load yet: cash/card, or Staff Charge Cove backup |
-| Portal already paid | **Today's store pickups** → Handed out |
+| **Saved card** (debit/credit on file from portal) | Staff → look up → ring → **Charge ···XXXX** (Cove optional). Not Stand Card on File |
+| Unable to load cards | No Cove load yet: cash/card, Staff saved card if on file, or Charge Cove backup |
+| Portal already paid | **Store pickups** → Handed out |
 | Zelle / PayPal / phone (no Stand) | Staff → **External** |
 | Code ends in **9** | Lagoon/Tide free food ticket · no charge |
 | Reef wants food | Lookup 6-digit / passcode → ring **BTSN food truck ticket** ($6 each, SKU POS-REFRESH) → deduct Cove → hand ticket |
@@ -256,7 +257,7 @@ Printable: **/staff/in-person**
 They must have loaded Cove in the portal at least once.
 
 ## Staff backup
-Charge Cove only if Stand Card on File fails. External if Stand is down. Pickups for portal-paid orders.
+Charge Cove if Stand Card on File fails. Charge **saved card** for any looked-up member with a portal card on file (full cart or Cove remainder). External if Stand is down. Pickups for portal-paid orders.
 
 ## Double-charge
 Stand (any tender) → no Staff charge. Portal pickup → no Stand.
@@ -269,17 +270,18 @@ Full doc: docs/STAFF-COVE-IN-PERSON-MANUAL.md`,
       slug: 'cove-register',
       title: 'Cove register quick reference',
       categoryId: 'cove',
-      summary: 'Stand for cash/card/Cove QR/PIN/passcode; Staff Charge Cove is backup only.',
+      summary: 'Stand is the register; Staff actions = Cove/saved card, External, Pickup only.',
       order: 2,
       need: 'retail',
-      body: `Staff → **The Cove** → In-person sales (Stand is the register).
+      body: `Square Stand (or mobile card reader) is the register. Staff → **The Cove** is for pickups, demand, and stock. The Staff register is hidden under **Admin** — only unhide if Stand and the mobile reader both cannot take a sale.
 
-1. **Cash / card** → Stand
+1. **Cash / card** → Stand (Help → Square Stand steps)
 2. **Cove Photos QR** → Stand → Gift card → scan
 3. **Cove 6-digit or passcode** → Stand → search Customer → **Card on File**
-4. **Portal already paid** → Today's store pickups · Handed out
-5. **External (AM)** → log Zelle / PayPal / phone
-6. **Unable to load cards** → cash/card or Staff Charge Cove backup
+4. **Saved card** (portal) → Admin → Show Staff register backup → Cove / saved card
+5. **Portal already paid** → Store pickups · Handed out
+6. **External (AM)** → Admin → Show Staff register backup → External
+7. **Unable to load cards** → cash/card on Stand/mobile, or Staff register backup
 
 Never Charge Cove after Stand already took the same items.
 
@@ -312,13 +314,17 @@ See **Cove in-person transactions manual** for the full decision table. Printabl
       slug: 'cove-products-inventory',
       title: 'Cove products & inventory',
       categoryId: 'cove',
-      summary: 'Add/restock products; advanced inventory when needed.',
+      summary: 'One catalog for snacks and spirit wear; restock and menu toggles.',
       order: 4,
-      body: `In **The Cove**, use **Cove products** to add items, prices, barcodes, and restock quantities.
+      body: `In **The Cove → Admin → Show catalog**, manage **snacks and spirit wear in one list**.
 
-Multiple staff can work products at once. **Spirit wear** stock is separate (Wix Stores / Cove shop merch + Square Stand items), not the snack register catalog. In person, sell spirit on **Square Stand**; browse online under **/cove → Stingrays Pride**.
+- **On Cove snacks** → visitor /cove menu and snack register tiles
+- **On Spirit Wear** → /cove/spirit-wear and Spirit register lane
+- Edit price, photo, variants, and stock on the same row (**Show editor**)
 
-Use advanced inventory only when you need deeper stock tools. Day-to-day is products + register.`,
+A product can be on both menus, one, or neither (hidden until you toggle it). Day-to-day ringing stays on **Square Stand**; Staff is for catalog and handoffs.
+
+Use advanced inventory only when you need deeper stock tools.`,
     },
     {
       slug: 'discount-codes',
@@ -614,9 +620,14 @@ Use reports for counts and follow-ups. Official books stay in MoneyMinder / bank
       summary: 'Announcement, board, nav, FAQs, volunteers, fundraising…',
       order: 2,
       need: 'site',
-      body: `Staff workspaces edit visitor-facing lists (announcement, board, nav, FAQs, volunteers, fundraising, tiers, wellness) without opening Wix for day-to-day copy.
+      body: `Edit settings where the job lives:
+- **Content** — announcement bar, WhatsApp grade links, home hero
+- **Membership** — shared benefits, perk tee, shirt designs
+- **Cove** — catalog menus + Digital Card
+- **Volunteers / Fundraising / Programs / Social / Newsletter / Wellness** — their own settings
+- **Site settings** — contact emails, address, and advanced Cove/Spirit ID backups only
 
-Change one list at a time, save, then **View site** to confirm. Leave deep Wix Editor work to whoever owns theme-level changes.`,
+Save, then **View site** to confirm. Leave deep Wix Editor work to whoever owns theme-level changes.`,
     },
     {
       slug: 'custom-domain',
@@ -666,6 +677,7 @@ If a parent paid but sees nothing:
 - Tell members: pick up at **Back to School Night on August 27**, or email **vp-membershipexperience@shmspto.org** to coordinate.
 - Standalone **Stone Hill car magnet** is also sold in the spirit shop for $10.
 - Mark **Set aside** when inventory is pulled, then **Handed out** after handoff.
+- Marked **Handed out** by mistake? Search account # or name under **Handed out**, then **Reopen** (puts the shirt/magnet back in the pickup queue).
 
 ## Free food & refreshments at PTO events
 - **Lagoon and Tide only** (not Reef).
@@ -699,7 +711,7 @@ Do not confuse account number with Square gift-card GAN or transaction ids.`,
       order: 5,
       body: `## Staff → Payments and Refunds (Square / PayPal)
 
-Use **Request refund** on a paid row in **Staff → Payments and Refunds** or **Cove retail → Today’s store pickups**.
+Use **Request refund** on a paid row in **Staff → Payments and Refunds** or **Cove retail → Store pickups**.
 President approves pending requests at the top of **Staff → Payments and Refunds**.
 
 1. Parent requests a refund **in writing** (email or portal message).
