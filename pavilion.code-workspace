@@ -1,0 +1,11 @@
+{
+  "folders": [
+    {
+      "name": "pavilion — Commons / demo",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "window.title": "pavilion — Commons${separator}${activeEditorShort}"
+  }
+}

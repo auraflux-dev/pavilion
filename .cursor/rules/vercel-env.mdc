@@ -1,0 +1,18 @@
+---
+description: robert-4220 Vercel CLI — load .env.vercel before any vercel command
+alwaysApply: true
+---
+
+# Vercel CLI (robert-4220 only)
+
+Pavilion deploys: `commons-pto-demo`, `commons-pto`, `commons-site`. Never treasurer / Stone Hill www.
+
+Before any `vercel` command in this workspace:
+
+```bash
+./scripts/with-vercel-env.sh vercel … --scope robert-4220s-projects
+```
+
+Requires local `.env.vercel` (copy from `.env.vercel.example`). Never commit tokens.
+
+Do **not** `vercel link` or deploy to treasurer. Stone Hill ships from `~/shmspto` via git push only.
