@@ -14,7 +14,7 @@ alwaysApply: true
 2. **Treasurer** Vercel auto-deploys production (`frontend` is Git-connected)
 3. Confirm live: `node scripts/check-prod-deploy.mjs` (from the **shmspto** repo)
 
-Agents **cannot** run `vercel deploy` for SHMS without treasurer login. That is fine. **Git push on treasurer is the deploy path.** Do not create a `frontend` project on robert-4220.
+Agents **cannot** and **must not** run `vercel deploy` for SHMS from the pavilion workspace. **Git push on `auraflux-dev/shmspto` is the deploy path.** Do not create a `frontend` project on robert-4220. Do not `vercel link` this monorepo to treasurer.
 - **Pavilion platform:** `auraflux-dev/pavilion` (this workspace) → `commons-site`, `commons-pto-demo`, `commons-pto`  
 
 Build Pavilion as if SHMS never existed. After an SHMS application ship, **default to deploying Pavilion** from the same SHA (vanilla only. no SHMS branding/copy). Skip only when the change is clearly school-only or Rob says skip.

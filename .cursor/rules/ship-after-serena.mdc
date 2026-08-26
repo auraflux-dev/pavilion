@@ -31,9 +31,11 @@ Stone Hill production deploys from **`auraflux-dev/shmspto`** via treasurer Git 
 
 - **Commit** task files on `pavilion` (do not push Stone Hill via this repo).
 - Pavilion marketing → `commons-site` (`onpavilion.com`).
-- Pavilion demo/trial → `commons-pto-demo` / `commons-pto` as relevant.
+- Pavilion demo/trial → `commons-pto-demo` / `commons-pto` as relevant (**robert-4220 only**).
 - Default: after a Stone Hill ship, also ship Pavilion from the same product change when it applies (vanilla only). Skip for clearly SHMS-only work or if Rob says skip.
+- Shared product catch-up: `node scripts/sync-product-between-repos.mjs --from-shms|--to-shms` then git commit in the destination repo. No treasurer Vercel CLI.
 - Never deploy from a dirty working tree. Never mix Stone Hill and Pavilion env.
+- Never `vercel link` this repo to treasurer.
 
 ## Exceptions
 

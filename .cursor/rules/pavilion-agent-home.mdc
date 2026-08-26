@@ -1,0 +1,52 @@
+---
+description: Pavilion workspace agents stay here; no treasurer Vercel; sync product via script + git
+alwaysApply: true
+---
+
+# Pavilion agent home (critical)
+
+This Cursor workspace is **`pavilion`** (`auraflux-dev/pavilion`). Agents stay here.
+
+## Vercel wall (never mix)
+
+| Account | Use for |
+|---------|---------|
+| **robert-4220s-projects** | Pavilion only: `commons-pto-demo`, `commons-pto`, `commons-site` |
+| **treasurer-4353s-projects** | Stone Hill www only, via **git push** on `~/shmspto`. **Never** `vercel link` / `vercel deploy` from this monorepo |
+
+If `vercel whoami` / MCP only shows treasurer, **stop**. Do not link or deploy. Ask Rob to switch to robert-4220 for Pavilion deploys.
+
+Local `.vercel/project.json` under this repo must **not** point at treasurer. If it does, delete it.
+
+## Product sync (no second Vercel login)
+
+Shared Staff / portal / checkout / Cove product lives in **`pavilion/frontend`**.
+
+Catch demo/trial up from school:
+
+```bash
+node scripts/sync-product-between-repos.mjs --from-shms --dry-run
+node scripts/sync-product-between-repos.mjs --from-shms --apply
+```
+
+Prep www from Pavilion product:
+
+```bash
+node scripts/sync-product-between-repos.mjs --to-shms --dry-run
+node scripts/sync-product-between-repos.mjs --to-shms --apply
+# then commit + git push origin main in ~/shmspto
+```
+
+Stone Hill production = **git push** `auraflux-dev/shmspto` `main`. Treasurer auto-deploys. Agents do not need the treasurer Vercel login.
+
+Check drift: `node scripts/shms-frontend-parity.mjs`
+
+## Edit map
+
+| Work | Where |
+|------|--------|
+| Demo / trial / shared product | `pavilion/frontend` (this repo) |
+| School-only CMS / SHMS ops | Prefer sync from school, or edit `~/shmspto` without leaving pavilion as the agent root when possible |
+| Pavilion marketing site | `commons-site/` |
+
+Do **not** open a separate agent rooted only on `shmspto` unless Rob asks. Port with the sync script instead of hopping Vercel accounts.

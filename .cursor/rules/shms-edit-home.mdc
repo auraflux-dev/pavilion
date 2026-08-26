@@ -1,40 +1,47 @@
 ---
-description: Stone Hill site/portal/staff edit in ~/shmspto — stop monorepo-only ships
+description: Stone Hill www ships from ~/shmspto; Pavilion agents sync product here first
 alwaysApply: true
 ---
 
 # Stone Hill edit home (critical)
 
-www.shmspto.org (visitor site, member portal, staff) deploys from **`auraflux-dev/shmspto`** only.
+www.shmspto.org deploys from **`auraflux-dev/shmspto`** only (git push → treasurer auto-deploy).
 
-## Where to edit
+## Agent home is pavilion
 
-| Surface | Edit and commit in |
-|---------|-------------------|
-| Stone Hill visitor, portal, staff, school APIs | **`~/shmspto`** (`auraflux-dev/shmspto`) |
-| Pavilion marketing / demo / trial | **`pavilion`** (this monorepo) |
+Cursor agents for this product work in the **`pavilion`** workspace. Do not require a second agent rooted on `shmspto` or a treasurer Vercel login to keep trees in sync.
 
-**Do not** implement Stone Hill product in this monorepo's `frontend/` and hope a later port happens. That is how features look done in chat, then vanish from Staff / portal / www.
+| Surface | Source of product work | How it reaches www |
+|---------|------------------------|--------------------|
+| Shared Staff / portal / checkout / Cove | **`pavilion/frontend`** | `node scripts/sync-product-between-repos.mjs --to-shms --apply` then commit/push **`~/shmspto`** |
+| Pavilion demo / trial | **`pavilion/frontend`** | robert-4220 deploy (`commons-pto-demo` / `commons-pto`) |
+| School-only content / ops | **`~/shmspto`** | commit/push `shmspto` only |
 
-If this Cursor workspace is `pavilion` and the task is Stone Hill:
-
-1. Prefer **`move_agent_to_root` → `/Users/robertgregory/shmspto`** (or the local `shmspto` clone) before editing.
-2. If you already edited monorepo `frontend/`, **port the same files into `~/shmspto/frontend/`** in the same turn, then commit/push **shmspto**.
-3. Pushing `pavilion` `main` does **not** update www.
-
-## After a Stone Hill application ship
-
-Run from either repo (sibling clones assumed):
+## Sync commands
 
 ```bash
+# School → Pavilion (demo/trial catch-up)
+node scripts/sync-product-between-repos.mjs --from-shms --dry-run
+node scripts/sync-product-between-repos.mjs --from-shms --apply
+
+# Pavilion → School (prep www ship)
+node scripts/sync-product-between-repos.mjs --to-shms --dry-run
+node scripts/sync-product-between-repos.mjs --to-shms --apply
+
 node scripts/shms-frontend-parity.mjs
 ```
 
-- **Exit 1 / "missing from shmspto"**: those school-facing files never reach www. Port them, commit on `shmspto`, push.
-- **"only in shmspto"**: fine for school-only work. Backport to the monorepo only when Pavilion needs the same product (vanilla).
+Pushing `pavilion` `main` does **not** update www.
+
+## After a school application ship
+
+1. Commit/push **`~/shmspto`**
+2. `node scripts/check-prod-deploy.mjs` (from shmspto)
+3. Keep Pavilion current with `--from-shms` when the change is shared product (vanilla)
 
 ## Anti-patterns (forbidden)
 
-- Editing Staff / portal / school pages only under `pavilion/frontend` and marking the task live.
-- Treating monorepo history ("it was in staff") as proof it is on www.
-- Skipping parity after a multi-file Stone Hill change.
+- `vercel link` / `vercel deploy` Stone Hill from this monorepo (treasurer or robert-4220)
+- Editing shared product only under `~/shmspto` while Pavilion stays stale
+- Marking www live after a pavilion-only commit
+- Hopping Vercel accounts just to copy files (use the sync script + git)

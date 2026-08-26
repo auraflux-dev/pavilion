@@ -24,6 +24,8 @@ Never put Stone Hill `DATABASE_URL` / Wix / Square env on Pavilion projects, or 
 
 At session start: `node scripts/commons-parity.mjs` is informational. Do not force catch-up unless Rob wants Pavilion on that SHA or the task is Pavilion-facing.
 
+**Product sync with Stone Hill** uses git + `scripts/sync-product-between-repos.mjs`, not a second Vercel login. Agents stay in the pavilion workspace. See `pavilion-agent-home.mdc`.
+
 Plaid stays on the **Trial** account until paying Pavilion clients.
 
 Vanillaize / demo gates still apply on Commons demo. After a Pavilion-facing ship, run `node scripts/commons-surface-check.mjs`.
