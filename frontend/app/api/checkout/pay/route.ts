@@ -42,7 +42,7 @@ import {
   type CheckoutConsentKind,
 } from '@/lib/checkout-consent'
 
-type Kind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation'
+type Kind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation' | 'cart'
 
 type StudentRow = {
   _id: string
@@ -65,11 +65,25 @@ export async function POST(req: NextRequest) {
     const saveCard = Boolean(body.saveCard)
     const consents = body.consents as ConsentAck[] | undefined
 
-    if (!kind || !['membership', 'product', 'store-card', 'program', 'event', 'donation'].includes(kind)) {
+    if (!kind || !['membership', 'product', 'store-card', 'program', 'event', 'donation', 'cart'].includes(kind)) {
       return NextResponse.json({ error: 'Invalid checkout kind' }, { status: 400 })
     }
 
-    const consentCheck = validateConsentAcks(kind as CheckoutConsentKind, consents)
+    const cartLineKinds =
+      kind === 'cart' && Array.isArray(body.cartLines)
+        ? ([
+            ...new Set(
+              body.cartLines
+                .map((l: { kind?: string }) => String(l?.kind ?? ''))
+                .filter(Boolean),
+            ),
+          ] as CheckoutConsentKind[])
+        : undefined
+    const consentCheck = validateConsentAcks(
+      kind as CheckoutConsentKind,
+      consents,
+      cartLineKinds,
+    )
     if (!consentCheck.ok) {
       return NextResponse.json({ error: consentCheck.error }, { status: 400 })
     }
@@ -142,6 +156,76 @@ export async function POST(req: NextRequest) {
 
     if (!paymentSource) {
       paymentSource = undefined
+    }
+
+    // ── Enrichment program ──────────────────────────────────────
+    if (kind === 'cart') {
+      const effective = await getEffectiveParentEmail(req)
+      const parentEmail = effective?.parentEmail ?? session.email
+      const accountEmails = [
+        effective?.actorEmail ?? session.email,
+        ...session.emails,
+      ]
+      const { resolveCheckoutIntent, fulfillPaidCheckout } = await import('@/lib/checkout-fulfill')
+      const { withCoveSplit, wantsCoveBalance } = await import('@/lib/checkout-cove-split')
+      const cartLines = Array.isArray(body.cartLines) ? body.cartLines : []
+      const couponCode = String(body.couponCode ?? '').trim() || null
+      let resolved = await resolveCheckoutIntent(
+        { kind: 'cart', cartLines, couponCode },
+        parentEmail,
+        accountEmails,
+      )
+      resolved = await withCoveSplit(
+        resolved,
+        parentEmail,
+        wantsCoveBalance(body.useCoveBalance),
+      )
+      const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
+      const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
+      if (cardCents > 0 && cardCents < 100) {
+        return NextResponse.json(
+          {
+            error:
+              'Remaining card amount is under $1. Pay the full amount by card, or load more on your Cove Digital Card.',
+          },
+          { status: 400 },
+        )
+      }
+      if (cardCents >= 100 && !paymentSource) {
+        return NextResponse.json(
+          { error: 'Enter your credit or debit card for the remaining balance.' },
+          { status: 400 },
+        )
+      }
+      const paymentKey = randomUUID()
+      let paymentId = paymentKey
+      if (cardCents >= 100 && paymentSource) {
+        const payment = await chargePayment({
+          sourceId: paymentSource,
+          amountCents: cardCents,
+          idempotencyKey: paymentKey,
+          customerId,
+          referenceId: resolved.customId,
+          buyerEmailAddress: session.email,
+          note: resolved.description,
+        })
+        paymentId = payment.id ?? paymentKey
+      }
+      const result = await fulfillPaidCheckout({
+        resolved,
+        parentEmail,
+        parentName: name,
+        transactionId: paymentId,
+        paymentMethod:
+          cardCents <= 0
+            ? 'Cove Digital Card'
+            : useStoredCard || saveCard
+              ? 'Square Card on File'
+              : 'Square Card',
+        sourcePrefix: 'square',
+        consents: consentCheck.acks,
+      })
+      return NextResponse.json({ ok: true, ...result, coveCents, cardCents })
     }
 
     // ── Enrichment program ──────────────────────────────────────

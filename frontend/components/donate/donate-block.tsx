@@ -7,11 +7,12 @@
 import { useMemo, useState } from 'react'
 import { Heart } from 'lucide-react'
 import { MemberGate } from '@/components/member-gate'
-import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
+import { useRouter } from 'next/navigation'
+import { buyNowGoCheckout } from '@/lib/cart/buy-actions'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { formString } from '@/lib/copy/form-string'
 import { DONATE_FORM_DEFAULTS } from '@/lib/defaults/visitor-string-defaults'
-import { EditableStringField } from '@/components/cms/editable-string-field'
+import { CmsString } from '@/components/cms/cms-string'
 import {
   DONATION_MAX_DOLLARS,
   DONATION_MIN_DOLLARS,
@@ -27,6 +28,10 @@ type Props = {
   body?: string
   /** CMS stringOverrides from donate-form PageContent */
   copy?: Record<string, string>
+  /** When set with cmsTitleKey/cmsBodyKey, inline-edit home-strings (or other page) headlines. */
+  cmsPage?: string
+  cmsTitleKey?: string
+  cmsBodyKey?: string
   /** Compact layout for home / narrow columns */
   compact?: boolean
 }
@@ -37,11 +42,18 @@ export function DonateBlock({
   title,
   body,
   copy = {},
+  cmsPage,
+  cmsTitleKey,
+  cmsBodyKey,
   compact = false,
 }: Props) {
   const merged = { ...DONATE_FORM_DEFAULTS, ...copy }
   const s = (key: string, fallback: string, vars?: Record<string, string | number | undefined | null>) =>
     formString(merged, key, fallback, vars)
+
+  const D = (key: string, fallback: string, className?: string, inlineTarget?: boolean) => (
+    <CmsString page="donate-form" k={key} fallback={fallback} copy={merged} className={className} inlineTarget={inlineTarget} />
+  )
 
   const resolvedEyebrow = vanillaizeIfDemo(eyebrow ?? s('donate.defaultEyebrow', 'Support SHMS PTO'))
   const resolvedTitle = vanillaizeIfDemo(title ?? s('donate.defaultTitle', 'Donate to the PTO'))
@@ -53,11 +65,11 @@ export function DonateBlock({
       ),
   )
 
+  const router = useRouter()
   const [amount, setAmount] = useState<number>(DONATION_PRESETS[0] ?? 5)
   const [other, setOther] = useState(false)
   const [custom, setCustom] = useState('')
   const [note, setNote] = useState('')
-  const [open, setOpen] = useState(false)
   const [error, setError] = useState('')
   const [thanks, setThanks] = useState('')
 
@@ -86,7 +98,17 @@ export function DonateBlock({
       )
       return
     }
-    setOpen(true)
+    buyNowGoCheckout(
+      {
+        kind: 'donation',
+        title: s('donate.checkoutTitle', 'PTO Donation'),
+        amount: effectiveAmount,
+        href: '/donate',
+        amountCents: Math.round(effectiveAmount * 100),
+        note: note.trim() || undefined,
+      },
+      router,
+    )
   }
 
   return (
@@ -109,40 +131,37 @@ export function DonateBlock({
           {eyebrow != null ? (
             resolvedEyebrow
           ) : (
-            <EditableStringField
-              page="donate-form"
-              stringKey="donate.defaultEyebrow"
-              value={resolvedEyebrow}
-              className={compact ? 'text-white' : 'text-white'}
-            />
+            D('donate.defaultEyebrow', 'Support SHMS PTO', compact ? 'text-white' : 'text-white')
           )}
         </div>
         <h2
           className={`font-bold mb-3 ${compact ? 'text-2xl md:text-3xl text-[#1A1A1A]' : 'text-3xl md:text-4xl text-white'}`}
         >
           {title != null ? (
-            resolvedTitle
+            cmsPage && cmsTitleKey ? (
+              <CmsString page={cmsPage} k={cmsTitleKey} fallback={resolvedTitle} copy={merged} className={compact ? 'text-[#1A1A1A]' : 'text-white'} />
+            ) : (
+              resolvedTitle
+            )
           ) : (
-            <EditableStringField
-              page="donate-form"
-              stringKey="donate.defaultTitle"
-              value={resolvedTitle}
-              className={compact ? 'text-[#1A1A1A]' : 'text-white'}
-            />
+            D('donate.defaultTitle', 'Donate to the PTO', compact ? 'text-[#1A1A1A]' : 'text-white')
           )}
         </h2>
         <p
           className={`mb-8 max-w-xl ${compact ? 'text-[#5A6070]' : 'text-white/85 mx-auto'}`}
         >
           {body != null ? (
-            resolvedBody
+            cmsPage && cmsBodyKey ? (
+              <CmsString page={cmsPage} k={cmsBodyKey} fallback={resolvedBody} copy={merged} className={compact ? 'text-[#5A6070]' : 'text-white/85'} />
+            ) : (
+              resolvedBody
+            )
           ) : (
-            <EditableStringField
-              page="donate-form"
-              stringKey="donate.defaultBody"
-              value={resolvedBody}
-              className={compact ? 'text-[#5A6070]' : 'text-white/85'}
-            />
+            D(
+              'donate.defaultBody',
+              'Give any amount to SHMS PTO. Every dollar funds enrichment, The Cove, and events for Stone Hill students.',
+              compact ? 'text-[#5A6070]' : 'text-white/85',
+            )
           )}
         </p>
 
@@ -153,7 +172,7 @@ export function DonateBlock({
         >
           <div className="flex items-center gap-2 mb-4">
             <Heart className="w-5 h-5" style={{ color: 'var(--brand-green)' }} aria-hidden />
-            <p className="text-sm font-bold text-[#1A1A1A]">{s('donate.chooseAmount', 'Choose an amount')}</p>
+            <p className="text-sm font-bold text-[#1A1A1A]">{D('donate.chooseAmount', 'Choose an amount')}</p>
           </div>
 
           <div className="flex flex-wrap gap-2 mb-4">
@@ -193,14 +212,14 @@ export function DonateBlock({
                   : { backgroundColor: 'var(--brand-warm)', color: '#1A1A1A', borderColor: 'var(--border)' }
               }
             >
-              {s('donate.other', 'Other')}
+              {D('donate.other', 'Other')}
             </button>
           </div>
 
           {other ? (
             <>
               <label className="block text-sm text-[#5A6070] mb-1" htmlFor={`${id}-custom`}>
-                {s('donate.amountLabel', 'Amount ($)')}
+                {D('donate.amountLabel', 'Amount ($)')}
               </label>
               <input
                 id={`${id}-custom`}
@@ -222,7 +241,7 @@ export function DonateBlock({
           ) : null}
 
           <label className="block text-sm text-[#5A6070] mb-1" htmlFor={`${id}-note`}>
-            {s('donate.noteLabel', 'Optional note')}
+            {D('donate.noteLabel', 'Optional note')}
           </label>
           <input
             id={`${id}-note`}
@@ -253,37 +272,14 @@ export function DonateBlock({
           </MemberGate>
 
           <p className="text-xs text-[#5A6070] mt-3 whitespace-pre-line">
-            {vanillaizeIfDemo(
-              s(
-                'donate.giftNote',
-                'Gifts go to SHMS PTO (501(c)(3)), not Loudoun County Public Schools. You will receive a receipt. Consult your tax advisor about deductibility.',
-              ),
+            {D(
+              'donate.giftNote',
+              'Gifts go to SHMS PTO (501(c)(3)), not Loudoun County Public Schools. You will receive a receipt. Consult your tax advisor about deductibility.',
             )}
           </p>
         </div>
       </div>
 
-      <PortalCardCheckout
-        open={open}
-        onClose={() => setOpen(false)}
-        amount={effectiveAmount}
-        title={s('donate.checkoutTitle', 'PTO Donation')}
-        subtitle={note ? `Note: ${note}` : vanillaizeIfDemo(s('donate.thankYou', 'Thank you for supporting SHMS PTO.'))}
-        containerId={`donate-pay-${id}`}
-        payBody={{
-          kind: 'donation',
-          amountCents: Math.round(effectiveAmount * 100),
-          note: note.trim() || undefined,
-        }}
-        onPaid={() => {
-          setOpen(false)
-          setThanks(
-            s('donate.thanksComplete', `Thank you. Your $${effectiveAmount.toFixed(2)} donation is complete.`, {
-              amount: effectiveAmount.toFixed(2),
-            }),
-          )
-        }}
-      />
     </section>
   )
 }

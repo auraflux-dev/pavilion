@@ -1,7 +1,13 @@
 /**
  * Visitor mini-cart lines. Persisted in localStorage so parents can leave and resume.
  */
-export type CartLineKind = 'program' | 'product' | 'membership' | 'event' | 'donation'
+export type CartLineKind =
+  | 'program'
+  | 'product'
+  | 'membership'
+  | 'event'
+  | 'donation'
+  | 'store-card'
 
 export type CartLine = {
   id: string
@@ -19,6 +25,8 @@ export type CartLine = {
   eventId?: string
   quantity?: number
   amountCents?: number
+  /** Optional note for donation lines. */
+  note?: string
   shirtSize?: string | null
   shirtDesign?: string | null
   shirtProductId?: string | null

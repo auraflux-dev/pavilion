@@ -7,16 +7,21 @@ import { Button } from '@/components/ui/button'
 import { ProgramLandingCheckout } from '@/components/programs/program-register-form'
 import type { Program } from '@/lib/api/programs'
 import { displayProgramName } from '@/lib/programs/display-name'
+import {
+  EP_MEETING_DATES_PROPOSED_LABEL,
+  programHasPublicMeetingDates,
+} from '@/lib/programs/ep-meeting-dates'
 import { formatShortDate, programDateBadge } from '@/lib/programs/schedule'
 import {
   formatMemberPriorityUntil,
   getRegistrationPhase,
 } from '@/lib/programs/registration-access'
 import { fallEpClassById, matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
+import { matchSpring2027EpClass, springEpClassById } from '@/lib/programs/spring-2027-ep'
 import { resolveProgramLandingCopy } from '@/lib/programs/resolve-landing-copy'
 import type { ProgramLandingCopy } from '@/lib/programs/landing-copy'
 import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
-import { useProgramUiCopy, ui } from '@/components/programs/program-ui-copy-context'
+import { CmsProgram, useProgramUiCopy, ui } from '@/components/programs/program-ui-copy-context'
 import {
   CATALOG_SEASON_LABELS,
   resolveProgramSeason,
@@ -48,7 +53,9 @@ export function ProgramLanding({
   const title = displayProgramName(program.name)
   const ep =
     fallEpClassById(String(program.fallEpClassId ?? '').trim()) ||
-    matchFall2026EpClass(program.name)
+    springEpClassById(String(program.fallEpClassId ?? '').trim()) ||
+    matchFall2026EpClass(program.name) ||
+    matchSpring2027EpClass(program.name)
   const season = resolveProgramSeason(program)
   const landingCopy =
     landingCopyProp ??
@@ -68,7 +75,8 @@ export function ProgramLanding({
     .filter((s) => /^\d{4}-\d{2}-\d{2}$/.test(s))
   const firstNight = meetingDates[0] || program.startDate
   const lastNight = meetingDates[meetingDates.length - 1] || program.endDate
-  const badge = programDateBadge(firstNight)
+  const datesApproved = programHasPublicMeetingDates(program)
+  const badge = datesApproved ? programDateBadge(firstNight) : null
   const feeLabel = feeTbd
     ? ui(uiCopy, 'register.tuitionTbd')
     : program.fee === 0
@@ -79,7 +87,7 @@ export function ProgramLanding({
   const day = String(program.dayOfWeek ?? '').trim()
   const time = String(program.classTime ?? '').trim()
   const location = String(program.location ?? '').trim()
-  const skips = String(program.skipsNote ?? '').trim()
+  const skips = datesApproved ? String(program.skipsNote ?? '').trim() : ''
   const instructor = String(program.instructorName ?? '').trim()
   const sessionCount = meetingDates.length || Number(program.durationWeeks ?? 0) || 0
   const memberDiscountNote = String(program.memberDiscountNote ?? '').trim()
@@ -115,7 +123,7 @@ export function ProgramLanding({
             className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--brand-green)] hover:opacity-80"
           >
             <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-            {ui(uiCopy, 'landing.backLink')}
+            <CmsProgram k="landing.backLink" fallback={ui(uiCopy, 'landing.backLink')} />
           </Link>
 
           <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
@@ -167,12 +175,16 @@ export function ProgramLanding({
                         {location}
                       </p>
                     ) : null}
-                    {sessionCount > 0 && firstNight && lastNight ? (
+                    {sessionCount > 0 || !datesApproved ? (
                       <p className="flex items-start gap-2">
                         <Calendar className="w-3.5 h-3.5 shrink-0 mt-0.5" aria-hidden="true" />
                         <span className="whitespace-pre-line">
-                          {`${sessionCount} sessions, ${formatShortDate(firstNight)} to ${formatShortDate(lastNight)}`}
-                          {skips
+                          {datesApproved && firstNight && lastNight
+                            ? `${sessionCount} sessions, ${formatShortDate(firstNight)} to ${formatShortDate(lastNight)}`
+                            : sessionCount > 0
+                              ? `${sessionCount} sessions\n${EP_MEETING_DATES_PROPOSED_LABEL}`
+                              : EP_MEETING_DATES_PROPOSED_LABEL}
+                          {datesApproved && skips
                             ? `\n${skips.toLowerCase().startsWith('no class') ? skips : `No class: ${skips}`}`
                             : ''}
                         </span>
@@ -184,19 +196,25 @@ export function ProgramLanding({
                 <dl className="grid grid-cols-2 gap-2 text-sm border-t border-[var(--border)] pt-3">
                   {instructor ? (
                     <>
-                      <dt className="text-[#5A6070]">{ui(uiCopy, 'landing.instructor')}</dt>
+                      <dt className="text-[#5A6070]">
+                        <CmsProgram k="landing.instructor" fallback={ui(uiCopy, 'landing.instructor')} />
+                      </dt>
                       <dd className="font-semibold text-[#1A1A1A] text-right">{instructor}</dd>
                     </>
                   ) : null}
                   {program.grades ? (
                     <>
-                      <dt className="text-[#5A6070]">{ui(uiCopy, 'landing.grades')}</dt>
+                      <dt className="text-[#5A6070]">
+                        <CmsProgram k="landing.grades" fallback={ui(uiCopy, 'landing.grades')} />
+                      </dt>
                       <dd className="font-semibold text-[#1A1A1A] text-right">{program.grades}</dd>
                     </>
                   ) : null}
                   {feeLabel ? (
                     <>
-                      <dt className="text-[#5A6070]">{ui(uiCopy, 'landing.tuition')}</dt>
+                      <dt className="text-[#5A6070]">
+                        <CmsProgram k="landing.tuition" fallback={ui(uiCopy, 'landing.tuition')} />
+                      </dt>
                       <dd className="font-semibold text-[#1A1A1A] text-right whitespace-pre-line">
                         {feeLabel}
                         {memberDiscountNote ? `\n${memberDiscountNote}` : ''}
@@ -207,7 +225,7 @@ export function ProgramLanding({
                     <>
                       <dt className="text-[#5A6070] flex items-center gap-1">
                         <Users className="w-3.5 h-3.5" aria-hidden="true" />
-                        {ui(uiCopy, 'landing.spots')}
+                        <CmsProgram k="landing.spots" fallback={ui(uiCopy, 'landing.spots')} />
                       </dt>
                       <dd className="font-semibold text-[#1A1A1A] text-right">{program.capacity}</dd>
                     </>
@@ -225,7 +243,11 @@ export function ProgramLanding({
 
               {priorityUntilLabel ? (
                 <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-                  {ui(uiCopy, 'catalog.priorityBanner', { until: priorityUntilLabel })}
+                  <CmsProgram
+                    k="catalog.priorityBanner"
+                    fallback={ui(uiCopy, 'catalog.priorityBanner', { until: priorityUntilLabel })}
+                    vars={{ until: priorityUntilLabel }}
+                  />
                 </p>
               ) : null}
 
@@ -236,9 +258,14 @@ export function ProgramLanding({
                   asChild
                 >
                   <a href="#register">
-                    {program.registrationOpen
-                      ? ui(uiCopy, 'landing.registerNow')
-                      : ui(uiCopy, 'landing.registrationOpensSoon')}
+                    {program.registrationOpen ? (
+                      <CmsProgram k="landing.registerNow" fallback={ui(uiCopy, 'landing.registerNow')} />
+                    ) : (
+                      <CmsProgram
+                        k="landing.registrationOpensSoon"
+                        fallback={ui(uiCopy, 'landing.registrationOpensSoon')}
+                      />
+                    )}
                   </a>
                 </Button>
                 {curriculum.length > 0 ? (
@@ -249,9 +276,11 @@ export function ProgramLanding({
                     onClick={() => setCurriculumOpen((v) => !v)}
                     aria-expanded={curriculumOpen}
                   >
-                    {curriculumOpen
-                      ? ui(uiCopy, 'landing.hideCurriculum')
-                      : ui(uiCopy, 'landing.viewCurriculum')}
+                    {curriculumOpen ? (
+                      <CmsProgram k="landing.hideCurriculum" fallback={ui(uiCopy, 'landing.hideCurriculum')} />
+                    ) : (
+                      <CmsProgram k="landing.viewCurriculum" fallback={ui(uiCopy, 'landing.viewCurriculum')} />
+                    )}
                   </Button>
                 ) : null}
                 <Button
@@ -261,16 +290,28 @@ export function ProgramLanding({
                   onClick={copyShareLink}
                 >
                   <Link2 className="w-4 h-4 mr-2" aria-hidden="true" />
-                  {copied ? ui(uiCopy, 'landing.linkCopied') : ui(uiCopy, 'landing.copyLink')}
+                  {copied ? (
+                    <CmsProgram k="landing.linkCopied" fallback={ui(uiCopy, 'landing.linkCopied')} />
+                  ) : (
+                    <CmsProgram k="landing.copyLink" fallback={ui(uiCopy, 'landing.copyLink')} />
+                  )}
                 </Button>
                 <p className="text-center">
                   <Link
                     href={scheduleHref}
                     className="text-sm font-semibold text-[var(--brand-green)] hover:underline underline-offset-2"
                   >
-                    {season === 'spring-2027'
-                      ? ui(uiCopy, 'landing.springScheduleLink')
-                      : ui(uiCopy, 'landing.fallScheduleLink')}
+                    {season === 'spring-2027' ? (
+                      <CmsProgram
+                        k="landing.springScheduleLink"
+                        fallback={ui(uiCopy, 'landing.springScheduleLink')}
+                      />
+                    ) : (
+                      <CmsProgram
+                        k="landing.fallScheduleLink"
+                        fallback={ui(uiCopy, 'landing.fallScheduleLink')}
+                      />
+                    )}
                   </Link>
                 </p>
               </div>
@@ -281,7 +322,10 @@ export function ProgramLanding({
                   className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5"
                 >
                   <h2 className="text-sm font-bold text-[#1A1A1A] mb-3">
-                    {landingCopy?.curriculumTitle || ui(uiCopy, 'landing.curriculumHeading')}
+                    <CmsProgram
+                      k="landing.curriculumHeading"
+                      fallback={landingCopy?.curriculumTitle || ui(uiCopy, 'landing.curriculumHeading')}
+                    />
                   </h2>
                   <ol className="space-y-2 text-sm text-[#5A6070]">
                     {curriculum.map((row) => (
@@ -325,7 +369,7 @@ export function ProgramLanding({
                       title={`${title} video`}
                     >
                       <source src={landingVideo.src} />
-                      {ui(uiCopy, 'landing.videoUnsupported')}
+                      <CmsProgram k="landing.videoUnsupported" fallback={ui(uiCopy, 'landing.videoUnsupported')} />
                     </video>
                   </div>
                 ) : (
@@ -341,10 +385,10 @@ export function ProgramLanding({
                       <Play className="w-6 h-6 ml-0.5" />
                     </div>
                     <p className="text-sm font-semibold text-[#1A1A1A]">
-                      {ui(uiCopy, 'landing.noVideoTitle')}
+                      <CmsProgram k="landing.noVideoTitle" fallback={ui(uiCopy, 'landing.noVideoTitle')} />
                     </p>
                     <p className="text-xs text-[#5A6070] max-w-sm whitespace-pre-line">
-                      {ui(uiCopy, 'landing.noVideoBody')}
+                      <CmsProgram k="landing.noVideoBody" fallback={ui(uiCopy, 'landing.noVideoBody')} />
                     </p>
                   </div>
                 )}

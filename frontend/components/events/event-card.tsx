@@ -4,14 +4,13 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Calendar, Clock, ExternalLink, Link2, MapPin, Ticket } from 'lucide-react'
-import { MemberGate } from '@/components/member-gate'
-import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import {
   earlyBirdCallout,
   eventPublicPath,
   type WixEvent,
 } from '@/lib/api/event-model'
-import { useCart } from '@/lib/cart/store'
+import { useRouter } from 'next/navigation'
+import { addToCartKeepShopping, buyNowGoCheckout } from '@/lib/cart/buy-actions'
 
 interface EventCardProps {
   event: WixEvent
@@ -82,9 +81,8 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
   const { month, day, time } = formatDate(event.dateAndTimeSettings?.startDate)
   const endTime = formatDate(event.dateAndTimeSettings?.endDate).time
   const ticket = event.ticket
+  const router = useRouter()
   const [qty, setQty] = useState(1)
-  const cart = useCart()
-  const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const remaining =
     ticket && ticket.capacity > 0 ? Math.max(0, ticket.capacity - ticket.soldCount) : null
@@ -92,6 +90,25 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
     Boolean(ticket?.onSale && ticket.price > 0 && event.id) &&
     (remaining == null || remaining > 0)
   const total = ticket ? ticket.price * qty : 0
+
+  function eventLine() {
+    return {
+      kind: 'event' as const,
+      title: (event.title || 'Event tickets').replace(/\n+/g, ' '),
+      amount: total,
+      href: '/events',
+      eventId: event.id!,
+      quantity: qty,
+    }
+  }
+
+  function addTicketsToCart() {
+    addToCartKeepShopping(eventLine())
+  }
+
+  function buyTicketsNow() {
+    buyNowGoCheckout(eventLine(), router)
+  }
   const path = eventPublicPath(event)
   const earlyBird = earlyBirdCallout(event.shortDescription) || earlyBirdCallout(event.description)
   const registerHref = event.externalRegistrationUrl
@@ -262,40 +279,20 @@ export function EventCard({ event, detailPage = false }: EventCardProps) {
               </label>
               <Button
                 type="button"
+                className="w-full text-white font-semibold"
+                style={{ backgroundColor: colors.accent }}
+                onClick={buyTicketsNow}
+              >
+                {`Buy now · $${total.toFixed(2)}`}
+              </Button>
+              <Button
+                type="button"
                 variant="outline"
                 className="w-full font-semibold"
-                onClick={() => {
-                  cart.add({
-                    kind: 'event',
-                    title: (event.title || 'Event tickets').replace(/\n+/g, ' '),
-                    amount: total,
-                    href: '/events',
-                    eventId: event.id!,
-                    quantity: qty,
-                  })
-                }}
+                onClick={addTicketsToCart}
               >
                 {`Add to cart · $${total.toFixed(2)}`}
               </Button>
-              <MemberGate label={`Buy tickets · $${total.toFixed(2)}`}>
-                <Button
-                  className="w-full text-white font-semibold"
-                  style={{ backgroundColor: colors.accent }}
-                  onClick={() => setCheckoutOpen(true)}
-                >
-                  Buy tickets · ${total.toFixed(2)}
-                </Button>
-              </MemberGate>
-              <PortalCardCheckout
-                open={checkoutOpen}
-                onClose={() => setCheckoutOpen(false)}
-                amount={total}
-                title={(event.title || 'Event tickets').replace(/\n+/g, ' ')}
-                subtitle={`${qty} ticket${qty === 1 ? '' : 's'} · $${ticket!.price.toFixed(2)} each`}
-                payBody={{ kind: 'event', eventId: event.id!, quantity: qty }}
-                containerId={`event-pay-${event.id}`}
-                onPaid={() => setCheckoutOpen(false)}
-              />
             </>
           ) : null}
           {!canBuy && registerHref ? (

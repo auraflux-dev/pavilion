@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Check, Loader2, Package, Truck } from 'lucide-react'
+import { Check, Loader2, Package, RotateCcw, Truck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   STAFF_FILTER_CARD,
@@ -15,6 +15,7 @@ type Item = {
   parentEmail: string
   parentFirstName?: string
   parentLastName?: string
+  accountNumber?: string
   studentNames?: string
   tier: string
   shirtSize: string
@@ -22,7 +23,7 @@ type Item = {
   label: string
   detail: string
   notes: string
-  status: 'pending' | 'ordered' | string
+  status: 'pending' | 'ordered' | 'picked_up' | 'fulfilled' | string
 }
 
 function parentDisplayName(item: Item) {
@@ -36,6 +37,7 @@ function matchesLookup(item: Item, q: string) {
     item.parentFirstName,
     item.parentLastName,
     parentDisplayName(item),
+    item.accountNumber,
     item.studentNames,
     item.tier,
     item.detail,
@@ -55,6 +57,7 @@ type Props = {
 
 export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
   const [items, setItems] = useState<Item[]>([])
+  const [handedOut, setHandedOut] = useState<Item[]>([])
   const [lookup, setLookup] = useState('')
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
@@ -68,6 +71,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Load failed')
       setItems(d.items ?? [])
+      setHandedOut(d.handedOut ?? [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Load failed')
     } finally {
@@ -79,7 +83,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
     void load()
   }, [load])
 
-  async function setAction(item: Item, action: 'ordered' | 'picked_up') {
+  async function setAction(item: Item, action: 'ordered' | 'picked_up' | 'reopen') {
     setBusy(true)
     setError('')
     setStatus('')
@@ -99,7 +103,9 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
       setStatus(
         action === 'ordered'
           ? `Set aside ${item.label} for ${who}`
-          : `Marked ${item.label} handed out to ${who}`,
+          : action === 'reopen'
+            ? `Reopened ${item.label} for ${who}. Back in the pickup queue.`
+            : `Marked ${item.label} handed out to ${who}`,
       )
       await load()
     } catch (err) {
@@ -113,7 +119,9 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
   const filtered = items.filter((i) => matchesLookup(i, q))
   const shirts = filtered.filter((i) => i.kind === 'spirit_shirt')
   const magnets = filtered.filter((i) => i.kind === 'magnet')
+  const handedFiltered = handedOut.filter((i) => matchesLookup(i, q))
   const cove = variant === 'cove'
+  const showSearch = items.length > 0 || handedOut.length > 0
 
   function Row({ item }: { item: Item }) {
     const ordered = item.status === 'ordered'
@@ -123,6 +131,9 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
         <div className="min-w-0">
           <p className="text-sm font-bold text-[#1A1A1A]">
             {name || item.parentEmail}
+            {item.accountNumber ? (
+              <span className="ml-1.5 font-semibold text-[#5A6070]">· {item.accountNumber}</span>
+            ) : null}
           </p>
           <p className="text-xs text-[#5A6070]">
             {name ? (
@@ -188,14 +199,14 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
           <Package className="w-5 h-5" style={{ color: 'var(--brand-green)' }} />
           {cove ? 'Magnet & shirt pickup' : 'Membership fulfillment queue'}
         </h2>
-        <p className="text-xs text-[#5A6070] mt-1">
+        <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
           {cove
-            ? 'Membership perks only (not candy). Set aside shirt/magnet, then Handed out at handoff. Snack/spirit window orders → Today’s store pickups above.'
-            : 'These memberships are already paid. Shirt and/or magnet are included benefits. Mark Set aside when you pull inventory, then Handed out at The Cove or Back to School Night (Aug 27).'}
+            ? 'Membership perks only (not candy). Set aside shirt/magnet, then Handed out at handoff.\nOnline snack/spirit orders: Cove → Store pickups.\nMarked Handed out by mistake? Search below and Reopen.'
+            : 'Queue = every paid-tier membership that still owes a shirt/magnet (Reef, Lagoon, Tide, faculty, and board-seat Reef).\nMark Set aside when you pull inventory, then Handed out at The Cove or Back to School Night (Aug 27).\nMarked Handed out by mistake? Search account # or name under Handed out, then Reopen.'}
         </p>
       </div>
 
-      {items.length > 0 ? (
+      {showSearch ? (
         <div className={STAFF_FILTER_CARD}>
           <p className={STAFF_FILTER_CARD_TITLE}>Search</p>
           <label className={STAFF_FILTER_LABEL}>
@@ -204,7 +215,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
               type="search"
               value={lookup}
               onChange={(e) => setLookup(e.target.value)}
-              placeholder="Parent name, student, or email"
+              placeholder="Account #, parent name, student, or email"
               autoComplete="off"
               name="staff-fulfillment-lookup"
               className={STAFF_FILTER_INPUT}
@@ -213,13 +224,24 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
         </div>
       ) : null}
 
-      {busy && items.length === 0 ? (
+      {busy && items.length === 0 && handedOut.length === 0 ? (
         <Loader2 className="w-5 h-5 animate-spin text-[var(--brand-green)]" />
-      ) : items.length === 0 ? (
-        <p className="text-sm text-[#5A6070]">Queue clear. Nothing waiting.</p>
-      ) : filtered.length === 0 ? (
-        <p className="text-sm text-[#5A6070]">No matches for “{lookup.trim()}”.</p>
-      ) : (
+      ) : items.length === 0 && handedFiltered.length === 0 ? (
+        <p className="text-sm text-[#5A6070]">
+          {handedOut.length > 0 && q
+            ? `No matches for “${lookup.trim()}”.`
+            : items.length === 0 && handedOut.length === 0
+              ? 'Queue clear. Nothing waiting.'
+              : q
+                ? `No open matches for “${lookup.trim()}”. Check Handed out below.`
+                : 'Queue clear. Nothing waiting.'}
+        </p>
+      ) : filtered.length === 0 && q ? (
+        <p className="text-sm text-[#5A6070]">
+          No open matches for “{lookup.trim()}”.
+          {handedFiltered.length > 0 ? ' See Handed out below to reopen.' : ''}
+        </p>
+      ) : filtered.length > 0 ? (
         <div className="space-y-5">
           {shirts.length > 0 ? (
             <div>
@@ -247,7 +269,77 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
             </div>
           ) : null}
         </div>
-      )}
+      ) : items.length === 0 ? (
+        <p className="text-sm text-[#5A6070]">Queue clear. Nothing waiting.</p>
+      ) : null}
+
+      {handedOut.length > 0 ? (
+        <details
+          className="rounded-xl border border-[var(--border)] bg-white group"
+          open={Boolean(q && handedFiltered.length > 0)}
+        >
+          <summary className="cursor-pointer list-none px-3 py-2 text-xs font-bold text-[#5A6070] flex items-center justify-between gap-2">
+            <span>
+              Show handed out ({q ? `${handedFiltered.length} match` : handedOut.length})
+              {q ? '' : ' · search above to find a family, then Reopen'}
+            </span>
+            <span className="shrink-0 font-bold group-open:hidden">Show</span>
+            <span className="shrink-0 font-bold hidden group-open:inline">Hide</span>
+          </summary>
+          {handedFiltered.length === 0 ? (
+            <p className="px-3 py-2 text-sm text-[#5A6070] border-t border-[var(--border)] bg-white">
+              {q ? `No handed-out matches for “${lookup.trim()}”.` : 'Use search to find a handed-out shirt or magnet.'}
+            </p>
+          ) : (
+            <ul className="divide-y divide-[var(--border)] border-t border-[var(--border)] bg-white">
+              {handedFiltered.map((item) => {
+                const name = parentDisplayName(item)
+                return (
+                  <li
+                    key={`done:${item.membershipId}:${item.kind}`}
+                    className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm text-[#1A1A1A]">
+                        {name || item.parentEmail}
+                        {item.accountNumber ? (
+                          <span className="text-xs text-[#5A6070]"> · {item.accountNumber}</span>
+                        ) : null}
+                      </p>
+                      <p className="text-xs text-[#5A6070]">
+                        {item.label}
+                        {item.kind === 'spirit_shirt'
+                          ? ` · ${item.detail || item.shirtSize || 'size'}`
+                          : ''}
+                        {name ? ` · ${item.parentEmail}` : ''}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={() => {
+                        if (
+                          !window.confirm(
+                            `Reopen ${item.label} for ${name || item.parentEmail}?\nPuts it back in the pickup queue as Ready for pickup.`,
+                          )
+                        ) {
+                          return
+                        }
+                        void setAction(item, 'reopen')
+                      }}
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 mr-1" />
+                      Reopen
+                    </Button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </details>
+      ) : null}
 
       {error ? <p className="text-xs text-red-600">{error}</p> : null}
       {status ? <p className="text-xs text-green-700 font-semibold">{status}</p> : null}

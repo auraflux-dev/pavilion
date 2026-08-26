@@ -15,7 +15,17 @@ type Family = {
   paidMember?: boolean
   membershipTier?: string
   paidMemberCode?: boolean
+  /** Card saved on website (StoredPaymentMethods) — brand/last4 only */
+  savedCard?: { brand: string; last4: string } | null
   students: Array<{ id: string; firstName: string; lastName: string }>
+}
+
+type PendingRemainder = {
+  amount: number
+  parentEmail: string
+  coveFamilyCode: string
+  brand: string
+  last4: string
 }
 
 type Product = {
@@ -69,18 +79,13 @@ function normalizeLookupInput(raw: string): string {
 }
 
 /**
- * In-person sales (window + event tables).
- * How paying? → Stand (cash+card+Cove gift card) / Cove backup / External logger.
+ * Staff actions for in-person sales when Square Stand is not enough.
+ * Stand playbook lives in Help (no Staff action) — only Cove backup / External / Pickup here.
  */
 export function StaffCoveRegister() {
-  type VenueMode = 'event' | 'window'
-  type PayLane = 'stand' | 'cove' | 'external' | 'pickup'
+  type PayLane = 'cove' | 'external' | 'pickup'
   type ExternalTender = 'zelle' | 'paypal' | 'phone_square' | 'other'
 
-  const [venueMode, setVenueMode] = useState<VenueMode>(() => {
-    if (typeof window === 'undefined') return 'event'
-    return window.localStorage.getItem('cove-venue-mode') === 'window' ? 'window' : 'event'
-  })
   const [payLane, setPayLane] = useState<PayLane | null>(null)
   const [code, setCode] = useState('')
   const [mode, setMode] = useState<SessionMode>('idle')
@@ -108,8 +113,10 @@ export function StaffCoveRegister() {
   const [demandQty, setDemandQty] = useState('1')
   const [demandEventNote, setDemandEventNote] = useState('')
   const [demandNotes, setDemandNotes] = useState('')
-  /** Opt-in when Cove balance is short: apply available Cove, then Stand for the rest. */
+  /** Opt-in when Cove balance is short: apply available Cove, then saved card or Stand for the rest. */
   const [allowPartialCove, setAllowPartialCove] = useState(false)
+  /** After partial Cove: charge online saved card, or dismiss if collected on Stand. */
+  const [pendingRemainder, setPendingRemainder] = useState<PendingRemainder | null>(null)
   const codeRef = useRef<HTMLInputElement>(null)
 
   const [productQuery, setProductQuery] = useState('')
@@ -138,14 +145,6 @@ export function StaffCoveRegister() {
       setError(err instanceof Error ? err.message : 'Product load failed'),
     )
   }, [loadProducts])
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem('cove-venue-mode', venueMode)
-    } catch {
-      /* ignore */
-    }
-  }, [venueMode])
 
   const deals = useMemo(() => products.filter((p) => p.featured), [products])
   const regular = useMemo(() => products.filter((p) => !p.featured), [products])
@@ -191,18 +190,17 @@ export function StaffCoveRegister() {
     mode === 'member' &&
     Boolean(family?.hasCard) &&
     Number(family?.balance ?? 0) > 0
+  const canChargeSavedCard =
+    payLane === 'cove' &&
+    mode === 'member' &&
+    Boolean(family?.savedCard?.last4) &&
+    cart.length > 0
 
   function chooseLane(lane: PayLane) {
     setPayLane(lane)
     setError('')
     setStatus('')
     setCart([])
-    if (lane === 'stand') {
-      setMode('idle')
-      setFamily(null)
-      setStatus('Stand: Cash/Card, Gift card (Photos QR), or search Customer → Card on File (PIN/passcode). Staff Charge Cove is backup only.')
-      return
-    }
     if (lane === 'pickup') {
       setMode('idle')
       setFamily(null)
@@ -245,7 +243,12 @@ export function StaffCoveRegister() {
         setFamily({ ...d.family, hasCard: false, balance: 0 })
         setMode('member')
         setCode(trimmed)
-        setStatus('Member found. No Cove card. Use Square Stand (cash or card).')
+        const saved = d.family.savedCard
+        setStatus(
+          saved?.last4
+            ? `Member found. No Cove card. Saved ${saved.brand} ···${saved.last4} ready, or use Square Stand.`
+            : 'Member found. No Cove card. Use Square Stand (cash or card).',
+        )
         setError('')
         return
       }
@@ -254,12 +257,16 @@ export function StaffCoveRegister() {
       setMode('member')
       setCode(trimmed)
       const refreshmentsPerk = Boolean(d.paidMember)
+      const saved = d.savedCard as Family['savedCard']
+      const savedNote = saved?.last4 ? ` · saved ${saved.brand} ···${saved.last4}` : ''
       setStatus(
         refreshmentsPerk
-          ? 'Lagoon/Tide perk (code ends in 9): refreshments free · no charge'
+          ? `Lagoon/Tide perk (code ends in 9): refreshments free · no charge${savedNote}`
           : d.hasCard
-            ? `Cove balance $${Number(d.balance).toFixed(2)}`
-            : 'Member found. No Cove balance (use Square Stand)',
+            ? `Cove balance $${Number(d.balance).toFixed(2)}${savedNote}`
+            : saved?.last4
+              ? `Member found. No Cove balance. Saved ${saved.brand} ···${saved.last4} ready, or Stand.`
+              : 'Member found. No Cove balance (use Square Stand)',
       )
     } catch (err) {
       setFamily(null)
@@ -407,13 +414,16 @@ export function StaffCoveRegister() {
     const short = remainingAfter < 0
     if (short && !allowPartialCove) {
       setError(
-        'Cove balance is short. Check “Apply available Cove, then collect the rest on Square Stand” to continue, or remove items.',
+        family.savedCard?.last4
+          ? 'Cove balance is short. Check “Apply available Cove, then charge saved card (or Stand)” to continue, or remove items.'
+          : 'Cove balance is short. Check “Apply available Cove, then collect the rest on Square Stand” to continue, or remove items.',
       )
       return
     }
     setBusy(true)
     setError('')
     setStatus('')
+    const saved = family.savedCard
     try {
       const r = await fetch('/api/staff/cove/checkout', {
         method: 'POST',
@@ -427,14 +437,84 @@ export function StaffCoveRegister() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Checkout failed')
       const remainder = Number(d.remainderDue ?? 0)
+      const coveCharged = Number(d.coveCharged ?? d.total)
+
+      if (remainder > 0 && saved?.last4) {
+        try {
+          const cardR = await fetch('/api/staff/cove/charge-saved-card', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              code: family.coveFamilyCode,
+              parentEmail: family.parentEmail,
+              amountCents: Math.round(remainder * 100),
+              note: `Cove remainder after $${coveCharged.toFixed(2)}`,
+            }),
+          })
+          const cardD = await cardR.json()
+          if (!cardR.ok) throw new Error(cardD.error ?? 'Saved card charge failed')
+          trackPurchase({
+            transactionId: `cove-saved-${Date.now()}`,
+            value: coveCharged + remainder,
+            items: [
+              {
+                item_name: 'Cove snack window',
+                item_category: 'cove',
+                price: coveCharged + remainder,
+                quantity: 1,
+              },
+            ],
+            surface: 'staff',
+            paymentType: 'cove_then_saved_card',
+          })
+          setStatus(
+            `Cove $${coveCharged.toFixed(2)} + ${saved.brand} ···${saved.last4} $${remainder.toFixed(2)}. New Cove $${Number(d.newBalance).toFixed(2)}.`,
+          )
+          setPendingRemainder(null)
+          resetSale()
+          await loadProducts()
+          return
+        } catch (cardErr) {
+          setPendingRemainder({
+            amount: remainder,
+            parentEmail: family.parentEmail,
+            coveFamilyCode: family.coveFamilyCode,
+            brand: saved.brand,
+            last4: saved.last4,
+          })
+          trackPurchase({
+            transactionId: `cove-balance-${Date.now()}`,
+            value: coveCharged,
+            items: [
+              {
+                item_name: 'Cove snack window',
+                item_category: 'cove',
+                price: coveCharged,
+                quantity: 1,
+              },
+            ],
+            surface: 'staff',
+            paymentType: 'cove_then_stand',
+          })
+          setStatus(
+            `Cove charged $${coveCharged.toFixed(2)}. Saved card failed — retry below or collect $${remainder.toFixed(2)} on Square Stand (custom amount).`,
+          )
+          setError(cardErr instanceof Error ? cardErr.message : 'Saved card charge failed')
+          setCart([])
+          setAllowPartialCove(false)
+          await loadProducts()
+          return
+        }
+      }
+
       trackPurchase({
         transactionId: `cove-balance-${Date.now()}`,
-        value: Number(d.coveCharged ?? d.total),
+        value: coveCharged,
         items: [
           {
             item_name: 'Cove snack window',
             item_category: 'cove',
-            price: Number(d.coveCharged ?? d.total),
+            price: coveCharged,
             quantity: 1,
           },
         ],
@@ -443,13 +523,100 @@ export function StaffCoveRegister() {
       })
       setStatus(
         remainder > 0
-          ? `Cove charged $${Number(d.coveCharged).toFixed(2)}. Collect $${remainder.toFixed(2)} on Square Stand as a custom amount. Do not re-ring these items.`
+          ? `Cove charged $${coveCharged.toFixed(2)}. Collect $${remainder.toFixed(2)} on Square Stand as a custom amount. Do not re-ring these items.`
           : `Cove charged $${Number(d.total).toFixed(2)}. New balance $${Number(d.newBalance).toFixed(2)}.`,
       )
       resetSale()
       await loadProducts()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Checkout failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function chargePendingSavedCard() {
+    if (!pendingRemainder) return
+    setBusy(true)
+    setError('')
+    try {
+      const r = await fetch('/api/staff/cove/charge-saved-card', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: pendingRemainder.coveFamilyCode,
+          parentEmail: pendingRemainder.parentEmail,
+          amountCents: Math.round(pendingRemainder.amount * 100),
+        }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Saved card charge failed')
+      trackPurchase({
+        transactionId: `cove-saved-retry-${Date.now()}`,
+        value: pendingRemainder.amount,
+        items: [
+          {
+            item_name: 'Cove snack remainder',
+            item_category: 'cove',
+            price: pendingRemainder.amount,
+            quantity: 1,
+          },
+        ],
+        surface: 'staff',
+        paymentType: 'saved_card_remainder',
+      })
+      setStatus(
+        `Charged ${pendingRemainder.brand} ···${pendingRemainder.last4} $${pendingRemainder.amount.toFixed(2)}.`,
+      )
+      setPendingRemainder(null)
+      resetSale()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Saved card charge failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  /** Full cart on online saved card — Cove not required. */
+  async function chargeSavedCardForCart() {
+    if (!family?.savedCard?.last4 || !cart.length) return
+    setBusy(true)
+    setError('')
+    setStatus('')
+    const saved = family.savedCard
+    try {
+      const r = await fetch('/api/staff/cove/charge-saved-card', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: family.coveFamilyCode,
+          parentEmail: family.parentEmail,
+          lines: cartPayload(),
+        }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Saved card charge failed')
+      const amount = Number(d.amount ?? cartTotal)
+      trackPurchase({
+        transactionId: `cove-saved-cart-${Date.now()}`,
+        value: amount,
+        items: [
+          {
+            item_name: 'Cove snack window',
+            item_category: 'cove',
+            price: amount,
+            quantity: 1,
+          },
+        ],
+        surface: 'staff',
+        paymentType: 'saved_card',
+      })
+      setStatus(`Charged ${saved.brand} ···${saved.last4} $${amount.toFixed(2)}.`)
+      setPendingRemainder(null)
+      resetSale()
+      await loadProducts()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Saved card charge failed')
     } finally {
       setBusy(false)
     }
@@ -588,6 +755,7 @@ export function StaffCoveRegister() {
     setLetterFilter('All')
     setCategoryFilter('All')
     setAllowPartialCove(false)
+    setPendingRemainder(null)
     if (payLane === 'cove') codeRef.current?.focus()
   }
 
@@ -605,6 +773,8 @@ export function StaffCoveRegister() {
     setProductQuery('')
     setLetterFilter('All')
     setCategoryFilter('All')
+    setPendingRemainder(null)
+    setAllowPartialCove(false)
     setStatus('')
     setError('')
   }
@@ -712,96 +882,55 @@ export function StaffCoveRegister() {
       className="scroll-mt-28 rounded-xl border-2 border-[var(--brand-green)] bg-white p-4 sm:p-5 space-y-4"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <h2 className="text-lg font-bold flex items-center gap-2">
-          <ShoppingCart className="w-5 h-5" style={{ color: 'var(--brand-green)' }} />
-          In-person sales
-        </h2>
-        <div className="flex rounded-lg border border-[var(--border)] overflow-hidden">
-          {(
-            [
-              { id: 'event' as const, label: 'Event' },
-              { id: 'window' as const, label: 'Window' },
-            ] as const
-          ).map((v) => (
-            <button
-              key={v.id}
-              type="button"
-              onClick={() => setVenueMode(v.id)}
-              className={`px-3 py-1.5 text-xs font-bold ${
-                venueMode === v.id
-                  ? 'bg-[var(--brand-green)] text-white'
-                  : 'bg-white text-[#5A6070]'
-              }`}
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <ShoppingCart className="w-5 h-5" style={{ color: 'var(--brand-green)' }} />
+            Staff actions
+          </h2>
+          <p className="text-xs text-[#5A6070] mt-1 max-w-xl leading-relaxed">
+            Cash, card, Cove gift card, and PIN/passcode Card on File run on{' '}
+            <strong>Square Stand</strong> — see Help, not this panel.{' '}
+            <a
+              href="/staff?view=help&article=cove-in-person-manual"
+              className="font-bold underline"
+              style={{ color: 'var(--brand-green)' }}
             >
-              {v.label}
-            </button>
-          ))}
+              In-person manual
+            </a>
+            {' · '}
+            <a
+              href="/staff?view=help&article=cove-in-person-square-stand"
+              className="font-bold underline"
+              style={{ color: 'var(--brand-green)' }}
+            >
+              Square Stand steps
+            </a>
+          </p>
         </div>
-      </div>
-
-      <p className="text-xs text-[#5A6070] leading-relaxed rounded-lg bg-[#FAFCF9] border border-[var(--border)] px-3 py-2">
-        {venueMode === 'event'
-          ? 'Event mode: Stand owns cash + card + Cove gift-card scan · Staff Charge Cove is backup · portal paid → Pickup only. Join QR optional after sale.'
-          : 'Window mode: Stand for cash/card/Cove Wallet · Staff Charge Cove only if no Wallet · portal checkout → Pickup only.'}
-        {' · '}
-        <span className="font-semibold text-[var(--brand-dark)]">
-          Optional. Buy first, join anytime
-        </span>
-      </p>
-
-      <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-[#5A6070] mb-2">
-          How paying?
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          {laneBtn(
-            'stand',
-            'Cash · card · Cove on Stand',
-            'Stand: Cash/Card · Gift card (Photos QR) · or Customer Card on File (PIN/passcode)',
-          )}
-          {laneBtn('cove', 'Cove backup (Staff)', 'Only if Stand Card on File fails / no gift card')}
-          {laneBtn('external', 'External (AM)', 'Zelle · PayPal · phone · no Stand')}
-        </div>
-        <button
-          type="button"
-          onClick={() => chooseLane('pickup')}
-          className={`mt-2 text-xs font-bold underline ${
-            payLane === 'pickup' ? 'text-[var(--brand-green)]' : 'text-[#5A6070]'
-          }`}
-        >
-          Paid in portal / site checkout → Pickup only
-        </button>
         {payLane ? (
-          <Button type="button" variant="outline" size="sm" className="ml-3 mt-2" onClick={clearSession}>
-            <X className="w-3.5 h-3.5 mr-1" /> Change lane
+          <Button type="button" variant="outline" size="sm" onClick={clearSession}>
+            <X className="w-3.5 h-3.5 mr-1" /> Clear
           </Button>
         ) : null}
       </div>
 
-      {payLane === 'stand' ? (
-        <div className="rounded-xl border-2 border-[var(--brand-dark)] bg-[#F5F7F4] p-4 space-y-2">
-          <p className="text-sm font-bold text-[#1A1A1A]">Use Square Stand (all in-person tenders)</p>
-          <ol className="text-sm text-[#5A6070] list-decimal pl-5 space-y-1">
-            <li>Ring snacks / spirit on Stand</li>
-            <li>
-              Cash or Card, or Gift card (Photos QR). Or search Customer by 6-digit/passcode →{' '}
-              <strong>Card on File</strong>
-            </li>
-            <li>Stop. Do not also Charge Cove in Staff</li>
-          </ol>
-          <p className="text-xs text-[#5A6070]">
-            Card on File needs a Cove load in the portal. &quot;Unable to load cards&quot; → cash/card or
-            Staff backup below. Portal-paid orders → Pickup only.
-          </p>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wider text-[#5A6070] mb-2">
+          Need Staff?
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {laneBtn('cove', 'Cove / saved card', 'Lookup · Charge Cove or portal card on file')}
+          {laneBtn('external', 'External (AM)', 'Log Zelle · PayPal · phone · no Stand')}
+          {laneBtn('pickup', 'Portal already paid', 'Jump to store pickups · Handed out')}
         </div>
-      ) : null}
+      </div>
 
       {payLane === 'pickup' ? (
         <div className="rounded-xl border border-[var(--border)] bg-[#FAFCF9] p-4">
           <p className="text-sm text-[#5A6070]">
             No new charge.{' '}
             <a href="#cove-store-pickups" className="font-bold underline" style={{ color: 'var(--brand-green)' }}>
-              Open today&apos;s store pickups
+              Open store pickups
             </a>
           </p>
         </div>
@@ -974,6 +1103,49 @@ export function StaffCoveRegister() {
               No Cove card. Use Square Stand (cash or card).
             </p>
           )}
+          {family.savedCard?.last4 ? (
+            <p className="text-sm font-semibold text-[#1A1A1A]">
+              Saved card on file: {family.savedCard.brand} ···{family.savedCard.last4}
+            </p>
+          ) : (
+            <p className="text-xs text-[#5A6070]">No online saved card — remainder goes to Square Stand.</p>
+          )}
+        </div>
+      ) : null}
+
+      {pendingRemainder ? (
+        <div className="rounded-xl border-2 border-[var(--brand-green)] bg-white p-4 space-y-3">
+          <p className="text-sm font-bold text-[#1A1A1A]">
+            Remainder ${pendingRemainder.amount.toFixed(2)} after Cove
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              disabled={busy}
+              onClick={() => void chargePendingSavedCard()}
+              className="text-white font-bold"
+              style={{ backgroundColor: 'var(--brand-green)' }}
+            >
+              {busy ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                `Charge ${pendingRemainder.brand} ···${pendingRemainder.last4} $${pendingRemainder.amount.toFixed(2)}`
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy}
+              onClick={() => {
+                setStatus(
+                  `Collect $${pendingRemainder.amount.toFixed(2)} on Square Stand as a custom amount. Do not re-ring items.`,
+                )
+                setPendingRemainder(null)
+                resetSale()
+              }}
+            >
+              Collected on Stand
+            </Button>
+          </div>
         </div>
       ) : null}
 
@@ -1124,7 +1296,9 @@ export function StaffCoveRegister() {
               {canUseCove ? (
                 <p className="text-xs" style={{ color: remainingAfter < 0 ? '#b91c1c' : 'var(--brand-green)' }}>
                   {remainingAfter < 0
-                    ? `Cove covers $${balance.toFixed(2)}. Remainder $${Math.abs(remainingAfter).toFixed(2)} on Square Stand.`
+                    ? family?.savedCard?.last4
+                      ? `Cove covers $${balance.toFixed(2)}. Remainder $${Math.abs(remainingAfter).toFixed(2)} → ${family.savedCard.brand} ···${family.savedCard.last4} (or Stand).`
+                      : `Cove covers $${balance.toFixed(2)}. Remainder $${Math.abs(remainingAfter).toFixed(2)} on Square Stand.`
                     : `Cove left after charge: $${remainingAfter.toFixed(2)}`}
                 </p>
               ) : null}
@@ -1134,6 +1308,21 @@ export function StaffCoveRegister() {
               <p className="text-xs text-[#5A6070]">Tap a product tile to add it.</p>
             ) : (
               <>
+                {canChargeSavedCard ? (
+                  <Button
+                    disabled={busy}
+                    onClick={() => void chargeSavedCardForCart()}
+                    className="text-white text-base px-8 py-6 font-bold w-full sm:w-auto"
+                    style={{ backgroundColor: 'var(--brand-green)' }}
+                  >
+                    {busy ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      `Charge ${family!.savedCard!.brand} ···${family!.savedCard!.last4} $${cartTotal.toFixed(2)}`
+                    )}
+                  </Button>
+                ) : null}
+
                 {payLane === 'cove' && canUseCove ? (
                   <div className="space-y-2">
                     {remainingAfter < 0 ? (
@@ -1145,22 +1334,29 @@ export function StaffCoveRegister() {
                           className="mt-0.5"
                         />
                         <span className="whitespace-pre-line">
-                          Optional. Apply available Cove (${balance.toFixed(2)}), then collect $
-                          {Math.abs(remainingAfter).toFixed(2)} on Square Stand.
-                          Leave unchecked if you will use Stand only for the full cart.
+                          {family?.savedCard?.last4
+                            ? `Optional. Apply available Cove ($${balance.toFixed(2)}), then charge saved ${family.savedCard.brand} ···${family.savedCard.last4} for $${Math.abs(remainingAfter).toFixed(2)} (or Stand if card fails). Or use the full-cart saved card button above and skip Cove.`
+                            : `Optional. Apply available Cove ($${balance.toFixed(2)}), then collect $${Math.abs(remainingAfter).toFixed(2)} on Square Stand. Leave unchecked if you will use Stand only for the full cart.`}
                         </span>
                       </label>
                     ) : null}
                     <Button
                       disabled={busy || (remainingAfter < 0 && !allowPartialCove)}
                       onClick={() => void chargeCove()}
-                      className="text-white text-base px-8 py-6 font-bold w-full sm:w-auto"
-                      style={{ backgroundColor: 'var(--brand-green)' }}
+                      variant={canChargeSavedCard ? 'outline' : undefined}
+                      className={
+                        canChargeSavedCard
+                          ? 'text-base px-8 py-6 font-bold w-full sm:w-auto'
+                          : 'text-white text-base px-8 py-6 font-bold w-full sm:w-auto'
+                      }
+                      style={canChargeSavedCard ? undefined : { backgroundColor: 'var(--brand-green)' }}
                     >
                       {busy ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                       ) : remainingAfter < 0 ? (
-                        `Charge Cove $${balance.toFixed(2)}, then Stand $${Math.abs(remainingAfter).toFixed(2)}`
+                        family?.savedCard?.last4
+                          ? `Charge Cove $${balance.toFixed(2)} + ${family.savedCard.brand} ···${family.savedCard.last4} $${Math.abs(remainingAfter).toFixed(2)}`
+                          : `Charge Cove $${balance.toFixed(2)}, then Stand $${Math.abs(remainingAfter).toFixed(2)}`
                       ) : (
                         `Charge Cove $${cartTotal.toFixed(2)}`
                       )}
@@ -1168,9 +1364,9 @@ export function StaffCoveRegister() {
                   </div>
                 ) : null}
 
-                {payLane === 'cove' && !canUseCove ? (
+                {payLane === 'cove' && !canUseCove && !canChargeSavedCard ? (
                   <p className="text-xs text-amber-900 font-semibold">
-                    Need Cove balance to charge here. Switch to Square Stand (cash, card, or load Cove online).
+                    No Cove balance and no saved card. Switch to Square Stand (cash or card), or load Cove / save a card online.
                   </p>
                 ) : null}
 

@@ -16,8 +16,8 @@ export type GaItem = {
 
 type PayKind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation' | 'cart'
 
-export type PayBodyLike = {
-  kind: string
+type PayBodyLike = {
+  kind: PayKind
   tier?: string
   productId?: string
   programId?: string
@@ -140,6 +140,52 @@ export function trackBeginCheckout(opts: {
   surface?: GaSurface
 }) {
   trackEvent('begin_checkout', {
+    currency: 'USD',
+    value: money(opts.value),
+    items: opts.items,
+    surface: opts.surface ?? gaSurface(),
+  })
+}
+
+/** Cart line → GA4 item (no PII). */
+export function itemFromCartLine(line: {
+  kind: string
+  title: string
+  amount: number
+  quantity?: number
+  programId?: string
+  productId?: string
+  variantId?: string
+  tier?: string
+  eventId?: string
+}): GaItem {
+  const quantity = Number(line.quantity) > 0 ? Number(line.quantity) : 1
+  const itemId =
+    line.kind === 'membership'
+      ? line.tier
+      : line.kind === 'product'
+        ? line.variantId || line.productId
+        : line.kind === 'program'
+          ? line.programId
+          : line.kind === 'event'
+            ? line.eventId
+            : line.kind
+  return {
+    item_id: itemId || line.kind,
+    item_name: line.title || line.kind,
+    item_category: line.kind,
+    price: money(line.amount / quantity),
+    quantity,
+  }
+}
+
+/** GA4 recommended add_to_cart — fires on every bag add (including Buy Now). */
+export function trackAddToCart(opts: {
+  value: number
+  items: GaItem[]
+  surface?: GaSurface
+}) {
+  trackEvent('add_to_cart', {
     currency: 'USD',
     value: money(opts.value),
     items: opts.items,

@@ -7,10 +7,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CheckoutConsent } from '@/components/checkout/checkout-consent'
-import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import { MemberGate } from '@/components/member-gate'
+import { useRouter } from 'next/navigation'
 import type { ConsentAck } from '@/lib/checkout-consent'
 import type { Program } from '@/lib/api/programs'
+import { programHasPublicMeetingDates } from '@/lib/programs/ep-meeting-dates'
 import { formatProgramSchedule } from '@/lib/programs/schedule'
 import { displayProgramName } from '@/lib/programs/display-name'
 import {
@@ -23,7 +24,7 @@ import { SpringCompanionOffer } from '@/components/programs/spring-companion-off
 import { resolveProgramSeason } from '@/lib/programs/season'
 import { programPublicPath } from '@/lib/programs/public-path'
 import { useCart } from '@/lib/cart/store'
-import { useProgramUiCopy, ui } from '@/components/programs/program-ui-copy-context'
+import { useProgramUiCopy, ui, CmsProgram } from '@/components/programs/program-ui-copy-context'
 import { MEMBERSHIP_CHOOSE_PATH } from '@/lib/membership-links'
 
 type Student = {
@@ -41,7 +42,7 @@ interface FormProps {
   onRegistered?: () => void
   /** Unique Square mount id when both modal and page can exist. */
   checkoutId: string
-  heading?: string
+  heading?: React.ReactNode
 }
 
 export function ProgramRegisterForm({
@@ -53,6 +54,20 @@ export function ProgramRegisterForm({
   heading,
 }: FormProps) {
   const uiCopy = useProgramUiCopy()
+  const P = ({
+    k,
+    vars,
+    className,
+    inlineTarget,
+  }: {
+    k: string
+    vars?: Record<string, string | number | undefined | null>
+    className?: string
+    inlineTarget?: boolean
+  }) => (
+    <CmsProgram k={k} fallback={ui(uiCopy, k, vars)} vars={vars} className={className} inlineTarget={inlineTarget} />
+  )
+  const router = useRouter()
   const { hasPaidMembership } = useAuth()
   const [students, setStudents] = useState<Student[]>([])
   const [studentId, setStudentId] = useState('')
@@ -62,8 +77,6 @@ export function ProgramRegisterForm({
   const [success, setSuccess] = useState('')
   const [consents, setConsents] = useState<ConsentAck[] | null>(null)
   const [consentComplete, setConsentComplete] = useState(false)
-  const [payOpen, setPayOpen] = useState(false)
-  const [payAmount, setPayAmount] = useState(0)
   const [couponCode, setCouponCode] = useState('')
   const [addCompanion, setAddCompanion] = useState(false)
   const [cartNote, setCartNote] = useState('')
@@ -78,7 +91,9 @@ export function ProgramRegisterForm({
     .split(/[,|;]/)
     .map((t) => t.trim())
     .includes('fee-tbd')
-  const scheduleLine = formatProgramSchedule(program)
+  const scheduleLine = formatProgramSchedule(program, {
+    includeCalendarDates: programHasPublicMeetingDates(program),
+  })
   const springAddon =
     addCompanion && companion && resolveProgramSeason(companion) === 'spring-2027'
       ? companion
@@ -97,7 +112,6 @@ export function ProgramRegisterForm({
     }
     setError('')
     setSuccess('')
-    setPayOpen(false)
     setLoading(true)
     fetch('/api/students')
       .then(async (r) => {
@@ -111,12 +125,37 @@ export function ProgramRegisterForm({
       .finally(() => setLoading(false))
   }, [program.registrationOpen])
 
+  function addProgramLine() {
+    const title = springAddon
+      ? `${displayProgramName(program.name)} + ${displayProgramName(springAddon.name)}`
+      : displayProgramName(program.name)
+    cart.add({
+      kind: 'program',
+      title,
+      amount: checkoutTotal,
+      href: programPublicPath(program),
+      programId: program._id,
+      addonProgramIds: springAddon?._id ? [springAddon._id] : undefined,
+      studentId: studentId || undefined,
+    })
+  }
+
   async function submit() {
     setBusy(true)
     setError('')
     setSuccess('')
     try {
       if (!studentId) throw new Error(ui(uiCopy, 'register.err.selectStudent'))
+
+      // Paid programs: express Buy now (single-line checkout).
+      if (fee > 0 && !feeTbd) {
+        cart.clear()
+        addProgramLine()
+        onClose?.()
+        router.push('/checkout?express=1')
+        return
+      }
+
       if (!consentComplete || !consents) {
         throw new Error(ui(uiCopy, 'register.err.consent'))
       }
@@ -135,23 +174,6 @@ export function ProgramRegisterForm({
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || ui(uiCopy, 'register.err.failed'))
-
-      if (data.requiresPayment) {
-        const amount = Number(data.fee) || program.fee || 0
-        setPayAmount(amount)
-        const pct = Number(data.memberDiscountPercent ?? 0)
-        if (pct > 0) {
-          setSuccess(
-            ui(uiCopy, 'register.success.discount', {
-              pct,
-              list: `$${Number(data.listFee).toFixed(2)}`,
-              amount: `$${amount.toFixed(2)}`,
-            }),
-          )
-        }
-        setPayOpen(true)
-        return
-      }
 
       const waitlisted = String(data.status ?? '') === 'Waitlisted'
       const position = Number(data.waitlistPosition ?? 0)
@@ -195,7 +217,9 @@ export function ProgramRegisterForm({
     }
   }
 
-  const title = heading ?? ui(uiCopy, 'register.heading', { name: program.name })
+  const title = heading ?? (
+    <P k="register.heading" vars={{ name: program.name }} />
+  )
 
   return (
     <>
@@ -207,13 +231,15 @@ export function ProgramRegisterForm({
               className="text-sm font-bold mt-1 whitespace-pre-line"
               style={{ color: 'var(--brand-green)' }}
             >
-              {feeTbd
-                ? ui(uiCopy, 'register.tuitionTbd')
-                : fee <= 0
-                  ? ui(uiCopy, 'register.free')
-                  : springAddon
-                    ? ui(uiCopy, 'register.fallPlusSpring', { total: `$${checkoutTotal.toFixed(2)}` })
-                    : ui(uiCopy, 'register.feeOnly', { total: `$${fee.toFixed(2)}` })}
+              {feeTbd ? (
+                <P k="register.tuitionTbd" />
+              ) : fee <= 0 ? (
+                <P k="register.free" />
+              ) : springAddon ? (
+                <P k="register.fallPlusSpring" vars={{ total: `$${checkoutTotal.toFixed(2)}` }} />
+              ) : (
+                <P k="register.feeOnly" vars={{ total: `$${fee.toFixed(2)}` }} />
+              )}
             </p>
             {!feeTbd && fee > 0 && String(program.memberDiscountNote ?? '').trim() ? (
               <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
@@ -234,20 +260,22 @@ export function ProgramRegisterForm({
         </div>
 
         {!program.registrationOpen ? (
-          <p className="text-sm text-[#5A6070]">{ui(uiCopy, 'register.notOpen')}</p>
+          <p className="text-sm text-[#5A6070]"><P k="register.notOpen" /></p>
         ) : null}
 
         {program.registrationOpen && priorityUntilLabel ? (
           <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-            {blockedByPriority
-              ? ui(uiCopy, 'register.priorityBlocked', { until: priorityUntilLabel })
-              : ui(uiCopy, 'register.priorityWindow', { until: priorityUntilLabel })}
+            {blockedByPriority ? (
+              <P k="register.priorityBlocked" vars={{ until: priorityUntilLabel }} />
+            ) : (
+              <P k="register.priorityWindow" vars={{ until: priorityUntilLabel }} />
+            )}
           </p>
         ) : null}
 
         {program.registrationOpen && loading ? (
           <div className="flex items-center gap-2 text-xs text-[#5A6070]">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" /> {ui(uiCopy, 'register.loading')}
+            <Loader2 className="w-3.5 h-3.5 animate-spin" /> <P k="register.loading" />
           </div>
         ) : null}
 
@@ -260,13 +288,13 @@ export function ProgramRegisterForm({
               window.location.href = MEMBERSHIP_CHOOSE_PATH
             }}
           >
-            {ui(uiCopy, 'register.viewMemberships')}
+            <P k="register.viewMemberships" inlineTarget />
           </Button>
         ) : null}
 
         {program.registrationOpen && !loading && !blockedByPriority && students.length === 0 ? (
           <p className="text-sm text-[#5A6070]">
-            {ui(uiCopy, 'register.addStudent')}
+            <P k="register.addStudent" />
           </p>
         ) : null}
 
@@ -274,7 +302,7 @@ export function ProgramRegisterForm({
           <>
             <div>
               <label className="block text-xs font-semibold text-[#5A6070] mb-1">
-                {ui(uiCopy, 'register.studentLabel')}
+                <P k="register.studentLabel" />
               </label>
               <select
                 value={studentId}
@@ -289,8 +317,7 @@ export function ProgramRegisterForm({
                 ))}
               </select>
               <p className="text-[11px] text-[#5A6070] mt-1.5">
-                Registration needs parent phone, emergency contact, and authorized pick-up on the
-                student profile. Edit those in Member Portal → Edit student.
+                <P k="register.profileHint" />
               </p>
             </div>
 
@@ -308,19 +335,17 @@ export function ProgramRegisterForm({
 
             {fee > 0 && !feeTbd ? (
               <label className="block text-xs font-semibold text-[#5A6070]">
-                Discount code
+                <P k="register.couponLabel" />
                 <input
                   type="text"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  placeholder="Optional override"
+                  placeholder={ui(uiCopy, 'register.couponPlaceholder')}
                   autoComplete="off"
                   className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-mono tracking-wide uppercase"
                 />
                 <span className="mt-1.5 block text-[11px] font-normal text-[#5A6070] whitespace-pre-line">
-                  {`Membership tier % applies automatically.
-Board 75% (one enrichment program per season) also applies automatically when unused.
-Only paste a code here if you need to override.`}
+                  <P k="register.discountHint" />
                 </span>
               </label>
             ) : null}
@@ -339,37 +364,42 @@ Only paste a code here if you need to override.`}
                 disabled={!studentId || feeTbd}
                 className="w-full font-bold"
                 onClick={() => {
-                  const title = springAddon
-                    ? `${displayProgramName(program.name)} + ${displayProgramName(springAddon.name)}`
-                    : displayProgramName(program.name)
-                  cart.add({
-                    kind: 'program',
-                    title,
-                    amount: checkoutTotal,
-                    href: programPublicPath(program),
-                    programId: program._id,
-                    addonProgramIds: springAddon?._id ? [springAddon._id] : undefined,
-                    studentId: studentId || undefined,
-                  })
+                  addProgramLine()
                   setCartNote(ui(uiCopy, 'register.addToCartNote'))
                   onClose?.()
+                  cart.setOpen(true)
                 }}
               >
-                {ui(uiCopy, 'register.addToCart', { total: `$${checkoutTotal.toFixed(2)}` })}
+                <P k="register.addToCart" vars={{ total: `$${checkoutTotal.toFixed(2)}` }} inlineTarget />
               </Button>
               <Button
                 type="button"
-                onClick={submit}
-                disabled={busy || !studentId || !consentComplete || feeTbd}
+                onClick={() => {
+                  // Paid enroll: express Buy now (single-line checkout).
+                  if (fee > 0 || checkoutTotal > 0) {
+                    cart.clear()
+                    addProgramLine()
+                    onClose?.()
+                    router.push('/checkout?express=1')
+                    return
+                  }
+                  void submit()
+                }}
+                disabled={
+                  busy ||
+                  !studentId ||
+                  feeTbd ||
+                  (fee <= 0 && !consentComplete)
+                }
                 className="w-full text-white font-bold"
                 style={{ backgroundColor: 'var(--brand-green)' }}
               >
                 {busy ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : fee > 0 && !feeTbd ? (
-                  ui(uiCopy, 'register.payNow', { total: `$${checkoutTotal.toFixed(2)}` })
+                  <P k="register.payNow" vars={{ total: `$${checkoutTotal.toFixed(2)}` }} inlineTarget />
                 ) : (
-                  ui(uiCopy, 'register.complete')
+                  <P k="register.complete" inlineTarget />
                 )}
               </Button>
               {cartNote ? (
@@ -384,41 +414,6 @@ Only paste a code here if you need to override.`}
         ) : null}
       </div>
 
-      <PortalCardCheckout
-        open={payOpen}
-        onClose={() => setPayOpen(false)}
-        amount={payAmount}
-        title={displayProgramName(program.name)}
-        subtitle={ui(uiCopy, 'register.checkoutSubtitle')}
-        payBody={{
-          kind: 'program',
-          programId: program._id,
-          studentId,
-          addonProgramIds: springAddon?._id ? [springAddon._id] : undefined,
-          couponCode: couponCode.trim() || undefined,
-          consents: consents ?? undefined,
-        }}
-        prefilledConsents={consents ?? undefined}
-        onPaid={(result) => {
-          setPayOpen(false)
-          const waitlisted = String(result?.status ?? '') === 'Waitlisted'
-          const position = Number(result?.waitlistPosition ?? 0)
-          if (waitlisted) {
-            setSuccess(
-              position > 0
-                ? ui(uiCopy, 'register.success.paidWaitlist', {
-                    positionLine: ui(uiCopy, 'register.success.paidWaitlistPosition', { position }),
-                  })
-                : ui(uiCopy, 'register.success.paidWaitlistNoPosition'),
-            )
-          } else {
-            setSuccess(ui(uiCopy, 'register.success.paidEnrolled', { name: program.name }))
-          }
-          onRegistered?.()
-          if (onClose) setTimeout(() => onClose(), waitlisted ? 3200 : 1400)
-        }}
-        containerId={checkoutId}
-      />
     </>
   )
 }
@@ -433,6 +428,9 @@ export function ProgramLandingCheckout({
 }) {
   const uiCopy = useProgramUiCopy()
   const comingSoon = !program.registrationOpen
+  const checkoutHeading = (
+    <CmsProgram k="register.checkoutHeading" fallback={ui(uiCopy, 'register.checkoutHeading')} />
+  )
   return (
     <div
       id="register"
@@ -444,11 +442,13 @@ export function ProgramLandingCheckout({
             program={program}
             companion={companion}
             checkoutId={`program-square-page-${program._id}`}
-            heading={ui(uiCopy, 'register.checkoutHeading')}
+            heading={checkoutHeading}
           />
           <div className="mt-4">
             <MemberGate label={ui(uiCopy, 'landing.checkoutComingSoonGate')}>
-              <p className="text-sm text-[#5A6070]">{ui(uiCopy, 'landing.checkoutSignedIn')}</p>
+              <p className="text-sm text-[#5A6070]">
+                <CmsProgram k="landing.checkoutSignedIn" fallback={ui(uiCopy, 'landing.checkoutSignedIn')} />
+              </p>
             </MemberGate>
           </div>
         </>
@@ -458,7 +458,7 @@ export function ProgramLandingCheckout({
             program={program}
             companion={companion}
             checkoutId={`program-square-page-${program._id}`}
-            heading={ui(uiCopy, 'register.checkoutHeading')}
+            heading={checkoutHeading}
           />
         </MemberGate>
       )}

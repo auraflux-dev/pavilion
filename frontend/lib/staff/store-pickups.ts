@@ -1,8 +1,10 @@
 /**
- * Today's Cove store window pickups. paid portal/site snack & spirit lines.
- * Window: Mon to Fri 8:25 to 8:50 AM America/New_York (soft buffer 8:20 to 8:55).
+ * Online Cove product pickups (portal/site snack & spirit lines).
+ * Open queue = Paid and not yet handed out (any day).
+ * Morning window flag: Mon–Fri 8:25–8:50 AM ET (soft buffer 8:20–8:55).
  */
 import { getWixClient } from '@/lib/wix-client'
+import { parseRefundAmountDollars } from '@/lib/refunds/refund-amount'
 
 export const STORE_WINDOW_TZ = 'America/New_York'
 /** Inclusive soft buffer around the posted 8:25 to 8:50 window. */
@@ -24,6 +26,8 @@ export type StorePickupItem = {
   status: string
   handedOut: boolean
   inWindow: boolean
+  refundStatus: string
+  refundedAmountDollars: number
 }
 
 function partsInTz(d: Date, timeZone = STORE_WINDOW_TZ) {
@@ -79,8 +83,14 @@ export function isCoveProductPayment(row: {
 }): boolean {
   const source = String(row.source ?? '')
   const program = String(row.programName ?? '')
+  // Register / Stand tenders are already fulfilled at sale — not an open pickup.
+  if (/register_redeem|pos_stand|terminal/i.test(source)) return false
   if (/_cove_product$/i.test(source)) return true
-  if (/^The Cove:/i.test(program) && !/Digital Card|Reload|First Load/i.test(program)) {
+  // Online checkout ledger: "The Cove: …" or "The Cove. …" product lines only.
+  if (
+    /^The Cove[:.]\s+/i.test(program) &&
+    !/Digital Card|Reload|First Load|snack window/i.test(program)
+  ) {
     return true
   }
   return false
@@ -92,7 +102,7 @@ export function isHandedOutStatus(status: string): boolean {
 
 function productLabel(programName: string): string {
   return String(programName ?? '')
-    .replace(/^The Cove:\s*/i, '')
+    .replace(/^The Cove[:.]\s*/i, '')
     .trim() || 'Cove item'
 }
 
@@ -115,6 +125,8 @@ export function startOfTodayEtUtcSafe(now = new Date()): Date {
 export async function listTodayStorePickups(opts?: {
   includeHandedOut?: boolean
   now?: Date
+  /** How far back to scan Payments for open / recent handed-out lines. */
+  lookbackDays?: number
 }): Promise<{
   dateEt: string
   weekday: boolean
@@ -123,22 +135,24 @@ export async function listTodayStorePickups(opts?: {
 }> {
   const now = opts?.now ?? new Date()
   const includeHandedOut = opts?.includeHandedOut !== false
+  const lookbackDays = Math.max(7, Math.min(180, opts?.lookbackDays ?? 90))
   const dateEt = etCalendarDate(now)
   const weekday = isWeekdayEt(now)
-  const start = startOfTodayEtUtcSafe(now)
   const client = getWixClient()
+
+  const since = new Date(now.getTime() - lookbackDays * 24 * 60 * 60 * 1000)
 
   let rows: Record<string, unknown>[] = []
   try {
     const result = await client.items
       .query('Payments')
-      .ge('paymentDate', start.toISOString())
+      .ge('paymentDate', since.toISOString())
       .descending('paymentDate')
-      .limit(100)
+      .limit(300)
       .find()
     rows = (result.items ?? []) as Record<string, unknown>[]
   } catch {
-    const result = await client.items.query('Payments').descending('paymentDate').limit(100).find()
+    const result = await client.items.query('Payments').descending('paymentDate').limit(300).find()
     rows = (result.items ?? []) as Record<string, unknown>[]
   }
 
@@ -147,14 +161,12 @@ export async function listTodayStorePickups(opts?: {
     if (!isCoveProductPayment(row as { source?: string; programName?: string })) continue
     const paymentDateRaw = row.paymentDate ? new Date(String(row.paymentDate)) : null
     if (!paymentDateRaw || Number.isNaN(paymentDateRaw.getTime())) continue
-    if (etCalendarDate(paymentDateRaw) !== dateEt) continue
-    if (!isInStoreWindow(paymentDateRaw)) continue
 
     const status = String(row.status ?? '')
     const handedOut = isHandedOutStatus(status)
     if (handedOut && !includeHandedOut) continue
-    // Skip non-paid / needs reconciliation
-    if (!/^paid/i.test(status.trim()) && status.trim() !== '') continue
+    // Skip refunded / non-paid
+    if (!/^paid/i.test(status.trim())) continue
 
     const programName = String(row.programName ?? '')
     items.push({
@@ -168,7 +180,9 @@ export async function listTodayStorePickups(opts?: {
       source: String(row.source ?? ''),
       status,
       handedOut,
-      inWindow: true,
+      inWindow: isInStoreWindow(paymentDateRaw),
+      refundStatus: String(row.refundStatus ?? ''),
+      refundedAmountDollars: parseRefundAmountDollars(row.refundedAmountDollars) ?? 0,
     })
   }
 
@@ -181,7 +195,8 @@ export async function listTodayStorePickups(opts?: {
   return {
     dateEt,
     weekday,
-    windowLabel: 'Mon to Fri 8:25 to 8:50 AM ET (list uses 8:20 to 8:55 buffer)',
+    windowLabel:
+      'Open online Cove snack & spirit orders (any day). Morning window Mon–Fri 8:25–8:50 AM ET is flagged when the payment fell in that slot.',
     items,
   }
 }
@@ -236,5 +251,7 @@ export async function markStorePickupHandedOut(
     status: nextStatus,
     handedOut: action === 'handed_out',
     inWindow: isInStoreWindow(new Date(paymentDate)),
+    refundStatus: String(existing.refundStatus ?? ''),
+    refundedAmountDollars: parseRefundAmountDollars(existing.refundedAmountDollars) ?? 0,
   }
 }

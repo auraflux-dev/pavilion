@@ -1,13 +1,12 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { usePathname } from 'next/navigation'
 import { Lock, Loader2, X } from 'lucide-react'
-import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
+import { useRouter } from 'next/navigation'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
-import { useCart } from '@/lib/cart/store'
-import { useDialogA11y } from '@/lib/hooks/use-dialog-a11y'
+import { addToCartKeepShopping, buyNowGoCheckout } from '@/lib/cart/buy-actions'
 
 type CatalogVariant = {
   id: string
@@ -36,14 +35,12 @@ interface Props {
 export function SpiritWearBuyButton({ productId, price, productName, disabled }: Props) {
   const { status } = useAuth()
   const pathname = usePathname()
-  const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const router = useRouter()
   const [pickerOpen, setPickerOpen] = useState(false)
   const [loadingVariants, setLoadingVariants] = useState(false)
   const [detail, setDetail] = useState<CatalogDetail | null>(null)
   const [selectedVariantId, setSelectedVariantId] = useState('')
   const [error, setError] = useState('')
-  const cart = useCart()
-  const panelRef = useRef<HTMLDivElement>(null)
 
   const selected =
     detail?.variants.find((v) => v.id === selectedVariantId) ??
@@ -74,7 +71,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
         return
       }
       setSelectedVariantId(variants[0]?.id ?? '')
-      setCheckoutOpen(true)
+      buyNow(variants[0]?.id ?? '', data)
     } catch {
       setError('Could not load options')
     } finally {
@@ -82,22 +79,53 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
     }
   }
 
-  function continueToPay() {
+  function productLine(variantId: string, catalog: CatalogDetail | null = detail) {
+    const selectedRow =
+      catalog?.variants.find((v) => v.id === variantId) ?? catalog?.variants[0] ?? null
+    const lineAmount = selectedRow?.price ?? price
+    const lineTitle = selectedRow
+      ? `${productName || catalog?.name || vanillaizeIfDemo('The Cove')}. ${selectedRow.label}`
+      : productName || vanillaizeIfDemo('The Cove')
+    return {
+      kind: 'product' as const,
+      title: lineTitle,
+      amount: lineAmount,
+      href: pathname || '/cove',
+      productId,
+      variantId: variantId || undefined,
+    }
+  }
+
+  function addToCartOnly(variantId: string, catalog: CatalogDetail | null = detail) {
+    addToCartKeepShopping(productLine(variantId, catalog))
+    setPickerOpen(false)
+  }
+
+  function buyNow(variantId: string, catalog: CatalogDetail | null = detail) {
+    buyNowGoCheckout(productLine(variantId, catalog), router)
+    setPickerOpen(false)
+  }
+
+  function continueBuyNow() {
     if (!selectedVariantId && (detail?.variants.length ?? 0) > 1) {
       setError('Choose a color')
       return
     }
-    setPickerOpen(false)
-    setCheckoutOpen(true)
+    buyNow(selectedVariantId)
+  }
+
+  function continueAddToCart() {
+    if (!selectedVariantId && (detail?.variants.length ?? 0) > 1) {
+      setError('Choose a color')
+      return
+    }
+    addToCartOnly(selectedVariantId)
   }
 
   function closeAll() {
     setPickerOpen(false)
-    setCheckoutOpen(false)
     setError('')
   }
-
-  useDialogA11y(pickerOpen, closeAll, panelRef)
 
   if (disabled) {
     return (
@@ -143,7 +171,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
         style={{ backgroundColor: 'var(--brand-green)' }}
       >
         {loadingVariants ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : null}
-        Buy
+        Buy now
       </button>
       {error && !pickerOpen ? (
         <p className="mt-1 text-[11px] text-red-700">{error}</p>
@@ -159,10 +187,7 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
             if (e.target === e.currentTarget) closeAll()
           }}
         >
-          <div
-            ref={panelRef}
-            className="w-full max-w-sm rounded-2xl bg-white shadow-xl border border-[var(--border)] p-5"
-          >
+          <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl border border-[var(--border)] p-5">
             <div className="flex items-start justify-between gap-3 mb-3">
               <div>
                 <h2
@@ -213,49 +238,22 @@ export function SpiritWearBuyButton({ productId, price, productName, disabled }:
 
             <button
               type="button"
-              onClick={() => {
-                cart.add({
-                  kind: 'product',
-                  title: chargeTitle,
-                  amount: chargeAmount,
-                  href: pathname || '/cove',
-                  productId,
-                  variantId: selectedVariantId || undefined,
-                })
-                setPickerOpen(false)
-              }}
-              className="w-full text-sm font-bold py-2.5 rounded-full border-2 border-[var(--brand-green)] text-[var(--brand-green)] bg-white mb-2"
+              onClick={continueBuyNow}
+              className="w-full text-sm font-bold py-2.5 rounded-full text-white mb-2"
+              style={{ backgroundColor: 'var(--brand-green)' }}
             >
-              Add to cart · ${chargeAmount.toFixed(2)}
+              Buy now · ${chargeAmount.toFixed(2)}
             </button>
             <button
               type="button"
-              onClick={continueToPay}
-              className="w-full text-sm font-bold py-2.5 rounded-full text-white"
-              style={{ backgroundColor: 'var(--brand-green)' }}
+              onClick={continueAddToCart}
+              className="w-full text-sm font-bold py-2.5 rounded-full border-2 border-[var(--brand-green)] text-[var(--brand-green)] bg-white"
             >
-              Pay now · ${chargeAmount.toFixed(2)}
+              Add to cart · ${chargeAmount.toFixed(2)}
             </button>
           </div>
         </div>
       ) : null}
-
-      <PortalCardCheckout
-        open={checkoutOpen}
-        onClose={closeAll}
-        amount={chargeAmount}
-        title={chargeTitle}
-        subtitle="Pay with your credit or debit card. stays on shmspto.org"
-        payBody={{
-          kind: 'product',
-          productId,
-          ...(selectedVariantId ? { variantId: selectedVariantId } : {}),
-        }}
-        containerId={`cove-pay-${productId.slice(0, 8)}`}
-        onPaid={() => {
-          window.dispatchEvent(new CustomEvent('cove-purchase'))
-        }}
-      />
     </>
   )
 }

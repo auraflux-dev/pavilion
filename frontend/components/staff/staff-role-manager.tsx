@@ -222,6 +222,28 @@ export function StaffRoleManager() {
     }
   }
 
+  async function ensureBoardMembership() {
+    setBusy(true)
+    setStatus('')
+    try {
+      const response = await fetch('/api/staff/roles/ensure-membership', { method: 'POST' })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.error ?? 'Could not grant Membership')
+      await load()
+      const updated = Number(data.updated ?? 0)
+      const already = Number(data.already ?? 0)
+      setStatus(
+        updated > 0
+          ? `Membership added for ${updated} board seat${updated === 1 ? '' : 's'} (${already} already had it). They can open Membership → Fulfillments at events.`
+          : `All board seats already have Membership (${already} checked).`,
+      )
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Could not grant Membership')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const moneyExtra = extras.includes('payments') || extras.includes('budget')
   const canSave = Boolean(email && (roles.length > 0 || extras.length > 0))
 
@@ -240,17 +262,27 @@ export function StaffRoleManager() {
         </p>
         {scope === 'all' ? (
           <div className="mt-3">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={syncBusy || busy}
-              onClick={() => void syncFromGoogle()}
-            >
-              {syncBusy ? 'Syncing…' : 'Sync from Google Workspace'}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={syncBusy || busy}
+                onClick={() => void syncFromGoogle()}
+              >
+                {syncBusy ? 'Syncing…' : 'Sync from Google Workspace'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={syncBusy || busy}
+                onClick={() => void ensureBoardMembership()}
+              >
+                {busy ? 'Updating…' : 'Give all board seats Membership'}
+              </Button>
+            </div>
             <p className="text-[11px] text-[#5A6070] mt-1.5 whitespace-pre-line">
               {vanillaizeIfDemo(
-                `Pulls active @${isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org'} users into this list.\nNew seats start with no roles. Assign role and programs here.\nRequires Connect Google as a Workspace admin (Staff → Inbox).`,
+                `Pulls active @${isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org'} users into this list.\nNew seats start with no roles. Assign role and programs here.\nRequires Connect Google as a Workspace admin (Staff → Inbox).\n“Give all board seats Membership” unlocks Membership → Fulfillments for every board role (events, programs, etc.). Instructors unchanged.`,
               )}
             </p>
           </div>

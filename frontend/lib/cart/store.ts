@@ -7,6 +7,7 @@
 import { useCallback, useSyncExternalStore } from 'react'
 import type { CartLine, CartState } from '@/lib/cart/types'
 import { CART_STORAGE_KEY } from '@/lib/cart/types'
+import { itemFromCartLine, trackAddToCart } from '@/lib/ga'
 
 const EMPTY: CartState = { lines: [], open: false }
 
@@ -68,6 +69,11 @@ export function addCartLine(input: Omit<CartLine, 'id' | 'addedAt'> & { id?: str
   const key = cartLineKey(line)
   const without = memory.lines.filter((l) => cartLineKey(l) !== key)
   setState({ lines: [...without, line], open: true })
+  // `amount` is the line total (events include qty; others are unit/line price).
+  trackAddToCart({
+    value: Number.isFinite(line.amount) ? Math.round(line.amount * 100) / 100 : 0,
+    items: [itemFromCartLine(line)],
+  })
   return line
 }
 
@@ -104,6 +110,7 @@ function cartLineKey(line: CartLine): string {
   if (line.kind === 'membership') return `membership:${line.tier}`
   if (line.kind === 'event') return `event:${line.eventId}`
   if (line.kind === 'donation') return `donation:${line.amountCents}`
+  if (line.kind === 'store-card') return `store-card:${line.studentId || ''}`
   return line.id
 }
 

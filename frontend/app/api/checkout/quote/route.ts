@@ -251,6 +251,43 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    if (kind === 'cart') {
+      const session = await getMemberSession(req)
+      if (!session) return NextResponse.json({ error: 'Log in to check out' }, { status: 401 })
+      const effective = await getEffectiveParentEmail(req)
+      const parentEmail = effective?.parentEmail ?? session.email
+      const accountEmails = [
+        effective?.actorEmail ?? session.email,
+        ...session.emails,
+      ]
+      const cartLines = Array.isArray(body.cartLines) ? body.cartLines : []
+      const { resolveCheckoutIntent } = await import('@/lib/checkout-fulfill')
+      const { withCoveSplit, wantsCoveBalance } = await import('@/lib/checkout-cove-split')
+      let resolved = await resolveCheckoutIntent(
+        {
+          kind: 'cart',
+          cartLines,
+          couponCode: String(body.couponCode ?? '').trim() || null,
+        },
+        parentEmail,
+        accountEmails,
+      )
+      resolved = await withCoveSplit(
+        resolved,
+        parentEmail,
+        wantsCoveBalance(body.useCoveBalance),
+      )
+      return NextResponse.json({
+        kind,
+        amount: resolved.amount,
+        listAmount: resolved.amount,
+        name: resolved.description,
+        coveDollars: Math.round(Number(resolved.meta.coveCents ?? 0) || 0) / 100,
+        cardDollars: Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0) / 100,
+        coveBalance: Number(resolved.meta.coveBalance ?? 0) || 0,
+      })
+    }
+
     return NextResponse.json({ error: 'Invalid kind' }, { status: 400 })
   } catch (err) {
     console.error('/api/checkout/quote', err)

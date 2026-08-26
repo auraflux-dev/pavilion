@@ -3,6 +3,8 @@
 import { createContext, useContext } from 'react'
 import { PROGRAM_UI_DEFAULTS } from '@/lib/defaults/program-ui-defaults'
 import { programUiString } from '@/lib/api/program-ui-copy'
+import { CmsString } from '@/components/cms/cms-string'
+import type { ComponentProps } from 'react'
 
 const ProgramUiCopyContext = createContext<Record<string, string>>(PROGRAM_UI_DEFAULTS)
 
@@ -33,4 +35,12 @@ export function ui(
 export function useProgramUi(key: string, vars?: Record<string, string | number | undefined | null>) {
   const copy = useProgramUiCopy()
   return programUiString(copy, key, vars)
+}
+
+type CmsProgramProps = Omit<ComponentProps<typeof CmsString>, 'page' | 'copy'>
+
+/** Program UI string: Staff → program-strings + admin inline edit (same key). */
+export function CmsProgram({ k, ...rest }: CmsProgramProps & { k: string }) {
+  const copy = useProgramUiCopy()
+  return <CmsString page="program-strings" k={k} copy={copy} {...rest} />
 }

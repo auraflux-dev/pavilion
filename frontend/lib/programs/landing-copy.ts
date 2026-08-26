@@ -61,9 +61,9 @@ Pre-algebra helps. No contest experience required.`,
 Loudoun Robotics at Stone Hill.
 
 • Four adults every night, including an LCPS-sub lead
-• SPIKE Prime kits and vendor laptops
+• LEGO MINDSTORMS EV3 kits and vendor laptops
 • Engineering notebook students keep
-• Fall family showcase at week 12
+• Family sumo tournament at week 12
 
 Cap 30. Spring continues Blocks to Python.`,
 }
@@ -195,26 +195,74 @@ const FALL: Record<string, ProgramLandingCopy> = {
   robotics: {
     eyebrow: 'Fall 2026 · STEM',
     pitch:
-      'Teams of 3. Robot and laptop included.\nNothing to buy or bring.',
+      'Learn how robots work, then build and program your own.\nTerm ends with a sumo tournament for families.',
     highlights: [
       'Loudoun Robotics. Four adults every night, including an LCPS-sub lead.',
-      'SPIKE Prime kits and vendor laptops. Engineering notebook you keep.',
-      'Twelve Wednesday nights. Fall showcase at week 12.',
+      'LEGO MINDSTORMS EV3 kits and vendor laptops. Engineering notebook you keep.',
+      'Twelve Wednesday nights. Family sumo tournament at week 12.',
     ],
-    curriculumTitle: 'Fall curriculum (Loudoun Robotics proposal)',
+    curriculumTitle: 'Fall curriculum (Loudoun Robotics)',
     curriculum: [
-      { week: 1, title: 'Hardware assembly', focus: 'Kit orientation and driving base' },
-      { week: 2, title: 'Structural integrity', focus: 'Bracing and load paths' },
-      { week: 3, title: 'Gear ratios', focus: 'Speed vs pulling power' },
-      { week: 4, title: 'Programming motors', focus: 'Sequence and exact distance' },
-      { week: 5, title: 'Programming loops', focus: 'Repeatable paths and turns' },
-      { week: 6, title: 'Force / touch sensors', focus: 'Stop on contact' },
-      { week: 7, title: 'Color / light sensors', focus: 'Line detection' },
-      { week: 8, title: 'Distance sensors', focus: 'Stop before an obstacle' },
-      { week: 9, title: 'Logic pathways', focus: 'If/else with two sensors' },
-      { week: 10, title: 'Driver vs autonomous', focus: 'Remote then pre-programmed' },
-      { week: 11, title: 'Team design challenge', focus: 'Simple attachment on a mat task' },
-      { week: 12, title: 'Troubleshooting & Fall showcase', focus: 'Final runs for families' },
+      {
+        week: 1,
+        title: 'Build and test',
+        focus: 'Build your first robot and drive it exactly one meter. Measure the error, then fix it.',
+      },
+      {
+        week: 2,
+        title: 'Grip and strength',
+        focus: 'Why some robots push and others spin. Traction, friction, and surviving a hit.',
+      },
+      {
+        week: 3,
+        title: 'Speed or strength?',
+        focus: 'Gear ratios — trade speed for pushing power, then see which wins a tug of war.',
+      },
+      {
+        week: 4,
+        title: 'Design your fighter',
+        focus: 'Now you choose — gearing, wheels, shape. Build the robot you keep.',
+      },
+      {
+        week: 5,
+        title: 'Make it move',
+        focus: 'Motors and sequence. Drive an exact distance on purpose — then try it by hand and compare.',
+      },
+      {
+        week: 6,
+        title: 'Repeat and turn',
+        focus: 'Loops and accurate turns. Drive a repeatable path without babysitting it.',
+      },
+      {
+        week: 7,
+        title: 'Feel a hit',
+        focus: 'The touch sensor — the moment a robot knows it has found its opponent.',
+      },
+      {
+        week: 8,
+        title: 'See the edge',
+        focus: 'The color sensor — detect the ring boundary and stop before driving out.',
+      },
+      {
+        week: 9,
+        title: 'Find the opponent',
+        focus: 'The ultrasonic sensor — measure distance and close in.',
+      },
+      {
+        week: 10,
+        title: 'Decide',
+        focus: 'If/else logic. At the edge, back off. On contact, push.',
+      },
+      {
+        week: 11,
+        title: 'Design the edge',
+        focus: 'Wedges, plows and low profiles — the attachment that wins matches.',
+      },
+      {
+        week: 12,
+        title: 'Tournament',
+        focus: 'Round-robin sumo in front of families. Awards for design as well as for winning.',
+      },
     ],
   },
 }
@@ -382,4 +430,46 @@ export function programLandingCopy(
 export function fallCatalogDescription(epId: string | undefined): string | null {
   if (!epId) return null
   return FALL_2026_CATALOG_DESCRIPTIONS[epId] ?? null
+}
+
+/** Short Programs-card descriptions (CMS / catalog). Spring semester. */
+export const SPRING_2027_CATALOG_DESCRIPTIONS: Record<string, string> = {
+  ye: `Young Entrepreneurs II: capital, investor practice, and Stingray Tank pitch prep.
+Continue with Missy Spears from Fall.
+
+• Startup costs, pricing, and basic financials
+• Elevator pitches and public speaking
+• Culminating Stingray Tank showcase
+
+Cap 30. Grades 6 to 8.`,
+
+  essay: `Spring analytical writing with Lumi.
+Andrew Martineau. Cap 10 to 14.
+
+• Evidence, MLA basics, and research habits
+• Persuasive and comparative essays
+• High-school readiness editing
+
+Twelve Tuesday nights.`,
+
+  mathcounts: `Competitive Math Part II with Janet Bih: advanced systems, team tactics, and mocks.
+
+• Mixed strategy selection and timed rounds
+• Sprint, Target, Team, and Countdown focus
+• Full mock competitions late in the semester
+
+Cap 10 to 30. Continues the Fall year plan.`,
+
+  robotics: `Loudoun Robotics Part II: Blocks to Python and advanced autonomy.
+
+• Functions, gyro, and line following
+• Attachment design and mission course
+• Engineering notebook and Spring showcase
+
+Teams of 3. Kits and laptops included.`,
+}
+
+export function springCatalogDescription(epId: string | undefined): string | null {
+  if (!epId) return null
+  return SPRING_2027_CATALOG_DESCRIPTIONS[epId] ?? null
 }

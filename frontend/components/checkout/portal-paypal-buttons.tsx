@@ -7,7 +7,9 @@ import { Button } from '@/components/ui/button'
 declare global {
   interface Window {
     paypal?: {
+      FUNDING?: { PAYPAL?: string }
       Buttons: (config: {
+        fundingSource?: string
         style?: { layout?: string; color?: string; shape?: string; label?: string }
         createOrder?: () => Promise<string>
         createVaultSetupToken?: () => Promise<string>
@@ -29,6 +31,8 @@ interface Props {
   active: boolean
   /** Membership/program terms still unchecked. SDK can load; pay is blocked. */
   requireConsent?: boolean
+  /** wallet = single button in express row; standalone = divider + save UI */
+  variant?: 'standalone' | 'wallet'
 }
 
 type PayPalMethod = { payerEmail: string }
@@ -40,7 +44,9 @@ export function PortalPayPalButtons({
   onBeforePay,
   active,
   requireConsent = false,
+  variant = 'standalone',
 }: Props) {
+  const isWallet = variant === 'wallet'
   const hostRef = useRef<HTMLDivElement>(null)
   const requireConsentRef = useRef(requireConsent)
   requireConsentRef.current = requireConsent
@@ -70,11 +76,12 @@ export function PortalPayPalButtons({
       .then((data) => {
         const method = (data.paypalMethod as PayPalMethod | null) ?? null
         setSavedPayPal(method)
-        setSavePayPal(!method)
-        setUseSaved(Boolean(method))
+        setSavePayPal(false)
+        // Wallet row always uses the PayPal button; vault UX is standalone-only.
+        setUseSaved(!isWallet && Boolean(method))
       })
       .catch(() => undefined)
-  }, [active])
+  }, [active, isWallet])
 
   useEffect(() => {
     if (!active || useSaved) return
@@ -90,10 +97,11 @@ export function PortalPayPalButtons({
         return
       }
 
+      // One PayPal button only — SDK otherwise stacks Pay Later / Debit / Venmo.
       const src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
         cfg.clientId,
-      )}&currency=USD&intent=capture&components=buttons&vault=true&enable-funding=paypal`
-      let script = document.querySelector<HTMLScriptElement>(`script[src^="https://www.paypal.com/sdk/js"]`)
+      )}&currency=USD&intent=capture&components=buttons&vault=true&enable-funding=paypal&disable-funding=paylater,card,credit,venmo`
+      let script = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`)
       if (!script) {
         script = document.createElement('script')
         script.src = src
@@ -113,6 +121,7 @@ export function PortalPayPalButtons({
       hostRef.current.innerHTML = ''
       await window.paypal
         .Buttons({
+          fundingSource: window.paypal.FUNDING?.PAYPAL,
           style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
           createOrder: async () => {
             if (requireConsentRef.current) {
@@ -202,13 +211,17 @@ export function PortalPayPalButtons({
 
   return (
     <div className="space-y-2">
-      <div className="relative flex items-center gap-3 py-1">
-        <div className="flex-1 h-px bg-[var(--border)]" />
-        <span className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">or PayPal</span>
-        <div className="flex-1 h-px bg-[var(--border)]" />
-      </div>
+      {!isWallet ? (
+        <div className="relative flex items-center gap-3 py-1">
+          <div className="flex-1 h-px bg-[var(--border)]" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
+            or PayPal
+          </span>
+          <div className="flex-1 h-px bg-[var(--border)]" />
+        </div>
+      ) : null}
 
-      {savedPayPal ? (
+      {!isWallet && savedPayPal ? (
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-xs text-[#1A1A1A]">
             <input type="radio" checked={useSaved} onChange={() => setUseSaved(true)} />
@@ -230,19 +243,9 @@ export function PortalPayPalButtons({
             </Button>
           ) : null}
         </div>
-      ) : (
-        <label className="flex items-start gap-2 text-xs text-[#5A6070]">
-          <input
-            type="checkbox"
-            checked={savePayPal}
-            onChange={(e) => setSavePayPal(e.target.checked)}
-            className="mt-0.5"
-          />
-          Save this PayPal to Payment methods for faster checkout later (never required).
-        </label>
-      )}
+      ) : null}
 
-      {!useSaved ? (
+      {!useSaved || isWallet ? (
         <>
           {!ready ? (
             <p className="text-[11px] text-[#5A6070] text-center">Loading PayPal…</p>

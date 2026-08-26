@@ -3,7 +3,6 @@
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { MemberGate } from '@/components/member-gate'
-import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import {
   normalizeMembershipTier,
   pickHighestTier,
@@ -15,8 +14,9 @@ import {
 } from '@/components/membership/membership-shirt-picker'
 import { tierNeedsShirtSize } from '@/lib/membership-entitlements'
 import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
+import { buyNowGoCheckout } from '@/lib/cart/buy-actions'
 
 interface Props {
   tierId: string
@@ -25,9 +25,9 @@ interface Props {
 }
 
 function JoinInner({ tierId, tierName, price }: Props) {
-  const searchParams = useSearchParams()
+  const router = useRouter()
+    const searchParams = useSearchParams()
   const studentId = searchParams.get('studentId')
-  const [open, setOpen] = useState(false)
   const [currentTier, setCurrentTier] = useState<string | null>(null)
   const [chargeAmount, setChargeAmount] = useState(price)
   const [listPrice, setListPrice] = useState(price)
@@ -162,7 +162,21 @@ function JoinInner({ tierId, tierName, price }: Props) {
 
   function startCheckout() {
     if (needsShirt && !shirt) return
-    setOpen(true)
+    buyNowGoCheckout(
+      {
+        kind: 'membership',
+        title,
+        amount: chargeAmount,
+        href: '/membership',
+        tier: tierId,
+        studentId: studentId || undefined,
+        shirtSize: needsShirt ? shirt?.size : undefined,
+        shirtDesign: needsShirt ? shirt?.design : undefined,
+        shirtProductId: needsShirt ? shirt?.productId : undefined,
+        shirtVariantId: needsShirt ? shirt?.variantId : undefined,
+      },
+      router,
+    )
   }
 
   return (
@@ -189,29 +203,7 @@ function JoinInner({ tierId, tierName, price }: Props) {
         {needsShirt && !shirt ? (
           <p className="text-[11px] text-[#5A6070]">Choose a design and size to continue.</p>
         ) : null}
-        <PortalCardCheckout
-          open={open}
-          onClose={() => setOpen(false)}
-          amount={chargeAmount}
-          title={title}
-          subtitle={
-            needsShirt && shirt ? `${subtitle} Spirit shirt: ${shirt.label}.` : subtitle
-          }
-          payBody={{
-            kind: 'membership',
-            tier: tierId,
-            studentId,
-            shirtSize: needsShirt ? shirt?.size : undefined,
-            shirtDesign: needsShirt ? shirt?.design : undefined,
-            shirtProductId: needsShirt ? shirt?.productId : undefined,
-            shirtVariantId: needsShirt ? shirt?.variantId : undefined,
-          }}
-          containerId={`membership-pay-${tierId}`}
-          onPaid={() => {
-            sessionStorage.removeItem('pendingMembership')
-            window.location.href = '/member-portal?membership=success'
-          }}
-        />
+        <p className="text-[11px] text-[#5A6070]">{subtitle}</p>
       </div>
     </MemberGate>
   )

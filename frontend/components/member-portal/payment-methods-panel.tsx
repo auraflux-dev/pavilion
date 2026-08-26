@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CreditCard, Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useFormString } from '@/components/member-portal/portal-form-copy-context'
+import { CmsPortal, useFormString } from '@/components/member-portal/portal-form-copy-context'
 
 type StoredCard = {
   brand: string
@@ -245,7 +245,7 @@ export function PaymentMethodsPanel() {
       const data = await r.json().catch(() => ({}))
       if (!r.ok) throw new Error(data.error || 'Could not save card.')
       setCard(data.paymentMethod ?? null)
-      setSuccess('Card saved for faster checkout.')
+      setSuccess(t('paymentPanel.cardSaved'))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save card.')
     } finally {
@@ -254,7 +254,7 @@ export function PaymentMethodsPanel() {
   }
 
   async function removeCard() {
-    if (!window.confirm('Remove this saved card and turn off auto top-off for all students?')) {
+    if (!window.confirm(t('paymentPanel.removeCardConfirm'))) {
       return
     }
     setRemoving('card')
@@ -268,7 +268,7 @@ export function PaymentMethodsPanel() {
         return
       }
       setCard(null)
-      setSuccess('Saved card removed. Auto top-off was turned off.')
+      setSuccess(t('paymentPanel.cardRemoved'))
     } catch {
       setError('Could not remove card.')
     } finally {
@@ -277,7 +277,7 @@ export function PaymentMethodsPanel() {
   }
 
   async function removePayPal() {
-    if (!window.confirm('Remove this saved PayPal from Payment methods?')) {
+    if (!window.confirm(t('paymentPanel.removePaypalConfirm'))) {
       return
     }
     setRemoving('paypal')
@@ -291,7 +291,7 @@ export function PaymentMethodsPanel() {
         return
       }
       setPaypal(null)
-      setSuccess('Saved PayPal removed.')
+      setSuccess(t('paymentPanel.paypalRemoved'))
     } catch {
       setError('Could not remove PayPal.')
     } finally {
@@ -309,11 +309,11 @@ export function PaymentMethodsPanel() {
           <CreditCard className="h-4 w-4" style={{ color: 'var(--brand-green)' }} />
         </div>
         <div className="min-w-0">
-          <h2 className="text-base font-bold text-[#1A1A1A]">{t('paymentPanel.title')}</h2>
+          <h2 className="text-base font-bold text-[#1A1A1A]">
+            <CmsPortal k="paymentPanel.title" fallback={t('paymentPanel.title')} />
+          </h2>
           <p className="mt-1 text-sm text-[#5A6070] whitespace-pre-line">
-            {`Square stores your card securely for Cove reloads, membership, spirit wear, and enrichment.
-Save a card or PayPal here for one-tap checkout.
-SHMS PTO never keeps the full card number.`}
+            <CmsPortal k="paymentPanel.intro" fallback={t('paymentPanel.intro')} />
           </p>
         </div>
       </div>
@@ -321,14 +321,13 @@ SHMS PTO never keeps the full card number.`}
       {busy ? (
         <div className="flex items-center gap-2 text-sm text-[#5A6070]">
           <Loader2 className="h-4 w-4 animate-spin" style={{ color: 'var(--brand-green)' }} />
-          {t('paymentPanel.loading')}
+          <CmsPortal k="paymentPanel.loading" fallback={t('paymentPanel.loading')} />
         </div>
       ) : null}
 
       {!busy && !configured ? (
         <p className="text-sm text-amber-800">
-          Card-on-file setup is temporarily unavailable. You can still pay by entering a card or using
-          PayPal at checkout.
+          <CmsPortal k="paymentPanel.unavailable" fallback={t('paymentPanel.unavailable')} />
         </p>
       ) : null}
 
@@ -357,7 +356,7 @@ SHMS PTO never keeps the full card number.`}
             ) : (
               <>
                 <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                Remove
+                <CmsPortal k="paymentPanel.remove" fallback={t('paymentPanel.remove')} />
               </>
             )}
           </Button>
@@ -366,16 +365,20 @@ SHMS PTO never keeps the full card number.`}
 
       {!busy && configured && !card ? (
         <div className="rounded-lg border border-dashed border-[var(--border)] px-3 py-4 space-y-3">
-          <h3 className="text-sm font-bold text-[#1A1A1A]">{t('paymentPanel.addCard')}</h3>
+          <h3 className="text-sm font-bold text-[#1A1A1A]">
+            <CmsPortal k="paymentPanel.addCard" fallback={t('paymentPanel.addCard')} />
+          </h3>
           <p className="text-sm text-[#5A6070] whitespace-pre-line">
-            {t('paymentPanel.noCard')}
+            <CmsPortal k="paymentPanel.noCard" fallback={t('paymentPanel.noCard')} />
           </p>
           <div
             id="payment-methods-square-card"
             className="min-h-12 rounded-lg border border-[var(--border)] bg-white px-2 py-1"
           />
           {!squareReady ? (
-            <p className="text-xs text-[#5A6070]">Loading card form…</p>
+            <p className="text-xs text-[#5A6070]">
+              <CmsPortal k="paymentPanel.loadingCardForm" fallback={t('paymentPanel.loadingCardForm')} />
+            </p>
           ) : null}
           <Button
             type="button"
@@ -388,21 +391,25 @@ SHMS PTO never keeps the full card number.`}
             {savingCard ? (
               <>
                 <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-                Saving…
+                <CmsPortal k="paymentPanel.saving" fallback={t('paymentPanel.saving')} />
               </>
             ) : (
-              'Save card'
+              <CmsPortal k="paymentPanel.saveCard" fallback={t('paymentPanel.saveCard')} />
             )}
           </Button>
         </div>
       ) : null}
 
       <div className="border-t border-[var(--border)] pt-4 space-y-3">
-        <h3 className="text-sm font-bold text-[#1A1A1A]">PayPal</h3>
+        <h3 className="text-sm font-bold text-[#1A1A1A]">
+          <CmsPortal k="paymentPanel.paypal" fallback={t('paymentPanel.paypal')} />
+        </h3>
         {!busy && paypal ? (
           <div className="rounded-lg border border-[var(--brand-line)] bg-[#FAFCF9] px-3 py-3 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-bold text-[#1A1A1A]">PayPal</p>
+              <p className="text-sm font-bold text-[#1A1A1A]">
+                <CmsPortal k="paymentPanel.paypal" fallback={t('paymentPanel.paypal')} />
+              </p>
               <p className="text-xs text-[#5A6070]">{paypal.payerEmail}</p>
             </div>
             <Button
@@ -418,7 +425,7 @@ SHMS PTO never keeps the full card number.`}
               ) : (
                 <>
                   <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                  Remove
+                  <CmsPortal k="paymentPanel.remove" fallback={t('paymentPanel.remove')} />
                 </>
               )}
             </Button>
@@ -428,18 +435,21 @@ SHMS PTO never keeps the full card number.`}
         {!busy && !paypal && paypalConfigured ? (
           <div className="rounded-lg border border-dashed border-[var(--border)] px-3 py-4 space-y-3">
             <p className="text-sm text-[#1A1A1A] whitespace-pre-line">
-              {`Save PayPal here for one-tap checkout.
-Or check “Save this PayPal…” the next time you pay with PayPal.`}
+              <CmsPortal k="paymentPanel.paypalSaveIntro" fallback={t('paymentPanel.paypalSaveIntro')} />
             </p>
             {!paypalReady ? (
-              <p className="text-xs text-[#5A6070]">Loading PayPal…</p>
+              <p className="text-xs text-[#5A6070]">
+                <CmsPortal k="paymentPanel.paypalLoading" fallback={t('paymentPanel.paypalLoading')} />
+              </p>
             ) : null}
             <div ref={paypalHostRef} />
           </div>
         ) : null}
 
         {!busy && !paypalConfigured ? (
-          <p className="text-sm text-amber-800">PayPal save is temporarily unavailable.</p>
+          <p className="text-sm text-amber-800">
+            <CmsPortal k="paymentPanel.paypalUnavailable" fallback={t('paymentPanel.paypalUnavailable')} />
+          </p>
         ) : null}
       </div>
 

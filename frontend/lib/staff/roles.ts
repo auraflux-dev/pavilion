@@ -3,7 +3,7 @@
  * Assigned in CMS collection StaffRoles (email + comma-separated roles).
  */
 import { getWixClient } from '@/lib/wix-client'
-import { parseExtraWorkspaces } from '@/lib/staff/permissions'
+import { effectiveStaffRoles, parseExtraWorkspaces } from '@/lib/staff/permissions'
 import type { StaffWorkspace } from '@/lib/audience'
 import { isDemoInstance } from '@/lib/demo/instance'
 
@@ -83,7 +83,7 @@ export function isValidPersonalEmail(email: string): boolean {
 
 const ROLE_SET = new Set<string>(STAFF_ROLES)
 
-function parseRoles(raw: unknown): StaffRole[] {
+export function parseRoles(raw: unknown): StaffRole[] {
  const parts = String(raw ?? '')
  .split(/[,|;]/)
  .map((r) => r.trim().toLowerCase())
@@ -147,10 +147,6 @@ export async function resolveStaffForSession(
   email: string,
   extraEmails: string[] = [],
 ): Promise<StaffProfile | null> {
-  const { resolveSyntheticStaffForSession } = await import('@/lib/fixtures/staff')
-  const synthetic = resolveSyntheticStaffForSession(email, extraEmails)
-  if (synthetic) return synthetic
-
   const candidates = [email, ...extraEmails]
     .map((value) => value.trim().toLowerCase())
     .filter((value, i, all) => value.includes('@') && all.indexOf(value) === i)
@@ -186,10 +182,6 @@ export async function getStaffProfile(email: string): Promise<StaffProfile | nul
   const normalized = email.trim().toLowerCase()
   if (!normalized || !isStaffEmail(normalized)) return null
 
-  const { syntheticStaffProfile } = await import('@/lib/fixtures/staff')
-  const synthetic = syntheticStaffProfile(normalized)
-  if (synthetic) return synthetic
-
   try {
     const client = getWixClient()
     const result = await client.items.query('StaffRoles').eq('email', normalized).limit(5).find()
@@ -211,19 +203,14 @@ export function hasStaffRole(profile: StaffProfile | null, role: StaffRole | Sta
  if (!profile) return false
  const needed = Array.isArray(role) ? role : [role]
  if (profile.roles.includes('admin')) return true
- // Extras are workspace grants only. Do not treat them as whole roles.
- return needed.some((r) => profile.roles.includes(r))
+ if (needed.some((r) => profile.roles.includes(r))) return true
+ const effective = effectiveStaffRoles(profile.roles, profile.extraWorkspaces)
+ return needed.some((r) => effective.includes(r))
 }
 
-/**
- * Full catalog for board/admin.
- * Instructor and coordinator seats stay scoped to StaffRoles.assignedProgramIds.
- */
+/** Full programs catalog (VP Programs / admin) vs scoped instructor/coordinator. */
 export function canManageAllPrograms(profile: StaffProfile | null): boolean {
-  if (!profile) return false
-  if (hasStaffRole(profile, ['admin', 'programs'])) return true
-  if (isInstructorStaffOnly(profile.roles)) return false
-  return profile.roles.length > 0
+ return hasStaffRole(profile, ['admin', 'programs'])
 }
 
 /** Create/edit instructor and class-coordinator StaffRoles (not other board seats). */

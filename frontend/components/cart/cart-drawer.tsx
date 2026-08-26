@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { PortalCardCheckout, type PortalPayBody } from '@/components/checkout/portal-card-checkout'
 import { MemberGate } from '@/components/member-gate'
 import { useCart } from '@/lib/cart/store'
 import type { CartLine } from '@/lib/cart/types'
@@ -13,7 +13,7 @@ import { useDialogA11y } from '@/lib/hooks/use-dialog-a11y'
 type Student = { id: string; firstName: string; lastName: string; grade: string }
 
 function lineNeedsStudent(line: CartLine) {
-  return line.kind === 'program' || line.kind === 'event' || line.kind === 'membership'
+  return line.kind === 'program' || line.kind === 'membership'
 }
 
 function studentLabel(students: Student[], id: string | undefined) {
@@ -23,57 +23,11 @@ function studentLabel(students: Student[], id: string | undefined) {
   return `${s.firstName} ${s.lastName} (Grade ${s.grade})`
 }
 
-function payBodyForLine(line: CartLine): Exclude<PortalPayBody, { kind: 'cart' | 'store-card' }> | null {
-  if (line.kind === 'program' && line.programId) {
-    const sid = String(line.studentId ?? '').trim()
-    if (!sid) return null
-    return {
-      kind: 'program',
-      programId: line.programId,
-      studentId: sid,
-      addonProgramIds: line.addonProgramIds,
-    }
-  }
-  if (line.kind === 'product' && line.productId) {
-    return {
-      kind: 'product',
-      productId: line.productId,
-      variantId: line.variantId,
-    }
-  }
-  if (line.kind === 'membership' && line.tier) {
-    return {
-      kind: 'membership',
-      tier: line.tier,
-      studentId: line.studentId || null,
-      shirtSize: line.shirtSize,
-      shirtDesign: line.shirtDesign,
-      shirtProductId: line.shirtProductId,
-      shirtVariantId: line.shirtVariantId,
-      physicalPerk: line.physicalPerk,
-    }
-  }
-  if (line.kind === 'event' && line.eventId) {
-    return {
-      kind: 'event',
-      eventId: line.eventId,
-      quantity: Math.max(1, Number(line.quantity ?? 1) || 1),
-    }
-  }
-  if (line.kind === 'donation' && line.amountCents) {
-    return {
-      kind: 'donation',
-      amountCents: line.amountCents,
-    }
-  }
-  return null
-}
-
 export function CartDrawer() {
+  const router = useRouter()
   const { lines, open, total, count, setOpen, remove, update, clear } = useCart()
   const [students, setStudents] = useState<Student[]>([])
   const [studentsLoading, setStudentsLoading] = useState(false)
-  const [payOpen, setPayOpen] = useState(false)
   const [bagError, setBagError] = useState('')
 
   useEffect(() => {
@@ -92,7 +46,6 @@ export function CartDrawer() {
       .finally(() => setStudentsLoading(false))
   }, [open, lines])
 
-  // Only auto-assign when the account has one student and a line is still missing one.
   useEffect(() => {
     if (!open || students.length !== 1) return
     const onlyId = students[0].id
@@ -104,28 +57,14 @@ export function CartDrawer() {
   }, [open, students, lines, update])
 
   useEffect(() => {
-    if (!open) {
-      setPayOpen(false)
-      setBagError('')
-    }
+    if (!open) setBagError('')
   }, [open])
-
-  const cartLinesPay = useMemo(() => {
-    const out: Exclude<PortalPayBody, { kind: 'cart' | 'store-card' }>[] = []
-    for (const line of lines) {
-      const body = payBodyForLine(line)
-      if (!body) return null
-      out.push(body)
-    }
-    return out
-  }, [lines])
 
   const missingStudentLines = lines.filter(
     (l) => l.kind === 'program' && !String(l.studentId ?? '').trim(),
   )
   const studentReady = missingStudentLines.length === 0
-  const canCheckout =
-    lines.length > 0 && studentReady && cartLinesPay != null && cartLinesPay.length === lines.length
+  const canCheckout = lines.length > 0 && studentReady
 
   const panelRef = useRef<HTMLElement>(null)
   useDialogA11y(open, () => setOpen(false), panelRef)
@@ -263,7 +202,7 @@ Member and board discounts apply at checkout.`}
                   disabled={!canCheckout}
                   onClick={() => {
                     setBagError('')
-                    if (!canCheckout || !cartLinesPay) {
+                    if (!canCheckout) {
                       setBagError(
                         missingStudentLines.length
                           ? 'Choose a student on each class line before checkout.'
@@ -271,7 +210,8 @@ Member and board discounts apply at checkout.`}
                       )
                       return
                     }
-                    setPayOpen(true)
+                    setOpen(false)
+                    router.push('/checkout')
                   }}
                 >
                   {`Check out · $${total.toFixed(2)}`}
@@ -300,26 +240,6 @@ Member and board discounts apply at checkout.`}
           ) : null}
         </div>
       </aside>
-
-      {payOpen && cartLinesPay ? (
-        <PortalCardCheckout
-          open
-          onClose={() => setPayOpen(false)}
-          amount={total}
-          title={count === 1 ? lines[0]?.title || 'Bag' : `Bag · ${count} items`}
-          subtitle="Pay once for everything in your bag"
-          payBody={{
-            kind: 'cart',
-            cartLines: cartLinesPay,
-          }}
-          containerId="cart-bag-square"
-          onPaid={() => {
-            clear()
-            setPayOpen(false)
-            setOpen(false)
-          }}
-        />
-      ) : null}
     </div>
   )
 }

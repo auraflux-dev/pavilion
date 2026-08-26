@@ -1,14 +1,14 @@
 'use client'
 
 /**
- * Full cart page. Same lines as the header drawer; opens drawer checkout.
+ * Full cart page. Same lines as the header drawer; checkout continues on /checkout.
  */
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/lib/cart/store'
 
 export function CartPageClient() {
-  const { lines, count, total, remove, setOpen, clear } = useCart()
+  const { lines, count, total, remove, clear } = useCart()
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 space-y-6">
@@ -84,11 +84,11 @@ Add something and it will stay here until you check out.`}
       {lines.length > 0 ? (
         <div className="flex flex-wrap gap-2 pt-2">
           <Button
+            asChild
             className="text-white font-bold"
             style={{ backgroundColor: 'var(--brand-green)' }}
-            onClick={() => setOpen(true)}
           >
-            {`Check out · $${total.toFixed(2)}`}
+            <Link href="/checkout">{`Check out · $${total.toFixed(2)}`}</Link>
           </Button>
           <Button type="button" variant="outline" onClick={() => clear()}>
             Empty bag

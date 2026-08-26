@@ -1,12 +1,14 @@
 /**
- * GET  /api/staff/cove/products. list catalog (+ Cove allowlist / inventory)
- * POST /api/staff/cove/products. create snack product in Wix + optional allowlist
- * PATCH /api/staff/cove/products. update name/price/qty/sku/showOnCove/variants/image
+ * GET  /api/staff/cove/products. list catalog (+ Cove / Spirit allowlists + inventory)
+ * POST /api/staff/cove/products. create product in Wix + optional Cove/Spirit allowlists
+ * PATCH /api/staff/cove/products. update fields + showOnCove / showOnSpirit
+ * DELETE /api/staff/cove/products. remove from Wix + both allowlists + inventory
  */
 import { NextRequest, NextResponse } from 'next/server'
 import {
   backfillMissingCoveSkus,
   createStaffCoveProduct,
+  deleteStaffCoveProduct,
   listInPersonSellProducts,
   listStaffCoveProducts,
   updateStaffCoveProduct,
@@ -90,6 +92,7 @@ export async function POST(req: NextRequest) {
       quantity: Number(body.quantity ?? 0),
       sku: body.sku != null ? String(body.sku) : undefined,
       showOnCove: body.showOnCove !== false,
+      showOnSpirit: body.showOnSpirit === true,
       imageUrl: body.imageUrl != null ? String(body.imageUrl) : undefined,
       imageMediaId: body.imageMediaId != null ? String(body.imageMediaId) : undefined,
       optionName: body.optionName != null ? String(body.optionName) : undefined,
@@ -128,6 +131,14 @@ export async function PATCH(req: NextRequest) {
       })
     }
 
+    if (body.syncSquare === true && typeof body.id === 'string' && body.id.trim()) {
+      const squareSync = await syncWixProductToSquareBestEffort(body.id.trim(), {
+        force: true,
+        forceImage: body.forceImage === true,
+      })
+      return NextResponse.json({ ok: true, squareSync })
+    }
+
     const product = await updateStaffCoveProduct({
       id: String(body.id ?? ''),
       name: body.name != null ? String(body.name) : undefined,
@@ -135,19 +146,26 @@ export async function PATCH(req: NextRequest) {
       quantity: body.quantity != null ? Number(body.quantity) : undefined,
       sku: body.sku != null ? String(body.sku) : undefined,
       showOnCove: typeof body.showOnCove === 'boolean' ? body.showOnCove : undefined,
+      showOnSpirit: typeof body.showOnSpirit === 'boolean' ? body.showOnSpirit : undefined,
       visible: typeof body.visible === 'boolean' ? body.visible : undefined,
       imageUrl: body.imageUrl != null ? String(body.imageUrl) : undefined,
       imageMediaId: body.imageMediaId != null ? String(body.imageMediaId) : undefined,
       optionName: body.optionName != null ? String(body.optionName) : undefined,
       variants: parseVariants(body.variants),
     })
-    // Sync when shown on Cove, SKU/price/variants changed, or newly allowlisted
+    // Sync when shown on Cove/Spirit, stock/image/SKU/price/variants change
+
     const shouldSync =
       body.showOnCove === true ||
+      body.showOnSpirit === true ||
       body.sku != null ||
       body.price != null ||
+      body.quantity != null ||
+      body.imageUrl != null ||
+      body.imageMediaId != null ||
       body.variants != null ||
-      product.onCove
+      product.onCove ||
+      product.onSpirit
     const squareSync = shouldSync
       ? await syncWixProductToSquareBestEffort(product.id)
       : { ok: true, skipped: true, reason: 'no Square-relevant fields' }
@@ -156,6 +174,28 @@ export async function PATCH(req: NextRequest) {
     console.error('cove products PATCH', err)
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Update failed' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  if (!(await gate(req))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  try {
+    const body = await req.json().catch(() => ({}))
+    const id =
+      typeof body?.id === 'string'
+        ? body.id
+        : req.nextUrl.searchParams.get('id') || ''
+    if (!id.trim()) {
+      return NextResponse.json({ error: 'Product id required' }, { status: 400 })
+    }
+    await deleteStaffCoveProduct(id)
+    return NextResponse.json({ ok: true, id: id.trim() })
+  } catch (err) {
+    console.error('cove products DELETE', err)
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Delete failed' },
       { status: 500 }
     )
   }

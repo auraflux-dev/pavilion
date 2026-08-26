@@ -1,19 +1,22 @@
 /**
- * Spring 2027 enrichment grid (placeholder dates).
- * Staging / review hosts can preview; www stays gated until SPRING_CATALOG_ENABLED.
- * Confirm against LCPS ICS before locking. Do not feed member portal from here.
+ * Locked Spring 2027 enrichment grid (library, Tue / Wed / Thu nights).
+ * Public /programs/spring-2027 + staff Programs use this. Do not feed member portal from here.
+ * Meeting nights skip LCPS holidays and spring break (Mar 22 to 26, 2027).
+ * Source: LCPS 2026-27 board calendar + events ICS, locked Aug 2026.
  */
 
 import type { Program } from '@/lib/api/programs'
+import { serializeMeetingDates } from '@/lib/programs/fall-2026-ep'
+import { springCatalogDescription } from '@/lib/programs/landing-copy'
+import { formatProgramSchedule } from '@/lib/programs/schedule'
 import { resolveProgramSeason } from '@/lib/programs/season'
 
 export const SPRING_2027_EP_LOCATION = 'SHMS Library'
 
 /**
- * Placeholder Tuesday nights (12). First week of February start.
- * Skips: Tue Mar 9 Eid; Tue Mar 23 spring break.
- * Snow buffer after last class (not on the sold list): May 11, 18, 25, Jun 1.
- * Source: LCPS events ICS (loudoun_county_public_schools_events.ics) + 2026-27 board calendar.
+ * Locked Tuesday nights (12). First week of February start.
+ * Skips: Tue Mar 9 holiday; Tue Mar 23 spring break.
+ * Weather makeup after last class (not sold): May 11, 18, 25, Jun 1.
  */
 export const SPRING_2027_TUESDAY_DATES = [
   '2027-02-02',
@@ -39,9 +42,9 @@ export const SPRING_2027_TUESDAY_SNOW_BUFFER = [
 ] as const
 
 /**
- * Placeholder Wednesday nights (12). First week of February start.
- * Skip Wed Mar 24 (spring break). Wed Mar 10 still meets (Eid was Tuesday Mar 9).
- * Snow buffer after last class: May 5, 12, 19, 26.
+ * Locked Wednesday nights (12). First week of February start.
+ * Skip Wed Mar 24 (spring break). Wed Mar 10 still meets (holiday was Tue Mar 9).
+ * Weather makeup after last class: May 5, 12, 19, 26.
  */
 export const SPRING_2027_WEDNESDAY_DATES = [
   '2027-02-03',
@@ -66,7 +69,7 @@ export const SPRING_2027_WEDNESDAY_SNOW_BUFFER = [
 ] as const
 
 /**
- * Placeholder Thursday nights (12). Day after Wed cohort.
+ * Locked Thursday nights (12). Day after Wed cohort.
  * Skip Thu Mar 25 (spring break).
  */
 export const SPRING_2027_THURSDAY_DATES = [
@@ -120,7 +123,7 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
     endClock: '18:45',
     vendor: 'Missy Spears',
     dates: SPRING_2027_TUESDAY_DATES,
-    skips: 'Tue Mar 9 Eid; Tue Mar 23 spring break',
+    skips: 'Tue Mar 9 holiday; Tue Mar 23 spring break',
     continuesFromFall: true,
   },
   {
@@ -134,7 +137,7 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
     endClock: '20:00',
     vendor: 'Lumi (Andrew Martineau)',
     dates: SPRING_2027_TUESDAY_DATES,
-    skips: 'Tue Mar 9 Eid; Tue Mar 23 spring break',
+    skips: 'Tue Mar 9 holiday; Tue Mar 23 spring break',
     continuesFromFall: true,
   },
   {
@@ -167,7 +170,7 @@ export const SPRING_2027_EP_CLASSES: Spring2027EpClass[] = [
   },
 ]
 
-export const SPRING_2027_EP_PLACEHOLDER = true
+export const SPRING_2027_EP_PLACEHOLDER = false
 
 export function formatSpring2027EpDate(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number)
@@ -241,35 +244,27 @@ export function spring2027PacketScheduleRows(): Spring2027ScheduleRow[] {
  */
 const SPRING_STAGING_CATALOG: Record<
   string,
-  { fee: number; capacity: number; category: string; description: string }
+  { name: string; capacity: number; category: string }
 > = {
   ye: {
-    fee: 375,
+    name: 'Young Entrepreneurs II: Stingray Tank',
     capacity: 30,
     category: 'Strategy',
-    description:
-      'Young Entrepreneurs II: capital, investor practice, and Stingray Tank pitch prep.\nContinue with Missy Spears from Fall.\n\n• Startup costs, pricing, and basic financials\n• Elevator pitches and public speaking\n• Culminating Stingray Tank showcase\n\nCap 30. Grades 6 to 8.',
   },
   essay: {
-    fee: 375,
+    name: 'Essay Writing: Analytical & High-School Ready',
     capacity: 14,
     category: 'Creative Arts',
-    description:
-      'Spring analytical writing with Lumi.\nAndrew Martineau. Cap 10 to 14.\n\n• Evidence, MLA basics, and research habits\n• Persuasive and comparative essays\n• High-school readiness editing\n\nTwelve Tuesday nights.',
   },
   mathcounts: {
-    fee: 375,
+    name: 'Competitive Math Prep (Spring)',
     capacity: 30,
     category: 'Competition',
-    description:
-      'Competitive Math Part II with Janet Bih: advanced systems, team tactics, and mocks.\n\n• Mixed strategy selection and timed rounds\n• Sprint, Target, Team, and Countdown focus\n• Full mock competitions late in the semester\n\nCap 10 to 30. Continues the Fall year plan.',
   },
   robotics: {
-    fee: 450,
+    name: 'Robotics: Advanced Systems & Applied Engineering',
     capacity: 30,
     category: 'STEM',
-    description:
-      'Loudoun Robotics Part II: Blocks to Python and advanced autonomy.\n\n• Functions, gyro, and line following\n• Attachment design and mission course\n• Engineering notebook and Spring showcase\n\nTeams of 3. Kits and laptops included.',
   },
 }
 
@@ -281,10 +276,11 @@ export function spring2027StagingCatalogPrograms(): Program[] {
     const meta = SPRING_STAGING_CATALOG[c.id]
     const startDate = c.dates[0]
     const endDate = c.dates[c.dates.length - 1]
+    const description = springCatalogDescription(c.id) || meta.name
     return {
       _id: `staging-spring-2027-${c.id}`,
-      name: c.name,
-      description: meta.description,
+      name: meta.name,
+      description,
       fee: 0,
       capacity: meta.capacity,
       registrationOpen: false,
@@ -299,7 +295,7 @@ export function spring2027StagingCatalogPrograms(): Program[] {
       startDate,
       endDate,
       location: SPRING_2027_EP_LOCATION,
-      meetingDates: c.dates.join(','),
+      meetingDates: serializeMeetingDates([...c.dates]),
       skipsNote: c.skips,
       instructorName: c.vendor,
       memberDiscountNote: '',
@@ -309,6 +305,22 @@ export function spring2027StagingCatalogPrograms(): Program[] {
       fallEpClassId: c.id,
     }
   })
+}
+
+/** Fill missing Spring 2027 packet slots so catalog + landing pages always list all four classes. */
+export function appendMissingSpringPacketPrograms<T extends Program>(programs: T[]): T[] {
+  const stubs = spring2027StagingCatalogPrograms() as T[]
+  const out = [...programs]
+  for (const stub of stubs) {
+    const klassId = String(stub.fallEpClassId ?? '').trim()
+    const has = out.some((p) => {
+      if (resolveProgramSeason(p) !== 'spring-2027') return false
+      if (String(p.fallEpClassId ?? '').trim() === klassId) return true
+      return matchSpring2027EpClass(p.name)?.id === klassId
+    })
+    if (!has) out.push(stub)
+  }
+  return out
 }
 
 export function matchSpring2027EpClass(programName: string): Spring2027EpClass | undefined {
@@ -402,10 +414,11 @@ export function selectCurrentSpring2027Programs<
     const linkedId =
       Boolean(String(winner.fallEpClassId ?? '').trim()) ||
       Boolean(matchSpring2027EpClass(winner.name))
+    // Packet-linked Spring rows always count (even if fee/dates/featured still empty).
     const seasonRow =
+      linkedId ||
       hasSpring2027SeasonStart(winner) ||
       score >= 50 ||
-      (linkedId && (winner.featured || winner.registrationOpen)) ||
       winner.featured
     if (!seasonRow) continue
     picked.push(winner)
@@ -432,6 +445,9 @@ export function selectCurrentSpring2027Programs<
 
 /** CMS field defaults from the Spring 2027 packet (staff seed only). */
 export function spring2027PacketCmsDefaults(klass: Spring2027EpClass): Record<string, string | number> {
+  const dates = [...klass.dates]
+  const startDate = dates[0]
+  const endDate = dates[dates.length - 1]
   return {
     fallEpClassId: klass.id,
     season: 'spring-2027',
@@ -439,13 +455,20 @@ export function spring2027PacketCmsDefaults(klass: Spring2027EpClass): Record<st
     classTime: klass.classTime,
     location: SPRING_2027_EP_LOCATION,
     instructorName: klass.vendor,
-    startDate: klass.dates[0],
-    endDate: klass.dates[klass.dates.length - 1],
-    durationWeeks: klass.dates.length,
-    meetingDates: klass.dates.join(','),
+    startDate,
+    endDate,
+    durationWeeks: dates.length,
+    meetingDates: serializeMeetingDates(dates),
     skipsNote: klass.skips,
     fee: 0,
     tags: 'fee-tbd,spring-2027',
     memberDiscountNote: '',
+    schedule: formatProgramSchedule({
+      dayOfWeek: klass.dayOfWeek,
+      classTime: klass.classTime,
+      durationWeeks: dates.length,
+      startDate,
+      endDate,
+    }),
   }
 }

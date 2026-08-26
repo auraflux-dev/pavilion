@@ -2,13 +2,11 @@
 
 /**
  * After login return to /membership?checkout=reef|lagoon|tide|faculty&…
- * Lagoon/Tide: design + size (parents get shirt + magnet).
- * Faculty: choose magnet OR shirt design/size, then pay $20.
+ * Collect shirt/perk if needed, add membership line, then go to /checkout.
  */
-import { Suspense, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/use-auth'
-import { PortalCardCheckout } from '@/components/checkout/portal-card-checkout'
 import {
   MembershipShirtPicker,
   type MembershipShirtSelection,
@@ -19,6 +17,7 @@ import {
   type PhysicalPerkChoice,
 } from '@/lib/membership-entitlements'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { buyNowGoCheckout } from '@/lib/cart/buy-actions'
 
 const TIER_LABELS: Record<string, string> = {
   reef: 'Reef',
@@ -35,15 +34,17 @@ const PRICE_FALLBACK: Record<string, number> = {
 }
 
 function HandlerInner() {
-  const searchParams = useSearchParams()
+  const router = useRouter()
+    const searchParams = useSearchParams()
   const { status } = useAuth()
   const checkout = searchParams.get('checkout')
   const studentId = searchParams.get('studentId')
-  const [open, setOpen] = useState(false)
   const [price, setPrice] = useState(0)
   const [shirt, setShirt] = useState<MembershipShirtSelection | null>(null)
   const [physicalPerk, setPhysicalPerk] = useState<PhysicalPerkChoice | ''>('')
   const [ready, setReady] = useState(false)
+  const [pushed, setPushed] = useState(false)
+  const pushedRef = useRef(false)
 
   const needsFacultyChoice = checkout ? tierOffersPhysicalPerkChoice(checkout) : false
   const needsParentShirt = checkout ? tierNeedsShirtSize(checkout) : false
@@ -52,6 +53,31 @@ function HandlerInner() {
   const choiceReady = needsFacultyChoice
     ? physicalPerk === 'magnet' || (physicalPerk === 'spirit_shirt' && !!shirt)
     : !needsParentShirt || !!shirt
+
+  function goToCheckout(dollars: number, perk: PhysicalPerkChoice | '' = physicalPerk) {
+    if (!checkout || dollars <= 0 || pushedRef.current) return
+    pushedRef.current = true
+    const tierName = TIER_LABELS[checkout] ?? checkout
+    const shirtForLine =
+      needsParentShirt || (needsFacultyChoice && perk === 'spirit_shirt') ? shirt : null
+    buyNowGoCheckout(
+      {
+        kind: 'membership',
+        title: `Join ${tierName}`,
+        amount: dollars,
+        href: '/membership',
+        tier: checkout,
+        studentId: studentId || undefined,
+        shirtSize: shirtForLine?.size,
+        shirtDesign: shirtForLine?.design,
+        shirtProductId: shirtForLine?.productId,
+        shirtVariantId: shirtForLine?.variantId,
+        physicalPerk: needsFacultyChoice ? perk || null : undefined,
+      },
+      router,
+    )
+    setPushed(true)
+  }
 
   useEffect(() => {
     if (status !== 'member') return
@@ -72,7 +98,7 @@ function HandlerInner() {
         // ignore
       }
 
-      let dollars = PRICE_FALLBACK[checkout] ?? 0
+      let dollars = Number(PRICE_FALLBACK[checkout] ?? 0)
       try {
         const res = await fetch('/api/checkout/quote', {
           method: 'POST',
@@ -89,20 +115,23 @@ function HandlerInner() {
       if (!cancelled && dollars > 0) {
         setPrice(dollars)
         setReady(true)
-        if (!needsParentShirt && !needsFacultyChoice) setOpen(true)
+        if (!needsParentShirt && !needsFacultyChoice) {
+          goToCheckout(dollars)
+        }
       }
     })()
 
     return () => {
       cancelled = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot return-to-checkout
   }, [status, checkout, studentId, needsParentShirt, needsFacultyChoice])
 
-  if (status !== 'member' || !checkout || !ready || price <= 0) return null
+  if (status !== 'member' || !checkout || !ready || price <= 0 || pushed) return null
 
   const tierName = TIER_LABELS[checkout] ?? checkout
 
-  if ((needsParentShirt || needsFacultyChoice) && !open) {
+  if (needsParentShirt || needsFacultyChoice) {
     return (
       <div className="mb-6 rounded-xl border border-[var(--border)] bg-white p-4 space-y-3">
         <p className="text-sm font-bold text-[#1A1A1A]">Finish joining {tierName}</p>
@@ -144,7 +173,7 @@ function HandlerInner() {
         ) : (
           <p className="text-xs text-[#5A6070]">
             Choose your included Spirit Wear design and size (Lagoon and Tide also include a car
-            magnet), then continue to pay.
+            magnet), then continue to checkout.
           </p>
         )}
         <MembershipShirtPicker
@@ -155,50 +184,17 @@ function HandlerInner() {
         <button
           type="button"
           disabled={!choiceReady}
-          onClick={() => setOpen(true)}
+          onClick={() => goToCheckout(price)}
           className="w-full rounded-lg px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
           style={{ backgroundColor: 'var(--brand-green)' }}
         >
-          Continue to pay · ${price.toFixed(0)}
+          Continue to checkout · ${price.toFixed(0)}
         </button>
       </div>
     )
   }
 
-  const perkNote = needsFacultyChoice
-    ? physicalPerk === 'spirit_shirt' && shirt
-      ? `Pay with your own card. Faculty perk: ${shirt.label}.`
-      : physicalPerk === 'magnet'
-        ? vanillaizeIfDemo('Pay with your own card. Faculty perk: Stone Hill car magnet.')
-        : 'Pay with your own credit or debit card on this page'
-    : needsParentShirt && shirt
-      ? `Pay with your own card. Spirit shirt: ${shirt.label}.`
-      : 'Pay with your own credit or debit card on this page'
-
-  return (
-    <PortalCardCheckout
-      open={open}
-      onClose={() => setOpen(false)}
-      amount={price}
-      title={`Join ${tierName}`}
-      subtitle={perkNote}
-      payBody={{
-        kind: 'membership',
-        tier: checkout,
-        studentId,
-        shirtSize: needsShirtSize ? shirt?.size : undefined,
-        shirtDesign: needsShirtSize ? shirt?.design : undefined,
-        shirtProductId: needsShirtSize ? shirt?.productId : undefined,
-        shirtVariantId: needsShirtSize ? shirt?.variantId : undefined,
-        physicalPerk: needsFacultyChoice ? physicalPerk || null : undefined,
-      }}
-      containerId={`membership-return-${checkout}`}
-      onPaid={() => {
-        sessionStorage.removeItem('pendingMembership')
-        window.location.href = '/member-portal?membership=success'
-      }}
-    />
-  )
+  return null
 }
 
 export function MembershipCheckoutHandler() {

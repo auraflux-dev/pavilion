@@ -72,6 +72,39 @@ const emptyForm = {
 type ProductSort = 'name-asc' | 'name-desc' | 'qty-asc' | 'qty-desc' | 'price-asc' | 'price-desc'
 type ProductScope = 'all' | 'on-cove' | 'spirit' | 'off-menus' | 'low-stock'
 
+function formatSquareSyncNote(squareSync: {
+  ok?: boolean
+  skipped?: boolean
+  reason?: string
+  createdSkus?: string[]
+  updated?: boolean
+  categorySynced?: boolean
+  imageSynced?: boolean
+  inventorySynced?: boolean
+} | null | undefined): string {
+  if (!squareSync) return ''
+  if (squareSync.ok === false) {
+    return ` Square sync note: ${squareSync.reason || 'failed'}.`
+  }
+  if (squareSync.reason === 'variants missing SKU') {
+    return ' SKU was missing. Try Save again (SKUs auto-fill from the name).'
+  }
+  if (squareSync.skipped && squareSync.reason === 'already on Square') {
+    return ' Already on Square Stand.'
+  }
+  if (squareSync.createdSkus?.length) {
+    return ` Square Stand: added ${squareSync.createdSkus.join(', ')}. Refresh Library on the iPad.`
+  }
+  const bits: string[] = []
+  if (squareSync.categorySynced) bits.push('category')
+  if (squareSync.imageSynced) bits.push('photo')
+  if (squareSync.inventorySynced) bits.push('stock')
+  if (bits.length || squareSync.updated) {
+    return ` Square Stand updated${bits.length ? ` (${bits.join(', ')})` : ''}. Refresh Library on the iPad.`
+  }
+  return ''
+}
+
 function productSortQty(p: Product): number | null {
   const fromVariants = (p.variants ?? [])
     .map((v) => v.quantity)
@@ -202,17 +235,9 @@ export function StaffCoveProductsPanel() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Create failed')
       setForm(emptyForm)
-      const syncNote =
-        d.squareSync?.createdSkus?.length
-          ? ` Square Stand: added ${d.squareSync.createdSkus.join(', ')}. Refresh Library on the iPad.`
-          : d.squareSync?.skipped && d.squareSync?.reason === 'already on Square'
-            ? ' Already on Square Stand.'
-            : d.squareSync?.ok === false
-              ? ` Square sync note: ${d.squareSync.reason || 'failed'}. Run sync script if needed.`
-              : d.squareSync?.reason === 'variants missing SKU'
-                ? ' SKU was missing. Try Save again (SKUs auto-fill from the name).'
-                : ''
-      setStatus(`Added “${d.product.name}”. Live on /cove within a few minutes.${syncNote}`)
+      setStatus(
+        `Added “${d.product.name}”. Live on /cove within a few minutes.${formatSquareSyncNote(d.squareSync)}`,
+      )
 
       await load()
     } catch (err) {
@@ -258,15 +283,7 @@ export function StaffCoveProductsPanel() {
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Save failed')
-      const syncNote =
-        d.squareSync?.createdSkus?.length
-          ? ` Square Stand: added ${d.squareSync.createdSkus.join(', ')}. Refresh Library on the iPad.`
-          : d.squareSync?.skipped && d.squareSync?.reason === 'already on Square'
-            ? ' Already on Square Stand.'
-            : d.squareSync?.ok === false
-              ? ` Square sync note: ${d.squareSync.reason || 'failed'}.`
-              : ''
-      setStatus(`Saved “${d.product.name}”.${syncNote}`)
+      setStatus(`Saved “${d.product.name}”.${formatSquareSyncNote(d.squareSync)}`)
 
       await load()
     } catch (err) {
@@ -350,6 +367,26 @@ export function StaffCoveProductsPanel() {
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Backfill failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function syncProductToSquare(id: string, name: string) {
+    setBusy(true)
+    setError('')
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/cove/products', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, syncSquare: true, forceImage: true }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Square sync failed')
+      setStatus(`Synced “${name}” to Square Stand.${formatSquareSyncNote(d.squareSync)}`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Square sync failed')
     } finally {
       setBusy(false)
     }
@@ -847,6 +884,20 @@ export function StaffCoveProductsPanel() {
                   onClick={() => void saveProduct(p.id)}
                 >
                   <Save className="w-3.5 h-3.5 mr-1" /> Save
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={busy || (!p.onCove && !p.onSpirit)}
+                  title={
+                    p.onCove || p.onSpirit
+                      ? 'Push category, photo, and Staff stock to Square Stand'
+                      : 'Turn on Cove or Spirit Wear first'
+                  }
+                  onClick={() => void syncProductToSquare(p.id, p.name)}
+                >
+                  Sync Square
                 </Button>
               </div>
 

@@ -3,6 +3,8 @@
  * Public /programs/fall-2026 + staff Programs use this. Do not feed member portal from here.
  */
 
+import type { Program } from '@/lib/api/programs'
+import { fallCatalogDescription } from '@/lib/programs/landing-copy'
 import { resolveProgramSeason } from '@/lib/programs/season'
 
 export const FALL_2026_EP_LOCATION = 'SHMS Library'
@@ -251,10 +253,12 @@ export function selectCurrentFall2026Programs<
     const linkedId =
       Boolean(String(winner.fallEpClassId ?? '').trim()) ||
       Boolean(matchFall2026EpClass(winner.name))
+    // Packet-linked Fall rows always count (even if fee/dates/featured still empty).
+    // Legacy rows are already excluded by isFall2026CatalogRow / resolveProgramSeason.
     const seasonRow =
+      linkedId ||
       hasFall2026SeasonStart(winner) ||
       score >= 50 ||
-      (linkedId && (winner.featured || winner.registrationOpen)) ||
       winner.featured
     if (!seasonRow) continue
     picked.push(winner)
@@ -332,4 +336,86 @@ export function mergeEmptyProgramFields<
     if (empty) patch[key] = value
   }
   return patch
+}
+
+const FALL_STAGING_CATALOG: Record<
+  string,
+  { name: string; capacity: number; category: string }
+> = {
+  ye: {
+    name: 'Young Entrepreneurs: From Passion to Pitch',
+    capacity: 30,
+    category: 'Strategy',
+  },
+  essay: {
+    name: 'Essay Writing & Academic Composition',
+    capacity: 14,
+    category: 'Creative Arts',
+  },
+  robotics: {
+    name: 'Robotics',
+    capacity: 30,
+    category: 'STEM',
+  },
+  mathcounts: {
+    name: 'Competitive Math Prep',
+    capacity: 30,
+    category: 'Competition',
+  },
+}
+
+/**
+ * Synthetic Fall programs when CMS is missing a packet class row (e.g. Robotics not seeded yet).
+ * Registration stays closed until Staff opens the Wix row.
+ */
+export function fall2026StagingCatalogPrograms(): Program[] {
+  return FALL_2026_EP_CLASSES.map((c, i) => {
+    const meta = FALL_STAGING_CATALOG[c.id]
+    const startDate = c.dates[0]
+    const endDate = c.dates[c.dates.length - 1]
+    const description = fallCatalogDescription(c.id) || meta.name
+    return {
+      _id: `staging-fall-2026-${c.id}`,
+      name: meta.name,
+      description,
+      fee: 0,
+      capacity: meta.capacity,
+      registrationOpen: false,
+      requiresWaiver: true,
+      grades: '6-8',
+      category: meta.category,
+      featured: true,
+      sortOrder: 50 + i,
+      dayOfWeek: c.dayOfWeek,
+      classTime: c.classTime,
+      durationWeeks: c.dates.length,
+      startDate,
+      endDate,
+      location: FALL_2026_EP_LOCATION,
+      meetingDates: serializeMeetingDates([...c.dates]),
+      skipsNote: c.skips,
+      instructorName: c.vendor,
+      memberDiscountNote: '',
+      season: 'fall-2026',
+      tags: 'coming-soon,fee-tbd',
+      schedule: `${c.dayOfWeek}s ${c.classTime}, 12 sessions`,
+      fallEpClassId: c.id,
+    }
+  })
+}
+
+/** Fill missing Fall 2026 packet slots so catalog + landing pages always list all four classes. */
+export function appendMissingFallPacketPrograms<T extends Program>(programs: T[]): T[] {
+  const stubs = fall2026StagingCatalogPrograms() as T[]
+  const out = [...programs]
+  for (const stub of stubs) {
+    const klassId = String(stub.fallEpClassId ?? '').trim()
+    const has = out.some((p) => {
+      if (resolveProgramSeason(p) !== 'fall-2026') return false
+      if (String(p.fallEpClassId ?? '').trim() === klassId) return true
+      return matchFall2026EpClass(p.name)?.id === klassId
+    })
+    if (!has) out.push(stub)
+  }
+  return out
 }
