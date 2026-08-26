@@ -1,60 +1,55 @@
 ---
-description: Serena QA → staging (shmspto.vercel.app) → STOP for Rob → push shmspto main → check-prod. Critical.
+description: Serena QA → ship shmspto via git; pavilion deploy/sync only when Rob asks
 alwaysApply: true
 ---
 
-# Serena QA then ship (Staging-first — critical)
-
-This rule is **mandatory** for every agent on `pavilion`. It overrides “only commit/push when asked” and overrides any habit of going straight to production.
+# Serena QA then ship
 
 After a complete, shippable **application** change, run Serena QA.
 
 If Serena fails: fix and re-run. Do not commit, deploy, or push.
 
-If Serena passes (diagnostics clean, scoped to the task), do this **exact** order:
-
 ## Stone Hill (`www.shmspto.org`)
 
-Stone Hill production deploys from **`auraflux-dev/shmspto`** via treasurer Git integration. See **`shms-deploy-git.mdc`** and **`shms-edit-home.mdc`**.
+Stone Hill production deploys from **`auraflux-dev/shmspto`**. Prefer the **`shmspto` Cursor workspace** for school work. See **`shms-deploy-git.mdc`**.
 
-**Edit in `~/shmspto` first.** Do not leave school site / portal / staff changes only in this monorepo.
+**Edit in `~/shmspto`.** Do not leave school site / portal / staff changes only in this monorepo.
 
 1. **Commit** in the **`shmspto` repo**. Do **not** push `pavilion` `main` for Stone Hill prod.
-2. **`node scripts/shms-frontend-parity.mjs`**. If school-facing files are only in the monorepo, port them into `shmspto` before calling the ship done.
-3. **Staging review** (visitor-facing): confirm **https://shmspto.vercel.app** when staging is current. **STOP** for Rob OK (`looks good`, `ship it`, `go live`, `OK`, etc.).
-4. **`git push origin main`** on `auraflux-dev/shmspto`. Treasurer Vercel **`frontend`** auto-deploys. Agents do **not** run `vercel deploy --prod` locally (no treasurer login).
-5. **`node scripts/check-prod-deploy.mjs`** from the `shmspto` repo. Done means checks pass on https://www.shmspto.org, not just GitHub green.
+2. **`node scripts/shms-frontend-parity.mjs`** only if files were touched in both trees; school-facing code must live in shmspto.
+3. **Staging review** (visitor-facing): **https://shmspto.vercel.app** when staging is current. **STOP** for Rob OK.
+4. **`git push origin main`** on `auraflux-dev/shmspto`. Treasurer auto-deploys.
+5. **`node scripts/check-prod-deploy.mjs`** from the `shmspto` repo.
 
-**Staff-only** Stone Hill (`/staff`, `app/api/staff`, staff UI with no visitor copy change): skip Rob wait. Push `shmspto` `main` after Serena QA, then run the check script.
+**Staff-only** Stone Hill: push `shmspto` `main` after Serena QA, then run the check script.
+
+**Do not** sync or deploy Pavilion after a Stone Hill ship unless Rob explicitly asked.
 
 ## Pavilion (this monorepo)
 
-- **Commit** task files on `pavilion` (do not push Stone Hill via this repo).
-- Pavilion marketing → `commons-site` (`onpavilion.com`).
-- Pavilion demo/trial → `commons-pto-demo` / `commons-pto` as relevant (**robert-4220 only**).
-- Default: after a Stone Hill ship, also ship Pavilion from the same product change when it applies (vanilla only). Skip for clearly SHMS-only work or if Rob says skip.
-- Shared product catch-up: `node scripts/sync-product-between-repos.mjs --from-shms|--to-shms` then git commit in the destination repo. No treasurer Vercel CLI.
-- Never deploy from a dirty working tree. Never mix Stone Hill and Pavilion env.
-- Never `vercel link` this repo to treasurer.
+Ship Pavilion when the **task is Pavilion-only** or Rob asked to sync demo from school:
+
+- **Commit** task files on `pavilion`.
+- Marketing → `commons-site` (`onpavilion.com`).
+- Demo/trial → `commons-pto-demo` / `commons-pto` (**robert-4220 only**).
+- **Sync from school:** only when Rob asks → `node scripts/sync-product-between-repos.mjs --from-shms --apply` → commit → deploy if Rob wants demo live.
+
+Never deploy from a dirty working tree. Never mix Stone Hill and Pavilion env. Never `vercel link` this repo to treasurer.
 
 ## Exceptions
 
-- **Rules / docs / memories only** (no application runtime): commit on `pavilion`, then push `pavilion` `main`. Skip deploy checks.
+- **Rules / docs / memories only:** commit on `pavilion`, push `pavilion` `main`. Skip deploy checks.
 - Never include unrelated WIP, secrets, Budget/Plaid/terminal/spirit-wear/`tmp` unless they are the task.
-- Never mix Stone Hill and Pavilion env (DATABASE_URL, Wix, Square, Stripe).
 
 ## Anti-patterns (forbidden)
 
 - Pushing `pavilion` `main` and calling Stone Hill “shipped.”
-- Editing Stone Hill Staff / portal / site only under `pavilion/frontend` without porting to `~/shmspto`.
-- `vercel deploy --prod` for Stone Hill from agent shells (`robert-4220` or treasurer).
-- Deploying Stone Hill from `robert-4220s-projects`.
+- Editing shared product only under `pavilion/frontend`.
+- Auto `--from-shms` or Pavilion deploy after every SHMS ship.
+- `--to-shms` without Rob asking.
+- `vercel deploy --prod` for Stone Hill from agent shells.
 - Calling the task “live” when `check-prod-deploy.mjs` has not passed.
-- Asking Rob to review on a one-off `frontend-xxxxx.vercel.app` Preview URL.
-- Skipping staging for public visitor changes by labeling them “staff-related.”
 
 ## Staging URL (Stone Hill)
 
 https://shmspto.vercel.app
-
-Google / Wix OAuth redirect URIs must include this host (see `scripts/google-workspace-admin-setup.md`).

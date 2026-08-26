@@ -9,28 +9,34 @@ Stone Hill (`www.shmspto.org`) deploys from **`auraflux-dev/shmspto`**, not this
 
 ## Agent ship path (required)
 
-1. **Edit in `~/shmspto`** for school site, portal, and staff (see **`shms-edit-home.mdc`**). Prefer moving the agent root there when the task is Stone Hill.
+1. **Edit in `~/shmspto`** for school site, portal, staff, and shared product. Use the **shmspto workspace** when the task is Stone Hill.
 2. **Serena QA** on the changed files.
-3. **Commit** in the **`shmspto` repo** (local clone, e.g. `~/shmspto`).
-   - If you already edited `frontend/` here in `pavilion`, port the same diff into `~/shmspto/frontend/` before commit.
+3. **Commit** in the **`shmspto` repo**.
    - Do **not** treat `git push origin main` on `pavilion` as a Stone Hill production deploy.
-4. **`node scripts/shms-frontend-parity.mjs`**. Fix any school-facing “only in monorepo” hits.
-5. **`git push origin main`** on `auraflux-dev/shmspto`.
-6. Treasurer Vercel project **`frontend`** auto-builds Production from that push.
-7. **`node scripts/check-prod-deploy.mjs`** from the `shmspto` repo. Git push alone is not done until this passes on https://www.shmspto.org.
+4. **`git push origin main`** on `auraflux-dev/shmspto`.
+5. Treasurer Vercel project **`frontend`** auto-builds Production from that push.
+6. **`node scripts/check-prod-deploy.mjs`** from the `shmspto` repo.
+
+If work accidentally landed in `pavilion/frontend`, port into `~/shmspto/frontend/` in the same turn — do not use `--to-shms` as the normal workflow.
+
+## Pavilion is not auto-updated
+
+After a Stone Hill ship, **do not** sync or deploy Pavilion unless Rob explicitly asked.
+
+When Rob asks to refresh demo: `--from-shms --apply` in pavilion, then commit + deploy `commons-pto-demo`.
 
 ## Agents cannot CLI-deploy Stone Hill
 
-- Do **not** run `vercel deploy --prod` for Stone Hill from agent shells (no treasurer Vercel login).
+- Do **not** run `vercel deploy --prod` for Stone Hill from agent shells.
 - Do **not** deploy Stone Hill from `robert-4220s-projects` or Pavilion projects.
 - CLI fallback (`node scripts/deploy-production.mjs`) is Rob-only with treasurer login. See `~/shmspto/scripts/DEPLOY.md`.
 
 ## Staging + Rob OK (visitor-facing)
 
-For public visitor UI (not staff-only): Rob reviews on **https://shmspto.vercel.app** when staging is current, then OK before pushing `shmspto` `main` for production.
+For public visitor UI: Rob reviews on **https://shmspto.vercel.app** when staging is current, then OK before pushing `shmspto` `main` for production.
 
-Staff-only (`/staff`, `app/api/staff`, staff components with no visitor copy change): push `shmspto` `main` after Serena QA without waiting for Rob OK.
+Staff-only: push `shmspto` `main` after Serena QA without waiting for Rob OK.
 
 ## Pavilion (this repo)
 
-Pavilion marketing/demo/trial still ship from **`pavilion`** (`commons-site`, `commons-pto-demo`, `commons-pto`) per `commons-parity.mdc`. Never mix SHMS Wix env onto Pavilion.
+Pavilion marketing/demo ships from **`pavilion`** when the task is Pavilion-facing or Rob requested a demo sync. Never mix SHMS Wix env onto Pavilion.

@@ -1,31 +1,39 @@
 ---
-description: Pavilion deploy is opt-in after SHMS ships; never mix env; Staging-first
+description: Pavilion deploy opt-in; shmspto canonical; sync only when Rob asks
 alwaysApply: true
 ---
 
 # Pavilion vs SHMS deploys
 
-Build **Pavilion** as if SHMS never existed (product, tenants, `onpavilion.com`, demo/trials). No Stone Hill PII or school cost on Pavilion.
+Build **Pavilion** demo/marketing as its own product surface. No Stone Hill PII or school cost on Pavilion.
 
-Stone Hill (`frontend` / www.shmspto.org) and Pavilion apps (`commons-pto-demo`, `commons-pto`, `commons-site`) share this monorepo for now but are **separate products**.
+Stone Hill (`frontend` / www.shmspto.org) and Pavilion apps share historical frontend code but are **separate products**:
 
-Application ships follow **Staging-first** in `ship-after-serena.mdc` and **`shms-deploy-git.mdc`** (critical, every agent):
+- **shmspto** = canonical source + live school
+- **pavilion** = consumer; catches up when Rob asks
 
-1. Serena QA → commit in **`auraflux-dev/shmspto`** for Stone Hill (port `frontend/` diffs from this monorepo if needed).
-2. **Staging review** on **https://shmspto.vercel.app** when staging is current (visitor-facing). Never use ephemeral Preview URLs for Rob review.
-3. **STOP.** Wait for explicit OK on visitor changes.
-4. **`git push origin main`** on **`shmspto`**. Treasurer Vercel auto-deploys. Run **`node scripts/check-prod-deploy.mjs`**. Agents do not `vercel deploy` Stone Hill locally.
+## Stone Hill ships (~/shmspto workspace)
 
-Staff-only exception: push `shmspto` `main` after Serena QA (no Rob wait), then run the check script.
-5. **Default after a Stone Hill application ship:** also deploy Pavilion app code from the **same SHA** (`commons-pto-demo` and `commons-pto` as relevant). Almost every SHMS product change belongs on Pavilion too. **Hard rule:** Pavilion stays vanilla. No Stone Hill / SHMS branding, school PII, or SHMS-specific copy on Pavilion surfaces (demo gates + `vanillaizeIfDemo` / Commons surface still apply). Skip Pavilion only when the change is clearly SHMS-only (school CMS content, SHMS-only env, one-off school ops) or Rob says skip.
-6. If the task is Pavilion-only (`commons-site`, demo vanillaize, trial packs), ship Pavilion projects only (same staging → OK → prod → push). Do not require a Stone Hill deploy.
+See **`shms-deploy-git.mdc`**. Summary:
 
-Never put Stone Hill `DATABASE_URL` / Wix / Square env on Pavilion projects, or Pavilion `DATABASE_URL` / Stripe on Stone Hill.
+1. Edit, Serena QA, commit in **`auraflux-dev/shmspto`**
+2. Staging review on **https://shmspto.vercel.app** when visitor-facing (Rob OK)
+3. **`git push origin main`** on **`shmspto`**
+4. **`node scripts/check-prod-deploy.mjs`**
 
-At session start: `node scripts/commons-parity.mjs` is informational. Do not force catch-up unless Rob wants Pavilion on that SHA or the task is Pavilion-facing.
+Staff-only: push `shmspto` `main` after Serena QA, then run the check script.
 
-**Product sync with Stone Hill** uses git + `scripts/sync-product-between-repos.mjs`, not a second Vercel login. Agents stay in the pavilion workspace. See `pavilion-agent-home.mdc`.
+**Do not** sync or deploy Pavilion as a follow-up unless Rob asked.
+
+## Pavilion ships (this workspace, opt-in)
+
+- **Pavilion-only tasks:** commit + deploy `commons-site`, `commons-pto-demo`, `commons-pto` as relevant.
+- **Demo catch-up from school:** Rob must ask → `--from-shms --apply` → commit pavilion → deploy demo (vanilla; no SHMS branding on Pavilion surfaces).
+
+Never put Stone Hill Wix / Square env on Pavilion projects, or Pavilion Stripe on Stone Hill.
+
+At session start: `node scripts/commons-parity.mjs` is informational. Do not force catch-up unless Rob wants Pavilion updated.
 
 Plaid stays on the **Trial** account until paying Pavilion clients.
 
-Vanillaize / demo gates still apply on Commons demo. After a Pavilion-facing ship, run `node scripts/commons-surface-check.mjs`.
+After a Pavilion-facing ship, run `node scripts/commons-surface-check.mjs`.

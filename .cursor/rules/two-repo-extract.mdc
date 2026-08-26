@@ -1,28 +1,38 @@
 ---
-description: Two-repo world: SHMS vs Pavilion deploy targets
+description: Two-repo world — shmspto canonical; pavilion consumer on Rob request
 alwaysApply: true
 ---
 
 # Two repos
 
-- **SHMS school:** `auraflux-dev/shmspto` → Vercel `frontend` (team **treasurer-4353s-projects**) → www.shmspto.org  
-  **Edit home is `~/shmspto`.** Site, member portal, and staff changes go there first. This monorepo is not live Stone Hill. Run `node scripts/shms-frontend-parity.mjs` after school ships. Forbids Commons/Pavilion env.
+- **SHMS school (canonical product):** `auraflux-dev/shmspto` → Vercel `frontend` (team **treasurer-4353s-projects**) → www.shmspto.org  
+  **Edit home is `~/shmspto`.** All shared product (site, portal, staff) is authored and shipped there. Forbids Commons/Pavilion env.
 
-## SHMS deploy path (agents)
+- **Pavilion platform (consumer):** `auraflux-dev/pavilion` (this workspace) → `commons-site`, `commons-pto-demo`, `commons-pto`  
+  Pulls product from shmspto **only when Rob asks** via `--from-shms`. Does not auto-follow SHMS ships.
+
+## SHMS deploy path (from ~/shmspto workspace)
 
 1. Code changes → **commit** → **push** `auraflux-dev/shmspto` **`main`**
 2. **Treasurer** Vercel auto-deploys production (`frontend` is Git-connected)
 3. Confirm live: `node scripts/check-prod-deploy.mjs` (from the **shmspto** repo)
 
-Agents **cannot** and **must not** run `vercel deploy` for SHMS from the pavilion workspace. **Git push on `auraflux-dev/shmspto` is the deploy path.** Do not create a `frontend` project on robert-4220. Do not `vercel link` this monorepo to treasurer.
-- **Pavilion platform:** `auraflux-dev/pavilion` (this workspace) → `commons-site`, `commons-pto-demo`, `commons-pto`  
+Agents **cannot** run `vercel deploy` for SHMS from the pavilion workspace. **Git push on `auraflux-dev/shmspto` is the deploy path.**
 
-Build Pavilion as if SHMS never existed. After an SHMS application ship, **default to deploying Pavilion** from the same SHA (vanilla only. no SHMS branding/copy). Skip only when the change is clearly school-only or Rob says skip.
+## Pavilion deploy path (opt-in)
 
-Application ships are **Staging-first** (see `ship-after-serena.mdc` and `shms-deploy-git.mdc`): https://shmspto.vercel.app → Rob OK → **push `auraflux-dev/shmspto` `main`** → `node scripts/check-prod-deploy.mjs`. Agents do not `vercel deploy` Stone Hill locally.
+Deploy Pavilion (`commons-pto-demo`, etc.) when:
+
+- The task is **Pavilion-only** (marketing, brand packs, CRM, trial plumbing), or
+- Rob asked to **sync from shmspto** (`--from-shms`) and then deploy demo
+
+**Never** default to deploying Pavilion after every Stone Hill application ship.
 
 Never mix env across the wall. See `EXTRACT.md`, `mem:hskrg-org`, `mem:hskrg-tools-inventory`.
 
 ## Vercel allowlist only
-Deploy only to: `frontend` (SHMS), `commons-site`, `commons-pto-demo`, `commons-pto`.  
-Never create one-off `pavilion-*` or legacy `wix-shmspto-*` ship projects. Never deploy monorepo code to `frontend` with Pavilion env, or SHMS extract to demo/trial.
+
+Deploy only to: `commons-site`, `commons-pto-demo`, `commons-pto` from this repo.  
+Stone Hill `frontend` ships from **`shmspto`** Git only — not from pavilion workspace CLI.
+
+Never create one-off `pavilion-*` or legacy `wix-shmspto-*` ship projects.

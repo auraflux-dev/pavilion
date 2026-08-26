@@ -1,19 +1,17 @@
 #!/usr/bin/env node
 /**
- * Sync shared product frontend files between Pavilion and Stone Hill.
+ * One-way product sync: Stone Hill (canonical) → Pavilion (consumer).
  *
- * Agent home is **pavilion**. You do not need treasurer Vercel for this.
+ * Run **only when Rob asks** to refresh demo/trial from shipped school code.
  * Stone Hill www ships by git push on ~/shmspto (treasurer auto-deploys).
- * Pavilion demo/trial ships on robert-4220 only.
+ * Pavilion demo/trial ships on robert-4220 only after sync + commit here.
  *
  * Usage:
  *   node scripts/sync-product-between-repos.mjs --from-shms --dry-run
  *   node scripts/sync-product-between-repos.mjs --from-shms --apply
- *   node scripts/sync-product-between-repos.mjs --to-shms --dry-run
- *   node scripts/sync-product-between-repos.mjs --to-shms --apply
  *
- * --from-shms  Copy school product from ~/shmspto → pavilion (demo/trial catch-up)
- * --to-shms    Copy school product from pavilion → ~/shmspto (school ship prep)
+ * --from-shms  Copy product from ~/shmspto → pavilion (default / expected direction)
+ * --to-shms    Legacy reverse copy — Rob must ask explicitly (rare)
  *
  * Skips Pavilion-only fixtures/demo and thin SHMS marketing wrappers by default.
  */

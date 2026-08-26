@@ -1,5 +1,5 @@
 ---
-description: Stone Hill www ships from ~/shmspto; Pavilion agents sync product here first
+description: Stone Hill www ships from ~/shmspto; pavilion consumes on Rob request only
 alwaysApply: true
 ---
 
@@ -7,41 +7,41 @@ alwaysApply: true
 
 www.shmspto.org deploys from **`auraflux-dev/shmspto`** only (git push → treasurer auto-deploy).
 
-## Agent home is pavilion
+## Where to edit
 
-Cursor agents for this product work in the **`pavilion`** workspace. Do not require a second agent rooted on `shmspto` or a treasurer Vercel login to keep trees in sync.
+| Surface | Edit in |
+|---------|---------|
+| Stone Hill visitor, portal, staff, shared product | **`~/shmspto`** (`auraflux-dev/shmspto`) |
+| Pavilion demo / trial / marketing | **`pavilion`** (this repo) — Pavilion-only layers |
 
-| Surface | Source of product work | How it reaches www |
-|---------|------------------------|--------------------|
-| Shared Staff / portal / checkout / Cove | **`pavilion/frontend`** | `node scripts/sync-product-between-repos.mjs --to-shms --apply` then commit/push **`~/shmspto`** |
-| Pavilion demo / trial | **`pavilion/frontend`** | robert-4220 deploy (`commons-pto-demo` / `commons-pto`) |
-| School-only content / ops | **`~/shmspto`** | commit/push `shmspto` only |
+**Shared product is authored in `~/shmspto`, not here.** Do not implement Staff / portal / checkout in `pavilion/frontend` and plan to port later.
 
-## Sync commands
+For Stone Hill work, prefer the **`shmspto` Cursor workspace** (`move_agent_to_root` → `~/shmspto`).
+
+## Pavilion consumes on request
+
+Pavilion catches up **only when Rob asks**:
 
 ```bash
-# School → Pavilion (demo/trial catch-up)
 node scripts/sync-product-between-repos.mjs --from-shms --dry-run
 node scripts/sync-product-between-repos.mjs --from-shms --apply
-
-# Pavilion → School (prep www ship)
-node scripts/sync-product-between-repos.mjs --to-shms --dry-run
-node scripts/sync-product-between-repos.mjs --to-shms --apply
-
-node scripts/shms-frontend-parity.mjs
 ```
+
+Do **not** run sync or deploy Pavilion after a SHMS ship unless Rob requested it.
+
+**Do not** use `--to-shms` unless Rob explicitly asks (rare).
 
 Pushing `pavilion` `main` does **not** update www.
 
-## After a school application ship
+## After a Stone Hill application ship (in ~/shmspto)
 
 1. Commit/push **`~/shmspto`**
 2. `node scripts/check-prod-deploy.mjs` (from shmspto)
-3. Keep Pavilion current with `--from-shms` when the change is shared product (vanilla)
+3. **Stop.** Do not sync or deploy Pavilion unless Rob asks.
 
 ## Anti-patterns (forbidden)
 
-- `vercel link` / `vercel deploy` Stone Hill from this monorepo (treasurer or robert-4220)
-- Editing shared product only under `~/shmspto` while Pavilion stays stale
-- Marking www live after a pavilion-only commit
-- Hopping Vercel accounts just to copy files (use the sync script + git)
+- `vercel link` / `vercel deploy` Stone Hill from this monorepo
+- Treating pavilion `frontend/` edits as live Stone Hill product
+- Auto `--from-shms` or Pavilion deploy after every school ship
+- `--to-shms` as the default product workflow
