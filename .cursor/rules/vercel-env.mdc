@@ -1,18 +1,21 @@
 ---
-description: robert-4220 Vercel CLI — load .env.vercel before any vercel command
+description: Ops secrets via Doppler; Vercel CLI through doppler_run.sh
 alwaysApply: true
 ---
 
-# Vercel CLI (robert-4220 only)
+# Secrets and Vercel CLI
 
-Pavilion deploys: `commons-pto-demo`, `commons-pto`, `commons-site`. Never treasurer / Stone Hill www.
+**Doppler** (`pavilion` / `dev`) holds agent ops secrets (`VERCEL_TOKEN`, `VERCEL_ORG_ID`).  
+**Vercel dashboard** holds Pavilion production runtime env.
 
-Before any `vercel` command in this workspace:
+Local `.env` is **bootstrap only**: `DOPPLER_TOKEN`. Never commit `.env`.
+
+Before any `vercel` command:
 
 ```bash
-./scripts/with-vercel-env.sh vercel … --scope robert-4220s-projects
+./scripts/doppler_run.sh vercel … --scope robert-4220s-projects
 ```
 
-Requires local `.env.vercel` (copy from `.env.vercel.example`). Never commit tokens.
+Never treasurer / Stone Hill www. Stone Hill ships from `~/shmspto` via git push only.
 
-Do **not** `vercel link` or deploy to treasurer. Stone Hill ships from `~/shmspto` via git push only.
+`~/hskrg-work` uses the same Doppler project (`pavilion` / `dev`).
