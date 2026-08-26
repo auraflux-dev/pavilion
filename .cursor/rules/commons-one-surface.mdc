@@ -1,0 +1,27 @@
+---
+description: One Commons demo app; brand packs for prospects; trial is an unlock
+alwaysApply: true
+---
+
+# One Commons surface (critical)
+
+Do **not** treat demo and trial as two products to deploy.
+
+| Surface | Role |
+|---------|------|
+| **commons-pto-demo** | The Pavilion app. Riverside sample by default. Brand a prospect with a pack. |
+| **commons-pto** | Legacy private host. Do not open new prospects here. |
+| **Stone Hill / shmspto** | Separate school product (treasurer git). |
+
+## Sales motion
+
+1. Share the demo: `https://commons-pto-demo.vercel.app/review?code=…`
+2. Brand it: `/review?brand=spring-hill` or banner / review “Brand this tour”
+3. If they want to continue: unlock private login / live connectors later. That is the “trial,” not a second Vercel project.
+
+## Agent rules
+
+- Ship Pavilion product to **commons-pto-demo** (robert-4220) only unless Rob asks otherwise.
+- Add prospect skins in `frontend/lib/crm/trial-packs/` (brand packs).
+- Cookie `pavilion_brand` + `/api/demo/brand` switch packs on demo.
+- Never `vercel link` this repo to treasurer.

@@ -7,6 +7,8 @@ alwaysApply: true
 
 This Cursor workspace is **`pavilion`** (`auraflux-dev/pavilion`). Agents stay here.
 
+Pavilion ships **one** Commons app (`commons-pto-demo`). Brand packs skin prospects. See `commons-one-surface.mdc`.
+
 ## Vercel wall (never mix)
 
 | Account | Use for |

@@ -86,16 +86,15 @@ async function categoryNamesForEvent(
 }
 
 export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
+  const { getActiveBrandPack } = await import('@/lib/crm/active-trial')
+  const brandPack = await getActiveBrandPack()
+  if (brandPack?.events?.length) return brandPack.events.slice(0, limit)
+  if (brandPack) return []
   if (isDemoInstance()) {
     const { DEMO_EVENTS } = await import('@/lib/demo/content')
     return DEMO_EVENTS.slice(0, limit)
   }
-  if (process.env.COMMONS_PLATFORM === 'true') {
-    const { trialPackForSlug } = await import('@/lib/crm/trial-packs')
-    const pack = trialPackForSlug(process.env.COMMONS_TRIAL_PACK || '')
-    if (pack?.events?.length) return pack.events.slice(0, limit)
-    return []
-  }
+  if (process.env.COMMONS_PLATFORM === 'true') return []
   try {
     const client = getWixClient()
     const result = await client.wixEventsV2

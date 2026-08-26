@@ -1,11 +1,11 @@
 'use client'
 
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { DEMO_BRAND } from '@/lib/demo/brand'
+import { DEMO_BRAND, publicBrandFace } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { DEMO_JOIN_PROFILES } from '@/lib/demo/seed'
 
@@ -19,6 +19,49 @@ function ReviewJoinInner() {
   const [code, setCode] = useState(presetCode)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [packs, setPacks] = useState<Array<{ slug: string; pto: string; town: string }>>([])
+  const [brandSlug, setBrandSlug] = useState<string | null>(null)
+  const face = publicBrandFace()
+
+  useEffect(() => {
+    const presetBrand = searchParams.get('brand')
+    fetch('/api/demo/brand')
+      .then(async (r) => {
+        const d = (await r.json()) as {
+          slug?: string | null
+          packs?: Array<{ slug: string; pto: string; town: string }>
+        }
+        setPacks(Array.isArray(d.packs) ? d.packs : [])
+        setBrandSlug(d.slug || null)
+        if (presetBrand && presetBrand !== (d.slug || '')) {
+          await fetch('/api/demo/brand', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug: presetBrand }),
+          })
+          window.location.replace('/review' + (presetCode ? `?code=${encodeURIComponent(presetCode)}` : ''))
+        }
+      })
+      .catch(() => {})
+  }, [searchParams, presetCode])
+
+  async function applyBrand(slug: string) {
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/demo/brand', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      })
+      if (!res.ok) throw new Error('Could not set brand')
+      window.location.reload()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not set brand')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   if (!isPublicDemoInstance()) {
     return (
@@ -81,14 +124,46 @@ function ReviewJoinInner() {
         PTO operating system demo
       </p>
       <h1 className="text-3xl font-bold mb-3" style={{ color: '#1A1A1A' }}>
-        Review {DEMO_BRAND.pto}
+        Review {face.pto}
       </h1>
-      <p className="text-sm text-[#5A6070] mb-8 leading-relaxed">
-        Sample school for a board walkthrough. Same product: public site,
-        family portal, staff workspace, membership, store, and books. Nothing
-        you click is saved, charged, or emailed. Join with the review code from
-        the person who sent you this link.
+      <p className="text-sm text-[#5A6070] mb-4 leading-relaxed">
+        One demo app. Default is Riverside sample. Brand it as a prospect PTO
+        for the walkthrough. Same product: public site, family portal, staff
+        workspace, membership, store, and books. Nothing you click is charged
+        or emailed. Join with the review code from the person who sent you this
+        link.
       </p>
+      {packs.length ? (
+        <div className="mb-8 space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#5A6070]">
+            Brand this tour
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant={brandSlug ? 'outline' : 'default'}
+              size="sm"
+              disabled={busy}
+              onClick={() => void applyBrand('')}
+            >
+              {DEMO_BRAND.pto}
+            </Button>
+            {packs.map((p) => (
+              <Button
+                key={p.slug}
+                type="button"
+                variant={brandSlug === p.slug ? 'default' : 'outline'}
+                size="sm"
+                disabled={busy}
+                onClick={() => void applyBrand(p.slug)}
+              >
+                {p.pto}
+                {p.town ? ` · ${p.town}` : ''}
+              </Button>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <p className="text-xs font-semibold uppercase tracking-wide text-[#5A6070] mb-2">
         Use a sample family from the demo roster

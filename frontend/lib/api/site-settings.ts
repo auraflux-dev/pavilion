@@ -1,3 +1,4 @@
+import { getActiveBrandPack } from '@/lib/crm/active-trial'
 /**
  * Site Settings. key/value pairs managed in Wix CMS.
  *
@@ -27,14 +28,11 @@ interface WixDataItem {
 }
 
 async function fetchAllSettings(): Promise<Record<string, string>> {
+ const brandPack = await getActiveBrandPack()
+ if (brandPack?.settings) return { ...brandPack.settings }
  if (isDemoInstance()) {
    const { DEMO_SETTINGS } = await import('@/lib/demo/content')
    return { ...DEMO_SETTINGS }
- }
- if (process.env.COMMONS_PLATFORM === 'true') {
-    const { trialPackForSlug } = await import('@/lib/crm/trial-packs')
-    const pack = trialPackForSlug(process.env.COMMONS_TRIAL_PACK || '')
-   if (pack?.settings) return { ...pack.settings }
  }
  const apiKey = process.env.WIX_API_KEY
  const siteId = process.env.WIX_SITE_ID

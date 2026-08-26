@@ -10,6 +10,7 @@ import { MEMBERSHIP_CHOOSE_PATH } from '@/lib/membership-links'
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { demoStorePath, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { DEMO_BRAND } from '@/lib/demo/brand'
+import { getActiveBrandPack } from '@/lib/crm/active-trial'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { fetchWithRetry } from '@/lib/fetch-with-retry'
 import { canViewProgramsCatalogNow } from '@/lib/programs/public-access'
@@ -138,14 +139,11 @@ function ensureHomeLink(links: NavLink[]): NavLink[] {
 }
 
 export async function getNavLinks(): Promise<NavLink[]> {
+ const brandPack = await getActiveBrandPack()
+ if (brandPack?.nav?.length) return brandPack.nav.map((l) => ({ ...l }))
  if (isDemoInstance()) {
    const { DEMO_NAV } = await import('@/lib/demo/content')
    return DEMO_NAV.map((l) => ({ ...l }))
- }
- if (process.env.COMMONS_PLATFORM === 'true') {
-    const { trialPackForSlug } = await import('@/lib/crm/trial-packs')
-    const pack = trialPackForSlug(process.env.COMMONS_TRIAL_PACK || '')
-   if (pack?.nav?.length) return pack.nav.map((l) => ({ ...l }))
  }
  const raw = await fetchNavLinks()
  // Always use CMS active links; home sections still gate Programs/Events via schoolInSession.

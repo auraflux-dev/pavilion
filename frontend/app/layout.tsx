@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import type { Metadata } from 'next'
 import { Inter, Merriweather } from 'next/font/google'
 import { GaAuthBridge } from '@/components/ga-auth-bridge'
@@ -6,8 +7,9 @@ import { SiteAnalytics } from '@/components/site-analytics'
 import { TrafficBeacon } from '@/components/traffic-beacon'
 import { DemoBanner } from '@/components/demo/demo-banner'
 import { CommonsSurfaceShell } from '@/components/demo/commons-surface-shell'
+import { BrandPackShell } from '@/components/demo/brand-pack-shell'
 import { publicBrandFace } from '@/lib/demo/brand'
-import { activeTrialPackSlug, isCommonsPlatform } from '@/lib/crm/active-trial'
+import { getActiveBrandPack, isCommonsPlatform } from '@/lib/crm/active-trial'
 import { isDemoInstance, publicSiteUrl } from '@/lib/demo/instance'
 import './globals.css'
 
@@ -77,21 +79,33 @@ export const metadata: Metadata = {
   icons: demo || commons ? [{ url: brand.logoPath }] : undefined,
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const pack = demo || commons ? await getActiveBrandPack() : null
+  const dataPto = pack?.slug || (demo ? 'riverside' : commons ? 'commons' : 'shms')
+  const packBrand = pack?.brand ?? null
   return (
     <html
       lang="en"
-      data-pto={
-        demo ? 'riverside' : commons ? activeTrialPackSlug() || 'commons' : 'shms'
-      }
+      data-pto={dataPto}
       className="bg-background"
+      style={
+        packBrand?.colors
+          ? ({
+              ['--brand-green']: packBrand.colors.primary,
+              ['--brand-dark']: packBrand.colors.dark,
+              ['--brand-accent']: packBrand.colors.accent,
+              ['--brand-warm']: packBrand.colors.warm,
+              ['--brand-soft']: packBrand.colors.soft,
+            } as CSSProperties)
+          : undefined
+      }
     >
       <head>
-        {demo ? (
+        {demo || commons ? (
           <link
             rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
@@ -107,8 +121,10 @@ export default function RootLayout({
           Skip to main content
         </a>
         <CommonsSurfaceShell enabled={surfaceShell}>
-          <DemoBanner />
-          {children}
+          <BrandPackShell brand={packBrand} slug={dataPto}>
+            <DemoBanner />
+            {children}
+          </BrandPackShell>
         </CommonsSurfaceShell>
         <TrafficBeacon />
         <GaAuthBridge />

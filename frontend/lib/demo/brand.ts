@@ -68,7 +68,7 @@ const STONE_HILL_BRAND: PublicBrandFace = {
   },
 }
 
-function brandFaceFromTrial(b: TrialBrand): PublicBrandFace {
+export function brandFaceFromTrial(b: TrialBrand): PublicBrandFace {
   return {
     school: b.school,
     pto: b.pto,
@@ -92,14 +92,23 @@ function brandFaceFromTrial(b: TrialBrand): PublicBrandFace {
   }
 }
 
-/** Active visitor chrome brand: demo, private trial pack, or Stone Hill. */
+/** Client override when a prospect brand pack is active on demo. */
+let clientBrandFace: PublicBrandFace | null = null
+
+export function setClientBrandFace(face: PublicBrandFace | null) {
+  clientBrandFace = face
+}
+
+/** Active visitor chrome brand: demo, prospect pack, or Stone Hill. */
 export function publicBrandFace(): PublicBrandFace {
-  if (isDemoInstance()) return DEMO_BRAND
-  if (isCommonsPlatform()) {
-    const trial = getActiveTrialBrand()
-    // Pavilion never falls through to Stone Hill branding.
-    return trial ? brandFaceFromTrial(trial) : DEMO_BRAND
+  if (clientBrandFace) return clientBrandFace
+  // Env-configured pack (demo or legacy commons-pto).
+  const trial = getActiveTrialBrand()
+  if (trial && (isDemoInstance() || isCommonsPlatform())) {
+    return brandFaceFromTrial(trial)
   }
+  if (isDemoInstance()) return DEMO_BRAND
+  if (isCommonsPlatform()) return DEMO_BRAND
   return STONE_HILL_BRAND
 }
 

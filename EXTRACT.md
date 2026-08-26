@@ -15,8 +15,8 @@ Only these projects should exist for this product map:
 
 Git push on `shmspto` `main` triggers treasurer Vercel Production. Agents verify with `node scripts/check-prod-deploy.mjs` (see `~/shmspto/scripts/DEPLOY.md`). Do not deploy Stone Hill via `vercel deploy` from agent shells.
 | `commons-site` | onpavilion.com | `pavilion` (`commons-site/`) |
-| `commons-pto-demo` | commons-pto-demo.vercel.app | `pavilion` (`frontend/` + demo env) |
-| `commons-pto` | commons-pto.vercel.app | `pavilion` (`frontend/` + trial env) |
+| `commons-pto-demo` | commons-pto-demo.vercel.app | **Primary** Pavilion app. Brand packs for prospects. |
+| `commons-pto` | commons-pto.vercel.app | Legacy private host. Do not open new prospects here. |
 
 Unrelated keep (not Pavilion/SHMS): `gig-finder` if still in use.
 

@@ -150,17 +150,14 @@ async function fetchPageRow(page: string): Promise<Partial<PageContentFields> | 
 }
 
 export async function getPageContent(page: string): Promise<PageContentFields> {
+  const { getActiveBrandPack } = await import('@/lib/crm/active-trial')
+  const brandPack = await getActiveBrandPack()
+  if (brandPack?.pages?.[page]) return merge(page, brandPack.pages[page])
   if (isDemoInstance()) {
     const { DEMO_PAGES } = await import('@/lib/demo/content')
     const row = DEMO_PAGES[page]
     if (row) return { ...row }
     return merge(page, null)
-  }
-  if (process.env.COMMONS_PLATFORM === 'true') {
-    const { trialPackForSlug } = await import('@/lib/crm/trial-packs')
-    const pack = trialPackForSlug(process.env.COMMONS_TRIAL_PACK || '')
-    const row = pack?.pages[page]
-    if (row) return merge(page, row)
   }
   const cms = await fetchPageRow(page)
   if (
