@@ -56,7 +56,18 @@ export function SignupClaimForm({ slug, fields, slots }: Props) {
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Sign-up failed')
-      router.push(d.confirmPath || `/signups/${slug}/confirm?token=${d.confirmationToken}`)
+      if (d.demo && !d.confirmationToken) {
+        throw new Error(d.message || 'Demo preview blocked this sign-up. Try again after the demo allowlist refresh.')
+      }
+      const token = typeof d.confirmationToken === 'string' ? d.confirmationToken.trim() : ''
+      const path =
+        typeof d.confirmPath === 'string' && d.confirmPath.includes('token=') && !d.confirmPath.includes('token=undefined')
+          ? d.confirmPath
+          : token
+            ? `/signups/${slug}/confirm?token=${encodeURIComponent(token)}`
+            : ''
+      if (!path) throw new Error('Sign-up succeeded but confirmation link was missing')
+      router.push(path)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign-up failed')
       setBusy(false)

@@ -32,6 +32,9 @@ export function isDemoJoinAllowPath(pathname: string): boolean {
   if (pathname.startsWith('/api/id')) return true
   if (pathname.startsWith('/api/commons')) return true
   if (pathname.startsWith('/api/webhooks/commons')) return true
+  // Neon product signups (SignUpGenius-style) — demo writes stay off Wix school CMS.
+  if (pathname.startsWith('/api/signups/')) return true
+  if (pathname.startsWith('/api/staff/signups')) return true
   return false
 }
 
@@ -39,6 +42,8 @@ const STAFF_GET_ALLOW = new Set(COMMONS_DEMO_ALLOWED_STAFF_GET)
 
 /** Staff/portal routes that would expose Stone Hill families, money, or mail. */
 export function isDemoPiiPath(pathname: string): boolean {
+  // Signup sheets/registrations are product Neon data (not live school CMS PII stubs).
+  if (pathname.startsWith('/api/staff/signups')) return false
   if (pathname.startsWith('/api/staff/') && !STAFF_GET_ALLOW.has(pathname)) return true
   if (pathname.startsWith('/api/portal/')) return true
   if (pathname.startsWith('/api/students')) return true
