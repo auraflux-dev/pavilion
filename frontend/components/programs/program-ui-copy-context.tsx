@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from 'react'
 import { PROGRAM_UI_DEFAULTS } from '@/lib/defaults/program-ui-defaults'
-import { programUiString } from '@/lib/api/program-ui-copy'
+import { programUiString } from '@/lib/api/program-ui-copy-shared'
 import { CmsString } from '@/components/cms/cms-string'
 import type { ComponentProps } from 'react'
 

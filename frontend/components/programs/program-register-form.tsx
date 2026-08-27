@@ -11,7 +11,7 @@ import { MemberGate } from '@/components/member-gate'
 import { useRouter } from 'next/navigation'
 import type { ConsentAck } from '@/lib/checkout-consent'
 import type { Program } from '@/lib/api/programs'
-import { programHasPublicMeetingDates } from '@/lib/programs/ep-meeting-dates'
+import { programHasPublicMeetingDates } from '@/lib/programs/ep-meeting-dates-shared'
 import { formatProgramSchedule } from '@/lib/programs/schedule'
 import { displayProgramName } from '@/lib/programs/display-name'
 import {

@@ -24,7 +24,7 @@ import {
   PORTAL_COPY_DEFAULTS,
   type PortalCopy,
 } from '@/lib/defaults/portal-copy'
-import { pickString } from '@/lib/api/page-strings'
+import { pickString } from '@/lib/api/page-strings-shared'
 import { PORTAL_NOTICE_DEFAULTS } from '@/lib/defaults/site-string-defaults'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isCommonsPlatform } from '@/lib/crm/active-trial'

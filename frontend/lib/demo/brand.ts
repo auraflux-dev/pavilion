@@ -1,6 +1,6 @@
 import { isDemoInstance } from '@/lib/demo/instance'
-import { getActiveTrialBrand, isCommonsPlatform } from '@/lib/crm/active-trial'
-import type { TrialBrand } from '@/lib/crm/trial-packs'
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
+import { trialPackForSlug, type TrialBrand } from '@/lib/crm/trial-packs'
 
 export const DEMO_BRAND = {
   school: 'Riverside Elementary School',
@@ -102,13 +102,21 @@ export function setClientBrandFace(face: PublicBrandFace | null) {
 /** Active visitor chrome brand: demo, prospect pack, or Stone Hill. */
 export function publicBrandFace(): PublicBrandFace {
   if (clientBrandFace) return clientBrandFace
-  // Env-configured pack (demo or legacy commons-pto).
-  const trial = getActiveTrialBrand()
-  if (trial && (isDemoInstance() || isCommonsPlatform())) {
-    return brandFaceFromTrial(trial)
+  // Env-configured pack only here (client-safe). Session org packs resolve on the server.
+  const slug = (
+    process.env.NEXT_PUBLIC_COMMONS_BRAND_PACK ||
+    process.env.COMMONS_BRAND_PACK ||
+    process.env.NEXT_PUBLIC_COMMONS_TRIAL_PACK ||
+    process.env.COMMONS_TRIAL_PACK ||
+    ''
+  ).trim()
+  const onProduct = isDemoInstance() || isPavilionProductPlatform()
+  if (slug && onProduct) {
+    const pack = trialPackForSlug(slug)
+    if (pack) return brandFaceFromTrial(pack.brand)
   }
   if (isDemoInstance()) return DEMO_BRAND
-  if (isCommonsPlatform()) return DEMO_BRAND
+  if (isPavilionProductPlatform()) return DEMO_BRAND
   return STONE_HILL_BRAND
 }
 
@@ -121,12 +129,12 @@ export function setClientPavilionSurface(enabled: boolean) {
 }
 
 export function isPavilionSurface(): boolean {
-  return isDemoInstance() || isCommonsPlatform() || clientPavilionSurface
+  return isDemoInstance() || isPavilionProductPlatform() || clientPavilionSurface
 }
 
 export function demoStorePath(): string {
   if (isDemoInstance()) return '/perch'
-  if (isCommonsPlatform()) return '/membership'
+  if (isPavilionProductPlatform()) return '/membership'
   return '/cove'
 }
 

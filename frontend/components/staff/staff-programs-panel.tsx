@@ -40,7 +40,7 @@ import {
 import {
   EP_MEETING_DATES_APPROVED_KEY,
   EP_MEETING_DATES_PROPOSED_LABEL,
-} from '@/lib/programs/ep-meeting-dates'
+} from '@/lib/programs/ep-meeting-dates-shared'
 
 type Program = {
   id: string

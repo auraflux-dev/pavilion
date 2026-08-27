@@ -230,7 +230,7 @@ async function fetchCmsTiers(): Promise<CmsTier[]> {
  * Faculty (and rows without productId) keep CMS copy.
  */
 export async function getMembershipTiers(): Promise<MembershipTier[]> {
-  const { getActiveBrandPack } = await import('@/lib/crm/active-trial')
+  const { getActiveBrandPack } = await import('@/lib/crm/active-trial-server')
   const brandPack = await getActiveBrandPack()
   if (brandPack?.tiers?.length) {
     return brandPack.tiers.map((t) => ({ ...t, perks: [...t.perks] }))

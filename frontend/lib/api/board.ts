@@ -41,7 +41,7 @@ interface WixQueryResponse {
 
 export async function getBoardMembers(): Promise<BoardMember[]> {
   const { isDemoInstance } = await import('@/lib/demo/instance')
-  const { getActiveBrandPack } = await import('@/lib/crm/active-trial')
+  const { getActiveBrandPack } = await import('@/lib/crm/active-trial-server')
   const brandPack = await getActiveBrandPack()
   if (brandPack?.board?.length) return brandPack.board.map((m) => ({ ...m }))
   if (isDemoInstance()) {

@@ -2,7 +2,7 @@
  * Program meeting schedule helpers to structured CMS fields + display strings.
  */
 
-import { EP_MEETING_DATES_PROPOSED_LABEL } from '@/lib/programs/ep-meeting-dates'
+import { EP_MEETING_DATES_PROPOSED_LABEL } from '@/lib/programs/ep-meeting-dates-shared'
 
 export type ProgramScheduleFields = {
   dayOfWeek?: string | null

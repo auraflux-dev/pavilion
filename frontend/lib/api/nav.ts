@@ -10,7 +10,6 @@ import { MEMBERSHIP_CHOOSE_PATH } from '@/lib/membership-links'
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { demoStorePath, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { DEMO_BRAND } from '@/lib/demo/brand'
-import { getActiveBrandPack } from '@/lib/crm/active-trial'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { fetchWithRetry } from '@/lib/fetch-with-retry'
 import { canViewProgramsCatalogNow } from '@/lib/programs/public-access'
@@ -139,7 +138,8 @@ function ensureHomeLink(links: NavLink[]): NavLink[] {
 }
 
 export async function getNavLinks(): Promise<NavLink[]> {
- const brandPack = await getActiveBrandPack()
+ const { getActiveTrialPack } = await import('@/lib/crm/active-trial')
+ const brandPack = getActiveTrialPack()
  if (brandPack?.nav?.length) return brandPack.nav.map((l) => ({ ...l }))
  if (isDemoInstance()) {
    const { DEMO_NAV } = await import('@/lib/demo/content')

@@ -87,7 +87,7 @@ async function categoryNamesForEvent(
 }
 
 export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
-  const { getActiveBrandPack } = await import('@/lib/crm/active-trial')
+  const { getActiveBrandPack } = await import('@/lib/crm/active-trial-server')
   const brandPack = await getActiveBrandPack()
   if (brandPack?.events?.length) return brandPack.events.slice(0, limit)
   if (brandPack) return []

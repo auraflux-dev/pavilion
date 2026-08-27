@@ -10,7 +10,7 @@ import { displayProgramName } from '@/lib/programs/display-name'
 import {
   EP_MEETING_DATES_PROPOSED_LABEL,
   programHasPublicMeetingDates,
-} from '@/lib/programs/ep-meeting-dates'
+} from '@/lib/programs/ep-meeting-dates-shared'
 import { formatShortDate, programDateBadge } from '@/lib/programs/schedule'
 import {
   formatMemberPriorityUntil,

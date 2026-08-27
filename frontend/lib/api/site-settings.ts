@@ -1,4 +1,3 @@
-import { getActiveBrandPack } from '@/lib/crm/active-trial'
 /**
  * Site Settings. key/value pairs managed in Wix CMS.
  *
@@ -28,7 +27,9 @@ interface WixDataItem {
 }
 
 async function fetchAllSettings(): Promise<Record<string, string>> {
- const brandPack = await getActiveBrandPack()
+ // Env pack only — avoid active-trial-server (pg) in modules that can enter client graphs.
+ const { getActiveTrialPack } = await import('@/lib/crm/active-trial')
+ const brandPack = getActiveTrialPack()
  if (brandPack?.settings) return { ...brandPack.settings }
  if (isDemoInstance()) {
    const { DEMO_SETTINGS } = await import('@/lib/demo/content')

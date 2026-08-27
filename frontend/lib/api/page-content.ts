@@ -150,8 +150,10 @@ async function fetchPageRow(page: string): Promise<Partial<PageContentFields> | 
 }
 
 export async function getPageContent(page: string): Promise<PageContentFields> {
-  const { getActiveBrandPack } = await import('@/lib/crm/active-trial')
-  const brandPack = await getActiveBrandPack()
+  // Env brand pack only — do not import active-trial-server here (pulled into client graphs
+  // via page-strings helpers). Cookie/session packs resolve in layout + server routes.
+  const { getActiveTrialPack } = await import('@/lib/crm/active-trial')
+  const brandPack = getActiveTrialPack()
   if (brandPack?.pages?.[page]) return merge(page, brandPack.pages[page])
   if (isDemoInstance()) {
     const { DEMO_PAGES } = await import('@/lib/demo/content')

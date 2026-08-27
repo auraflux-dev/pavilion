@@ -17,7 +17,7 @@ import {
 } from '@/lib/programs/spring-2027-ep'
 import {
   EP_MEETING_DATES_PROPOSED_LABEL,
-} from '@/lib/programs/ep-meeting-dates'
+} from '@/lib/programs/ep-meeting-dates-shared'
 import { formatProgramSchedule } from '@/lib/programs/schedule'
 import { resolveProgramSeason, isPublicProgramsCatalogOpen } from '@/lib/programs/season'
 import type { ProgramsCatalogAccess } from '@/lib/programs/public-access'
