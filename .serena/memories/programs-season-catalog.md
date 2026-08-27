@@ -15,3 +15,8 @@
 - Lib: `frontend/lib/staff/program-catalog-product.ts` · checkout reads via `resolveProgramListFee`.
 - Not on Cove/Spirit allowlists; still charged as `kind: program` (roster + discounts).
 - **SHMS promote:** wait until Fall EP sales cycle completes before promoting this to `shmspto` / www.
+
+## Volunteer signups in Staff
+
+- `/volunteer` writes `Volunteers` CMS; Staff → Volunteers lists them (status workflow).
+- Audit of remaining Wix-only form queues: `docs/STAFF-VS-WIX-CMS.md` (ContactSubmissions next).

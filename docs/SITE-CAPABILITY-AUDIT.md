@@ -85,7 +85,7 @@ Audience shells: **visitor** · **free member** · **paid member** · **staff (b
 | `/store` `/spirit-wear` | Allowlists, coupons | Retail + Discounts COVERED |
 | `/meetings` | Minutes | COVERED |
 | `/board` | BoardMembers | COVERED |
-| `/volunteer` | Opportunities | COVERED |
+| `/volunteer` | Opportunities + signups (`Volunteers`) | COVERED (Staff → Volunteers) |
 | `/fundraising` | Goals/CTAs | COVERED |
 | `/survey/[slug]` | Surveys | COVERED |
 | Legal pages | PageContent | Page copy COVERED |
