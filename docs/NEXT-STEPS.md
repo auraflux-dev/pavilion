@@ -1,37 +1,34 @@
-# Pavilion architecture — next steps
+# Architecture next steps
 
-Safe progress without updating www.shmspto.org until you explicitly promote + ship SHMS.
+See also **[PRODUCT-BACKLOG.md](./PRODUCT-BACKLOG.md)** (active product work, www-safe).
 
-## Done (this phase)
+## Done (flip)
 
 - [x] Pavilion-first authoring rules  
-- [x] Promote script (dry-run default): `node scripts/promote-to-shms.mjs`  
-- [x] Soft parity (does not block SHMS ships)  
-- [x] Board labels: `product` / `customer:shms` / `customer:lumi`  
-- [x] Ship map + PRODUCT-VS-CUSTOMER docs  
+- [x] `promote-to-shms.mjs` (dry-run default)  
+- [x] Soft parity  
+- [x] Board labels + wiki `product-vs-customer`  
+- [x] Customers doc (SHMS + Lumi)  
+- [x] [PUBLIC-REPO-PREP.md](./PUBLIC-REPO-PREP.md)  
 
-## Safe anytime
+## Active now (no www impact)
 
-- [ ] Upsert HSKRG wiki `HOME/product-vs-customer` (needs `HSKRG_AGENT_API_KEY`)  
-- [ ] Finish [PUBLIC-REPO-PREP.md](./PUBLIC-REPO-PREP.md) scrub  
-- [ ] Ship Pavilion demo/marketing only (`ship-pavilion.mjs`)  
-- [ ] Dry-run promote reports (no `--apply`)  
+- [ ] P1 Host → tenant routing  
+- [ ] P2 Pack → org seed  
+- [ ] P3 Lumi customer path (docs / board; Wix OK)  
+- [ ] P4 Rename commons-* → Pavilion (robert-4220)  
+- [ ] P5 Public GitHub org transfer  
+- [ ] P6 Retire `commons-pto` legacy host  
+- [ ] P7 Per-tenant connector secrets UX  
 
-## Off-peak / Rob OK (touches live school)
+## Off-peak / Rob OK (www)
 
-- [ ] `promote-to-shms.mjs --apply` → review diff in `~/shmspto`  
-- [ ] Commit + `ship-stone-hill.mjs` (www production)  
-
-## Later phases
-
-1. **Public GitHub org** for Pavilion (off `auraflux-dev`) — see PUBLIC-REPO-PREP  
-2. **Rename** customer-facing `commons-*` → Pavilion (robert-4220 first; never treasurer)  
-3. **Lumi** as customer #2 on board (`customer:lumi`); Wix OK until they join Pavilion stack  
-4. Host→tenant routing / pack seed (product SaaS depth) — separate plan  
+- [ ] `promote-to-shms.mjs --apply`  
+- [ ] `ship-stone-hill.mjs`  
 
 ## Customers
 
-| # | Customer | Repo / surface | Stack |
-|---|----------|----------------|-------|
-| 1 | Stone Hill | `auraflux-dev/shmspto` | treasurer Vercel |
-| 2 | Lumi | `auraflux-dev/lumi` | Wix (for now) |
+| # | Customer | Label | Stack today |
+|---|----------|-------|-------------|
+| 1 | Stone Hill | `customer:shms` | treasurer Vercel |
+| 2 | Lumi | `customer:lumi` | Wix |

@@ -39,8 +39,53 @@ export async function organizationIdFromRequest(req: Request): Promise<string> {
     }
   }
 
+  const fromHost = await organizationIdFromHostHeader(req)
+  if (fromHost) return requireOrganizationId(fromHost)
+
   if (isDemoInstance()) return requireOrganizationId(riversideSnapshot().organization.id)
   throw new MissingOrganizationIdError()
+}
+
+/** Normalize request Host / x-forwarded-host (no port). */
+export function normalizeRequestHost(req: Request): string {
+  const raw =
+    req.headers.get('x-forwarded-host')?.split(',')[0]?.trim() ||
+    req.headers.get('host')?.trim() ||
+    ''
+  return raw.split(':')[0].trim().toLowerCase()
+}
+
+/**
+ * Resolve tenant from Host matching organizations.temp_host or custom_domain.
+ * Session still wins when present. Used for trial vanity hosts on the shared stack.
+ */
+export async function organizationIdFromHostHeader(req: Request): Promise<string | null> {
+  if (!commonsDbEnabled()) return null
+  const host = normalizeRequestHost(req)
+  if (!host) return null
+  // Shared product hosts are not tenants
+  if (
+    host === 'localhost' ||
+    host.endsWith('.vercel.app') ||
+    host === 'commons-pto-demo.vercel.app' ||
+    host === 'commons-pto.vercel.app' ||
+    host === 'www.shmspto.org' ||
+    host === 'shmspto.org'
+  ) {
+    return null
+  }
+  try {
+    const found = await sql<{ id: string }>(
+      `select id from organizations
+       where lower(nullif(trim(temp_host), '')) = $1
+          or lower(nullif(trim(custom_domain), '')) = $1
+       limit 1`,
+      [host],
+    )
+    return found.rows[0]?.id?.trim() || null
+  } catch {
+    return null
+  }
 }
 
 export async function sqlForOrg<T extends QueryResultRow = QueryResultRow>(
