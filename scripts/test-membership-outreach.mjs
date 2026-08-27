@@ -50,6 +50,12 @@ import {
   defaultScoopPageUrl,
   resolveScoopUrl,
 } from '../frontend/lib/staff/newsletter-scoop.ts'
+import {
+  newsletterWebPublicPath,
+  newsletterWebPublicUrl,
+  normalizeNewsletterWebSlug,
+  slugifyNewsletterTitle,
+} from '../frontend/lib/staff/newsletter-web-pure.ts'
 import { composeNewsletterBody } from '../frontend/lib/staff/newsletter-sections.ts'
 import {
   canApproveNewsletter,
@@ -282,7 +288,9 @@ check('branded newsletter HTML header hero footer', () => {
     canvaViewUrl: 'https://www.canva.com/design/ABC/view',
     canvaTitle: 'Fall blast',
     sendId: 'send123',
+    documentTitle: 'Fall Welcome Newsletter',
   })
+  assert.ok(html.includes('<title>Fall Welcome Newsletter</title>'))
   assert.ok(html.includes('SHMS PTO'))
   assert.ok(html.includes('/brand/cove-logo-640.png'))
   assert.ok(html.includes('newsletter-heroes/x.png'))
@@ -351,6 +359,16 @@ check('whatsapp graphic share opens png + caption', () => {
   assert.equal(g.caption, 'Scoop link')
   assert.ok(g.imageUrl?.includes('newsletter-heroes/x.png'))
   assert.ok(g.instructions.includes('PNG'))
+})
+
+check('newsletter web slug + public path', () => {
+  const slug = slugifyNewsletterTitle('Fall Welcome!', new Date('2026-09-15T12:00:00Z'))
+  assert.equal(slug, 'fall-welcome-20260915')
+  assert.equal(normalizeNewsletterWebSlug(slug), slug)
+  assert.equal(normalizeNewsletterWebSlug('../etc/passwd'), null)
+  assert.equal(normalizeNewsletterWebSlug('Fall Welcome'), null)
+  assert.equal(newsletterWebPublicPath(slug), `/newsletters/${slug}`)
+  assert.ok(newsletterWebPublicUrl(slug).includes(`/newsletters/${slug}`))
 })
 
 check('weekly scoop share text + url fallback', () => {

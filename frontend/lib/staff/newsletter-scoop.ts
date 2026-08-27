@@ -1,6 +1,6 @@
 /**
- * Weekly Scoop (free monthly): share a link, not a full HTML blast.
- * Paid members get the full email; free parents get this link in WhatsApp / portal / optional email.
+ * Scoop share helpers: school Scoop is the school channel; PTO supplies a newsletter web link
+ * (from Publish to site). Staff can also WhatsApp / portal-post that same link to free parents.
  */
 import { newsletterSiteOrigin } from './newsletter-site'
 

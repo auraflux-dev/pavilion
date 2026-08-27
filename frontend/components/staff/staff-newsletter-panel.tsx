@@ -13,6 +13,7 @@ import {
   buildScoopShareText,
   resolveScoopUrl,
 } from '@/lib/staff/newsletter-scoop'
+import { newsletterWebPublicUrl } from '@/lib/staff/newsletter-web-pure'
 import { isPavilionProductPlatformPublic } from '@/lib/crm/platform-env'
 import {
   NEWSLETTER_BEAT_PRESETS,
@@ -54,6 +55,7 @@ export function StaffNewsletterPanel() {
   const [testEmailsExtra, setTestEmailsExtra] = useState('')
   const [sendAudience, setSendAudience] = useState<NewsletterKind>('paid')
   const [scoopUrl, setScoopUrl] = useState('')
+  const [webUrl, setWebUrl] = useState('')
   const [scoopIncludeSignups, setScoopIncludeSignups] = useState(true)
   const [subscriberCount, setSubscriberCount] = useState(0)
   const [canApprove, setCanApprove] = useState(false)
@@ -169,7 +171,45 @@ export function StaffNewsletterPanel() {
   }, [useBeats, intro, beats, signoff])
 
   function scoopLink() {
-    return resolveScoopUrl(scoopUrl, heroMeta.canvaViewUrl)
+    return resolveScoopUrl(scoopUrl || webUrl, heroMeta.canvaViewUrl)
+  }
+
+  async function publishToSite() {
+    setBusy(true)
+    setStatus('')
+    try {
+      const r = await fetch('/api/staff/newsletter/publish-web', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: subject.trim() || (sendAudience === 'scoop' ? SCOOP_DEFAULT_SUBJECT : ''),
+          body,
+          beatsJson: beatsPayload(),
+          customCss: liveCss,
+          heroImageUrl: heroMeta.heroImageUrl,
+          extraImageUrls: heroMeta.pageImageUrls?.slice(1),
+          canvaViewUrl: heroMeta.canvaViewUrl,
+          canvaThumbnailUrl: heroMeta.canvaThumbnailUrl,
+          canvaTitle: heroMeta.canvaTitle,
+        }),
+      })
+      const d = (await r.json()) as { error?: string; url?: string; slug?: string }
+      if (!r.ok) throw new Error(d.error ?? 'Publish failed')
+      const url = String(d.url ?? '').trim() || (d.slug ? newsletterWebPublicUrl(d.slug) : '')
+      if (!url) throw new Error('Publish succeeded but no URL returned')
+      setWebUrl(url)
+      setScoopUrl(url)
+      try {
+        await navigator.clipboard.writeText(url)
+        setStatus(`Published to site. Link copied:\n${url}\n\nPaste this into the school Scoop (or WhatsApp).`)
+      } catch {
+        setStatus(`Published to site:\n${url}\n\nCopy this link for the school Scoop.`)
+      }
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Publish failed')
+    } finally {
+      setBusy(false)
+    }
   }
 
   function scoopShareText() {
@@ -659,19 +699,22 @@ export function StaffNewsletterPanel() {
             className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2"
           >
             <p className="text-xs text-[#5A6070] whitespace-pre-line">
-              Free audience gets a link, not the full newsletter in their inbox.
-              Paste the Canva view link (or we use the attached Canva / the site newsletter page).
-              Then export to WhatsApp and post to the member portal.
+              School Scoop is the school channel — PTO supplies a newsletter link.
+              Use Publish to site first, then paste that URL here (or we fall back to Canva / signup page).
+              Optionally WhatsApp free parents and post to the member portal.
             </p>
             <label className="text-xs text-[#5A6070] block">
-              Scoop link
+              Newsletter web link (for school Scoop)
               <input
                 value={scoopUrl}
                 onChange={(e) => setScoopUrl(e.target.value)}
-                placeholder={resolveScoopUrl('', heroMeta.canvaViewUrl)}
+                placeholder={webUrl || resolveScoopUrl('', heroMeta.canvaViewUrl)}
                 className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
               />
             </label>
+            {webUrl ? (
+              <p className="text-[11px] text-[#1B6B45] break-all">Last published: {webUrl}</p>
+            ) : null}
             <label className="flex items-center gap-2 text-xs text-[#5A6070]">
               <input
                 type="checkbox"
@@ -1237,6 +1280,14 @@ export function StaffNewsletterPanel() {
         </div>
 
         <div data-help-shot="send-actions" className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy || (!subject.trim() && !body.trim() && !useBeats)}
+            onClick={() => void publishToSite()}
+          >
+            Publish to site & copy link
+          </Button>
           {sendAudience === 'scoop' ? (
             <>
               <Button

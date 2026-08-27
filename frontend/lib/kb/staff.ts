@@ -431,7 +431,8 @@ If a name is missing, it becomes “there”.
 
 ## Choose the newsletter type
 - **Paid members (full email)**: default. Sends to paid roster only. Optional portal post for paid parents.
-- **Weekly Scoop (free monthly link)**: paste the Canva view link (or we use the attached Canva / https://www.shmspto.org/newsletter). Then **Copy + open WhatsApp** and **Post scoop to portal**: Optional: **Email scoop link** to free parents (checkbox to include footer signups).
+- **Publish to site & copy link**: creates a public page (e.g. `/newsletters/…`) with the same branded HTML. Paste that URL into the **school Scoop**. Also fills the Scoop link field.
+- **Weekly Scoop helpers** (optional free-parent share): after publish, use the web link for WhatsApp / portal / optional email. Prefer the published site URL over Canva.
 - **Footer signup list only**: public form emails. No portal.
 
 ![Newsletter type. Paid, Weekly Scoop, or footer signups](/help/staff-newsletter/03-newsletter-type.png)
@@ -470,10 +471,16 @@ In WhatsApp: attach that PNG, then paste the caption.
 
 Grade links live in **Site settings** (6th / 7th / 8th announcement links).
 
-## Weekly Scoop, step by step
+## Publish for school Scoop
+1. Write the PTO newsletter (subject, copy/beats, Canva PNG as usual)
+2. **Publish to site & copy link** — opens nothing; copies `https://…/newsletters/…`
+3. Paste that link into the school Scoop
+4. Optionally still **Send email now** to paid members
+
+## Weekly Scoop helpers (free parents), step by step
 1. Type = Weekly Scoop
 2. Subject can stay **SHMS Weekly Scoop**
-3. Short note in the body. Scoop link field: Canva view URL
+3. Publish to site first (or paste the web URL into the Scoop link field)
 4. **Copy + open WhatsApp** (PNG tab + groups)
 5. **Post scoop to portal** (free parents only. Paid members will not see this scoop)
 6. Optional **Email scoop link** after a test send

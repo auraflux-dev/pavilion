@@ -161,6 +161,8 @@ export function buildNewsletterHtml(opts: {
   physicalAddress?: string
   unsubscribeUrl?: string
   merge?: NewsletterMergeVars
+  /** Browser tab / SEO title for web editions. */
+  documentTitle?: string
 }): string {
   const origin = newsletterSiteOrigin()
   const branding = opts.branding ?? {
@@ -214,7 +216,7 @@ export function buildNewsletterHtml(opts: {
   return `<!DOCTYPE html>
 <html lang="en" class="nl-wrap">
 <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>SHMS PTO</title>${customCssBlock}</head>
+<title>${escapeHtml(opts.documentTitle?.trim() || branding.headerTitle || 'Newsletter')}</title>${customCssBlock}</head>
 <body class="nl-wrap" style="margin:0;padding:0;background:#F4F7F5;font-family:${NEWSLETTER_FONT}">
 ${pixel}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F7F5">
