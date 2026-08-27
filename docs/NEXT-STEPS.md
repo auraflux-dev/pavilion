@@ -13,10 +13,10 @@ See also **[PRODUCT-BACKLOG.md](./PRODUCT-BACKLOG.md)** (active product work, ww
 
 ## Active now (no www impact)
 
-- [ ] P1 Host → tenant routing  
-- [ ] P2 Pack → org seed  
-- [ ] P3 Lumi customer path (docs / board; Wix OK)  
-- [ ] P4 Rename commons-* → Pavilion (robert-4220)  
+- [x] P1 Host → tenant routing (code + DNS doc) — more middleware later  
+- [x] P2 Pack → org seed (brand_pack_slug + vanilla pack)  
+- [x] P3 Lumi customer path (docs / board; Wix OK)  
+- [x] P4 Rename map doc (Vercel rename later)  
 - [ ] P5 Public GitHub org transfer  
 - [ ] P6 Retire `commons-pto` legacy host  
 - [ ] P7 Per-tenant connector secrets UX  

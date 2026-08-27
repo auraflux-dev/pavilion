@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
     firstName?: string
     lastName?: string
     provisionKey?: string
+    brandPack?: string
   }
 
   if (!provisionKeyOk(req, body.provisionKey)) {
@@ -65,12 +66,14 @@ export async function POST(req: NextRequest) {
       password: body.password || '',
       firstName: body.firstName,
       lastName: body.lastName,
+      brandPack: body.brandPack,
     })
     const res = NextResponse.json({
       ok: true,
       slug: started.slug,
       tempHost: started.tempHost,
       trialEndsAt: started.trialEndsAt,
+      brandPackSlug: started.brandPackSlug,
       next: '/staff',
     })
     for (const cookie of started.setCookies) {

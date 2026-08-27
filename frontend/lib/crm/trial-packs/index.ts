@@ -321,3 +321,64 @@ export function trialPackForSlug(slug: string): TrialPack | null {
 export function knownTrialPackSlugs(): string[] {
   return Object.keys(PACKS)
 }
+
+/** Light pack for any new trial that has no named prospect pack yet. */
+export function vanillaTrialPack(opts: {
+  slug: string
+  schoolName: string
+  host: string
+}): TrialPack {
+  const school = opts.schoolName.trim() || 'Your School'
+  const short = school.replace(/\s+Elementary.*$/i, '').replace(/\s+PTO$/i, '').trim() || school
+  const pto = /PTO|PTA/i.test(school) ? school : `${school} PTO`
+  const host = opts.host.trim() || `${opts.slug}.commons-pto.org`
+  const brand: TrialBrand = {
+    school,
+    pto,
+    short,
+    town: '',
+    host,
+    store: 'Spirit Shop',
+    card: 'Family card',
+    cheer: 'Join the PTO',
+    logoPath: '',
+    colors: {
+      primary: '#1B4D3E',
+      dark: '#0F2E26',
+      accent: '#C4A35A',
+      warm: '#F7F5F0',
+      soft: '#EEF3F0',
+    },
+  }
+  return {
+    slug: opts.slug,
+    brand,
+    settings: {
+      schoolInSession: 'true',
+      storeCardBonusPercent: '0',
+      presidentEmail: `president@${host}`,
+      announcementEnabled: 'false',
+      contactEmailGeneral: `president@${host}`,
+      portalGrades: 'K,1,2,3,4,5,6,7,8',
+    },
+    nav: [
+      { id: 'v0', label: 'Home', href: '/', sortOrder: 0, showInNav: true, showInFooter: true, active: true },
+      { id: 'v1', label: 'Events', href: '/events', sortOrder: 1, showInNav: true, showInFooter: true, active: true },
+      { id: 'v2', label: 'Membership', href: '/membership', sortOrder: 2, showInNav: true, showInFooter: true, active: true },
+      { id: 'v3', label: 'Volunteer', href: '/volunteer', sortOrder: 3, showInNav: true, showInFooter: true, active: true },
+      { id: 'v4', label: 'Contact', href: '/contact', sortOrder: 4, showInNav: true, showInFooter: true, active: true },
+    ],
+    pages: {
+      home: empty('home', {
+        eyebrow: pto,
+        title: `Welcome to ${short}`,
+        body: 'Your Pavilion trial site.\nMember portal and staff tools are ready to explore.',
+        ctaLabel: 'Join',
+        ctaHref: '/membership',
+      }),
+    },
+    tiers: [],
+    board: [],
+    events: [],
+  }
+}

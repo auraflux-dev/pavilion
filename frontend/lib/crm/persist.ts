@@ -4,6 +4,7 @@ import { getAuth } from '@/lib/crm/auth'
 import { commonsDbEnabled, sql } from '@/lib/crm/db'
 import { ensureCommonsReady } from '@/lib/crm/migrate'
 import { riversideSnapshot } from '@/lib/crm/riverside'
+import { seedTrialOrgBrandPack } from '@/lib/crm/seed-trial-pack'
 import { requireOrganizationId } from '@/lib/crm/tenant'
 
 function passwordForEmail(email: string): string {
@@ -103,11 +104,14 @@ export async function persistTrialStart(opts: {
   password: string
   firstName?: string
   lastName?: string
+  /** Optional named pack (e.g. spring-hill). Else slug match or vanilla. */
+  brandPack?: string
 }): Promise<{
   orgId: string
   slug: string
   tempHost: string
   trialEndsAt: string
+  brandPackSlug: string
   setCookies: string[]
 }> {
   if (!commonsDbEnabled()) throw new Error('Commons database is not configured')
@@ -176,5 +180,20 @@ export async function persistTrialStart(opts: {
     await sql(`update people set auth_user_id = $1 where id = $2`, [userId, personId])
   }
 
-  return { orgId, slug, tempHost, trialEndsAt: ends.toISOString(), setCookies }
+  const seeded = await seedTrialOrgBrandPack({
+    orgId,
+    slug,
+    schoolName,
+    tempHost,
+    brandPack: opts.brandPack,
+  })
+
+  return {
+    orgId,
+    slug,
+    tempHost,
+    trialEndsAt: ends.toISOString(),
+    brandPackSlug: seeded.packSlug,
+    setCookies,
+  }
 }

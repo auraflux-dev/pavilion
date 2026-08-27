@@ -6,12 +6,12 @@ Work these on **`~/pavilion`** / robert-4220 only. Do **not** promote or `ship-s
 
 | ID | Item | Status | Notes |
 |----|------|--------|-------|
-| P1 | **Host → tenant resolution** | In progress | `iss_ZB_ZkLo_s1O-` — Host → org in `tenant.ts` |
-| P2 | **Brand pack → trial org seed** | Todo | `iss_pdfHK1mOuCrs` |
+| P1 | **Host → tenant resolution** | In progress | `iss_ZB_ZkLo_s1O-` — Host lookup + [HOST-TENANT-DNS.md](./HOST-TENANT-DNS.md) |
+| P2 | **Brand pack → trial org seed** | In progress | `iss_pdfHK1mOuCrs` — `brand_pack_slug` + vanilla pack on trial start |
 | P3 | **Lumi customer path** | Docs | `iss_NHhBTGWQD1Ln` — [CUSTOMER-LUMI.md](./CUSTOMER-LUMI.md) |
-| P4 | **Rename commons-* → Pavilion** | Todo | `iss_0Birrzq59_JH` — robert-4220 only |
+| P4 | **Rename commons-* → Pavilion** | Docs | `iss_0Birrzq59_JH` — [RENAME-COMMONS-TO-PAVILION.md](./RENAME-COMMONS-TO-PAVILION.md) |
 | P5 | **Public Pavilion GitHub org** | Prep done | `iss_NWtbFIlbmiLL` — [PUBLIC-REPO-PREP.md](./PUBLIC-REPO-PREP.md) |
-| P6 | **Retire legacy `commons-pto` host** | Todo | After host routing + demo covers trials |
+| P6 | **Retire legacy `commons-pto` host** | Todo | After P1 solid — see rename map |
 | P7 | **Connector secrets UX** | Todo | Per-tenant Square/etc. in staff |
 
 ## Blocked on Rob / off-peak (www)

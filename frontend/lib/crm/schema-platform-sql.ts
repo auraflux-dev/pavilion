@@ -5,6 +5,7 @@ alter table organizations add column if not exists trial_started_at timestamptz;
 alter table organizations add column if not exists trial_ends_at timestamptz;
 alter table organizations add column if not exists custom_domain text not null default '';
 alter table organizations add column if not exists temp_host text not null default '';
+alter table organizations add column if not exists brand_pack_slug text not null default '';
 alter table organizations add column if not exists store_card_enabled boolean not null default false;
 
 alter table students add column if not exists organization_id text references organizations (id) on delete cascade;
