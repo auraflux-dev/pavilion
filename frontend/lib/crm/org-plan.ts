@@ -67,12 +67,15 @@ export async function getOrgBilling(orgId: string): Promise<OrgBilling | null> {
 export async function assertOrgWritable(orgId: string): Promise<OrgBilling> {
   const org = await getOrgBilling(orgId)
   if (!org) throw new Error('organization_id is required')
-  if (!writesAllowed(org.plan, org.trialEndsAt)) {
-    const err = new Error('Trial ended. Data stays for 30 days. Subscribe to keep writing.')
-    ;(err as Error & { status: number }).status = 402
-    throw err
+  // Sample product demo (commons-pto-demo) owns Neon product data (signups, Pavilion CMS).
+  // Do not treat it like an expired trial tenant.
+  const { isDemoInstance } = await import('@/lib/demo/instance')
+  if (isDemoInstance() || writesAllowed(org.plan, org.trialEndsAt)) {
+    return org
   }
-  return org
+  const err = new Error('Trial ended. Data stays for 30 days. Subscribe to keep writing.')
+  ;(err as Error & { status: number }).status = 402
+  throw err
 }
 
 export function holdEndsAt(trialEndsAt: string | null): Date | null {
