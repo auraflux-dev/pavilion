@@ -7,7 +7,7 @@ import { getWixClient } from '@/lib/wix-client'
 import {
   studentSafetyComplete,
   type StudentSafety,
-} from '@/lib/program-enroll'
+} from '@/lib/student-safety'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { MEMBERSHIP_CHOOSE_PATH } from '@/lib/membership-links'
 

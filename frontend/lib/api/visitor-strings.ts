@@ -1,4 +1,6 @@
-import { getPageStrings, pickString } from '@/lib/api/page-strings'
+import 'server-only'
+
+import { getPageStrings } from '@/lib/api/page-strings'
 import {
   CURRICULUM_PAGE_DEFAULTS,
   DONATE_FORM_DEFAULTS,
@@ -7,6 +9,8 @@ import {
   SURVEY_DEFAULTS,
   VISITOR_VIDEO_DEFAULTS,
 } from '@/lib/defaults/visitor-string-defaults'
+
+export { visitorString } from '@/lib/api/visitor-strings-shared'
 
 export async function getVisitorVideoStrings(): Promise<Record<string, string>> {
   const cms = await getPageStrings('visitor-videos')
@@ -36,12 +40,4 @@ export async function getLegalShellStrings(): Promise<Record<string, string>> {
 export async function getSurveyStrings(): Promise<Record<string, string>> {
   const cms = await getPageStrings('survey-strings')
   return { ...SURVEY_DEFAULTS, ...cms }
-}
-
-export function visitorString(
-  copy: Record<string, string>,
-  key: string,
-  fallback: string,
-): string {
-  return pickString(copy, key, fallback)
 }

@@ -11,7 +11,7 @@ import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import {
   formatMemberPriorityUntil,
   toDatetimeLocalValue,
-} from '@/lib/programs/registration-access'
+} from '@/lib/programs/registration-access-shared'
 import { Fall2026EpSchedule } from '@/components/programs/fall-2026-ep-schedule'
 import { StaffProgramsCalendarPlanner } from '@/components/staff/staff-programs-calendar-planner'
 import {

@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext } from 'react'
-import { formCopy } from '@/lib/api/portal-form-copy'
+import { formCopy } from '@/lib/api/portal-form-copy-shared'
 import { PORTAL_FORM_DEFAULTS } from '@/lib/defaults/portal-form-defaults'
 import { CmsString } from '@/components/cms/cms-string'
 import type { ComponentProps } from 'react'

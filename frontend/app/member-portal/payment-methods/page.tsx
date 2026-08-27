@@ -2,7 +2,7 @@ import { MemberShell } from '@/components/shells/member-shell'
 import { PaymentMethodsPanel } from '@/components/member-portal/payment-methods-panel'
 import { PortalFormCopyProvider } from '@/components/member-portal/portal-form-copy-context'
 import { getPortalFormCopy } from '@/lib/api/portal-form-copy'
-import { formCopy } from '@/lib/api/portal-form-copy'
+import { formCopy } from '@/lib/api/portal-form-copy-shared'
 
 export const metadata = {
   title: 'Payment methods',

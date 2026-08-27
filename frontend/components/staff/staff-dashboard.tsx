@@ -70,7 +70,7 @@ import {
   resolveStaffWorkspaceGroups,
   staffCopy as staffStr,
   staffWorkspaceLabel,
-} from '@/lib/api/staff-portal-copy'
+} from '@/lib/api/staff-portal-copy-shared'
 import { STAFF_PORTAL_DEFAULTS } from '@/lib/defaults/staff-portal-defaults'
 import {
   STAFF_WORKSPACE_BLURB,

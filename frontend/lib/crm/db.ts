@@ -1,3 +1,5 @@
+import 'server-only'
+
 import { Pool, type QueryResult, type QueryResultRow } from 'pg'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { isPavilionProductPlatform } from '@/lib/crm/platform-env'

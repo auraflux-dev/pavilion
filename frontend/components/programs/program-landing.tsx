@@ -15,7 +15,7 @@ import { formatShortDate, programDateBadge } from '@/lib/programs/schedule'
 import {
   formatMemberPriorityUntil,
   getRegistrationPhase,
-} from '@/lib/programs/registration-access'
+} from '@/lib/programs/registration-access-shared'
 import { fallEpClassById, matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
 import { matchSpring2027EpClass, springEpClassById } from '@/lib/programs/spring-2027-ep'
 import { resolveProgramLandingCopy } from '@/lib/programs/resolve-landing-copy'

@@ -1,4 +1,4 @@
-import type { PageContentFields } from '@/lib/api/page-content'
+import type { PageContentFields } from '@/lib/defaults/page-content'
 import { EditableCopy } from '@/components/cms/editable-copy'
 
 type Props = {

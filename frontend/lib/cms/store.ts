@@ -1,3 +1,5 @@
+import 'server-only'
+
 /**
  * Pavilion CMS repository (Postgres). Authoritative content for demo/platform orgs.
  * SHMS publish path: sync selected org rows → Wix (see docs/PAVILION-CMS.md).

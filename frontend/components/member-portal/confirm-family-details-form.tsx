@@ -5,7 +5,7 @@ import { Loader2, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { useFormString } from '@/components/member-portal/portal-form-copy-context'
-import { interpolateCopy } from '@/lib/api/portal-form-copy'
+import { interpolateCopy } from '@/lib/api/portal-form-copy-shared'
 
 type StudentSeed = {
   parentFirstName?: string

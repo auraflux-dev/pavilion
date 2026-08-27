@@ -13,7 +13,7 @@ import { formatShortDate, programDateBadge } from '@/lib/programs/schedule'
 import {
   formatMemberPriorityUntil,
   getRegistrationPhase,
-} from '@/lib/programs/registration-access'
+} from '@/lib/programs/registration-access-shared'
 import { MemberGate } from '@/components/member-gate'
 import { ProgramRegisterModal } from '@/components/programs/program-register-modal'
 import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'

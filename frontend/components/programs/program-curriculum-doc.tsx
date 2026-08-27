@@ -2,7 +2,7 @@
 
 import type { CurriculumShareDoc } from '@/lib/programs/curriculum-share'
 import { CURRICULUM_PAGE_DEFAULTS } from '@/lib/defaults/visitor-string-defaults'
-import { visitorString } from '@/lib/api/visitor-strings'
+import { visitorString } from '@/lib/api/visitor-strings-shared'
 
 export function ProgramCurriculumDoc({
   doc,

@@ -1,3 +1,5 @@
+import 'server-only'
+
 /**
  * Page heroes / marketing copy from Wix CMS PageContent collection.
  * Falls back to code defaults when the collection or row is missing.

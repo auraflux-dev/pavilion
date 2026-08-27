@@ -17,7 +17,7 @@ import { displayProgramName } from '@/lib/programs/display-name'
 import {
   formatMemberPriorityUntil,
   getRegistrationPhase,
-} from '@/lib/programs/registration-access'
+} from '@/lib/programs/registration-access-shared'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { gaSurface, trackEvent } from '@/lib/ga'
 import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'

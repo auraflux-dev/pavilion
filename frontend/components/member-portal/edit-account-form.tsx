@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Pencil, Loader2, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useFormString } from '@/components/member-portal/portal-form-copy-context'
-import { interpolateCopy } from '@/lib/api/portal-form-copy'
+import { interpolateCopy } from '@/lib/api/portal-form-copy-shared'
 
 interface Props {
   initialName: string

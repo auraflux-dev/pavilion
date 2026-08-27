@@ -13,7 +13,8 @@ import { isDemoInstance } from '@/lib/demo/instance'
 import { DEMO_BRAND } from '@/lib/demo/brand'
 import { canViewProgramsCatalogNow, isProgramsReviewHost } from '@/lib/programs/public-access'
 import { isProgramsCatalogListed } from '@/lib/programs/public-catalog'
-import { getPageStrings, pickString } from '@/lib/api/page-strings'
+import { getPageStrings } from '@/lib/api/page-strings'
+import { pickString } from '@/lib/api/page-strings-shared'
 import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 
 export default async function HomePage() {

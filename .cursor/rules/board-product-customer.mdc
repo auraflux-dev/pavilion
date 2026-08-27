@@ -17,4 +17,12 @@ Org: `pavilion` (unless cross-product → `hskrg`).
 
 Wiki Why must state `Audience: product` or `Audience: customer:…`.
 
-Full map: `~/shmspto/docs/AGENT-SHIP-MAP.md` and `docs/PRODUCT-VS-CUSTOMER.md`.
+## Feature ship ladder
+
+1. Pavilion (commons-pto-demo) — fully built + browser/e2e  
+2. Customer staging — re-QA  
+3. Customer prod  
+
+Do not open customer promote while a product feature is mid-build unless Rob asks.
+
+Full map: `docs/PRODUCT-VS-CUSTOMER.md` and `~/shmspto/docs/AGENT-SHIP-MAP.md`.

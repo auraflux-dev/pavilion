@@ -1,3 +1,5 @@
+import 'server-only'
+
 import { getPageStrings } from '@/lib/api/page-strings'
 import { PROGRAM_UI_DEFAULTS } from '@/lib/defaults/program-ui-defaults'
 

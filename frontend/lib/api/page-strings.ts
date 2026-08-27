@@ -1,3 +1,5 @@
+import 'server-only'
+
 import { getPageContent } from '@/lib/api/page-content'
 import { parseStringOverrides, mergeStringOverrides } from '@/lib/copy/string-overrides'
 import { parseKeyedLines } from '@/lib/defaults/portal-copy'

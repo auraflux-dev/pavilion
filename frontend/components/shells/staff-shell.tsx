@@ -11,7 +11,7 @@ import {
   groupStaffNavItemsWithCopy,
   staffCopy as staffStr,
   staffWorkspaceLabel,
-} from '@/lib/api/staff-portal-copy'
+} from '@/lib/api/staff-portal-copy-shared'
 import { STAFF_PORTAL_DEFAULTS } from '@/lib/defaults/staff-portal-defaults'
 import type { StaffWorkspaceGroup } from '@/lib/staff/workspace-groups'
 import { groupStaffNavItems } from '@/lib/staff/workspace-groups'
