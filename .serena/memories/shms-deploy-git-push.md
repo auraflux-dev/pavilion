@@ -1,22 +1,13 @@
-# SHMS deploy (Stone Hill only)
+# Pavilion product deploy / promote
 
-Repo: **auraflux-dev/shmspto** (not `wix-shmspto` for school ships).
+**Product repo:** auraflux-dev/pavilion  
+**Customer #1:** shmspto (www) — promote, do not auto-ship during school hours  
+**Customer #2:** auraflux-dev/lumi (Wix OK)
 
-Vercel: team **treasurer-4353s-projects**, project **`frontend`**, domains **www.shmspto.org** / **shmspto.org**.
+```bash
+node scripts/ship-pavilion.mjs --target commons-pto-demo
+node scripts/promote-to-shms.mjs          # dry-run
+node scripts/promote-to-shms.mjs --apply # write shmspto tree only
+```
 
-## Agent ship order
-
-1. Serena QA (application code)
-2. **Commit** task files only
-3. **Push** `main` on `auraflux-dev/shmspto`
-4. Treasurer Vercel **auto-deploys** production (Git-connected)
-5. Confirm: `node scripts/check-prod-deploy.mjs` (run from **shmspto** repo)
-
-## What agents cannot do
-
-- `vercel deploy` / `vercel --prod` for SHMS without treasurer CLI login (banned team for Pavilion work anyway)
-- Create or deploy to a `frontend` project on **robert-4220**
-
-## Pavilion (this monorepo)
-
-`auraflux-dev/wix-shmspto` → robert-4220: `commons-site`, `commons-pto-demo`, `commons-pto`, `hskrg-work`. Separate env wall. See `two-repo-extract.mdc`.
+Demo ship ≠ www. Hotfix on www → `--from-shms` same day.

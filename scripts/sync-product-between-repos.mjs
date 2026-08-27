@@ -1,19 +1,21 @@
 #!/usr/bin/env node
 /**
- * One-way product sync: Stone Hill (canonical) → Pavilion (consumer).
+ * Product sync between Pavilion (product) and SHMS (customer #1).
  *
- * Run **only when Rob asks** to refresh demo/trial from shipped school code.
- * Stone Hill www ships by git push on ~/shmspto (treasurer auto-deploys).
- * Pavilion demo/trial ships on robert-4220 only after sync + commit here.
+ * Expected direction — promote product to customer:
+ *   node scripts/sync-product-between-repos.mjs --to-shms --dry-run
+ *   node scripts/sync-product-between-repos.mjs --to-shms --apply
+ *   node scripts/promote-to-shms.mjs              # dry-run wrapper
+ *   node scripts/promote-to-shms.mjs --apply
  *
- * Usage:
- *   node scripts/sync-product-between-repos.mjs --from-shms --dry-run
+ * Emergency — port SHMS hotfix back into product (same day):
  *   node scripts/sync-product-between-repos.mjs --from-shms --apply
  *
- * --from-shms  Copy product from ~/shmspto → pavilion (default / expected direction)
- * --to-shms    Legacy reverse copy — Rob must ask explicitly (rare)
+ * --to-shms / --promote-shms  pavilion → shmspto (expected)
+ * --from-shms                 shmspto → pavilion (hotfix port-back only)
  *
  * Skips Pavilion-only fixtures/demo and thin SHMS marketing wrappers by default.
+ * Applying --to-shms does NOT deploy www; ship-stone-hill.mjs does (production).
  */
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
@@ -43,15 +45,19 @@ const MARKETING_WRAPPER_RE =
 
 const args = new Set(process.argv.slice(2))
 const fromShms = args.has('--from-shms')
-const toShms = args.has('--to-shms')
+const toShms = args.has('--to-shms') || args.has('--promote-shms')
 const apply = args.has('--apply')
 const dryRun = args.has('--dry-run') || !apply
 const includeMarketing = args.has('--include-marketing')
 const onlyDiffs = args.has('--diffs-only')
 
 if (fromShms === toShms) {
-  console.error('Pick exactly one of --from-shms or --to-shms')
+  console.error('Pick exactly one of --to-shms / --promote-shms (expected) or --from-shms (hotfix port-back)')
   process.exit(2)
+}
+
+if (fromShms) {
+  console.warn('NOTE: --from-shms is emergency hotfix port-back (SHMS → product). Prefer authoring in pavilion.\n')
 }
 
 function walk(absRoot, base, out = []) {
@@ -134,8 +140,12 @@ for (const row of planned) {
 
 if (dryRun) {
   console.log('\nRe-run with --apply to write files. Then commit in the destination repo.')
-  console.log('Stone Hill ship: commit + git push origin main on ~/shmspto (no treasurer Vercel CLI).')
-  console.log('Pavilion ship: robert-4220 only (commons-pto-demo / commons-pto).')
+  if (!fromShms) {
+    console.log('SHMS customer ship (updates LIVE www — production-sensitive):')
+    console.log('  cd ~/shmspto && node scripts/ship-stone-hill.mjs')
+  } else {
+    console.log('After hotfix port-back: commit pavilion + ship-pavilion if demo should match.')
+  }
 } else {
   const stamp = {
     at: new Date().toISOString(),

@@ -43,7 +43,8 @@ function sleep(seconds) {
   spawnSync('sleep', [String(seconds)], { stdio: 'ignore' })
 }
 
-console.log(`Pavilion ship — target "${target}" (robert-4220). Not Stone Hill www.\n`)
+console.log(`Pavilion product ship — target "${target}" (robert-4220).`)
+console.log('This does NOT update www.shmspto.org (customer #1). Use promote-to-shms when intentional.\n')
 
 console.log('Optional: parity if school + demo both touched …')
 run('node', ['scripts/shms-frontend-parity.mjs'], { allowFail: true })
@@ -91,5 +92,6 @@ Stone Hill www: ~/shmspto → node scripts/ship-stone-hill.mjs
   process.exit(1)
 }
 
-console.log(`\nPASS  Pavilion ship complete (${target}).`)
+console.log(`\nPASS  Pavilion product ship complete (${target}).`)
+console.log('Note: www.shmspto.org unchanged. Promote + ship-stone-hill only when updating customer #1.')
 process.exit(0)

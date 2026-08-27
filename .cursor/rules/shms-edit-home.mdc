@@ -1,47 +1,37 @@
 ---
-description: Stone Hill www ships from ~/shmspto; pavilion consumes on Rob request only
+description: Pavilion authors product; SHMS is customer promote — do not treat www as product home
 alwaysApply: true
 ---
 
-# Stone Hill edit home (critical)
+# Edit home (Pavilion-first)
 
-www.shmspto.org deploys from **`auraflux-dev/shmspto`** only (git push → treasurer auto-deploy).
+**Shared product** (visitor, member portal, staff) is authored in **`~/pavilion`**.  
+www.shmspto.org is **customer #1** — dedicated deploy from **`~/shmspto`**, updated by promote.
 
 ## Where to edit
 
 | Surface | Edit in |
 |---------|---------|
-| Stone Hill visitor, portal, staff, shared product | **`~/shmspto`** (`auraflux-dev/shmspto`) |
-| Pavilion demo / trial / marketing | **`pavilion`** (this repo) — Pavilion-only layers |
+| Shared product (site / portal / staff) | **`~/pavilion`** (this repo) |
+| Demo / brand packs / trial CRM / marketing | **`~/pavilion`** |
+| SHMS-only ops (Wix CMS, school env, production hotfix) | **`~/shmspto`** |
 
-**Shared product is authored in `~/shmspto`, not here.** Do not implement Staff / portal / checkout in `pavilion/frontend` and plan to port later.
+Pushing `pavilion` `main` does **not** update www. Promoting + shipping SHMS does — **avoid casual promotes during school hours.**
 
-For Stone Hill work, prefer the **`shmspto` Cursor workspace** (`move_agent_to_root` → `~/shmspto`).
-
-## Pavilion consumes on request
-
-Pavilion catches up **only when Rob asks**:
+## Promote to Stone Hill (intentional)
 
 ```bash
-node scripts/sync-product-between-repos.mjs --from-shms --dry-run
-node scripts/sync-product-between-repos.mjs --from-shms --apply
+node scripts/promote-to-shms.mjs
+# then ~/shmspto → node scripts/ship-stone-hill.mjs
 ```
 
-Do **not** run sync or deploy Pavilion after a SHMS ship unless Rob requested it.
+## Hotfix discipline
 
-**Do not** use `--to-shms` unless Rob explicitly asks (rare).
-
-Pushing `pavilion` `main` does **not** update www.
-
-## After a Stone Hill application ship (in ~/shmspto)
-
-1. Commit/push **`~/shmspto`**
-2. `node scripts/check-prod-deploy.mjs` (from shmspto)
-3. **Stop.** Do not sync or deploy Pavilion unless Rob asks.
+If you must fix www first: edit `~/shmspto` → `ship-stone-hill.mjs` → **same day** port into pavilion with `--from-shms` (emergency only).
 
 ## Anti-patterns (forbidden)
 
-- `vercel link` / `vercel deploy` Stone Hill from this monorepo
-- Treating pavilion `frontend/` edits as live Stone Hill product
-- Auto `--from-shms` or Pavilion deploy after every school ship
-- `--to-shms` as the default product workflow
+- Treating `~/shmspto` as the place to build new shared product
+- Auto-promoting to SHMS after every demo ship
+- `vercel link` / deploy Stone Hill from this monorepo
+- Calling Stone Hill “shipped” after only pushing pavilion

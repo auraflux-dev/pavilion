@@ -1,58 +1,44 @@
 ---
-description: Pavilion workspace — Commons only; consumer of shmspto product on Rob request
+description: Pavilion workspace — product author; SHMS is customer #1
 alwaysApply: true
 ---
 
 # Pavilion agent home (critical)
 
-This Cursor workspace is **`pavilion`** (`auraflux-dev/pavilion`). Agents stay here for **Pavilion / Commons only**.
+This workspace is **`pavilion`** (`auraflux-dev/pavilion`). **Pavilion is the product** (sold as Pavilion; legacy hosts may still say `commons-*`).
 
-Pavilion ships **one** Commons app (`commons-pto-demo`). Brand packs skin prospects. See `commons-one-surface.mdc`.
+Ship the product app: **`commons-pto-demo`**. Brand packs skin prospects. See `commons-one-surface.mdc`.
 
-## Canonical product source
-
-**`auraflux-dev/shmspto`** (`~/shmspto`) is the **source of truth** for shared PTO product (Staff, portal, checkout, Cove).
-
-Pavilion is a **downstream consumer**. It does **not** lead product development and does **not** auto-sync after every SHMS ship.
+## Source of truth
 
 | Work | Where |
 |------|--------|
-| Stone Hill visitor, portal, staff, shared product | **`~/shmspto`** — use that workspace |
-| Pavilion-only (demo flags, brand packs, CRM, trial, `commons-site`) | **`pavilion`** (this repo) |
-| Pull SHMS product into demo | **Only when Rob asks** — see sync below |
+| Shared product (site, portal, staff) | **`~/pavilion`** — author here |
+| Demo / brand packs / trial / `commons-site` | **`~/pavilion`** |
+| SHMS production customer | **`~/shmspto`** — promote when intentional; hotfix-only edits |
 
 ## Vercel wall (never mix)
 
 | Account | Use for |
 |---------|---------|
-| **robert-4220s-projects** | Pavilion only: `commons-pto-demo`, `commons-pto`, `commons-site` |
-| **treasurer-4353s-projects** | Stone Hill www only, via **git push** on `~/shmspto`. **Never** `vercel link` / `vercel deploy` from this monorepo |
+| **robert-4220s-projects** | Pavilion: `commons-pto-demo`, `commons-pto`, `commons-site` |
+| **treasurer-4353s-projects** | SHMS www only via **`~/shmspto`** git push. **Never** from this monorepo |
 
-If `vercel whoami` / MCP only shows treasurer, **stop**. Do not link or deploy. Ask Rob to switch to robert-4220 for Pavilion deploys.
+## Promote / sync
 
-Local `.vercel/project.json` under this repo must **not** point at treasurer. If it does, delete it.
-
-## Product sync (Rob-initiated only, one direction)
-
-Sync **only when Rob explicitly asks** (e.g. “sync demo from school”, “pull shms into pavilion”).
+**Expected:** pavilion → SHMS (customer promote):
 
 ```bash
-node scripts/sync-product-between-repos.mjs --from-shms --dry-run
-node scripts/sync-product-between-repos.mjs --from-shms --apply
-# then commit pavilion + deploy commons-pto-demo if Rob wants demo live
+node scripts/promote-to-shms.mjs
 ```
 
-**Do not** run `--from-shms` or deploy Pavilion after a Stone Hill ship unless Rob asked.
+**Emergency only:** SHMS hotfix → pavilion (`--from-shms`) same day.
 
-**Do not** run `--to-shms` unless Rob explicitly asks to port Pavilion-only work into school (rare). Default product path is edit in `~/shmspto`, not pavilion → shms.
-
-Drift check (informational): `node scripts/shms-frontend-parity.mjs` — “only in shmspto” is expected until Rob requests a sync.
-
-Stone Hill production = **git push** `auraflux-dev/shmspto` `main`. Treasurer auto-deploys. Agents do not need the treasurer Vercel login from this workspace.
+Do **not** promote to live SHMS unless Rob asks or it is an agreed customer ship. **School-hours sensitivity:** www is production.
 
 ## Anti-patterns (forbidden)
 
-- Editing shared Staff / portal / checkout product in `pavilion/frontend` as the primary path
-- Auto-syncing or auto-deploying Pavilion after every SHMS ship
-- `--to-shms` without Rob asking
-- `vercel link` / Stone Hill deploy from this repo
+- Authoring shared product only in `~/shmspto`
+- Auto-promote after every Pavilion ship
+- Pushing pavilion and calling www “live”
+- Treasurer `vercel` from this repo

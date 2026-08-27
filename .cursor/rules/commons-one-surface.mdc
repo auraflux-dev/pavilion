@@ -1,27 +1,30 @@
 ---
-description: One Commons demo app; brand packs for prospects; trial is an unlock
+description: One Pavilion demo stack; brand packs; trial is unlock — SHMS is customer
 alwaysApply: true
 ---
 
-# One Commons surface (critical)
+# One Pavilion demo surface (critical)
+
+Customer-facing product name is **Pavilion**. Legacy hosts may still say `commons-*`.
 
 Do **not** treat demo and trial as two products to deploy.
 
 | Surface | Role |
 |---------|------|
-| **commons-pto-demo** | The Pavilion app. Riverside sample by default. Brand a prospect with a pack. |
+| **commons-pto-demo** | Pavilion product demo / trials (one Vercel stack). Riverside sample + brand packs. |
 | **commons-pto** | Legacy private host. Do not open new prospects here. |
-| **Stone Hill / shmspto** | Separate school product (treasurer git). |
+| **Stone Hill / shmspto** | **Customer #1** — dedicated treasurer deploy. Not the product author. |
 
 ## Sales motion
 
 1. Share the demo: `https://commons-pto-demo.vercel.app/review?code=…`
 2. Brand it: `/review?brand=spring-hill` or banner / review “Brand this tour”
-3. If they want to continue: unlock private login / live connectors later. That is the “trial,” not a second Vercel project.
+3. Continue → unlock private login / connectors = **trial** (tenant row), not a second Vercel project
 
 ## Agent rules
 
-- Ship Pavilion product to **commons-pto-demo** (robert-4220) only unless Rob asks otherwise.
-- Add prospect skins in `frontend/lib/crm/trial-packs/` (brand packs).
-- Cookie `pavilion_brand` + `/api/demo/brand` switch packs on demo.
-- Never `vercel link` this repo to treasurer.
+- Ship product to **commons-pto-demo** unless Rob asks otherwise.
+- Brand packs: `frontend/lib/crm/trial-packs/`
+- Cookie `pavilion_brand` + `/api/demo/brand`
+- Never `vercel link` this repo to treasurer
+- Demo ship does **not** update www.shmspto.org — promote + SHMS ship does
