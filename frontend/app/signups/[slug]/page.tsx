@@ -2,35 +2,42 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import { commonsDbEnabled } from '@/lib/crm/db'
-import { MissingOrganizationIdError, organizationFromHostHeader, organizationIdFromRequest } from '@/lib/crm/tenant'
+import {
+  MissingOrganizationIdError,
+  organizationFromHostHeader,
+  organizationIdFromRequest,
+} from '@/lib/crm/tenant'
+import { SignupClaimForm } from '@/components/signups/signup-claim-form'
 import { resolvePublishedSignupSheet } from '@/lib/signups/sheets'
 
 export const dynamic = 'force-dynamic'
 
 type Props = { params: Promise<{ slug: string }> }
 
-export default async function SignupPublicPage({ params }: Props) {
-  const { slug } = await params
-  if (!commonsDbEnabled()) notFound()
-
+async function loadSheet(slug: string) {
+  if (!commonsDbEnabled()) return null
   const hdrs = await headers()
   const req = new Request('http://local/signups', { headers: hdrs })
-  let sheet
+  let orgId: string | null = null
   try {
-    let orgId: string | null = null
-    try {
-      orgId = await organizationIdFromRequest(req)
-    } catch (err) {
-      if (!(err instanceof MissingOrganizationIdError)) throw err
-      const hostRow = await organizationFromHostHeader(req)
-      orgId = hostRow?.id ?? null
-    }
-    sheet = await resolvePublishedSignupSheet(slug, orgId)
+    orgId = await organizationIdFromRequest(req)
   } catch (err) {
     if (!(err instanceof MissingOrganizationIdError)) throw err
-    notFound()
+    const hostRow = await organizationFromHostHeader(req)
+    orgId = hostRow?.id ?? null
   }
+  return resolvePublishedSignupSheet(slug, orgId)
+}
+
+export default async function SignupPublicPage({ params }: Props) {
+  const { slug } = await params
+  const sheet = await loadSheet(slug)
   if (!sheet) notFound()
+
+  const slots = sheet.slots.map((s) => ({
+    ...s,
+    quantityRemaining: Math.max(0, s.quantityNeeded - s.quantityClaimed),
+  }))
 
   return (
     <main className="min-h-screen bg-[#F7F5F0] px-4 py-10">
@@ -48,33 +55,7 @@ export default async function SignupPublicPage({ params }: Props) {
           ) : null}
         </div>
 
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-[#1A1A1A]">Available slots</h2>
-          {sheet.slots.map((slot) => {
-            const remaining = Math.max(0, slot.quantityNeeded - slot.quantityClaimed)
-            return (
-              <div
-                key={slot.id}
-                className="rounded-xl border border-[var(--border,#E5E2DC)] bg-white p-4"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <p className="font-medium text-[#1A1A1A]">{slot.title}</p>
-                    {slot.description ? (
-                      <p className="text-sm text-[#5A6070] mt-1">{slot.description}</p>
-                    ) : null}
-                  </div>
-                  <span className="text-sm text-[#5A6070]">
-                    {remaining} of {slot.quantityNeeded} open
-                  </span>
-                </div>
-                <p className="text-xs text-[#5A6070] mt-3">
-                  Participant sign-up form — next iteration (claim + confirmation email).
-                </p>
-              </div>
-            )
-          })}
-        </div>
+        <SignupClaimForm slug={sheet.slug} fields={sheet.fields} slots={slots} />
 
         <p className="text-center text-sm text-[#5A6070]">
           <Link href="/" className="underline">

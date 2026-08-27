@@ -344,3 +344,20 @@ export async function resolvePublishedSignupSheet(
   if (orgId) return getPublishedSignupSheetBySlug(orgId, slug)
   return getPublishedSignupSheetPublic(slug)
 }
+
+export async function updateSignupSheetStatus(
+  orgId: string,
+  sheetId: string,
+  status: SignupSheetStatus,
+): Promise<SignupSheet | null> {
+  await ensureCommonsReady()
+  if (!['draft', 'published', 'closed'].includes(status)) {
+    throw new Error('Invalid status')
+  }
+  await sqlForOrg(
+    orgId,
+    `update signup_sheets set status = $1, updated_at = now() where id = $2`,
+    [status, sheetId],
+  )
+  return getSignupSheetById(orgId, sheetId)
+}

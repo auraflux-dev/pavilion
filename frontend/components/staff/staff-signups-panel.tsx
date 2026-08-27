@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import type { SignupRegistration } from '@/lib/signups/registrations'
 import type { SignupSheetSummary, SignupSlotType } from '@/lib/signups/types'
 
 type SlotDraft = {
@@ -39,11 +40,14 @@ export function StaffSignupsPanel() {
   const [configured, setConfigured] = useState(true)
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
-  const [status, setStatus] = useState('')
+  const [flash, setFlash] = useState('')
   const [busy, setBusy] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(emptyForm)
   const [slots, setSlots] = useState<SlotDraft[]>([emptySlot()])
+  const [rosterSheetId, setRosterSheetId] = useState<string | null>(null)
+  const [roster, setRoster] = useState<SignupRegistration[]>([])
+  const [rosterTitle, setRosterTitle] = useState('')
 
   const load = useCallback(async () => {
     const r = await fetch('/api/staff/signups/sheets')
@@ -57,6 +61,40 @@ export function StaffSignupsPanel() {
   useEffect(() => {
     void load().catch((err) => setError(err instanceof Error ? err.message : 'Load failed'))
   }, [load])
+
+  async function patchSheetStatus(id: string, next: 'draft' | 'published' | 'closed') {
+    setBusy(true)
+    setError('')
+    try {
+      const r = await fetch(`/api/staff/signups/sheets/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: next }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Update failed')
+      setFlash(`Updated “${d.sheet.title}” → ${next}`)
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Update failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function openRoster(id: string, title: string) {
+    setRosterSheetId(id)
+    setRosterTitle(title)
+    setError('')
+    try {
+      const r = await fetch(`/api/staff/signups/sheets/${id}/registrations`)
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Load failed')
+      setRoster(d.registrations ?? [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Load failed')
+    }
+  }
 
   function addSlot() {
     setSlots((prev) => [...prev, emptySlot()])
@@ -72,7 +110,7 @@ export function StaffSignupsPanel() {
 
   async function save() {
     setBusy(true)
-    setStatus('')
+    setFlash('')
     setError('')
     try {
       const payload = {
@@ -96,7 +134,7 @@ export function StaffSignupsPanel() {
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Save failed')
-      setStatus(`Created “${d.sheet.title}”. Public path: ${d.sheet.publicPath}`)
+      setFlash(`Created “${d.sheet.title}”. Public path: ${d.sheet.publicPath}`)
       setShowForm(false)
       setForm(emptyForm)
       setSlots([emptySlot()])
@@ -134,9 +172,9 @@ export function StaffSignupsPanel() {
           {error}
         </div>
       ) : null}
-      {status ? (
+      {flash ? (
         <div className="rounded-lg border border-[var(--border)] bg-[#F0FAF4] px-4 py-3 text-sm text-[#1A1A1A] whitespace-pre-line">
-          {status}
+          {flash}
         </div>
       ) : null}
 
@@ -307,8 +345,7 @@ export function StaffSignupsPanel() {
           </div>
 
           <p className="text-xs text-[#5A6070]">
-            Default participant fields: name, email, phone. Custom fields and confirmation emails
-            come next.
+            Default participant fields: name, email, phone. Publish to share the public claim link.
           </p>
 
           <div className="flex flex-wrap gap-2">
@@ -330,7 +367,7 @@ export function StaffSignupsPanel() {
               <th className="px-4 py-2 font-medium">Status</th>
               <th className="px-4 py-2 font-medium">Slots</th>
               <th className="px-4 py-2 font-medium">Sign-ups</th>
-              <th className="px-4 py-2 font-medium">Link</th>
+              <th className="px-4 py-2 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -347,14 +384,30 @@ export function StaffSignupsPanel() {
                   <td className="px-4 py-3 capitalize">{sheet.status}</td>
                   <td className="px-4 py-3">{sheet.slotCount}</td>
                   <td className="px-4 py-3">{sheet.registrationCount}</td>
-                  <td className="px-4 py-3">
-                    {sheet.status === 'published' ? (
-                      <Link href={sheet.publicPath} className="underline" target="_blank">
-                        {sheet.publicPath}
-                      </Link>
+                  <td className="px-4 py-3 space-x-2 whitespace-nowrap">
+                    {sheet.status !== 'published' ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={busy}
+                        onClick={() => void patchSheetStatus(sheet.id, 'published')}
+                      >
+                        Publish
+                      </Button>
                     ) : (
-                      <span className="text-[#5A6070]">Publish to share</span>
+                      <Link href={sheet.publicPath} className="underline text-sm" target="_blank">
+                        Open
+                      </Link>
                     )}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => void openRoster(sheet.id, sheet.title)}
+                    >
+                      Roster
+                    </Button>
                   </td>
                 </tr>
               ))
@@ -362,6 +415,41 @@ export function StaffSignupsPanel() {
           </tbody>
         </table>
       </div>
+
+      {rosterSheetId ? (
+        <div className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="font-semibold text-[#1A1A1A]">Roster — {rosterTitle}</h3>
+            <Button type="button" variant="outline" size="sm" onClick={() => setRosterSheetId(null)}>
+              Close
+            </Button>
+          </div>
+          {roster.length === 0 ? (
+            <p className="text-sm text-[#5A6070]">No sign-ups yet.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="text-left text-[#5A6070]">
+                <tr>
+                  <th className="py-1 font-medium">Name</th>
+                  <th className="py-1 font-medium">Email</th>
+                  <th className="py-1 font-medium">Slot</th>
+                  <th className="py-1 font-medium">Qty</th>
+                </tr>
+              </thead>
+              <tbody>
+                {roster.map((row) => (
+                  <tr key={row.id} className="border-t border-[var(--border)]">
+                    <td className="py-2">{row.participantName}</td>
+                    <td className="py-2">{row.participantEmail}</td>
+                    <td className="py-2">{row.slotTitle}</td>
+                    <td className="py-2">{row.quantity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      ) : null}
     </div>
   )
 }
