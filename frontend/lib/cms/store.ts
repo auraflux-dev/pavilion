@@ -100,7 +100,9 @@ export async function getCmsPageContent(
     [orgId, page],
   )
   const row = res.rows[0]
-  if (!row || row.active === false) return null
+  if (!row) return null
+  const active = row.active !== false && row.active !== null
+  if (!active) return null
   return {
     page: row.page,
     eyebrow: row.eyebrow,
@@ -116,7 +118,7 @@ export async function getCmsPageContent(
     flyerImage: row.flyer_image,
     customCss: row.custom_css,
     stringOverrides: row.string_overrides,
-    active: row.active !== false,
+    active: true,
   }
 }
 
