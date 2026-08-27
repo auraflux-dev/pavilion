@@ -19,7 +19,7 @@ import {
   isDemoPiiPath,
   isWriteMethod,
 } from '@/lib/demo/guard'
-import { hasBetterAuthCookie, isCommonsPlatformHost } from '@/lib/crm/auth-edge'
+import { hasBetterAuthCookie, isCommonsPlatformHost, isSharedProductHost } from '@/lib/crm/auth-edge'
 import { commonsRequiresLogin, isCommonsPublicPath } from '@/lib/crm/private-tenant'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { isCommonsDemoHiddenPath } from '@/lib/demo/commons-surface'
@@ -48,6 +48,41 @@ export async function middleware(req: NextRequest) {
       loginUrl.search = ''
       loginUrl.searchParams.set('returnTo', pathname + (req.nextUrl.search || ''))
       return NextResponse.redirect(loginUrl)
+    }
+  }
+
+  // Vanity / custom Host → hard-gate locked trials (P1). Shared product hosts skipped.
+  if (
+    isCommonsPlatformHost() &&
+    !isCommonsPublicPath(pathname) &&
+    !pathname.startsWith('/api/')
+  ) {
+    const host =
+      req.headers.get('x-forwarded-host')?.split(',')[0]?.trim().toLowerCase().split(':')[0] ||
+      req.headers.get('host')?.trim().toLowerCase().split(':')[0] ||
+      ''
+    if (host && !isSharedProductHost(host)) {
+      try {
+        const statusUrl = new URL('/api/commons/host-status', req.url)
+        const statusRes = await fetch(statusUrl, {
+          headers: {
+            'x-forwarded-host': host,
+            host,
+          },
+          cache: 'no-store',
+        })
+        if (statusRes.ok) {
+          const data = (await statusRes.json()) as { matched?: boolean; locked?: boolean }
+          if (data.matched && data.locked) {
+            const lockedUrl = req.nextUrl.clone()
+            lockedUrl.pathname = '/trial-locked'
+            lockedUrl.search = ''
+            return NextResponse.redirect(lockedUrl)
+          }
+        }
+      } catch {
+        // Fail open: Node routes still enforce assertOrgWritable on writes.
+      }
     }
   }
 

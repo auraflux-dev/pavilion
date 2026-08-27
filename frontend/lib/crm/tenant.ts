@@ -1,7 +1,8 @@
 import type { PoolClient, QueryResult, QueryResultRow } from 'pg'
 import { getAuth } from '@/lib/crm/auth'
+import { isSharedProductHost } from '@/lib/crm/auth-edge'
 import { commonsDbEnabled, getPool, sql } from '@/lib/crm/db'
-import { assertOrgWritable } from '@/lib/crm/org-plan'
+import { assertOrgWritable, type OrgPlan } from '@/lib/crm/org-plan'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { riversideSnapshot } from '@/lib/crm/riverside'
 
@@ -55,37 +56,47 @@ export function normalizeRequestHost(req: Request): string {
   return raw.split(':')[0].trim().toLowerCase()
 }
 
+export type HostTenantRow = {
+  id: string
+  plan: OrgPlan
+  trialEndsAt: string | null
+}
+
 /**
  * Resolve tenant from Host matching organizations.temp_host or custom_domain.
  * Session still wins when present. Used for trial vanity hosts on the shared stack.
  */
-export async function organizationIdFromHostHeader(req: Request): Promise<string | null> {
+export async function organizationFromHostHeader(req: Request): Promise<HostTenantRow | null> {
   if (!commonsDbEnabled()) return null
   const host = normalizeRequestHost(req)
-  if (!host) return null
-  // Shared product hosts are not tenants
-  if (
-    host === 'localhost' ||
-    host.endsWith('.vercel.app') ||
-    host === 'commons-pto-demo.vercel.app' ||
-    host === 'commons-pto.vercel.app' ||
-    host === 'www.shmspto.org' ||
-    host === 'shmspto.org'
-  ) {
-    return null
-  }
+  if (!host || isSharedProductHost(host)) return null
   try {
-    const found = await sql<{ id: string }>(
-      `select id from organizations
+    const found = await sql<{
+      id: string
+      plan: string | null
+      trial_ends_at: Date | null
+    }>(
+      `select id, plan, trial_ends_at from organizations
        where lower(nullif(trim(temp_host), '')) = $1
           or lower(nullif(trim(custom_domain), '')) = $1
        limit 1`,
       [host],
     )
-    return found.rows[0]?.id?.trim() || null
+    const row = found.rows[0]
+    if (!row?.id?.trim()) return null
+    return {
+      id: row.id.trim(),
+      plan: (row.plan || 'demo') as OrgPlan,
+      trialEndsAt: row.trial_ends_at ? row.trial_ends_at.toISOString() : null,
+    }
   } catch {
     return null
   }
+}
+
+export async function organizationIdFromHostHeader(req: Request): Promise<string | null> {
+  const row = await organizationFromHostHeader(req)
+  return row?.id ?? null
 }
 
 export async function sqlForOrg<T extends QueryResultRow = QueryResultRow>(

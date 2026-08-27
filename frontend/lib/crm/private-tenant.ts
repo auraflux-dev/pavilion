@@ -11,7 +11,9 @@ export function isCommonsPublicPath(pathname: string): boolean {
   if (pathname.startsWith('/api/cron/')) return true
   // Provisioning UI + API. still require COMMONS_PROVISION_SECRET in the route.
   if (pathname === '/trial' || pathname.startsWith('/trial/')) return true
+  if (pathname === '/trial-locked' || pathname.startsWith('/trial-locked/')) return true
   if (pathname === '/api/commons/trial/start') return true
+  if (pathname === '/api/commons/host-status') return true
   return false
 }
 

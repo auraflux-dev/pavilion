@@ -25,5 +25,5 @@ Do **not** put trial DNS on treasurer / www.shmspto.org.
 
 ## Follow-ups
 
-- Middleware: optional hard gate when Host maps to locked trial
+- [x] Middleware hard gate when Host maps to locked trial (`/trial-locked` + `/api/commons/host-status`)
 - Rename suffix env to Pavilion domain when P4 lands

@@ -13,7 +13,7 @@ See also **[PRODUCT-BACKLOG.md](./PRODUCT-BACKLOG.md)** (active product work, ww
 
 ## Active now (no www impact)
 
-- [x] P1 Host → tenant routing (code + DNS doc) — more middleware later  
+- [x] P1 Host → tenant routing (code + DNS doc + locked middleware gate)  
 - [x] P2 Pack → org seed (brand_pack_slug + vanilla pack)  
 - [x] P3 Lumi customer path (docs / board; Wix OK)  
 - [x] P4 Rename map doc (Vercel rename later)  
