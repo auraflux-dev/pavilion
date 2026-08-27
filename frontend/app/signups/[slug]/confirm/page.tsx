@@ -60,8 +60,8 @@ export default async function SignupConfirmPage({ params, searchParams }: Props)
           </p>
         ) : null}
         <p className="text-xs text-[#5A6070]">
-          A confirmation email is sent when Gmail send is configured. Keep this page or the email for
-          your records.
+          Keep this page for your records.
+          When email is connected for this school, a confirmation message is sent too.
         </p>
         <p className="text-sm">
           <Link href={`/signups/${encodeURIComponent(slug)}`} className="underline">

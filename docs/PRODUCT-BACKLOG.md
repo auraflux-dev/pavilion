@@ -14,6 +14,7 @@ Work these on **`~/pavilion`** / robert-4220 only. Do **not** promote or `ship-s
 | P6 | **Retire legacy `commons-pto` host** | Docs | [RETIRE-COMMONS-PTO.md](./RETIRE-COMMONS-PTO.md) — project delete Rob OK |
 | P7 | **Connector secrets UX** | Done | Staff Payments panel + `/api/commons/connectors` |
 | P8 | **Capability packaging** | Started | [SOLUTION-PACKAGING.md](./SOLUTION-PACKAGING.md) + `lib/crm/capabilities.ts` — wire gates / promote allowlists next |
+| P9 | **Sign-up sheets** | In progress | Neon sheets + claim on commons-pto-demo. Next: confirm-email modes, reminders, e2e. Customer promote only after product QA. |
 
 ## Blocked on Rob / off-peak (www)
 
@@ -24,7 +25,6 @@ Work these on **`~/pavilion`** / robert-4220 only. Do **not** promote or `ship-s
 
 ## Product policy
 
-- **SHMS = VIP dedicated** on treasurer. Do not migrate www to multi-tenant demo/platform hosts.
-- **Lumi = partial capability pack** (not full SHMS shape). See [SOLUTION-PACKAGING.md](./SOLUTION-PACKAGING.md).
+- Build and fully test features on **Pavilion** first (demo + e2e). Then customer **staging**, then customer **prod**.
 - Shared stack = new prospects / trials. Dedicated Vercel (or Wix wall) = customer hosting SKUs.
 - Sell/deploy by **capability** (website / member / staff features), not only whole-app.

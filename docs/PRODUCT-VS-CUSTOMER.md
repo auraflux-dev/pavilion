@@ -10,11 +10,18 @@ Pavilion is the product we sell. Stone Hill and Lumi are customers. Tickets and 
 
 | Kind | Label | Edit home | Ship |
 |------|-------|-----------|------|
-| Product | `product` | `~/pavilion` | `ship-pavilion.mjs` (demo ≠ www) |
-| Customer SHMS | `customer:shms` | promote → `~/shmspto` or SHMS-only ops | `ship-stone-hill.mjs` (live www — careful school hours) |
-| Customer Lumi | `customer:lumi` | `auraflux-dev/lumi` / Wix | customer surface |
+| Product | `product` | `~/pavilion` | `ship-pavilion.mjs` → commons-pto-demo (and marketing when relevant) |
+| Customer | `customer:…` | customer repo after promote | customer **staging** first, then **prod** |
 
-Wiki Why line must be: `Audience: product` | `Audience: customer:shms` | `Audience: customer:lumi`
+Wiki Why line must be: `Audience: product` | `Audience: customer:…`
+
+### Feature ship ladder (default)
+
+1. **Pavilion** — build on `~/pavilion`, browser QA + e2e as needed, ship **commons-pto-demo**. Stay here until the feature is fully built and trusted.
+2. **Customer staging** — promote/ship into that customer’s staging host. Browser/e2e again there.
+3. **Customer prod** — only after staging is good. Never jump product → customer prod.
+
+Do not mix “feature is done on Pavilion” with “live at a school.” Customer promote is a separate, intentional step after product QA.
 
 Upsert to HSKRG Work when API key available:
 
@@ -25,15 +32,13 @@ Upsert to HSKRG Work when API key available:
 ## Code / commands
 
 ```bash
-# Product
+# Product (always first)
 cd ~/pavilion && node scripts/ship-pavilion.mjs --target commons-pto-demo
 
-# Promote to SHMS (dry-run default — safe)
-cd ~/pavilion && node scripts/promote-to-shms.mjs
-cd ~/pavilion && node scripts/promote-to-shms.mjs --apply   # writes tree only
-cd ~/shmspto && node scripts/ship-stone-hill.mjs            # LIVE www
+# Customer promote / staging / prod — only when Rob asks for a named customer
+# (each customer has its own staging and prod wall; see that customer’s ship map)
 ```
 
 ### Enrichment tuition ↔ ecommerce catalog
 
-Product work in Pavilion: Programs Staff fee syncs to a Wix Stores catalog SKU (`Programs.productId`), same price home as memberships/Cove. **Do not promote to SHMS until after Fall EP sales.** Wiki: `HOME/product-ep-catalog-tuition`.
+Product work in Pavilion: Programs Staff fee syncs to a Wix Stores catalog SKU (`Programs.productId`), same price home as memberships/Cove. Wiki: `HOME/product-ep-catalog-tuition`.
