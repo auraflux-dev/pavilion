@@ -234,7 +234,7 @@ Printable: **/staff/in-person**
 
 ## How are they paying?
 
-| Paying with… | Do this |
+| Paying with... | Do this |
 |--------------|---------|
 | Cash or card / wallet | **Stand** → Cash or Card → stop |
 | Cove **Photos QR** | **Stand** → Gift card → scan → stop |
@@ -415,7 +415,7 @@ Personal bits you can type in subject or body:
 - {{firstName}} {{lastName}} {{name}}
 - {{tier}} {{grade}} {{email}}
 
-Example: Hi {{firstName}}, your {{tier}} membership…
+Example: Hi {{firstName}}, your {{tier}} membership...
 
 If a name is missing, it becomes “there”.
 
@@ -431,7 +431,7 @@ If a name is missing, it becomes “there”.
 
 ## Choose the newsletter type
 - **Paid members (full email)**: default. Sends to paid roster only. Optional portal post for paid parents.
-- **Publish to site & copy link**: creates a public page (e.g. `/newsletters/…`) with the same branded HTML. Paste that URL into the **school Scoop**. Also fills the Scoop link field.
+- **Publish to site & copy link**: creates a public page (e.g. /newsletters/...) with the same branded HTML. Paste that URL into the **school Scoop**. Also fills the Scoop link field.
 - **Weekly Scoop helpers** (optional free-parent share): after publish, use the web link for WhatsApp / portal / optional email. Prefer the published site URL over Canva.
 - **Footer signup list only**: public form emails. No portal.
 
@@ -473,7 +473,7 @@ Grade links live in **Site settings** (6th / 7th / 8th announcement links).
 
 ## Publish for school Scoop
 1. Write the PTO newsletter (subject, copy/beats, Canva PNG as usual)
-2. **Publish to site & copy link** — opens nothing; copies `https://…/newsletters/…`
+2. **Publish to site & copy link** — opens nothing; copies https://www.shmspto.org/newsletters/...
 3. Paste that link into the school Scoop
 4. Optionally still **Send email now** to paid members
 
@@ -624,7 +624,7 @@ Use reports for counts and follow-ups. Official books stay in MoneyMinder / bank
       slug: 'site-lists',
       title: 'Site settings & lists',
       categoryId: 'admin',
-      summary: 'Announcement, board, nav, FAQs, volunteers, fundraising…',
+      summary: 'Announcement, board, nav, FAQs, volunteers, fundraising...',
       order: 2,
       need: 'site',
       body: `Edit settings where the job lives:

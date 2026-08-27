@@ -5,8 +5,10 @@ import {
 } from '@/lib/staff/newsletter-sections'
 import {
   NEWSLETTER_BRANDING_DEFAULTS,
+  resolveEmailHeaderLogoUrl,
   type NewsletterBranding,
 } from '@/lib/staff/newsletter-branding'
+import { tagUrlWithUtm, type UtmOpts } from '@/lib/staff/newsletter-utm'
 import { newsletterSiteOrigin } from './newsletter-site'
 
 /** Single sans-serif stack for all newsletter text. */
@@ -92,15 +94,18 @@ function beatImageHtml(url: string, alt: string, linkUrl?: string): string {
   return `<div style="margin:0 0 14px">${inner}</div>`
 }
 
-function beatBlock(beat: NewsletterBeat, isFirst: boolean): string {
+function beatBlock(beat: NewsletterBeat, isFirst: boolean, utm?: UtmOpts): string {
   const heading = beat.heading.trim()
   const body = beat.body.trim()
   const imageUrl = String(beat.imageUrl ?? '').trim()
   if (!heading && !body && !imageUrl) return ''
   const border = isFirst ? '' : `border-top:1px solid #E2E8E4;`
   const title = heading
+  const imageLink = String(beat.imageLinkUrl ?? '').trim()
+  const imageLinkUrl =
+    imageLink && utm ? tagUrlWithUtm(imageLink, { ...utm, content: 'beat-image' }) : imageLink
   const imageHtml = imageUrl
-    ? beatImageHtml(imageUrl, title || 'Section image', beat.imageLinkUrl)
+    ? beatImageHtml(imageUrl, title || 'Section image', imageLinkUrl || undefined)
     : ''
   const bodyHtml = body ? plainTextToEmailHtml(body) : ''
   return `<tr><td class="nl-section" style="padding:${SECTION_DIVIDER_PADDING};${border}">
@@ -113,6 +118,7 @@ function beatBlock(beat: NewsletterBeat, isFirst: boolean): string {
 export function buildNewsletterSectionsHtml(
   sections: NewsletterSections,
   merge?: NewsletterMergeVars,
+  utm?: UtmOpts,
 ): string {
   const apply = (t: string) => (merge ? applyMergeFields(t, merge) : t)
   const rows: string[] = []
@@ -133,6 +139,7 @@ export function buildNewsletterSectionsHtml(
         body: apply(beat.body),
       },
       i === 0 && !intro,
+      utm,
     )
     if (block) rows.push(block)
   })
@@ -150,6 +157,8 @@ export function buildNewsletterSectionsHtml(
  */
 export function buildNewsletterHtml(opts: {
   textBody: string
+  /** Pre-sanitized HTML fragment — used instead of plainTextToEmailHtml when set. */
+  htmlBody?: string
   sections?: NewsletterSections | null
   branding?: NewsletterBranding
   sendId?: string
@@ -161,23 +170,31 @@ export function buildNewsletterHtml(opts: {
   physicalAddress?: string
   unsubscribeUrl?: string
   merge?: NewsletterMergeVars
+  /** Tag header / hero shell links for GA when set. */
+  utm?: UtmOpts
   /** Browser tab / SEO title for web editions. */
   documentTitle?: string
 }): string {
   const origin = newsletterSiteOrigin()
+  const utm = opts.utm
+  const headerHref = utm
+    ? tagUrlWithUtm(origin, { ...utm, content: 'header-logo' })
+    : origin
   const branding = opts.branding ?? {
     headerTitle: NEWSLETTER_BRANDING_DEFAULTS.newsletterHeaderTitle,
     footerLines: NEWSLETTER_BRANDING_DEFAULTS.newsletterFooterText.split('\n'),
     headerLogoUrl: '',
     customCss: '',
   }
-  const logoUrl =
-    branding.headerLogoUrl.trim() || `${origin}/brand/cove-logo-640.png`
+  const logoUrl = resolveEmailHeaderLogoUrl(branding.headerLogoUrl, origin)
   const heroUrl = (opts.heroImageUrl || opts.canvaThumbnailUrl || '').trim()
   const extra = (opts.extraImageUrls ?? [])
     .map((u) => String(u ?? '').trim())
     .filter((u) => u && u !== heroUrl)
-  const linkHref = (opts.canvaViewUrl || origin).trim()
+  const linkHrefRaw = (opts.canvaViewUrl || origin).trim()
+  const linkHref = utm
+    ? tagUrlWithUtm(linkHrefRaw, { ...utm, content: 'hero' })
+    : linkHrefRaw
   const heroAlt = escapeHtml(opts.canvaTitle?.trim() || 'SHMS PTO newsletter')
   const apply = (t: string) => (opts.merge ? applyMergeFields(t, opts.merge) : t)
   const useSections =
@@ -187,10 +204,11 @@ export function buildNewsletterHtml(opts: {
         (b) => b.heading.trim() || b.body.trim() || String(b.imageUrl ?? '').trim(),
       ) ||
       opts.sections.signoff.trim())
+  const richHtml = String(opts.htmlBody ?? '').trim()
   const bodyHtml = useSections
-    ? buildNewsletterSectionsHtml(opts.sections!, opts.merge)
+    ? buildNewsletterSectionsHtml(opts.sections!, opts.merge, utm)
     : `<tr><td style="font-family:${NEWSLETTER_FONT_BODY};font-size:15px;line-height:1.55;color:#1A1A1A">
-            ${plainTextToEmailHtml(apply(opts.textBody))}
+            ${richHtml ? apply(richHtml) : plainTextToEmailHtml(apply(opts.textBody))}
           </td></tr>`
   const pixel =
     opts.sendId
@@ -223,7 +241,7 @@ ${pixel}
   <tr><td align="center" style="padding:24px 12px">
     <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #E2E8E4">
       <tr><td class="nl-header" style="background:#1B6B45;padding:16px 20px;text-align:center">
-        <a href="${escapeHtml(origin)}" style="text-decoration:none">
+        <a href="${escapeHtml(headerHref)}" style="text-decoration:none">
           <img src="${escapeHtml(logoUrl)}" alt="SHMS PTO" width="120" style="display:inline-block;height:auto;border:0;max-width:120px" />
         </a>
         <p class="nl-header-title" style="margin:10px 0 0;font-family:${NEWSLETTER_FONT};font-size:16px;color:#ffffff;letter-spacing:0.02em">${escapeHtml(branding.headerTitle)}</p>

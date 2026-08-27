@@ -660,7 +660,7 @@ export function StaffNewsletterPanel() {
             >
               How this works
             </Link>
-            {' · '}Canva PNG, test send, Weekly Scoop, schedule.
+            {' · '}Canva PNG, test send, Publish to site, schedule.
           </p>
         )}
       </div>
