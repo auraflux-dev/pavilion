@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         notes ? `Notes: ${notes}` : null,
         '',
         'Reply to this email to reach the volunteer.',
-        'Also saved in Wix CMS → Volunteers.',
+        'Also in Staff → Volunteers (signups queue).',
       ]
         .filter(Boolean)
         .join('\n'),

@@ -14,18 +14,19 @@ www.shmspto.org is **customer #1** — dedicated deploy from **`~/shmspto`**, up
 |---------|---------|
 | Shared product (site / portal / staff) | **`~/pavilion`** (this repo) |
 | Demo / brand packs / trial CRM / marketing | **`~/pavilion`** |
-| SHMS-only ops (Wix CMS, school env, production hotfix) | **`~/shmspto`** |
+| SHMS-only ops (Wix CMS wiring, school env, production hotfix) | **`~/shmspto`** |
 
-### Wix = SHMS only (critical)
+### Product vs CMS backend (critical)
 
-**Wix CMS / Wix Data / Wix Stores live credentials are for VIP customer SHMS only.** Pavilion product and other tenants do not use Wix.
+| Layer | Home |
+|-------|------|
+| **Product code** (Staff UIs, APIs, form queues, checkout) | Always author in **`~/pavilion`** |
+| **Pavilion CMS** (content/data store for demo + non-SHMS tenants) | Built **on pavilion** by agents (Postgres / platform CMS). **Not Wix.** |
+| **Wix CMS / Data / Stores** | **SHMS VIP only.** Deploy/promote product → `~/shmspto` + Wix when that customer needs it |
 
-| Work | Commit / ship |
-|------|----------------|
-| Shared product that must stay Wix-free (or connector-agnostic) | **`~/pavilion`** |
-| Anything that reads/writes **Wix collections**, Staff queues over Wix CMS, SiteSettings via Wix, Wix Stores for SHMS catalog | **`~/shmspto` only** — do **not** commit that to pavilion |
+Build the Staff volunteer queue (and similar) **on pavilion**. SHMS gets it via promote/ship and talks to **Wix**. Pavilion demo/product talks to **Pavilion CMS** (fixtures today; real store as we build it).
 
-Examples that stay on **shmspto**: volunteer/contact form CMS queues, live Volunteers / ContactSubmissions Staff lists, SHMS inbox addresses (`@shmspto.org`), Wix CMS field ensures.
+Do **not** treat “uses Wix on SHMS” as “commit only on shmspto.” Shared product stays pavilion-first.
 
 Pushing `pavilion` `main` does **not** update www. Promoting + shipping SHMS does — **avoid casual promotes during school hours.**
 
@@ -43,7 +44,8 @@ If you must fix www first: edit `~/shmspto` → `ship-stone-hill.mjs` → **same
 ## Anti-patterns (forbidden)
 
 - Treating `~/shmspto` as the place to build new shared product
-- Committing **Wix CMS / Wix Data Staff queues** or SHMS-only inbox hardcodes into **`~/pavilion`**
+- Skipping pavilion product work because “SHMS uses Wix”
+- Wiring Pavilion demo/product to live Stone Hill Wix
 - Auto-promoting to SHMS after every demo ship
 - `vercel link` / deploy Stone Hill from this monorepo
 - Calling Stone Hill “shipped” after only pushing pavilion
