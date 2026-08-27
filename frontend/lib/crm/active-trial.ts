@@ -5,8 +5,6 @@
  * "Trial" means they like it and unlock private/live connectors later.
  * Separate commons-pto host is legacy until retired.
  */
-import { getAuth } from '@/lib/crm/auth'
-import { commonsDbEnabled, sql } from '@/lib/crm/db'
 import {
   trialPackForSlug,
   vanillaTrialPack,
@@ -66,6 +64,8 @@ export function getActiveTrialPack(): TrialPack | null {
 }
 
 async function packFromSessionOrg(): Promise<TrialPack | null> {
+  const { commonsDbEnabled, sql } = await import('@/lib/crm/db')
+  const { getAuth } = await import('@/lib/crm/auth')
   if (!commonsDbEnabled() || !isCommonsPlatform()) return null
   const auth = getAuth()
   if (!auth) return null
