@@ -30,11 +30,13 @@ Stone Hill production deploys from **`auraflux-dev/shmspto`**. Prefer the **`shm
 Ship Pavilion when the **task is Pavilion-only** or Rob asked to sync demo from school:
 
 - **Commit** task files on `pavilion`.
-- Marketing → `commons-site` (`onpavilion.com`).
-- Demo/trial → `commons-pto-demo` / `commons-pto` (**robert-4220 only**).
-- **Sync from school:** only when Rob asks → `node scripts/sync-product-between-repos.mjs --from-shms --apply` → commit → deploy if Rob wants demo live.
+- **`node scripts/ship-pavilion.mjs --target commons-pto-demo`** (or `commons-site` for marketing).
+- Marketing lives in `commons-site/` → `--target commons-site`.
+- **Sync from school:** only when Rob asks → `node scripts/sync-product-between-repos.mjs --from-shms --apply` → commit → ship if Rob wants demo live.
 
 Never deploy from a dirty working tree. Never mix Stone Hill and Pavilion env. Never `vercel link` this repo to treasurer.
+
+Full map: `~/shmspto/docs/AGENT-SHIP-MAP.md`.
 
 ## Exceptions
 

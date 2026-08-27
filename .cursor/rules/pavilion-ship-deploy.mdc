@@ -1,0 +1,47 @@
+---
+description: Mandatory Pavilion ship path — robert-4220 targets; Stone Hill is shmspto only
+alwaysApply: true
+---
+
+# Pavilion ship & deploy (mandatory for agents)
+
+Pavilion deploys to **`robert-4220s-projects`** only. Stone Hill www is **`~/shmspto`** → `ship-stone-hill.mjs` (treasurer).
+
+Master map: `~/shmspto/docs/AGENT-SHIP-MAP.md` and `~/.cursor/rules/agent-ship-map.mdc`.
+
+## After Pavilion application code ships
+
+```bash
+node scripts/ship-pavilion.mjs --target commons-pto-demo
+```
+
+| `--target` | Production URL | When |
+|------------|----------------|------|
+| `commons-pto-demo` | https://commons-pto-demo.vercel.app | Default — demo / product preview |
+| `commons-site` | https://onpavilion.com | Marketing site changes in `commons-site/` |
+| `commons-pto` | https://commons-pto.vercel.app | Legacy host — only if Rob asks |
+
+Flow: optional parity → `git push` → poll `check-pavilion-deploy.mjs` → `--cli-fallback` if needed.
+
+## Doppler
+
+**`pavilion` / `dev`** — `./scripts/doppler_run.sh` or `./scripts/vercel-robert4220.sh`.
+
+Same token as **`~/hskrg-work`**. Never `shmspto` Doppler for Pavilion deploys.
+
+## Stone Hill (do not ship from here)
+
+School site / portal / staff: edit **`~/shmspto`**, then `node scripts/ship-stone-hill.mjs`.  
+Sync from school: `node scripts/sync-product-between-repos.mjs --from-shms --apply` **only when Rob asks**.
+
+## Forbidden
+
+- Bare `npx vercel`
+- `deploy-pavilion.mjs` directly
+- Treasurer scope / `vercel link` to Stone Hill `frontend`
+- Pushing `pavilion` `main` and calling Stone Hill “shipped”
+- Auto `--from-shms` after every SHMS ship
+
+## Success criteria
+
+`node scripts/check-pavilion-deploy.mjs --target …` passes.

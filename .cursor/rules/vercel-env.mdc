@@ -13,9 +13,13 @@ Local `.env` is **bootstrap only**: `DOPPLER_TOKEN`. Never commit `.env`.
 Before any `vercel` command:
 
 ```bash
-./scripts/doppler_run.sh vercel … --scope robert-4220s-projects
+./scripts/vercel-robert4220.sh … --scope robert-4220s-projects
 ```
 
-Never treasurer / Stone Hill www. Stone Hill ships from `~/shmspto` via git push only.
+Or `./scripts/doppler_run.sh env -u VERCEL_ORG_ID npx vercel … --scope robert-4220s-projects`
+
+**Ship:** `node scripts/ship-pavilion.mjs --target commons-pto-demo` — see `pavilion-ship-deploy.mdc` and `~/shmspto/docs/AGENT-SHIP-MAP.md`.
+
+Never treasurer / Stone Hill www. Stone Hill: `~/shmspto` → `node scripts/ship-stone-hill.mjs`.
 
 `~/hskrg-work` uses the same Doppler project (`pavilion` / `dev`).
