@@ -16,6 +16,8 @@
     "dev": "wix dev",
     "lint": "eslint .",
     "ship": "node scripts/ship-pavilion.mjs --target commons-pto-demo",
-    "ship:site": "node scripts/ship-pavilion.mjs --target commons-site"
+    "ship:site": "node scripts/ship-pavilion.mjs --target commons-site",
+    "promote:shms": "node scripts/promote-to-shms.mjs",
+    "promote:shms:apply": "node scripts/promote-to-shms.mjs --apply"
   }
 }
