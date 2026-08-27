@@ -14,6 +14,7 @@ export async function loadCommonsStaffJson(req: Request): Promise<{
   personalEmail: string
   extraWorkspaces: []
   isAdmin: boolean
+  platformOwner: boolean
   homes: { role: StaffRole; title: string; owns: string; thisWeek: string[] }[]
   commons: true
 } | null> {
@@ -25,6 +26,9 @@ export async function loadCommonsStaffJson(req: Request): Promise<{
   const userId = session?.user?.id
   const email = (session?.user?.email || '').trim().toLowerCase()
   if (!userId || !email) return null
+  const { isPlatformOwnerEmail } = await import('@/lib/crm/platform-owners')
+  const platformOwner = await isPlatformOwnerEmail(email)
+
   const found = await sql<{
     first_name: string
     last_name: string
@@ -34,17 +38,27 @@ export async function loadCommonsStaffJson(req: Request): Promise<{
     `select p.first_name, p.last_name, a.role, a.board_title
        from people p
        join staff_assignments a on a.person_id = p.id
-      where p.auth_user_id = $1
+      where p.auth_user_id = $1 or lower(p.email) = $2
       limit 8`,
-    [userId],
+    [userId, email],
   )
-  if (!found.rows.length) return null
-  const roles = [...new Set(found.rows.map((r) => r.role))] as StaffRole[]
+
+  if (!found.rows.length && !platformOwner) return null
+
+  const roles = (
+    platformOwner
+      ? (['admin', 'marketing', 'secretary', 'treasurer', 'events', 'programs', 'retail', 'membership'] as StaffRole[])
+      : ([...new Set(found.rows.map((r) => r.role))] as StaffRole[])
+  )
   const name =
-    `${found.rows[0].first_name} ${found.rows[0].last_name}`.trim() ||
-    session.user.name ||
-    email
-  const boardTitle = found.rows[0].board_title || 'Treasurer'
+    found.rows[0]
+      ? `${found.rows[0].first_name} ${found.rows[0].last_name}`.trim() ||
+        session.user.name ||
+        email
+      : session.user.name || email
+  const boardTitle = platformOwner
+    ? 'Pavilion platform owner'
+    : found.rows[0]?.board_title || 'Staff'
   const homes = roles.map((role) => ({
     role,
     ...ROLE_HOME_COPY[role],
@@ -57,7 +71,8 @@ export async function loadCommonsStaffJson(req: Request): Promise<{
     roles,
     personalEmail: '',
     extraWorkspaces: [],
-    isAdmin: roles.includes('admin'),
+    isAdmin: platformOwner || roles.includes('admin'),
+    platformOwner: Boolean(platformOwner),
     homes,
     commons: true,
   }

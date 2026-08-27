@@ -26,6 +26,33 @@ export async function resolveCmsOrganizationId(req?: Request): Promise<string | 
   if (!pavilionCmsEnabled()) return null
   const { ensureCommonsReady } = await import('@/lib/crm/migrate')
   await ensureCommonsReady()
+
+  // Platform owners may pin a customer org via cookie (Staff CMS switcher).
+  if (req) {
+    try {
+      const { PLATFORM_CMS_ORG_COOKIE, isPlatformOwnerEmail, readPlatformCmsOrgCookie } =
+        await import('@/lib/crm/platform-owners')
+      const cookieOrg = readPlatformCmsOrgCookie(req.headers.get('cookie'))
+      if (cookieOrg) {
+        const { getAuth } = await import('@/lib/crm/auth')
+        const auth = getAuth()
+        const session = auth
+          ? await auth.api.getSession({ headers: req.headers })
+          : null
+        const email = String(session?.user?.email ?? '').trim().toLowerCase()
+        if (email && (await isPlatformOwnerEmail(email))) {
+          return requireOrganizationId(cookieOrg)
+        }
+        // Demo staff tour: allow cookie org when demo instance
+        const { isDemoInstance } = await import('@/lib/demo/instance')
+        if (isDemoInstance()) return requireOrganizationId(cookieOrg)
+      }
+      void PLATFORM_CMS_ORG_COOKIE
+    } catch {
+      // fall through
+    }
+  }
+
   if (req) {
     try {
       return await organizationIdFromRequest(req)

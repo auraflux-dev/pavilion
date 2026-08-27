@@ -5,6 +5,7 @@ import { CRM_SCHEMA_SQL } from '@/lib/crm/schema-sql'
 import { CRM_PLATFORM_SQL } from '@/lib/crm/schema-platform-sql'
 import { SIGNUPS_SCHEMA_SQL } from '@/lib/signups/schema-sql'
 import { CMS_SCHEMA_SQL } from '@/lib/cms/schema-sql'
+import { PLATFORM_OWNERS_SQL, ensurePlatformOwnerSeed } from '@/lib/crm/platform-owners'
 import { riversideSnapshot } from '@/lib/crm/riverside'
 import { isDemoInstance } from '@/lib/demo/instance'
 
@@ -26,6 +27,8 @@ async function migrateAndSeed(): Promise<void> {
   await sql(CRM_PLATFORM_SQL)
   await sql(SIGNUPS_SCHEMA_SQL)
   await sql(CMS_SCHEMA_SQL)
+  await sql(PLATFORM_OWNERS_SQL)
+  await ensurePlatformOwnerSeed()
   const auth = getAuth()
   if (auth) {
     const ctx = await auth.$context

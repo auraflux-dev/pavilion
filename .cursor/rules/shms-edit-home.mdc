@@ -22,6 +22,7 @@ www.shmspto.org is **customer #1** — dedicated deploy from **`~/shmspto`**, up
 |-------|------|
 | **Product code** (Staff UIs, APIs, form queues, checkout) | Always author in **`~/pavilion`** |
 | **Pavilion CMS** (Postgres `cms_*`, org-scoped) | **Authoritative** content store for demo, trials, and all Pavilion customers. Built on pavilion. |
+| **Platform owners** (`@onpavilion.com`) | Overarching Staff admins. Can switch customer org and edit that CMS. See `docs/PAVILION-CMS.md`. |
 | **Wix CMS** | **SHMS publish target only.** After content is right in Pavilion CMS, sync/commit those rows into Wix and promote staff code to `~/shmspto`. |
 
 Build Staff queues and page/settings editors **on pavilion** against Pavilion CMS. For SHMS www: sync CMS → Wix, then ship shmspto.

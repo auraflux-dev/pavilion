@@ -58,6 +58,7 @@ export async function GET(req: NextRequest) {
           personalEmail: demoStaff.staff.personalEmail,
           extraWorkspaces: demoStaff.staff.extraWorkspaces ?? [],
           isAdmin: true,
+          platformOwner: true,
           homes,
           demo: true,
         }),

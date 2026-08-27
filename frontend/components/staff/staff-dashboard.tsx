@@ -94,6 +94,8 @@ type StaffMe = {
   extraWorkspaces?: string[]
   personalEmail?: string
   isAdmin: boolean
+  /** Pavilion platform owner: can switch customer CMS orgs */
+  platformOwner?: boolean
   homes: StaffHome[]
 }
 
@@ -182,6 +184,11 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   const [activityItems, setActivityItems] = useState<
     { id: string; label: string; count: number; href: string; tone: 'info' | 'warn' }[]
   >([])
+  const [platformOrgs, setPlatformOrgs] = useState<
+    { id: string; name: string; slug: string; plan: string }[]
+  >([])
+  const [cmsOrgId, setCmsOrgId] = useState('')
+  const [cmsOrgBusy, setCmsOrgBusy] = useState(false)
 
   useEffect(() => {
     fetch('/api/staff/me')
@@ -204,6 +211,37 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
       })
       .catch(() => null)
   }, [me])
+
+  useEffect(() => {
+    if (!me?.platformOwner) return
+    fetch('/api/staff/platform/orgs')
+      .then(async (r) => {
+        const data = await r.json()
+        if (!r.ok) return
+        setPlatformOrgs(Array.isArray(data.organizations) ? data.organizations : [])
+        setCmsOrgId(String(data.selectedOrganizationId ?? ''))
+      })
+      .catch(() => null)
+  }, [me?.platformOwner])
+
+  async function selectCmsOrg(organizationId: string) {
+    setCmsOrgBusy(true)
+    try {
+      const r = await fetch('/api/staff/platform/orgs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ organizationId }),
+      })
+      const data = await r.json()
+      if (!r.ok) throw new Error(data.error ?? 'Could not switch organization')
+      setCmsOrgId(organizationId)
+      window.location.reload()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not switch organization')
+    } finally {
+      setCmsOrgBusy(false)
+    }
+  }
 
   const canMarketing = staffCanWorkspace(me, 'social')
   const canSurveys = staffCanWorkspace(me, 'surveys')
@@ -470,6 +508,33 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         <StaffTrialBanner />
+        {me.platformOwner && platformOrgs.length > 0 ? (
+          <section className="rounded-xl border border-[var(--border)] bg-[#F7F8FA] px-4 py-3 flex flex-wrap items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-[#1A1A1A]">Pavilion platform CMS</p>
+              <p className="text-xs text-[#5A6070] whitespace-pre-line">
+                You own all customer CMS accounts.
+                Pick a school to edit their Staff site content.
+              </p>
+            </div>
+            <label className="text-[11px] text-[#5A6070] flex items-center gap-2">
+              Customer
+              <select
+                value={cmsOrgId}
+                disabled={cmsOrgBusy}
+                onChange={(e) => void selectCmsOrg(e.target.value)}
+                className="border border-[var(--border)] rounded-lg px-2 py-1.5 text-xs text-[#1A1A1A] bg-white min-w-[12rem]"
+              >
+                {platformOrgs.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                    {o.plan ? ` (${o.plan})` : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </section>
+        ) : null}
         {active === 'home' ? (
           <section className="space-y-4">
             <div>

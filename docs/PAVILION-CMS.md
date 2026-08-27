@@ -51,6 +51,14 @@ bash scripts/doppler_prd.sh node scripts/sync-pavilion-cms-to-wix.mjs --org org_
 
 Do **not** treat Wix as the place to author shared product content long-term. Pavilion CMS is authoritative; Wix is the SHMS publish connector until cutover.
 
-## Code defaults
+## Platform owners vs customer staff
 
-When Pavilion CMS has no row yet, public site still falls back to code defaults / DEMO fixtures / (SHMS) Wix.
+| Actor | Email | Scope |
+|-------|--------|--------|
+| **Pavilion platform owner** | `@onpavilion.com` (e.g. `robert@onpavilion.com`) | Overarching CMS admin. Can switch customer org and edit that org’s Pavilion CMS. |
+| **Customer staff** | Per-school (e.g. `@shmspto.org` on SHMS) | Staff for **one** organization only |
+
+Platform owners are seeded in `platform_owners` + person/staff on `org_pavilion`. Staff UI shows **Pavilion platform CMS** org switcher when `platformOwner` is true.
+
+Staff product app is **commons-pto-demo** / platform hosts (not marketing commons-site alone). Create the Google Workspace mailbox `robert@onpavilion.com` in ops; code already recognizes `@onpavilion.com` as platform staff.
+
