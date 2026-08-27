@@ -8,3 +8,10 @@
 - `FULL_YEAR_CATALOG_ENABLED` stays **false**; full-year buy can be built later, stay dark.
 - CMS field `Programs.season`: `fall-2026` | `spring-2027` | `full-year` (infer from dates/tags/fallEpClassId if empty).
 - Checkout for every enrichment class keeps **enrichment-waiver + enrichment-medical + photo-release**. Do not replace with site `/terms`. `requiresWaiver` CMS flag is separate from that consent stack.
+
+## Ecommerce catalog tuition (product)
+
+- List tuition lives in **Wix Stores** like memberships/Cove. Programs CMS field `productId` links the SKU; `fee` is edited in Staff and mirrored to the catalog on save.
+- Lib: `frontend/lib/staff/program-catalog-product.ts` · checkout reads via `resolveProgramListFee`.
+- Not on Cove/Spirit allowlists; still charged as `kind: program` (roster + discounts).
+- **SHMS promote:** wait until Fall EP sales cycle completes before promoting this to `shmspto` / www.

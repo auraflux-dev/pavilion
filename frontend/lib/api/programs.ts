@@ -31,6 +31,8 @@ export interface Program {
   name: string;
   description: string;
   fee: number;
+  /** Wix Stores catalog product that owns list tuition (memberships/Cove pattern). */
+  productId?: string;
   capacity: number;
   registrationOpen: boolean;
   /**
@@ -120,6 +122,7 @@ function mapProgramItem(item: Record<string, unknown>): Program {
     name: vanillaizeIfDemo(String(item.name ?? '')),
     description: vanillaizeIfDemo(String(item.description ?? '')),
     fee: Number(item.fee ?? 0) || 0,
+    productId: String(item.productId ?? '').trim() || undefined,
     capacity: Number(item.capacity ?? 0) || 0,
     registrationOpen: item.registrationOpen === true,
     memberPriorityUntil: memberPriorityUntilIso(item.memberPriorityUntil) ?? undefined,

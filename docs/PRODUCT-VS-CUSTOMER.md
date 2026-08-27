@@ -33,3 +33,7 @@ cd ~/pavilion && node scripts/promote-to-shms.mjs
 cd ~/pavilion && node scripts/promote-to-shms.mjs --apply   # writes tree only
 cd ~/shmspto && node scripts/ship-stone-hill.mjs            # LIVE www
 ```
+
+### Enrichment tuition ↔ ecommerce catalog
+
+Product work in Pavilion: Programs Staff fee syncs to a Wix Stores catalog SKU (`Programs.productId`), same price home as memberships/Cove. **Do not promote to SHMS until after Fall EP sales.** Wiki: `HOME/product-ep-catalog-tuition`.

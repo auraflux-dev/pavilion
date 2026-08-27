@@ -117,12 +117,15 @@ export async function enrollInProgram(opts: {
   if (!consentCheck.ok) throw new Error(consentCheck.error)
 
   const existing = await findExistingEnrollment(opts.programId, opts.studentId)
+  const { resolveProgramListFee } = await import('@/lib/programs/list-fee')
+  const fee = await resolveProgramListFee(program)
+
   if (existing) {
     const status = String(existing.status ?? '')
     return {
       enrollmentId: String(existing._id),
       programName: program.name,
-      fee: program.fee ?? 0,
+      fee,
       status,
       waitlistPosition:
         status === WAITLIST_STATUS ? Number(existing.waitlistPosition ?? 0) || undefined : undefined,
@@ -130,7 +133,6 @@ export async function enrollInProgram(opts: {
     }
   }
 
-  const fee = Number(program.fee ?? 0)
   if (fee > 0 && !opts.transactionId) {
     throw new Error('Payment required for this program')
   }

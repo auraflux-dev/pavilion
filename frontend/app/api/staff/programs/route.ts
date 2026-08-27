@@ -40,6 +40,7 @@ function mapProgram(item: Record<string, unknown>) {
     name: String(item.name ?? ''),
     description: normalizePlainCopy(String(item.description ?? '')),
     fee: Number(item.fee ?? 0) || 0,
+    productId: String(item.productId ?? '').trim(),
     capacity: Number(item.capacity ?? 0) || 0,
     registrationOpen: item.registrationOpen === true,
     memberPriorityUntil: memberPriorityUntilIso(item.memberPriorityUntil) ?? '',
@@ -281,8 +282,47 @@ export async function POST(req: NextRequest) {
         landingCurriculum: normalizePlainCopy(String(body.landingCurriculum ?? '')),
       }
       const inserted = await client.items.insert('Programs', row)
+      const newId = String((inserted as { _id?: string })._id ?? '').trim()
+      let catalogSync: {
+        productId: string
+        created: boolean
+        price: number
+        sku: string
+      } | null = null
+      if (newId && Number(row.fee) > 0) {
+        try {
+          const { ensureProgramCatalogProduct } = await import('@/lib/staff/program-catalog-product')
+          const synced = await ensureProgramCatalogProduct({
+            programId: newId,
+            name: row.name,
+            fee: Number(row.fee),
+            season: row.season,
+          })
+          if (synced) {
+            catalogSync = {
+              productId: synced.productId,
+              created: synced.created,
+              price: synced.price,
+              sku: synced.sku,
+            }
+            await client.items.update('Programs', {
+              ...row,
+              _id: newId,
+              productId: synced.productId,
+              fee: synced.price,
+            } as Parameters<typeof client.items.update>[1])
+          }
+        } catch (catalogErr) {
+          console.error('/api/staff/programs POST catalog sync', catalogErr)
+        }
+      }
       revalidatePublicPrograms()
-      return NextResponse.json({ ok: true, id: (inserted as { _id?: string })._id })
+      return NextResponse.json({
+        ok: true,
+        id: newId || undefined,
+        productId: catalogSync?.productId,
+        catalogSync,
+      })
     }
 
     const programId = String(body.programId ?? '').trim()
@@ -379,6 +419,10 @@ export async function PATCH(req: NextRequest) {
           ? normalizePlainCopy(String(body.description))
           : existing.description,
       fee: body.fee != null ? Number(body.fee) || 0 : existing.fee,
+      productId:
+        body.productId != null
+          ? String(body.productId).trim()
+          : existing.productId,
       capacity: body.capacity != null ? Number(body.capacity) || 0 : existing.capacity,
       registrationOpen:
         body.registrationOpen != null
@@ -406,6 +450,68 @@ export async function PATCH(req: NextRequest) {
     }
     await client.items.update(collection, updates as Parameters<typeof client.items.update>[1])
 
+    // Keep enrichment tuition in the ecommerce catalog (same home as memberships/Cove).
+    let catalogSync: {
+      productId: string
+      created: boolean
+      price: number
+      sku: string
+    } | null = null
+    const nextFee = Number(updates.fee ?? 0) || 0
+    const prevFee = Number(existing.fee ?? 0) || 0
+    const nextNameForCatalog = String(updates.name ?? '')
+    const prevNameForCatalog = String(existing.name ?? '')
+    const existingProductId = String(updates.productId ?? existing.productId ?? '').trim()
+    const shouldSyncCatalog =
+      nextFee > 0 &&
+      (body.fee != null ||
+        body.name != null ||
+        body.syncCatalog === true ||
+        !existingProductId ||
+        nextFee !== prevFee ||
+        nextNameForCatalog !== prevNameForCatalog)
+    if (shouldSyncCatalog) {
+      try {
+        const { ensureProgramCatalogProduct } = await import('@/lib/staff/program-catalog-product')
+        const synced = await ensureProgramCatalogProduct({
+          programId: id,
+          name: nextNameForCatalog,
+          fee: nextFee,
+          season: String(updates.season ?? existing.season ?? ''),
+          existingProductId,
+        })
+        if (synced) {
+          catalogSync = {
+            productId: synced.productId,
+            created: synced.created,
+            price: synced.price,
+            sku: synced.sku,
+          }
+          if (synced.productId !== existingProductId || nextFee !== synced.price) {
+            await client.items.update(collection, {
+              ...updates,
+              _id: id,
+              productId: synced.productId,
+              fee: synced.price,
+            } as Parameters<typeof client.items.update>[1])
+            updates.productId = synced.productId
+            updates.fee = synced.price
+          }
+        }
+      } catch (catalogErr) {
+        console.error('/api/staff/programs PATCH catalog sync', catalogErr)
+        return NextResponse.json(
+          {
+            error:
+              catalogErr instanceof Error
+                ? catalogErr.message
+                : 'Could not sync program fee to the ecommerce catalog',
+          },
+          { status: 500 },
+        )
+      }
+    }
+
     const nextName = String(updates.name ?? '')
     const prevName = String(existing.name ?? '')
     if (nextName && nextName !== prevName) {
@@ -431,7 +537,12 @@ export async function PATCH(req: NextRequest) {
     }
 
     revalidatePublicPrograms()
-    return NextResponse.json({ ok: true })
+    return NextResponse.json({
+      ok: true,
+      productId: String(updates.productId ?? '').trim() || undefined,
+      fee: Number(updates.fee ?? 0) || 0,
+      catalogSync,
+    })
   } catch (err) {
     console.error('/api/staff/programs PATCH', err)
     return NextResponse.json({ error: 'Could not update' }, { status: 500 })

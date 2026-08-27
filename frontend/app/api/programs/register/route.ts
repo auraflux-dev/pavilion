@@ -85,7 +85,8 @@ export async function POST(req: NextRequest) {
     const addonProgramIds = Array.isArray(body.addonProgramIds)
       ? body.addonProgramIds.map((id: unknown) => String(id ?? '').trim()).filter(Boolean)
       : []
-    const fee = Number(program.fee ?? 0)
+    const { resolveProgramListFee } = await import('@/lib/programs/list-fee')
+    const fee = await resolveProgramListFee(program)
     if (fee > 0 || addonProgramIds.length > 0) {
       const couponCode = String(body.couponCode ?? '').trim() || null
       const { resolveCheckoutIntent } = await import('@/lib/checkout-fulfill')

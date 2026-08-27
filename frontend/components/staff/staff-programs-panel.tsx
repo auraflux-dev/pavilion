@@ -47,6 +47,8 @@ type Program = {
   name: string
   description: string
   fee: number
+  /** Wix Stores catalog product for list tuition */
+  productId: string
   capacity: number
   registrationOpen: boolean
   /** ISO datetime; paid members only until this time when registration is open */
@@ -449,10 +451,25 @@ export function StaffProgramsPanel() {
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Update failed')
       setPrograms((list) =>
-        list.map((p) => (p.id === id ? ({ ...p, ...body } as Program) : p)),
+        list.map((p) =>
+          p.id === id
+            ? ({
+                ...p,
+                ...body,
+                ...(d.productId != null ? { productId: String(d.productId) } : {}),
+                ...(d.fee != null ? { fee: Number(d.fee) || 0 } : {}),
+              } as Program)
+            : p,
+        ),
       )
       discardProgramDraft(id)
-      setStatus('Saved.')
+      setStatus(
+        d.catalogSync?.productId
+          ? d.catalogSync.created
+            ? 'Saved · linked to ecommerce catalog.'
+            : 'Saved · catalog price updated.'
+          : 'Saved.',
+      )
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Update failed')
       await load()
@@ -1186,7 +1203,7 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                   />
                 </div>
                 <label className="text-[11px] text-[#5A6070] space-y-0.5">
-                  <span>Fee ($)</span>
+                  <span>Fee ($) · ecommerce catalog</span>
                   <input
                     type="number"
                     min={0}
@@ -1195,6 +1212,27 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                     className="w-full border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[#1A1A1A]"
                     onChange={(e) => patchProgramDraft(p.id, { fee: Number(e.target.value) || 0 })}
                   />
+                  <span className="block text-[10px] text-[#8A90A0] leading-snug">
+                    {row.productId
+                      ? `Linked catalog product · ${row.productId.slice(0, 8)}…`
+                      : 'Save with a fee > 0 to create the Wix Stores catalog SKU (same place as memberships).'}
+                  </span>
+                  {row.fee > 0 ? (
+                    <button
+                      type="button"
+                      className="mt-1 text-[10px] font-medium text-[var(--brand)] underline-offset-2 hover:underline"
+                      disabled={savingProgramId === p.id}
+                      onClick={() =>
+                        void saveProgram(p.id, {
+                          fee: row.fee,
+                          name: row.name,
+                          syncCatalog: true,
+                        })
+                      }
+                    >
+                      {row.productId ? 'Re-sync catalog price' : 'Create catalog SKU now'}
+                    </button>
+                  ) : null}
                 </label>
                 <label className="text-[11px] text-[#5A6070] space-y-0.5">
                   <span>Capacity (0 = unlimited)</span>

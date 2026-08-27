@@ -302,7 +302,8 @@ export async function resolveCheckoutIntent(
       parentEmail,
     )
     if (!access.ok) throw new Error(access.error || 'Registration not available')
-    const fee = Number(program.fee ?? 0)
+    const { resolveProgramListFee } = await import('@/lib/programs/list-fee')
+    const fee = await resolveProgramListFee(program)
     if (fee <= 0) throw new Error('This program does not require payment. Use free registration')
 
     const addons: Array<{ id: string; name: string; fee: number }> = []
@@ -320,7 +321,7 @@ export async function resolveCheckoutIntent(
         parentEmail,
       )
       if (!addonAccess.ok) throw new Error(addonAccess.error || 'Companion class not available')
-      const addonFee = Number(addon.fee ?? 0)
+      const addonFee = await resolveProgramListFee(addon)
       if (addonFee <= 0) throw new Error('Companion class fee is not set')
       addons.push({ id: addon._id, name: addon.name, fee: addonFee })
     }
@@ -408,6 +409,9 @@ export async function resolveCheckoutIntent(
       meta: {
         programId,
         programName: program.name,
+        ...(String(program.productId ?? '').trim()
+          ? { productId: String(program.productId).trim() }
+          : {}),
         studentId,
         listFee: String(listFee),
         memberDiscountPercent: String(appliedPercent || 0),
