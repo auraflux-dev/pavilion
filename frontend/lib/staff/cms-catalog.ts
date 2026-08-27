@@ -551,7 +551,8 @@ export const SITE_SETTING_GROUPS: {
       },
       {
         key: 'contactEmailVolunteer',
-        label: 'Volunteer signup inbox (VP Events · vp-community-events@)',
+        label:
+          'Volunteer signup inboxes (vp-community-events@, robertgregory@, secretary@; comma-separated)',
       },
       {
         key: 'contactEmailMarketing',
