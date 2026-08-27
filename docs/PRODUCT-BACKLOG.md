@@ -18,9 +18,10 @@ Work these on **`~/pavilion`** / robert-4220 only. Do **not** promote or `ship-s
 
 | ID | Item |
 |----|------|
-| S1 | `promote-to-shms --apply` + review |
+| S1 | `promote-to-shms --apply` + review (VIP path — [CUSTOMER-SHMS-VIP.md](./CUSTOMER-SHMS-VIP.md)) |
 | S2 | `ship-stone-hill.mjs` (live www) |
 
-## Done
+## Product policy
 
-- Pavilion-first authoring, promote dry-run, soft parity, board labels, wiki taxonomy
+- **SHMS = VIP dedicated** on treasurer. Do not migrate www to multi-tenant demo/platform hosts.
+- Shared stack = new prospects / trials. Dedicated Vercel (or Wix wall) = customer SKUs.
