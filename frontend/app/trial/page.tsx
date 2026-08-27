@@ -124,7 +124,7 @@ function TrialForm() {
               placeholder="oak-street-pto"
             />
             <span className="text-xs text-[#5A6070]">
-              Letters, numbers, hyphens. Becomes yourpto.commons-pto.org (private until login)
+              Letters, numbers, hyphens. Becomes yourpto on the Pavilion trial host (private until login)
             </span>
           </label>
           <label className="block text-sm font-medium">

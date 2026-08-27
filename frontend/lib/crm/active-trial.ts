@@ -20,7 +20,9 @@ export const PAVILION_BRAND_COOKIE = 'pavilion_brand'
 export function isCommonsPlatform(): boolean {
   return (
     process.env.COMMONS_PLATFORM === 'true' ||
-    process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
+    process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ||
+    process.env.PAVILION_PLATFORM === 'true' ||
+    process.env.NEXT_PUBLIC_PAVILION_PLATFORM === 'true'
   )
 }
 

@@ -18,8 +18,8 @@ See also **[PRODUCT-BACKLOG.md](./PRODUCT-BACKLOG.md)** (active product work, ww
 - [x] P3 Lumi customer path (docs / board; Wix OK)  
 - [x] P4 Rename map doc (Vercel rename later)  
 - [ ] P5 Public GitHub org transfer  
-- [ ] P6 Retire `commons-pto` legacy host  
-- [ ] P7 Per-tenant connector secrets UX  
+- [x] P6 Retire `commons-pto` path doc + env alias  
+- [x] P7 Per-tenant connector secrets UX (Staff panel)  
 
 ## Off-peak / Rob OK (www)
 

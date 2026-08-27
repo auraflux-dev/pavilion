@@ -92,3 +92,38 @@ export async function listOrgsWithProvider(provider: ConnectorProvider): Promise
   )
   return found.rows.map((r) => r.organization_id)
 }
+
+export async function connectorMeta(
+  orgId: string,
+): Promise<{ square: boolean; plaid: boolean; squareMerchantId: string; plaidItemId: string }> {
+  const id = requireOrganizationId(orgId)
+  const found = await sqlForOrg<{ provider: string; merchant_id: string; item_id: string }>(
+    id,
+    `select provider, merchant_id, item_id from organization_connectors where organization_id = $1`,
+    [id],
+  )
+  let square = false
+  let plaid = false
+  let squareMerchantId = ''
+  let plaidItemId = ''
+  for (const row of found.rows) {
+    if (row.provider === 'square') {
+      square = true
+      squareMerchantId = row.merchant_id || ''
+    }
+    if (row.provider === 'plaid') {
+      plaid = true
+      plaidItemId = row.item_id || ''
+    }
+  }
+  return { square, plaid, squareMerchantId, plaidItemId }
+}
+
+export async function deleteConnector(orgId: string, provider: ConnectorProvider): Promise<void> {
+  const id = requireOrganizationId(orgId)
+  await sqlForOrg(
+    id,
+    `delete from organization_connectors where organization_id = $1 and provider = $2`,
+    [id, provider],
+  )
+}

@@ -7,5 +7,7 @@ export function hasBetterAuthCookie(cookieNames: string[]): boolean {
 }
 
 export function isCommonsPlatformHost(): boolean {
-  return process.env.COMMONS_PLATFORM === 'true' && process.env.DEMO_INSTANCE !== 'true'
+  const platform =
+    process.env.COMMONS_PLATFORM === 'true' || process.env.PAVILION_PLATFORM === 'true'
+  return platform && process.env.DEMO_INSTANCE !== 'true'
 }

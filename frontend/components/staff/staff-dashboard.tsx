@@ -13,6 +13,7 @@ import { StaffMinutesPanel } from '@/components/staff/staff-minutes-panel'
 import { StaffProgramsPanel } from '@/components/staff/staff-programs-panel'
 import { StaffReportsPanel } from '@/components/staff/staff-reports-panel'
 import { StaffPaymentsPanel } from '@/components/staff/staff-payments-panel'
+import { StaffCommonsConnectorsPanel } from '@/components/staff/staff-commons-connectors-panel'
 import { StaffBudgetPanel } from '@/components/staff/staff-budget-panel'
 import {
   STAFF_FILTER_CARD,
@@ -827,7 +828,13 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
         ) : null}
         {active === 'timesheets' && canTimesheets ? <StaffTimesheetsPanel /> : null}
         {active === 'payments' && canPayments ? (
-          <StaffPaymentsPanel isAdmin={Boolean(me?.isAdmin)} />
+          <div className="space-y-4">
+            {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ||
+            process.env.NEXT_PUBLIC_PAVILION_PLATFORM === 'true' ? (
+              <StaffCommonsConnectorsPanel />
+            ) : null}
+            <StaffPaymentsPanel isAdmin={Boolean(me?.isAdmin)} />
+          </div>
         ) : null}
         {active === 'budget' && canPayments ? <StaffBudgetPanel /> : null}
         {active === 'reports' ? (

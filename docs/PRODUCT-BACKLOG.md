@@ -11,8 +11,8 @@ Work these on **`~/pavilion`** / robert-4220 only. Do **not** promote or `ship-s
 | P3 | **Lumi customer path** | Docs | `iss_NHhBTGWQD1Ln` — [CUSTOMER-LUMI.md](./CUSTOMER-LUMI.md) |
 | P4 | **Rename commons-* → Pavilion** | Docs | `iss_0Birrzq59_JH` — [RENAME-COMMONS-TO-PAVILION.md](./RENAME-COMMONS-TO-PAVILION.md) |
 | P5 | **Public Pavilion GitHub org** | Prep done | `iss_NWtbFIlbmiLL` — [PUBLIC-REPO-PREP.md](./PUBLIC-REPO-PREP.md) |
-| P6 | **Retire legacy `commons-pto` host** | Todo | After P1 solid — see rename map |
-| P7 | **Connector secrets UX** | Todo | Per-tenant Square/etc. in staff |
+| P6 | **Retire legacy `commons-pto` host** | Docs | [RETIRE-COMMONS-PTO.md](./RETIRE-COMMONS-PTO.md) |
+| P7 | **Connector secrets UX** | In progress | Staff → Payments connectors panel + `/api/commons/connectors` |
 
 ## Blocked on Rob / off-peak (www)
 
