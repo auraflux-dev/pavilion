@@ -93,3 +93,30 @@ export type SignupSheetSummary = Pick<
   SignupSheet,
   'id' | 'slug' | 'title' | 'location' | 'startsAt' | 'endsAt' | 'status' | 'updatedAt' | 'publicPath'
 > & { slotCount: number; registrationCount: number }
+
+export type SignupRegistration = {
+  id: string
+  sheetId: string
+  slotId: string
+  slotTitle: string
+  participantName: string
+  participantEmail: string
+  participantPhone: string
+  customAnswers: Record<string, string>
+  quantity: number
+  confirmationToken: string
+  createdAt: string
+}
+
+export type ClaimSlotInput = {
+  slotId: string
+  quantity?: number
+}
+
+export type ClaimSignupInput = {
+  name: string
+  email: string
+  phone?: string
+  customAnswers?: Record<string, string>
+  slots: ClaimSlotInput[]
+}

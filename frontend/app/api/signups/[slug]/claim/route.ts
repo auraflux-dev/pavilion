@@ -8,7 +8,7 @@ import {
 import { sendSignupConfirmationEmail } from '@/lib/signups/confirm-email'
 import { claimSignupSlots } from '@/lib/signups/registrations'
 import { resolvePublishedSignupSheet } from '@/lib/signups/sheets'
-import type { ClaimSignupInput } from '@/lib/signups/registrations'
+import type { ClaimSignupInput } from '@/lib/signups/types'
 
 export const dynamic = 'force-dynamic'
 

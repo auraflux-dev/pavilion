@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import type { SignupRegistration } from '@/lib/signups/registrations'
-import type { SignupSheetSummary, SignupSlotType } from '@/lib/signups/types'
+import type { SignupRegistration, SignupSheetSummary, SignupSlotType } from '@/lib/signups/types'
 
 type SlotDraft = {
   slotType: SignupSlotType

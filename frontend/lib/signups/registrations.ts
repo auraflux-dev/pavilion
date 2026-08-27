@@ -1,34 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import { ensureCommonsReady } from '@/lib/crm/migrate'
 import { withOrgClient } from '@/lib/crm/tenant'
-import type { SignupSheet } from '@/lib/signups/types'
+import type { SignupSheet, SignupRegistration, ClaimSignupInput, ClaimSlotInput } from '@/lib/signups/types'
 
-export type ClaimSlotInput = {
-  slotId: string
-  quantity?: number
-}
-
-export type ClaimSignupInput = {
-  name: string
-  email: string
-  phone?: string
-  customAnswers?: Record<string, string>
-  slots: ClaimSlotInput[]
-}
-
-export type SignupRegistration = {
-  id: string
-  sheetId: string
-  slotId: string
-  slotTitle: string
-  participantName: string
-  participantEmail: string
-  participantPhone: string
-  customAnswers: Record<string, string>
-  quantity: number
-  confirmationToken: string
-  createdAt: string
-}
+export type { SignupRegistration, ClaimSignupInput, ClaimSlotInput }
 
 function newId(prefix: string): string {
   return `${prefix}_${randomUUID().replace(/-/g, '').slice(0, 16)}`

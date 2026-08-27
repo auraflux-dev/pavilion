@@ -1,7 +1,6 @@
 import { isDemoInstance } from '@/lib/demo/instance'
 import { sendMassEmail } from '@/lib/staff/mass-email'
-import type { SignupRegistration } from '@/lib/signups/registrations'
-import type { SignupSheet } from '@/lib/signups/types'
+import type { SignupRegistration, SignupSheet } from '@/lib/signups/types'
 
 export async function sendSignupConfirmationEmail(opts: {
   sheet: SignupSheet
