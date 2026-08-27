@@ -45,7 +45,6 @@ import { StaffPageThemePanel } from '@/components/staff/staff-page-theme-panel'
 import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-panel'
 import { StaffMembershipShirtDesignsPanel } from '@/components/staff/staff-membership-shirt-designs-panel'
 import { StaffCmsCollectionPanel } from '@/components/staff/staff-cms-collection-panel'
-import { StaffVolunteerSubmissionsPanel } from '@/components/staff/staff-volunteer-submissions-panel'
 import { StaffReveal } from '@/components/staff/staff-reveal'
 import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
 import { StaffNewsletterSendReportPanel } from '@/components/staff/staff-newsletter-send-report'
@@ -997,7 +996,6 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
         ) : null}
         {active === 'volunteers' && canVolunteers ? (
           <div className="space-y-4">
-            <StaffVolunteerSubmissionsPanel />
             <StaffCmsCollectionPanel collection="VolunteerOpportunities" title="Volunteer opportunities" />
             <StaffReveal
               storageKey="staff-reveal-volunteer-benefits"

@@ -91,21 +91,12 @@ export async function resolveSubmissionInbox(
     )
   }
   if (kind === 'volunteer') {
-    // Always include Events + Rob + Secretary (CMS may add more).
-    const list = parseStaffInboxes(
+    return normalizeStaffInbox(
       settings.get(
         'contactEmailVolunteer',
-        'vp-community-events@shmspto.org, robertgregory@shmspto.org, secretary@shmspto.org',
+        settings.get('contactEmailGeneral', STAFF_INBOX_FALLBACK),
       ),
     )
-    for (const extra of [
-      'vp-community-events@shmspto.org',
-      'robertgregory@shmspto.org',
-      'secretary@shmspto.org',
-    ]) {
-      if (!list.includes(extra)) list.push(extra)
-    }
-    return list.join(', ')
   }
   if (kind === 'newsletter' || kind === 'survey' || kind === 'portal-help') {
     return normalizeStaffInbox(

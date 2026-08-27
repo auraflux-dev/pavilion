@@ -67,25 +67,6 @@ async function countRecentContacts(days: number): Promise<number> {
   }
 }
 
-async function countNewVolunteerSignups(): Promise<number> {
-  if (isDemoInstance()) return 0
-  try {
-    const client = getWixClient()
-    const found = await client.items.query('Volunteers').eq('status', 'new').limit(100).find()
-    return (found.items ?? []).length
-  } catch {
-    try {
-      const client = getWixClient()
-      const found = await client.items.query('Volunteers').limit(100).find()
-      return (found.items ?? []).filter(
-        (row) => String((row as { status?: string }).status ?? 'new').toLowerCase() === 'new',
-      ).length
-    } catch {
-      return 0
-    }
-  }
-}
-
 export async function GET(req: NextRequest) {
   const session = await getStaffSession(req)
   if (!session) {
@@ -147,19 +128,6 @@ export async function GET(req: NextRequest) {
         count: n,
         href: '/staff?view=inbox',
         tone: 'info',
-      })
-    }
-  }
-
-  if (requireStaffRole(session.staff, ['events', 'secretary', 'admin'])) {
-    const n = await countNewVolunteerSignups()
-    if (n > 0) {
-      items.push({
-        id: 'volunteers',
-        label: 'New volunteer signups',
-        count: n,
-        href: '/staff?view=volunteers',
-        tone: 'warn',
       })
     }
   }
