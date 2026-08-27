@@ -17,6 +17,7 @@ import {
   matchFall2026EpClass,
   selectCurrentFall2026Programs,
 } from '@/lib/programs/fall-2026-ep'
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 import {
   matchSpring2027EpClass,
   selectCurrentSpring2027Programs,
@@ -159,7 +160,7 @@ export async function getPrograms(): Promise<Program[]> {
     const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
     return DEMO_PROGRAMS.filter((p) => p.registrationOpen)
   }
-  if (process.env.COMMONS_PLATFORM === 'true') return []
+  if (isPavilionProductPlatform()) return []
   const client = tryGetWixClient();
   if (!client) return []
   const result = await client.items
@@ -183,7 +184,7 @@ export async function getAllPrograms(opts?: {
     )
     return appendSpringPacketIfNeeded(listed, opts)
   }
-  if (process.env.COMMONS_PLATFORM === 'true') return []
+  if (isPavilionProductPlatform()) return []
   const client = tryGetWixClient();
   if (!client) return []
   const result = await client.items.query("Programs").find();
@@ -200,7 +201,7 @@ export async function getFeaturedPrograms(opts?: {
       opts,
     )
   }
-  if (process.env.COMMONS_PLATFORM === 'true') return []
+  if (isPavilionProductPlatform()) return []
   const client = tryGetWixClient();
   if (!client) return []
   const result = await client.items

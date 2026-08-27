@@ -13,6 +13,7 @@ import {
   buildScoopShareText,
   resolveScoopUrl,
 } from '@/lib/staff/newsletter-scoop'
+import { isPavilionProductPlatformPublic } from '@/lib/crm/platform-env'
 import {
   NEWSLETTER_BEAT_PRESETS,
   NEWSLETTER_MAX_BEATS,
@@ -611,7 +612,7 @@ export function StaffNewsletterPanel() {
             ? ''
             : '\nGmail send is not ready. Connect Google in Staff → Inbox (president@).'}
         </p>
-        {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
+        {isPavilionProductPlatformPublic() ? null : (
           <p className="text-xs text-[#5A6070] mt-2">
             <Link
               href="/staff?view=help&article=member-newsletter-diane"

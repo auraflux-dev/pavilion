@@ -1,11 +1,12 @@
 import { Pool, type QueryResult, type QueryResultRow } from 'pg'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 
 let pool: Pool | null = null
 
 /** True on the Commons demo project or a paying Commons app. Never set DATABASE_URL on Stone Hill. */
 export function isCommonsPlatform(): boolean {
-  return isDemoInstance() || process.env.COMMONS_PLATFORM === 'true'
+  return isDemoInstance() || isPavilionProductPlatform()
 }
 
 export function commonsDbEnabled(): boolean {

@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { PlayCircle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { isPavilionProductPlatformPublic } from '@/lib/crm/platform-env'
 
 const STORAGE_KEY = 'staff-notice-diane-newsletter-walkthrough-v1'
 const HELP_HREF = '/staff?view=help&article=member-newsletter-diane'
@@ -23,7 +24,7 @@ export function StaffWalkthroughNotice({
 
   const commons =
     typeof process !== 'undefined' &&
-    process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
+    isPavilionProductPlatformPublic()
   const demo =
     typeof process !== 'undefined' &&
     (process.env.NEXT_PUBLIC_DEMO_INSTANCE === 'true' ||

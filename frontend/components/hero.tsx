@@ -4,6 +4,7 @@ import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 import { demoStorePath, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { EditableHomeField } from '@/components/home/editable-home-field'
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 
 function resolveHomeImage(raw: string, fallback: string): string {
   const url = (raw || '').trim()
@@ -14,7 +15,7 @@ function resolveHomeImage(raw: string, fallback: string): string {
 export async function Hero() {
   const [settings, content] = await Promise.all([getSiteSettings(), getPageContent('home')])
   const inSession = settings.getBool('schoolInSession', false)
-  const commons = process.env.COMMONS_PLATFORM === 'true'
+  const commons = isPavilionProductPlatform()
   const stats = [
     { value: settings.get('heroStatFamilies', '500+'), label: 'Student Families' },
     ...(inSession

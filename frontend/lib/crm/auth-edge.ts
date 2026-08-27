@@ -1,3 +1,5 @@
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
+
 /** Cookie helpers safe for Edge middleware. No Postgres. */
 
 export function hasBetterAuthCookie(cookieNames: string[]): boolean {
@@ -7,9 +9,7 @@ export function hasBetterAuthCookie(cookieNames: string[]): boolean {
 }
 
 export function isCommonsPlatformHost(): boolean {
-  const platform =
-    process.env.COMMONS_PLATFORM === 'true' || process.env.PAVILION_PLATFORM === 'true'
-  return platform && process.env.DEMO_INSTANCE !== 'true'
+  return isPavilionProductPlatform() && process.env.DEMO_INSTANCE !== 'true'
 }
 
 /** Shared product / apex hosts are not per-tenant vanity hosts. Edge-safe. */

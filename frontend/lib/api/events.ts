@@ -7,6 +7,7 @@ import {
   isRunForCharitySlug,
   RUN_FOR_CHARITY_REGISTER_URL,
 } from '@/lib/run-for-charity'
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 
 import {
   earlyBirdCallout,
@@ -94,7 +95,7 @@ export async function getUpcomingEvents(limit = 6): Promise<WixEvent[]> {
     const { DEMO_EVENTS } = await import('@/lib/demo/content')
     return DEMO_EVENTS.slice(0, limit)
   }
-  if (process.env.COMMONS_PLATFORM === 'true') return []
+  if (isPavilionProductPlatform()) return []
   try {
     const client = getWixClient()
     const result = await client.wixEventsV2

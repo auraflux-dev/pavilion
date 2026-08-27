@@ -14,6 +14,7 @@ import { DEMO_BRAND } from '@/lib/demo/brand'
 import { canViewProgramsCatalogNow, isProgramsReviewHost } from '@/lib/programs/public-access'
 import { isProgramsCatalogListed } from '@/lib/programs/public-catalog'
 import { getPageStrings, pickString } from '@/lib/api/page-strings'
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 
 export default async function HomePage() {
   const inSession = await isSchoolInSession()
@@ -26,7 +27,7 @@ export default async function HomePage() {
       reviewHost,
     }) && !programsAccess.previewMode
   const demo = isDemoInstance()
-  const commons = process.env.COMMONS_PLATFORM === 'true'
+  const commons = isPavilionProductPlatform()
   const homeStrings = await getPageStrings('home-strings')
 
   const videoBody = commons

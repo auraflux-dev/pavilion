@@ -3,6 +3,7 @@
  * Browser fetch from this host sends Origin; block cross-site POSTs.
  */
 import { isDemoInstance, publicSiteUrl } from '@/lib/demo/instance'
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 
 function allowedOrigins(): string[] {
   const site = publicSiteUrl()
@@ -19,8 +20,9 @@ function allowedOrigins(): string[] {
   if (isDemoInstance()) {
     set.add('https://commons-pto-demo.vercel.app')
   }
-  if (process.env.COMMONS_PLATFORM === 'true') {
+  if (isPavilionProductPlatform()) {
     set.add('https://commons-pto.vercel.app')
+    set.add('https://commons-pto-demo.vercel.app')
   }
   if (process.env.NODE_ENV !== 'production') {
     set.add('http://localhost:3000')

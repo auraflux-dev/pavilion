@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { SectionJumpNav, type SectionJumpItem } from '@/components/section-jump-nav'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
+import { isPavilionProductPlatformPublic } from '@/lib/crm/platform-env'
 
 function BandNav({
   ariaLabel,
@@ -120,7 +121,7 @@ export function FundraisingSectionNav() {
 export function MembershipSectionNav() {
   const commons =
     typeof process !== 'undefined' &&
-    process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
+    isPavilionProductPlatformPublic()
   const tierHint = isPublicDemoInstance()
     ? 'Member · Family · Patron'
     : commons

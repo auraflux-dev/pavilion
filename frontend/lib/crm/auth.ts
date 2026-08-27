@@ -3,6 +3,7 @@ import { nextCookies } from 'better-auth/next-js'
 import { getPool } from '@/lib/crm/db'
 import { hashPassword, verifyPassword } from '@/lib/crm/bcrypt-password'
 import { isDemoInstance, publicSiteUrl } from '@/lib/demo/instance'
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 
 export const AUTH_BASE_PATH = '/api/id'
 
@@ -42,11 +43,7 @@ export function createCommonsAuth() {
 let cached: ReturnType<typeof createCommonsAuth> | undefined
 
 export function getAuth() {
-  if (
-    !isDemoInstance() &&
-    process.env.COMMONS_PLATFORM !== 'true' &&
-    process.env.PAVILION_PLATFORM !== 'true'
-  ) {
+  if (!isDemoInstance() && !isPavilionProductPlatform()) {
     return null
   }
   if (cached !== undefined) return cached

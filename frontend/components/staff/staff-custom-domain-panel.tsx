@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
+import { isPavilionProductPlatformPublic } from '@/lib/crm/platform-env'
 
 type DnsRecord = { type: string; name: string; value: string }
 
 export function StaffCustomDomainPanel() {
   const demo = isPublicDemoInstance()
-  const platform = process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
+  const platform = isPavilionProductPlatformPublic()
   const visible = demo || platform
   const [domain, setDomain] = useState('')
   const [busy, setBusy] = useState(false)

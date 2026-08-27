@@ -14,16 +14,12 @@ import {
   type TrialPack,
 } from '@/lib/crm/trial-packs'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 
 export const PAVILION_BRAND_COOKIE = 'pavilion_brand'
 
 export function isCommonsPlatform(): boolean {
-  return (
-    process.env.COMMONS_PLATFORM === 'true' ||
-    process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ||
-    process.env.PAVILION_PLATFORM === 'true' ||
-    process.env.NEXT_PUBLIC_PAVILION_PLATFORM === 'true'
-  )
+  return isPavilionProductPlatform()
 }
 
 /** Demo or legacy platform host. Shared product surface. */

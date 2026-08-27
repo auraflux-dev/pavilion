@@ -22,11 +22,11 @@ One Pavilion stack: **`commons-pto-demo`** (rename later). Stop using **`commons
 6. Vercel: pause or delete `commons-pto` project  
 7. Update AGENT-SHIP-MAP / ship targets  
 
-## Do not
+## Env alias (code)
 
-- Touch treasurer / www.shmspto.org  
-- Force SHMS onto the shared stack  
+Dual-read helpers live in `frontend/lib/crm/platform-env.ts`:
 
-## Status
+- `isPavilionProductPlatform()` — server / Edge
+- `isPavilionProductPlatformPublic()` — client (`NEXT_PUBLIC_*`)
 
-Docs + env alias landed. Project deletion waits on Rob ops OK.
+Legacy `COMMONS_PLATFORM` still works; set `PAVILION_PLATFORM` / `NEXT_PUBLIC_PAVILION_PLATFORM` when renaming Vercel env.

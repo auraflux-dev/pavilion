@@ -1,3 +1,4 @@
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 /**
  * Enrichment catalog seasons.
  *
@@ -42,7 +43,7 @@ export const PROGRAMS_PREVIEW_COOKIE = 'shms_programs_preview'
 
 /** Calendar / demo gate only. Does not include staff bypass. */
 export function isPublicProgramsCatalogOpen(now: Date = new Date()): boolean {
-  if (process.env.COMMONS_PLATFORM === 'true') return true
+  if (isPavilionProductPlatform()) return true
   if (process.env.DEMO_INSTANCE === 'true' || process.env.NEXT_PUBLIC_DEMO_INSTANCE === 'true') return true
   return now.getTime() >= PROGRAMS_PUBLIC_OPENS_AT_MS
 }

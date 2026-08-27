@@ -14,6 +14,7 @@ import { StaffProgramsPanel } from '@/components/staff/staff-programs-panel'
 import { StaffReportsPanel } from '@/components/staff/staff-reports-panel'
 import { StaffPaymentsPanel } from '@/components/staff/staff-payments-panel'
 import { StaffCommonsConnectorsPanel } from '@/components/staff/staff-commons-connectors-panel'
+import { isPavilionProductPlatformPublic } from '@/lib/crm/platform-env'
 import { StaffBudgetPanel } from '@/components/staff/staff-budget-panel'
 import {
   STAFF_FILTER_CARD,
@@ -468,17 +469,17 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
             <div>
               <h1 className="text-2xl font-bold text-[#1A1A1A]">{staffStr(staffCopy, 'dashboard.homeTitle')}</h1>
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
-                {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
+                {isPavilionProductPlatformPublic()
                   ? `Private trial staff for your school.\nPick an area below, or use the top nav.\nStart with Membership, Events, or Site.`
                   : `Roles: ${me.roles.join(', ')}.\nStaff login: ${me.email}.\nPick an area below, or use the top nav.\nOnly what you need for that job.}`}
               </p>
-              {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
+              {isPavilionProductPlatformPublic() ? null : (
                 <div className="mt-3">
                   <StaffSyncFreshnessChip />
                 </div>
               )}
             </div>
-            {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
+            {isPavilionProductPlatformPublic() ? null : (
               <>
                 <StaffPersonalEmailPanel
                   initialEmail={me.personalEmail ?? ''}
@@ -829,8 +830,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
         {active === 'timesheets' && canTimesheets ? <StaffTimesheetsPanel /> : null}
         {active === 'payments' && canPayments ? (
           <div className="space-y-4">
-            {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ||
-            process.env.NEXT_PUBLIC_PAVILION_PLATFORM === 'true' ? (
+            {isPavilionProductPlatformPublic() ? (
               <StaffCommonsConnectorsPanel />
             ) : null}
             <StaffPaymentsPanel isAdmin={Boolean(me?.isAdmin)} />

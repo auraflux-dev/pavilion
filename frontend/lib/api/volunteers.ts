@@ -1,5 +1,6 @@
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { getWixClient } from "@/lib/wix-client";
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 
 export interface VolunteerOpportunity {
   _id: string;
@@ -17,7 +18,7 @@ export async function getVolunteerOpportunities(): Promise<VolunteerOpportunity[
     const { DEMO_VOLUNTEER } = await import('@/lib/demo/content')
     return [...DEMO_VOLUNTEER]
   }
-  if (process.env.COMMONS_PLATFORM === 'true') return []
+  if (isPavilionProductPlatform()) return []
   if (!process.env.WIX_SITE_ID || !process.env.WIX_API_KEY) return []
   try {
     const client = getWixClient()

@@ -3,6 +3,7 @@ import { items } from "@wix/data";
 import * as wixEvents from "@wix/events";
 import { isDemoInstance } from "@/lib/demo/instance";
 import { isSyntheticStagingMode } from "@/lib/fixtures/synthetic-mode";
+import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 
 export type WixServerClient = ReturnType<typeof createWixServerClient>
 
@@ -18,7 +19,7 @@ function createWixServerClient(siteId: string, apiKey: string) {
 }
 
 function wixBlockedReason(): string | null {
-  if (process.env.COMMONS_PLATFORM === 'true') return 'Wix client is not used on Commons platform'
+  if (isPavilionProductPlatform()) return 'Wix client is not used on Commons platform'
   if (isDemoInstance()) return 'Wix client is not used on demo instance'
   if (isSyntheticStagingMode()) return 'Wix client is not used in synthetic staging mode'
   return null
