@@ -11,6 +11,6 @@ Product code: `auraflux-dev/pavilion`.
 
 **SHMS stays dedicated.** Deploy product → school via promote + `ship-stone-hill` without moving www onto the shared multi-tenant stack.
 
-Lumi does not need to leave Wix to be customer #2 on the board. When they run on Pavilion stack later, trial/tenant **or** dedicated enterprise Vercel if purchased.
+**Lumi takes a capability pack** (some, not all) — see [SOLUTION-PACKAGING.md](./SOLUTION-PACKAGING.md). Wix wall is fine until/unless they take Pavilion hosting.
 
 Active backlog: [PRODUCT-BACKLOG.md](./PRODUCT-BACKLOG.md).

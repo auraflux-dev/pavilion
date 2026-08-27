@@ -13,6 +13,7 @@ Work these on **`~/pavilion`** / robert-4220 only. Do **not** promote or `ship-s
 | P5 | **Public Pavilion GitHub org** | Prep done | `iss_NWtbFIlbmiLL` — [PUBLIC-REPO-PREP.md](./PUBLIC-REPO-PREP.md) — Rob OK to transfer |
 | P6 | **Retire legacy `commons-pto` host** | Docs | [RETIRE-COMMONS-PTO.md](./RETIRE-COMMONS-PTO.md) — project delete Rob OK |
 | P7 | **Connector secrets UX** | Done | Staff Payments panel + `/api/commons/connectors` |
+| P8 | **Capability packaging** | Started | [SOLUTION-PACKAGING.md](./SOLUTION-PACKAGING.md) + `lib/crm/capabilities.ts` — wire gates / promote allowlists next |
 
 ## Blocked on Rob / off-peak (www)
 
@@ -24,4 +25,6 @@ Work these on **`~/pavilion`** / robert-4220 only. Do **not** promote or `ship-s
 ## Product policy
 
 - **SHMS = VIP dedicated** on treasurer. Do not migrate www to multi-tenant demo/platform hosts.
-- Shared stack = new prospects / trials. Dedicated Vercel (or Wix wall) = customer SKUs.
+- **Lumi = partial capability pack** (not full SHMS shape). See [SOLUTION-PACKAGING.md](./SOLUTION-PACKAGING.md).
+- Shared stack = new prospects / trials. Dedicated Vercel (or Wix wall) = customer hosting SKUs.
+- Sell/deploy by **capability** (website / member / staff features), not only whole-app.

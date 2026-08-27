@@ -5,20 +5,30 @@
 ## Today
 
 - Repo: [`auraflux-dev/lumi`](https://github.com/auraflux-dev/lumi) (private)
-- Hosting: **Wix** — fine for a customer wall (same idea as SHMS on dedicated Vercel)
+- Hosting: **Wix** — customer wall (same idea as SHMS VIP dedicated, different host)
 - Board: HSKRG Work tickets labeled **`customer:lumi`**
-- Not in Pavilion product authoring path
+- Needs **some Pavilion capabilities, not all** — see [SOLUTION-PACKAGING.md](./SOLUTION-PACKAGING.md)
 
-## Later (join Pavilion stack — optional)
+## Capability stance
 
-When Lumi should run on Pavilion (not required to be “customer #2”):
+Default pack in code: `PACK_LUMI_PARTIAL` (`frontend/lib/crm/capabilities.ts`):
 
-1. Provision trial/tenant on `commons-pto-demo` (or renamed Pavilion demo) **or** dedicated enterprise Vercel if purchased  
-2. Brand pack / content migration from Wix as needed  
-3. Keep `auraflux-dev/lumi` as customer notes/ops repo or archive after cutover  
+- **In:** marketing site, programs, events, staff CMS, Wix connector  
+- **Out (until asked):** member portal, retail/POS, finance, Plaid, shared-stack trial  
+
+They can grow capability-by-capability without taking the whole SHMS-shaped product.
+
+## Later (optional Pavilion hosting)
+
+Not required to be “customer #2”:
+
+1. Keep Wix wall **or** move to shared trial / dedicated Vercel  
+2. Enable more capabilities from the catalog (portal, Square, …)  
+3. Brand / content migration as needed  
+4. Keep `auraflux-dev/lumi` as ops notes or archive after cutover  
 
 ## Agent rules
 
-- Lumi site/Wix work → edit `lumi` repo (or Wix), ticket `customer:lumi`  
-- Shared product features → `~/pavilion`, label `product`, then customers adopt via promote/tenant  
+- Lumi site/Wix work → `lumi` repo (or Wix), ticket `customer:lumi`  
+- Shared features → `~/pavilion`, label `product`, then adopt via pack + promote/tenant  
 - Never put Lumi secrets on SHMS treasurer env  

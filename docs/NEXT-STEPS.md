@@ -20,6 +20,7 @@ See also **[PRODUCT-BACKLOG.md](./PRODUCT-BACKLOG.md)** (active product work, ww
 - [ ] P5 Public GitHub org transfer  
 - [x] P6 Retire `commons-pto` path doc + env alias  
 - [x] P7 Per-tenant connector secrets UX (Staff panel)  
+- [ ] P8 Capability packaging (surfaces + packs; wire runtime / promote next)  
 
 ## Off-peak / Rob OK (www)
 
