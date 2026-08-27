@@ -32,6 +32,33 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   if (!gated) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const { config } = gated
   try {
+    const { pavilionCmsEnabled, resolveCmsOrganizationId, listCmsNavLinks } =
+      await import('@/lib/cms/store')
+    if (pavilionCmsEnabled() && config.id === 'NavLinks') {
+      const orgId = await resolveCmsOrganizationId(req)
+      const links = orgId ? await listCmsNavLinks(orgId, false) : []
+      const items = links.map((l) =>
+        mapCmsRow(
+          {
+            _id: l.id,
+            label: l.label,
+            href: l.href,
+            sortOrder: l.sortOrder,
+            showInNav: l.showInNav,
+            showInFooter: l.showInFooter,
+            active: l.active,
+          },
+          config.fields,
+        ),
+      )
+      return NextResponse.json({
+        collection: config.id,
+        label: config.label,
+        fields: config.fields,
+        items,
+        backend: 'pavilion-cms',
+      })
+    }
     const items = await listCollection(config.id, config.sortField ?? 'sortOrder')
     return NextResponse.json({
       collection: config.id,
@@ -67,6 +94,23 @@ export async function POST(req: NextRequest, ctx: Ctx) {
     if (config.activeField && row[config.activeField] === undefined) {
       row[config.activeField] = true
     }
+    const { pavilionCmsEnabled, resolveCmsOrganizationId, upsertCmsNavLink } =
+      await import('@/lib/cms/store')
+    if (pavilionCmsEnabled() && config.id === 'NavLinks') {
+      const orgId = await resolveCmsOrganizationId(req)
+      if (!orgId) {
+        return NextResponse.json({ error: 'Organization required for Pavilion CMS' }, { status: 400 })
+      }
+      const saved = await upsertCmsNavLink(orgId, {
+        label: String(row.label ?? ''),
+        href: String(row.href ?? ''),
+        sortOrder: Number(row.sortOrder ?? 99) || 99,
+        showInNav: row.showInNav !== false,
+        showInFooter: row.showInFooter === true,
+        active: row.active !== false,
+      })
+      return NextResponse.json({ ok: true, id: saved.id, backend: 'pavilion-cms' })
+    }
     const client = getWixClient()
     const inserted = await client.items.insert(config.id, row)
     return NextResponse.json({ ok: true, id: (inserted as { _id?: string })._id })
@@ -89,6 +133,24 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     const id = String(body.id ?? '').trim()
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
     const row = buildCmsPayload(body, config.fields)
+    const { pavilionCmsEnabled, resolveCmsOrganizationId, upsertCmsNavLink } =
+      await import('@/lib/cms/store')
+    if (pavilionCmsEnabled() && config.id === 'NavLinks') {
+      const orgId = await resolveCmsOrganizationId(req)
+      if (!orgId) {
+        return NextResponse.json({ error: 'Organization required for Pavilion CMS' }, { status: 400 })
+      }
+      await upsertCmsNavLink(orgId, {
+        id,
+        label: String(row.label ?? ''),
+        href: String(row.href ?? ''),
+        sortOrder: Number(row.sortOrder ?? 99) || 99,
+        showInNav: row.showInNav !== false,
+        showInFooter: row.showInFooter === true,
+        active: row.active !== false,
+      })
+      return NextResponse.json({ ok: true, id, backend: 'pavilion-cms' })
+    }
     const client = getWixClient()
     const existing = await client.items.get(config.id, id)
     await client.items.update(config.id, {

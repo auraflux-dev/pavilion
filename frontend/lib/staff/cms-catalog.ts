@@ -830,7 +830,16 @@ export function buildCmsPayload(body: Record<string, unknown>, fields: CmsField[
   return row
 }
 
-export async function upsertSiteSetting(key: string, value: string) {
+export async function upsertSiteSetting(key: string, value: string, orgId?: string) {
+  const { pavilionCmsEnabled, resolveCmsOrganizationId, upsertCmsSiteSetting } =
+    await import('@/lib/cms/store')
+  if (pavilionCmsEnabled()) {
+    const resolved = orgId || (await resolveCmsOrganizationId())
+    if (resolved) {
+      await upsertCmsSiteSetting(resolved, key, value)
+      return
+    }
+  }
   const client = getWixClient()
   const existing = await client.items.query('SiteSettings').eq('key', key).limit(1).find()
   const found = existing.items?.[0] as { _id?: string } | undefined

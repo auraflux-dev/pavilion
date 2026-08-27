@@ -21,10 +21,12 @@ www.shmspto.org is **customer #1** — dedicated deploy from **`~/shmspto`**, up
 | Layer | Home |
 |-------|------|
 | **Product code** (Staff UIs, APIs, form queues, checkout) | Always author in **`~/pavilion`** |
-| **Pavilion CMS** (content/data store for demo + non-SHMS tenants) | Built **on pavilion** by agents (Postgres / platform CMS). **Not Wix.** |
-| **Wix CMS / Data / Stores** | **SHMS VIP only.** Deploy/promote product → `~/shmspto` + Wix when that customer needs it |
+| **Pavilion CMS** (Postgres `cms_*`, org-scoped) | **Authoritative** content store for demo, trials, and all Pavilion customers. Built on pavilion. |
+| **Wix CMS** | **SHMS publish target only.** After content is right in Pavilion CMS, sync/commit those rows into Wix and promote staff code to `~/shmspto`. |
 
-Build the Staff volunteer queue (and similar) **on pavilion**. SHMS gets it via promote/ship and talks to **Wix**. Pavilion demo/product talks to **Pavilion CMS** (fixtures today; real store as we build it).
+Build Staff queues and page/settings editors **on pavilion** against Pavilion CMS. For SHMS www: sync CMS → Wix, then ship shmspto.
+
+See `docs/PAVILION-CMS.md`.
 
 Do **not** treat “uses Wix on SHMS” as “commit only on shmspto.” Shared product stays pavilion-first.
 

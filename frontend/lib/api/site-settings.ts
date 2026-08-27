@@ -31,6 +31,21 @@ async function fetchAllSettings(): Promise<Record<string, string>> {
  const { getActiveTrialPack } = await import('@/lib/crm/active-trial')
  const brandPack = getActiveTrialPack()
  if (brandPack?.settings) return { ...brandPack.settings }
+
+ try {
+   const { pavilionCmsEnabled, resolveCmsOrganizationId, listCmsSiteSettings } =
+     await import('@/lib/cms/store')
+   if (pavilionCmsEnabled()) {
+     const orgId = await resolveCmsOrganizationId()
+     if (orgId) {
+       const map = await listCmsSiteSettings(orgId)
+       if (Object.keys(map).length) return map
+     }
+   }
+ } catch {
+   // fall through
+ }
+
  if (isDemoInstance()) {
    const { DEMO_SETTINGS } = await import('@/lib/demo/content')
    return { ...DEMO_SETTINGS }

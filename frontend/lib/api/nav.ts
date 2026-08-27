@@ -141,6 +141,24 @@ export async function getNavLinks(): Promise<NavLink[]> {
  const { getActiveTrialPack } = await import('@/lib/crm/active-trial')
  const brandPack = getActiveTrialPack()
  if (brandPack?.nav?.length) return brandPack.nav.map((l) => ({ ...l }))
+
+ try {
+   const { pavilionCmsEnabled, resolveCmsOrganizationId, listCmsNavLinks } =
+     await import('@/lib/cms/store')
+   if (pavilionCmsEnabled()) {
+     const orgId = await resolveCmsOrganizationId()
+     if (orgId) {
+       const cmsNav = await listCmsNavLinks(orgId, true)
+       if (cmsNav.length) {
+         const links = ensureHomeLink(normalizeCommerceNav(cmsNav))
+         return links.map((l) => ({ ...l, label: vanillaizeIfDemo(l.label) }))
+       }
+     }
+   }
+ } catch {
+   // fall through
+ }
+
  if (isDemoInstance()) {
    const { DEMO_NAV } = await import('@/lib/demo/content')
    return DEMO_NAV.map((l) => ({ ...l }))

@@ -53,9 +53,36 @@ export async function GET(req: NextRequest) {
   try {
     const staff = session.staff
     const allPages = canEditAllPageCopy(staff)
-    const client = getWixClient()
-    const result = await client.items.query('PageContent').ascending('page').limit(100).find()
-    let pages = (result.items ?? []).map((i) => mapRow(i as Record<string, unknown>))
+
+    const { pavilionCmsEnabled, resolveCmsOrganizationId, listCmsPageContent } =
+      await import('@/lib/cms/store')
+    let pages: ReturnType<typeof mapRow>[] = []
+    if (pavilionCmsEnabled()) {
+      const orgId = await resolveCmsOrganizationId(req)
+      if (orgId) {
+        const rows = await listCmsPageContent(orgId)
+        pages = rows.map((r) =>
+          mapRow({
+            _id: r.id,
+            page: r.page,
+            eyebrow: r.eyebrow,
+            title: r.title,
+            body: r.body,
+            sectionTitle: r.sectionTitle,
+            sectionBody: r.sectionBody,
+            bullets: r.bullets,
+            ctaLabel: r.ctaLabel,
+            ctaHref: r.ctaHref,
+            flyerImage: r.flyerImage,
+            active: r.active,
+          }),
+        )
+      }
+    } else {
+      const client = getWixClient()
+      const result = await client.items.query('PageContent').ascending('page').limit(100).find()
+      pages = (result.items ?? []).map((i) => mapRow(i as Record<string, unknown>))
+    }
     const known = new Set(pages.map((p) => p.page))
     const defaultKeys = allPages
       ? Object.keys(PAGE_CONTENT_DEFAULTS)
@@ -119,6 +146,18 @@ export async function PATCH(req: NextRequest) {
       ctaHref: String(body.ctaHref ?? '').trim(),
       flyerImage: String(body.flyerImage ?? '').trim(),
       active: body.active !== false,
+    }
+
+    const { pavilionCmsEnabled, resolveCmsOrganizationId, upsertCmsPageContent } =
+      await import('@/lib/cms/store')
+    if (pavilionCmsEnabled()) {
+      const orgId = await resolveCmsOrganizationId(req)
+      if (!orgId) {
+        return NextResponse.json({ error: 'Organization required for Pavilion CMS' }, { status: 400 })
+      }
+      await upsertCmsPageContent(orgId, row)
+      revalidatePublicPage(page)
+      return NextResponse.json({ ok: true, id: page })
     }
 
     const client = getWixClient()

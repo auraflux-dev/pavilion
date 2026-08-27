@@ -40,12 +40,24 @@ export async function GET(req: NextRequest) {
   if (!groups.length) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   try {
-    const client = getWixClient()
-    const result = await client.items.query('SiteSettings').limit(200).find()
     const map: Record<string, { id: string; value: string }> = {}
-    for (const item of result.items ?? []) {
-      const row = item as { _id?: string; key?: string; value?: string }
-      if (row.key) map[row.key] = { id: row._id ?? '', value: String(row.value ?? '') }
+    const { pavilionCmsEnabled, resolveCmsOrganizationId, listCmsSiteSettings } =
+      await import('@/lib/cms/store')
+    if (pavilionCmsEnabled()) {
+      const orgId = await resolveCmsOrganizationId(req)
+      if (orgId) {
+        const cmsMap = await listCmsSiteSettings(orgId)
+        for (const [key, value] of Object.entries(cmsMap)) {
+          map[key] = { id: key, value }
+        }
+      }
+    } else {
+      const client = getWixClient()
+      const result = await client.items.query('SiteSettings').limit(200).find()
+      for (const item of result.items ?? []) {
+        const row = item as { _id?: string; key?: string; value?: string }
+        if (row.key) map[row.key] = { id: row._id ?? '', value: String(row.value ?? '') }
+      }
     }
 
     const settings: Record<string, string> = {}

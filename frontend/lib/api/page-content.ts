@@ -155,6 +155,22 @@ export async function getPageContent(page: string): Promise<PageContentFields> {
   const { getActiveTrialPack } = await import('@/lib/crm/active-trial')
   const brandPack = getActiveTrialPack()
   if (brandPack?.pages?.[page]) return merge(page, brandPack.pages[page])
+
+  // Pavilion CMS (Postgres) when commons DB is on — authoritative for demo/platform.
+  try {
+    const { pavilionCmsEnabled, resolveCmsOrganizationId, getCmsPageContent } =
+      await import('@/lib/cms/store')
+    if (pavilionCmsEnabled()) {
+      const orgId = await resolveCmsOrganizationId()
+      if (orgId) {
+        const row = await getCmsPageContent(orgId, page)
+        if (row) return merge(page, row)
+      }
+    }
+  } catch {
+    // fall through to demo fixtures / Wix
+  }
+
   if (isDemoInstance()) {
     const { DEMO_PAGES } = await import('@/lib/demo/content')
     const row = DEMO_PAGES[page]
