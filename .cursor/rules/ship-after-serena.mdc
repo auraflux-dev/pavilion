@@ -23,7 +23,7 @@ If Serena fails: fix and re-run. Do not commit, deploy, or push.
 
 ## Stone Hill (customer #1) — separate
 
-Only when promoting product to live school or doing SHMS-only ops/hotfixes:
+Only when promoting product to live school or doing SHMS-only ops/hotfixes **that Rob asked for** (especially during Fall EP registration: no proactive www work):
 
 1. Prefer **`node scripts/promote-to-shms.mjs`** from pavilion (when product → school).
 2. In **`~/shmspto`**: `node scripts/ship-stone-hill.mjs`.

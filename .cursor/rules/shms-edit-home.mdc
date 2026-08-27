@@ -32,6 +32,12 @@ Do **not** treat “uses Wix on SHMS” as “commit only on shmspto.” Shared 
 
 Pushing `pavilion` `main` does **not** update www. Promoting + shipping SHMS does — **avoid casual promotes during school hours.**
 
+### Fall EP registration season (soft)
+
+During Fall enrichment registration, prefer **pavilion-only** for proactive / non-critical work (Pavilion CMS, demo, product). Do **not** promote, ship www, or poke live Wix “just because.”
+
+**Still do SHMS work when Rob asks** for a fix or update that must hit www. Hotfixes and requested ships are fine; unsolicited production changes are not.
+
 ## Promote to Stone Hill (intentional)
 
 ```bash
