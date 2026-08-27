@@ -45,7 +45,7 @@ export const STAFF_PERMISSION_GROUPS: { id: string; label: string; items: StaffW
   {
     id: 'programs',
     label: 'Programs & events',
-    items: ['programs', 'timesheets', 'events', 'volunteers', 'wellness'],
+    items: ['programs', 'timesheets', 'events', 'volunteers', 'signups', 'wellness'],
   },
   {
     id: 'money',
@@ -141,6 +141,7 @@ export const WORKSPACE_ROLES: Record<StaffWorkspace, StaffRole[]> = {
   newsletter: ['marketing', 'secretary', 'membership', 'admin'],
   comms: ['marketing', 'secretary', 'membership', 'events', 'admin'],
   reports: ['programs', 'retail', 'treasurer', 'membership', 'events', 'admin'],
+  signups: ['events', 'secretary', 'admin'],
 }
 
 const ASSIGNABLE = new Set<string>(

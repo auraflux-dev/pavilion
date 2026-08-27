@@ -9,11 +9,17 @@ After a complete, shippable **application** change, run Serena QA.
 
 If Serena fails: fix and re-run. Do not commit, deploy, or push.
 
+**Before Serena (UI/UX):** browser QA + screenshots → wiki QA section — see `~/.cursor/rules/hskrg-board-workflow.mdc`.
+
 ## Pavilion (this monorepo) — product
 
-1. **Commit** on `pavilion`.
-2. **`node scripts/ship-pavilion.mjs --target commons-pto-demo`** (or `commons-site` for marketing).
-3. Success = demo/marketing check passes. **That is not www.shmspto.org.**
+1. **Browser QA** (if UI): screenshots → `ship-agent-qa-assets.mjs` → draft wiki QA section.  
+2. **Serena QA** on touched files.  
+3. **Commit** on `pavilion`.  
+4. **`node scripts/ship-pavilion.mjs --target commons-pto-demo`** (or `commons-site` for marketing).  
+5. Success = demo/marketing check passes. **That is not www.shmspto.org.**  
+6. **`node ~/hskrg-work/scripts/verify-agent-closeout.mjs --issue iss_xxx`**  
+7. **Board:** close ticket + upsert wiki (include QA screenshots when UI).
 
 ## Stone Hill (customer #1) — separate
 

@@ -24,6 +24,7 @@ import {
   STAFF_FILTER_SELECT,
 } from '@/lib/staff/staff-filter-ui'
 import { StaffEventsPanel } from '@/components/staff/staff-events-panel'
+import { StaffSignupsPanel } from '@/components/staff/staff-signups-panel'
 import { StaffCoveStockAdmin, StaffRetailPanel } from '@/components/staff/staff-retail-panel'
 import { StaffDiscountsPanel } from '@/components/staff/staff-discounts-panel'
 import { StaffMembershipPanel } from '@/components/staff/staff-membership-panel'
@@ -147,6 +148,7 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'timesheets',
   'reports',
   'help',
+  'signups',
 ]
 
 function parseWorkspace(raw: string | null): StaffWorkspace | null {
@@ -211,6 +213,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   const canTimesheets = staffCanWorkspace(me, 'timesheets')
   const canPayments = staffCanWorkspace(me, 'payments')
   const canEvents = staffCanWorkspace(me, 'events')
+  const canSignups = staffCanWorkspace(me, 'signups')
   const canRetail = staffCanWorkspace(me, 'retail')
   const canDiscounts = staffCanWorkspace(me, 'discounts')
   const canContent = staffCanWorkspace(me, 'content')
@@ -252,6 +255,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     if (canPayments) items.push({ id: 'payments', label: wsLabel('payments') })
     if (canPayments) items.push({ id: 'budget', label: wsLabel('budget') })
     if (canEvents) items.push({ id: 'events', label: wsLabel('events') })
+    if (canSignups) items.push({ id: 'signups', label: wsLabel('signups') })
     if (canRetail) items.push({ id: 'retail', label: wsLabel('retail') })
     if (canDiscounts) items.push({ id: 'discounts', label: wsLabel('discounts') })
     if (canMembership) items.push({ id: 'membership', label: wsLabel('membership') })
@@ -297,6 +301,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     canTimesheets,
     canPayments,
     canEvents,
+    canSignups,
     canRetail,
     canDiscounts,
     canMembership,
@@ -868,6 +873,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
             </StaffReveal>
           </div>
         ) : null}
+        {active === 'signups' && canSignups ? <StaffSignupsPanel /> : null}
         {active === 'retail' && canRetail ? (
           <div className="space-y-4">
             <StaffRetailSectionNav />

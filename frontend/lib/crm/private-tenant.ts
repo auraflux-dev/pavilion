@@ -14,6 +14,8 @@ export function isCommonsPublicPath(pathname: string): boolean {
   if (pathname === '/trial-locked' || pathname.startsWith('/trial-locked/')) return true
   if (pathname === '/api/commons/trial/start') return true
   if (pathname === '/api/commons/host-status') return true
+  if (pathname === '/signups' || pathname.startsWith('/signups/')) return true
+  if (pathname.startsWith('/api/signups/')) return true
   return false
 }
 

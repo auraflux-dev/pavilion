@@ -23,6 +23,8 @@ export type CapabilityId =
   | 'connect.square'
   | 'connect.plaid'
   | 'platform.trial'
+  | 'staff.signups'
+  | 'site.signups'
 
 export type CapabilityDef = {
   id: CapabilityId
@@ -106,6 +108,17 @@ export const CAPABILITY_CATALOG: CapabilityDef[] = [
     surfaces: ['website', 'member', 'staff'],
     summary: 'Shared-stack trial tenancy (not for SHMS VIP)',
   },
+  {
+    id: 'staff.signups',
+    surfaces: ['staff', 'website'],
+    summary: 'SignUpGenius-style sheets — create slots, public link, roster',
+  },
+  {
+    id: 'site.signups',
+    surfaces: ['website'],
+    requires: ['staff.signups'],
+    summary: 'Public /signups/{slug} participant pages',
+  },
 ]
 
 /** Hosting is separate from which capabilities are on. */
@@ -171,6 +184,8 @@ export const PACK_LUMI_PARTIAL: CustomerCapabilityPack = {
     'site.events',
     'staff.cms',
     'connect.wix',
+    'staff.signups',
+    'site.signups',
   ],
   notes: 'No portal/retail/POS/Plaid until they ask. Hosting may stay Wix.',
 }

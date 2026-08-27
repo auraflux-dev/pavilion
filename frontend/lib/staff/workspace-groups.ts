@@ -27,8 +27,8 @@ export const STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
   {
     id: 'programs',
     label: 'Programs & events',
-    blurb: 'Classes, teaching hours, events, volunteers.',
-    workspaces: ['programs', 'timesheets', 'events', 'volunteers'],
+    blurb: 'Classes, teaching hours, events, volunteers, sign-up sheets.',
+    workspaces: ['programs', 'timesheets', 'events', 'volunteers', 'signups'],
   },
   {
     id: 'money',

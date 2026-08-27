@@ -3,6 +3,7 @@ import { getAuth } from '@/lib/crm/auth'
 import { commonsDbEnabled, sql } from '@/lib/crm/db'
 import { CRM_SCHEMA_SQL } from '@/lib/crm/schema-sql'
 import { CRM_PLATFORM_SQL } from '@/lib/crm/schema-platform-sql'
+import { SIGNUPS_SCHEMA_SQL } from '@/lib/signups/schema-sql'
 import { riversideSnapshot } from '@/lib/crm/riverside'
 import { isDemoInstance } from '@/lib/demo/instance'
 
@@ -22,6 +23,7 @@ export async function ensureCommonsReady(): Promise<void> {
 async function migrateAndSeed(): Promise<void> {
   await sql(CRM_SCHEMA_SQL)
   await sql(CRM_PLATFORM_SQL)
+  await sql(SIGNUPS_SCHEMA_SQL)
   const auth = getAuth()
   if (auth) {
     const ctx = await auth.$context

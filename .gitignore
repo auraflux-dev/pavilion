@@ -9,6 +9,9 @@ data/*.csv
 migration/data/
 .vercel
 
+# agent browser QA staging (copied to hskrg-work/public/agent-qa)
+.agent-qa/
+
 # promo-videos — rebuild from scripts; keep sources, drop work products
 promo-videos/out/
 promo-videos/tmp/
