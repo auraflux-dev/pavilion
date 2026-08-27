@@ -1,42 +1,31 @@
 ---
-description: Stone Hill production ships via auraflux-dev/shmspto Git push only
+description: SHMS www is customer deploy via shmspto Git — not from pavilion CLI
 alwaysApply: true
 ---
 
-# Stone Hill deploy (treasurer Git)
+# Stone Hill deploy (customer #1)
 
-Stone Hill (`www.shmspto.org`) deploys from **`auraflux-dev/shmspto`**, not this monorepo's `origin`.
+www.shmspto.org deploys from **`auraflux-dev/shmspto`** only (treasurer Git), not this monorepo’s `origin`.
 
-## Agent ship path (required)
+## Product vs customer
 
-1. **Edit in `~/shmspto`** for school site, portal, staff, and shared product. Use the **shmspto workspace** when the task is Stone Hill.
-2. **Serena QA** on the changed files.
-3. **Commit** in the **`shmspto` repo**.
-   - Do **not** treat `git push origin main` on `pavilion` as a Stone Hill production deploy.
-4. **`git push origin main`** on `auraflux-dev/shmspto`.
-5. Treasurer Vercel project **`frontend`** auto-builds Production from that push.
-6. **`node scripts/check-prod-deploy.mjs`** from the `shmspto` repo.
+- Shared product → author in **`~/pavilion`**, ship demo, then **promote** when updating school.
+- SHMS-only / hotfix → **`~/shmspto`**, then `ship-stone-hill.mjs`. Port hotfix back with `--from-shms` same day.
 
-If work accidentally landed in `pavilion/frontend`, port into `~/shmspto/frontend/` in the same turn — do not use `--to-shms` as the normal workflow.
+## Customer ship path
 
-## Pavilion is not auto-updated
+1. Promote if needed: `node scripts/promote-to-shms.mjs` (dry-run) / `--apply`  
+2. Commit in **`shmspto`**  
+3. `node scripts/ship-stone-hill.mjs`  
+4. Confirm `check-prod-deploy.mjs`  
 
-After a Stone Hill ship, **do not** sync or deploy Pavilion unless Rob explicitly asked.
+**Pushing `pavilion` main does not update www.**
 
-When Rob asks to refresh demo: `--from-shms --apply` in pavilion, then commit + deploy `commons-pto-demo`.
+## Agents cannot CLI-deploy Stone Hill from here
 
-## Agents cannot CLI-deploy Stone Hill
+- No `vercel deploy` / treasurer link from this repo  
+- CLI fallback only via `~/shmspto` ship script + Doppler treasurer token  
 
-- Do **not** run `vercel deploy --prod` for Stone Hill from agent shells.
-- Do **not** deploy Stone Hill from `robert-4220s-projects` or Pavilion projects.
-- CLI fallback (`node scripts/deploy-production.mjs`) is Rob-only with treasurer login. See `~/shmspto/scripts/DEPLOY.md`.
+## Staging
 
-## Staging + Rob OK (visitor-facing)
-
-For public visitor UI: Rob reviews on **https://shmspto.vercel.app** when staging is current, then OK before pushing `shmspto` `main` for production.
-
-Staff-only: push `shmspto` `main` after Serena QA without waiting for Rob OK.
-
-## Pavilion (this repo)
-
-Pavilion marketing/demo ships from **`pavilion`** when the task is Pavilion-facing or Rob requested a demo sync. Never mix SHMS Wix env onto Pavilion.
+Visitor review: https://shmspto.vercel.app when staging is current — Rob OK before production when visitor-facing.

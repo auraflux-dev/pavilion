@@ -1,0 +1,20 @@
+---
+description: Pavilion product vs customer labels for HSKRG Work tickets
+alwaysApply: true
+---
+
+# Board tags (Pavilion workspace)
+
+When creating HSKRG Work tickets from this repo:
+
+| Work | Labels |
+|------|--------|
+| Shared product / demo / trial CRM | `product` |
+| SHMS promote / school-only | `customer:shms` |
+| Lumi | `customer:lumi` |
+
+Org: `pavilion` (unless cross-product → `hskrg`).
+
+Wiki Why must state `Audience: product` or `Audience: customer:…`.
+
+Full map: `~/shmspto/docs/AGENT-SHIP-MAP.md` and `docs/PRODUCT-VS-CUSTOMER.md`.

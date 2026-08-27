@@ -1,19 +1,10 @@
 #!/usr/bin/env node
 /**
- * Compare Stone Hill frontend source trees:
- *   auraflux-dev/pavilion/frontend  (Pavilion monorepo)
- *   auraflux-dev/shmspto/frontend      (www.shmspto.org — source of truth for school)
+ * Compare Pavilion (product) vs SHMS (customer #1) frontend trees.
+ * Prefer ~/shmspto/scripts/shms-frontend-parity.mjs — soft exit by default.
  *
- * Why this exists: agents often edit the open Cursor workspace (monorepo) while
- * production ships from ~/shmspto. Features then "were in staff" but vanish from
- * www, or land on www and never return to the monorepo for Pavilion.
- *
- * Usage:
  *   node scripts/shms-frontend-parity.mjs
- *   node scripts/shms-frontend-parity.mjs --json
  *   SHMS_ROOT=~/shmspto MONO_ROOT=~/pavilion node scripts/shms-frontend-parity.mjs
- *
- * Exit 1 when school-facing paths exist only in the monorepo (missing from live ship repo).
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { homedir } from 'node:os'

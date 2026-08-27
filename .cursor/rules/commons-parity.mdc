@@ -1,39 +1,33 @@
 ---
-description: Pavilion deploy opt-in; shmspto canonical; sync only when Rob asks
+description: Pavilion product vs SHMS customer deploys — never mix env
 alwaysApply: true
 ---
 
 # Pavilion vs SHMS deploys
 
-Build **Pavilion** demo/marketing as its own product surface. No Stone Hill PII or school cost on Pavilion.
+**Pavilion** = product (demo/marketing/trials on robert-4220).  
+**SHMS** = customer #1 (www on treasurer). Separate env walls.
 
-Stone Hill (`frontend` / www.shmspto.org) and Pavilion apps share historical frontend code but are **separate products**:
+- **pavilion** = product author + demo stack  
+- **shmspto** = customer tree; promote from pavilion when updating live school  
 
-- **shmspto** = canonical source + live school
-- **pavilion** = consumer; catches up when Rob asks
+## Pavilion ships (this workspace)
 
-## Stone Hill ships (~/shmspto workspace)
+```bash
+node scripts/ship-pavilion.mjs --target commons-pto-demo
+```
 
-See **`shms-deploy-git.mdc`**. Summary:
+Demo ship does **not** update www.
 
-1. Edit, Serena QA, commit in **`auraflux-dev/shmspto`**
-2. Staging review on **https://shmspto.vercel.app** when visitor-facing (Rob OK)
-3. **`git push origin main`** on **`shmspto`**
-4. **`node scripts/check-prod-deploy.mjs`**
+## SHMS customer ships
 
-Staff-only: push `shmspto` `main` after Serena QA, then run the check script.
+Promote (dry-run first): `node scripts/promote-to-shms.mjs`  
+Then `~/shmspto` → `node scripts/ship-stone-hill.mjs` (live www — school-hours sensitive).
 
-**Do not** sync or deploy Pavilion as a follow-up unless Rob asked.
+Hotfix on www → same day `--from-shms` into pavilion.
 
-## Pavilion ships (this workspace, opt-in)
+Never put Stone Hill Wix / Square on Pavilion, or Pavilion Stripe on Stone Hill.
 
-- **Pavilion-only tasks:** commit + deploy `commons-site`, `commons-pto-demo`, `commons-pto` as relevant.
-- **Demo catch-up from school:** Rob must ask → `--from-shms --apply` → commit pavilion → deploy demo (vanilla; no SHMS branding on Pavilion surfaces).
+At session start: `node scripts/commons-parity.mjs` is informational.
 
-Never put Stone Hill Wix / Square env on Pavilion projects, or Pavilion Stripe on Stone Hill.
-
-At session start: `node scripts/commons-parity.mjs` is informational. Do not force catch-up unless Rob wants Pavilion updated.
-
-Plaid stays on the **Trial** account until paying Pavilion clients.
-
-After a Pavilion-facing ship, run `node scripts/commons-surface-check.mjs`.
+After a Pavilion-facing ship, run `node scripts/commons-surface-check.mjs` when relevant.
