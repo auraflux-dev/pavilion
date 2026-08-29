@@ -17,6 +17,27 @@ export type NewsletterBranding = {
   customCss: string
 }
 
+const EMAIL_ASSET_ORIGIN = 'https://www.shmspto.org'
+const DEFAULT_EMAIL_HEADER_LOGO_PATH = '/shms-logo.png'
+
+/** Resolve header logo for HTML email (absolute URL). Custom SiteSettings value wins when set. */
+export function resolveEmailHeaderLogoUrl(
+  headerLogoUrl: string | undefined | null,
+  origin: string,
+): string {
+  const trimmed = String(headerLogoUrl ?? '').trim()
+  const base = origin.replace(/\/$/, '')
+  if (trimmed) {
+    if (/^https?:\/\//i.test(trimmed)) return trimmed
+    return `${base}${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}`
+  }
+  // Demo/trial: prefer site origin logo when no custom header is set.
+  if (/commons-pto|onpavilion|localhost|127\.0\.0\.1/i.test(base)) {
+    return `${base}/demo/mark.png`
+  }
+  return `${EMAIL_ASSET_ORIGIN}${DEFAULT_EMAIL_HEADER_LOGO_PATH}`
+}
+
 export function parseNewsletterBranding(settings: {
   get: (key: string, fallback?: string) => string
 }): NewsletterBranding {
