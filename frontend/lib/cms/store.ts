@@ -523,6 +523,17 @@ export async function deleteCmsPageSection(orgId: string, id: string): Promise<v
   )
 }
 
+export async function deleteCmsPageSectionsForPage(
+  orgId: string,
+  pageSlug: string,
+): Promise<void> {
+  await sqlForOrg(
+    orgId,
+    `delete from cms_page_sections where organization_id = $1 and page_slug = $2`,
+    [orgId, pageSlug],
+  )
+}
+
 export type CmsSiteBrand = {
   logoUrl: string
   faviconUrl: string

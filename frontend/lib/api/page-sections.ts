@@ -44,7 +44,13 @@ export async function getPageSections(pageSlug: string): Promise<PageSectionView
     if (!orgId) return null
 
     const total = await countCmsPageSections(orgId, pageSlug)
-    if (total === 0) {
+    if (pageSlug === 'home' && total > 6) {
+      // Prior race left duplicate seeds; wipe and reseed once.
+      const { deleteCmsPageSectionsForPage } = await import('@/lib/cms/store')
+      const { seedHomeSectionsIfEmpty } = await import('@/lib/cms/seed-page-sections')
+      await deleteCmsPageSectionsForPage(orgId, pageSlug)
+      await seedHomeSectionsIfEmpty(orgId)
+    } else if (total === 0) {
       // Auto-seed home only so the demo composer is populated.
       // Other routes stay legacy until Staff opens Pages and seeds/edits.
       if (pageSlug === 'home') {
