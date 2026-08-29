@@ -19,6 +19,9 @@ import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 import { getPageSections } from '@/lib/api/page-sections'
 import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
+/** Request-time so demo page builder sections can seed/render (not frozen at build). */
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const composed = await getPageSections('home')
   if (composed?.length) {

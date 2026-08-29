@@ -18,6 +18,7 @@ export type LayoutBrandOverride = {
 
 export async function resolveCmsLayoutBrand(): Promise<LayoutBrandOverride | null> {
   if (!cmsPageBuilderEnabled()) return null
+  if (process.env.NEXT_PHASE === 'phase-production-build') return null
   try {
     const { ensureCommonsReady } = await import('@/lib/crm/migrate')
     await ensureCommonsReady()

@@ -26,7 +26,7 @@ async function migrateAndSeed(): Promise<void> {
   await sql(CRM_SCHEMA_SQL)
   await sql(CRM_PLATFORM_SQL)
   await sql(SIGNUPS_SCHEMA_SQL)
-  await sql(CMS_SCHEMA_SQL)
+  await applyCmsSchema()
   await sql(PLATFORM_OWNERS_SQL)
   await ensurePlatformOwnerSeed()
   const auth = getAuth()
@@ -36,6 +36,24 @@ async function migrateAndSeed(): Promise<void> {
     await runMigrations()
   }
   if (isDemoInstance()) await seedRiverside()
+}
+
+/** Tolerate concurrent create-table races from parallel Next workers. */
+async function applyCmsSchema(): Promise<void> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await sql(CMS_SCHEMA_SQL)
+      return
+    } catch (err) {
+      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: unknown }).code) : ''
+      const msg = err instanceof Error ? err.message : String(err)
+      if (code === '23505' || /already exists/i.test(msg)) {
+        if (attempt === 2) return
+        continue
+      }
+      throw err
+    }
+  }
 }
 
 async function seedRiverside(): Promise<void> {
