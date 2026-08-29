@@ -44,7 +44,7 @@ export async function getPageSections(pageSlug: string): Promise<PageSectionView
     if (!orgId) return null
 
     const total = await countCmsPageSections(orgId, pageSlug)
-    if (pageSlug === 'home' && total > 6) {
+    if (pageSlug === 'home' && total > 3) {
       // Prior race left duplicate seeds; wipe and reseed once.
       const { deleteCmsPageSectionsForPage } = await import('@/lib/cms/store')
       const { seedHomeSectionsIfEmpty } = await import('@/lib/cms/seed-page-sections')
