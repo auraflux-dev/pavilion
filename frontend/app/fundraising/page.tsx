@@ -18,6 +18,8 @@ import { FundraisingSectionNav } from '@/components/jump-nav/public-section-navs
 import { rollForwardSchoolYearCopy } from '@/lib/copy/roll-forward-school-year'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { MEMBERSHIP_CHOOSE_PATH } from '@/lib/membership-links'
+import { getPageSections } from '@/lib/api/page-sections'
+import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Star, ShoppingBag, Users, Heart, TrendingUp, Ticket, ArrowRight, RefreshCw,
@@ -48,6 +50,15 @@ function fmtDollars(n: number) {
 }
 
 export default async function FundraisingPage() {
+  const composed = await getPageSections('fundraising')
+  if (composed?.length) {
+    return (
+      <VisitorChrome pageKey="fundraising">
+        <PageSectionsRenderer sections={composed} />
+      </VisitorChrome>
+    )
+  }
+
   const [data, settings, ctas, page, sponsors, allocations, annualGoal, shellCopy] = await Promise.all([
     getFundraisingTotals(),
     getSiteSettings(),

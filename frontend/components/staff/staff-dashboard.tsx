@@ -41,6 +41,8 @@ import {
 } from '@/components/staff/staff-section-navs'
 import { StaffWorkspaceHub } from '@/components/staff/staff-workspace-hub'
 import { StaffPageContentPanel } from '@/components/staff/staff-page-content-panel'
+import { StaffPageSectionsPanel } from '@/components/staff/staff-page-sections-panel'
+import { StaffSiteBrandPanel } from '@/components/staff/staff-site-brand-panel'
 import { StaffPageThemePanel } from '@/components/staff/staff-page-theme-panel'
 import { StaffSiteSettingsPanel } from '@/components/staff/staff-site-settings-panel'
 import { StaffMembershipShirtDesignsPanel } from '@/components/staff/staff-membership-shirt-designs-panel'
@@ -256,6 +258,8 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   const canRetail = staffCanWorkspace(me, 'retail')
   const canDiscounts = staffCanWorkspace(me, 'discounts')
   const canContent = staffCanWorkspace(me, 'content')
+  const canPages = staffCanWorkspace(me, 'pages')
+  const canBrand = staffCanWorkspace(me, 'brand')
   const canPageTheme = staffCanWorkspace(me, 'pagetheme')
   const canSite = staffCanWorkspace(me, 'site')
   const canBoard = staffCanWorkspace(me, 'board')
@@ -300,6 +304,8 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     if (canMembership) items.push({ id: 'membership', label: wsLabel('membership') })
     if (canTiers) items.push({ id: 'tiers', label: wsLabel('tiers') })
     if (canContent) items.push({ id: 'content', label: wsLabel('content') })
+    if (canPages) items.push({ id: 'pages', label: wsLabel('pages') })
+    if (canBrand) items.push({ id: 'brand', label: wsLabel('brand') })
     if (canPageTheme) items.push({ id: 'pagetheme', label: wsLabel('pagetheme') })
     if (canSite) items.push({ id: 'site', label: wsLabel('site') })
     if (canBoard) items.push({ id: 'board', label: wsLabel('board') })
@@ -346,6 +352,8 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     canMembership,
     canTiers,
     canContent,
+    canPages,
+    canBrand,
     canPageTheme,
     canSite,
     canBoard,
@@ -1007,6 +1015,8 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
         {active === 'inbox' ? <StaffWorkspaceHub tab="inbox" /> : null}
         {active === 'calendar' ? <StaffWorkspaceHub tab="calendar" /> : null}
         {active === 'docs' ? <StaffWorkspaceHub tab="docs" /> : null}
+        {active === 'pages' && canPages ? <StaffPageSectionsPanel /> : null}
+        {active === 'brand' && canBrand ? <StaffSiteBrandPanel /> : null}
         {active === 'content' && canContent ? (
           <div className="space-y-4">
             <StaffPageContentPanel />

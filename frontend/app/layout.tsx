@@ -12,6 +12,7 @@ import { publicBrandFace } from '@/lib/demo/brand'
 import { isCommonsPlatform } from '@/lib/crm/active-trial'
 import { getActiveBrandPack } from '@/lib/crm/active-trial-server'
 import { isDemoInstance, publicSiteUrl } from '@/lib/demo/instance'
+import { resolveCmsLayoutBrand } from '@/lib/cms/resolve-layout-brand'
 import './globals.css'
 
 const _inter = Inter({ subsets: ['latin'] })
@@ -86,24 +87,43 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const pack = demo || commons ? await getActiveBrandPack() : null
+  const cmsLayout = demo || commons ? await resolveCmsLayoutBrand() : null
   const dataPto = pack?.slug || (demo ? 'riverside' : commons ? 'commons' : 'shms')
   const packBrand = pack?.brand ?? null
+  const mergedStyle = {
+    ...(packBrand?.colors
+      ? {
+          ['--brand-green']: packBrand.colors.primary,
+          ['--brand-dark']: packBrand.colors.dark,
+          ['--brand-accent']: packBrand.colors.accent,
+          ['--brand-warm']: packBrand.colors.warm,
+          ['--brand-soft']: packBrand.colors.soft,
+        }
+      : {}),
+    ...(cmsLayout?.cssVars ?? {}),
+  } as CSSProperties
+  const cmsClient = cmsLayout
+    ? {
+        logoUrl: cmsLayout.logoUrl || undefined,
+        ptoName: cmsLayout.ptoName || undefined,
+        schoolName: cmsLayout.schoolName || undefined,
+        cheer: cmsLayout.cheer || undefined,
+        fontSans: cmsLayout.fontSans || undefined,
+        colors: {
+          primary: cmsLayout.cssVars['--brand-green'],
+          dark: cmsLayout.cssVars['--brand-dark'],
+          accent: cmsLayout.cssVars['--brand-accent'],
+          warm: cmsLayout.cssVars['--brand-warm'],
+          soft: cmsLayout.cssVars['--brand-soft'],
+        },
+      }
+    : null
   return (
     <html
       lang="en"
       data-pto={dataPto}
       className="bg-background"
-      style={
-        packBrand?.colors
-          ? ({
-              ['--brand-green']: packBrand.colors.primary,
-              ['--brand-dark']: packBrand.colors.dark,
-              ['--brand-accent']: packBrand.colors.accent,
-              ['--brand-warm']: packBrand.colors.warm,
-              ['--brand-soft']: packBrand.colors.soft,
-            } as CSSProperties)
-          : undefined
-      }
+      style={Object.keys(mergedStyle).length ? mergedStyle : undefined}
     >
       <head>
         {demo || commons ? (
@@ -111,6 +131,9 @@ export default async function RootLayout({
             rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
           />
+        ) : null}
+        {cmsLayout?.faviconUrl ? (
+          <link rel="icon" href={cmsLayout.faviconUrl} />
         ) : null}
       </head>
       <body className="font-sans antialiased text-foreground">
@@ -122,7 +145,7 @@ export default async function RootLayout({
           Skip to main content
         </a>
         <CommonsSurfaceShell enabled={surfaceShell}>
-          <BrandPackShell brand={packBrand} slug={dataPto}>
+          <BrandPackShell brand={packBrand} slug={dataPto} cmsBrand={cmsClient}>
             <DemoBanner />
             {children}
           </BrandPackShell>

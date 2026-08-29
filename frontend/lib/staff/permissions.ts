@@ -6,6 +6,7 @@ import { STAFF_WORKSPACE_LABEL, type StaffWorkspace } from '@/lib/audience'
 import { COMMONS_DEMO_HIDDEN_WORKSPACES } from '@/lib/demo/commons-surface'
 import { DEMO_BRAND } from '@/lib/demo/brand'
 import { isDemoInstance, isPublicDemoInstance } from '@/lib/demo/instance'
+import { cmsPageBuilderEnabledPublic } from '@/lib/cms/page-builder-flag'
 import type { StaffRole } from '@/lib/staff/roles'
 
 export const STAFF_ROLE_LABEL: Record<StaffRole, string> = {
@@ -57,6 +58,8 @@ export const STAFF_PERMISSION_GROUPS: { id: string; label: string; items: StaffW
     label: 'Site & comms',
     items: [
       'content',
+      'pages',
+      'brand',
       'pagetheme',
       'site',
       'board',
@@ -120,6 +123,8 @@ export const WORKSPACE_ROLES: Record<StaffWorkspace, StaffRole[]> = {
   membership: ['membership', 'secretary', 'admin'],
   tiers: ['membership', 'secretary', 'admin'],
   content: ['marketing', 'secretary', 'retail', 'admin'],
+  pages: ['marketing', 'secretary', 'admin'],
+  brand: ['marketing', 'admin'],
   pagetheme: ['marketing', 'admin'],
   site: [
     'marketing',
@@ -216,6 +221,12 @@ export function staffCanWorkspace(
   workspace: StaffWorkspace,
 ): boolean {
   if (!staff) return false
+  if (
+    (workspace === 'pages' || workspace === 'brand') &&
+    !cmsPageBuilderEnabledPublic()
+  ) {
+    return false
+  }
   if (
     (isDemoInstance() || isPublicDemoInstance()) &&
     COMMONS_DEMO_HIDDEN_WORKSPACES.includes(workspace)

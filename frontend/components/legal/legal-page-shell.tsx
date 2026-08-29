@@ -2,6 +2,9 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { getLegalDoc, type LegalDoc } from '@/lib/api/legal'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { getPageSections } from '@/lib/api/page-sections'
+import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
+import { VisitorChrome } from '@/components/site/visitor-chrome'
 
 function LegalArticle({ doc }: { doc: LegalDoc }) {
   return (
@@ -26,6 +29,15 @@ function LegalArticle({ doc }: { doc: LegalDoc }) {
 }
 
 export async function LegalPageShell({ slug }: { slug: LegalDoc['slug'] }) {
+  const composed = await getPageSections(slug)
+  if (composed?.length) {
+    return (
+      <VisitorChrome pageKey={slug}>
+        <PageSectionsRenderer sections={composed} />
+      </VisitorChrome>
+    )
+  }
+
   const doc = await getLegalDoc(slug)
   return (
     <div className="min-h-screen flex flex-col">

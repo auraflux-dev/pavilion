@@ -15,6 +15,8 @@ import { ParentVideoSection } from '@/components/videos/parent-video-section'
 import { getVisitorVideoStrings, visitorString } from '@/lib/api/visitor-strings'
 import { VISITOR_VIDEO_DEFAULTS } from '@/lib/defaults/visitor-string-defaults'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { getPageSections } from '@/lib/api/page-sections'
+import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
 export const revalidate = 300
 
@@ -45,6 +47,15 @@ function parseHowSteps(bullets: string[]) {
 }
 
 export default async function CovePage() {
+  const composed = await getPageSections('cove')
+  if (composed?.length) {
+    return (
+      <VisitorChrome pageKey="cove">
+        <PageSectionsRenderer sections={composed} />
+      </VisitorChrome>
+    )
+  }
+
   const [allItems, featuredItems, spiritItems, catalog, storeCopy, howCopy, ctaCopy, spiritCopy, settings, videoStrings] =
     await Promise.all([
       getStoreItems(),

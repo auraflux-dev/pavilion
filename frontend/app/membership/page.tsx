@@ -17,10 +17,21 @@ import { MembershipSectionNav } from '@/components/jump-nav/public-section-navs'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isCommonsPlatform } from '@/lib/crm/active-trial'
+import { getPageSections } from '@/lib/api/page-sections'
+import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
 export const revalidate = 60
 
 export default async function MembershipPage() {
+  const composed = await getPageSections('membership')
+  if (composed?.length) {
+    return (
+      <VisitorChrome pageKey="membership">
+        <PageSectionsRenderer sections={composed} />
+      </VisitorChrome>
+    )
+  }
+
   const commons = isCommonsPlatform()
   const [settings, allTiers, faqItems, page, videoStrings] = await Promise.all([
     getSiteSettings(),

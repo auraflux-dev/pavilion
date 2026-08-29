@@ -48,6 +48,8 @@ export type StaffWorkspace =
  | 'help'
  | 'pagetheme'
  | 'signups'
+ | 'pages'
+ | 'brand'
 
 export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
  home: 'Home',
@@ -86,4 +88,6 @@ export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
  help: 'Help',
  pagetheme: 'Page CSS & strings',
  signups: 'Sign-up sheets',
+ pages: 'Pages',
+ brand: 'Brand',
 }

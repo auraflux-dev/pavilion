@@ -34,8 +34,25 @@ flowchart LR
 - `cms_collection_items` — generic collections (Board, FAQ, …) next
 - `cms_form_submissions` — volunteer/contact queues next
 
+## Page builder (demo / trial only)
+
+Feature flag: `cmsPageBuilderEnabled()` = demo instance or Pavilion product platform. **Never on SHMS production builds.**
+
+| Piece | Role |
+|-------|------|
+| `cms_page_sections` | Ordered section instances per page slug |
+| `cms_site_brand` | Logo, colors, fonts, display names |
+| Staff **Pages** | Section library + drag-reorder composer |
+| Staff **Brand** | Site-wide visual identity |
+| Visitor | `getPageSections` → `PageSectionsRenderer`, else legacy React page |
+
+Home auto-seeds sections from legacy PageContent on first demo read. Other pages stay legacy until Staff opens Pages for that slug.
+
+Do **not** promote page-builder tables to SHMS/Wix until intentionally cut over.
+
 Schema: [`frontend/lib/cms/schema-sql.ts`](../frontend/lib/cms/schema-sql.ts)  
-Store: [`frontend/lib/cms/store.ts`](../frontend/lib/cms/store.ts)
+Store: [`frontend/lib/cms/store.ts`](../frontend/lib/cms/store.ts)  
+Flag: [`frontend/lib/cms/page-builder-flag.ts`](../frontend/lib/cms/page-builder-flag.ts)
 
 ## SHMS publish path
 
@@ -55,10 +72,9 @@ Do **not** treat Wix as the place to author shared product content long-term. Pa
 
 | Actor | Email | Scope |
 |-------|--------|--------|
-| **Pavilion platform owner** | `@onpavilion.com` (e.g. `robert@onpavilion.com`) | Overarching CMS admin. Can switch customer org and edit that org’s Pavilion CMS. |
+| **Pavilion platform owner** | `@onpavilion.com` (e.g. `robert@onpavilion.com`) | Overarching CMS admin. Can switch customer org and edit that CMS. |
 | **Customer staff** | Per-school (e.g. `@shmspto.org` on SHMS) | Staff for **one** organization only |
 
 Platform owners are seeded in `platform_owners` + person/staff on `org_pavilion`. Staff UI shows **Pavilion platform CMS** org switcher when `platformOwner` is true.
 
 Staff product app is **commons-pto-demo** / platform hosts (not marketing commons-site alone). Create the Google Workspace mailbox `robert@onpavilion.com` in ops; code already recognizes `@onpavilion.com` as platform staff.
-

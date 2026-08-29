@@ -389,3 +389,263 @@ export async function seedDemoCmsIfEmpty(orgId: string): Promise<void> {
     })
   }
 }
+
+export type CmsPageSectionRow = {
+  id: string
+  pageSlug: string
+  sortOrder: number
+  sectionType: string
+  data: Record<string, unknown>
+  active: boolean
+}
+
+function parseSectionJson(raw: string): Record<string, unknown> {
+  try {
+    const v = JSON.parse(raw || '{}')
+    return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {}
+  } catch {
+    return {}
+  }
+}
+
+export async function listCmsPageSections(
+  orgId: string,
+  pageSlug: string,
+  activeOnly = true,
+): Promise<CmsPageSectionRow[]> {
+  const res = await sqlForOrg<{
+    id: string
+    page_slug: string
+    sort_order: number
+    section_type: string
+    data_json: string
+    active: boolean
+  }>(
+    orgId,
+    activeOnly
+      ? `select id, page_slug, sort_order, section_type, data_json, active
+           from cms_page_sections
+          where organization_id = $1 and page_slug = $2 and active = true
+          order by sort_order asc`
+      : `select id, page_slug, sort_order, section_type, data_json, active
+           from cms_page_sections
+          where organization_id = $1 and page_slug = $2
+          order by sort_order asc`,
+    [orgId, pageSlug],
+  )
+  return res.rows.map((row) => ({
+    id: row.id,
+    pageSlug: row.page_slug,
+    sortOrder: row.sort_order,
+    sectionType: row.section_type,
+    data: parseSectionJson(row.data_json),
+    active: row.active,
+  }))
+}
+
+export async function countCmsPageSections(orgId: string, pageSlug: string): Promise<number> {
+  const res = await sqlForOrg<{ n: string }>(
+    orgId,
+    `select count(*)::text as n from cms_page_sections
+      where organization_id = $1 and page_slug = $2`,
+    [orgId, pageSlug],
+  )
+  return Number(res.rows[0]?.n ?? 0)
+}
+
+export async function upsertCmsPageSection(
+  orgId: string,
+  input: {
+    id?: string
+    pageSlug: string
+    sortOrder?: number
+    sectionType: string
+    data?: Record<string, unknown>
+    active?: boolean
+  },
+): Promise<CmsPageSectionRow> {
+  const id = String(input.id ?? '').trim() || randomUUID()
+  const dataJson = JSON.stringify(input.data ?? {})
+  const sortOrder = Number(input.sortOrder ?? 0) || 0
+  await sqlForOrg(
+    orgId,
+    `insert into cms_page_sections (
+       id, organization_id, page_slug, sort_order, section_type, data_json, active, updated_at
+     ) values ($1, $2, $3, $4, $5, $6, $7, now())
+     on conflict (id) do update set
+       page_slug = excluded.page_slug,
+       sort_order = excluded.sort_order,
+       section_type = excluded.section_type,
+       data_json = excluded.data_json,
+       active = excluded.active,
+       updated_at = now()`,
+    [
+      id,
+      orgId,
+      input.pageSlug.trim(),
+      sortOrder,
+      input.sectionType.trim(),
+      dataJson,
+      input.active !== false,
+    ],
+  )
+  return {
+    id,
+    pageSlug: input.pageSlug.trim(),
+    sortOrder,
+    sectionType: input.sectionType.trim(),
+    data: input.data ?? {},
+    active: input.active !== false,
+  }
+}
+
+export async function reorderCmsPageSections(
+  orgId: string,
+  pageSlug: string,
+  orderedIds: string[],
+): Promise<void> {
+  for (let i = 0; i < orderedIds.length; i++) {
+    await sqlForOrg(
+      orgId,
+      `update cms_page_sections
+          set sort_order = $3, updated_at = now()
+        where organization_id = $1 and page_slug = $2 and id = $4`,
+      [orgId, pageSlug, i, orderedIds[i]],
+    )
+  }
+}
+
+export async function deleteCmsPageSection(orgId: string, id: string): Promise<void> {
+  await sqlForOrg(
+    orgId,
+    `delete from cms_page_sections where organization_id = $1 and id = $2`,
+    [orgId, id],
+  )
+}
+
+export type CmsSiteBrand = {
+  logoUrl: string
+  faviconUrl: string
+  colorPrimary: string
+  colorDark: string
+  colorAccent: string
+  colorWarm: string
+  colorSoft: string
+  fontSans: string
+  fontDisplay: string
+  ptoName: string
+  schoolName: string
+  cheer: string
+}
+
+const EMPTY_BRAND: CmsSiteBrand = {
+  logoUrl: '',
+  faviconUrl: '',
+  colorPrimary: '',
+  colorDark: '',
+  colorAccent: '',
+  colorWarm: '',
+  colorSoft: '',
+  fontSans: '',
+  fontDisplay: '',
+  ptoName: '',
+  schoolName: '',
+  cheer: '',
+}
+
+export async function getCmsSiteBrand(orgId: string): Promise<CmsSiteBrand | null> {
+  const res = await sqlForOrg<{
+    logo_url: string
+    favicon_url: string
+    color_primary: string
+    color_dark: string
+    color_accent: string
+    color_warm: string
+    color_soft: string
+    font_sans: string
+    font_display: string
+    pto_name: string
+    school_name: string
+    cheer: string
+  }>(
+    orgId,
+    `select logo_url, favicon_url, color_primary, color_dark, color_accent, color_warm, color_soft,
+            font_sans, font_display, pto_name, school_name, cheer
+       from cms_site_brand where organization_id = $1 limit 1`,
+    [orgId],
+  )
+  const row = res.rows[0]
+  if (!row) return null
+  return {
+    logoUrl: row.logo_url ?? '',
+    faviconUrl: row.favicon_url ?? '',
+    colorPrimary: row.color_primary ?? '',
+    colorDark: row.color_dark ?? '',
+    colorAccent: row.color_accent ?? '',
+    colorWarm: row.color_warm ?? '',
+    colorSoft: row.color_soft ?? '',
+    fontSans: row.font_sans ?? '',
+    fontDisplay: row.font_display ?? '',
+    ptoName: row.pto_name ?? '',
+    schoolName: row.school_name ?? '',
+    cheer: row.cheer ?? '',
+  }
+}
+
+export async function upsertCmsSiteBrand(
+  orgId: string,
+  input: Partial<CmsSiteBrand>,
+): Promise<CmsSiteBrand> {
+  const current = (await getCmsSiteBrand(orgId)) ?? EMPTY_BRAND
+  const next: CmsSiteBrand = {
+    logoUrl: input.logoUrl ?? current.logoUrl,
+    faviconUrl: input.faviconUrl ?? current.faviconUrl,
+    colorPrimary: input.colorPrimary ?? current.colorPrimary,
+    colorDark: input.colorDark ?? current.colorDark,
+    colorAccent: input.colorAccent ?? current.colorAccent,
+    colorWarm: input.colorWarm ?? current.colorWarm,
+    colorSoft: input.colorSoft ?? current.colorSoft,
+    fontSans: input.fontSans ?? current.fontSans,
+    fontDisplay: input.fontDisplay ?? current.fontDisplay,
+    ptoName: input.ptoName ?? current.ptoName,
+    schoolName: input.schoolName ?? current.schoolName,
+    cheer: input.cheer ?? current.cheer,
+  }
+  await sqlForOrg(
+    orgId,
+    `insert into cms_site_brand (
+       organization_id, logo_url, favicon_url, color_primary, color_dark, color_accent,
+       color_warm, color_soft, font_sans, font_display, pto_name, school_name, cheer, updated_at
+     ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13, now())
+     on conflict (organization_id) do update set
+       logo_url = excluded.logo_url,
+       favicon_url = excluded.favicon_url,
+       color_primary = excluded.color_primary,
+       color_dark = excluded.color_dark,
+       color_accent = excluded.color_accent,
+       color_warm = excluded.color_warm,
+       color_soft = excluded.color_soft,
+       font_sans = excluded.font_sans,
+       font_display = excluded.font_display,
+       pto_name = excluded.pto_name,
+       school_name = excluded.school_name,
+       cheer = excluded.cheer,
+       updated_at = now()`,
+    [
+      orgId,
+      next.logoUrl,
+      next.faviconUrl,
+      next.colorPrimary,
+      next.colorDark,
+      next.colorAccent,
+      next.colorWarm,
+      next.colorSoft,
+      next.fontSans,
+      next.fontDisplay,
+      next.ptoName,
+      next.schoolName,
+      next.cheer,
+    ],
+  )
+  return next
+}

@@ -10,10 +10,21 @@ import { formString } from '@/lib/copy/form-string'
 import { Calendar, ArrowRight } from 'lucide-react'
 import { EventsSectionNav } from '@/components/jump-nav/public-section-navs'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { getPageSections } from '@/lib/api/page-sections'
+import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
 export const revalidate = 300
 
 export default async function EventsPage() {
+  const composed = await getPageSections('events')
+  if (composed?.length) {
+    return (
+      <VisitorChrome pageKey="events">
+        <PageSectionsRenderer sections={composed} />
+      </VisitorChrome>
+    )
+  }
+
   let events: WixEvent[] = []
   let error = false
   const [{ getSiteSettings }, page, eventsCopy] = await Promise.all([

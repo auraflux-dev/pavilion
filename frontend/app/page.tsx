@@ -16,8 +16,19 @@ import { isProgramsCatalogListed } from '@/lib/programs/public-catalog'
 import { getPageStrings } from '@/lib/api/page-strings'
 import { pickString } from '@/lib/api/page-strings-shared'
 import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
+import { getPageSections } from '@/lib/api/page-sections'
+import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
 export default async function HomePage() {
+  const composed = await getPageSections('home')
+  if (composed?.length) {
+    return (
+      <VisitorChrome pageKey="home">
+        <PageSectionsRenderer sections={composed} />
+      </VisitorChrome>
+    )
+  }
+
   const inSession = await isSchoolInSession()
   const programsAccess = await canViewProgramsCatalogNow()
   const reviewHost = await isProgramsReviewHost()

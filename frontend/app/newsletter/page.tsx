@@ -4,6 +4,8 @@ import { NewsletterSignup } from '@/components/newsletter/newsletter-signup'
 import { getPageContent } from '@/lib/api/page-content'
 import { getNewsletterSignupCopy } from '@/lib/api/visitor-forms-copy'
 import { Mail, Bell, Calendar, BookOpen } from 'lucide-react'
+import { getPageSections } from '@/lib/api/page-sections'
+import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
 const NEWSLETTER_PERKS = [
   {
@@ -29,6 +31,15 @@ const NEWSLETTER_PERKS = [
 ]
 
 export default async function NewsletterPage() {
+  const composed = await getPageSections('newsletter')
+  if (composed?.length) {
+    return (
+      <VisitorChrome pageKey="newsletter">
+        <PageSectionsRenderer sections={composed} />
+      </VisitorChrome>
+    )
+  }
+
   const [page, signupCopy] = await Promise.all([
     getPageContent('newsletter'),
     getNewsletterSignupCopy(),

@@ -8,6 +8,8 @@ import { Users } from 'lucide-react'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { MEMBERSHIP_CHOOSE_PATH } from '@/lib/membership-links'
+import { getPageSections } from '@/lib/api/page-sections'
+import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
 export const revalidate = 300
 
@@ -33,6 +35,15 @@ const COMMITTEES = [
 ]
 
 export default async function MeetingsPage() {
+  const composed = await getPageSections('meetings')
+  if (composed?.length) {
+    return (
+      <VisitorChrome pageKey="meetings">
+        <PageSectionsRenderer sections={composed} />
+      </VisitorChrome>
+    )
+  }
+
   const [page, ptoMeetings, seacMeetings, msaacMeetings, leafMeetings] = await Promise.all([
     getPageContent('meetings'),
     getMeetingsByCommittee('PTO').catch(() => []),

@@ -8,6 +8,8 @@ import { getContactFormCopy } from '@/lib/api/visitor-forms-copy'
 import { CONTACT_DEFAULTS } from '@/lib/defaults/page-content'
 import { normalizeStaffInbox, resolveTreasurerInboxes } from '@/lib/staff/inbox'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { getPageSections } from '@/lib/api/page-sections'
+import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
 export async function generateMetadata() {
   return {
@@ -19,6 +21,15 @@ export async function generateMetadata() {
 export const revalidate = 300
 
 export default async function ContactPage() {
+  const composed = await getPageSections('contact')
+  if (composed?.length) {
+    return (
+      <VisitorChrome pageKey="contact">
+        <PageSectionsRenderer sections={composed} />
+      </VisitorChrome>
+    )
+  }
+
   const [settings, page, formCopy] = await Promise.all([
     getSiteSettings(),
     getPageContent('contact'),

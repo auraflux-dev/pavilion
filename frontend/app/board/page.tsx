@@ -10,6 +10,8 @@ import { BoardSectionNav } from '@/components/jump-nav/public-section-navs'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
 import { BoardMemberPhoto } from '@/components/board/board-member-photo'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { getPageSections } from '@/lib/api/page-sections'
+import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
 export const revalidate = 300 // refresh from Wix CMS every 5 minutes
 
@@ -23,6 +25,15 @@ export async function generateMetadata() {
 }
 
 export default async function BoardPage() {
+  const composed = await getPageSections('board')
+  if (composed?.length) {
+    return (
+      <VisitorChrome pageKey="board">
+        <PageSectionsRenderer sections={composed} />
+      </VisitorChrome>
+    )
+  }
+
   const [members, settings, page, videoStrings] = await Promise.all([
     getBoardMembers(),
     getSiteSettings(),

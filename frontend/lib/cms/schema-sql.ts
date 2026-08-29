@@ -76,4 +76,35 @@ create table if not exists cms_form_submissions (
 
 create index if not exists cms_form_submissions_org_kind_idx
   on cms_form_submissions (organization_id, form_kind, submitted_at desc);
+
+create table if not exists cms_page_sections (
+  id               text primary key,
+  organization_id  text not null references organizations (id) on delete cascade,
+  page_slug        text not null,
+  sort_order       int not null default 0,
+  section_type     text not null,
+  data_json        text not null default '{}',
+  active           boolean not null default true,
+  updated_at       timestamptz not null default now()
+);
+
+create index if not exists cms_page_sections_org_page_idx
+  on cms_page_sections (organization_id, page_slug, sort_order);
+
+create table if not exists cms_site_brand (
+  organization_id  text primary key references organizations (id) on delete cascade,
+  logo_url         text not null default '',
+  favicon_url      text not null default '',
+  color_primary    text not null default '',
+  color_dark       text not null default '',
+  color_accent     text not null default '',
+  color_warm       text not null default '',
+  color_soft       text not null default '',
+  font_sans        text not null default '',
+  font_display     text not null default '',
+  pto_name         text not null default '',
+  school_name      text not null default '',
+  cheer            text not null default '',
+  updated_at       timestamptz not null default now()
+);
 `

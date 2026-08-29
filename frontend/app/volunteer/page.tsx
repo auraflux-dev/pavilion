@@ -6,10 +6,21 @@ import { getVolunteerOpportunities } from '@/lib/api/volunteers'
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { getPageContent } from '@/lib/api/page-content'
 import { VolunteerSectionNav } from '@/components/jump-nav/public-section-navs'
+import { getPageSections } from '@/lib/api/page-sections'
+import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
 export const revalidate = 300
 
 export default async function VolunteerPage() {
+  const composed = await getPageSections('volunteer')
+  if (composed?.length) {
+    return (
+      <VisitorChrome pageKey="volunteer">
+        <PageSectionsRenderer sections={composed} />
+      </VisitorChrome>
+    )
+  }
+
   const [opportunities, settings, page] = await Promise.all([
     getVolunteerOpportunities(),
     getSiteSettings(),
