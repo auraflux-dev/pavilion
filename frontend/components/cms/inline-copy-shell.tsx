@@ -1,14 +1,23 @@
 'use client'
 
 import { InlineCopyProvider } from '@/components/cms/inline-copy-context'
-import { InlineCopyToolbar } from '@/components/cms/inline-copy-toolbar'
+import { LiveEditorProvider } from '@/components/cms/live-editor-context'
+import { LiveEditorToolbar } from '@/components/cms/live-editor-toolbar'
 
-/** Wrap visitor / portal chrome so admins can toggle inline CMS copy editing. */
-export function InlineCopyShell({ children }: { children: React.ReactNode }) {
+/** Visitor/portal shell: inline copy + live page layout editor for admins. */
+export function InlineCopyShell({
+  pageSlug = 'home',
+  children,
+}: {
+  pageSlug?: string
+  children: React.ReactNode
+}) {
   return (
     <InlineCopyProvider>
-      {children}
-      <InlineCopyToolbar />
+      <LiveEditorProvider pageSlug={pageSlug}>
+        {children}
+        <LiveEditorToolbar />
+      </LiveEditorProvider>
     </InlineCopyProvider>
   )
 }

@@ -204,78 +204,49 @@ function SectionSpacer({ data }: { data: SpacerSectionData }) {
   return <div className={h} aria-hidden />
 }
 
+export function PageSectionBlock({ section }: { section: PageSectionView }) {
+  switch (section.type) {
+    case 'hero':
+      return <SectionHero data={parseSectionData('hero', section.data) as HeroSectionData} />
+    case 'richText':
+      return (
+        <SectionRichText data={parseSectionData('richText', section.data) as RichTextSectionData} />
+      )
+    case 'bullets':
+      return (
+        <SectionBullets data={parseSectionData('bullets', section.data) as BulletsSectionData} />
+      )
+    case 'cta':
+      return <SectionCta data={parseSectionData('cta', section.data) as CtaSectionData} />
+    case 'media':
+      return <SectionMedia data={parseSectionData('media', section.data) as MediaSectionData} />
+    case 'pdfList':
+      return (
+        <SectionPdfList data={parseSectionData('pdfList', section.data) as PdfListSectionData} />
+      )
+    case 'gridCards':
+      return (
+        <SectionGridCards
+          data={parseSectionData('gridCards', section.data) as GridCardsSectionData}
+        />
+      )
+    case 'contact':
+      return (
+        <SectionContact data={parseSectionData('contact', section.data) as ContactSectionData} />
+      )
+    case 'spacer':
+      return <SectionSpacer data={parseSectionData('spacer', section.data) as SpacerSectionData} />
+    default:
+      return null
+  }
+}
+
 export function PageSectionsRenderer({ sections }: { sections: PageSectionView[] }) {
   return (
     <>
-      {sections.map((section) => {
-        switch (section.type) {
-          case 'hero':
-            return (
-              <SectionHero
-                key={section.id}
-                data={parseSectionData('hero', section.data) as HeroSectionData}
-              />
-            )
-          case 'richText':
-            return (
-              <SectionRichText
-                key={section.id}
-                data={parseSectionData('richText', section.data) as RichTextSectionData}
-              />
-            )
-          case 'bullets':
-            return (
-              <SectionBullets
-                key={section.id}
-                data={parseSectionData('bullets', section.data) as BulletsSectionData}
-              />
-            )
-          case 'cta':
-            return (
-              <SectionCta
-                key={section.id}
-                data={parseSectionData('cta', section.data) as CtaSectionData}
-              />
-            )
-          case 'media':
-            return (
-              <SectionMedia
-                key={section.id}
-                data={parseSectionData('media', section.data) as MediaSectionData}
-              />
-            )
-          case 'pdfList':
-            return (
-              <SectionPdfList
-                key={section.id}
-                data={parseSectionData('pdfList', section.data) as PdfListSectionData}
-              />
-            )
-          case 'gridCards':
-            return (
-              <SectionGridCards
-                key={section.id}
-                data={parseSectionData('gridCards', section.data) as GridCardsSectionData}
-              />
-            )
-          case 'contact':
-            return (
-              <SectionContact
-                key={section.id}
-                data={parseSectionData('contact', section.data) as ContactSectionData}
-              />
-            )
-          case 'spacer':
-            return (
-              <SectionSpacer
-                key={section.id}
-                data={parseSectionData('spacer', section.data) as SpacerSectionData}
-              />
-            )
-          default:
-            return null
-        }
-      })}
+      {sections.map((section) => (
+        <PageSectionBlock key={section.id} section={section} />
+      ))}
     </>
   )
 }

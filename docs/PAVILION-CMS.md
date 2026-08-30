@@ -42,11 +42,12 @@ Feature flag: `cmsPageBuilderEnabled()` = demo instance or Pavilion product plat
 |-------|------|
 | `cms_page_sections` | Ordered section instances per page slug |
 | `cms_site_brand` | Logo, colors, fonts, display names |
-| Staff **Pages** | Section library + drag-reorder composer |
-| Staff **Brand** | Site-wide visual identity |
-| Visitor | `getPageSections` → `PageSectionsRenderer`, else legacy React page |
+| `cms_custom_pages` | Staff-created pages at `/p/[slug]` |
+| Staff **Pages** / **Brand** | Backend composer |
+| **Live editor** (admin on visitor site) | Bottom bar: Edit page layout, Edit copy, New page |
+| Visitor | `getPageSections` → renderer, else legacy React page |
 
-Home auto-seeds sections from legacy PageContent on first demo read. Other pages stay legacy until Staff opens Pages for that slug.
+Home auto-seeds sections from legacy PageContent on first demo read. Other built-in pages stay legacy until an admin confirms “Edit page layout” (converts to sections). Custom pages are always section-based.
 
 Do **not** promote page-builder tables to SHMS/Wix until intentionally cut over.
 

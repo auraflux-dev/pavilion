@@ -107,4 +107,19 @@ create table if not exists cms_site_brand (
   cheer            text not null default '',
   updated_at       timestamptz not null default now()
 );
+
+create table if not exists cms_custom_pages (
+  id               text primary key,
+  organization_id  text not null references organizations (id) on delete cascade,
+  slug             text not null,
+  title            text not null default '',
+  show_in_nav      boolean not null default true,
+  sort_order       int not null default 99,
+  active           boolean not null default true,
+  updated_at       timestamptz not null default now(),
+  unique (organization_id, slug)
+);
+
+create index if not exists cms_custom_pages_org_idx
+  on cms_custom_pages (organization_id, sort_order);
 `

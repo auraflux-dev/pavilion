@@ -50,8 +50,19 @@ export async function GET(req: NextRequest) {
   }
 
   const sections = await listCmsPageSections(orgId, pageSlug, false)
+  const { listCmsCustomPages } = await import('@/lib/cms/store')
+  const custom = await listCmsCustomPages(orgId, false)
+  const pages = [
+    ...COMPOSABLE_PAGES.map((p) => ({ slug: p.slug, label: p.label, href: p.href, custom: false })),
+    ...custom.map((p) => ({
+      slug: p.slug,
+      label: p.title,
+      href: `/p/${p.slug}`,
+      custom: true,
+    })),
+  ]
   return NextResponse.json({
-    pages: COMPOSABLE_PAGES,
+    pages,
     pageSlug,
     sections: sections.map((s) => ({
       ...s,
@@ -100,6 +111,95 @@ export async function POST(req: NextRequest) {
     const pageSlug = String(body.pageSlug ?? '').trim()
     if (pageSlug) revalidatePublicPage(pageSlug)
     return NextResponse.json({ ok: true })
+  }
+
+  if (action === 'create-page') {
+    const rawSlug = String(body.slug ?? '').trim().toLowerCase()
+    const slug = rawSlug.replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '')
+    const title = String(body.title ?? '').trim() || slug
+    const reserved = new Set([
+      'staff',
+      'member-portal',
+      'api',
+      'auth',
+      'cart',
+      'checkout',
+      'login',
+      'join',
+      'review',
+      'trial',
+      'p',
+      'programs',
+      'events',
+      'signups',
+      'survey',
+      'legal',
+      'newsletter',
+      'home',
+      'membership',
+      'volunteer',
+      'board',
+      'contact',
+      'fundraising',
+      'cove',
+      'meetings',
+      'privacy',
+      'terms',
+      'photo-release',
+      'data-security',
+    ])
+    if (!slug || reserved.has(slug) || COMPOSABLE_PAGES.some((p) => p.slug === slug)) {
+      return NextResponse.json({ error: 'Invalid or reserved slug' }, { status: 400 })
+    }
+    const { upsertCmsCustomPage, upsertCmsNavLink, upsertCmsPageSection } = await import(
+      '@/lib/cms/store'
+    )
+    const page = await upsertCmsCustomPage(orgId, {
+      slug,
+      title,
+      showInNav: body.showInNav !== false,
+      active: true,
+    })
+    await upsertCmsPageSection(orgId, {
+      pageSlug: slug,
+      sortOrder: 0,
+      sectionType: 'hero',
+      data: emptySectionData('hero') as unknown as Record<string, unknown>,
+      active: true,
+    })
+    // Seed hero title from page title
+    const sections = await (await import('@/lib/cms/store')).listCmsPageSections(orgId, slug, false)
+    const hero = sections[0]
+    if (hero) {
+      await upsertCmsPageSection(orgId, {
+        id: hero.id,
+        pageSlug: slug,
+        sortOrder: 0,
+        sectionType: 'hero',
+        data: {
+          ...emptySectionData('hero'),
+          title,
+          body: 'Add your content with Edit page layout.',
+          ctaLabel: '',
+          ctaHref: '',
+        } as unknown as Record<string, unknown>,
+        active: true,
+      })
+    }
+    if (page.showInNav) {
+      await upsertCmsNavLink(orgId, {
+        label: title,
+        href: `/p/${slug}`,
+        sortOrder: page.sortOrder,
+        showInNav: true,
+        showInFooter: false,
+        active: true,
+      })
+    }
+    const { revalidatePath } = await import('next/cache')
+    revalidatePath(`/p/${slug}`)
+    revalidatePath('/', 'layout')
+    return NextResponse.json({ page, href: `/p/${slug}` })
   }
 
   if (action === 'add') {

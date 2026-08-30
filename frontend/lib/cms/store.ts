@@ -660,3 +660,123 @@ export async function upsertCmsSiteBrand(
   )
   return next
 }
+
+export type CmsCustomPage = {
+  id: string
+  slug: string
+  title: string
+  showInNav: boolean
+  sortOrder: number
+  active: boolean
+}
+
+export async function listCmsCustomPages(
+  orgId: string,
+  activeOnly = true,
+): Promise<CmsCustomPage[]> {
+  const res = await sqlForOrg<{
+    id: string
+    slug: string
+    title: string
+    show_in_nav: boolean
+    sort_order: number
+    active: boolean
+  }>(
+    orgId,
+    activeOnly
+      ? `select id, slug, title, show_in_nav, sort_order, active
+           from cms_custom_pages
+          where organization_id = $1 and active = true
+          order by sort_order asc, title asc`
+      : `select id, slug, title, show_in_nav, sort_order, active
+           from cms_custom_pages
+          where organization_id = $1
+          order by sort_order asc, title asc`,
+    [orgId],
+  )
+  return res.rows.map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    showInNav: row.show_in_nav,
+    sortOrder: row.sort_order,
+    active: row.active,
+  }))
+}
+
+export async function getCmsCustomPage(
+  orgId: string,
+  slug: string,
+): Promise<CmsCustomPage | null> {
+  const res = await sqlForOrg<{
+    id: string
+    slug: string
+    title: string
+    show_in_nav: boolean
+    sort_order: number
+    active: boolean
+  }>(
+    orgId,
+    `select id, slug, title, show_in_nav, sort_order, active
+       from cms_custom_pages
+      where organization_id = $1 and slug = $2
+      limit 1`,
+    [orgId, slug],
+  )
+  const row = res.rows[0]
+  if (!row) return null
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    showInNav: row.show_in_nav,
+    sortOrder: row.sort_order,
+    active: row.active,
+  }
+}
+
+export async function upsertCmsCustomPage(
+  orgId: string,
+  input: {
+    id?: string
+    slug: string
+    title: string
+    showInNav?: boolean
+    sortOrder?: number
+    active?: boolean
+  },
+): Promise<CmsCustomPage> {
+  const slug = input.slug
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  if (!slug) throw new Error('slug required')
+  const id = String(input.id ?? '').trim() || randomUUID()
+  const title = String(input.title ?? '').trim() || slug
+  const sortOrder = Number(input.sortOrder ?? 99) || 99
+  await sqlForOrg(
+    orgId,
+    `insert into cms_custom_pages (
+       id, organization_id, slug, title, show_in_nav, sort_order, active, updated_at
+     ) values ($1, $2, $3, $4, $5, $6, $7, now())
+     on conflict (organization_id, slug) do update set
+       title = excluded.title,
+       show_in_nav = excluded.show_in_nav,
+       sort_order = excluded.sort_order,
+       active = excluded.active,
+       updated_at = now()`,
+    [
+      id,
+      orgId,
+      slug,
+      title,
+      input.showInNav !== false,
+      sortOrder,
+      input.active !== false,
+    ],
+  )
+  const row = await getCmsCustomPage(orgId, slug)
+  if (!row) throw new Error('Failed to save page')
+  return row
+}

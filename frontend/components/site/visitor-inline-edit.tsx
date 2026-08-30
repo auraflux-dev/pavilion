@@ -2,11 +2,13 @@
 
 import { InlineCopyShell } from '@/components/cms/inline-copy-shell'
 
-type Props = {
+/** Enables admin inline copy + live page layout editing on the public site. */
+export function VisitorInlineEdit({
+  pageSlug = 'home',
+  children,
+}: {
+  pageSlug?: string
   children: React.ReactNode
-}
-
-/** Client wrapper for admin inline copy editing on public pages. */
-export function VisitorInlineEdit({ children }: Props) {
-  return <InlineCopyShell>{children}</InlineCopyShell>
+}) {
+  return <InlineCopyShell pageSlug={pageSlug}>{children}</InlineCopyShell>
 }

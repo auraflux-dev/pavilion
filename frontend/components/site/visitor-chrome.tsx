@@ -5,6 +5,7 @@ import { getPageContent } from '@/lib/api/page-content'
 import { PageThemeRoot, PageThemeStyles } from '@/components/site/page-theme'
 import { VisitorInlineEdit } from '@/components/site/visitor-inline-edit'
 import { CmsCopyBoundary } from '@/components/cms/cms-copy-boundary'
+import { LivePageMain } from '@/components/cms/live-page-main'
 import { cmsBundlesForPage } from '@/lib/copy/cms-pages'
 
 type Props = {
@@ -30,7 +31,7 @@ export async function VisitorChrome({
   const content = await getPageContent(pageKey)
   const bundles = [...new Set([...cmsBundlesForPage(pageKey, cmsPages), 'site-chrome'])]
   return (
-    <VisitorInlineEdit>
+    <VisitorInlineEdit pageSlug={pageKey}>
       <CmsCopyBoundary pages={bundles}>
         <div className="min-h-screen flex flex-col">
           <PageThemeStyles pageKey={pageKey} css={content.customCss ?? ''} />
@@ -38,7 +39,7 @@ export async function VisitorChrome({
           <Navbar />
           <PageThemeRoot pageKey={pageKey} className="flex-1 flex flex-col">
             <main id="main-content" className={mainClassName} style={mainStyle}>
-              {children}
+              <LivePageMain>{children}</LivePageMain>
             </main>
           </PageThemeRoot>
           {showFooter ? <Footer /> : null}
