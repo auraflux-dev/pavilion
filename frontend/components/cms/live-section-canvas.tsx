@@ -413,6 +413,7 @@ export function LiveSectionCanvas() {
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error || 'Save failed')
+      if (d.demo) throw new Error(d.message || 'Preview only. Changes did not save.')
       setStatus('Section saved.')
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Save failed')
@@ -435,6 +436,10 @@ export function LiveSectionCanvas() {
     const d = await r.json()
     if (!r.ok) {
       setStatus(d.error || 'Add failed')
+      return
+    }
+    if (d.demo) {
+      setStatus(d.message || 'Preview only. Changes did not save.')
       return
     }
     await reloadSections()

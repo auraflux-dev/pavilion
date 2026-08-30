@@ -69,6 +69,7 @@ export function LiveEditorToolbar() {
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error || 'Create failed')
+      if (d.demo) throw new Error(d.message || 'Preview only. Page was not created.')
       setShowCreate(false)
       router.push(`/p/${clean}?edit=1`)
     } catch (err) {

@@ -27,8 +27,18 @@ const JOIN_ALLOW = new Set([
   '/api/auth/email-login',
 ])
 
+/** Pavilion CMS page builder (demo/trial Neon). Not Wix school data. */
+const CMS_PAGE_BUILDER_WRITE_ALLOW = new Set([
+  '/api/staff/page-sections',
+  '/api/staff/site-brand',
+  '/api/staff/cms-media/upload',
+  '/api/staff/page-content',
+  '/api/staff/inline-copy',
+])
+
 export function isDemoJoinAllowPath(pathname: string): boolean {
   if (JOIN_ALLOW.has(pathname)) return true
+  if (CMS_PAGE_BUILDER_WRITE_ALLOW.has(pathname)) return true
   if (pathname.startsWith('/api/id')) return true
   if (pathname.startsWith('/api/commons')) return true
   if (pathname.startsWith('/api/webhooks/commons')) return true
