@@ -553,7 +553,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
                 {isPavilionProductPlatformPublic()
                   ? `Private trial staff for your school.\nPick an area below, or use the top nav.\nStart with Membership, Events, or Site.`
-                  : `Roles: ${me.roles.join(', ')}.\nStaff login: ${me.email}.\nPick an area below, or use the top nav.\nOnly what you need for that job.}`}
+                  : `Roles: ${me.roles.join(', ')}.\nStaff login: ${me.email}.\nPick an area below, or use the top nav.\nOnly what you need for that job.`}
               </p>
               {isPavilionProductPlatformPublic() ? null : (
                 <div className="mt-3">
