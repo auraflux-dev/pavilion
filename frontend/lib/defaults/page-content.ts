@@ -77,7 +77,8 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   }),
   /** Home page community strip. Wix PageContent page = home-community */
   'home-community': empty('home-community', {
-    title: 'Building community together.\nGo Stingrays!',
+    title:
+      'Fall & Spring enrichment registration is open.\nPaid members through Sep 7 · everyone Sep 8–13.',
     body: '',
   }),
   membership: empty('membership', {
@@ -94,9 +95,10 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
     body: 'Stay connected with everything happening at Stone Hill Middle School: meetings, celebrations, competitions, and more.',
   }),
   programs: empty('programs', {
-    eyebrow: 'Fall 2026 Enrichment',
+    eyebrow: 'Fall 2026 & Spring 2027',
     title: 'Enrichment Programs',
-    body: 'Evening classes for grades 6 to 8.',
+    body:
+      'Evening classes for grades 6 to 8: Young Entrepreneurs, Essay Writing & Academic Composition, Robotics, and Competitive Math. Paid-member priority through Mon Sep 7; open to all signed-in parents Sep 8–13.',
     bullets: [],
     sectionTitle: 'Fall 2026 schedule',
     sectionBody:

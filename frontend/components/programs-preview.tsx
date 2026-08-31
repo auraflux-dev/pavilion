@@ -1,24 +1,17 @@
 import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-react'
 import { getFeaturedPrograms } from '@/lib/api/programs'
-import { getPageContent } from '@/lib/api/page-content'
 import { displayProgramName } from '@/lib/programs/display-name'
 import { programPublicPath } from '@/lib/programs/public-path'
 import { programDateBadge } from '@/lib/programs/schedule'
-
+import { matchFall2026EpClass } from '@/lib/programs/fall-2026-ep'
 import { BrandImageWash } from '@/components/brand/brand-image-wash'
 
 export async function ProgramsPreview() {
-  const [programs, page] = await Promise.all([
-    getFeaturedPrograms(),
-    getPageContent('programs').catch(() => null),
-  ])
+  const programs = await getFeaturedPrograms()
 
   // Fallback if CMS is empty. show placeholder cards
   const display = programs.length > 0 ? programs : []
-  const sectionBlurb =
-    String(page?.sectionBody || page?.body || '').trim() ||
-    'After-school enrichment for students.'
 
   return (
     <section
@@ -45,10 +38,14 @@ export async function ProgramsPreview() {
             Enrichment programs
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#5A6070] max-w-2xl mx-auto leading-relaxed whitespace-pre-line">
-            {sectionBlurb}
+            {`Registration open now for Fall 2026 & Spring 2027.\nPaid members through Mon Sep 7 · all parents Sep 8–13.\nYoung Entrepreneurs · Essay Writing & Academic Composition · Robotics · Competitive Math.`}
             {'\n'}
+            <a href="/programs" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
+              Enroll at /programs
+            </a>
+            {' · '}
             <a href="/programs/fall-2026" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
-              Full schedule
+              Fall schedule
             </a>
           </p>
         </div>
@@ -62,8 +59,10 @@ export async function ProgramsPreview() {
               .replace(/&amp;/g, '&')
               .replace(/\s+/g, ' ')
               .trim()
+            const ep = matchFall2026EpClass(program.name)
+            // Public catalog redacts startDate until Staff approves EP nights.
             const badge = programDateBadge(program.startDate)
-            const whenShort = [program.dayOfWeek, program.classTime]
+            const whenShort = [ep?.dayOfWeek ?? program.dayOfWeek, ep?.classTime ?? program.classTime]
               .map((s) => String(s ?? '').trim())
               .filter(Boolean)
               .join(' · ')

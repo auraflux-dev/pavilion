@@ -17,8 +17,6 @@ import { BrandImageWash } from '@/components/brand/brand-image-wash'
 import { canViewProgramsCatalogNow, isProgramsReviewHost } from '@/lib/programs/public-access'
 import { isProgramsCatalogListed } from '@/lib/programs/public-catalog'
 import { isSpringCatalogListed } from '@/lib/programs/season'
-import { getPageSections } from '@/lib/api/page-sections'
-import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
 export const revalidate = 300 // revalidate every 5 minutes
 
@@ -27,15 +25,6 @@ export default async function ProgramsPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const composed = await getPageSections('programs')
-  if (composed?.length) {
-    return (
-      <VisitorChrome pageKey="programs">
-        <PageSectionsRenderer sections={composed} />
-      </VisitorChrome>
-    )
-  }
-
   let programs: Program[] = []
   let error = false
 
@@ -73,7 +62,8 @@ export default async function ProgramsPage({
             body: catalogOpen
               ? isDemoInstance()
                 ? 'After-school clubs and classes for elementary grades.'
-                : 'Evening classes for grades 6 to 8.'
+                : page.body?.trim() ||
+                  'Evening classes for grades 6 to 8: Young Entrepreneurs, Essay Writing & Academic Composition, Robotics, and Competitive Math. Paid members through Sep 7; all parents Sep 8–13.'
               : inSession
                 ? 'Check back here once you receive the announcement that registration is open.'
                 : vanillaizeIfDemo(

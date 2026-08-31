@@ -1,6 +1,5 @@
 import { getSiteSettings } from '@/lib/api/site-settings'
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
-import { isMemberRequest } from '@/lib/is-member-request'
 import { humanizePublicCopy } from '@/lib/copy/humanize-public-copy'
 import { AnnouncementBarClient } from './announcement-bar-client'
 
@@ -21,13 +20,5 @@ export async function AnnouncementBar() {
   // WhatsApp / grade-group invites stay out of the top bar
   if (/whatsapp/i.test(text)) return null
 
-  const member = await isMemberRequest()
-  const link6 = member ? settings.get('announcement6thLink', '') : ''
-  const link7 = member ? settings.get('announcement7thLink', '') : ''
-  const link8 = member ? settings.get('announcement8thLink', '') : ''
-  if (link6 || link7 || link8) return null
-
-  return (
-    <AnnouncementBarClient text={text} link6="" link7="" link8="" />
-  )
+  return <AnnouncementBarClient text={text} link6="" link7="" link8="" />
 }
