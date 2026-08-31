@@ -13,7 +13,18 @@ function resolveHomeImage(raw: string, fallback: string): string {
 }
 
 export async function Hero() {
-  const [settings, content] = await Promise.all([getSiteSettings(), getPageContent('home')])
+  const { getActiveBrandPack } = await import('@/lib/crm/active-trial-server')
+  const { resolveRequestSurface } = await import('@/lib/crm/product-surface-server')
+  const [settings, cmsContent, pack, surface] = await Promise.all([
+    getSiteSettings(),
+    getPageContent('home'),
+    getActiveBrandPack(),
+    resolveRequestSurface(),
+  ])
+  // Demo prospect pack: use pack home copy/images, not Riverside CMS.
+  const packHome = surface === 'demo' && pack?.pages?.home ? pack.pages.home : null
+  const content = packHome || cmsContent
+  const packSettings = surface === 'demo' && pack ? pack.settings : null
   const inSession = settings.getBool('schoolInSession', false)
   const commons = isPavilionProductPlatform()
   const stats = [
@@ -30,11 +41,11 @@ export async function Hero() {
   ]
 
   const topImage = resolveHomeImage(
-    settings.get('homeHeroImageTopUrl', '/home/hero-a.jpg'),
+    packSettings?.homeHeroImageTopUrl || settings.get('homeHeroImageTopUrl', '/home/hero-a.jpg'),
     '/home/hero-a.jpg'
   )
   const bottomImage = resolveHomeImage(
-    settings.get('homeHeroImageBottomUrl', '/home/hero-b.jpg'),
+    packSettings?.homeHeroImageBottomUrl || settings.get('homeHeroImageBottomUrl', '/home/hero-b.jpg'),
     '/home/hero-b.jpg'
   )
   const topAlt = settings.get(
