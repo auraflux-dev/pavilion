@@ -1,4 +1,4 @@
-import { isDemoInstance } from '@/lib/demo/instance'
+import { demoDeploymentEnabled, isDemoInstance } from '@/lib/demo/instance'
 import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 import { trialPackForSlug, type TrialBrand } from '@/lib/crm/trial-packs'
 
@@ -135,8 +135,9 @@ export function publicBrandFace(): PublicBrandFace {
     const pack = trialPackForSlug(slug)
     if (pack) return brandFaceFromTrial(pack.brand)
   }
-  if (isDemoInstance()) return DEMO_BRAND
-  // Unified platform without a pack: neutral, never Riverside sample.
+  // Unified demo+platform: demoDeploymentEnabled is true, so default chrome is Riverside.
+  // Trial hosts resolve packs on the server (Navbar/Footer); do not use this for vanity hosts.
+  if (demoDeploymentEnabled() || isDemoInstance()) return DEMO_BRAND
   if (isPavilionProductPlatform()) return VANILLA_PUBLIC_BRAND
   return STONE_HILL_BRAND
 }
