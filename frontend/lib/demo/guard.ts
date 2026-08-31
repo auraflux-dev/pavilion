@@ -23,6 +23,7 @@ export function isWriteMethod(method: string): boolean {
 const JOIN_ALLOW = new Set([
   '/api/demo/join',
   '/api/demo/switch',
+  '/api/demo/brand',
   '/api/auth/logout',
   '/api/auth/email-login',
 ])

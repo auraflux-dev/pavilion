@@ -23,10 +23,12 @@ import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  // Vanilla pack preview on demo: skip Riverside CMS sections so the blank look shows.
+  // Prospect / vanilla pack on demo: skip Riverside CMS so the pack skin actually shows.
   const { getActiveBrandPack } = await import('@/lib/crm/active-trial-server')
+  const { resolveRequestSurface } = await import('@/lib/crm/product-surface-server')
   const pack = await getActiveBrandPack()
-  const skipDemoCms = pack?.slug === 'vanilla'
+  const surface = await resolveRequestSurface()
+  const skipDemoCms = surface === 'demo' && Boolean(pack)
   const composed = skipDemoCms ? null : await getPageSections('home')
   if (composed?.length) {
     return (
