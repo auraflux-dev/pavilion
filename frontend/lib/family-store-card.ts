@@ -105,10 +105,11 @@ export async function familyHasPriorStoreCardCredit(parentEmail: string): Promis
     const byEmail = await client.items
       .query('Payments')
       .eq('parentEmail', email)
-      .eq('status', 'Paid')
-      .limit(50)
+      .limit(80)
       .find()
-    for (const p of (byEmail.items ?? []) as Array<{ source?: string }>) {
+    for (const p of (byEmail.items ?? []) as Array<{ source?: string; status?: string }>) {
+      const st = String(p.status ?? '').toLowerCase()
+      if (st !== 'paid' && st !== 'loaded') continue
       if (countsAsPrior(String(p.source ?? ''))) return true
     }
 
@@ -117,10 +118,11 @@ export async function familyHasPriorStoreCardCredit(parentEmail: string): Promis
       const byStudent = await client.items
         .query('Payments')
         .eq('studentId', id)
-        .eq('status', 'Paid')
         .limit(50)
         .find()
-      for (const p of (byStudent.items ?? []) as Array<{ source?: string }>) {
+      for (const p of (byStudent.items ?? []) as Array<{ source?: string; status?: string }>) {
+        const st = String(p.status ?? '').toLowerCase()
+        if (st !== 'paid' && st !== 'loaded') continue
         if (countsAsPrior(String(p.source ?? ''))) return true
       }
     }

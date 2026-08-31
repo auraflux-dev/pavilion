@@ -93,6 +93,52 @@ async function resolveGiftCardCredit(tier: PaidTier): Promise<number> {
   return entry?.giftCardCredit ?? 0
 }
 
+/**
+ * Base Cove dollars already granted via membership_gift_card loads (excludes bonus).
+ * Unused Square balance rolls over on its own; upgrades must only top up what was never loaded.
+ */
+export async function sumLoadedMembershipCoveCreditBase(
+  parentEmail: string,
+): Promise<number> {
+  const email = parentEmail.trim().toLowerCase()
+  if (!email) return 0
+  try {
+    const client = getWixClient()
+    const found = await client.items
+      .query('Payments')
+      .eq('parentEmail', email)
+      .eq('source', 'membership_gift_card')
+      .limit(50)
+      .find()
+    let total = 0
+    for (const row of (found.items ?? []) as Array<{
+      status?: string
+      amount?: number
+      notes?: string
+    }>) {
+      const status = String(row.status ?? '').trim().toLowerCase()
+      if (status !== 'loaded' && status !== 'paid') continue
+      const notes = String(row.notes ?? '')
+      const baseFromNotes = notes.match(/credit\s+\$([0-9]+(?:\.[0-9]+)?)/i)
+      if (baseFromNotes) {
+        total += Number(baseFromNotes[1]) || 0
+        continue
+      }
+      const bonusFromNotes = notes.match(/\+\s*([0-9]+(?:\.[0-9]+)?)\s*%/)
+      const loaded = Number(row.amount) || 0
+      if (bonusFromNotes && loaded > 0) {
+        const pct = Number(bonusFromNotes[1]) || 0
+        total += pct > 0 ? loaded / (1 + pct / 100) : loaded
+        continue
+      }
+      total += loaded
+    }
+    return Math.round(total * 100) / 100
+  } catch {
+    return 0
+  }
+}
+
 async function resolveCheckoutProduct(
   tier: PaidTier
 ): Promise<{ productId: string; variantId: string } | null> {
@@ -189,16 +235,19 @@ export async function applyPaidMembership(opts: {
     updatedStudentIds.push(student._id)
 
     // Gift-card credit once per order (or once when moving free → paid without orderId).
-    // Upgrades only load the tier credit delta so Reef→Lagoon does not re-grant the full Lagoon amount.
+    // Top up to this tier's credit using what was actually loaded before — unused Square
+    // balance already rolls over; never assume a prior tier load that never happened.
     if (!giftCardResult) {
       const { normalizeMembershipTier } = await import('@/lib/staff/members-roster')
       const previousNormalized = normalizeMembershipTier(previousTier)
       const fullCredit = await resolveGiftCardCredit(tier)
-      const priorCredit =
+      const alreadyLoadedBase = await sumLoadedMembershipCoveCreditBase(email)
+      const priorAssumed =
         previousNormalized === 'free'
           ? 0
           : await resolveGiftCardCredit(previousNormalized)
-      const creditDollars = Math.max(0, fullCredit - priorCredit)
+      const priorCredit = Math.min(priorAssumed, alreadyLoadedBase)
+      const creditDollars = Math.max(0, fullCredit - alreadyLoadedBase)
       const shouldLoad =
         creditDollars > 0 &&
         (opts.orderId
@@ -319,10 +368,14 @@ export async function applyPaidMembership(opts: {
               notes:
                 bonusPercent > 0
                   ? `Membership ${tier} family Cove credit $${creditDollars} → $${loadedDollars.toFixed(2)} (+${bonusPercent}%)${
-                      priorCredit > 0 ? ` (upgrade delta from $${priorCredit})` : ''
+                      alreadyLoadedBase > 0
+                        ? ` (top-up; $${alreadyLoadedBase} already loaded; prior tier assumed $${priorCredit})`
+                        : ''
                     }`
                   : `Membership ${tier} family Cove credit${
-                      priorCredit > 0 ? ` (upgrade delta from $${priorCredit})` : ''
+                      alreadyLoadedBase > 0
+                        ? ` (top-up; $${alreadyLoadedBase} already loaded)`
+                        : ''
                     }`,
             })
           } catch {
