@@ -1,8 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { displayMembershipTier } from '@/lib/demo/brand'
+import { defaultUtmCampaign } from '@/lib/staff/newsletter-utm'
 import { useLiveCommerceGate } from '@/lib/demo/commons-surface-context'
 import {
   STAFF_FILTER_CARD,
@@ -15,6 +17,9 @@ import {
   StaffSectionTab,
   useStaffExclusiveSection,
 } from '@/components/staff/staff-exclusive-section'
+import { StaffRichEmailComposer } from '@/components/staff/staff-rich-email-composer'
+import { htmlToPlainText } from '@/lib/staff/email-html'
+import { staffInboxComposeHref } from '@/lib/staff/inbox-compose-link'
 
 const MEMBERSHIP_SECTIONS = [
   'membership-invite',
@@ -46,7 +51,10 @@ type ParentRow = {
 type Summary = {
   parents: number
   paid: number
+  /** Joined the new site as free (Memberships row). */
   free: number
+  /** Directory/Jumbula-only free — no Memberships join. */
+  freeLegacy?: number
   withPhone: number
 }
 
@@ -68,9 +76,25 @@ export function StaffMembershipPanel() {
   const [waLinks, setWaLinks] = useState({ grade6: '', grade7: '', grade8: '' })
 
   const [subject, setSubject] = useState('')
+  /** Rich HTML body from the composer (portal/WhatsApp use plain-text strip). */
   const [body, setBody] = useState('')
   const [alsoPortal, setAlsoPortal] = useState(true)
   const [waGrade, setWaGrade] = useState<'6' | '7' | '8' | 'all'>('all')
+  /** Outreach audience: large paid/free buckets (independent of roster accordion). */
+  const [outreachGroup, setOutreachGroup] = useState<'all' | 'paid' | 'free' | 'free_legacy'>('paid')
+  /** Second filter: specific paid tier, or all paid tiers. */
+  const [outreachPaidTier, setOutreachPaidTier] = useState<
+    'all' | 'reef' | 'lagoon' | 'tide'
+  >('all')
+  const [attachments, setAttachments] = useState<
+    Array<{ key: string; filename: string; mimeType: string }>
+  >([])
+  const [attachmentStatus, setAttachmentStatus] = useState('')
+  const attachFileRef = useRef<HTMLInputElement>(null)
+  const [heroImageUrl, setHeroImageUrl] = useState('')
+
+  const plainBody = htmlToPlainText(body)
+  const hasMessage = Boolean(plainBody || subject)
 
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteFirst, setInviteFirst] = useState('')
@@ -118,27 +142,88 @@ export function StaffMembershipPanel() {
     void loadRoster()
   }, [loadRoster])
 
+  function resolveOutreachTier(): string {
+    if (outreachGroup === 'free') return 'free'
+    if (outreachGroup === 'free_legacy') return 'free_legacy'
+    if (outreachPaidTier === 'reef' || outreachPaidTier === 'lagoon' || outreachPaidTier === 'tide') {
+      return outreachPaidTier
+    }
+    if (outreachGroup === 'paid') return 'paid'
+    return 'all'
+  }
+
+  function outreachAudienceLabel(resolvedTier: string): string {
+    if (resolvedTier === 'free') return 'free members (joined site)'
+    if (resolvedTier === 'free_legacy') return 'free legacy (directory only)'
+    if (resolvedTier === 'paid') return 'all paid members'
+    if (resolvedTier === 'reef') return 'Reef members'
+    if (resolvedTier === 'lagoon') return 'Lagoon members'
+    if (resolvedTier === 'tide') return 'Tide members'
+    return 'all parents'
+  }
+
+  function outreachEmailPayload(extra: Record<string, unknown> = {}) {
+    return {
+      channel: 'email' as const,
+      subject,
+      body: plainBody,
+      htmlBody: body.trim() || undefined,
+      tier: resolveOutreachTier(),
+      grade,
+      heroImageUrl: heroImageUrl.trim() || undefined,
+      attachmentKeys: attachments.length ? attachments : undefined,
+      utmCampaign: defaultUtmCampaign(subject || 'membership-outreach'),
+      trackClicks: true,
+      trackOpens: true,
+      ...extra,
+    }
+  }
+
+  async function onAttachmentSelected(files: FileList | null) {
+    const file = files?.[0]
+    if (!file) return
+    setBusy(true)
+    setStatus('')
+    setAttachmentStatus('')
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const r = await fetch('/api/staff/newsletter/upload-attachment', {
+        method: 'POST',
+        body: form,
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Upload failed')
+      setAttachments((prev) => [
+        ...prev,
+        { key: d.key, filename: d.filename, mimeType: d.mimeType },
+      ])
+      setAttachmentStatus(`Attached ${d.filename}.`)
+      setStatus(`Attached ${d.filename}.`)
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Attachment upload failed')
+    } finally {
+      setBusy(false)
+      if (attachFileRef.current) attachFileRef.current.value = ''
+    }
+  }
+
   async function previewEmail() {
     setBusy(true)
     setStatus('')
     try {
+      const audienceTier = resolveOutreachTier()
       const r = await fetch('/api/staff/membership/outreach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          channel: 'email',
-          subject,
-          body,
-          tier,
-          grade,
-          dryRun: true,
-          alsoPortal: false,
-        }),
+        body: JSON.stringify(
+          outreachEmailPayload({ dryRun: true, alsoPortal: false }),
+        ),
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Preview failed')
       setStatus(
-        `Preview: ${d.recipientCount} recipients` +
+        `Preview: ${d.recipientCount} ${outreachAudienceLabel(audienceTier)}` +
           (d.recipientsPreview?.length
             ? `. E.g. ${d.recipientsPreview.slice(0, 5).join(', ')}`
             : ''),
@@ -154,14 +239,23 @@ export function StaffMembershipPanel() {
     setBusy(true)
     setStatus('')
     try {
+      const audienceTier = resolveOutreachTier()
       const r = await fetch('/api/staff/membership/outreach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channel: 'portal', subject, body, tier, grade }),
+        body: JSON.stringify({
+          channel: 'portal',
+          subject,
+          body: plainBody,
+          tier: audienceTier,
+          grade,
+        }),
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Send failed')
-      setStatus(`Sent to portal inbox (${d.recipientCount ?? 0} matched parents).`)
+      setStatus(
+        `Sent to portal inbox (${d.recipientCount ?? 0} ${outreachAudienceLabel(audienceTier)}).`,
+      )
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Send failed')
     } finally {
@@ -176,15 +270,9 @@ export function StaffMembershipPanel() {
       const r = await fetch('/api/staff/membership/outreach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          channel: 'email',
-          subject,
-          body,
-          tier,
-          grade,
-          dryRun: false,
-          alsoPortal,
-        }),
+        body: JSON.stringify(
+          outreachEmailPayload({ dryRun: false, alsoPortal }),
+        ),
       })
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Email failed')
@@ -192,7 +280,10 @@ export function StaffMembershipPanel() {
       if (d.send?.mode === 'gmail') {
         setStatus(
           `Gmail: sent ${d.send.sent}, failed ${d.send.failed}` +
-            (d.portalInserted ? ' · also posted to portal inbox' : ''),
+            (d.portalInserted ? ' · also posted to portal inbox' : '') +
+            (attachments.length
+              ? ` · ${attachments.length} attachment${attachments.length === 1 ? '' : 's'}`
+              : ''),
         )
       } else if (d.mailto) {
         window.location.href = d.mailto
@@ -220,7 +311,7 @@ export function StaffMembershipPanel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           channel: 'whatsapp',
-          message: body || subject,
+          message: plainBody || subject,
           whatsappGrade: waGrade,
         }),
       })
@@ -527,8 +618,8 @@ export function StaffMembershipPanel() {
             </label>
             {summary ? (
               <p className="text-[11px] text-[#5A6070]">
-                {summary.parents} parents · {summary.paid} paid · {summary.free} free ·{' '}
-                {summary.withPhone} with phone
+                {summary.parents} in view · {summary.paid} paid · {summary.free} free
+                joined · {summary.freeLegacy ?? 0} free legacy · {summary.withPhone} with phone
                 {busy ? ' · Loading…' : ''}
               </p>
             ) : null}
@@ -557,7 +648,8 @@ export function StaffMembershipPanel() {
                   className={STAFF_FILTER_SELECT}
                 >
                   <option value="all">All parents</option>
-                  <option value="free">Free only</option>
+                  <option value="free">Free joined (site)</option>
+                  <option value="free_legacy">Free legacy (directory)</option>
                   <option value="paid">Paid only</option>
                   <option value="reef">Reef</option>
                   <option value="lagoon">Lagoon</option>
@@ -616,12 +708,12 @@ export function StaffMembershipPanel() {
                   </ul>
                 </div>
                 <div className="flex flex-col gap-1 shrink-0">
-                  <a
-                    href={`mailto:${encodeURIComponent(m.parentEmail)}`}
+                  <Link
+                    href={staffInboxComposeHref(m.parentEmail)}
                     className="text-xs font-bold underline text-[var(--brand-green)]"
                   >
                     Email
-                  </a>
+                  </Link>
                   {m.parentPhone ? (
                     <a
                       href={`https://wa.me/${m.parentPhone.replace(/\D/g, '')}`}
@@ -650,25 +742,122 @@ export function StaffMembershipPanel() {
         <div>
           <h2 className="text-lg font-bold">Outreach</h2>
           <p className="text-xs text-[#5A6070] mt-1">
-            Audience follows the roster filters above. Portal inbox always works.
+            Pick who gets this message below (paid vs free, or Reef / Lagoon / Tide). Portal
+            inbox always works.
             {emailConfigured
-              ? ' Mass email sends from your Google Workspace mailbox via Gmail API.'
-              : ' Mass email opens your mail app with BCC until you Connect Google as membership@ (Staff → Inbox) or set GMAIL_* on Vercel.'}
+              ? ' Mass email sends from your signed-in @shmspto.org mailbox (Connect Google once in Staff → Inbox).'
+              : ' Mass email needs Connect Google while signed in as your role address (Staff → Inbox), or set GMAIL_* on Vercel for the shared send mailbox only.'}
           </p>
         </div>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          <label className="text-xs font-semibold text-[#5A6070] space-y-1">
+            Member group
+            <select
+              value={outreachGroup}
+              onChange={(e) => {
+                const next = e.target.value as 'all' | 'paid' | 'free' | 'free_legacy'
+                setOutreachGroup(next)
+                if (next === 'free' || next === 'free_legacy') setOutreachPaidTier('all')
+              }}
+              className="block w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+            >
+              <option value="paid">All paid members</option>
+              <option value="free">Free members (joined site)</option>
+              <option value="free_legacy">Free legacy (directory only)</option>
+              <option value="all">All parents</option>
+            </select>
+          </label>
+          <label className="text-xs font-semibold text-[#5A6070] space-y-1">
+            Paid tier
+            <select
+              value={outreachPaidTier}
+              disabled={outreachGroup === 'free' || outreachGroup === 'free_legacy'}
+              onChange={(e) => {
+                const next = e.target.value as 'all' | 'reef' | 'lagoon' | 'tide'
+                setOutreachPaidTier(next)
+                if (next !== 'all' && (outreachGroup === 'free' || outreachGroup === 'free_legacy')) {
+                  setOutreachGroup('paid')
+                }
+                if (next !== 'all' && outreachGroup === 'all') setOutreachGroup('paid')
+              }}
+              className="block w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A] disabled:opacity-50"
+            >
+              <option value="all">All paid tiers (Reef + Lagoon + Tide)</option>
+              <option value="reef">Reef only</option>
+              <option value="lagoon">Lagoon only</option>
+              <option value="tide">Tide only</option>
+            </select>
+          </label>
+        </div>
+        <p className="text-[11px] text-[#5A6070]">
+          Sending to: <strong>{outreachAudienceLabel(resolveOutreachTier())}</strong>
+          {grade ? ` · grade ${grade}` : ''}. Use Preview audience to confirm the count.
+        </p>
+
         <input
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           placeholder="Subject"
           className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
         />
-        <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          rows={5}
-          placeholder="Message body"
-          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-        />
+        <div className="space-y-1">
+          <p className="text-xs font-semibold text-[#5A6070]">Email body</p>
+          <StaffRichEmailComposer html={body} onChange={setBody} />
+          <p className="text-[11px] text-[#5A6070]">
+            Bold, lists, links, and headings are included in Gmail. Portal inbox and WhatsApp
+            use a plain-text version.
+          </p>
+        </div>
+        <label className="text-xs font-semibold text-[#5A6070] space-y-1 block">
+          Hero image URL (optional)
+          <input
+            value={heroImageUrl}
+            onChange={(e) => setHeroImageUrl(e.target.value)}
+            placeholder="https://… (shown above the message in email)"
+            className="block w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal text-[#1A1A1A]"
+          />
+        </label>
+        <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-3 space-y-2">
+          <p className="text-xs font-semibold text-[#1A1A1A]">Attachments (optional)</p>
+          <input
+            ref={attachFileRef}
+            type="file"
+            accept=".pdf,image/png,image/jpeg"
+            className="hidden"
+            onChange={(e) => void onAttachmentSelected(e.target.files)}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={busy}
+            onClick={() => attachFileRef.current?.click()}
+          >
+            Attach file (PDF or image)
+          </Button>
+          {attachmentStatus ? (
+            <p className="text-xs text-[var(--brand-green)]">{attachmentStatus}</p>
+          ) : null}
+          {attachments.length ? (
+            <ul className="text-xs text-[#5A6070] space-y-1">
+              {attachments.map((a) => (
+                <li key={a.key} className="flex items-center gap-2">
+                  <span>{a.filename}</span>
+                  <button
+                    type="button"
+                    className="underline text-[var(--brand-green)]"
+                    onClick={() =>
+                      setAttachments((prev) => prev.filter((x) => x.key !== a.key))
+                    }
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
         <label className="flex items-center gap-2 text-xs text-[#5A6070]">
           <input
             type="checkbox"
@@ -681,14 +870,14 @@ export function StaffMembershipPanel() {
           <Button
             type="button"
             variant="outline"
-            disabled={busy || !subject || !body}
+            disabled={busy || !subject || !plainBody}
             onClick={() => void previewEmail()}
           >
             Preview audience
           </Button>
           <Button
             type="button"
-            disabled={busy || !subject || !body}
+            disabled={busy || !subject || !plainBody}
             onClick={() => void sendPortal()}
             className="text-white"
             style={{ backgroundColor: 'var(--brand-green)' }}
@@ -697,7 +886,7 @@ export function StaffMembershipPanel() {
           </Button>
           <Button
             type="button"
-            disabled={busy || !subject || !body}
+            disabled={busy || !subject || !plainBody}
             onClick={() => void sendEmail()}
             className="text-white"
             style={{ backgroundColor: 'var(--brand-dark)' }}
@@ -726,7 +915,7 @@ export function StaffMembershipPanel() {
             </select>
             <Button
               type="button"
-              disabled={busy || !(body || subject)}
+              disabled={busy || !hasMessage}
               onClick={() => void openWhatsApp()}
               className="text-white"
               style={{ backgroundColor: '#128C7E' }}

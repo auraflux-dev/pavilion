@@ -17,7 +17,7 @@ import {
   validateMassEmailDraft,
   type EmailAttachment,
 } from '@/lib/staff/mass-email'
-import { defaultUtmCampaign } from '@/lib/staff/newsletter-utm'
+import { defaultUtmCampaign, tagUrlsInHtml, tagUrlsInText } from '@/lib/staff/newsletter-utm'
 import { prepareTrackedNewsletterSend } from '@/lib/staff/newsletter-tracking'
 import { loadNewsletterBrandingFromKeys } from '@/lib/staff/newsletter-branding'
 import { buildNewsletterHtml } from '@/lib/staff/newsletter-html'
@@ -73,6 +73,8 @@ export type NewsletterExecuteInput = {
   actorPersonalEmail?: string
   /** R2 keys from /api/staff/newsletter/upload-attachment */
   attachmentKeys?: Array<{ key: string; filename: string; mimeType: string }>
+  /** Sanitized HTML fragment for branded email body (optional; falls back to plain text). */
+  htmlBody?: string
 }
 
 export type NewsletterExecuteResult = {
@@ -173,7 +175,15 @@ async function archiveNewsletter(opts: {
 }) {
   if (opts.customEmails.length) return false
   const audience =
-    opts.grade ? 'grade' : opts.tier === 'free' ? 'free' : opts.tier === 'paid' ? 'paid' : 'all'
+    opts.grade
+      ? 'grade'
+      : opts.tier === 'free'
+        ? 'free'
+        : opts.tier === 'free_legacy'
+          ? 'free_legacy'
+          : opts.tier === 'paid'
+            ? 'paid'
+            : 'all'
   try {
     const client = getWixClient()
     await client.items.insert('Newsletters', {
@@ -229,8 +239,6 @@ export async function executeNewsletterEmail(
   const alsoPortal = input.alsoPortal !== false
   const customEmails = Array.isArray(input.emails) ? input.emails.map(String) : []
   const utmCampaign = defaultUtmCampaign(subject, String(input.utmCampaign ?? '').trim())
-  const trackClicks = input.trackClicks !== false
-  const trackOpens = input.trackOpens === true
   const sendAudience: NewsletterSendAudience =
     input.sendAudience === 'test' ||
     input.sendAudience === 'subscribers' ||
@@ -239,6 +247,8 @@ export async function executeNewsletterEmail(
       ? input.sendAudience
       : 'members'
   const isTestAudience = sendAudience === 'test'
+  const trackClicks = input.trackClicks !== false
+  const trackOpens = isTestAudience ? input.trackOpens === true : input.trackOpens !== false
   const isSubscribers = sendAudience === 'subscribers'
   const isPaidAudience = sendAudience === 'paid'
   const isScoop = sendAudience === 'scoop'
@@ -313,11 +323,28 @@ export async function executeNewsletterEmail(
     (await loadSiteSetting('contactAddress')) ||
     '23415 Evergreen Ridge Drive, Ashburn, VA 20148'
 
+  const richHtmlBody = String(input.htmlBody ?? '').trim()
   let outboundBody = message
+  let outboundHtml = richHtmlBody || undefined
   let archiveBody = message
   let newsletterSendId: string | null = null
   const staffEmail = input.actorEmail.trim().toLowerCase()
   const fromName = input.actorName || staffEmail
+
+  const utmMedium = isSubscribers
+    ? 'email-signup'
+    : isScoop
+      ? 'email-scoop'
+      : isPaidAudience
+        ? 'email-paid'
+        : isTestAudience
+          ? 'email-test'
+          : 'email'
+  const utmOpts = {
+    campaign: effectiveUtmCampaign,
+    source: 'newsletter' as const,
+    medium: utmMedium,
+  }
 
   const emailAttachments: EmailAttachment[] = []
   for (const meta of input.attachmentKeys ?? []) {
@@ -339,21 +366,12 @@ export async function executeNewsletterEmail(
     attachments: emailAttachments.length ? emailAttachments : undefined,
   }
 
-  if (!dryRun && !isTestAudience) {
+  if (!dryRun) {
     try {
       const prepared = await prepareTrackedNewsletterSend({
         body: message,
-        utm: {
-          campaign: effectiveUtmCampaign,
-          source: 'newsletter',
-          medium: isSubscribers
-            ? 'email-signup'
-            : isScoop
-              ? 'email-scoop'
-              : isPaidAudience
-                ? 'email-paid'
-                : 'email',
-        },
+        htmlBody: richHtmlBody || undefined,
+        utm: utmOpts,
         trackClicks,
         sentByEmail: input.actorEmail,
         subject: effectiveSubject,
@@ -363,33 +381,14 @@ export async function executeNewsletterEmail(
         recipientCount: recipients.length,
       })
       outboundBody = prepared.bodyForSend
+      outboundHtml = prepared.htmlForSend ?? outboundHtml
       archiveBody = prepared.bodyForArchive
       newsletterSendId = prepared.sendId
     } catch (err) {
       console.warn('[newsletter-execute] tracking setup failed', err)
-    }
-  } else if (!dryRun && isTestAudience && trackClicks) {
-    try {
-      const prepared = await prepareTrackedNewsletterSend({
-        body: message,
-        utm: {
-          campaign: effectiveUtmCampaign,
-          source: 'newsletter',
-          medium: 'email-test',
-        },
-        trackClicks: true,
-        sentByEmail: input.actorEmail,
-        subject: effectiveSubject,
-        tier: 'test',
-        grade: '',
-        templateId: input.templateId,
-        recipientCount: recipients.length,
-      })
-      outboundBody = prepared.bodyForSend
-      archiveBody = prepared.bodyForArchive
-      newsletterSendId = prepared.sendId
-    } catch (err) {
-      console.warn('[newsletter-execute] test tracking failed', err)
+      outboundBody = tagUrlsInText(message, utmOpts)
+      outboundHtml = richHtmlBody ? tagUrlsInHtml(richHtmlBody, utmOpts) : undefined
+      archiveBody = outboundBody
     }
   }
 
@@ -406,6 +405,8 @@ export async function executeNewsletterEmail(
     canvaThumbnailUrl: input.canvaThumbnailUrl || undefined,
     canvaTitle: input.canvaTitle || undefined,
     physicalAddress,
+    utm: utmOpts,
+    htmlBody: outboundHtml || undefined,
   }
 
   function personalizeForRecipient(to: string) {
@@ -432,6 +433,7 @@ export async function executeNewsletterEmail(
       html: buildNewsletterHtml({
         ...htmlOptsBase,
         textBody: coreText,
+        htmlBody: outboundHtml ? applyMergeFields(outboundHtml, vars) : undefined,
         merge: vars,
         unsubscribeUrl: unsubPage,
       }),
@@ -446,6 +448,7 @@ export async function executeNewsletterEmail(
       ? buildNewsletterHtml({
           ...htmlOptsBase,
           textBody: outboundBody,
+          htmlBody: outboundHtml || undefined,
           unsubscribeUrl: newsletterUnsubscribePageUrl(recipients[0] || input.actorEmail),
         })
       : undefined,

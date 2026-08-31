@@ -72,7 +72,20 @@ export async function GET(req: NextRequest) {
         accountNumber: String(item.accountNumber ?? ''),
         boardComplimentary: Boolean(
           String(item.boardDiscountFallCode ?? '').trim() ||
-            String(item.boardDiscountSpringCode ?? '').trim(),
+            String(item.boardDiscountSpringCode ?? '').trim() ||
+            (() => {
+              try {
+                const raw = String(item.entitlementsJson ?? '')
+                if (!raw.trim()) return false
+                const ents = JSON.parse(raw) as { kind?: string }[]
+                return ents.some(
+                  (e) =>
+                    e?.kind === 'board_enrichment_fall' || e?.kind === 'board_enrichment_spring',
+                )
+              } catch {
+                return false
+              }
+            })(),
         ),
       })),
     )
@@ -84,6 +97,8 @@ export async function GET(req: NextRequest) {
           const an = `${a.parentLastName} ${a.parentFirstName}`.trim().toLowerCase()
           const bn = `${b.parentLastName} ${b.parentFirstName}`.trim().toLowerCase()
           if (an && bn && an !== bn) return an.localeCompare(bn)
+          if (an && !bn) return -1
+          if (!an && bn) return 1
           return a.parentEmail.localeCompare(b.parentEmail)
         })
       } else {
@@ -101,6 +116,11 @@ export async function GET(req: NextRequest) {
       const includeArchived =
         req.nextUrl.searchParams.get('includeArchived') === '1' ||
         req.nextUrl.searchParams.get('includeArchived') === 'true'
+      const base = filterParentRoster(roster, {
+        q,
+        grade,
+        includeArchived,
+      })
       const filtered = sortRoster(
         filterParentRoster(roster, {
           q,
@@ -109,14 +129,19 @@ export async function GET(req: NextRequest) {
           includeArchived,
         }),
       )
-      const paid = filtered.filter((r) => r.accountType === 'paid').length
-      const free = filtered.filter((r) => r.accountType !== 'paid').length
+      const paid = base.filter((r) => r.accountType === 'paid').length
+      const free = base.filter((r) => r.accountType === 'free' && r.siteJoined).length
+      const freeLegacy = base.filter((r) => r.accountType === 'free' && !r.siteJoined).length
       return NextResponse.json({
-        members: filtered,
+        members: filtered.map((m) => ({
+          ...m,
+          siteJoined: m.siteJoined === true,
+        })),
         summary: {
           parents: filtered.length,
           paid,
           free,
+          freeLegacy,
           withPhone: filtered.filter((r) => Boolean(r.parentPhone)).length,
         },
       })

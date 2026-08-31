@@ -9,6 +9,7 @@ import { sanitizeTestRecipients } from './newsletter-test-groups'
 export type EmailAudience =
   | 'all'
   | 'free'
+  | 'free_legacy'
   | 'paid'
   | 'reef'
   | 'lagoon'
@@ -211,13 +212,16 @@ export async function sendMassEmail(
   }
 
   if (!auth) {
+    const staffFrom = preferSender?.trim().toLowerCase()
     return {
       ok: false,
       mode: 'unavailable',
       sent: 0,
       failed: recipients.length,
       errors: [
-        'Gmail send is not ready. In Staff → Inbox, Connect Google while signed in as president@shmspto.org (or treasurer@ / vp-membershipexperience@), or set GMAIL_REFRESH_TOKEN + GMAIL_SENDER on Vercel.',
+        staffFrom
+          ? `Gmail send is not ready for ${staffFrom}. Sign in as that address in Staff → Inbox → Connect Google (one-time per mailbox).`
+          : 'Gmail send is not ready. In Staff → Inbox, Connect Google while signed in as president@shmspto.org (or treasurer@ / vp-membershipexperience@), or set GMAIL_REFRESH_TOKEN + GMAIL_SENDER on Vercel.',
       ],
     }
   }

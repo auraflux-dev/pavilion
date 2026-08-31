@@ -23,16 +23,25 @@ export type ParentRosterRow = {
   accountNumber: string
   /** Highest tier among active students, else free */
   membershipTier: string
-  /** Paid family/faculty. Board gifted Reef counts as free. */
+  /** Paid family/faculty/board-seat Reef (anyone who gets paid-tier perks / magnets). */
   accountType: 'free' | 'paid'
-  /** Board seat complimentary Reef (75% EP codes, no SHMSREEF10). */
+  /**
+   * True when this parent has an active Memberships CMS row (joined the new site).
+   * False for directory/Jumbula-only parents with no Memberships record.
+   */
+  siteJoined: boolean
+  /** Board seat complimentary Reef (75% EP codes, no SHMSREEF10). Still counts as paid. */
   boardComplimentary?: boolean
   students: StudentRosterRow[]
 }
 
 export type RosterFilters = {
   q?: string
-  /** free | paid | reef | lagoon | tide | faculty | all */
+  /**
+   * free = joined free members (Memberships tier free).
+   * free_legacy = directory-only free (no Memberships row).
+   * paid | reef | lagoon | tide | faculty | all
+   */
   tier?: string
   grade?: string
   includeArchived?: boolean
@@ -67,22 +76,21 @@ export function isPaidTier(tier: string): boolean {
 
 /**
  * Staff roster paid/free counts.
- * Faculty (paid) + Reef / Lagoon / Tide count as paid.
- * Board gifted Reef is marked free separately via boardComplimentary.
+ * Faculty + Reef / Lagoon / Tide count as paid (includes board-seat complimentary Reef).
+ * Board comps still set boardComplimentary for EP coupon rules (no SHMSREEF10).
  */
 export function isPaidAccountType(tier: string): boolean {
   const n = normalizeMembershipTier(tier)
   return n === 'reef' || n === 'lagoon' || n === 'tide' || n === 'faculty'
 }
 
-/** Board seat gift: Reef comps count free unless they upgrade to Lagoon/Tide. */
+/** Paid-tier memberships count as paid, including board-seat Reef (magnet / portal perks). */
 export function accountTypeForMembership(opts: {
   tier: string
   boardComplimentary?: boolean
 }): 'free' | 'paid' {
-  const n = normalizeMembershipTier(opts.tier)
-  if (opts.boardComplimentary && (n === 'reef' || n === 'ruby')) return 'free'
-  return isPaidAccountType(n) ? 'paid' : 'free'
+  void opts.boardComplimentary
+  return isPaidAccountType(opts.tier) ? 'paid' : 'free'
 }
 
 /** Lagoon / Tide: Cove code ends in 9 for event refreshments. Reef is paid but does not get this perk. */
@@ -94,39 +102,6 @@ export function isCovePaidMemberTier(tier: string): boolean {
 export function tierRank(tier: string | undefined | null): number {
   const n = normalizeMembershipTier(tier)
   return TIER_RANK[n] ?? (isPaidTier(n) ? 10 : 0)
-}
-
-export type MembershipTierTotals = {
-  reef: number
-  lagoon: number
-  tide: number
-  free: number
-  other: number
-  paid: number
-  parents: number
-}
-
-/** Parent-level membership counts by canonical tier (Staff Membership source of truth). */
-export function membershipTierTotals(rows: ParentRosterRow[]): MembershipTierTotals {
-  const out: MembershipTierTotals = {
-    reef: 0,
-    lagoon: 0,
-    tide: 0,
-    free: 0,
-    other: 0,
-    paid: 0,
-    parents: rows.length,
-  }
-  for (const row of rows) {
-    const n = normalizeMembershipTier(row.membershipTier)
-    if (n === 'reef') out.reef += 1
-    else if (n === 'lagoon') out.lagoon += 1
-    else if (n === 'tide') out.tide += 1
-    else if (!isPaidAccountType(n)) out.free += 1
-    else out.other += 1
-    if (row.accountType === 'paid') out.paid += 1
-  }
-  return out
 }
 
 export function pickHighestTier(tiers: string[]): string {
@@ -184,6 +159,7 @@ export function buildParentRoster(items: RawStudent[]): ParentRosterRow[] {
         accountNumber: '',
         membershipTier: 'free',
         accountType: 'free',
+        siteJoined: false,
         students: [student],
       })
       continue
@@ -244,7 +220,7 @@ export function applyMembershipsToRoster(
   memberships: MembershipRosterRow[],
 ): ParentRosterRow[] {
   const byEmail = new Map(
-    roster.map((r) => [r.parentEmail, { ...r, students: [...r.students] }]),
+    roster.map((r) => [r.parentEmail, { ...r, students: [...r.students], siteJoined: r.siteJoined === true }]),
   )
 
   for (const m of memberships) {
@@ -272,20 +248,27 @@ export function applyMembershipsToRoster(
           tier,
           boardComplimentary: m.boardComplimentary === true,
         }),
+        siteJoined: true,
         students: [],
       })
       continue
     }
 
+    existing.siteJoined = true
     if (accountNumber) existing.accountNumber = accountNumber
     if (m.boardComplimentary === true) existing.boardComplimentary = true
 
     // Do not let a free Memberships row wipe a paid Students tier
     if (!isPaidTier(tier)) {
-      existing.accountType = accountTypeForMembership({
-        tier: existing.membershipTier,
-        boardComplimentary: existing.boardComplimentary,
-      })
+      if (!isPaidAccountType(existing.membershipTier)) {
+        existing.membershipTier = 'free'
+        existing.accountType = 'free'
+      } else {
+        existing.accountType = accountTypeForMembership({
+          tier: existing.membershipTier,
+          boardComplimentary: existing.boardComplimentary,
+        })
+      }
       continue
     }
 
@@ -334,9 +317,14 @@ export function filterParentRoster(
         if (row.accountType !== 'paid' && t !== 'faculty' && !row.boardComplimentary) return false
       }
 
-      if (tier === 'free' && row.accountType !== 'free') return false
-      if (tier === 'paid' && row.accountType !== 'paid') return false
-      if (tier !== 'all' && tier !== 'free' && tier !== 'paid') {
+      // Joined free = Memberships row on new site. Legacy = directory-only free.
+      if (tier === 'free') {
+        if (row.accountType !== 'free' || row.siteJoined !== true) return false
+      } else if (tier === 'free_legacy') {
+        if (row.accountType !== 'free' || row.siteJoined === true) return false
+      } else if (tier === 'paid') {
+        if (row.accountType !== 'paid') return false
+      } else if (tier !== 'all') {
         const want = normalizeMembershipTier(tier)
         const hasTier = row.students.some(
           (s) => normalizeMembershipTier(s.membershipTier) === want,

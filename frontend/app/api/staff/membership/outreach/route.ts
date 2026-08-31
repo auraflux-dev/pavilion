@@ -25,7 +25,7 @@ import {
   publishScoopToPortal,
 } from '@/lib/staff/newsletter-execute'
 import { canApproveNewsletter } from '@/lib/staff/newsletter-jobs'
-import { isSyntheticStagingMode } from '@/lib/fixtures/synthetic-mode'
+import { htmlToPlainText, looksLikeHtml, sanitizeEmailHtml } from '@/lib/staff/email-html'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -81,6 +81,7 @@ async function loadRoster() {
       parentFirstName: String(item.parentFirstName ?? item.firstName ?? ''),
       parentLastName: String(item.parentLastName ?? item.lastName ?? ''),
       parentPhone: String(item.parentPhone ?? item.phone ?? ''),
+      accountNumber: String(item.accountNumber ?? ''),
     })),
   )
 }
@@ -96,8 +97,15 @@ async function archiveNewsletter(opts: {
 }) {
   // Custom email lists are ParentMessages-only (not a reusable newsletter audience).
   if (opts.customEmails.length) return false
-  const audience =
-    opts.grade ? 'grade' : opts.tier === 'free' ? 'free' : opts.tier === 'paid' ? 'paid' : 'all'
+  const audience = opts.grade
+    ? 'grade'
+    : opts.tier === 'free'
+      ? 'free'
+      : opts.tier === 'free_legacy'
+        ? 'free_legacy'
+        : opts.tier === 'paid'
+          ? 'paid'
+          : 'all'
   try {
     const client = getWixClient()
     await client.items.insert('Newsletters', {
@@ -151,7 +159,7 @@ export async function GET(req: NextRequest) {
   }
   try {
     const links = await loadWhatsAppLinks()
-    const gmail = await gmailSendReady()
+    const gmail = await gmailSendReady(gated.session!.email)
     const staffRows = await loadAll('StaffRoles')
     const siteTestEmails = await loadSiteSetting('newsletterTestEmails')
     const testGroups = buildNewsletterTestGroups({
@@ -199,44 +207,52 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const dryRun = body.dryRun === true
-    if (isSyntheticStagingMode()) {
-      if (dryRun) {
-        return NextResponse.json({
-          ok: true,
-          synthetic: true,
-          recipientCount: 3,
-          recipientsPreview: ['reviewer@example.com', 'board@example.com', 'member@example.com'],
-          audience: String(body.sendAudience ?? 'paid'),
-          testSend: body.sendAudience === 'test' || body.testSend === true,
-        })
-      }
-      return NextResponse.json(
-        {
-          error:
-            'Synthetic staging. Live outreach and newsletter sends are blocked. Use www.shmspto.org.',
-          synthetic: true,
-        },
-        { status: 403 },
-      )
-    }
-
     const channel = String(body.channel ?? 'portal').trim() // portal | email | whatsapp
     const subject = String(body.subject ?? '').trim()
-    const message = String(body.body ?? body.message ?? '').trim()
+    const rawBody = String(body.body ?? body.message ?? '').trim()
+    const htmlBodyRaw = String(body.htmlBody ?? '').trim()
+    const htmlBody =
+      htmlBodyRaw
+        ? sanitizeEmailHtml(htmlBodyRaw)
+        : looksLikeHtml(rawBody)
+          ? sanitizeEmailHtml(rawBody)
+          : ''
+    // Plain text for portal / WhatsApp / MIME text part
+    const message = htmlBody ? htmlToPlainText(htmlBody) || rawBody : rawBody
     const tier = String(body.tier ?? 'all').trim() || 'all'
     const grade = String(body.grade ?? '').trim()
+    const dryRun = body.dryRun === true
     const alsoPortal = body.alsoPortal !== false
     const customEmails = Array.isArray(body.emails)
       ? body.emails.map((e: unknown) => String(e))
       : []
-    const trackClicks = body.trackClicks !== false
-    const trackOpens = body.trackOpens === true
+  const trackClicks = body.trackClicks !== false
+  const trackOpens = body.trackOpens !== false
     const templateId = String(body.templateId ?? '').trim()
     const canvaViewUrl = String(body.canvaViewUrl ?? '').trim()
     const canvaThumbnailUrl = String(body.canvaThumbnailUrl ?? '').trim()
     const canvaTitle = String(body.canvaTitle ?? '').trim()
     const heroImageUrl = String(body.heroImageUrl ?? '').trim()
+    const attachmentKeys = Array.isArray(body.attachmentKeys)
+      ? body.attachmentKeys
+          .map((a: unknown) => {
+            const row = a as { key?: string; filename?: string; mimeType?: string }
+            const key = String(row?.key ?? '').trim()
+            if (!key) return null
+            return {
+              key,
+              filename: String(row?.filename ?? 'attachment').trim() || 'attachment',
+              mimeType: String(row?.mimeType ?? 'application/octet-stream').trim(),
+            }
+          })
+          .filter(
+            (a: { key: string; filename: string; mimeType: string } | null): a is {
+              key: string
+              filename: string
+              mimeType: string
+            } => Boolean(a),
+          )
+      : []
     const sendAudienceRaw = String(body.sendAudience ?? 'members').trim()
     const testGroup = String(body.testGroup ?? 'me').trim() as
       | 'me'
@@ -295,6 +311,7 @@ export async function POST(req: NextRequest) {
         actorPersonalEmail: session.staff.personalEmail,
         subject,
         message,
+        htmlBody: htmlBody || undefined,
         tier,
         grade,
         alsoPortal:
@@ -315,20 +332,7 @@ export async function POST(req: NextRequest) {
         extraImageUrls: Array.isArray(body.extraImageUrls)
           ? body.extraImageUrls.map((u: unknown) => String(u)).filter(Boolean)
           : undefined,
-        beatsJson: String(body.beatsJson ?? '').trim() || undefined,
-        attachmentKeys: Array.isArray(body.attachmentKeys)
-          ? body.attachmentKeys
-              .map((a: unknown) => {
-                const row = a as { key?: string; filename?: string; mimeType?: string }
-                return {
-                  key: String(row.key ?? '').trim(),
-                  filename: String(row.filename ?? 'attachment').trim(),
-                  mimeType: String(row.mimeType ?? 'application/octet-stream').trim(),
-                }
-              })
-              .filter((a: { key: string }) => a.key)
-          : undefined,
-        canvaDesignId: String(body.canvaDesignId ?? '').trim() || undefined,
+        attachmentKeys: attachmentKeys.length ? attachmentKeys : undefined,
         sendAudience,
         testGroup,
         testEmails: testEmailsRaw,
