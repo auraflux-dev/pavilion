@@ -643,7 +643,7 @@ Save, then **View site** to confirm. Leave deep Wix Editor work to whoever owns 
       summary: 'CNAME and A records when you leave the trial URL.',
       order: 3,
       need: 'site',
-      body: `Your trial is private. Sign in at your temp host /login with the email and password Auraflux sent you (yourpto.commons-pto.org).
+      body: `Your trial is private. Sign in at your temp host /login with the email and password Auraflux sent you (yourpto.onpavilion.com).
 The public Riverside demo is not your school.
 
 When you want pto.yourschool.org (or yourpto.org):

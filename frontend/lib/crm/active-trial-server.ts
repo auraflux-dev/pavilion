@@ -11,6 +11,7 @@ import {
   isCommonsSurface,
   PAVILION_BRAND_COOKIE,
 } from '@/lib/crm/active-trial'
+import { trialHostForSlug } from '@/lib/crm/product-host'
 import { isDemoInstance } from '@/lib/demo/instance'
 import {
   trialPackForSlug,
@@ -57,7 +58,7 @@ async function packFromSessionOrg(): Promise<TrialPack | null> {
     return vanillaTrialPack({
       slug: row.slug,
       schoolName: row.name,
-      host: row.temp_host || `${row.slug}.commons-pto.org`,
+      host: row.temp_host || trialHostForSlug(row.slug),
     })
   } catch {
     return null

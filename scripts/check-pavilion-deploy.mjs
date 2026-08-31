@@ -8,8 +8,9 @@ import { spawnSync } from 'node:child_process'
 
 export const PAVILION_TARGETS = {
   'commons-pto-demo': {
-    label: 'Commons PTO demo',
+    label: 'Pavilion demo',
     base: 'https://commons-pto-demo.vercel.app',
+    altBase: 'https://demo.onpavilion.com',
     mustInclude: ['Riverside Elementary PTO'],
   },
   'commons-site': {
@@ -49,12 +50,24 @@ function curl(url) {
 
 console.log(`Checking ${cfg.label} at ${cfg.base} …\n`)
 const res = curl(`${cfg.base}/`)
+const altRes = cfg.altBase ? curl(`${cfg.altBase}/`) : null
 const issues = []
-if (!res.ok) issues.push('fetch failed')
+if (!res.ok) issues.push(`fetch failed (${cfg.base})`)
 else {
   for (const needle of cfg.mustInclude) {
     if (!res.body.toLowerCase().includes(needle.toLowerCase())) {
-      issues.push(`missing "${needle}"`)
+      issues.push(`missing "${needle}" on ${cfg.base}`)
+    }
+  }
+}
+if (cfg.altBase) {
+  if (!altRes?.ok) {
+    console.log(`WARN  optional host ${cfg.altBase} not reachable yet (DNS pending)`)
+  } else {
+    for (const needle of cfg.mustInclude) {
+      if (!altRes.body.toLowerCase().includes(needle.toLowerCase())) {
+        issues.push(`missing "${needle}" on ${cfg.altBase}`)
+      }
     }
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isSecure } from '@/lib/auth-cookies'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { normalizeRequestHost } from '@/lib/crm/tenant'
+import { isDemoProductHost } from '@/lib/crm/product-host'
 import { persistDemoJoin } from '@/lib/crm/persist'
 import { DEMO_MEMBER_SINCE_MS } from '@/lib/demo/issue-session'
 import {
@@ -17,7 +18,7 @@ function bad(message: string, status = 400) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isDemoInstance()) {
+  if (!isDemoProductHost(normalizeRequestHost(req))) {
     return bad('Demo join is only on the review instance.', 404)
   }
   if (!expectedDemoJoinCode()) {

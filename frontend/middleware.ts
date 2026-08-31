@@ -19,7 +19,8 @@ import {
   isDemoPiiPath,
   isWriteMethod,
 } from '@/lib/demo/guard'
-import { hasBetterAuthCookie, isCommonsPlatformHost, isSharedProductHost } from '@/lib/crm/auth-edge'
+import { hasBetterAuthCookie, isCommonsPlatformHost, isDemoHostForMiddleware, isSharedProductHost } from '@/lib/crm/auth-edge'
+import { PAVILION_SURFACE_HEADER } from '@/lib/crm/product-host'
 import { commonsRequiresLogin, isCommonsPublicPath } from '@/lib/crm/private-tenant'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { isCommonsDemoHiddenPath } from '@/lib/demo/commons-surface'
@@ -36,11 +37,23 @@ const PROTECTED_ROUTES = ['/member-portal', '/staff']
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
-  const demo = isDemoInstance()
-  const synthetic = !demo && isSyntheticStagingFromRequest(req)
+  const host =
+    req.headers.get('x-forwarded-host')?.split(',')[0]?.trim().toLowerCase().split(':')[0] ||
+    req.headers.get('host')?.trim().toLowerCase().split(':')[0] ||
+    ''
+  const demo = isDemoHostForMiddleware(host) || (!host && isDemoInstance())
+  const trialHost = isCommonsPlatformHost(host)
+  const surface = demo ? 'demo' : trialHost ? 'trial' : 'other'
+
+  const requestHeaders = new Headers(req.headers)
+  requestHeaders.set(PAVILION_SURFACE_HEADER, surface)
+
+  function next(): NextResponse {
+    return NextResponse.next({ request: { headers: requestHeaders } })
+  }
 
   // Commons platform tenants are private. login we issue, not a public school site.
-  if (commonsRequiresLogin() && !isCommonsPublicPath(pathname)) {
+  if (trialHost && commonsRequiresLogin() && !isCommonsPublicPath(pathname)) {
     const commonsOk = hasBetterAuthCookie(req.cookies.getAll().map((c) => c.name))
     if (!commonsOk) {
       const loginUrl = req.nextUrl.clone()
@@ -51,9 +64,11 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  const synthetic = !demo && !trialHost && isSyntheticStagingFromRequest(req)
+
   // Vanity / custom Host → hard-gate locked trials (P1). Shared product hosts skipped.
   if (
-    isCommonsPlatformHost() &&
+    trialHost &&
     !isCommonsPublicPath(pathname) &&
     !pathname.startsWith('/api/')
   ) {
@@ -157,22 +172,22 @@ export async function middleware(req: NextRequest) {
     const demoOk =
       demo && hasDemoReviewCookie(req.cookies.get(DEMO_REVIEW_COOKIE)?.value)
     const commonsOk =
-      isCommonsPlatformHost() &&
+      trialHost &&
       hasBetterAuthCookie(req.cookies.getAll().map((c) => c.name))
     if (!isMemberTokens(tokens) && !demoOk && !commonsOk) {
       const loginUrl = req.nextUrl.clone()
       loginUrl.pathname = demo
         ? '/review'
-        : isCommonsPlatformHost()
+        : trialHost
           ? '/login'
           : '/auth/join'
-      if (!demo && !isCommonsPlatformHost()) loginUrl.searchParams.set('mode', 'login')
+      if (!demo && !trialHost) loginUrl.searchParams.set('mode', 'login')
       loginUrl.searchParams.set('returnTo', pathname + (req.nextUrl.search || ''))
       return NextResponse.redirect(loginUrl)
     }
   }
 
-  return NextResponse.next()
+  return next()
 }
 
 export const config = {

@@ -131,7 +131,11 @@ export async function persistTrialStart(opts: {
 
   const orgId = `org_${createHash('sha256').update(`trial:${slug}:${email}`).digest('hex').slice(0, 16)}`
   const personId = `p_${createHash('sha256').update(`trial:${orgId}:${email}`).digest('hex').slice(0, 16)}`
-  const suffix = (process.env.COMMONS_TEMP_DOMAIN_SUFFIX || 'commons-pto.org').replace(/^\./, '')
+  const suffix = (
+    process.env.PAVILION_TRIAL_DOMAIN_SUFFIX ||
+    process.env.COMMONS_TEMP_DOMAIN_SUFFIX ||
+    'onpavilion.com'
+  ).replace(/^\./, '')
   const tempHost = `${slug}.${suffix}`
   const started = new Date()
   const ends = new Date(started.getTime() + 30 * 24 * 60 * 60 * 1000)

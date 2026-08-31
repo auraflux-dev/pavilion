@@ -10,7 +10,8 @@ import { MEMBERSHIP_CHOOSE_PATH } from '@/lib/membership-links'
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { demoStorePath, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { DEMO_BRAND } from '@/lib/demo/brand'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoProductHost } from '@/lib/crm/product-host'
+import { requestHost } from '@/lib/crm/product-surface-server'
 import { fetchWithRetry } from '@/lib/fetch-with-retry'
 import { canViewProgramsCatalogNow } from '@/lib/programs/public-access'
 
@@ -137,6 +138,13 @@ function ensureHomeLink(links: NavLink[]): NavLink[] {
  ].sort((a, b) => a.sortOrder - b.sortOrder)
 }
 
+async function servingDemoNav(): Promise<boolean> {
+  const host = await requestHost()
+  if (host) return isDemoProductHost(host)
+  const { isDemoInstance } = await import('@/lib/demo/instance')
+  return isDemoInstance()
+}
+
 export async function getNavLinks(): Promise<NavLink[]> {
  const { getActiveTrialPack } = await import('@/lib/crm/active-trial')
  const brandPack = getActiveTrialPack()
@@ -163,7 +171,7 @@ export async function getNavLinks(): Promise<NavLink[]> {
    // fall through
  }
 
- if (isDemoInstance()) {
+ if (await servingDemoNav()) {
    const { DEMO_NAV } = await import('@/lib/demo/content')
    return DEMO_NAV.map((l) => ({ ...l }))
  }

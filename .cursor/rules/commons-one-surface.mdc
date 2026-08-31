@@ -17,9 +17,10 @@ Do **not** treat demo and trial as two products to deploy.
 
 ## Sales motion
 
-1. Share the demo: `https://commons-pto-demo.vercel.app/review?code=…`
+1. Share the demo: `https://demo.onpavilion.com` (or legacy `commons-pto-demo.vercel.app`)
 2. Brand it: `/review?brand=spring-hill` or banner / review “Brand this tour”
-3. Continue → unlock private login / connectors = **trial** (tenant row), not a second Vercel project
+3. Tour staff/member depth: `/review` + review code (sales-sent links only)
+4. Continue → unlock private login / connectors = **trial** (`{slug}.onpavilion.com`), not a second Vercel project
 
 ## Agent rules
 

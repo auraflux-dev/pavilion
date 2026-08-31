@@ -7,6 +7,7 @@ import type { NavLink } from '@/lib/api/nav'
 import type { MembershipTier } from '@/lib/api/membership'
 import type { BoardMember } from '@/lib/api/board'
 import type { WixEvent } from '@/lib/api/event-model'
+import { trialHostForSlug } from '@/lib/crm/product-host'
 
 export type TrialBrand = {
   school: string
@@ -64,7 +65,7 @@ export function springHillPack(): TrialPack {
     pto: 'Spring Hill Elementary PTO',
     short: 'Spring Hill PTO',
     town: 'McLean',
-    host: 'spring-hill.commons-pto.org',
+    host: 'spring-hill.onpavilion.com',
     store: 'Spirit Shop',
     card: 'Family card',
     cheer: 'Be a CHAMPION',
@@ -331,7 +332,7 @@ export function vanillaTrialPack(opts: {
   const school = opts.schoolName.trim() || 'Your School'
   const short = school.replace(/\s+Elementary.*$/i, '').replace(/\s+PTO$/i, '').trim() || school
   const pto = /PTO|PTA/i.test(school) ? school : `${school} PTO`
-  const host = opts.host.trim() || `${opts.slug}.commons-pto.org`
+  const host = opts.host.trim() || trialHostForSlug(opts.slug)
   const brand: TrialBrand = {
     school,
     pto,

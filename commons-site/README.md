@@ -7,7 +7,7 @@ Domain: **https://onpavilion.com** (also commons-site.vercel.app). Colors: ink +
 - School parent payments and in-person stay on **each school’s Square**
 - Never put Stone Hill / SHMS Wix, Square, or `DATABASE_URL` on this project
 - `/account` magic-link + Stripe Customer Portal; `/help`, `/partners`, `/gallery`, `/watch`
-- Demo CTA: https://commons-pto-demo.vercel.app/review?code=riverside-board
+- Demo CTA: https://demo.onpavilion.com (public browse; `/review` for staff/member tour)
 - Brand: `lib/brand.ts` (`PRODUCT_NAME`, `PRODUCT_DOMAIN`)
 
 ## Local

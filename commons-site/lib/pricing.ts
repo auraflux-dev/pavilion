@@ -1,6 +1,6 @@
 /**
- * Mirror of frontend/lib/ops/commons-cost-sheet.ts COMMONS_LIST_PRICE_USD.
- * Keep in sync when list price changes.
+ * Mirror of frontend/lib/demo/review-links.ts and ops pricing.
+ * Keep demo origin in sync when changing hosts.
  */
 import { CONTACT_EMAIL } from '@/lib/brand'
 
@@ -10,5 +10,11 @@ export const COMMONS_LIST_PRICE_USD = 399
 export const ADDON_STORE_USD = 99
 export const ADDON_CREATIVE_USD = 99
 
-export const DEMO_URL =
-  'https://commons-pto-demo.vercel.app/review?code=66988432952500a7587ff938'
+/** Public always-on demo. No review code required. */
+export const DEMO_URL = 'https://demo.onpavilion.com'
+
+/** Staff / member portal tour (review code entered on page or from sales link). */
+export const DEMO_TOUR_URL = 'https://demo.onpavilion.com/review'
+
+/** Legacy Vercel host until demo.onpavilion.com DNS is live. */
+export const DEMO_URL_LEGACY = 'https://commons-pto-demo.vercel.app'
