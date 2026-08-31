@@ -114,8 +114,12 @@ export default async function RootLayout({
           ['--brand-green']: packBrand.colors.primary,
           ['--brand-dark']: packBrand.colors.dark,
           ['--brand-accent']: packBrand.colors.accent,
+          ['--brand-gold']: packBrand.colors.accent,
           ['--brand-warm']: packBrand.colors.warm,
           ['--brand-soft']: packBrand.colors.soft,
+          ['--primary']: packBrand.colors.primary,
+          ['--ring']: packBrand.colors.primary,
+          ['--secondary']: packBrand.colors.accent,
         }
       : {}),
     ...(cmsLayout?.cssVars ?? {}),

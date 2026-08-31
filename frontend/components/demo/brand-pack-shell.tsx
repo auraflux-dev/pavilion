@@ -63,9 +63,17 @@ export function BrandPackShell({
       warm: cmsBrand?.colors?.warm || brand?.colors?.warm,
       soft: cmsBrand?.colors?.soft || brand?.colors?.soft,
     }
-    if (colors.primary) root.style.setProperty('--brand-green', colors.primary)
+    if (colors.primary) {
+      root.style.setProperty('--brand-green', colors.primary)
+      root.style.setProperty('--primary', colors.primary)
+      root.style.setProperty('--ring', colors.primary)
+    }
     if (colors.dark) root.style.setProperty('--brand-dark', colors.dark)
-    if (colors.accent) root.style.setProperty('--brand-accent', colors.accent)
+    if (colors.accent) {
+      root.style.setProperty('--brand-accent', colors.accent)
+      root.style.setProperty('--brand-gold', colors.accent)
+      root.style.setProperty('--secondary', colors.accent)
+    }
     if (colors.warm) root.style.setProperty('--brand-warm', colors.warm)
     if (colors.soft) root.style.setProperty('--brand-soft', colors.soft)
     if (cmsBrand?.fontSans) {

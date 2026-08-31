@@ -91,39 +91,74 @@ html[data-pto='riverside'] body {
   font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Spring Hill Elementary private trial — Toolkit navy + gold (not Stone Hill forest). */
-html[data-pto='spring-hill'],
-html[data-pto='commons'] {
-  --brand-green: #2b3857;
-  --brand-dark: #11116e;
-  --brand-gold: #eeaa32;
+/* Spring Hill Elementary — Panthers maroon + gold (logo / springhillpto.org). */
+html[data-pto='spring-hill'] {
+  --brand-green: #742b33;
+  --brand-dark: #4a1218;
+  --brand-gold: #ffd966;
+  --brand-accent: #ffd966;
   --brand-warm: #f9f4e8;
-  --brand-soft: #eef1f6;
-  --brand-line: #d5dce8;
-  --brand-mist: #f3f5f9;
+  --brand-soft: #f5eef0;
+  --brand-line: #e8d5d8;
+  --brand-mist: #faf5f6;
   --brand-text: #1a1a1a;
   --background: #f9f4e8;
   --foreground: #1a1a1a;
-  --primary: #2b3857;
-  --secondary: #eeaa32;
+  --primary: #742b33;
+  --secondary: #ffd966;
   --secondary-foreground: #1a1a1a;
-  --muted: #e8ecf2;
+  --muted: #f0e6e8;
   --muted-foreground: #5a6070;
-  --accent: #eeaa32;
+  --accent: #ffd966;
   --accent-foreground: #1a1a1a;
-  --border: #e0e4ec;
-  --input: #e0e4ec;
-  --ring: #2b3857;
-  --chart-1: #2b3857;
-  --chart-2: #eeaa32;
-  --chart-3: #5c88a9;
-  --sidebar: #2b3857;
+  --border: #e8dce0;
+  --input: #e8dce0;
+  --ring: #742b33;
+  --chart-1: #742b33;
+  --chart-2: #ffd966;
+  --chart-3: #4a1218;
+  --sidebar: #742b33;
   --sidebar-foreground: #ffffff;
   --sidebar-primary: #ffffff;
-  --sidebar-primary-foreground: #2b3857;
-  --sidebar-accent: #2b3857;
+  --sidebar-primary-foreground: #742b33;
+  --sidebar-accent: #742b33;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #2b3857;
+  --sidebar-border: #742b33;
+}
+
+/* Neutral product shell (vanilla / unnamed trial). Not Riverside. Not Spring Hill. */
+html[data-pto='commons'] {
+  --brand-green: #1a1a1a;
+  --brand-dark: #111111;
+  --brand-gold: #5a6070;
+  --brand-accent: #5a6070;
+  --brand-warm: #f7f7f5;
+  --brand-soft: #eeeeec;
+  --brand-line: #e0e0dc;
+  --brand-mist: #f5f5f3;
+  --brand-text: #1a1a1a;
+  --background: #f7f7f5;
+  --foreground: #1a1a1a;
+  --primary: #1a1a1a;
+  --secondary: #5a6070;
+  --secondary-foreground: #ffffff;
+  --muted: #eeeeec;
+  --muted-foreground: #5a6070;
+  --accent: #5a6070;
+  --accent-foreground: #ffffff;
+  --border: #e0e0dc;
+  --input: #e0e0dc;
+  --ring: #1a1a1a;
+  --chart-1: #1a1a1a;
+  --chart-2: #5a6070;
+  --chart-3: #888888;
+  --sidebar: #1a1a1a;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #1a1a1a;
+  --sidebar-accent: #1a1a1a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1a1a1a;
 }
 
 @theme inline {

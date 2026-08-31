@@ -70,13 +70,13 @@ export function springHillPack(): TrialPack {
     card: 'Family card',
     cheer: 'Be a CHAMPION',
     logoPath: '/trial/spring-hill/logo.png',
-    // From springhillpto.org Toolkit skin (navy + gold, not Stone Hill forest).
+    // Panthers logo + springhillpto.org: maroon + gold (not Riverside navy).
     colors: {
-      primary: '#2b3857',
-      dark: '#11116e',
-      accent: '#eeaa32',
+      primary: '#742b33',
+      dark: '#4a1218',
+      accent: '#ffd966',
       warm: '#f9f4e8',
-      soft: '#eef1f6',
+      soft: '#f5eef0',
     },
   }
   const b = brand
