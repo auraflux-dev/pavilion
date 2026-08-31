@@ -48,7 +48,7 @@ export function EditableCopy({ target, value, className = '', block = true, inli
           role="button"
           tabIndex={0}
           className={editClass}
-          onClick={(e) => {
+          onDoubleClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
             open()
@@ -60,9 +60,9 @@ export function EditableCopy({ target, value, className = '', block = true, inli
               open()
             }
           }}
-          title="Click to edit copy"
+          title="Double-click to edit copy"
         >
-          {shown || '(empty — click to add)'}
+          {shown || '(empty — double-click to add)'}
         </span>
       )
     }

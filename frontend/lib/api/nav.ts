@@ -150,7 +150,11 @@ export async function getNavLinks(): Promise<NavLink[]> {
      if (orgId) {
        const cmsNav = await listCmsNavLinks(orgId, true)
        if (cmsNav.length) {
-         const links = ensureHomeLink(normalizeCommerceNav(cmsNav))
+         const links = ensureHomeLink(
+           normalizeCommerceNav(
+             cmsNav.filter((link) => !isCmsQaItem(link.label, link.href)),
+           ),
+         )
          return links.map((l) => ({ ...l, label: vanillaizeIfDemo(l.label) }))
        }
      }
