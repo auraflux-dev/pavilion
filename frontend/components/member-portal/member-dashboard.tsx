@@ -245,6 +245,16 @@ export function MemberDashboard({
       const liteData = await liteRes.json().catch(() => ({}))
       if (gen !== loadGen.current) return
       if (!liteRes.ok || !liteData.member) {
+        // Staff admins stay on the portal so live copy edit works without a parent session.
+        const meRes = await fetch('/api/staff/me', { credentials: 'include' })
+        if (meRes.ok) {
+          const me = await meRes.json().catch(() => null)
+          if (me?.isAdmin) {
+            setStatus('error')
+            setHasLoaded(true)
+            return
+          }
+        }
         redirectToLogin()
         return
       }
