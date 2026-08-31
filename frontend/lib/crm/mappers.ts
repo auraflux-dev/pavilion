@@ -58,9 +58,10 @@ export function householdToRosterRow(
     parentFirstName: primary?.firstName ?? '',
     parentLastName: primary?.lastName ?? '',
     parentPhone: primary?.phone ?? '',
-    accountNumber: '',
+    accountNumber: String((hh as { accountNumber?: string }).accountNumber ?? '').trim(),
     membershipTier: tier,
     accountType: accountTypeForTier(tier),
+    siteJoined: Boolean(membership),
     students: kids.map((s) => ({
       id: s.id,
       firstName: s.firstName,
@@ -122,12 +123,14 @@ export function rosterSummary(rows: ParentRosterRow[]): {
   parents: number
   paid: number
   free: number
+  freeLegacy: number
   withPhone: number
 } {
   return {
     parents: rows.length,
     paid: rows.filter((r) => r.accountType === 'paid').length,
-    free: rows.filter((r) => r.accountType === 'free').length,
+    free: rows.filter((r) => r.accountType === 'free' && r.siteJoined).length,
+    freeLegacy: rows.filter((r) => r.accountType === 'free' && !r.siteJoined).length,
     withPhone: rows.filter((r) => Boolean(r.parentPhone.trim())).length,
   }
 }
