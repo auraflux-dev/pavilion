@@ -20,6 +20,37 @@ import {
   type TrialPack,
 } from '@/lib/crm/trial-packs'
 
+type OrgPackRow = {
+  brand_pack_slug: string
+  slug: string
+  name: string
+  temp_host: string
+}
+
+function packFromOrgRow(row: OrgPackRow): TrialPack {
+  const packSlug = (row.brand_pack_slug || '').trim().toLowerCase()
+  if (packSlug) {
+    const named = trialPackForSlug(packSlug)
+    if (named) return named
+  }
+  if (trialPackForSlug(row.slug)) return trialPackForSlug(row.slug)!
+  return vanillaTrialPack({
+    slug: row.slug,
+    schoolName: row.name,
+    host: row.temp_host || trialHostForSlug(row.slug),
+  })
+}
+
+async function packFromOrgId(orgId: string): Promise<TrialPack | null> {
+  const { sql } = await import('@/lib/crm/db')
+  const org = await sql<OrgPackRow>(
+    `select brand_pack_slug, slug, name, temp_host from organizations where id = $1 limit 1`,
+    [orgId],
+  )
+  const row = org.rows[0]
+  return row ? packFromOrgRow(row) : null
+}
+
 async function packFromSessionOrg(): Promise<TrialPack | null> {
   const { commonsDbEnabled, sql } = await import('@/lib/crm/db')
   const { getAuth } = await import('@/lib/crm/auth')
@@ -39,34 +70,40 @@ async function packFromSessionOrg(): Promise<TrialPack | null> {
     )
     const orgId = person.rows[0]?.organization_id?.trim()
     if (!orgId) return null
-    const org = await sql<{
-      brand_pack_slug: string
-      slug: string
-      name: string
-      temp_host: string
-    }>(
-      `select brand_pack_slug, slug, name, temp_host from organizations where id = $1 limit 1`,
-      [orgId],
-    )
-    const row = org.rows[0]
-    if (!row) return null
-    const packSlug = (row.brand_pack_slug || '').trim().toLowerCase()
-    if (packSlug) {
-      const named = trialPackForSlug(packSlug)
-      if (named) return named
-    }
-    if (trialPackForSlug(row.slug)) return trialPackForSlug(row.slug)
-    return vanillaTrialPack({
-      slug: row.slug,
-      schoolName: row.name,
-      host: row.temp_host || trialHostForSlug(row.slug),
-    })
+    return packFromOrgId(orgId)
   } catch {
     return null
   }
 }
 
-/** Prefer cookie on demo (prospect switch), else session org pack on trial, else env. */
+/** Trial vanity Host → org pack (works before login so chrome is not Riverside). */
+async function packFromRequestHost(): Promise<TrialPack | null> {
+  const { commonsDbEnabled, sql } = await import('@/lib/crm/db')
+  const { isPavilionProductPlatform } = await import('@/lib/crm/platform-env')
+  const { isSharedProductHost, normalizeProductHost } = await import('@/lib/crm/product-host')
+  if (!commonsDbEnabled() || !isPavilionProductPlatform()) return null
+  try {
+    const { headers } = await import('next/headers')
+    const h = await headers()
+    const host = normalizeProductHost(
+      h.get('x-forwarded-host')?.split(',')[0]?.trim() || h.get('host')?.trim() || '',
+    )
+    if (!host || isSharedProductHost(host)) return null
+    const found = await sql<OrgPackRow>(
+      `select brand_pack_slug, slug, name, temp_host from organizations
+       where lower(nullif(trim(temp_host), '')) = $1
+          or lower(nullif(trim(custom_domain), '')) = $1
+       limit 1`,
+      [host],
+    )
+    const row = found.rows[0]
+    return row ? packFromOrgRow(row) : null
+  } catch {
+    return null
+  }
+}
+
+/** Prefer cookie on demo (prospect switch), else session/host org pack on trial, else env (demo only). */
 export async function getActiveBrandPack(opts?: {
   cookieHeader?: string | null
 }): Promise<TrialPack | null> {
@@ -90,10 +127,12 @@ export async function getActiveBrandPack(opts?: {
     }
     if (slug) return trialPackForSlug(slug)
   } else if (surface === 'trial') {
-    const fromOrg = await packFromSessionOrg()
+    const fromOrg = (await packFromSessionOrg()) || (await packFromRequestHost())
     if (fromOrg) return fromOrg
+    // Never fall through to Riverside env pack on a private trial host.
+    return null
   } else if (isCommonsPlatform() && !isDemoInstance()) {
-    const fromOrg = await packFromSessionOrg()
+    const fromOrg = (await packFromSessionOrg()) || (await packFromRequestHost())
     if (fromOrg) return fromOrg
   }
 

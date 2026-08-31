@@ -4,7 +4,11 @@ import { issueDemoReviewResponse } from '@/lib/demo/issue-session'
 import type { DemoLane } from '@/lib/demo/session'
 
 export async function POST(req: NextRequest) {
-  if (!isDemoInstance()) {
+  const host =
+    req.headers.get('x-forwarded-host')?.split(',')[0]?.trim().toLowerCase().split(':')[0] ||
+    req.headers.get('host')?.trim().toLowerCase().split(':')[0] ||
+    ''
+  if (!isDemoInstance(host)) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 

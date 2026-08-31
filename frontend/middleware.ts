@@ -52,8 +52,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next({ request: { headers: requestHeaders } })
   }
 
-  // Commons platform tenants are private. login we issue, not a public school site.
-  if (trialHost && commonsRequiresLogin() && !isCommonsPublicPath(pathname)) {
+  // Trial vanity hosts are private. Unified stack: gate by Host, not env-only commonsRequiresLogin().
+  if (trialHost && commonsRequiresLogin(host) && !isCommonsPublicPath(pathname)) {
     const commonsOk = hasBetterAuthCookie(req.cookies.getAll().map((c) => c.name))
     if (!commonsOk) {
       const loginUrl = req.nextUrl.clone()
@@ -107,6 +107,32 @@ export async function middleware(req: NextRequest) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
     return new NextResponse('Not found', { status: 404 })
+  }
+
+  // ?brand=vanilla (or spring-hill) on the public demo → set cookie and drop the query.
+  if (demo && req.method === 'GET' && !pathname.startsWith('/api/')) {
+    const brand = (req.nextUrl.searchParams.get('brand') || '').trim().toLowerCase()
+    if (brand) {
+      const url = req.nextUrl.clone()
+      url.searchParams.delete('brand')
+      const res = NextResponse.redirect(url)
+      if (brand === 'riverside' || brand === 'clear' || brand === 'default') {
+        res.cookies.set('pavilion_brand', '', {
+          httpOnly: false,
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 0,
+        })
+      } else {
+        res.cookies.set('pavilion_brand', brand, {
+          httpOnly: false,
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 30,
+        })
+      }
+      return res
+    }
   }
 
   if (demo && (pathname === '/perch' || pathname.startsWith('/perch/'))) {

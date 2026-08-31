@@ -23,10 +23,18 @@ export function isDemoInstance(host?: string): boolean {
   return false
 }
 
-/** Client-safe. Uses hostname on the client; env fallback during SSR build. */
+/** Client-safe. Uses hostname on the client; never assume demo SSR on unified platform. */
 export function isPublicDemoInstance(): boolean {
   if (typeof window !== 'undefined') {
     return isDemoProductHost(window.location.hostname)
+  }
+  // Unified demo+trial deploy: SSR without Host must not paint demo chrome on trial hosts.
+  // Client re-check uses window.location; demo hosts hydrate the banner on.
+  if (
+    process.env.NEXT_PUBLIC_PAVILION_PLATFORM === 'true' ||
+    process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true'
+  ) {
+    return false
   }
   return process.env.NEXT_PUBLIC_DEMO_INSTANCE === 'true'
 }

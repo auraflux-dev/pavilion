@@ -19,6 +19,7 @@ export function isCommonsPublicPath(pathname: string): boolean {
   return false
 }
 
-export function commonsRequiresLogin(): boolean {
-  return isCommonsPlatformHost()
+/** True when this Host is a private trial vanity (pass Host on unified stacks). */
+export function commonsRequiresLogin(host?: string): boolean {
+  return isCommonsPlatformHost(host)
 }

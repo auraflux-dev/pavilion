@@ -26,8 +26,16 @@ function packsPublic() {
   })
 }
 
+function requestHost(req: NextRequest): string {
+  return (
+    req.headers.get('x-forwarded-host')?.split(',')[0]?.trim().toLowerCase().split(':')[0] ||
+    req.headers.get('host')?.trim().toLowerCase().split(':')[0] ||
+    ''
+  )
+}
+
 export async function GET(req: NextRequest) {
-  if (!isDemoInstance()) {
+  if (!isDemoInstance(requestHost(req))) {
     return NextResponse.json({ error: 'Demo only' }, { status: 404 })
   }
   const slug = (req.cookies.get(PAVILION_BRAND_COOKIE)?.value || '').trim().toLowerCase()
@@ -39,7 +47,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isDemoInstance()) {
+  if (!isDemoInstance(requestHost(req))) {
     return NextResponse.json({ error: 'Demo only' }, { status: 404 })
   }
   const body = (await req.json().catch(() => ({}))) as { slug?: string }
