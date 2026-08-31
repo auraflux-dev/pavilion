@@ -311,6 +311,13 @@ export function springHillPack(): TrialPack {
 
 const PACKS: Record<string, () => TrialPack> = {
   'spring-hill': springHillPack,
+  /** Demo / sales preview of an unbranded new trial (not a real prospect pack). */
+  vanilla: () =>
+    vanillaTrialPack({
+      slug: 'vanilla',
+      schoolName: 'Your School PTO',
+      host: 'demo.onpavilion.com',
+    }),
 }
 
 export function trialPackForSlug(slug: string): TrialPack | null {
@@ -339,16 +346,17 @@ export function vanillaTrialPack(opts: {
     short,
     town: '',
     host,
-    store: 'Spirit Shop',
+    store: 'Store',
     card: 'Family card',
-    cheer: 'Join the PTO',
+    cheer: 'Welcome',
     logoPath: '',
     colors: {
-      primary: '#1B4D3E',
-      dark: '#0F2E26',
-      accent: '#C4A35A',
-      warm: '#F7F5F0',
-      soft: '#EEF3F0',
+      // Neutral product shell. Not Riverside green. Not a prospect pack.
+      primary: '#1A1A1A',
+      dark: '#111111',
+      accent: '#5A6070',
+      warm: '#F7F7F5',
+      soft: '#EEEEEC',
     },
   }
   return {
@@ -357,10 +365,10 @@ export function vanillaTrialPack(opts: {
     settings: {
       schoolInSession: 'true',
       storeCardBonusPercent: '0',
-      presidentEmail: `president@${host}`,
+      presidentEmail: `board@${host}`,
       announcementEnabled: 'false',
-      contactEmailGeneral: `president@${host}`,
-      portalGrades: 'K,1,2,3,4,5,6,7,8',
+      contactEmailGeneral: `board@${host}`,
+      portalGrades: 'K,1,2,3,4,5',
     },
     nav: [
       { id: 'v0', label: 'Home', href: '/', sortOrder: 0, showInNav: true, showInFooter: true, active: true },
@@ -371,10 +379,10 @@ export function vanillaTrialPack(opts: {
     ],
     pages: {
       home: empty('home', {
-        eyebrow: pto,
-        title: `Welcome to ${short}`,
-        body: 'Your Pavilion trial site.\nMember portal and staff tools are ready to explore.',
-        ctaLabel: 'Join',
+        eyebrow: 'Your PTO trial',
+        title: pto,
+        body: 'This is a new Pavilion workspace.\nNo prospect brand pack is applied.\nEdit copy, pages, and programs from Staff.',
+        ctaLabel: 'Open membership',
         ctaHref: '/membership',
       }),
     },

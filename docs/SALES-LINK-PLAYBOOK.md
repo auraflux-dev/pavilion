@@ -9,9 +9,9 @@
 | Website CTA, cold traffic | https://demo.onpavilion.com | No code. Public visitor pages. |
 | Conference / social “try Pavilion” | https://demo.onpavilion.com | Same. |
 | Live sales call (branded skin) | https://demo.onpavilion.com/review?brand=spring-hill | Brand pack cookie. Code on page or `?code=` below. |
+| Vanilla blank trial look (no prospect skin) | https://demo.onpavilion.com/review?brand=vanilla | Neutral shell + “Your School PTO”. |
 | Tour staff + member portals | https://demo.onpavilion.com/review | User enters review code. Or pre-fill `?code=` from CRM. |
 | Named prospect private trial | https://{slug}.onpavilion.com | Provision first. Email login credentials. |
-| Legacy until DNS | https://commons-pto-demo.vercel.app | Same paths as demo host. |
 
 ## Review codes
 

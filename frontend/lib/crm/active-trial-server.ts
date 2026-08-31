@@ -23,7 +23,8 @@ import {
 async function packFromSessionOrg(): Promise<TrialPack | null> {
   const { commonsDbEnabled, sql } = await import('@/lib/crm/db')
   const { getAuth } = await import('@/lib/crm/auth')
-  if (!commonsDbEnabled() || !isCommonsPlatform()) return null
+  const { isPavilionProductPlatform } = await import('@/lib/crm/platform-env')
+  if (!commonsDbEnabled() || !isPavilionProductPlatform()) return null
   const auth = getAuth()
   if (!auth) return null
   try {
@@ -65,14 +66,17 @@ async function packFromSessionOrg(): Promise<TrialPack | null> {
   }
 }
 
-/** Prefer cookie on demo (prospect switch), else session org pack on platform, else env. */
+/** Prefer cookie on demo (prospect switch), else session org pack on trial, else env. */
 export async function getActiveBrandPack(opts?: {
   cookieHeader?: string | null
 }): Promise<TrialPack | null> {
   if (!isCommonsSurface()) return null
 
-  let slug = ''
-  if (isDemoInstance()) {
+  const { resolveRequestSurface } = await import('@/lib/crm/product-surface-server')
+  const surface = await resolveRequestSurface()
+
+  if (surface === 'demo') {
+    let slug = ''
     if (opts?.cookieHeader !== undefined) {
       slug = brandPackSlugFromCookieHeader(opts.cookieHeader)
     } else {
@@ -85,13 +89,16 @@ export async function getActiveBrandPack(opts?: {
       }
     }
     if (slug) return trialPackForSlug(slug)
-  } else if (isCommonsPlatform()) {
+  } else if (surface === 'trial') {
+    const fromOrg = await packFromSessionOrg()
+    if (fromOrg) return fromOrg
+  } else if (isCommonsPlatform() && !isDemoInstance()) {
     const fromOrg = await packFromSessionOrg()
     if (fromOrg) return fromOrg
   }
 
-  slug = activeBrandPackSlugFromEnv().toLowerCase()
-  return slug ? trialPackForSlug(slug) : null
+  const envSlug = activeBrandPackSlugFromEnv().toLowerCase()
+  return envSlug ? trialPackForSlug(envSlug) : null
 }
 
 export async function getActiveBrand(opts?: {

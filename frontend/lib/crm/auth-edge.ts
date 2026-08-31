@@ -18,11 +18,23 @@ export function hasBetterAuthCookie(cookieNames: string[]): boolean {
 /**
  * Private trial tenant host (login-gated). On unified deploy, derived from Host.
  * Legacy: COMMONS_PLATFORM without DEMO_INSTANCE on a separate project.
+ *
+ * When both DEMO_INSTANCE and PAVILION_PLATFORM are set, pass Host:
+ * demo.onpavilion.com stays public; {slug}.onpavilion.com is login-gated.
  */
 export function isCommonsPlatformHost(host?: string): boolean {
   if (!isPavilionProductPlatform()) return false
   if (host) return isTrialVanityHost(host)
-  return process.env.DEMO_INSTANCE !== 'true'
+  // Unified stack (demo + platform on one project): do not treat every request as trial.
+  if (process.env.DEMO_INSTANCE === 'true' || process.env.NEXT_PUBLIC_DEMO_INSTANCE === 'true') {
+    return false
+  }
+  return true
+}
+
+/** Ops may provision trials when platform is on (including unified demo+platform deploy). */
+export function canProvisionTrials(): boolean {
+  return isPavilionProductPlatform()
 }
 
 export { isSharedProductHost, isTrialVanityHost, normalizeProductHost }

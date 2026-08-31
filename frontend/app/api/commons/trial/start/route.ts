@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { persistTrialStart } from '@/lib/crm/persist'
-import { isCommonsPlatformHost } from '@/lib/crm/auth-edge'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { canProvisionTrials } from '@/lib/crm/auth-edge'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,23 +13,12 @@ function provisionKeyOk(req: NextRequest, bodyKey?: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  if (isDemoInstance() && !isCommonsPlatformHost()) {
-    return NextResponse.json(
-      {
-        ok: false,
-        preview: true,
-        error:
-          'This sample school stays preview-only.\nPavilion starts a private trial on the host and sends you the URL plus login.',
-      },
-      { status: 409 },
-    )
-  }
-  if (!isCommonsPlatformHost()) {
+  if (!canProvisionTrials()) {
     return NextResponse.json(
       {
         ok: false,
         error:
-          'Trial signup runs on the Pavilion app, not Stone Hill.\nAsk Pavilion for a private trial login.',
+          'Trial signup runs on the Pavilion product app.\nSet PAVILION_PLATFORM on commons-pto-demo.\nAsk Pavilion for a private trial login.',
       },
       { status: 503 },
     )
@@ -68,13 +56,14 @@ export async function POST(req: NextRequest) {
       lastName: body.lastName,
       brandPack: body.brandPack,
     })
+    const loginUrl = `https://${started.tempHost}/login`
     const res = NextResponse.json({
       ok: true,
       slug: started.slug,
       tempHost: started.tempHost,
       trialEndsAt: started.trialEndsAt,
       brandPackSlug: started.brandPackSlug,
-      next: '/staff',
+      next: loginUrl,
     })
     for (const cookie of started.setCookies) {
       res.headers.append('Set-Cookie', cookie)
