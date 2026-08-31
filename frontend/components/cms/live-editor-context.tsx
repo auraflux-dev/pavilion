@@ -13,6 +13,7 @@ import {
   type ReactNode,
 } from 'react'
 import { cmsPageBuilderEnabledPublic } from '@/lib/cms/page-builder-flag'
+import { isCopyOnlyPageSlug } from '@/lib/cms/portal-live-edit'
 import { useInlineCopy } from '@/components/cms/inline-copy-context'
 
 export type LiveSectionRow = {
@@ -65,9 +66,10 @@ export function LiveEditorProvider({
 }) {
   const { canEdit } = useInlineCopy()
   const pageBuilderOn = cmsPageBuilderEnabledPublic()
-  const canLayoutEdit = canEdit && pageBuilderOn
-
   const [pageSlug, setPageSlug] = useState(initialSlug || 'home')
+  const canLayoutEdit =
+    canEdit && pageBuilderOn && !isCopyOnlyPageSlug(pageSlug)
+
   const [layoutEditMode, setLayoutEditMode] = useState(false)
   const [sections, setSections] = useState<LiveSectionRow[]>([])
   const [loadingSections, setLoadingSections] = useState(false)

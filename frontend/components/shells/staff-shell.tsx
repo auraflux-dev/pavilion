@@ -20,6 +20,7 @@ import { clearAuthCache } from '@/lib/hooks/use-auth'
 import { publicBrandFace } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { DemoMark } from '@/components/demo/demo-mark'
+import { CmsString } from '@/components/cms/cms-string'
 
 type NavItem = {
   id: StaffWorkspace
@@ -118,7 +119,9 @@ export function StaffShell({
               />
             )}
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--brand-gold)]">{sc('shell.staff')}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--brand-gold)]">
+                <CmsString page="staff-portal" k="shell.staff" copy={shellCopy} inlineTarget />
+              </p>
               <p className="text-sm font-semibold truncate">
                 {name || sc('shell.boardMember')}
                 {boardTitle ? (
@@ -140,7 +143,13 @@ export function StaffShell({
                     : 'text-white/85 hover:bg-white/10'
                 }`}
               >
-                {item.label}
+                <CmsString
+                  page="staff-portal"
+                  k={`workspace.${item.id}`}
+                  copy={shellCopy}
+                  fallback={item.label}
+                  inlineTarget
+                />
               </button>
             ))}
             {overflow.length > 0 ? (
@@ -156,7 +165,7 @@ export function StaffShell({
                   aria-expanded={moreOpen}
                   aria-haspopup="menu"
                 >
-                  {sc('shell.more')}
+                  <CmsString page="staff-portal" k="shell.more" copy={shellCopy} inlineTarget />
                   <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
                 {moreOpen ? (
@@ -201,10 +210,10 @@ export function StaffShell({
                 href="/member-portal"
                 className="px-2.5 py-1 rounded text-xs font-semibold text-white/90 hover:bg-white/10"
               >
-                {sc('shell.member')}
+                <CmsString page="staff-portal" k="shell.member" copy={shellCopy} inlineTarget />
               </Link>
               <span className="px-2.5 py-1 rounded text-xs font-semibold bg-white text-[var(--brand-dark)]">
-                {sc('shell.staff')}
+                <CmsString page="staff-portal" k="shell.staff" copy={shellCopy} inlineTarget />
               </span>
             </span>
             <Link href="/">
@@ -213,7 +222,7 @@ export function StaffShell({
                 variant="outline"
                 className="border-white/40 text-white hover:bg-white/10 bg-transparent h-8 text-xs"
               >
-                {sc('shell.viewSite')}
+                <CmsString page="staff-portal" k="shell.viewSite" copy={shellCopy} inlineTarget />
               </Button>
             </Link>
             <Button
@@ -221,7 +230,7 @@ export function StaffShell({
               className="h-8 text-xs bg-[var(--brand-gold)] text-[var(--brand-dark)] hover:bg-[#ffe44d] font-bold"
               onClick={() => void signOut()}
             >
-              {sc('shell.signOut')}
+              <CmsString page="staff-portal" k="shell.signOut" copy={shellCopy} inlineTarget />
             </Button>
           </div>
 
@@ -286,11 +295,11 @@ export function StaffShell({
                     variant="outline"
                     className="w-full border-white/40 text-white bg-transparent"
                   >
-                    {sc('shell.member')}
+                    <CmsString page="staff-portal" k="shell.member" copy={shellCopy} inlineTarget />
                   </Button>
                 </Link>
                 <Button size="sm" className="w-full bg-white text-[var(--brand-dark)] font-semibold">
-                  {sc('shell.staff')}
+                  <CmsString page="staff-portal" k="shell.staff" copy={shellCopy} inlineTarget />
                 </Button>
               </div>
               <Link href="/" className="block" onClick={() => setMenuOpen(false)}>
@@ -299,7 +308,7 @@ export function StaffShell({
                   variant="outline"
                   className="w-full border-white/40 text-white bg-transparent"
                 >
-                  {sc('shell.viewSite')}
+                  <CmsString page="staff-portal" k="shell.viewSite" copy={shellCopy} inlineTarget />
                 </Button>
               </Link>
               <Button
@@ -307,7 +316,7 @@ export function StaffShell({
                 className="w-full bg-[var(--brand-gold)] text-[var(--brand-dark)] font-bold"
                 onClick={() => void signOut()}
               >
-                {sc('shell.signOut')}
+                <CmsString page="staff-portal" k="shell.signOut" copy={shellCopy} inlineTarget />
               </Button>
             </div>
           </div>
@@ -327,7 +336,7 @@ export function StaffShell({
               className="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
               style={{ color: 'var(--brand-green)' }}
             >
-              ← {sc('shell.home')}
+              ← <CmsString page="staff-portal" k="shell.home" copy={shellCopy} inlineTarget />
             </button>
             <Link
               href="/"

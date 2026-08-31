@@ -4,6 +4,8 @@ import { PortalHelpForm } from '@/components/member-portal/portal-help-form'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
 import { getMergedKbArticles } from '@/lib/api/kb-articles'
 import { articlesByCategoryWithExtras } from '@/lib/kb'
+import { MemberInlineEdit } from '@/components/site/member-inline-edit'
+import { CmsCopyBoundary } from '@/components/cms/cms-copy-boundary'
 
 export const metadata = {
   title: 'Member Help',
@@ -17,6 +19,8 @@ export default async function MemberHelpIndexPage() {
   const groups = articlesByCategoryWithExtras('member', articles)
 
   return (
+    <MemberInlineEdit pageSlug="member-portal">
+    <CmsCopyBoundary pages={['member-portal', 'portal-forms', 'portal-help']}>
     <MemberShell>
       <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
@@ -44,5 +48,7 @@ export default async function MemberHelpIndexPage() {
         </div>
       </main>
     </MemberShell>
+    </CmsCopyBoundary>
+    </MemberInlineEdit>
   )
 }

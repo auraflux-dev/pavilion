@@ -142,6 +142,11 @@ export function LiveEditorToolbar() {
       <div className="pointer-events-auto flex flex-col items-center gap-1.5 rounded-full border border-[var(--border)] bg-white px-3 py-2 shadow-lg">
         <div className="flex flex-wrap items-center justify-center gap-2">
           <span className="text-xs font-semibold text-[#5A6070]">Admin</span>
+          {!canLayoutEdit && canEdit ? (
+            <span className="hidden sm:inline text-[10px] font-medium text-[#5A6070]">
+              Portal copy
+            </span>
+          ) : null}
           {canLayoutEdit ? (
             <button
               type="button"

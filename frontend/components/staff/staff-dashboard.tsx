@@ -74,6 +74,7 @@ import {
   staffWorkspaceLabel,
 } from '@/lib/api/staff-portal-copy-shared'
 import { STAFF_PORTAL_DEFAULTS } from '@/lib/defaults/staff-portal-defaults'
+import { CmsString } from '@/components/cms/cms-string'
 import {
   STAFF_WORKSPACE_BLURB,
   STAFF_WORKSPACE_GROUPS,
@@ -546,7 +547,9 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
         {active === 'home' ? (
           <section className="space-y-4">
             <div>
-              <h1 className="text-2xl font-bold text-[#1A1A1A]">{staffStr(staffCopy, 'dashboard.homeTitle')}</h1>
+              <h1 className="text-2xl font-bold text-[#1A1A1A]">
+                <CmsString page="staff-portal" k="dashboard.homeTitle" copy={staffCopy} />
+              </h1>
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
                 {isPavilionProductPlatformPublic()
                   ? `Private trial staff for your school.\nPick an area below, or use the top nav.\nStart with Membership, Events, or Site.`
@@ -572,7 +575,9 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
             )}
             {activityItems.length > 0 ? (
               <div className="rounded-xl border border-[var(--brand-green)]/25 bg-[#E8F3E8] p-4 space-y-2">
-                <p className="text-sm font-bold text-[var(--brand-green)]">{sc('dashboard.needsAttention')}</p>
+                <p className="text-sm font-bold text-[var(--brand-green)]">
+                  <CmsString page="staff-portal" k="dashboard.needsAttention" copy={staffCopy} />
+                </p>
                 <ul className="space-y-1.5">
                   {activityItems.map((item) => (
                     <li key={item.id}>

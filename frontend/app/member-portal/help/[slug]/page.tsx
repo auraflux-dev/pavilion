@@ -3,6 +3,7 @@ import { MemberShell } from '@/components/shells/member-shell'
 import { KnowledgeBase } from '@/components/kb/knowledge-base'
 import { getMergedKbArticle, getMergedKbArticles } from '@/lib/api/kb-articles'
 import { articlesByCategoryWithExtras, getCategory } from '@/lib/kb'
+import { MemberInlineEdit } from '@/components/site/member-inline-edit'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,20 +29,22 @@ export default async function MemberHelpArticlePage({ params }: Props) {
   const groups = articlesByCategoryWithExtras('member', articles)
 
   return (
-    <MemberShell>
-      <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
-          <KnowledgeBase
-            title="Member Help"
-            subtitle=""
-            groups={groups}
-            indexHref="/member-portal/help"
-            articleHrefTemplate="/member-portal/help/{slug}"
-            active={article}
-            activeCategory={category}
-          />
-        </div>
-      </main>
-    </MemberShell>
+    <MemberInlineEdit pageSlug="member-portal">
+      <MemberShell>
+        <main id="main-content" className="flex-1" style={{ backgroundColor: 'var(--brand-warm)' }}>
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
+            <KnowledgeBase
+              title="Member Help"
+              subtitle=""
+              groups={groups}
+              indexHref="/member-portal/help"
+              articleHrefTemplate="/member-portal/help/{slug}"
+              active={article}
+              activeCategory={category}
+            />
+          </div>
+        </main>
+      </MemberShell>
+    </MemberInlineEdit>
   )
 }
