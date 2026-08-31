@@ -23,6 +23,9 @@ function allowedOrigins(): string[] {
   if (isPavilionProductPlatform()) {
     set.add('https://commons-pto.vercel.app')
     set.add('https://commons-pto-demo.vercel.app')
+    set.add(`https://${process.env.PAVILION_DEMO_HOST || 'demo.onpavilion.com'}`)
+    set.add('https://onpavilion.com')
+    set.add('https://www.onpavilion.com')
   }
   if (process.env.NODE_ENV !== 'production') {
     set.add('http://localhost:3000')
@@ -46,6 +49,23 @@ function isLocalDevOrigin(origin: string): boolean {
   }
 }
 
+function isPavilionTrialOrigin(origin: string): boolean {
+  if (!isPavilionProductPlatform()) return false
+  try {
+    const host = new URL(origin).hostname.toLowerCase()
+    const suffix = (
+      process.env.PAVILION_TRIAL_DOMAIN_SUFFIX ||
+      process.env.COMMONS_TEMP_DOMAIN_SUFFIX ||
+      'onpavilion.com'
+    )
+      .replace(/^\./, '')
+      .toLowerCase()
+    return host === suffix || host.endsWith(`.${suffix}`)
+  } catch {
+    return false
+  }
+}
+
 export function isSameOriginRequest(req: Request): boolean {
   const method = req.method.toUpperCase()
   if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return true
@@ -58,6 +78,7 @@ export function isSameOriginRequest(req: Request): boolean {
   if (origin) {
     if (origin === requestOrigin) return true
     if (allowed.some((a) => origin === a || origin.startsWith(`${a}/`))) return true
+    if (isPavilionTrialOrigin(origin)) return true
     return isLocalDevOrigin(origin)
   }
   if (referer) {

@@ -1,13 +1,17 @@
 import { getTopNavLinks } from '@/lib/api/nav'
 import { publicBrandFace } from '@/lib/demo/brand'
 import { isCommonsPlatform } from '@/lib/crm/active-trial'
-import { isDemoInstance } from '@/lib/demo/instance'
 import { NavbarClient } from './navbar-client'
 
 export async function Navbar() {
   const links = await getTopNavLinks()
-  const brand = publicBrandFace()
-  const mode = isDemoInstance() ? 'demo' : isCommonsPlatform() ? 'commons' : 'stone-hill'
+  const { getActiveBrandPack } = await import('@/lib/crm/active-trial-server')
+  const { brandFaceFromTrial } = await import('@/lib/demo/brand')
+  const pack = await getActiveBrandPack()
+  const brand = pack ? brandFaceFromTrial(pack.brand) : publicBrandFace()
+  const { isDemoRequestSurface } = await import('@/lib/crm/product-surface-server')
+  const demoSurface = await isDemoRequestSurface()
+  const mode = demoSurface ? 'demo' : isCommonsPlatform() ? 'commons' : 'stone-hill'
   return (
     <NavbarClient
       links={links}

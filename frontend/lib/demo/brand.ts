@@ -99,6 +99,26 @@ export function setClientBrandFace(face: PublicBrandFace | null) {
   clientBrandFace = face
 }
 
+/** Neutral shell when a trial has no prospect pack (not Riverside). */
+export const VANILLA_PUBLIC_BRAND: PublicBrandFace = brandFaceFromTrial({
+  school: 'Your School',
+  pto: 'Your School PTO',
+  short: 'Your School',
+  town: '',
+  host: 'onpavilion.com',
+  store: 'Store',
+  card: 'Family card',
+  cheer: 'Welcome',
+  logoPath: '',
+  colors: {
+    primary: '#1A1A1A',
+    dark: '#111111',
+    accent: '#5A6070',
+    warm: '#F7F7F5',
+    soft: '#EEEEEC',
+  },
+})
+
 /** Active visitor chrome brand: demo, prospect pack, or Stone Hill. */
 export function publicBrandFace(): PublicBrandFace {
   if (clientBrandFace) return clientBrandFace
@@ -116,7 +136,8 @@ export function publicBrandFace(): PublicBrandFace {
     if (pack) return brandFaceFromTrial(pack.brand)
   }
   if (isDemoInstance()) return DEMO_BRAND
-  if (isPavilionProductPlatform()) return DEMO_BRAND
+  // Unified platform without a pack: neutral, never Riverside sample.
+  if (isPavilionProductPlatform()) return VANILLA_PUBLIC_BRAND
   return STONE_HILL_BRAND
 }
 

@@ -99,7 +99,13 @@ export default async function RootLayout({
   const trial = await isTrialRequestSurface()
   const productSurface = demo || trial
   const pack = productSurface ? await getActiveBrandPack() : null
-  const cmsLayout = productSurface ? await resolveCmsLayoutBrand() : null
+  // Prospect / vanilla pack cookie must win over Riverside CMS brand on the shared demo.
+  const cmsLayout =
+    productSurface && !(demo && pack)
+      ? await resolveCmsLayoutBrand()
+      : trial
+        ? await resolveCmsLayoutBrand()
+        : null
   const dataPto = pack?.slug || (demo ? 'riverside' : trial ? 'commons' : 'shms')
   const packBrand = pack?.brand ?? null
   const mergedStyle = {

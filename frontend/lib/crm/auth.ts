@@ -24,11 +24,43 @@ export function createCommonsAuth() {
     secret,
     baseURL: process.env.BETTER_AUTH_URL || publicSiteUrl(),
     basePath: AUTH_BASE_PATH,
-    trustedOrigins: [
-      publicSiteUrl(),
-      'https://commons-pto-demo.vercel.app',
-      'https://commons-pto.vercel.app',
-    ],
+    trustedOrigins: (request) => {
+      const base = [
+        publicSiteUrl(),
+        `https://${process.env.PAVILION_DEMO_HOST || 'demo.onpavilion.com'}`,
+        'https://onpavilion.com',
+        'https://www.onpavilion.com',
+        'https://commons-pto-demo.vercel.app',
+        'https://commons-pto.vercel.app',
+      ]
+      if (!request) return base
+      const origin = request.headers.get('origin') || ''
+      const suffix = (
+        process.env.PAVILION_TRIAL_DOMAIN_SUFFIX ||
+        process.env.COMMONS_TEMP_DOMAIN_SUFFIX ||
+        'onpavilion.com'
+      )
+        .replace(/^\./, '')
+        .toLowerCase()
+      try {
+        if (origin) {
+          const host = new URL(origin).hostname.toLowerCase()
+          if (host === suffix || host.endsWith(`.${suffix}`)) {
+            return [...base, origin]
+          }
+        }
+      } catch {
+        // ignore
+      }
+      const host =
+        request.headers.get('x-forwarded-host')?.split(',')[0]?.trim().toLowerCase().split(':')[0] ||
+        request.headers.get('host')?.trim().toLowerCase().split(':')[0] ||
+        ''
+      if (host && (host === suffix || host.endsWith(`.${suffix}`))) {
+        return [...base, `https://${host}`]
+      }
+      return base
+    },
     emailAndPassword: {
       enabled: true,
       password: {
