@@ -1,8 +1,8 @@
 /**
  * POST /api/cron/topup-membership-cove-credit
  * Auth: Authorization: Bearer $CRON_SECRET or $PURCHASE_RESEND_SECRET
- * Body: { parentEmail, tier? } — loads missing membership Cove credit up to tier entitlement.
- * Unused Square balance already rolls over; this only adds what was never loaded.
+ * Body: { parentEmail, tier? } — loads any missing Cove credit for that tier (full tier grant).
+ * Unused Square balance rolls over; upgrades stack each paid tier's full credit.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import {
@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'tier must be reef|lagoon|tide' }, { status: 400 })
     }
 
-    const before = await sumLoadedMembershipCoveCreditBase(parentEmail)
+    const beforeTotal = await sumLoadedMembershipCoveCreditBase(parentEmail)
+    const beforeTier = await sumLoadedMembershipCoveCreditBase(parentEmail, tier)
     const orderId = `ops-cove-topup-${tier}-${parentEmail.slice(0, 24)}-${Date.now()}`
     const result = await applyPaidMembership({
       parentEmail,
@@ -61,7 +62,8 @@ export async function POST(req: NextRequest) {
       ok: true,
       parentEmail,
       tier,
-      alreadyLoadedBaseBefore: before,
+      alreadyLoadedBaseBefore: beforeTotal,
+      alreadyLoadedForTierBefore: beforeTier,
       giftCard: result.giftCard ?? null,
       updatedStudentIds: result.updatedStudentIds,
     })
