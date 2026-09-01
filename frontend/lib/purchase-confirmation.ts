@@ -22,6 +22,8 @@ export type PurchaseConfirmationInput = {
   meta?: Record<string, string>
   /** Extra lines from fulfill (waitlist, balance, etc.) */
   extras?: Record<string, unknown>
+  /** Ops resend: email parent/portal only; do not re-blast staff sale alerts. */
+  skipStaffNotify?: boolean
 }
 
 export type PurchaseConfirmation = {
@@ -91,6 +93,10 @@ export function buildPurchaseConfirmationCopy(
   if (input.kind === 'program') {
     const waitlisted = Boolean(input.extras?.waitlisted || input.extras?.status === 'Waitlisted')
     const pos = input.extras?.waitlistPosition
+    const programLabel =
+      input.meta?.programName ||
+      input.description.replace(/^Enrichment:\s*/i, '').trim() ||
+      'enrichment program'
     const nextSteps = waitlisted
       ? [
           `You are on the waitlist${pos ? ` (#${pos})` : ''}. We will email you if a seat opens.`,
@@ -104,11 +110,25 @@ export function buildPurchaseConfirmationCopy(
         ]
     return paintConfirm({
       subject: waitlisted
-        ? `Waitlisted: ${input.meta?.programName || 'enrichment program'}`
-        : `Enrolled: ${input.meta?.programName || 'enrichment program'}`,
-      body: [...baseReceipt, 'Next steps:', ...nextSteps.map((s) => `• ${s}`), '', `${brand.short} Programs`].join(
-        '\n',
-      ),
+        ? `Waitlisted: ${programLabel}`
+        : `Enrolled: ${programLabel}`,
+      body: [
+        `Hi ${name.split(' ')[0] || 'there'},`,
+        '',
+        waitlisted
+          ? `Thanks for joining the waitlist for ${programLabel}.`
+          : `Thanks for enrolling in ${programLabel}.`,
+        '',
+        `Order: ${input.description}`,
+        `Amount: ${money(input.amount)}`,
+        `Reference: ${input.transactionId}`,
+        '',
+        ...tenderBreakdownLines(input.extras),
+        'Next steps:',
+        ...nextSteps.map((s) => `• ${s}`),
+        '',
+        `${brand.short} Programs`,
+      ].join('\n'),
       nextSteps,
       portalHref: '/member-portal#calendar',
     })
@@ -253,22 +273,24 @@ export async function sendPurchaseConfirmation(
     console.warn('[purchase-confirmation] email error', err)
   }
 
-  try {
-    const { notifyStaffTransaction } = await import('@/lib/staff/submission-notify')
-    const staff = await notifyStaffTransaction({
-      kind: input.kind,
-      parentEmail: input.parentEmail,
-      parentName: input.parentName,
-      amount: input.amount,
-      description: input.description,
-      transactionId: input.transactionId,
-      meta: input.meta,
-    })
-    if (!staff.ok) {
-      console.warn('[purchase-confirmation] staff sale alert skipped', staff)
+  if (!input.skipStaffNotify) {
+    try {
+      const { notifyStaffTransaction } = await import('@/lib/staff/submission-notify')
+      const staff = await notifyStaffTransaction({
+        kind: input.kind,
+        parentEmail: input.parentEmail,
+        parentName: input.parentName,
+        amount: input.amount,
+        description: input.description,
+        transactionId: input.transactionId,
+        meta: input.meta,
+      })
+      if (!staff.ok) {
+        console.warn('[purchase-confirmation] staff sale alert skipped', staff)
+      }
+    } catch (err) {
+      console.warn('[purchase-confirmation] staff sale alert error', err)
     }
-  } catch (err) {
-    console.warn('[purchase-confirmation] staff sale alert error', err)
   }
 
   return { ...copy, emailed }

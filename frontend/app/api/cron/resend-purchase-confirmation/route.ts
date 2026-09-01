@@ -1,7 +1,16 @@
 /**
  * POST /api/cron/resend-purchase-confirmation
- * Auth: Authorization: Bearer $CRON_SECRET
- * Body: { transactionId: string } — resends parent + staff payment emails for that payment.
+ * Auth: Bearer $CRON_SECRET or $PURCHASE_RESEND_SECRET
+ * Body: {
+ *   transactionId?: string
+ *   paymentId?: string
+ *   kind?: PurchaseConfirmKind
+ *   parentName?: string
+ *   description?: string
+ *   programName?: string
+ *   amount?: number
+ *   notifyStaff?: boolean   // default false — do not re-blast staff alerts
+ * }
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getWixClient } from '@/lib/wix-client'
@@ -33,7 +42,46 @@ function kindFromPayment(row: Record<string, unknown>): PurchaseConfirmKind {
   if (type.includes('event') || type.includes('ticket')) return 'event'
   if (type.includes('donat')) return 'donation'
   if (type.includes('cart') || name.includes('bag')) return 'program'
+  // Never treat poisoned Stand ledger rows as Cove/shop when notes look like enrollments
+  const notes = String(row.notes || '').toLowerCase()
+  if (notes.includes('enrichment') || /competitive math|robotics|chess/.test(notes)) {
+    return 'program'
+  }
   return 'product'
+}
+
+function paymentRank(row: Record<string, unknown>): number {
+  const source = String(row.source || '').toLowerCase()
+  const name = String(row.programName || row.programTitle || row.description || '').toLowerCase()
+  if (source.includes('square_pos_stand') || name.includes('in-person sales')) return 0
+  if (source.includes('_program') || name.includes('enrichment')) return 100
+  if (source.includes('_cart') || name.includes('bag')) return 90
+  if (source.includes('membership')) return 80
+  if (source.includes('checkout')) return 70
+  return 40
+}
+
+function pickBestPaymentRow(
+  items: Array<Record<string, unknown>>,
+): Record<string, unknown> | null {
+  if (!items.length) return null
+  return [...items].sort((a, b) => paymentRank(b) - paymentRank(a))[0] ?? null
+}
+
+function amountFromRow(row: Record<string, unknown>, override?: number): number {
+  if (override != null && Number.isFinite(override) && override > 0) return Number(override)
+  const stored = Number(row.amount ?? 0) || 0
+  const notes = String(row.notes || '')
+  const coveMatch = notes.match(/Cove\s+\$([0-9]+(?:\.[0-9]+)?)/i)
+  const cardMatch = notes.match(/card\s+\$([0-9]+(?:\.[0-9]+)?)/i)
+  if (coveMatch && cardMatch) {
+    const total = Number(coveMatch[1]) + Number(cardMatch[1])
+    // Prefer reconstructed total when ledger amount looks like card-only tender
+    if (total > 0 && (stored <= 0 || Math.abs(stored - Number(cardMatch[1])) < 0.02)) {
+      return Math.round(total * 100) / 100
+    }
+  }
+  return stored
 }
 
 export async function POST(req: NextRequest) {
@@ -49,6 +97,8 @@ export async function POST(req: NextRequest) {
       parentName?: string
       description?: string
       programName?: string
+      amount?: number
+      notifyStaff?: boolean
     }
     const transactionId = String(body.transactionId || '').trim()
     const paymentId = String(body.paymentId || '').trim()
@@ -68,21 +118,22 @@ export async function POST(req: NextRequest) {
       const found = await client.items
         .query('Payments')
         .eq('transactionId', transactionId)
-        .limit(5)
+        .limit(10)
         .find()
-      row = (found.items?.[0] as Record<string, unknown>) || null
+      row = pickBestPaymentRow((found.items ?? []) as Array<Record<string, unknown>>)
       if (!row) {
         const found2 = await client.items
           .query('Payments')
-          .limit(50)
+          .limit(80)
           .descending('_createdDate')
           .find()
-        row =
-          (found2.items ?? []).find((item) => {
-            const r = item as Record<string, unknown>
-            const tx = String(r.transactionId || r.squarePaymentId || '')
+        const matches = ((found2.items ?? []) as Array<Record<string, unknown>>).filter(
+          (item) => {
+            const tx = String(item.transactionId || item.squarePaymentId || '')
             return tx === transactionId || tx.startsWith(`${transactionId}:`)
-          }) as Record<string, unknown> | undefined ?? null
+          },
+        )
+        row = pickBestPaymentRow(matches)
       }
     }
 
@@ -91,22 +142,37 @@ export async function POST(req: NextRequest) {
     }
 
     const parentEmail = String(row.parentEmail || row.email || '').trim()
-    if (!parentEmail) {
-      return NextResponse.json({ error: 'Payment has no parent email' }, { status: 400 })
+    if (!parentEmail || parentEmail === 'guest@register.local') {
+      return NextResponse.json(
+        { error: 'Payment has no parent email (or is a guest Stand row)' },
+        { status: 400 },
+      )
     }
 
-    const amount = Number(row.amount ?? 0) || 0
-    const description = String(
+    const amount = amountFromRow(row, body.amount)
+    let description = String(
       body.description ||
         row.description ||
         row.programName ||
         row.programTitle ||
         'SHMS PTO purchase',
-    )
+    ).trim()
+    // Prefer website cart/program wording over poisoned Stand ledger titles
+    if (/in-person sales|square stand/i.test(description) && !body.description) {
+      const notes = String(row.notes || '')
+      if (/enrichment|bag|competitive math|robotics/i.test(notes)) {
+        description = 'Enrichment enrollment'
+      }
+    }
     const tx = String(row.transactionId || row.squarePaymentId || transactionId || paymentId)
-    const programName = String(
+    let programName = String(
       body.programName || row.programName || row.programTitle || '',
-    )
+    ).trim()
+    if (/in-person sales|square stand/i.test(programName) && body.programName) {
+      programName = body.programName
+    } else if (/in-person sales|square stand/i.test(programName)) {
+      programName = body.programName || description
+    }
     const kind = (body.kind as PurchaseConfirmKind | undefined) || kindFromPayment(row)
     const notes = String(row.notes || '')
     const coveMatch = notes.match(/Cove\s+\$([0-9]+(?:\.[0-9]+)?)/i)
@@ -128,6 +194,7 @@ export async function POST(req: NextRequest) {
       transactionId: tx,
       meta: programName ? { programName } : undefined,
       extras: Object.keys(extras).length ? extras : undefined,
+      skipStaffNotify: body.notifyStaff !== true,
     })
 
     return NextResponse.json({
@@ -136,6 +203,11 @@ export async function POST(req: NextRequest) {
       subject: confirmation.subject,
       parentEmail,
       transactionId: tx,
+      kind,
+      amount,
+      description,
+      staffNotified: body.notifyStaff === true,
+      source: String(row.source || ''),
     })
   } catch (err) {
     const eventId = await reportError(err, { route: '/api/cron/resend-purchase-confirmation' })

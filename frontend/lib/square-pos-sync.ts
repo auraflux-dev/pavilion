@@ -256,6 +256,27 @@ export async function fulfillSquarePosPayment(paymentId: string): Promise<PosSyn
     }
   }
 
+  // Website checkout may write `${paymentId}:bagN` before the parent Payments row.
+  // Treat those as already fulfilled so we never invent a Stand sale.
+  try {
+    const priorPrefixed = await wix.items
+      .query('Payments')
+      .startsWith('transactionId', `${id}:`)
+      .limit(1)
+      .find()
+    if ((priorPrefixed.items ?? []).length > 0) {
+      return {
+        ok: true,
+        alreadyProcessed: true,
+        paymentId: id,
+        totalDollars: 0,
+        reason: 'checkout_prefixed',
+      }
+    }
+  } catch {
+    // startsWith unsupported on some CMS schemas — ignore
+  }
+
   const payRes = await client.payments.get({ paymentId: id })
   const payment = (payRes as { payment?: Record<string, unknown> }).payment
   if (!payment) {
@@ -272,16 +293,44 @@ export async function fulfillSquarePosPayment(paymentId: string): Promise<PosSyn
     return { ok: true, skipped: true, reason: 'other location', paymentId: id }
   }
 
+  // Online Payments API / Cove+card web carts are not Square Stand. Without this,
+  // card remainders get ledgered as "In-person sales" and poison receipts on resend.
+  const appDetails = (payment.applicationDetails ?? payment.application_details) as
+    | { squareProduct?: string; square_product?: string }
+    | undefined
+  const squareProduct = String(
+    appDetails?.squareProduct ?? appDetails?.square_product ?? '',
+  ).toUpperCase()
+  const posProducts = new Set(['SQUARE_POS', 'TERMINAL_API', 'RETAIL'])
+  if (squareProduct && !posProducts.has(squareProduct)) {
+    return {
+      ok: true,
+      skipped: true,
+      reason: `non-POS product ${squareProduct}`,
+      paymentId: id,
+    }
+  }
+
   const note = String(payment.note ?? '')
   const ref = String(payment.referenceId ?? '')
   if (
-    /membership|store.?card|cove.?reload|donation|checkout/i.test(`${note} ${ref}`) ||
+    /membership|store.?card|cove.?reload|donation|checkout|enrichment|enroll|program|bag\b|cart\b|spirit/i.test(
+      `${note} ${ref}`,
+    ) ||
     ref.startsWith('topoff:')
   ) {
     return { ok: true, skipped: true, reason: 'non-POS payment', paymentId: id }
   }
 
   const orderId = String(payment.orderId ?? '')
+  if (!squareProduct && !orderId) {
+    return {
+      ok: true,
+      skipped: true,
+      reason: 'untagged payment without order',
+      paymentId: id,
+    }
+  }
   let squareLines: SquareLine[] = []
   if (orderId) {
     try {

@@ -183,7 +183,19 @@ export type TransactionNotifyKind =
   | 'event'
   | 'donation'
 
-function transactionLabel(kind: TransactionNotifyKind): string {
+function transactionLabel(kind: TransactionNotifyKind, description?: string): string {
+  const desc = String(description || '').toLowerCase()
+  // Defense: bags/enrollments must never show as Cove/shop even if kind was wrong.
+  if (
+    kind === 'product' &&
+    (/enrichment|bag\b|enroll|program:|competitive math|robotics|chess|coding/i.test(desc) ||
+      desc.includes('classes'))
+  ) {
+    return 'Program enrollment'
+  }
+  if (kind === 'product' && /in-person sales|square stand/i.test(desc)) {
+    return 'In-person Stand sale'
+  }
   switch (kind) {
     case 'membership':
       return 'Membership sale'
@@ -254,11 +266,12 @@ export async function notifyStaffTransaction(opts: {
       .filter(Boolean),
   )
 
+  const label = transactionLabel(opts.kind, opts.description)
   const amount =
     Number.isFinite(opts.amount) ? `$${Number(opts.amount).toFixed(2)}` : String(opts.amount)
   const name = (opts.parentName || '').trim() || '(no name)'
   const lines = [
-    `A ${transactionLabel(opts.kind).toLowerCase()} just processed on shmspto.org.`,
+    `A ${label.toLowerCase()} just processed on shmspto.org.`,
     '',
     `Parent: ${name}`,
     `Email: ${opts.parentEmail}`,
@@ -268,10 +281,19 @@ export async function notifyStaffTransaction(opts: {
   ]
   if (opts.paymentMethod) lines.push(`Payment: ${opts.paymentMethod}`)
   if (opts.meta) {
-    const skip = /^(cartPartsJson|gan|giftCardId|coveBalance|accountNumber)$/i
+    const skip =
+      /^(cartPartsJson|cartTitles|gan|giftCardId|coveBalance|accountNumber|studentId|programId)$/i
+    const desc = String(opts.description || '').trim().toLowerCase()
     for (const [k, v] of Object.entries(opts.meta)) {
       if (!v || skip.test(k)) continue
       if (String(v).length > 180) continue
+      // Avoid repeating Order line as programName / productName
+      if (/^(programName|productName|description)$/i.test(k)) {
+        if (String(v).trim().toLowerCase() === desc) continue
+        if (/in-person sales|square stand/i.test(String(v)) && label === 'Program enrollment') {
+          continue
+        }
+      }
       lines.push(`${k}: ${v}`)
     }
   }
@@ -294,7 +316,7 @@ export async function notifyStaffTransaction(opts: {
 
   return sendMassEmail(
     {
-      subject: `[SHMS PTO · ${transactionLabel(opts.kind)}] ${opts.description} · ${amount}`,
+      subject: `[SHMS PTO · ${label}] ${opts.description} · ${amount}`,
       body: lines.join('\n'),
       fromName: 'SHMS PTO Website',
       replyTo: opts.parentEmail,
