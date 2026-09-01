@@ -17,9 +17,37 @@ import {
   nextWaitlistPosition,
 } from '@/lib/programs/enrollments'
 
-export type { StudentSafety } from '@/lib/student-safety'
-export { studentSafetyComplete } from '@/lib/student-safety'
-import { studentSafetyComplete, type StudentSafety } from '@/lib/student-safety'
+export type StudentSafety = {
+  _id: string
+  firstName?: string
+  lastName?: string
+  parentEmail?: string
+  parentPhone?: string
+  secondaryPhone?: string
+  emergencyContact?: string
+  emergencyPhone?: string
+  allergies?: string
+  medicalConditions?: string
+  medications?: string
+  pickupAuthorized?: string
+  selfRelease?: boolean
+  photoMediaConsent?: boolean | null
+  membershipTier?: string
+  archived?: boolean
+}
+
+export function studentSafetyComplete(s: StudentSafety): { ok: true } | { ok: false; error: string } {
+  if (!String(s.parentPhone ?? '').trim()) {
+    return { ok: false, error: 'Add a parent phone number on the student profile before registering.' }
+  }
+  if (!String(s.emergencyContact ?? '').trim() || !String(s.emergencyPhone ?? '').trim()) {
+    return { ok: false, error: 'Add an emergency contact name and phone on the student profile before registering.' }
+  }
+  if (!String(s.pickupAuthorized ?? '').trim()) {
+    return { ok: false, error: 'Add at least one authorized pick-up person on the student profile before registering.' }
+  }
+  return { ok: true }
+}
 
 export async function getOwnedStudent(
   parentEmail: string,
@@ -54,6 +82,8 @@ export async function enrollInProgram(opts: {
   consents: ConsentAck[]
   transactionId?: string
   feePaid?: number
+  /** Household account number (A#####). Stamped on the enrollment row. */
+  accountNumber?: string
   /** When true, allow Waitlisted even if payment was collected (rare). */
   allowWaitlist?: boolean
 }): Promise<{
@@ -66,17 +96,10 @@ export async function enrollInProgram(opts: {
 }> {
   const program = await getProgramById(opts.programId)
   if (!program) throw new Error('Program not found')
-  const stagingCheckout =
-    process.env.VERCEL_ENV === 'preview' || process.env.PROGRAMS_STAGING_CHECKOUT === 'true'
-  if (!program.registrationOpen && !stagingCheckout) {
-    throw new Error('Registration is closed for this program')
-  }
+  if (!program.registrationOpen) throw new Error('Registration is closed for this program')
 
   const { assertCanRegisterForProgram } = await import('@/lib/programs/registration-access')
-  const access = await assertCanRegisterForProgram(
-    stagingCheckout ? { ...program, registrationOpen: true } : program,
-    opts.parentEmail,
-  )
+  const access = await assertCanRegisterForProgram(program, opts.parentEmail)
   if (!access.ok) throw new Error(access.error || 'Registration not available')
 
   const student = await getOwnedStudent(opts.parentEmail, opts.studentId)
@@ -89,15 +112,12 @@ export async function enrollInProgram(opts: {
   if (!consentCheck.ok) throw new Error(consentCheck.error)
 
   const existing = await findExistingEnrollment(opts.programId, opts.studentId)
-  const { resolveProgramListFee } = await import('@/lib/programs/list-fee')
-  const fee = await resolveProgramListFee(program)
-
   if (existing) {
     const status = String(existing.status ?? '')
     return {
       enrollmentId: String(existing._id),
       programName: program.name,
-      fee,
+      fee: program.fee ?? 0,
       status,
       waitlistPosition:
         status === WAITLIST_STATUS ? Number(existing.waitlistPosition ?? 0) || undefined : undefined,
@@ -105,6 +125,7 @@ export async function enrollInProgram(opts: {
     }
   }
 
+  const fee = Number(program.fee ?? 0)
   if (fee > 0 && !opts.transactionId) {
     throw new Error('Payment required for this program')
   }
@@ -128,6 +149,17 @@ export async function enrollInProgram(opts: {
   const studentName = `${student.firstName ?? ''} ${student.lastName ?? ''}`.trim()
   const parentEmail = opts.parentEmail.trim().toLowerCase()
   const feePaid = opts.feePaid ?? (fee > 0 ? fee : 0)
+  let accountNumber = String(opts.accountNumber ?? '').trim().toUpperCase()
+  if (!accountNumber) {
+    try {
+      const { ensureAccountNumberForEmail } = await import(
+        '@/lib/staff/membership-account-number'
+      )
+      accountNumber = await ensureAccountNumberForEmail(parentEmail)
+    } catch {
+      accountNumber = ''
+    }
+  }
 
   const inserted = await client.items.insert('ProgramEnrollments', {
     programId: opts.programId,
@@ -135,6 +167,7 @@ export async function enrollInProgram(opts: {
     studentId: opts.studentId,
     studentName,
     parentEmail,
+    accountNumber,
     status,
     feePaid,
     transactionId: opts.transactionId ?? '',

@@ -182,7 +182,7 @@ export async function resolveCheckoutIntent(
     const parts: ResolvedCheckout[] = []
     for (const line of raw) {
       const lineKind = String(line?.kind ?? '').trim()
-      if (!lineKind || lineKind === 'cart' || lineKind === 'store-card') {
+      if (!lineKind || lineKind === 'cart') {
         throw new Error('That bag item cannot be checked out this way')
       }
       const resolvedLine = await resolveCheckoutIntent(
@@ -195,14 +195,16 @@ export async function resolveCheckoutIntent(
     const amount = Math.round(parts.reduce((sum, p) => sum + p.amount, 0) * 100) / 100
     if (amount <= 0) throw new Error('Nothing to charge in the bag')
     const titles = parts.map((p) => p.description).filter(Boolean)
+    // Square/PayPal charge note must name the classes (same as staff email).
+    // Never leave multi-class EP carts as "Bag · N items" or reconcile breaks.
+    const description =
+      cartNotifyDescription(parts, titles[0] || 'Bag') ||
+      (parts.length === 1 ? titles[0] || 'Bag' : `Bag · ${parts.length} items`)
     return {
       kind: 'cart',
       amount,
       amountCents: Math.round(amount * 100),
-      description:
-        parts.length === 1
-          ? titles[0] || 'Bag'
-          : `Bag · ${parts.length} items`,
+      description,
       customId: `bag:${parentEmail.replace(/[^a-zA-Z0-9]/g, '').slice(0, 20)}:${parts.length}`,
       meta: {
         cartPartsJson: JSON.stringify(parts),
@@ -346,8 +348,7 @@ export async function resolveCheckoutIntent(
       parentEmail,
     )
     if (!access.ok) throw new Error(access.error || 'Registration not available')
-    const { resolveProgramListFee } = await import('@/lib/programs/list-fee')
-    const fee = await resolveProgramListFee(program)
+    const fee = Number(program.fee ?? 0)
     if (fee <= 0) throw new Error('This program does not require payment. Use free registration')
 
     const addons: Array<{ id: string; name: string; fee: number; season: string }> = []
@@ -365,7 +366,7 @@ export async function resolveCheckoutIntent(
         parentEmail,
       )
       if (!addonAccess.ok) throw new Error(addonAccess.error || 'Companion class not available')
-      const addonFee = await resolveProgramListFee(addon)
+      const addonFee = Number(addon.fee ?? 0)
       if (addonFee <= 0) throw new Error('Companion class fee is not set')
       addons.push({
         id: addon._id,
@@ -435,7 +436,6 @@ export async function resolveCheckoutIntent(
       const addonApplied = await applyCheckoutDiscount({
         scope: 'program',
         listAmount: addon.fee,
-        // Do not reuse Fall typed code on Spring — auto-pick that season's board code.
         couponCode: null,
         parentEmail,
         accountEmails,
@@ -492,9 +492,6 @@ export async function resolveCheckoutIntent(
       meta: {
         programId,
         programName: program.name,
-        ...(String(program.productId ?? '').trim()
-          ? { productId: String(program.productId).trim() }
-          : {}),
         studentId,
         listFee: String(listFee),
         memberDiscountPercent: String(appliedPercent || 0),
@@ -659,6 +656,15 @@ export async function fulfillPaidCheckout(opts: {
     skipConfirmation = false,
   } = opts
   const client = getWixClient()
+  let accountNumber = ''
+  try {
+    const { ensureAccountNumberForEmail } = await import(
+      '@/lib/staff/membership-account-number'
+    )
+    accountNumber = await ensureAccountNumberForEmail(parentEmail)
+  } catch (err) {
+    console.error('fulfillPaidCheckout accountNumber', err)
+  }
   const confirm = async (
     result: Record<string, unknown>,
     input: Parameters<typeof attachPurchaseConfirmation>[1],
@@ -726,6 +732,7 @@ export async function fulfillPaidCheckout(opts: {
       transactionId,
       source: `${sourcePrefix}_cart`,
       parentEmail,
+      accountNumber,
       notes: [
         `${parts.length} items`,
         coveCents > 0 ? `Cove $${(coveCents / 100).toFixed(2)}` : '',
@@ -799,6 +806,7 @@ export async function fulfillPaidCheckout(opts: {
       consents: consents ?? [],
       transactionId,
       feePaid: resolved.amount,
+      accountNumber,
     })
     const addonIds = String(resolved.meta.addonProgramIds ?? '')
       .split(',')
@@ -813,6 +821,7 @@ export async function fulfillPaidCheckout(opts: {
         consents: consents ?? [],
         transactionId: `${transactionId}:addon:${addonId.slice(0, 8)}`,
         feePaid: 0,
+        accountNumber,
       })
       addonEnrollments.push(addonEnrolled)
     }
@@ -827,6 +836,7 @@ export async function fulfillPaidCheckout(opts: {
       transactionId,
       source: `${sourcePrefix}_program`,
       parentEmail,
+      accountNumber,
       studentId: resolved.meta.studentId,
       notes: [
         resolved.meta.programId,
@@ -933,6 +943,7 @@ export async function fulfillPaidCheckout(opts: {
       transactionId,
       source: `${sourcePrefix}_membership`,
       parentEmail,
+      accountNumber,
       ...(studentId ? { studentId } : {}),
       ...(applied.updatedStudentIds?.[0] && !studentId
         ? { studentId: applied.updatedStudentIds[0] }
@@ -1004,6 +1015,7 @@ export async function fulfillPaidCheckout(opts: {
       transactionId,
       source: `${sourcePrefix}_cove_product`,
       parentEmail,
+      accountNumber,
       ...(productStudentId ? { studentId: productStudentId } : {}),
       notes: [
         resolved.meta.variantId
@@ -1068,6 +1080,7 @@ export async function fulfillPaidCheckout(opts: {
       transactionId,
       source: `${sourcePrefix}_event_ticket`,
       parentEmail,
+      accountNumber,
       notes: [
         `${resolved.meta.eventId}|qty:${quantity}`,
         cove.coveCents > 0 ? `Cove $${(cove.coveCents / 100).toFixed(2)}` : '',
@@ -1119,6 +1132,7 @@ export async function fulfillPaidCheckout(opts: {
       transactionId,
       source: `${sourcePrefix}_donation`,
       parentEmail,
+      accountNumber,
       notes: [
         note || 'General PTO donation',
         cove.coveCents > 0 ? `Cove $${(cove.coveCents / 100).toFixed(2)}` : '',
@@ -1207,6 +1221,7 @@ export async function fulfillPaidCheckout(opts: {
     await client.items.insert('Payments', {
       studentId,
       parentEmail: parentEmailForCard,
+      accountNumber,
       programName: isFirstLoad
         ? `Family Cove Digital Card First Load (+${bonusPercent}% bonus)`
         : 'Family Cove Digital Card Reload',
@@ -1243,6 +1258,8 @@ export async function fulfillPaidCheckout(opts: {
   } catch (loadError) {
     await client.items.insert('Payments', {
       studentId,
+      parentEmail,
+      accountNumber,
       programName: 'Store Card Reload',
       amount: resolved.amount,
       status: 'Needs Reconciliation',
