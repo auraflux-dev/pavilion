@@ -174,13 +174,6 @@ export async function enrollInProgram(opts: {
     } as never)
   }
 
-  try {
-    const { revalidatePublicPrograms } = await import('@/lib/staff/revalidate-public')
-    revalidatePublicPrograms()
-  } catch {
-    // best-effort catalog bust so spots left update
-  }
-
   return {
     enrollmentId,
     programName: program.name,

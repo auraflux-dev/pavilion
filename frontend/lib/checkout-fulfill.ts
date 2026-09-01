@@ -726,6 +726,15 @@ export async function fulfillPaidCheckout(opts: {
         .replace(/Enrichment:\s*/gi, '')
         .trim() || resolved.description
 
+    if (notifyKind === 'program' || parts.some((p) => p.kind === 'program')) {
+      try {
+        const { revalidatePublicPrograms } = await import('@/lib/staff/revalidate-public')
+        revalidatePublicPrograms()
+      } catch {
+        // ignore
+      }
+    }
+
     return confirm(
       {
         kind: 'cart',
@@ -825,6 +834,12 @@ export async function fulfillPaidCheckout(opts: {
       for (const id of [...new Set(ids)]) {
         await consumeDiscountCode(id)
       }
+    }
+    try {
+      const { revalidatePublicPrograms } = await import('@/lib/staff/revalidate-public')
+      revalidatePublicPrograms()
+    } catch {
+      // ignore
     }
     return confirm(
       {

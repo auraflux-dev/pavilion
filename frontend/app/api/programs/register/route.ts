@@ -118,6 +118,13 @@ export async function POST(req: NextRequest) {
       consents: consents ?? [],
     })
 
+    try {
+      const { revalidatePublicPrograms } = await import('@/lib/staff/revalidate-public')
+      revalidatePublicPrograms()
+    } catch {
+      // ignore
+    }
+
     return NextResponse.json({ ok: true, ...result })
   } catch (err) {
     console.error('programs/register', err)
