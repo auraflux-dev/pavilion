@@ -32,6 +32,7 @@ import {
 import {
   effectiveLandingFields,
 } from '@/lib/programs/landing-fields'
+import { displayProgramName } from '@/lib/programs/display-name'
 import {
   isProgramDraftDirty,
   mergeProgramDraft,
@@ -145,6 +146,32 @@ function sortProgramsByDisplayOrder(list: Program[]): Program[] {
   })
 }
 
+/** Roster / attendance / transfer labels match catalog cards, with season when helpful. */
+function staffProgramOptionLabel(p: Program, opts?: { withSeason?: boolean }): string {
+  const name = displayProgramName(p.name) || p.name || 'Untitled'
+  if (!opts?.withSeason) return name
+  const season = resolveProgramSeason(p)
+  const seasonLabel =
+    season && season in CATALOG_SEASON_LABELS
+      ? CATALOG_SEASON_LABELS[season as CatalogSeasonId]
+      : ''
+  return seasonLabel ? `${name} · ${seasonLabel}` : name
+}
+
+/** Current Fall + Spring EP catalog rows only (no legacy dance / membership CMS). */
+function currentEpCatalogPrograms(programs: Program[]): Program[] {
+  const fall = selectCurrentFall2026Programs(programs)
+  const spring = selectCurrentSpring2027Programs(programs)
+  const seen = new Set<string>()
+  const out: Program[] = []
+  for (const p of [...fall, ...spring]) {
+    if (seen.has(p.id)) continue
+    seen.add(p.id)
+    out.push(p)
+  }
+  return out
+}
+
 export function StaffProgramsPanel() {
   const [programs, setPrograms] = useState<Program[]>([])
   const [canManageAll, setCanManageAll] = useState(true)
@@ -206,6 +233,13 @@ export function StaffProgramsPanel() {
     }
     return ordered
   }, [programs, showOlderPrograms, staffCatalogSeason, visibleIdOrder])
+
+  useEffect(() => {
+    const ids = new Set(visiblePrograms.map((p) => p.id))
+    const firstId = visiblePrograms[0]?.id ?? ''
+    setRosterProgramId((prev) => (prev && ids.has(prev) ? prev : firstId))
+    setAttProgramId((prev) => (prev && ids.has(prev) ? prev : firstId))
+  }, [visiblePrograms])
 
   useEffect(() => {
     if (programs.length === 0 || dragId) return
@@ -289,11 +323,9 @@ export function StaffProgramsPanel() {
           (p) => p.id,
         ),
       )
-      const firstId = list[0]?.id as string | undefined
-      if (firstId) {
-        setRosterProgramId((prev) => prev || firstId)
-        setAttProgramId((prev) => prev || firstId)
-      }
+      // Roster / attendance ids are synced to visiblePrograms below.
+      // Do not default to list[0]: that is often a legacy CMS row (Dance, membership)
+      // that is not in the season dropdown, which leaves Roster empty/wrong.
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Load failed')
     }
@@ -666,12 +698,14 @@ export function StaffProgramsPanel() {
   }
 
   async function transferEnrollment(id: string) {
-    const choices = programs.filter((p) => p.id !== rosterProgramId)
+    const choices = currentEpCatalogPrograms(programs).filter((p) => p.id !== rosterProgramId)
     if (!choices.length) {
-      setStatus('No other programs available to transfer into.')
+      setStatus('No other enrichment programs available to transfer into.')
       return
     }
-    const label = choices.map((p, i) => `${i + 1}. ${p.name}`).join('\n')
+    const label = choices
+      .map((p, i) => `${i + 1}. ${staffProgramOptionLabel(p, { withSeason: true })}`)
+      .join('\n')
     const pick = window.prompt(`Transfer to program number:\n${label}`)
     if (!pick) return
     const idx = Number(pick) - 1
@@ -680,6 +714,7 @@ export function StaffProgramsPanel() {
       setStatus('Invalid program selection.')
       return
     }
+    const destLabel = staffProgramOptionLabel(dest, { withSeason: true })
     setBusy(true)
     setStatus('')
     try {
@@ -697,7 +732,7 @@ export function StaffProgramsPanel() {
       if (!r.ok) throw new Error(d.error ?? 'Transfer failed')
       await loadRoster(rosterProgramId)
       await load()
-      setStatus(`Transferred to ${dest.name}.`)
+      setStatus(`Transferred to ${destLabel}.`)
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Transfer failed')
     } finally {
@@ -1052,7 +1087,7 @@ There are ${visiblePrograms.length} program${visiblePrograms.length === 1 ? '' :
                     {row.registrationOpen ? ' · Reg open' : ' · Reg closed'}
                     {row.featured ? ' · Featured' : ''}
                   </p>
-                  <p className="text-sm font-bold text-[#1A1A1A] truncate">{row.name || 'Untitled'}</p>
+                  <p className="text-sm font-bold text-[#1A1A1A] truncate">{staffProgramOptionLabel(row)}</p>
                   <p className="text-xs text-[#5A6070] mt-1">
                     Seats{' '}
                     {row.capacity
@@ -1538,7 +1573,7 @@ Leave blank for normal in-app Square checkout.`}
             <option value="">Select program…</option>
             {visiblePrograms.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name}
+                {staffProgramOptionLabel(p, { withSeason: showOlderPrograms })}
               </option>
             ))}
           </select>
@@ -1831,7 +1866,7 @@ Parents see it in their portal Messages and on the class board.`}
               <option value="">Select program…</option>
               {visiblePrograms.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name}
+                  {staffProgramOptionLabel(p, { withSeason: showOlderPrograms })}
                 </option>
               ))}
             </select>
