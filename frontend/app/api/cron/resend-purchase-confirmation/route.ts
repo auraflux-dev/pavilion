@@ -22,12 +22,17 @@ function authorize(req: NextRequest): boolean {
 
 function kindFromPayment(row: Record<string, unknown>): PurchaseConfirmKind {
   const type = String(row.type || row.source || row.kind || '').toLowerCase()
-  if (type.includes('program') || type.includes('enroll')) return 'program'
-  if (type.includes('membership')) return 'membership'
-  if (type.includes('store') || type.includes('gift')) return 'store-card'
+  const name = String(row.programName || row.programTitle || row.description || '').toLowerCase()
+  if (type.includes('program') || type.includes('enroll') || name.includes('enrichment')) {
+    return 'program'
+  }
+  if (type.includes('membership') || name.includes('membership')) return 'membership'
+  if (type.includes('store') || type.includes('gift') || name.includes('cove digital')) {
+    return 'store-card'
+  }
   if (type.includes('event') || type.includes('ticket')) return 'event'
   if (type.includes('donat')) return 'donation'
-  if (type.includes('cart')) return 'program'
+  if (type.includes('cart') || name.includes('bag')) return 'program'
   return 'product'
 }
 
@@ -40,6 +45,10 @@ export async function POST(req: NextRequest) {
     const body = (await req.json().catch(() => ({}))) as {
       transactionId?: string
       paymentId?: string
+      kind?: PurchaseConfirmKind
+      parentName?: string
+      description?: string
+      programName?: string
     }
     const transactionId = String(body.transactionId || '').trim()
     const paymentId = String(body.paymentId || '').trim()
@@ -88,11 +97,17 @@ export async function POST(req: NextRequest) {
 
     const amount = Number(row.amount ?? 0) || 0
     const description = String(
-      row.description || row.programName || row.programTitle || 'SHMS PTO purchase',
+      body.description ||
+        row.description ||
+        row.programName ||
+        row.programTitle ||
+        'SHMS PTO purchase',
     )
     const tx = String(row.transactionId || row.squarePaymentId || transactionId || paymentId)
-    const programName = String(row.programName || row.programTitle || '')
-    const kind = kindFromPayment(row)
+    const programName = String(
+      body.programName || row.programName || row.programTitle || '',
+    )
+    const kind = (body.kind as PurchaseConfirmKind | undefined) || kindFromPayment(row)
     const notes = String(row.notes || '')
     const coveMatch = notes.match(/Cove\s+\$([0-9]+(?:\.[0-9]+)?)/i)
     const cardMatch = notes.match(/card\s+\$([0-9]+(?:\.[0-9]+)?)/i)
@@ -105,7 +120,9 @@ export async function POST(req: NextRequest) {
     const confirmation = await sendPurchaseConfirmation({
       kind,
       parentEmail,
-      parentName: String(row.parentName || row.studentName || '').trim() || undefined,
+      parentName:
+        String(body.parentName || row.parentName || row.studentName || '').trim() ||
+        undefined,
       amount,
       description,
       transactionId: tx,
