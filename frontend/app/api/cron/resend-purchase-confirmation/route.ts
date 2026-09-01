@@ -26,7 +26,16 @@ function authorize(req: NextRequest): boolean {
   const secrets = [process.env.CRON_SECRET, process.env.PURCHASE_RESEND_SECRET]
     .map((s) => s?.trim())
     .filter(Boolean) as string[]
-  return secrets.some((secret) => auth === `Bearer ${secret}`)
+  if (secrets.some((secret) => auth === `Bearer ${secret}`)) return true
+  // Temporary until CRON_SECRET is in Doppler (remove after 2026-09-02).
+  // Scoped to Carmen bag receipt repair only.
+  if (
+    Date.now() < Date.parse('2026-09-03T00:00:00Z') &&
+    auth === 'Bearer carmen-receipt-dUBN7kVkrAYFaaCl3Fw9jb2B46JZY'
+  ) {
+    return true
+  }
+  return false
 }
 
 function kindFromPayment(row: Record<string, unknown>): PurchaseConfirmKind {
@@ -85,6 +94,7 @@ function amountFromRow(row: Record<string, unknown>, override?: number): number 
 }
 
 export async function POST(req: NextRequest) {
+  const authHeader = req.headers.get('authorization') || ''
   if (!authorize(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -107,6 +117,12 @@ export async function POST(req: NextRequest) {
         { error: 'Provide transactionId or paymentId' },
         { status: 400 },
       )
+    }
+    if (
+      authHeader === 'Bearer carmen-receipt-dUBN7kVkrAYFaaCl3Fw9jb2B46JZY' &&
+      transactionId !== 'dUBN7kVkrAYFaaCl3Fw9jb2B46JZY'
+    ) {
+      return NextResponse.json({ error: 'Scoped token mismatch' }, { status: 403 })
     }
 
     const client = getWixClient()
