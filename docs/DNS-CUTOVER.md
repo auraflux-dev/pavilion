@@ -89,6 +89,7 @@ Secret already lives in Vercel as `CHEDDARUP_WEBHOOK_SECRET`.
 
 - `https://www.shmspto.org/auth/callback`
 - `https://shmspto.org/auth/callback` (apex, if anyone hits it)
+- `https://www.shmspto.org/auth/join` (password-reset return URL)
 - Keep `https://shmspto.vercel.app/auth/callback` until www is confirmed stable
 
 Code uses the **request host** for `redirect_uri` when possible (`frontend/lib/wix-oauth-client.ts`), with fallback to `NEXT_PUBLIC_SITE_URL`, then `shmspto.vercel.app`. After DNS, set the env so fallbacks are correct.

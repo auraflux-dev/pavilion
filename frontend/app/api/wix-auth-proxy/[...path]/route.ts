@@ -137,10 +137,14 @@ async function proxyToWix(req: NextRequest, wixPath: string) {
           const loc = new URL(v, `https://${UPSTREAM_DNS}`)
           if (
             loc.hostname === UPSTREAM_DNS &&
-            loc.pathname.startsWith(`${sitePrefix}/`)
+            (loc.pathname === sitePrefix ||
+              loc.pathname.startsWith(`${sitePrefix}/`))
           ) {
             loc.hostname = PUBLIC_HOST
-            loc.pathname = loc.pathname.slice(sitePrefix.length) || '/'
+            loc.pathname =
+              loc.pathname === sitePrefix
+                ? '/'
+                : loc.pathname.slice(sitePrefix.length) || '/'
             v = loc.toString()
           }
         } catch {
@@ -169,9 +173,14 @@ async function handle(req: NextRequest, ctx: Ctx) {
   if (!path?.length) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
-  // Rewrites pass /_api, /__auth, /_serverless, /_partials into this catch-all
-  const wixPath = `/${path.join('/')}`
+  // Rewrites pass /_api, /__auth, /_serverless, /_partials into this catch-all.
+  // `__wix_site_root` is the published Wix home (password-reset token dialog).
+  let wixPath = `/${path.join('/')}`
+  if (wixPath === '/__wix_site_root' || wixPath === '/__wix_site_root/') {
+    wixPath = '/'
+  }
   const allowed =
+    wixPath === '/' ||
     wixPath.startsWith('/_api/') ||
     wixPath.startsWith('/__auth/') ||
     wixPath.startsWith('/_serverless/') ||

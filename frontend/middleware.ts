@@ -151,6 +151,26 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Wix password-reset emails land on the published site with
+  // ?forgotPasswordToken=… (Members Area UI). After DNS cutover that is
+  // Next.js, which ignored the token and showed the homepage. Proxy the
+  // Wix site root so the reset form still opens on www.
+  const forgotPasswordToken =
+    req.nextUrl.searchParams.get('forgotPasswordToken') ||
+    req.nextUrl.searchParams.get('forgetPasswordToken')
+  if (
+    forgotPasswordToken &&
+    !pathname.startsWith('/api/') &&
+    !pathname.startsWith('/_api/') &&
+    !pathname.startsWith('/__auth/') &&
+    !pathname.startsWith('/_serverless/') &&
+    !pathname.startsWith('/_partials/')
+  ) {
+    const rewriteUrl = req.nextUrl.clone()
+    rewriteUrl.pathname = '/api/wix-auth-proxy/__wix_site_root'
+    return NextResponse.rewrite(rewriteUrl)
+  }
+
   // Wix login UI needs /_api, /__auth, /_serverless, /_partials on www.
   // After DNS cutover those hit Vercel. rewrite to the Node proxy.
   if (

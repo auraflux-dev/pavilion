@@ -48,13 +48,10 @@ export async function POST(req: NextRequest) {
     const visitorTokens = await client.auth.generateVisitorTokens()
     client.auth.setTokens(visitorTokens)
 
-    // After reset on Wix-hosted page, send them back to our login.
-    const rawReturn = String(body.returnTo || '/member-portal').trim()
-    const safeReturn =
-      rawReturn.startsWith('/') && !rawReturn.startsWith('//')
-        ? rawReturn
-        : '/member-portal'
-    const redirectUri = `${origin}/auth/join?mode=login&returnTo=${encodeURIComponent(safeReturn)}`
+    // After reset on the Wix-managed page, send them back to our login.
+    // Must be an allowed OAuth redirect URI in the Wix Headless app
+    // (exact match preferred; avoid extra query strings).
+    const redirectUri = `${origin}/auth/join`
     await client.auth.sendPasswordResetEmail(email, redirectUri)
 
     return NextResponse.json({
