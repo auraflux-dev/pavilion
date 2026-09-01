@@ -10,6 +10,7 @@ export type UtmOpts = {
 }
 
 const URL_RE = /https?:\/\/[^\s<>"')\]]+/gi
+const HTML_HREF_RE = /href\s*=\s*(["'])(https?:\/\/[^"']+)\1/gi
 
 function slugCampaign(raw: string): string {
   return String(raw ?? '')
@@ -67,6 +68,14 @@ export function tagUrlsInText(text: string, opts: UtmOpts): string {
   })
 }
 
+/** Tag http(s) href attributes in HTML email fragments. */
+export function tagUrlsInHtml(html: string, opts: UtmOpts): string {
+  if (!html.trim() || !slugCampaign(opts.campaign)) return html
+  return html.replace(HTML_HREF_RE, (_match, quote: string, href: string) => {
+    return `href=${quote}${tagUrlWithUtm(href, opts)}${quote}`
+  })
+}
+
 export function extractUrlsFromText(text: string): string[] {
   const out: string[] = []
   const seen = new Set<string>()
@@ -75,6 +84,34 @@ export function extractUrlsFromText(text: string): string[] {
     if (!seen.has(href)) {
       seen.add(href)
       out.push(href)
+    }
+  }
+  return out
+}
+
+export function extractUrlsFromHtml(html: string): string[] {
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const match of html.matchAll(HTML_HREF_RE)) {
+    const href = String(match[2] ?? '').trim()
+    if (href && !seen.has(href)) {
+      seen.add(href)
+      out.push(href)
+    }
+  }
+  return out
+}
+
+/** Unique tracked URLs from plain + HTML (plain order first). */
+export function extractTrackedUrls(plain: string, html?: string): string[] {
+  const out = extractUrlsFromText(plain)
+  const seen = new Set(out)
+  if (html?.trim()) {
+    for (const href of extractUrlsFromHtml(html)) {
+      if (!seen.has(href)) {
+        seen.add(href)
+        out.push(href)
+      }
     }
   }
   return out

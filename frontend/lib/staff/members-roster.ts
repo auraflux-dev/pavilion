@@ -358,3 +358,36 @@ export function filterParentRoster(
 export function rosterEmails(rows: ParentRosterRow[]): string[] {
   return Array.from(new Set(rows.map((r) => r.parentEmail).filter(Boolean)))
 }
+
+export type MembershipTierTotals = {
+  reef: number
+  lagoon: number
+  tide: number
+  free: number
+  other: number
+  paid: number
+  parents: number
+}
+
+/** Count parents by highest membership tier (Staff roster shape). */
+export function membershipTierTotals(rows: ParentRosterRow[]): MembershipTierTotals {
+  const totals: MembershipTierTotals = {
+    reef: 0,
+    lagoon: 0,
+    tide: 0,
+    free: 0,
+    other: 0,
+    paid: 0,
+    parents: rows.length,
+  }
+  for (const row of rows) {
+    const tier = normalizeMembershipTier(row.membershipTier)
+    if (tier === 'reef') totals.reef += 1
+    else if (tier === 'lagoon') totals.lagoon += 1
+    else if (tier === 'tide') totals.tide += 1
+    else if (tier === 'free') totals.free += 1
+    else if (isPaidTier(tier)) totals.other += 1
+    if (row.accountType === 'paid') totals.paid += 1
+  }
+  return totals
+}

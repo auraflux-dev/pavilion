@@ -1,5 +1,10 @@
+import {
+  extractTrackedUrls,
+  tagUrlsInHtml,
+  tagUrlsInText,
+  type UtmOpts,
+} from '@/lib/staff/newsletter-utm'
 import { getWixClient } from '@/lib/wix-client'
-import { extractUrlsFromText, tagUrlsInText, type UtmOpts } from '@/lib/staff/newsletter-utm'
 import { newsletterSiteOrigin } from '@/lib/staff/newsletter-site'
 
 export type TrackedLink = {
@@ -10,6 +15,7 @@ export type TrackedLink = {
 
 export type PrepareTrackedSendOpts = {
   body: string
+  htmlBody?: string
   utm: UtmOpts
   trackClicks: boolean
   sentByEmail: string
@@ -26,6 +32,9 @@ export type PreparedTrackedSend = {
   bodyForSend: string
   /** UTM-tagged copy for portal archive (no /r/ wrappers). */
   bodyForArchive: string
+  /** HTML fragment with UTM (+ optional /r/ wrappers) when htmlBody was provided. */
+  htmlForSend?: string
+  htmlForArchive?: string
   links: TrackedLink[]
   utmCampaign: string
 }
@@ -40,6 +49,17 @@ function replaceUrlAtIndex(text: string, targetUrl: string, replacement: string)
   })
 }
 
+function replaceHrefUrl(html: string, targetUrl: string, replacement: string): string {
+  const esc = escapeRegExp(targetUrl)
+  const re = new RegExp(`href\\s*=\\s*(["'])${esc}\\1`, 'gi')
+  let replaced = false
+  return html.replace(re, (_m, quote: string) => {
+    if (replaced) return `href=${quote}${targetUrl}${quote}`
+    replaced = true
+    return `href=${quote}${replacement}${quote}`
+  })
+}
+
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
@@ -49,7 +69,9 @@ export async function prepareTrackedNewsletterSend(
   opts: PrepareTrackedSendOpts,
 ): Promise<PreparedTrackedSend> {
   const utmBody = tagUrlsInText(opts.body, opts.utm)
-  const urls = extractUrlsFromText(utmBody)
+  const htmlRaw = String(opts.htmlBody ?? '').trim()
+  const utmHtml = htmlRaw ? tagUrlsInHtml(htmlRaw, opts.utm) : undefined
+  const urls = extractTrackedUrls(utmBody, utmHtml)
   const links: TrackedLink[] = urls.map((url, idx) => ({ idx, url, clicks: 0 }))
 
   const client = getWixClient()
@@ -76,6 +98,8 @@ export async function prepareTrackedNewsletterSend(
       sendId,
       bodyForSend: utmBody,
       bodyForArchive: utmBody,
+      htmlForSend: utmHtml,
+      htmlForArchive: utmHtml,
       links,
       utmCampaign: opts.utm.campaign,
     }
@@ -83,9 +107,13 @@ export async function prepareTrackedNewsletterSend(
 
   const origin = newsletterSiteOrigin()
   let bodyForSend = utmBody
+  let htmlForSend = utmHtml
   for (const link of links) {
     const tracked = `${origin}/r/${sendId}/${link.idx}`
     bodyForSend = replaceUrlAtIndex(bodyForSend, link.url, tracked)
+    if (htmlForSend) {
+      htmlForSend = replaceHrefUrl(htmlForSend, link.url, tracked)
+    }
   }
 
   await client.items.update('NewsletterSends', {
@@ -98,6 +126,8 @@ export async function prepareTrackedNewsletterSend(
     sendId,
     bodyForSend,
     bodyForArchive: utmBody,
+    htmlForSend,
+    htmlForArchive: utmHtml,
     links,
     utmCampaign: opts.utm.campaign,
   }
