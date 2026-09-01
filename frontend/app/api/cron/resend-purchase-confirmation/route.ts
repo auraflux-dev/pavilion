@@ -93,6 +93,14 @@ export async function POST(req: NextRequest) {
     const tx = String(row.transactionId || row.squarePaymentId || transactionId || paymentId)
     const programName = String(row.programName || row.programTitle || '')
     const kind = kindFromPayment(row)
+    const notes = String(row.notes || '')
+    const coveMatch = notes.match(/Cove\s+\$([0-9]+(?:\.[0-9]+)?)/i)
+    const cardMatch = notes.match(/card\s+\$([0-9]+(?:\.[0-9]+)?)/i)
+    const balMatch = notes.match(/Cove balance\s+\$([0-9]+(?:\.[0-9]+)?)/i)
+    const extras: Record<string, unknown> = {}
+    if (coveMatch) extras.coveCharged = Number(coveMatch[1])
+    if (cardMatch) extras.remainderDue = Number(cardMatch[1])
+    if (balMatch) extras.coveNewBalance = Number(balMatch[1]).toFixed(2)
 
     const confirmation = await sendPurchaseConfirmation({
       kind,
@@ -102,6 +110,7 @@ export async function POST(req: NextRequest) {
       description,
       transactionId: tx,
       meta: programName ? { programName } : undefined,
+      extras: Object.keys(extras).length ? extras : undefined,
     })
 
     return NextResponse.json({
