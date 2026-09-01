@@ -34,6 +34,40 @@ import {
 } from '@/lib/fixtures'
 
 const PROTECTED_ROUTES = ['/member-portal', '/staff']
+/** Keep in sync with ACTIVITY_CORRELATION_COOKIE in platform-activity.ts */
+const ACTIVITY_CORRELATION_COOKIE = 'pavilion_act_cid'
+
+function firePasswordResetTokenHit(req: NextRequest, token: string) {
+  try {
+    const origin = req.nextUrl.origin
+    const pepper =
+      process.env.PLATFORM_ACTIVITY_PEPPER?.trim() ||
+      process.env.CRON_SECRET?.trim() ||
+      process.env.HSKRG_AGENT_API_KEY?.trim() ||
+      'pavilion-activity-dev'
+    const correlationId = req.cookies.get(ACTIVITY_CORRELATION_COOKIE)?.value || ''
+    const ua = req.headers.get('user-agent') || ''
+    void fetch(`${origin}/api/ops/platform-activity`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-pavilion-activity-ingest': pepper,
+      },
+      body: JSON.stringify({
+        category: 'auth',
+        action: 'password_reset_token_hit',
+        actorKind: 'anonymous',
+        outcome: 'ok',
+        route: req.nextUrl.pathname,
+        correlationId,
+        tokenFingerprintSource: token,
+        detail: `ua=${ua.slice(0, 80)}`,
+      }),
+    }).catch(() => {})
+  } catch {
+    /* never block reset redirect */
+  }
+}
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
@@ -167,6 +201,7 @@ export async function middleware(req: NextRequest) {
     !pathname.startsWith('/_serverless/') &&
     !pathname.startsWith('/_partials/')
   ) {
+    firePasswordResetTokenHit(req, forgotPasswordToken)
     const upstream =
       process.env.WIX_AUTH_UPSTREAM_HOST?.trim() || 'treasurer7596.wixsite.com'
     const sitePath = process.env.WIX_AUTH_SITE_PATH?.trim() || '/shms-pto-2026'

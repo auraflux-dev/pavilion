@@ -50,6 +50,7 @@ export type StaffWorkspace =
  | 'signups'
  | 'pages'
  | 'brand'
+ | 'activity'
 
 export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
  home: 'Home',
@@ -90,4 +91,5 @@ export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
  signups: 'Sign-up sheets',
  pages: 'Pages',
  brand: 'Brand',
+ activity: 'Activity',
 }

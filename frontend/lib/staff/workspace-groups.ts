@@ -22,7 +22,7 @@ export const STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
     id: 'families',
     label: 'Families',
     blurb: 'Memberships, parent lookup, and portal messages.',
-    workspaces: ['membership', 'members', 'messages', 'tiers', 'access'],
+    workspaces: ['membership', 'members', 'messages', 'tiers', 'access', 'activity'],
   },
   {
     id: 'programs',
@@ -80,6 +80,7 @@ export const STAFF_WORKSPACE_BLURB: Partial<Record<StaffWorkspace, string>> = {
   projects: 'Year board, tasks & calendar',
   members: 'Lookup, act-as, archive',
   access: 'Instructors and @shmspto.org roles',
+  activity: 'Auth and platform event log',
   social: 'Facebook from Staff',
   surveys: 'Create, share, review, CSV',
   messages: 'Parent portal inbox',

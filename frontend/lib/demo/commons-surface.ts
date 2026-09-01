@@ -46,6 +46,7 @@ export const COMMONS_DEMO_ALLOWED_STAFF_GET = [
   '/api/staff/site-brand',
   '/api/staff/cms-media/upload',
   '/api/staff/activity',
+  '/api/staff/activity-log',
   '/api/commons/surface',
   '/api/commons/trial/status',
   '/api/commons/domain',

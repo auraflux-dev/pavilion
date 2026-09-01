@@ -41,7 +41,7 @@ export const STAFF_PERMISSION_GROUPS: { id: string; label: string; items: StaffW
   {
     id: 'people',
     label: 'People',
-    items: ['members', 'access', 'membership', 'tiers', 'messages', 'surveys'],
+    items: ['members', 'access', 'membership', 'tiers', 'messages', 'surveys', 'activity'],
   },
   {
     id: 'programs',
@@ -122,6 +122,7 @@ export const WORKSPACE_ROLES: Record<StaffWorkspace, StaffRole[]> = {
   discounts: ['retail', 'membership', 'admin'],
   membership: ['membership', 'secretary', 'admin'],
   tiers: ['membership', 'secretary', 'admin'],
+  activity: ['admin', 'membership', 'secretary'],
   content: ['marketing', 'secretary', 'retail', 'admin'],
   pages: ['marketing', 'secretary', 'admin'],
   brand: ['marketing', 'admin'],

@@ -98,6 +98,7 @@ export function isSameOriginRequest(req: Request): boolean {
   const path = new URL(req.url).pathname
   if (path.startsWith('/api/webhooks/') || path.startsWith('/api/cron/')) return true
   if (path.startsWith('/api/wix-auth-proxy/')) return true
+  if (path === '/api/ops/platform-activity') return true
   if (req.headers.get('authorization')?.startsWith('Bearer ')) return true
 
  // Public forms may be posted without Origin in some older browsers. allow

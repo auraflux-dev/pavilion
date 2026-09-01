@@ -11,9 +11,49 @@ import { TOKENS_COOKIE, TOKEN_MAX_AGE, isSecure } from '@/lib/auth-cookies'
 import { approvePendingMemberByEmail } from '@/lib/auth-approve-member'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { issueDemoReviewResponse } from '@/lib/demo/issue-session'
+import { organizationIdFromRequest } from '@/lib/crm/tenant'
+import {
+  ACTIVITY_CORRELATION_COOKIE,
+  classifyUserAgent,
+  clientIpFromHeaders,
+  writePlatformActivity,
+} from '@/lib/ops/platform-activity'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+
+type AuthCtx = {
+  ip: string
+  uaClass: string
+  correlationId: string
+  organizationId?: string
+}
+
+function logAuth(
+  ctx: AuthCtx,
+  opts: {
+    action: 'login_success' | 'login_failed'
+    email?: string
+    outcome: 'ok' | 'failed' | 'ambiguous'
+    detail?: string
+    method?: string
+  },
+) {
+  void writePlatformActivity({
+    category: 'auth',
+    action: opts.action,
+    actorKind: 'member',
+    email: opts.email,
+    method: opts.method || 'email',
+    outcome: opts.outcome,
+    route: '/api/auth/email-login',
+    ip: ctx.ip,
+    userAgentClass: ctx.uaClass,
+    correlationId: ctx.correlationId,
+    detail: opts.detail,
+    organizationId: ctx.organizationId,
+  })
+}
 
 function safeReturnTo(raw: unknown): string {
   const value = String(raw || '/member-portal').trim()
@@ -48,9 +88,18 @@ async function issueMemberCookiesFromSession(
   returnTo: string,
   origin: string,
   contactName?: { firstName: string; lastName: string },
+  authMeta?: { ctx: AuthCtx; email?: string },
 ): Promise<NextResponse> {
   const clientId = process.env.NEXT_PUBLIC_WIX_CLIENT_ID
   if (!clientId) {
+    if (authMeta) {
+      logAuth(authMeta.ctx, {
+        action: 'login_failed',
+        email: authMeta.email,
+        outcome: 'failed',
+        detail: 'missing_wix_client',
+      })
+    }
     return NextResponse.json(
       { error: 'Server login is not configured (missing Wix client id)' },
       { status: 503 },
@@ -89,6 +138,14 @@ async function issueMemberCookiesFromSession(
 
   const authUrl = redirect.redirectSession?.fullUrl
   if (!authUrl) {
+    if (authMeta) {
+      logAuth(authMeta.ctx, {
+        action: 'login_failed',
+        email: authMeta.email,
+        outcome: 'failed',
+        detail: 'no_redirect_session',
+      })
+    }
     return NextResponse.json(
       { error: 'Could not start member session with Wix' },
       { status: 502 },
@@ -102,6 +159,14 @@ async function issueMemberCookiesFromSession(
   const location = authRes.headers.get('location')
   if (!location || (authRes.status !== 302 && authRes.status !== 301)) {
     console.error('email-login authorize', authRes.status, location?.slice(0, 200))
+    if (authMeta) {
+      logAuth(authMeta.ctx, {
+        action: 'login_failed',
+        email: authMeta.email,
+        outcome: 'failed',
+        detail: `authorize_${authRes.status}`,
+      })
+    }
     return NextResponse.json(
       { error: 'Could not complete Wix member session' },
       { status: 502 },
@@ -115,12 +180,28 @@ async function issueMemberCookiesFromSession(
     code = cb.searchParams.get('code')
     state = cb.searchParams.get('state')
   } catch {
+    if (authMeta) {
+      logAuth(authMeta.ctx, {
+        action: 'login_failed',
+        email: authMeta.email,
+        outcome: 'failed',
+        detail: 'invalid_authorize_redirect',
+      })
+    }
     return NextResponse.json(
       { error: 'Invalid Wix authorize redirect' },
       { status: 502 },
     )
   }
   if (!code || !state) {
+    if (authMeta) {
+      logAuth(authMeta.ctx, {
+        action: 'login_failed',
+        email: authMeta.email,
+        outcome: 'failed',
+        detail: 'missing_auth_code',
+      })
+    }
     return NextResponse.json(
       { error: 'Wix did not return an authorization code' },
       { status: 502 },
@@ -129,6 +210,14 @@ async function issueMemberCookiesFromSession(
 
   const tokens = await client.auth.getMemberTokens(code, state, oAuthData)
   if (!tokens?.accessToken?.value || !tokens?.refreshToken?.value) {
+    if (authMeta) {
+      logAuth(authMeta.ctx, {
+        action: 'login_failed',
+        email: authMeta.email,
+        outcome: 'failed',
+        detail: 'token_issue_failed',
+      })
+    }
     return NextResponse.json({ error: 'Could not issue member tokens' }, { status: 502 })
   }
 
@@ -155,6 +244,15 @@ async function issueMemberCookiesFromSession(
     }
   }
 
+  if (authMeta) {
+    logAuth(authMeta.ctx, {
+      action: 'login_success',
+      email: authMeta.email,
+      outcome: 'ok',
+      detail: 'session_ok',
+    })
+  }
+
   const res = NextResponse.json({ ok: true, redirectTo: returnTo })
   res.cookies.set(TOKENS_COOKIE, JSON.stringify(tokens), {
     httpOnly: true,
@@ -167,6 +265,19 @@ async function issueMemberCookiesFromSession(
 }
 
 export async function POST(req: NextRequest) {
+  let organizationId: string | undefined
+  try {
+    organizationId = await organizationIdFromRequest(req)
+  } catch {
+    organizationId = undefined
+  }
+  const ctx: AuthCtx = {
+    ip: clientIpFromHeaders(req),
+    uaClass: classifyUserAgent(req.headers.get('user-agent') || ''),
+    correlationId: req.cookies.get(ACTIVITY_CORRELATION_COOKIE)?.value || '',
+    organizationId,
+  }
+
   try {
     const body = (await req.json()) as {
       mode?: 'login' | 'signup'
@@ -191,9 +302,17 @@ export async function POST(req: NextRequest) {
     const returnTo = safeReturnTo(body.returnTo)
     const origin = canonicalOrigin(req)
     const mode = body.mode === 'signup' ? 'signup' : 'login'
+    const authMeta = { ctx, email: email.includes('@') ? email : undefined }
 
     if (isDemoInstance()) {
       const paidHint = /membership|cove|perch|upgrade|card/i.test(returnTo)
+      logAuth(ctx, {
+        action: 'login_success',
+        email: authMeta.email,
+        outcome: 'ok',
+        detail: 'demo_review',
+        method: 'email',
+      })
       return issueDemoReviewResponse({
         req,
         lane: 'parent',
@@ -231,6 +350,12 @@ export async function POST(req: NextRequest) {
     if (verificationCode) {
       const stateToken = String(body.stateToken || '').trim()
       if (!stateToken) {
+        logAuth(ctx, {
+          action: 'login_failed',
+          email: authMeta.email,
+          outcome: 'failed',
+          detail: 'missing_verify_state',
+        })
         return NextResponse.json(
           { error: 'Missing verification state. Start sign-up again.' },
           { status: 400 },
@@ -247,6 +372,12 @@ export async function POST(req: NextRequest) {
         verified.loginState !== LoginState.SUCCESS ||
         !verified.data?.sessionToken
       ) {
+        logAuth(ctx, {
+          action: 'login_failed',
+          email: authMeta.email,
+          outcome: 'failed',
+          detail: 'verification_failed',
+        })
         return NextResponse.json(
           { error: 'Verification failed. Check the code and try again.' },
           { status: 400 },
@@ -257,6 +388,7 @@ export async function POST(req: NextRequest) {
         returnTo,
         origin,
         signupName,
+        authMeta,
       )
     }
 
@@ -301,10 +433,17 @@ export async function POST(req: NextRequest) {
             returnTo,
             origin,
             signupName,
+            authMeta,
           )
         }
       }
       if (!healed.ok && healed.reason === 'blocked') {
+        logAuth(ctx, {
+          action: 'login_failed',
+          email: authMeta.email,
+          outcome: 'failed',
+          detail: 'errorCode=memberBlocked',
+        })
         return NextResponse.json(
           {
             error:
@@ -314,6 +453,12 @@ export async function POST(req: NextRequest) {
           { status: 403 },
         )
       }
+      logAuth(ctx, {
+        action: 'login_failed',
+        email: authMeta.email,
+        outcome: 'failed',
+        detail: 'errorCode=ownerApprovalRequired',
+      })
       return NextResponse.json(
         {
           error:
@@ -330,6 +475,12 @@ export async function POST(req: NextRequest) {
     ) {
       const fail = result as { error?: string; errorCode?: string }
       if (fail.errorCode === 'emailAlreadyExists') {
+        logAuth(ctx, {
+          action: 'login_failed',
+          email: authMeta.email,
+          outcome: 'failed',
+          detail: 'errorCode=emailAlreadyExists',
+        })
         return NextResponse.json(
           {
             error: 'That email already has an account. Log in instead.',
@@ -339,6 +490,12 @@ export async function POST(req: NextRequest) {
         )
       }
       const code = fail.errorCode
+      logAuth(ctx, {
+        action: 'login_failed',
+        email: authMeta.email,
+        outcome: 'failed',
+        detail: code ? `errorCode=${code}` : 'login_rejected',
+      })
       const friendly =
         code === 'invalidPassword'
           ? 'Incorrect email or password.'
@@ -360,9 +517,15 @@ export async function POST(req: NextRequest) {
       returnTo,
       origin,
       signupName,
+      authMeta,
     )
   } catch (err) {
     console.error('email-login', err)
+    logAuth(ctx, {
+      action: 'login_failed',
+      outcome: 'failed',
+      detail: err instanceof Error ? err.message.slice(0, 120) : 'exception',
+    })
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Could not complete sign-in' },
       { status: 500 },

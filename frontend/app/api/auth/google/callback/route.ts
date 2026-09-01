@@ -16,6 +16,13 @@ import {
   googleMemberRedirectBase,
   safeReturnTo,
 } from '@/lib/auth-google-member'
+import { organizationIdFromRequest } from '@/lib/crm/tenant'
+import {
+  ACTIVITY_CORRELATION_COOKIE,
+  classifyUserAgent,
+  clientIpFromHeaders,
+  writePlatformActivity,
+} from '@/lib/ops/platform-activity'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -26,6 +33,37 @@ function failRedirect(origin: string, returnTo: string, reason: string) {
   fail.searchParams.set('returnTo', returnTo)
   fail.searchParams.set('error', reason)
   return NextResponse.redirect(fail, 302)
+}
+
+async function logGoogle(
+  req: NextRequest,
+  opts: {
+    action: 'login_success' | 'login_failed'
+    email?: string
+    outcome: 'ok' | 'failed'
+    detail: string
+  },
+) {
+  let organizationId: string | undefined
+  try {
+    organizationId = await organizationIdFromRequest(req)
+  } catch {
+    organizationId = undefined
+  }
+  void writePlatformActivity({
+    category: 'auth',
+    action: opts.action,
+    actorKind: 'member',
+    email: opts.email,
+    method: 'google',
+    outcome: opts.outcome,
+    route: '/api/auth/google/callback',
+    ip: clientIpFromHeaders(req),
+    userAgentClass: classifyUserAgent(req.headers.get('user-agent') || ''),
+    correlationId: req.cookies.get(ACTIVITY_CORRELATION_COOKIE)?.value || '',
+    detail: opts.detail,
+    organizationId,
+  })
 }
 
 export async function GET(req: NextRequest) {
@@ -65,6 +103,11 @@ export async function GET(req: NextRequest) {
   }
 
   if (!googleMemberOauthConfigured()) {
+    void logGoogle(req, {
+      action: 'login_failed',
+      outcome: 'failed',
+      detail: 'google_not_configured',
+    })
     return clear(failRedirect(origin, returnTo, 'google_not_configured'))
   }
   if (oauthError) {
@@ -74,14 +117,30 @@ export async function GET(req: NextRequest) {
       desc.includes('access blocked')
         ? 'google_org_internal'
         : 'google_denied'
+    void logGoogle(req, {
+      action: 'login_failed',
+      outcome: 'failed',
+      detail: reason,
+    })
     return clear(failRedirect(origin, returnTo, reason))
   }
   if (!code || !stateParam || stateParam !== cookieState) {
+    void logGoogle(req, {
+      action: 'login_failed',
+      outcome: 'failed',
+      detail: 'google_state_mismatch',
+    })
     return clear(failRedirect(origin, returnTo, 'google_state_mismatch'))
   }
 
   try {
-    const { tokens } = await completeGoogleMemberLogin({ code, redirectUri })
+    const { tokens, email } = await completeGoogleMemberLogin({ code, redirectUri })
+    void logGoogle(req, {
+      action: 'login_success',
+      email,
+      outcome: 'ok',
+      detail: 'session_ok',
+    })
     const res = NextResponse.redirect(new URL(returnTo, origin), 302)
     res.cookies.set(TOKENS_COOKIE, JSON.stringify(tokens), {
       httpOnly: true,
@@ -95,8 +154,18 @@ export async function GET(req: NextRequest) {
     console.error('google member callback', err)
     const msg = err instanceof Error ? err.message : ''
     if (msg === 'google_email_unverified') {
+      void logGoogle(req, {
+        action: 'login_failed',
+        outcome: 'failed',
+        detail: 'google_email_unverified',
+      })
       return clear(failRedirect(origin, returnTo, 'google_email_unverified'))
     }
+    void logGoogle(req, {
+      action: 'login_failed',
+      outcome: 'failed',
+      detail: 'google_failed',
+    })
     return clear(failRedirect(origin, returnTo, 'google_failed'))
   }
 }

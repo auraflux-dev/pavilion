@@ -26,6 +26,8 @@ const JOIN_ALLOW = new Set([
   '/api/demo/brand',
   '/api/auth/logout',
   '/api/auth/email-login',
+  '/api/auth/reset-password',
+  '/api/ops/platform-activity',
 ])
 
 /** Pavilion CMS page builder (demo/trial Neon). Not Wix school data. */

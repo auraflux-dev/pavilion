@@ -347,6 +347,25 @@ export async function POST(req: NextRequest) {
         ],
       },
       {
+        id: 'PlatformActivity',
+        displayName: 'Platform Activity',
+        fields: [
+          { key: 'category', displayName: 'Category', type: 'TEXT' },
+          { key: 'action', displayName: 'Action', type: 'TEXT' },
+          { key: 'actorKind', displayName: 'Actor kind', type: 'TEXT' },
+          { key: 'emailHash', displayName: 'Email hash', type: 'TEXT' },
+          { key: 'emailDomain', displayName: 'Email domain', type: 'TEXT' },
+          { key: 'method', displayName: 'Method', type: 'TEXT' },
+          { key: 'outcome', displayName: 'Outcome', type: 'TEXT' },
+          { key: 'route', displayName: 'Route', type: 'TEXT' },
+          { key: 'ip', displayName: 'IP', type: 'TEXT' },
+          { key: 'userAgentClass', displayName: 'User agent class', type: 'TEXT' },
+          { key: 'correlationId', displayName: 'Correlation ID', type: 'TEXT' },
+          { key: 'detail', displayName: 'Detail', type: 'TEXT' },
+          { key: 'createdAt', displayName: 'Created at', type: 'TEXT' },
+        ],
+      },
+      {
         id: 'FamilyGuardians',
         displayName: 'Family Guardians',
         fields: [

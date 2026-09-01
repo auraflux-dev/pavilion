@@ -8,6 +8,7 @@ import { listMessages } from '@/lib/google/gmail'
 import { sendMassEmail } from '@/lib/staff/mass-email'
 import { preferredGmailSender } from '@/lib/staff/gmail-send-auth'
 import { formatWeeklyTraffic, summarizeTrafficWeek } from '@/lib/ops/site-traffic'
+import { countAuthActivity } from '@/lib/ops/platform-activity'
 import {
   applyMembershipsToRoster,
   buildParentRoster,
@@ -338,6 +339,23 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
   const surveyRows = filterRows(surveys, ['_createdDate'], win)
   const auditRows = filterRows(audit, ['createdAt', '_createdDate'], win)
   const taskRows = filterRows(tasks, ['createdAt', '_createdDate'], win)
+
+  let authCounts = {
+    passwordResetRequested: 0,
+    passwordResetTokenHit: 0,
+    loginSuccess: 0,
+    loginFailed: 0,
+    logout: 0,
+  }
+  try {
+    authCounts = await countAuthActivity({
+      startIso: win.startIso,
+      endIso: win.endIso,
+    })
+  } catch (err) {
+    console.warn('[daily-activity] auth counts skipped', err)
+  }
+
   const minutesRows = filterRows(minutes, ['_createdDate', 'meetingDate'], win)
   const newsletterRows = filterRows(newsletters, ['publishedAt', '_createdDate'], win)
   const errorRows = filterRows(errors, ['createdAt', '_createdDate'], win)
@@ -441,6 +459,13 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
       messageRows.map((r) => `${str(r, 'parentEmail')} · ${str(r, 'subject') || '(no subject)'}`),
     ),
     'STAFF PORTAL',
+    'AUTH',
+    `  Password resets requested: ${authCounts.passwordResetRequested}`,
+    `  Reset link opens (token hit): ${authCounts.passwordResetTokenHit}`,
+    `  Logins ok: ${authCounts.loginSuccess}`,
+    `  Logins failed: ${authCounts.loginFailed}`,
+    `  Logouts: ${authCounts.logout}`,
+    '',
     ...section(
       'Staff audit (act-as / sensitive)',
       auditRows.length,
@@ -473,6 +498,7 @@ export async function buildDailyActivityReport(now = new Date()): Promise<{
       errorRows.map((r) => `${str(r, 'route') || 'app'} · ${str(r, 'message').slice(0, 120)}`),
     ),
     'Staff links',
+    '  Platform activity (auth log): https://www.shmspto.org/staff?view=activity',
     '  Membership roster (totals by type): https://www.shmspto.org/staff?view=membership',
     '  Daily report emails (Site settings → Contact): https://www.shmspto.org/staff?view=site',
     '  Staff Home: https://www.shmspto.org/staff',

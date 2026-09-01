@@ -83,6 +83,29 @@ create table if not exists staff_audit (
 
 create index if not exists staff_audit_org_idx on staff_audit (organization_id, created_at desc);
 
+create table if not exists platform_activity (
+  id                bigserial primary key,
+  organization_id   text not null references organizations (id) on delete cascade,
+  category          text not null default 'auth',
+  action            text not null,
+  actor_kind        text not null default 'anonymous',
+  email_hash        text not null default '',
+  email_domain      text not null default '',
+  method            text not null default '',
+  outcome           text not null default 'ok',
+  route             text not null default '',
+  ip                text not null default '',
+  user_agent_class  text not null default '',
+  correlation_id    text not null default '',
+  detail            text not null default '',
+  created_at        timestamptz not null default now()
+);
+
+create index if not exists platform_activity_org_idx
+  on platform_activity (organization_id, created_at desc);
+create index if not exists platform_activity_category_idx
+  on platform_activity (organization_id, category, created_at desc);
+
 create table if not exists error_events (
   event_id         text primary key,
   organization_id  text references organizations (id) on delete set null,
