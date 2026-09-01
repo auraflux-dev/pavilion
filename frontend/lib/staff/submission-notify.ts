@@ -218,6 +218,53 @@ export async function resolveTransactionInbox(overrideTo?: string): Promise<stri
   return resolveSubmissionInbox('membership-experience', overrideTo)
 }
 
+function moneyDollars(n: number): string {
+  return `$${Number(n).toFixed(2)}`
+}
+
+/** Cove / card split for staff sale alerts (mirrors parent confirmation). */
+function staffTenderLines(extras?: Record<string, unknown>): string[] {
+  if (!extras) return []
+  let coveDollars = 0
+  let cardDollars = 0
+  if (extras.coveCents != null || extras.cardCents != null) {
+    coveDollars = (Number(extras.coveCents) || 0) / 100
+    cardDollars = (Number(extras.cardCents) || 0) / 100
+  } else if (extras.coveCharged != null || extras.remainderDue != null) {
+    coveDollars = Number(extras.coveCharged) || 0
+    cardDollars = Number(extras.remainderDue) || 0
+  }
+  if (coveDollars <= 0 && cardDollars <= 0) return []
+  const lines = ['How paid:']
+  if (coveDollars > 0) lines.push(`• Cove Digital Card: ${moneyDollars(coveDollars)}`)
+  if (cardDollars > 0) lines.push(`• Card / other: ${moneyDollars(cardDollars)}`)
+  const balRaw = extras.coveNewBalance ?? extras.newBalance
+  if (balRaw != null && String(balRaw).trim() !== '') {
+    lines.push(`Cove Digital Card balance now: ${moneyDollars(Number(balRaw))}`)
+  }
+  return lines
+}
+
+function derivePaymentMethod(
+  paymentMethod: string | undefined,
+  extras?: Record<string, unknown>,
+): string | undefined {
+  const explicit = (paymentMethod || '').trim()
+  if (explicit) return explicit
+  if (!extras) return undefined
+  const cove =
+    extras.coveCents != null
+      ? (Number(extras.coveCents) || 0) / 100
+      : Number(extras.coveCharged) || 0
+  const card =
+    extras.cardCents != null
+      ? (Number(extras.cardCents) || 0) / 100
+      : Number(extras.remainderDue) || 0
+  if (cove > 0 && card > 0) return 'Card + Cove Digital Card'
+  if (cove > 0) return 'Cove Digital Card'
+  return undefined
+}
+
 /**
  * Email vp-membershipexperience@ (or CMS override) when a parent checkout succeeds.
  * Best-effort. never blocks fulfillment.
@@ -231,6 +278,8 @@ export async function notifyStaffTransaction(opts: {
   transactionId: string
   paymentMethod?: string
   meta?: Record<string, string>
+  /** Fulfill extras: coveCents / cardCents / coveNewBalance */
+  extras?: Record<string, unknown>
 }): Promise<SendMassEmailResult | { ok: false; mode: 'skipped'; reason: string }> {
   const auth = await resolveGmailSendAuth().catch(() => null)
   if (!auth) {
@@ -271,19 +320,22 @@ export async function notifyStaffTransaction(opts: {
   const amount =
     Number.isFinite(opts.amount) ? `$${Number(opts.amount).toFixed(2)}` : String(opts.amount)
   const name = (opts.parentName || '').trim() || '(no name)'
+  const tender = staffTenderLines(opts.extras)
+  const paymentMethod = derivePaymentMethod(opts.paymentMethod, opts.extras)
   const lines = [
     `A ${label.toLowerCase()} just processed on shmspto.org.`,
     '',
     `Parent: ${name}`,
     `Email: ${opts.parentEmail}`,
     `Order: ${opts.description}`,
-    `Amount: ${amount}`,
+    tender.length > 0 ? `Amount (order total): ${amount}` : `Amount: ${amount}`,
     `Reference: ${opts.transactionId}`,
   ]
-  if (opts.paymentMethod) lines.push(`Payment: ${opts.paymentMethod}`)
+  if (paymentMethod) lines.push(`Payment: ${paymentMethod}`)
+  if (tender.length) lines.push(...tender)
   if (opts.meta) {
     const skip =
-      /^(cartPartsJson|cartTitles|gan|giftCardId|coveBalance|accountNumber|studentId|programId)$/i
+      /^(cartPartsJson|cartTitles|gan|giftCardId|coveBalance|coveCents|cardCents|coveNewBalance|coveCharged|remainderDue|accountNumber|studentId|programId)$/i
     const desc = String(opts.description || '').trim().toLowerCase()
     for (const [k, v] of Object.entries(opts.meta)) {
       if (!v || skip.test(k)) continue

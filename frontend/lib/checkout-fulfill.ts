@@ -777,6 +777,7 @@ export async function fulfillPaidCheckout(opts: {
         amount: resolved.amount,
         description: bagDescription,
         transactionId,
+        paymentMethod: methodNote,
         meta: singlePart?.meta ?? {
           programName: bagProgramName.slice(0, 160),
           cartCount: String(parts.length),
@@ -881,6 +882,7 @@ export async function fulfillPaidCheckout(opts: {
         amount: resolved.amount,
         description: resolved.description,
         transactionId,
+        paymentMethod: cove.methodNote,
         meta: resolved.meta,
         extras: {
           ...enrolled,
@@ -965,6 +967,7 @@ export async function fulfillPaidCheckout(opts: {
         amount: resolved.amount,
         description: resolved.description,
         transactionId,
+        paymentMethod: methodNote,
         meta: resolved.meta,
         extras: {
           coveCents,
@@ -1044,6 +1047,7 @@ export async function fulfillPaidCheckout(opts: {
         amount: resolved.amount,
         description: resolved.description,
         transactionId,
+        paymentMethod: methodNote,
         meta: resolved.meta,
         extras: {
           coveCents,
@@ -1105,6 +1109,7 @@ export async function fulfillPaidCheckout(opts: {
         amount: resolved.amount,
         description: resolved.description,
         transactionId,
+        paymentMethod: cove.methodNote,
         meta: resolved.meta,
         extras: {
           coveCents: cove.coveCents,
@@ -1154,6 +1159,7 @@ export async function fulfillPaidCheckout(opts: {
         amount: resolved.amount,
         description: resolved.description,
         transactionId,
+        paymentMethod: cove.methodNote,
         meta: resolved.meta,
         extras: {
           coveCents: cove.coveCents,

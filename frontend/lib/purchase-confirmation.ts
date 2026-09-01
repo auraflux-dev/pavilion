@@ -19,6 +19,8 @@ export type PurchaseConfirmationInput = {
   amount: number
   description: string
   transactionId: string
+  /** e.g. Square Card on File + Cove Digital Card — staff sale alerts */
+  paymentMethod?: string
   meta?: Record<string, string>
   /** Extra lines from fulfill (waitlist, balance, etc.) */
   extras?: Record<string, unknown>
@@ -283,7 +285,9 @@ export async function sendPurchaseConfirmation(
         amount: input.amount,
         description: input.description,
         transactionId: input.transactionId,
+        paymentMethod: input.paymentMethod,
         meta: input.meta,
+        extras: input.extras,
       })
       if (!staff.ok) {
         console.warn('[purchase-confirmation] staff sale alert skipped', staff)
