@@ -65,20 +65,32 @@ export async function GET(req: NextRequest) {
       )
     }
     if (getDemoReviewSession(req)) {
+      const demo = getDemoReviewSession(req)!
+      const parentOnly = demo.lane === 'parent'
       return NextResponse.json(
         {
           error: vanillaizeIfDemo(
-            'Use Staff in the demo banner to open the board workspace.',
+            parentOnly
+              ? 'You joined as a parent. Open the staff workspace from the demo banner or /review.'
+              : 'Demo session expired or invalid. Rejoin at /review.',
           ),
+          code: parentOnly ? 'demo_parent_lane' : 'demo_session_invalid',
         },
         { status: 403 },
       )
     }
+    return NextResponse.json(
+      { error: 'Sign in to continue.', code: 'sign_in_required' },
+      { status: 401 },
+    )
   }
 
   const session = await getMemberSession(req)
   if (!session) {
-    return NextResponse.json({ error: 'Sign in to continue.' }, { status: 401 })
+    return NextResponse.json(
+      { error: 'Sign in to continue.', code: 'sign_in_required' },
+      { status: 401 },
+    )
   }
 
   const staff = await resolveStaffForSession(session.email, session.emails)

@@ -40,11 +40,17 @@ export function isPublicDemoInstance(): boolean {
 }
 
 /** Node/Edge API routes on unified demo+trial must pass Host (not env-only isDemoInstance()). */
+export function hostFromRequest(req: {
+  headers: { get(name: string): string | null }
+}): string {
+  const raw = req.headers.get('x-forwarded-host') || req.headers.get('host') || ''
+  return raw.split(',')[0]?.trim().split(':')[0]?.toLowerCase() || ''
+}
+
 export function isDemoInstanceFromRequest(req: {
   headers: { get(name: string): string | null }
 }): boolean {
-  const raw = req.headers.get('x-forwarded-host') || req.headers.get('host') || ''
-  const host = raw.split(',')[0]?.trim().split(':')[0]?.toLowerCase() || ''
+  const host = hostFromRequest(req)
   if (host) return isDemoInstance(host)
   return isDemoInstance()
 }

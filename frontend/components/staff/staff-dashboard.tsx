@@ -57,6 +57,7 @@ import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
 import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-notice'
 import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
+import { isPublicDemoInstance } from '@/lib/demo/instance'
 import { StaffWhatsAppQueuePanel } from '@/components/staff/staff-whatsapp-queue-panel'
 import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
 import { StaffTimesheetsPanel } from '@/components/staff/staff-timesheets-panel'
@@ -172,6 +173,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   const searchParams = useSearchParams()
   const [me, setMe] = useState<StaffMe | null>(null)
   const [error, setError] = useState('')
+  const [errorCode, setErrorCode] = useState('')
   const [query, setQuery] = useState('')
   const [memberSort, setMemberSort] = useState<'email' | 'name'>('email')
   const [memberTier, setMemberTier] = useState<'all' | 'paid' | 'free'>('all')
@@ -199,7 +201,10 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     fetch('/api/staff/me')
       .then(async (r) => {
         const data = await r.json()
-        if (!r.ok) throw new Error(data.error ?? 'Not authorized')
+        if (!r.ok) {
+          setErrorCode(String(data.code || ''))
+          throw new Error(data.error ?? 'Not authorized')
+        }
         setMe(data)
         trackLogin('staff', 'staff')
       })
@@ -494,13 +499,40 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   }
 
   if (error) {
+    const onDemo = isPublicDemoInstance()
+    const title =
+      errorCode === 'demo_parent_lane'
+        ? 'Parent tour active'
+        : errorCode === 'sign_in_required' && onDemo
+          ? 'Join the demo first'
+          : staffStr(staffCopy, 'dashboard.accessRequired')
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold text-[#1A1A1A] mb-2">{staffStr(staffCopy, 'dashboard.accessRequired')}</h1>
-        <p className="text-sm text-[#5A6070] mb-6">{vanillaizeIfDemo(error)}</p>
-        <Link href="/member-portal" className="text-sm font-bold" style={{ color: 'var(--brand-green)' }}>
-          {staffStr(staffCopy, 'dashboard.backToPortal')}
-        </Link>
+        <h1 className="text-2xl font-bold text-[#1A1A1A] mb-2">{title}</h1>
+        <p className="text-sm text-[#5A6070] mb-6 whitespace-pre-line">{vanillaizeIfDemo(error)}</p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          {onDemo ? (
+            <>
+              <Link
+                href="/review?staff=1"
+                className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-bold text-white"
+                style={{ backgroundColor: 'var(--brand-green)' }}
+              >
+                Open staff workspace (no code)
+              </Link>
+              <Link href="/review" className="text-sm font-bold" style={{ color: 'var(--brand-green)' }}>
+                Demo join / review code
+              </Link>
+            </>
+          ) : (
+            <Link href="/auth/join?returnTo=/staff" className="text-sm font-bold" style={{ color: 'var(--brand-green)' }}>
+              Staff sign in
+            </Link>
+          )}
+          <Link href="/member-portal" className="text-sm font-bold text-[#5A6070]">
+            {staffStr(staffCopy, 'dashboard.backToPortal')}
+          </Link>
+        </div>
       </div>
     )
   }

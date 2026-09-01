@@ -3,7 +3,7 @@ import { getWixClient } from '@/lib/wix-client'
 import { getStaffSession } from '@/lib/staff/session'
 import { getStaffGoogleAccess, workspaceStatusPayload } from '@/lib/google/workspace-auth'
 import { vanillaizeDeep } from '@/lib/demo/brand'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import {
   STAFF_ONBOARDING_TRACKS,
   buildTrackProgress,
@@ -30,8 +30,8 @@ async function googleConnected(email: string): Promise<boolean> {
   }
 }
 
-async function loadRoleRow(email: string): Promise<StaffRoleRow | null> {
-  if (isDemoInstance()) return null
+async function loadRoleRow(email: string, demo: boolean): Promise<StaffRoleRow | null> {
+  if (demo) return null
   const client = getWixClient()
   const result = await client.items.query('StaffRoles').eq('email', email).limit(1).find()
   return (result.items?.[0] as StaffRoleRow | undefined) ?? null
@@ -43,19 +43,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  const demo = isDemoInstanceFromRequest(req)
   const roles = onboardingRolesFor(session.staff.roles, session.email)
   if (!roles.length) {
     return NextResponse.json({ tracks: [], progress: {}, roles: [] })
   }
 
   try {
-    const row = await loadRoleRow(session.email)
+    const row = await loadRoleRow(session.email, demo)
     const progress = parseOnboardingProgress(row?.onboardingProgress)
     const flags = {
       personalEmail: Boolean(session.staff.personalEmail),
-      googleConnected: isDemoInstance()
-        ? false
-        : await googleConnected(session.email),
+      googleConnected: demo ? false : await googleConnected(session.email),
     }
 
     const tracks = roles.map((role) => {
@@ -76,7 +75,7 @@ export async function GET(req: NextRequest) {
         roles,
         flags,
         myEmail: session.email,
-        demo: isDemoInstance(),
+        demo,
       }),
     )
   } catch (err) {
@@ -95,6 +94,11 @@ export async function PATCH(req: NextRequest) {
   const session = await getStaffSession(req)
   if (!session?.staff) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const demo = isDemoInstanceFromRequest(req)
+  if (demo) {
+    return NextResponse.json({ ok: true, demo: true })
   }
 
   const allowed = new Set(onboardingRolesFor(session.staff.roles, session.email))
@@ -119,7 +123,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Unknown step for this role' }, { status: 400 })
     }
 
-    const row = await loadRoleRow(session.email)
+    const row = await loadRoleRow(session.email, false)
     if (!row?._id) {
       return NextResponse.json({ error: 'StaffRoles row not found' }, { status: 404 })
     }

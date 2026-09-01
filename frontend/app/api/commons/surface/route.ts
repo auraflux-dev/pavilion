@@ -5,13 +5,13 @@ import {
   COMMONS_DEMO_HIDDEN_WORKSPACES,
   filterSurfaceWorkspaces,
 } from '@/lib/demo/commons-surface'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   const gate = await liveCommerceGate(req)
-  const demo = isDemoInstance()
+  const demo = isDemoInstanceFromRequest(req)
   const hiddenStaffWorkspaces = filterSurfaceWorkspaces(
     demo ? COMMONS_DEMO_HIDDEN_WORKSPACES : gate.liveCommerce ? [] : COMMONS_COMMERCE_GATED_WORKSPACES,
   )

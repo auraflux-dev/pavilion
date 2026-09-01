@@ -9,7 +9,7 @@ import { getMemberSession } from '@/lib/auth-member'
 import { pickSessionEmail } from '@/lib/member-emails'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
 import { resolveStaffForSession } from '@/lib/staff/roles'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import {
   demoMemberId,
   demoStaffProfile,
@@ -49,7 +49,7 @@ function visitorResponse(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    if (isDemoInstance()) {
+    if (isDemoInstanceFromRequest(req)) {
       const demo = getDemoReviewSession(req)
       if (demo) {
         const staff = demo.lane === 'parent' ? null : demoStaffProfile(demo)

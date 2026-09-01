@@ -8,7 +8,7 @@ import {
   getStaffGoogleAccess,
   workspaceServiceAccountConfigured,
 } from '@/lib/google/workspace-auth'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import { DEMO_SEED_ACTIVITY } from '@/lib/demo/seed'
 
 export const dynamic = 'force-dynamic'
@@ -37,8 +37,8 @@ async function gmailInboxUnread(email: string): Promise<number | null> {
   }
 }
 
-async function countNeedsReconcile(): Promise<number> {
-  if (isDemoInstance()) return 0
+async function countNeedsReconcile(demo: boolean): Promise<number> {
+  if (demo) return 0
   try {
     const client = getWixClient()
     const found = await client.items
@@ -52,8 +52,8 @@ async function countNeedsReconcile(): Promise<number> {
   }
 }
 
-async function countRecentContacts(days: number): Promise<number> {
-  if (isDemoInstance()) return 0
+async function countRecentContacts(days: number, demo: boolean): Promise<number> {
+  if (demo) return 0
   try {
     const since = new Date(Date.now() - days * 86400000).toISOString()
     const client = getWixClient()
@@ -67,8 +67,8 @@ async function countRecentContacts(days: number): Promise<number> {
   }
 }
 
-async function countNewVolunteerSignups(): Promise<number> {
-  if (isDemoInstance()) return 0
+async function countNewVolunteerSignups(demo: boolean): Promise<number> {
+  if (demo) return 0
   try {
     const client = getWixClient()
     const found = await client.items.query('Volunteers').eq('status', 'new').limit(100).find()
@@ -92,7 +92,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Sign in to continue.' }, { status: 401 })
   }
 
-  if (isDemoInstance()) {
+  const demo = isDemoInstanceFromRequest(req)
+  if (demo) {
     return NextResponse.json({
       googleConnected: false,
       mailUnread: null,
@@ -118,7 +119,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (requireStaffRole(session.staff, ['treasurer', 'admin'])) {
-    const n = await countNeedsReconcile()
+    const n = await countNeedsReconcile(demo)
     if (n > 0) {
       items.push({
         id: 'payments',
@@ -139,7 +140,7 @@ export async function GET(req: NextRequest) {
       'marketing',
     ])
   ) {
-    const n = await countRecentContacts(7)
+    const n = await countRecentContacts(7, demo)
     if (n > 0) {
       items.push({
         id: 'forms',
@@ -152,7 +153,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (requireStaffRole(session.staff, ['events', 'secretary', 'admin'])) {
-    const n = await countNewVolunteerSignups()
+    const n = await countNewVolunteerSignups(demo)
     if (n > 0) {
       items.push({
         id: 'volunteers',

@@ -3,7 +3,7 @@ import { getAuth } from '@/lib/crm/auth'
 import { isSharedProductHost } from '@/lib/crm/auth-edge'
 import { commonsDbEnabled, getPool, sql } from '@/lib/crm/db'
 import { assertOrgWritable, type OrgPlan } from '@/lib/crm/org-plan'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import { riversideSnapshot } from '@/lib/crm/riverside'
 
 export class MissingOrganizationIdError extends Error {
@@ -21,7 +21,7 @@ export function requireOrganizationId(orgId: string | null | undefined): string 
 
 export async function organizationIdFromRequest(req: Request): Promise<string> {
   if (!commonsDbEnabled()) {
-    if (isDemoInstance()) return requireOrganizationId(riversideSnapshot().organization.id)
+    if (isDemoInstanceFromRequest(req)) return requireOrganizationId(riversideSnapshot().organization.id)
     throw new MissingOrganizationIdError()
   }
 
@@ -43,7 +43,7 @@ export async function organizationIdFromRequest(req: Request): Promise<string> {
   const fromHost = await organizationIdFromHostHeader(req)
   if (fromHost) return requireOrganizationId(fromHost)
 
-  if (isDemoInstance()) return requireOrganizationId(riversideSnapshot().organization.id)
+  if (isDemoInstanceFromRequest(req)) return requireOrganizationId(riversideSnapshot().organization.id)
   throw new MissingOrganizationIdError()
 }
 

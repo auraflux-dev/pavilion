@@ -13,7 +13,7 @@ import {
   requireOrganizationId,
   sqlForOrg,
 } from '@/lib/crm/tenant'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import type { PageContentFields } from '@/lib/defaults/page-content'
 import type { NavLink } from '@/lib/api/nav'
 
@@ -40,12 +40,10 @@ export async function resolveCmsOrganizationId(req?: Request): Promise<string | 
           ? await auth.api.getSession({ headers: req.headers })
           : null
         const email = String(session?.user?.email ?? '').trim().toLowerCase()
-        if (email && (await isPlatformOwnerEmail(email))) {
+        if (email && (await isPlatformOwnerEmail(email, { demo: isDemoInstanceFromRequest(req) }))) {
           return requireOrganizationId(cookieOrg)
         }
-        // Demo staff tour: allow cookie org when demo instance
-        const { isDemoInstance } = await import('@/lib/demo/instance')
-        if (isDemoInstance()) return requireOrganizationId(cookieOrg)
+        if (isDemoInstanceFromRequest(req)) return requireOrganizationId(cookieOrg)
       }
       void PLATFORM_CMS_ORG_COOKIE
     } catch {
@@ -60,14 +58,21 @@ export async function resolveCmsOrganizationId(req?: Request): Promise<string | 
       if (!(err instanceof MissingOrganizationIdError)) throw err
     }
   }
-  if (isDemoInstance()) return requireOrganizationId(riversideSnapshot().organization.id)
+  if (req && isDemoInstanceFromRequest(req)) {
+    return requireOrganizationId(riversideSnapshot().organization.id)
+  }
   try {
     const { headers } = await import('next/headers')
     const h = await headers()
     const synthetic = new Request('https://pavilion.local', { headers: h })
+    if (isDemoInstanceFromRequest(synthetic)) {
+      return requireOrganizationId(riversideSnapshot().organization.id)
+    }
     return await organizationIdFromRequest(synthetic)
   } catch {
-    if (isDemoInstance()) return requireOrganizationId(riversideSnapshot().organization.id)
+    if (req && isDemoInstanceFromRequest(req)) {
+      return requireOrganizationId(riversideSnapshot().organization.id)
+    }
     return null
   }
 }

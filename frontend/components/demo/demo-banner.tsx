@@ -13,6 +13,7 @@ export function DemoBanner() {
   const brand = publicBrandFace()
   const [packs, setPacks] = useState<PackRow[]>([])
   const [activeSlug, setActiveSlug] = useState<string | null>(null)
+  const [switchError, setSwitchError] = useState('')
 
   useEffect(() => {
     if (!isPublicDemoInstance()) return
@@ -29,14 +30,15 @@ export function DemoBanner() {
   if (pathname === '/review' || pathname === '/trial') return null
 
   async function switchLane(lane: 'both' | 'parent', parentKind?: 'paid' | 'free') {
+    setSwitchError('')
     const res = await fetch('/api/demo/switch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ lane, parentKind }),
     })
-    const data = (await res.json().catch(() => ({}))) as { next?: string }
+    const data = (await res.json().catch(() => ({}))) as { next?: string; error?: string }
     if (!res.ok) {
-      window.location.assign('/review')
+      setSwitchError(data.error || 'Could not switch lane. Try /review.')
       return
     }
     window.location.assign(data.next || (lane === 'parent' ? '/member-portal' : '/staff'))
@@ -64,7 +66,7 @@ export function DemoBanner() {
       </span>
       <span className="flex flex-wrap items-center gap-3">
         <Link href="/review" className="underline font-semibold">
-          Board join
+          Demo join
         </Link>
         {packs.map((p) => (
           <button
@@ -77,16 +79,19 @@ export function DemoBanner() {
           </button>
         ))}
         <button type="button" className="underline font-semibold" onClick={() => void switchLane('both')}>
-          Staff lane
+          Open staff (no code)
         </button>
         <button
           type="button"
           className="underline font-semibold"
           onClick={() => void switchLane('parent', 'paid')}
         >
-          Parent lane
+          Parent tour
         </button>
       </span>
+      {switchError ? (
+        <span className="w-full text-center text-xs opacity-90">{switchError}</span>
+      ) : null}
     </div>
   )
 }

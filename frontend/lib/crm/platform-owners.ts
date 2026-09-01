@@ -23,10 +23,14 @@ export function isPlatformStaffEmail(email: string): boolean {
   return email.trim().toLowerCase().endsWith(`@${PLATFORM_STAFF_EMAIL_DOMAIN}`)
 }
 
-export async function isPlatformOwnerEmail(email: string): Promise<boolean> {
+export async function isPlatformOwnerEmail(
+  email: string,
+  opts?: { demo?: boolean },
+): Promise<boolean> {
   const normalized = email.trim().toLowerCase()
   if (!normalized) return false
-  if (isDemoInstance() && (normalized === PLATFORM_OWNER_PRIMARY_EMAIL || normalized.endsWith('@onpavilion.com'))) {
+  const demo = opts?.demo ?? isDemoInstance()
+  if (demo && (normalized === PLATFORM_OWNER_PRIMARY_EMAIL || normalized.endsWith('@onpavilion.com'))) {
     return true
   }
   if (!commonsDbEnabled()) {
@@ -82,9 +86,12 @@ export type PlatformOrgOption = {
   plan: string
 }
 
-export async function listCustomerOrganizations(): Promise<PlatformOrgOption[]> {
+export async function listCustomerOrganizations(opts?: {
+  demo?: boolean
+}): Promise<PlatformOrgOption[]> {
+  const demo = opts?.demo ?? isDemoInstance()
   if (!commonsDbEnabled()) {
-    if (isDemoInstance()) {
+    if (demo) {
       return [
         { id: 'org_riverside', name: 'Riverside Elementary PTO', slug: 'riverside', plan: 'demo' },
         { id: 'org_pavilion', name: 'Pavilion', slug: 'pavilion', plan: 'platform' },

@@ -1,8 +1,8 @@
 import { sql } from '@/lib/crm/db'
 import { getOrgBilling } from '@/lib/crm/org-plan'
 import { organizationIdFromRequest, requireOrganizationId } from '@/lib/crm/tenant'
+import { isDemoInstanceFromRequest, hostFromRequest } from '@/lib/demo/instance'
 import { isCommonsPlatformHost } from '@/lib/crm/auth-edge'
-import { isDemoInstance } from '@/lib/demo/instance'
 import { isSyntheticStagingMode } from '@/lib/fixtures/synthetic-mode'
 
 export async function orgHasSquare(orgId: string): Promise<boolean> {
@@ -23,7 +23,7 @@ export type LiveCommerceGate = {
 }
 
 export async function liveCommerceGate(req: Request): Promise<LiveCommerceGate> {
-  if (isDemoInstance()) {
+  if (isDemoInstanceFromRequest(req)) {
     return {
       liveCommerce: false,
       reason: 'demo',
@@ -37,7 +37,8 @@ export async function liveCommerceGate(req: Request): Promise<LiveCommerceGate> 
       note: 'Synthetic staging.\nCheckout uses fixture quotes only. No live charges.',
     }
   }
-  if (!isCommonsPlatformHost()) {
+  const host = hostFromRequest(req)
+  if (!isCommonsPlatformHost(host)) {
     return { liveCommerce: true, reason: 'stone-hill', note: '' }
   }
   try {

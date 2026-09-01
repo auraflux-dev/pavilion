@@ -8,7 +8,7 @@ import {
 } from '@/lib/defaults/page-content'
 import type { StaffProfile } from '@/lib/staff/roles'
 import { vanillaizeCopy } from '@/lib/demo/brand'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import { revalidatePublicPage } from '@/lib/staff/revalidate-public'
 import { effectivePageContentRow } from '@/lib/copy/effective-staff-copy'
 
@@ -94,7 +94,8 @@ export async function GET(req: NextRequest) {
     if (!allPages) {
       merged = merged.filter((p) => isCovePageContentKey(p.page))
     }
-    if (isDemoInstance()) {
+    const demo = isDemoInstanceFromRequest(req)
+    if (demo) {
       merged = merged.map((p) => ({
         ...p,
         eyebrow: vanillaizeCopy(p.eyebrow),
@@ -109,8 +110,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       pages: merged,
       scope: allPages ? 'all' : 'cove',
-      canBrandFix: allPages && !isDemoInstance(),
-      demo: isDemoInstance(),
+      canBrandFix: allPages && !demo,
+      demo,
     })
   } catch (err) {
     console.error('/api/staff/page-content GET', err)
