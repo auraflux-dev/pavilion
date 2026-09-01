@@ -6,7 +6,7 @@ import { ExternalLink } from 'lucide-react'
 import {
   BEST_RUNNERS_SIGNUP_URL,
   RUN_FOR_CHARITY_FLYER_PDF_URL,
-  RUN_FOR_CHARITY_REGISTER_PATH,
+  RUN_FOR_CHARITY_EVENT_PATH,
 } from '@/lib/run-for-charity'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
 import { formString } from '@/lib/copy/form-string'
@@ -171,7 +171,7 @@ export function RunForCharityPromo({ copy = {} }: { copy?: Record<string, string
 
             <p className="text-sm text-white/65">
               <Link
-                href={RUN_FOR_CHARITY_REGISTER_PATH}
+                href={RUN_FOR_CHARITY_EVENT_PATH}
                 className="underline underline-offset-2 hover:text-white transition-colors"
               >
                 {E('rfc.details', 'Full event details', 'text-white/65', true)}

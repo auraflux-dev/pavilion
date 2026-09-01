@@ -1,5 +1,7 @@
 /** Shared event types + pure helpers safe for client components. */
 
+import { BEST_RUNNERS_SIGNUP_URL } from '@/lib/run-for-charity'
+
 export interface WixEvent {
   id?: string
   title?: string
@@ -31,16 +33,21 @@ export function eventPublicPath(event: Pick<WixEvent, 'slug' | 'id'>): string | 
 
 export function extractExternalRegistrationUrl(text?: string): string | undefined {
   if (!text) return undefined
+  const bestRunners = text.match(
+    /https:\/\/(?:www\.)?bestrunners\.org\/register\/signup[^\s<>"']*/i,
+  )
+  if (bestRunners?.[0]) {
+    return bestRunners[0].replace(/[.,);]+$/, '')
+  }
   const eventRegister = text.match(
     /https:\/\/(?:www\.)?shmspto\.org\/events\/run-for-charity[^\s<>"']*/i,
   )
   if (eventRegister?.[0]) {
-    const cleaned = eventRegister[0].replace(/[.,);]+$/, '')
-    return cleaned.includes('#') ? cleaned : `${cleaned}#register`
+    return BEST_RUNNERS_SIGNUP_URL
   }
   const bridge = text.match(/https:\/\/(?:www\.)?shmspto\.org\/run-for-charity[^\s<>"']*/i)
   if (bridge?.[0]) {
-    return 'https://www.shmspto.org/events/run-for-charity-1k-5k-best-runners-code-shms#register'
+    return BEST_RUNNERS_SIGNUP_URL
   }
   const m = text.match(/https:\/\/[^\s<>"']+/i)
   if (!m?.[0]) return undefined

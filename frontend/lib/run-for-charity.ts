@@ -1,28 +1,33 @@
-/** Best Runners partnership. school code on the event page (no middle hop). */
+/** Best Runners partnership. Register goes straight to Best Runners with SHMS applied. */
 export const RUN_FOR_CHARITY_SCHOOL_CODE = 'SHMS'
 
 export const RUN_FOR_CHARITY_EVENT_SLUG =
   'run-for-charity-1k-5k-best-runners-code-shms'
 
-/** Canonical share / register page (school code + continue to Best Runners). */
+/** Informational event page on our site (schedule, copy). Not the register CTA. */
 export const RUN_FOR_CHARITY_EVENT_PATH = `/events/${RUN_FOR_CHARITY_EVENT_SLUG}`
 
 export const RUN_FOR_CHARITY_REGISTER_HASH = '#register'
 
+/** @deprecated Prefer BEST_RUNNERS_SIGNUP_URL for register CTAs. */
 export const RUN_FOR_CHARITY_REGISTER_PATH = `${RUN_FOR_CHARITY_EVENT_PATH}${RUN_FOR_CHARITY_REGISTER_HASH}`
 
-/** @deprecated Use RUN_FOR_CHARITY_EVENT_PATH. old bridge redirects there. */
+/** @deprecated Use RUN_FOR_CHARITY_EVENT_PATH. old bridge redirects to Best Runners signup. */
 export const RUN_FOR_CHARITY_BRIDGE_PATH = '/run-for-charity'
 
 export const RUN_FOR_CHARITY_BRIDGE_URL = `https://www.shmspto.org${RUN_FOR_CHARITY_EVENT_PATH}`
 
-export const RUN_FOR_CHARITY_REGISTER_URL = `https://www.shmspto.org${RUN_FOR_CHARITY_REGISTER_PATH}`
-
-/** Best Runners signup with SHMS referral already on the URL. */
+/** Best Runners signup with school code SHMS already on the URL. */
 export const BEST_RUNNERS_SIGNUP_URL =
   'https://bestrunners.org/register/signup?ref=SHMS'
 
-/** Current official flyer (QR encodes the SHMS signup URL). */
+/**
+ * Canonical register URL for flyer taps, portal rail, receipts, fundraising CTAs.
+ * Always Best Runners with ref=SHMS (no middle hop on our site).
+ */
+export const RUN_FOR_CHARITY_REGISTER_URL = BEST_RUNNERS_SIGNUP_URL
+
+/** Current official flyer image (QR on flyer should match BEST_RUNNERS_SIGNUP_URL). */
 export const RUN_FOR_CHARITY_FLYER_PDF_URL = '/events/run-for-charity-2026.jpg'
 
 export function isRunForCharitySlug(slug?: string | null): boolean {

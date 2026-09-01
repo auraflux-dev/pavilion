@@ -84,7 +84,7 @@ const FALLBACK_CTAS: FundraisingCTA[] = [
     description:
       'Best Runners 1K & 5K on Sep 13 at Rock Ridge. Adults $30. Kids $20. Use code SHMS so Stone Hill receives 100% of your registration fee.',
     ctaLabel: 'Register with code SHMS',
-    href: '/events/run-for-charity-1k-5k-best-runners-code-shms#register',
+    href: 'https://bestrunners.org/register/signup?ref=SHMS',
     icon: 'Ticket',
     sortOrder: 5,
     active: true,
