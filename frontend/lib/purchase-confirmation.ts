@@ -36,6 +36,30 @@ function money(n: number) {
   return `$${Number(n).toFixed(2)}`
 }
 
+/** Cove is redeemed via Gift Cards API, so Square card receipts omit it — spell it out here. */
+function tenderBreakdownLines(extras?: Record<string, unknown>): string[] {
+  if (!extras) return []
+  let coveDollars = 0
+  let cardDollars = 0
+  if (extras.coveCents != null || extras.cardCents != null) {
+    coveDollars = (Number(extras.coveCents) || 0) / 100
+    cardDollars = (Number(extras.cardCents) || 0) / 100
+  } else if (extras.coveCharged != null || extras.remainderDue != null) {
+    coveDollars = Number(extras.coveCharged) || 0
+    cardDollars = Number(extras.remainderDue) || 0
+  }
+  if (coveDollars <= 0 && cardDollars <= 0) return []
+  const lines = ['How you paid:']
+  if (coveDollars > 0) lines.push(`• Cove Digital Card: ${money(coveDollars)}`)
+  if (cardDollars > 0) lines.push(`• Card / other: ${money(cardDollars)}`)
+  const balRaw = extras.coveNewBalance ?? extras.newBalance
+  if (balRaw != null && String(balRaw).trim() !== '') {
+    lines.push(`Cove Digital Card balance now: ${money(Number(balRaw))}`)
+  }
+  lines.push('')
+  return lines
+}
+
 function paintConfirm(
   out: Omit<PurchaseConfirmation, 'emailed'>,
 ): Omit<PurchaseConfirmation, 'emailed'> {
@@ -61,6 +85,7 @@ export function buildPurchaseConfirmationCopy(
     `Amount: ${money(input.amount)}`,
     `Reference: ${input.transactionId}`,
     '',
+    ...tenderBreakdownLines(input.extras),
   ]
 
   if (input.kind === 'program') {

@@ -187,17 +187,38 @@ export async function POST(req: NextRequest) {
         status: 'Paid',
         paymentDate: new Date().toISOString(),
         paymentMethod:
-          remainderDue > 0 ? 'Cove Digital Card + Square Stand remainder' : 'Cove Family Card',
+          remainderDue > 0 ? 'Cove Digital Card + Square Stand remainder' : 'Cove Digital Card',
         transactionId: idempotencyKey,
         source: 'cove_register_redeem',
-        programName: 'The Cove. snack window',
+        programName: `The Cove: ${lineSummary}`.slice(0, 200),
         notes:
           remainderDue > 0
             ? `Code ${family.coveFamilyCode}: ${lineSummary}. Cove $${coveCharged.toFixed(2)}. Collect $${remainderDue.toFixed(2)} on Square Stand as a custom amount. Do not re-ring items.`
-            : `Code ${family.coveFamilyCode}: ${lineSummary}`,
+            : `Code ${family.coveFamilyCode}: ${lineSummary}. Cove $${coveCharged.toFixed(2)}. Balance now $${Number(newBalance).toFixed(2)}.`,
       })
     } catch (err) {
       console.warn('Cove sale Payments insert failed:', err)
+    }
+
+    let emailed = false
+    try {
+      const { sendPurchaseConfirmation } = await import('@/lib/purchase-confirmation')
+      const confirmation = await sendPurchaseConfirmation({
+        kind: 'product',
+        parentEmail: family.parentEmail,
+        amount: totalDollars,
+        description: `The Cove · ${lineSummary}`,
+        transactionId: idempotencyKey,
+        meta: { productName: lineSummary.slice(0, 120) },
+        extras: {
+          coveCharged,
+          remainderDue,
+          coveNewBalance: Number(newBalance).toFixed(2),
+        },
+      })
+      emailed = confirmation.emailed
+    } catch (err) {
+      console.warn('Cove sale parent receipt failed:', err)
     }
 
     return NextResponse.json({
@@ -209,6 +230,7 @@ export async function POST(req: NextRequest) {
       lines: priced,
       parentEmail: family.parentEmail,
       coveFamilyCode: family.coveFamilyCode,
+      emailed,
     })
   } catch (err) {
     console.error('cove checkout', err)

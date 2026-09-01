@@ -668,7 +668,12 @@ export async function fulfillPaidCheckout(opts: {
         description: resolved.description,
         transactionId,
         meta: singlePart?.meta ?? resolved.meta,
-        extras: { lines: results, coveCents, cardCents } as Record<string, unknown>,
+        extras: {
+          lines: results,
+          coveCents,
+          cardCents,
+          ...(coveNewBalance ? { coveNewBalance } : {}),
+        } as Record<string, unknown>,
       },
     )
   }
@@ -745,7 +750,13 @@ export async function fulfillPaidCheckout(opts: {
         description: resolved.description,
         transactionId,
         meta: resolved.meta,
-        extras: { ...enrolled, addonEnrollments } as Record<string, unknown>,
+        extras: {
+          ...enrolled,
+          addonEnrollments,
+          coveCents: cove.coveCents,
+          cardCents: cove.cardCents,
+          ...(cove.coveNewBalance ? { coveNewBalance: cove.coveNewBalance } : {}),
+        } as Record<string, unknown>,
       },
     )
   }
@@ -822,6 +833,11 @@ export async function fulfillPaidCheckout(opts: {
         description: resolved.description,
         transactionId,
         meta: resolved.meta,
+        extras: {
+          coveCents,
+          cardCents,
+          ...(coveNewBalance ? { coveNewBalance } : {}),
+        },
       },
     )
   }
@@ -895,6 +911,11 @@ export async function fulfillPaidCheckout(opts: {
         description: resolved.description,
         transactionId,
         meta: resolved.meta,
+        extras: {
+          coveCents,
+          cardCents,
+          ...(coveNewBalance ? { coveNewBalance } : {}),
+        },
       },
     )
   }
@@ -950,6 +971,11 @@ export async function fulfillPaidCheckout(opts: {
         description: resolved.description,
         transactionId,
         meta: resolved.meta,
+        extras: {
+          coveCents: cove.coveCents,
+          cardCents: cove.cardCents,
+          ...(cove.coveNewBalance ? { coveNewBalance: cove.coveNewBalance } : {}),
+        },
       },
     )
   }
@@ -993,6 +1019,11 @@ export async function fulfillPaidCheckout(opts: {
         description: resolved.description,
         transactionId,
         meta: resolved.meta,
+        extras: {
+          coveCents: cove.coveCents,
+          cardCents: cove.cardCents,
+          ...(cove.coveNewBalance ? { coveNewBalance: cove.coveNewBalance } : {}),
+        },
       },
     )
   }
