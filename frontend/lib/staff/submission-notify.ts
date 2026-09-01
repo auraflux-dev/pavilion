@@ -188,7 +188,9 @@ function transactionLabel(kind: TransactionNotifyKind, description?: string): st
   // Defense: bags/enrollments must never show as Cove/shop even if kind was wrong.
   if (
     kind === 'product' &&
-    (/enrichment|bag\b|enroll|program:|competitive math|robotics|chess|coding/i.test(desc) ||
+    (/enrichment|bag\b|enroll|program:|competitive math|robotics|chess|coding|essay writing|young entrepreneurs/i.test(
+      desc,
+    ) ||
       desc.includes('classes'))
   ) {
     return 'Program enrollment'

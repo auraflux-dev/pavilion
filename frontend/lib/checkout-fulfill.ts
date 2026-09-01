@@ -132,6 +132,21 @@ function cartConfirmationKind(parts: ResolvedCheckout[]): PurchaseConfirmationIn
   return 'product'
 }
 
+/** Staff/parent subject for multi-item bags: name the classes, not "Bag · N items". */
+function cartNotifyDescription(parts: ResolvedCheckout[], fallback: string): string {
+  const titles = parts
+    .map((p) => String(p.description || '').trim())
+    .filter(Boolean)
+  if (titles.length === 0) return fallback
+  if (titles.length === 1) return titles[0]
+  const allPrograms = parts.every((p) => p.kind === 'program')
+  if (allPrograms) {
+    const short = titles.map((t) => t.replace(/^Enrichment:\s*/i, '').trim()).filter(Boolean)
+    return short.length ? `Enrichment: ${short.join(' + ')}` : fallback
+  }
+  return titles.join(' · ')
+}
+
 async function attachPurchaseConfirmation(
   result: Record<string, unknown>,
   input: PurchaseConfirmationInput,
@@ -700,7 +715,10 @@ export async function fulfillPaidCheckout(opts: {
     }
 
     await client.items.insert('Payments', {
-      programName: resolved.description || `Bag · ${parts.length} items`,
+      programName:
+        cartNotifyDescription(parts, resolved.description) ||
+        resolved.description ||
+        `Bag · ${parts.length} items`,
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
@@ -725,6 +743,7 @@ export async function fulfillPaidCheckout(opts: {
       String(resolved.meta.cartTitles || '')
         .replace(/Enrichment:\s*/gi, '')
         .trim() || resolved.description
+    const bagDescription = cartNotifyDescription(parts, resolved.description)
 
     if (notifyKind === 'program' || parts.some((p) => p.kind === 'program')) {
       try {
@@ -749,10 +768,7 @@ export async function fulfillPaidCheckout(opts: {
         parentEmail,
         parentName,
         amount: resolved.amount,
-        description:
-          notifyKind === 'program' && parts.length > 1
-            ? `Enrichment bag · ${parts.length} classes`
-            : resolved.description,
+        description: bagDescription,
         transactionId,
         meta: singlePart?.meta ?? {
           programName: bagProgramName.slice(0, 160),
