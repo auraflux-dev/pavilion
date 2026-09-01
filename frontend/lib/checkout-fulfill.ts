@@ -306,7 +306,7 @@ export async function resolveCheckoutIntent(
     const fee = await resolveProgramListFee(program)
     if (fee <= 0) throw new Error('This program does not require payment. Use free registration')
 
-    const addons: Array<{ id: string; name: string; fee: number }> = []
+    const addons: Array<{ id: string; name: string; fee: number; season: string }> = []
     for (const addonId of addonIds) {
       const addon = await getProgramById(addonId)
       if (!addon) throw new Error('Spring companion class not found')
@@ -323,7 +323,12 @@ export async function resolveCheckoutIntent(
       if (!addonAccess.ok) throw new Error(addonAccess.error || 'Companion class not available')
       const addonFee = await resolveProgramListFee(addon)
       if (addonFee <= 0) throw new Error('Companion class fee is not set')
-      addons.push({ id: addon._id, name: addon.name, fee: addonFee })
+      addons.push({
+        id: addon._id,
+        name: addon.name,
+        fee: addonFee,
+        season: String((addon as { season?: string }).season ?? ''),
+      })
     }
 
     const client = getWixClient()
@@ -363,7 +368,9 @@ export async function resolveCheckoutIntent(
         )
       }
     }
-    // Board season codes apply to the primary class only. Add-ons get membership %.
+    // Board 75%: one code per season — Fall code on Fall class, Spring code on Spring
+    // companion (even when checking out both in one cart during Fall calendar months).
+    const primarySeason = String((program as { season?: string }).season ?? '')
     const primaryApplied = await applyCheckoutDiscount({
       scope: 'program',
       listAmount: fee,
@@ -371,29 +378,52 @@ export async function resolveCheckoutIntent(
       parentEmail,
       accountEmails,
       tierPercent: percent,
+      programSeason: primarySeason,
     })
     if (primaryApplied.error) throw new Error(primaryApplied.error)
     let addonAmount = 0
     let addonList = 0
+    let addonDiscountDollars = 0
+    const addonDiscountBits: string[] = []
+    const addonConsumeIds: string[] = []
     for (const addon of addons) {
       addonList += addon.fee
       const addonApplied = await applyCheckoutDiscount({
         scope: 'program',
         listAmount: addon.fee,
+        // Do not reuse Fall typed code on Spring — auto-pick that season's board code.
         couponCode: null,
         parentEmail,
         accountEmails,
         tierPercent: percent,
+        programSeason: addon.season,
       })
       if (addonApplied.error) throw new Error(addonApplied.error)
       addonAmount += addonApplied.amount
+      if (addonApplied.discount) {
+        addonDiscountDollars += addonApplied.discount.dollars
+        if (addonApplied.discount.consumeId) {
+          addonConsumeIds.push(addonApplied.discount.consumeId)
+        }
+        if (addonApplied.discount.percent) {
+          addonDiscountBits.push(
+            `${addon.name} ${addonApplied.discount.percent}%${
+              addonApplied.discount.code ? ` (${addonApplied.discount.code})` : ''
+            }`,
+          )
+        }
+      }
     }
     const discount = primaryApplied.discount
     const amount = primaryApplied.amount + addonAmount
     const listFee = fee + addonList
-    const discountDollars = discount?.dollars ?? 0
+    const discountDollars = (discount?.dollars ?? 0) + addonDiscountDollars
     const appliedPercent = discount?.percent ?? 0
     const names = [program.name, ...addons.map((a) => a.name)].join(' + ')
+    const consumeIds = [
+      ...(discount?.consumeId ? [discount.consumeId] : []),
+      ...addonConsumeIds,
+    ]
 
     return {
       kind,
@@ -401,7 +431,16 @@ export async function resolveCheckoutIntent(
       amountCents: Math.round(amount * 100),
       description:
         addons.length > 0
-          ? `Enrichment: ${names}`
+          ? `Enrichment: ${names}${
+              appliedPercent > 0 || addonDiscountBits.length
+                ? ` (${[
+                    appliedPercent > 0 ? `primary ${appliedPercent}%` : '',
+                    ...addonDiscountBits,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')})`
+                : ''
+            }`
           : appliedPercent > 0
             ? `Enrichment: ${program.name} (${appliedPercent}% discount)`
             : `Enrichment: ${program.name}`,
@@ -419,7 +458,10 @@ export async function resolveCheckoutIntent(
         discountCode: discount?.code || String(student?.discountCode ?? ''),
         addonProgramIds: addons.map((a) => a.id).join(','),
         addonProgramNames: addons.map((a) => a.name).join(' · '),
-        ...(discount?.consumeId ? { consumeDiscountId: discount.consumeId } : {}),
+        ...(consumeIds[0] ? { consumeDiscountId: consumeIds[0] } : {}),
+        ...(consumeIds.length > 1
+          ? { consumeDiscountIds: consumeIds.join(',') }
+          : {}),
       },
     }
   }
@@ -732,8 +774,17 @@ export async function fulfillPaidCheckout(opts: {
         .filter(Boolean)
         .join(' · '),
     })
-    if (resolved.meta.consumeDiscountId) {
-      await consumeDiscountCode(resolved.meta.consumeDiscountId)
+    if (resolved.meta.consumeDiscountId || resolved.meta.consumeDiscountIds) {
+      const ids = [
+        ...String(resolved.meta.consumeDiscountIds ?? '')
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+        String(resolved.meta.consumeDiscountId ?? '').trim(),
+      ].filter(Boolean)
+      for (const id of [...new Set(ids)]) {
+        await consumeDiscountCode(id)
+      }
     }
     return confirm(
       {

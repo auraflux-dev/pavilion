@@ -1,6 +1,7 @@
 /**
  * Apply DiscountCodes on Square/PayPal checkout (Wix coupon records, our charge).
- * Board 75% codes: one enrichment program per season. Spirit codes: Cove catalog only.
+ * Board 75% codes: one enrichment program per season (Fall BRD75F / Spring BRD75S).
+ * Spirit codes: Cove catalog only.
  */
 import { getWixClient } from '@/lib/wix-client'
 import { clampDiscountPercent, normalizeCode } from '@/lib/staff/discounts'
@@ -73,10 +74,32 @@ export function currentBoardSeason(now = new Date()): 'fall' | 'spring' {
   return 'fall'
 }
 
-/** Unused board 75% code for this household and current season, if any. */
+/** Map CMS program.season (e.g. fall-2026 / spring-2027) to board code season. */
+export function boardSeasonFromProgramSeason(
+  season: string | null | undefined,
+): 'fall' | 'spring' | null {
+  const s = String(season ?? '')
+    .trim()
+    .toLowerCase()
+  if (!s) return null
+  if (s.includes('spring')) return 'spring'
+  if (s.includes('fall')) return 'fall'
+  return null
+}
+
+function boardCodeSeason(code: string): 'fall' | 'spring' | null {
+  const c = code.trim().toUpperCase()
+  if (c.startsWith('BRD75F')) return 'fall'
+  if (c.startsWith('BRD75S')) return 'spring'
+  return null
+}
+
+/** Unused board 75% code for this household and season (program season, else calendar). */
 export async function resolveUnusedBoardDiscountCode(opts: {
   parentEmail: string
   accountEmails?: string[]
+  /** Prefer the program's season so Spring EP gets BRD75S even during Fall calendar months. */
+  season?: 'fall' | 'spring' | null
 }): Promise<string | null> {
   const emails = [
     ...new Set(
@@ -86,7 +109,7 @@ export async function resolveUnusedBoardDiscountCode(opts: {
     ),
   ]
   if (emails.length === 0) return null
-  const season = currentBoardSeason()
+  const season = opts.season === 'fall' || opts.season === 'spring' ? opts.season : currentBoardSeason()
   const field = season === 'fall' ? 'boardDiscountFallCode' : 'boardDiscountSpringCode'
   const client = getWixClient()
 
@@ -133,16 +156,20 @@ export async function applyCheckoutDiscount(opts: {
   accountEmails?: string[]
   /** Program only: automatic membership tier % when no better coupon. */
   tierPercent?: number
+  /** Program season so Fall/Spring board 75% codes apply to the matching class. */
+  programSeason?: string | null
 }): Promise<{ amount: number; discount: AppliedCheckoutDiscount | null; error?: string }> {
   const listAmount = money(opts.listAmount)
   const tierPercent = Math.min(75, Math.max(0, Math.round(Number(opts.tierPercent ?? 0) || 0)))
   const typed = (opts.couponCode ?? '').trim()
+  const programBoardSeason = boardSeasonFromProgramSeason(opts.programSeason)
 
   if (!typed) {
     if (opts.scope === 'program') {
       const autoBoard = await resolveUnusedBoardDiscountCode({
         parentEmail: opts.parentEmail,
         accountEmails: opts.accountEmails,
+        season: programBoardSeason,
       })
       if (autoBoard) {
         return applyCheckoutDiscount({ ...opts, couponCode: autoBoard })
@@ -197,6 +224,18 @@ export async function applyCheckoutDiscount(opts: {
 
   if (boardCodeExpired(code)) {
     return { amount: listAmount, discount: null, error: 'That board season code has expired.' }
+  }
+
+  const codeSeason = boardCodeSeason(code)
+  if (codeSeason && programBoardSeason && codeSeason !== programBoardSeason) {
+    return {
+      amount: listAmount,
+      discount: null,
+      error:
+        codeSeason === 'fall'
+          ? 'That board code is for a Fall enrichment class. Use your Spring board code for Spring.'
+          : 'That board code is for a Spring enrichment class. Use your Fall board code for Fall.',
+    }
   }
 
   const usageLimit = Number(row.usageLimit ?? 0) || 0
