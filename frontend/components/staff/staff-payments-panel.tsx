@@ -16,6 +16,7 @@ import {
   STAFF_FILTER_LABEL,
   STAFF_FILTER_SELECT,
 } from '@/lib/staff/staff-filter-ui'
+import { StaffHouseholdPanel } from '@/components/staff/staff-household-panel'
 
 type Payment = {
   id: string
@@ -29,6 +30,7 @@ type Payment = {
   source: string
   payerEmail: string
   parentEmail: string
+  accountNumber?: string
   payerName: string
   refundStatus: string
   refundedAmountDollars: number
@@ -269,6 +271,7 @@ export function StaffPaymentsPanel({ isAdmin = false }: Props) {
 
   return (
     <section className="rounded-xl border border-[var(--border)] bg-white p-5 space-y-4">
+      <StaffHouseholdPanel initialQuery={accountApplied} />
       <div className="flex flex-wrap justify-between gap-2">
         <div>
           <h2 className="text-lg font-bold">Payments and Refunds</h2>
@@ -553,11 +556,27 @@ export function StaffPaymentsPanel({ isAdmin = false }: Props) {
                     {p.paymentDate ? new Date(p.paymentDate).toLocaleString() : 'n/a'}
                     {p.transactionId ? ` · tx ${p.transactionId}` : ''}
                   </p>
-                  {(p.payerEmail || p.parentEmail || p.payerName) && (
+                  {p.accountNumber ? (
+                    <p className="text-xs text-[#5A6070]">
+                      <button
+                        type="button"
+                        className="font-semibold tabular-nums underline"
+                        style={{ color: 'var(--brand-green)' }}
+                        onClick={() => {
+                          setAccount(p.accountNumber || '')
+                          setAccountApplied(p.accountNumber || '')
+                        }}
+                      >
+                        {p.accountNumber}
+                      </button>
+                      {' · '}
+                      {p.payerName} {p.parentEmail || p.payerEmail}
+                    </p>
+                  ) : (p.payerEmail || p.parentEmail || p.payerName) ? (
                     <p className="text-xs text-[#5A6070]">
                       {p.payerName} {p.parentEmail || p.payerEmail}
                     </p>
-                  )}
+                  ) : null}
                 </div>
                 <div className="flex flex-wrap gap-2 items-start">
                   {p.status === 'Needs Reconciliation' ? (

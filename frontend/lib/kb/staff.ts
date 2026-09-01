@@ -702,11 +702,12 @@ If a parent paid but sees nothing:
       order: 4,
       body: `## Account number vs email vs Cove PIN
 
-- **Account number** (example A10042): stable family ID on Memberships. Top line in Staff → Members and Memberships. Searchable in Payments.
-- **Email**: still how the system joins students, payments, and guardians.
+- **Account number** (example A10042): stable family ID on Memberships. Top line in Staff → Members and Memberships.
+- **Staff → Programs → Household** and **Staff → Payments**: open by A##### first. Enrollments and processor payment rows nest under that account.
+- **Email**: entry key only. The system resolves email → A#####, then lists activity for every email on that household.
 - **Cove 6-digit PIN / word passcode**: snack window and Stand only. Can be reset. Lagoon/Tide PINs end in 9.
 
-President opening Staff → Members runs a one-time backfill so existing families get numbers. New families get one when membership or Cove setup runs.
+President opening Staff → Members runs a one-time backfill so existing families get numbers. New families get one when membership or Cove setup runs. EP payments and seats also stamp A##### at checkout.
 
 Do not confuse account number with Square gift-card GAN or transaction ids.`,
     },

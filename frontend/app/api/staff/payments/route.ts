@@ -82,6 +82,7 @@ export async function GET(req: NextRequest) {
         source: String(row.source ?? ''),
         payerEmail: String(row.payerEmail ?? ''),
         parentEmail: String(row.parentEmail ?? row.payerEmail ?? ''),
+        accountNumber: String(row.accountNumber ?? '').trim(),
         payerName: String(row.payerName ?? ''),
         refundStatus: String(row.refundStatus ?? ''),
         refundedAmountDollars: parseRefundAmountDollars(row.refundedAmountDollars) ?? 0,
@@ -90,13 +91,21 @@ export async function GET(req: NextRequest) {
     })
 
     if (accountQ) {
-      if (accountEmails.length === 0) {
+      const { normalizeAccountNumber } = await import(
+        '@/lib/staff/membership-account-number',
+      )
+      const want = normalizeAccountNumber(accountQ)
+      if (accountEmails.length === 0 && !want) {
         payments = []
       } else {
         const set = new Set(accountEmails)
-        payments = payments.filter(
-          (p) => set.has(p.parentEmail.toLowerCase()) || set.has(p.payerEmail.toLowerCase()),
-        )
+        payments = payments.filter((p) => {
+          const stamped = normalizeAccountNumber(
+            (p as { accountNumber?: string }).accountNumber,
+          )
+          if (want && stamped === want) return true
+          return set.has(p.parentEmail.toLowerCase()) || set.has(p.payerEmail.toLowerCase())
+        })
       }
     }
     if (nameQ) {

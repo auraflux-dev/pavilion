@@ -42,6 +42,7 @@ import {
   EP_MEETING_DATES_APPROVED_KEY,
   EP_MEETING_DATES_PROPOSED_LABEL,
 } from '@/lib/programs/ep-meeting-dates-shared'
+import { StaffHouseholdPanel } from '@/components/staff/staff-household-panel'
 
 type Program = {
   id: string
@@ -175,7 +176,7 @@ function currentEpCatalogPrograms(programs: Program[]): Program[] {
 export function StaffProgramsPanel() {
   const [programs, setPrograms] = useState<Program[]>([])
   const [canManageAll, setCanManageAll] = useState(true)
-  const [tab, setTab] = useState<'programs' | 'roster' | 'attendance' | 'calendar'>(
+  const [tab, setTab] = useState<'programs' | 'roster' | 'household' | 'attendance' | 'calendar'>(
     'programs',
   )
   const [rosterProgramId, setRosterProgramId] = useState('')
@@ -829,6 +830,7 @@ export function StaffProgramsPanel() {
   const tabs = [
     ['programs', 'Programs'],
     ['roster', 'Roster'],
+    ['household', 'Household'],
     ['attendance', 'Attendance'],
     ['calendar', 'Calendar'],
   ] as const
@@ -1558,6 +1560,10 @@ Leave blank for normal in-app Square checkout.`}
             </div>
           ) : null}
         </div>
+      ) : null}
+
+      {tab === 'household' ? (
+        <StaffHouseholdPanel />
       ) : null}
 
       {tab === 'roster' ? (
