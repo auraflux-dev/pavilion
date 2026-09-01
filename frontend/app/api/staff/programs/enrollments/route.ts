@@ -305,6 +305,12 @@ export async function PATCH(req: NextRequest) {
     })
 
     const promoted = await maybePromoteAfterSeatFreed(programId, previousStatus, status)
+    try {
+      const { revalidatePublicPrograms } = await import('@/lib/staff/revalidate-public')
+      revalidatePublicPrograms()
+    } catch {
+      // ignore
+    }
     return NextResponse.json({ ok: true, promoted })
   } catch (err) {
     console.error('/api/staff/programs/enrollments PATCH', err)

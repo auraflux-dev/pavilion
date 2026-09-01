@@ -54,6 +54,49 @@ export async function countSeatsTaken(programId: string): Promise<number> {
   ).length
 }
 
+/** Seat counts keyed by programId (Enrolled + Paid only). */
+export async function seatCountsByProgramIds(
+  programIds: string[],
+): Promise<Map<string, number>> {
+  const ids = [...new Set(programIds.map((id) => String(id || '').trim()).filter(Boolean))]
+  const counts = new Map<string, number>()
+  for (const id of ids) counts.set(id, 0)
+  if (ids.length === 0) return counts
+
+  const client = getWixClient()
+  // One scan of ProgramEnrollments is cheaper than N capacity queries for catalog pages.
+  let items: ProgramEnrollmentRow[] = []
+  try {
+    const found = await client.items.query('ProgramEnrollments').limit(1000).find()
+    items = (found.items ?? []) as ProgramEnrollmentRow[]
+  } catch {
+    // Fall back to per-program counts if bulk query fails
+    await Promise.all(
+      ids.map(async (id) => {
+        counts.set(id, await countSeatsTaken(id))
+      }),
+    )
+    return counts
+  }
+
+  const idSet = new Set(ids)
+  for (const row of items) {
+    const pid = String(row.programId ?? '').trim()
+    if (!idSet.has(pid)) continue
+    if (!SEAT_STATUSES.has(String(row.status ?? ''))) continue
+    counts.set(pid, (counts.get(pid) ?? 0) + 1)
+  }
+  return counts
+}
+
+export function seatsRemainingForCapacity(
+  capacity: number,
+  seatsTaken: number,
+): number | null {
+  if (!(capacity > 0)) return null
+  return Math.max(0, capacity - seatsTaken)
+}
+
 export async function nextWaitlistPosition(programId: string): Promise<number> {
   const client = getWixClient()
   const found = await client.items

@@ -14,7 +14,9 @@ export const PROGRAM_UI_DEFAULTS: Record<string, string> = {
   'catalog.learnMore': 'Learn more',
   'catalog.registrationOpensSoon': 'Registration opens soon',
   'catalog.registrationClosed': 'Registration closed',
-  'catalog.spots': '{count} spots',
+  'catalog.spots': '{count} spots left',
+  'catalog.spotsFull': 'Full · waitlist open',
+  'catalog.spotsOne': '1 spot left',
   'catalog.priorityBanner':
     'Open to paid PTO members only until {until}. Then registration opens to all signed-in parents.',
 
@@ -24,7 +26,8 @@ export const PROGRAM_UI_DEFAULTS: Record<string, string> = {
   'landing.instructor': 'Instructor',
   'landing.grades': 'Grades',
   'landing.tuition': 'Tuition',
-  'landing.spots': 'Spots',
+  'landing.spots': 'Spots left',
+  'landing.spotsFull': 'Full',
   'landing.registerNow': 'Register now',
   'landing.registrationOpensSoon': 'Registration opens soon',
   'landing.viewCurriculum': 'View curriculum',

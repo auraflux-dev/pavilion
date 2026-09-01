@@ -10,6 +10,8 @@ export function revalidatePublicPrograms() {
   revalidatePath('/programs/fall-2026')
   revalidatePath('/programs/spring-2027')
   revalidatePath('/programs', 'layout')
+  // Seat counts on program landings
+  revalidatePath('/programs', 'page')
 }
 
 /** SiteSettings keys (nav, hero, announcements, etc.). */

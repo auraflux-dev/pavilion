@@ -34,6 +34,10 @@ export interface Program {
   /** Wix Stores catalog product that owns list tuition (memberships/Cove pattern). */
   productId?: string;
   capacity: number;
+  /** Enrolled + Paid seats (from ProgramEnrollments). */
+  seatsTaken?: number;
+  /** capacity − seatsTaken when capacity > 0. */
+  seatsRemaining?: number | null;
   registrationOpen: boolean;
   /**
    * When set and still in the future (with registrationOpen), only paid members
@@ -171,7 +175,23 @@ export async function getPrograms(): Promise<Program[]> {
     .eq("registrationOpen", true)
     .find();
 
-  return publicPrograms(result.items as Record<string, unknown>[]);
+  return withLiveSeatCounts(publicPrograms(result.items as Record<string, unknown>[]));
+}
+
+async function withLiveSeatCounts(programs: Program[]): Promise<Program[]> {
+  if (programs.length === 0) return programs
+  const { seatCountsByProgramIds, seatsRemainingForCapacity } = await import(
+    '@/lib/programs/enrollments'
+  )
+  const counts = await seatCountsByProgramIds(programs.map((p) => p._id))
+  return programs.map((p) => {
+    const seatsTaken = counts.get(p._id) ?? 0
+    return {
+      ...p,
+      seatsTaken,
+      seatsRemaining: seatsRemainingForCapacity(p.capacity, seatsTaken),
+    }
+  })
 }
 
 export async function getAllPrograms(opts?: {
@@ -185,13 +205,23 @@ export async function getAllPrograms(opts?: {
       ),
       opts,
     )
-    return appendSpringPacketIfNeeded(listed, opts)
+    const packet = appendSpringPacketIfNeeded(listed, opts)
+    // Demo: show open seats without Wix enrollments (≈ half full).
+    return packet.map((p) => {
+      const seatsTaken =
+        p.capacity > 0 ? Math.min(p.capacity, Math.floor(p.capacity / 2)) : 0
+      return {
+        ...p,
+        seatsTaken,
+        seatsRemaining: p.capacity > 0 ? Math.max(0, p.capacity - seatsTaken) : null,
+      }
+    })
   }
   if (isPavilionProductPlatform()) return []
   const client = tryGetWixClient();
   if (!client) return []
   const result = await client.items.query("Programs").find();
-  return publicPrograms(result.items as Record<string, unknown>[], opts);
+  return withLiveSeatCounts(publicPrograms(result.items as Record<string, unknown>[], opts));
 }
 
 export async function getFeaturedPrograms(opts?: {
@@ -212,7 +242,7 @@ export async function getFeaturedPrograms(opts?: {
     .eq("featured", true)
     .ascending("sortOrder")
     .find();
-  return publicPrograms(result.items as Record<string, unknown>[], opts);
+  return withLiveSeatCounts(publicPrograms(result.items as Record<string, unknown>[], opts));
 }
 
 /** Staging / Preview: treat CMS Fall (and real Spring) rows as open so checkout dry-runs work. */
@@ -346,13 +376,24 @@ function publicPrograms(
 export async function getProgramById(id: string): Promise<Program | null> {
   if (isDemoInstance()) {
     const { DEMO_PROGRAMS } = await import('@/lib/demo/content')
-    return DEMO_PROGRAMS.find((p) => p._id === id) ?? null
+    const found = DEMO_PROGRAMS.find((p) => p._id === id) ?? null
+    if (!found) return null
+    const seatsTaken =
+      found.capacity > 0 ? Math.min(found.capacity, Math.floor(found.capacity / 2)) : 0
+    return {
+      ...found,
+      seatsTaken,
+      seatsRemaining:
+        found.capacity > 0 ? Math.max(0, found.capacity - seatsTaken) : null,
+    }
   }
   const client = tryGetWixClient();
   if (!client) return null
   try {
     const item = await client.items.get("Programs", id);
-    return mapProgramItem(item as Record<string, unknown>);
+    const program = mapProgramItem(item as Record<string, unknown>);
+    const [enriched] = await withLiveSeatCounts([program])
+    return enriched ?? program
   } catch {
     return null;
   }

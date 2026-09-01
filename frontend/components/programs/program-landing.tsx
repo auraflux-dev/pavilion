@@ -22,6 +22,7 @@ import { resolveProgramLandingCopy } from '@/lib/programs/resolve-landing-copy'
 import type { ProgramLandingCopy } from '@/lib/programs/landing-copy'
 import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
 import { CmsProgram, useProgramUiCopy, ui } from '@/components/programs/program-ui-copy-context'
+import { ProgramSpotsLeft } from '@/components/programs/program-spots-left'
 import {
   CATALOG_SEASON_LABELS,
   resolveProgramSeason,
@@ -227,7 +228,18 @@ export function ProgramLanding({
                         <Users className="w-3.5 h-3.5" aria-hidden="true" />
                         <CmsProgram k="landing.spots" fallback={ui(uiCopy, 'landing.spots')} />
                       </dt>
-                      <dd className="font-semibold text-[#1A1A1A] text-right">{program.capacity}</dd>
+                      <dd className="font-semibold text-[#1A1A1A] text-right">
+                        <ProgramSpotsLeft
+                          programId={program._id}
+                          capacity={program.capacity}
+                          initialRemaining={
+                            program.seatsRemaining != null
+                              ? program.seatsRemaining
+                              : Math.max(0, program.capacity - (program.seatsTaken ?? 0))
+                          }
+                          variant="value"
+                        />
+                      </dd>
                     </>
                   ) : null}
                 </dl>

@@ -8,7 +8,7 @@ import {
   programLandingStaticParams,
 } from '@/lib/programs/program-landing-route'
 
-export const revalidate = 300
+export const revalidate = 60
 
 interface Props {
   params: Promise<{ slug: string }>

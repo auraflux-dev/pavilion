@@ -18,6 +18,7 @@ import { MemberGate } from '@/components/member-gate'
 import { ProgramRegisterModal } from '@/components/programs/program-register-modal'
 import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
 import { useProgramUiCopy, ui } from '@/components/programs/program-ui-copy-context'
+import { ProgramSpotsLeft } from '@/components/programs/program-spots-left'
 
 interface ProgramCardProps {
   program: Program
@@ -253,7 +254,15 @@ export function ProgramCard({ program, companion = null }: ProgramCardProps) {
           {program.capacity > 0 ? (
             <div className="flex items-center gap-2 text-sm text-[#5A6070]">
               <Users className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-              <span>{ui(uiCopy, 'catalog.spots', { count: program.capacity })}</span>
+              <ProgramSpotsLeft
+                programId={program._id}
+                capacity={program.capacity}
+                initialRemaining={
+                  program.seatsRemaining != null
+                    ? program.seatsRemaining
+                    : Math.max(0, program.capacity - (program.seatsTaken ?? 0))
+                }
+              />
             </div>
           ) : null}
         </div>

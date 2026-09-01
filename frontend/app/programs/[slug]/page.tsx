@@ -7,7 +7,7 @@ import {
 } from '@/lib/programs/public-path'
 import { resolveProgramSeason } from '@/lib/programs/season'
 
-export const revalidate = 300
+export const revalidate = 60
 
 interface Props {
   params: Promise<{ slug: string }>

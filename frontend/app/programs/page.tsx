@@ -18,7 +18,7 @@ import { canViewProgramsCatalogNow, isProgramsReviewHost } from '@/lib/programs/
 import { isProgramsCatalogListed } from '@/lib/programs/public-catalog'
 import { isSpringCatalogListed } from '@/lib/programs/season'
 
-export const revalidate = 300 // revalidate every 5 minutes
+export const revalidate = 60 // spots left; enrollment also busts via revalidatePublicPrograms
 
 export default async function ProgramsPage({
   searchParams,
