@@ -268,8 +268,11 @@ export async function notifyStaffTransaction(opts: {
   ]
   if (opts.paymentMethod) lines.push(`Payment: ${opts.paymentMethod}`)
   if (opts.meta) {
+    const skip = /^(cartPartsJson|gan|giftCardId|coveBalance|accountNumber)$/i
     for (const [k, v] of Object.entries(opts.meta)) {
-      if (v) lines.push(`${k}: ${v}`)
+      if (!v || skip.test(k)) continue
+      if (String(v).length > 180) continue
+      lines.push(`${k}: ${v}`)
     }
   }
 

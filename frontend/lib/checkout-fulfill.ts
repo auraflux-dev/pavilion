@@ -94,12 +94,41 @@ type StudentRow = {
 
 /** Bag checkout: one staff/parent confirmation using the line kind(s), not hard-coded program. */
 function cartConfirmationKind(parts: ResolvedCheckout[]): PurchaseConfirmationInput['kind'] {
+  if (parts.length === 0) return 'product'
   if (parts.length === 1) {
     const k = parts[0].kind
-    if (k === 'membership' || k === 'program' || k === 'product' || k === 'store-card' || k === 'event' || k === 'donation') {
+    if (
+      k === 'membership' ||
+      k === 'program' ||
+      k === 'product' ||
+      k === 'store-card' ||
+      k === 'event' ||
+      k === 'donation'
+    ) {
       return k
     }
+    return 'product'
   }
+  const kinds = new Set(parts.map((p) => p.kind))
+  // Homogeneous bags keep that kind (e.g. two enrichment classes → program, not Cove/shop).
+  if (kinds.size === 1) {
+    const only = parts[0].kind
+    if (
+      only === 'membership' ||
+      only === 'program' ||
+      only === 'product' ||
+      only === 'store-card' ||
+      only === 'event' ||
+      only === 'donation'
+    ) {
+      return only
+    }
+  }
+  if (kinds.has('program')) return 'program'
+  if (kinds.has('membership')) return 'membership'
+  if (kinds.has('event')) return 'event'
+  if (kinds.has('donation')) return 'donation'
+  if (kinds.has('store-card')) return 'store-card'
   return 'product'
 }
 
@@ -692,6 +721,10 @@ export async function fulfillPaidCheckout(opts: {
 
     const notifyKind = cartConfirmationKind(parts)
     const singlePart = parts.length === 1 ? parts[0] : null
+    const bagProgramName =
+      String(resolved.meta.cartTitles || '')
+        .replace(/Enrichment:\s*/gi, '')
+        .trim() || resolved.description
 
     return confirm(
       {
@@ -707,9 +740,16 @@ export async function fulfillPaidCheckout(opts: {
         parentEmail,
         parentName,
         amount: resolved.amount,
-        description: resolved.description,
+        description:
+          notifyKind === 'program' && parts.length > 1
+            ? `Enrichment bag · ${parts.length} classes`
+            : resolved.description,
         transactionId,
-        meta: singlePart?.meta ?? resolved.meta,
+        meta: singlePart?.meta ?? {
+          programName: bagProgramName.slice(0, 160),
+          cartCount: String(parts.length),
+          cartTitles: String(resolved.meta.cartTitles ?? '').slice(0, 160),
+        },
         extras: {
           lines: results,
           coveCents,
