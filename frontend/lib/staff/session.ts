@@ -10,7 +10,7 @@ import { staffCanWorkspace } from '@/lib/staff/permissions'
 import type { StaffWorkspace } from '@/lib/audience'
 import { commonsStaffProfile, loadCommonsStaffJson } from '@/lib/crm/commons-staff'
 import { isCommonsPlatformHost } from '@/lib/crm/auth-edge'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import { demoStaffProfile, getDemoReviewSession } from '@/lib/demo/session'
 
 function commonsStaffSession(
@@ -42,7 +42,7 @@ export async function getStaffSession(req: NextRequest) {
     if (commons) return commonsStaffSession(commons)
   }
 
-  if (isDemoInstance()) {
+  if (isDemoInstanceFromRequest(req)) {
     const demo = getDemoReviewSession(req)
     if (demo && (demo.lane === 'staff' || demo.lane === 'both')) {
       const session = await getMemberSession(req)

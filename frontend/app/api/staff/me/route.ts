@@ -10,7 +10,7 @@ import {
   STAFF_EMAIL_DOMAIN,
   type StaffRole,
 } from '@/lib/staff/roles'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import { isSyntheticStagingMode } from '@/lib/fixtures/synthetic-mode'
 import { vanillaizeDeep, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { getDemoReviewSession } from '@/lib/demo/session'
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
   const commons = await loadCommonsStaffJson(req)
   if (commons) return NextResponse.json(commons)
 
-  if (isDemoInstance()) {
+  if (isDemoInstanceFromRequest(req)) {
     const demoStaff = await getStaffSession(req)
     if (demoStaff) {
       const homes = demoStaff.staff.roles.map((role) => ({

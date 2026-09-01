@@ -39,6 +39,16 @@ export function isPublicDemoInstance(): boolean {
   return process.env.NEXT_PUBLIC_DEMO_INSTANCE === 'true'
 }
 
+/** Node/Edge API routes on unified demo+trial must pass Host (not env-only isDemoInstance()). */
+export function isDemoInstanceFromRequest(req: {
+  headers: { get(name: string): string | null }
+}): boolean {
+  const raw = req.headers.get('x-forwarded-host') || req.headers.get('host') || ''
+  const host = raw.split(',')[0]?.trim().split(':')[0]?.toLowerCase() || ''
+  if (host) return isDemoInstance(host)
+  return isDemoInstance()
+}
+
 const SHMS_SITE = 'https://www.shmspto.org'
 const DEMO_SITE = `https://${PAVILION_DEMO_HOST}`
 const LEGACY_DEMO_SITE = 'https://commons-pto-demo.vercel.app'

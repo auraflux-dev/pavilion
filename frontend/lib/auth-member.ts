@@ -3,7 +3,7 @@ import { createOAuthClient } from '@/lib/wix-oauth-client'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { isMemberTokens, parseTokensCookie } from '@/lib/auth'
 import { collectMemberEmails, pickSessionEmail } from '@/lib/member-emails'
-import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoInstance, isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import { demoMemberId, getDemoReviewSession } from '@/lib/demo/session'
 
 async function loadWixMemberSession(req: NextRequest) {
@@ -24,7 +24,7 @@ async function loadWixMemberSession(req: NextRequest) {
 type WixMemberSession = NonNullable<Awaited<ReturnType<typeof loadWixMemberSession>>>
 
 export async function getMemberSession(req: NextRequest): Promise<WixMemberSession | null> {
-  if (isDemoInstance()) {
+  if (isDemoInstanceFromRequest(req)) {
     const demo = getDemoReviewSession(req)
     if (demo) {
       const memberId = demoMemberId(demo.email)
