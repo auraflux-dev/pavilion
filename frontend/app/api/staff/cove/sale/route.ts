@@ -202,7 +202,7 @@ export async function POST(req: NextRequest) {
           firstName: nameParts[0] || '',
           lastName: nameParts.slice(1).join(' ') || '',
         })
-        const redirectUri = `${origin}/auth/join?mode=login&returnTo=${encodeURIComponent('/member-portal')}`
+        const redirectUri = `${origin}/auth/join`
         await sendWixSetPasswordEmail(guestEmail, redirectUri)
         const mail = await sendStaffInviteEmail({
           email: guestEmail,

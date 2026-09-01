@@ -62,7 +62,8 @@ export async function POST(req: NextRequest) {
 
     const member = await findOrCreateFreeMember({ email, firstName, lastName })
 
-    const redirectUri = `${origin}/auth/join?mode=login&returnTo=${encodeURIComponent('/member-portal')}`
+    // Exact match for Wix Headless "Allowed authorization redirect URIs".
+    const redirectUri = `${origin}/auth/join`
     let wixResetSent = false
     let wixResetError: string | undefined
     if (sendEmail) {
