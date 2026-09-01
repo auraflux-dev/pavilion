@@ -185,17 +185,16 @@ export type TransactionNotifyKind =
 
 function transactionLabel(kind: TransactionNotifyKind, description?: string): string {
   const desc = String(description || '').toLowerCase()
-  // Defense: bags/enrollments must never show as Cove/shop even if kind was wrong.
+  // Description wins over kind: bag/enroll checkouts and Stand sync must never show as Cove/shop.
   if (
-    kind === 'product' &&
-    (/enrichment|bag\b|enroll|program:|competitive math|robotics|chess|coding|essay writing|young entrepreneurs/i.test(
+    /enrichment|bag\b|enroll|program:|competitive math|robotics|chess|coding|essay writing|young entrepreneurs/i.test(
       desc,
     ) ||
-      desc.includes('classes'))
+    desc.includes('classes')
   ) {
     return 'Program enrollment'
   }
-  if (kind === 'product' && /in-person sales|square stand/i.test(desc)) {
+  if (/in-person sales|square stand|in-person ·/i.test(desc)) {
     return 'In-person Stand sale'
   }
   switch (kind) {
