@@ -153,8 +153,9 @@ export async function middleware(req: NextRequest) {
 
   // Wix password-reset emails land on the published site with
   // ?forgotPasswordToken=… (Members Area UI). After DNS cutover that is
-  // Next.js, which ignored the token and showed the homepage. Proxy the
-  // Wix site root so the reset form still opens on www.
+  // Next.js, which ignored the token and showed the homepage. Send the
+  // browser to the still-published Wix site so the reset form opens.
+  // (Proxying the Wix home caused a Location rewrite loop back to www.)
   const forgotPasswordToken =
     req.nextUrl.searchParams.get('forgotPasswordToken') ||
     req.nextUrl.searchParams.get('forgetPasswordToken')
@@ -166,9 +167,14 @@ export async function middleware(req: NextRequest) {
     !pathname.startsWith('/_serverless/') &&
     !pathname.startsWith('/_partials/')
   ) {
-    const rewriteUrl = req.nextUrl.clone()
-    rewriteUrl.pathname = '/api/wix-auth-proxy/__wix_site_root'
-    return NextResponse.rewrite(rewriteUrl)
+    const upstream =
+      process.env.WIX_AUTH_UPSTREAM_HOST?.trim() || 'treasurer7596.wixsite.com'
+    const sitePath = process.env.WIX_AUTH_SITE_PATH?.trim() || '/shms-pto-2026'
+    const dest = new URL(`https://${upstream}${sitePath}/`)
+    req.nextUrl.searchParams.forEach((value, key) => {
+      dest.searchParams.set(key, value)
+    })
+    return NextResponse.redirect(dest)
   }
 
   // Wix login UI needs /_api, /__auth, /_serverless, /_partials on www.
