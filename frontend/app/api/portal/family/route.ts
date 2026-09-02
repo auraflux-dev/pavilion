@@ -13,8 +13,26 @@ import { getUpcomingProgramSessions } from '@/lib/api/program-sessions'
 import { getEffectiveParentEmail } from '@/lib/staff/session'
 import { listEnrollmentsForStudent } from '@/lib/programs/enrollments'
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
+import { mapPortalStudents } from '@/lib/portal/map-students'
 
 export const dynamic = 'force-dynamic'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function memberPayload(member: any, actorEmail: string) {
+  const firstName = String(member?.contact?.firstName ?? '').trim()
+  const lastName = String(member?.contact?.lastName ?? '').trim()
+  const memberName = `${firstName} ${lastName}`.trim() || actorEmail
+  return {
+    id: String(member?._id ?? ''),
+    name: memberName,
+    email: actorEmail,
+    profileImage: member?.profile?.photo?.url ?? null,
+    memberSince: member?._createdDate ?? null,
+    firstName,
+    lastName,
+    phone: String(member?.contact?.phones?.[0]?.phone ?? '').trim(),
+  }
+}
 
 export type PortalCalendarItem = {
   id: string
@@ -52,6 +70,10 @@ export async function GET(req: NextRequest) {
   const tokensCookie = req.cookies.get(TOKENS_COOKIE)?.value
   if (!tokensCookie) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const lite =
+    req.nextUrl.searchParams.get('lite') === '1' ||
+    req.nextUrl.searchParams.get('lite') === 'true'
+
   try {
     const tokens = JSON.parse(tokensCookie)
     const oauthClient = createOAuthClient(tokens)
@@ -62,19 +84,45 @@ export async function GET(req: NextRequest) {
     const email = effective?.parentEmail ?? actorEmail
     const actingAs = Boolean(effective?.actingAs)
 
-    const admin = getWixClient()
     const { listStudentsForViewer, resolvePrimaryParentEmail } = await import('@/lib/family-guardians')
-    const householdEmail = await resolvePrimaryParentEmail(email)
     const studentRows = await listStudentsForViewer(email)
+    const portalStudents = mapPortalStudents(
+      studentRows as Array<Record<string, unknown>>,
+      email,
+    )
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const students = studentRows.map((s: any) => ({
-      id: s._id as string,
-      firstName: String(s.firstName ?? ''),
-      lastName: String(s.lastName ?? ''),
-      grade: String(s.grade ?? ''),
-      name: `${s.firstName ?? ''} ${s.lastName ?? ''}`.trim(),
+    const students = portalStudents.map((s) => ({
+      id: s.id,
+      firstName: s.firstName,
+      lastName: s.lastName,
+      grade: s.grade,
+      name: `${s.firstName} ${s.lastName}`.trim(),
     }))
+
+    // Fast path for first paint / soft refresh. Skip enrollments, payments, messages, calendar.
+    if (lite) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const paidFromStudentRows = studentRows.some((raw: any) => {
+        if (raw.archived === true) return false
+        return String(raw.membershipTier ?? 'free') !== 'free'
+      })
+      return NextResponse.json({
+        member: memberPayload(member, actorEmail),
+        accountType: paidFromStudentRows ? 'paid' : 'free',
+        students: portalStudents,
+        calendar: [],
+        messages: [],
+        purchases: [],
+        studentCount: students.length,
+        actingAs,
+        parentEmail: email,
+        actorEmail,
+        lite: true,
+      })
+    }
+
+    const admin = getWixClient()
+    const householdEmail = await resolvePrimaryParentEmail(email)
     const studentIds: string[] = students.map((s: { id: string }) => s.id)
     const studentById = new Map<string, string>(
       students.map((s: { id: string; name: string }) => [s.id, s.name])
@@ -461,7 +509,12 @@ export async function GET(req: NextRequest) {
         sentAt: row.sentAt ? String(row.sentAt) : null,
       }))
 
+    const accountType: 'free' | 'paid' = hasPaidMembership ? 'paid' : 'free'
+
     return NextResponse.json({
+      member: memberPayload(member, actorEmail),
+      accountType,
+      students: portalStudents,
       calendar: calendarOut.slice(0, 20),
       messages: messages.slice(0, 15),
       purchases: purchases.slice(0, 12),
@@ -470,6 +523,7 @@ export async function GET(req: NextRequest) {
       actingAs,
       parentEmail: email,
       actorEmail,
+      lite: false,
     })
   } catch (err) {
     console.error('/api/portal/family error:', err)
