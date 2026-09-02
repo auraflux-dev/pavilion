@@ -497,7 +497,7 @@ export const SITE_SETTING_GROUPS: {
     keys: [
  { key: 'schoolInSession', label: 'School in session (true/false). shows Programs & Events' },
       { key: 'announcementEnabled', label: 'Enabled (true/false)' },
-      { key: 'announcementText', label: 'Banner text', multiline: true },
+      { key: 'announcementText', label: 'Banner text', multiline: true, hint: 'Keep short. Inline links: [enrichment registration](/programs)' },
       { key: 'announcement6thLink', label: '6th grade WhatsApp invite URL' },
       { key: 'announcement7thLink', label: '7th grade WhatsApp invite URL' },
       { key: 'announcement8thLink', label: '8th grade WhatsApp invite URL' },

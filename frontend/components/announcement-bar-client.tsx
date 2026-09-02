@@ -12,7 +12,30 @@ interface Props {
 }
 
 function renderAnnouncementText(text: string) {
-  // Turn a trailing https URL into a link (event cards, schedule pages).
+  // Inline markdown links: [Programs](/programs) or [Register](https://…)
+  const parts: Array<string | { href: string; label: string }> = []
+  const md = /\[([^\]]+)\]\((\/[^)\s]*|https?:\/\/[^)\s]+)\)/g
+  let last = 0
+  let m: RegExpExecArray | null
+  while ((m = md.exec(text)) !== null) {
+    if (m.index > last) parts.push(text.slice(last, m.index))
+    parts.push({ label: m[1]!, href: m[2]! })
+    last = m.index + m[0].length
+  }
+  if (last > 0) {
+    if (last < text.length) parts.push(text.slice(last))
+    return parts.map((part, i) =>
+      typeof part === 'string' ? (
+        <span key={i}>{part}</span>
+      ) : (
+        <a key={i} href={part.href} className="underline font-bold hover:opacity-80">
+          {part.label}
+        </a>
+      ),
+    )
+  }
+
+  // Trailing bare https URL → linked label "Details" (legacy CMS rows).
   const match = text.match(/^(.*?)(https:\/\/\S+)\s*$/)
   if (!match) return text
   const [, before, href] = match
