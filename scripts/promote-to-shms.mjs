@@ -11,6 +11,10 @@
  *   cd ~/shmspto && node scripts/ship-stone-hill.mjs
  *
  * www.shmspto.org is production — avoid ship during school hours unless hotfix.
+ *
+ * SHMS-ahead gate: promote overwrites matching frontend files. If SHMS is ahead on
+ * shared product paths, port those into Pavilion and commit both sides BEFORE
+ * --apply / SHMS commit / www ship. See ~/shmspto/.cursor/rules/shms-edit-home.mdc.
  */
 import { spawnSync } from 'node:child_process'
 import { dirname, resolve } from 'node:path'
