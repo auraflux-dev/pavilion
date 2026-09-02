@@ -4,10 +4,16 @@
  */
 import { getWixClient } from '@/lib/wix-client'
 import { sendMassEmail } from '@/lib/staff/mass-email'
+import { plainTextToEmailHtml } from '@/lib/staff/newsletter-html'
 import {
   buildMembershipEntitlements,
   PHYSICAL_PERK_PICKUP_NOTE,
 } from '@/lib/membership-entitlements'
+import {
+  runForCharityReceiptHtmlBlock,
+  runForCharityReceiptTextFooter,
+  stillShowingRunForCharity,
+} from '@/lib/run-for-charity'
 import { publicBrandFace, vanillaizeIfDemo } from '@/lib/demo/brand'
 
 export type PurchaseConfirmKind = 'membership' | 'product' | 'store-card' | 'program' | 'event' | 'donation'
@@ -64,15 +70,22 @@ function tenderBreakdownLines(extras?: Record<string, unknown>): string[] {
   return lines
 }
 
+function withReceiptPromo<T extends { body: string }>(copy: T): T {
+  if (!stillShowingRunForCharity()) return copy
+  const footer = runForCharityReceiptTextFooter()
+  if (!footer) return copy
+  return { ...copy, body: `${copy.body}${footer}` }
+}
+
 function paintConfirm(
   out: Omit<PurchaseConfirmation, 'emailed'>,
 ): Omit<PurchaseConfirmation, 'emailed'> {
-  return {
+  return withReceiptPromo({
     subject: vanillaizeIfDemo(out.subject),
     body: vanillaizeIfDemo(out.body),
     nextSteps: out.nextSteps.map((s) => vanillaizeIfDemo(s)),
     portalHref: vanillaizeIfDemo(out.portalHref),
-  }
+  })
 }
 
 export function buildPurchaseConfirmationCopy(
@@ -261,9 +274,15 @@ export async function sendPurchaseConfirmation(
 
   let emailed = false
   try {
+    const flyerHtml = runForCharityReceiptHtmlBlock()
+    // Strip the plain-text flyer footer from HTML body so the image block is not duplicated as text.
+    const bodyForHtml = flyerHtml
+      ? copy.body.replace(runForCharityReceiptTextFooter(), '').trimEnd()
+      : copy.body
     const result = await sendMassEmail({
       subject: copy.subject,
       body: copy.body,
+      html: `${plainTextToEmailHtml(bodyForHtml)}${flyerHtml}`,
       fromName: publicBrandFace().short,
       recipients: [input.parentEmail],
     })
