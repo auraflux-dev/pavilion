@@ -4,7 +4,9 @@ export type GalleryItem = {
   kind: 'demo' | 'trial' | 'live'
   blurb: string
   href?: string
-  placeholder: true
+  imageSrc?: string
+  imageAlt?: string
+  galleryImages?: { src: string; alt: string }[]
 }
 
 export const GALLERY_ITEMS: GalleryItem[] = [
@@ -12,23 +14,32 @@ export const GALLERY_ITEMS: GalleryItem[] = [
     id: 'riverside',
     title: 'Riverside demo',
     kind: 'demo',
-    blurb: 'Public demo board tour. Vanilla school brand for prospects.',
+    blurb: 'Public demo board tour.\nVanilla school brand for prospects.',
     href: 'https://demo.onpavilion.com',
-    placeholder: true,
+    imageSrc: '/gallery/riverside-public.jpg',
+    imageAlt: 'Riverside Elementary PTO public homepage',
+    galleryImages: [
+      {
+        src: '/gallery/riverside-member.jpg',
+        alt: 'Riverside family membership tiers',
+      },
+      {
+        src: '/gallery/riverside-staff.jpg',
+        alt: 'Riverside staff portal home',
+      },
+    ],
   },
   {
     id: 'trial-slot',
     title: 'Private trial builds',
     kind: 'trial',
     blurb: 'Permissioned screenshots of real trials land here as sales ships them.',
-    placeholder: true,
   },
   {
     id: 'live-slot',
     title: 'Live school builds',
     kind: 'live',
     blurb: 'Paid schools with approval appear in this gallery after go-live.',
-    placeholder: true,
   },
 ]
 
