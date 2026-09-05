@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
-/* Locked brand: Pavilion · ink + sea glass. Tokens for pavilionpto.com marketing. */
+/* Locked brand: Pavilion · ink + sea glass. Marketing tokens for onpavilion.com. */
 :root {
-  --paper: #f3efe6;
-  --paper-deep: #e8e1d4;
+  --paper: #f1ede4;
+  --paper-deep: #e4ddd0;
   --ink: #12231f;
   --ink-muted: #3d4f49;
   --accent: #0f6b5c;
@@ -29,6 +29,63 @@ body {
 
 .hero-plane {
   background:
-    radial-gradient(1200px 600px at 70% 10%, rgba(15, 107, 92, 0.35), transparent 55%),
-    linear-gradient(160deg, #0d2a26 0%, #163f38 42%, #1f4f46 100%);
+    radial-gradient(1200px 600px at 70% 10%, rgba(15, 107, 92, 0.38), transparent 55%),
+    linear-gradient(160deg, #0c2824 0%, #163f38 42%, #1f4f46 100%);
+}
+
+@keyframes marketing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes marketing-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes marketing-stagger {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.motion-rise {
+  animation: marketing-rise 0.7s ease-out both;
+}
+
+.motion-rise-delay {
+  animation-delay: 0.14s;
+}
+
+.motion-float {
+  animation: marketing-float 7s ease-in-out infinite;
+}
+
+.motion-stagger {
+  animation: marketing-stagger 0.55s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-rise,
+  .motion-rise-delay,
+  .motion-float,
+  .motion-stagger {
+    animation: none;
+  }
 }
