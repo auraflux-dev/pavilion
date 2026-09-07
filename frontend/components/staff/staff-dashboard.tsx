@@ -55,6 +55,8 @@ import { StaffNewsletterSendReportPanel } from '@/components/staff/staff-newslet
 import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
 import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
 import { StaffClientOnboardingPanel } from '@/components/staff/staff-client-onboarding-panel'
+import { StaffPlatformConsole } from '@/components/staff/staff-platform-console'
+import { StaffServingOrgBanner } from '@/components/staff/staff-serving-org-banner'
 import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-notice'
 import { StaffGmailFromNotice } from '@/components/staff/staff-gmail-from-notice'
 import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
@@ -198,6 +200,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   >([])
   const [cmsOrgId, setCmsOrgId] = useState('')
   const [cmsOrgBusy, setCmsOrgBusy] = useState(false)
+  const [platformMode, setPlatformMode] = useState<'platform' | 'client' | null>(null)
 
   useEffect(() => {
     fetch('/api/staff/me')
@@ -225,13 +228,31 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   }, [me])
 
   useEffect(() => {
+    if (!me?.platformOwner) {
+      setPlatformMode('client')
+      return
+    }
+    fetch('/api/staff/platform/mode')
+      .then(async (r) => {
+        const data = await r.json()
+        if (!r.ok) {
+          setPlatformMode(isPublicDemoInstance() ? 'client' : 'platform')
+          return
+        }
+        setPlatformMode(data.mode === 'client' ? 'client' : 'platform')
+        if (data.selectedOrganizationId) setCmsOrgId(String(data.selectedOrganizationId))
+      })
+      .catch(() => setPlatformMode(isPublicDemoInstance() ? 'client' : 'platform'))
+  }, [me?.platformOwner])
+
+  useEffect(() => {
     if (!me?.platformOwner) return
     fetch('/api/staff/platform/orgs')
       .then(async (r) => {
         const data = await r.json()
         if (!r.ok) return
         setPlatformOrgs(Array.isArray(data.organizations) ? data.organizations : [])
-        setCmsOrgId(String(data.selectedOrganizationId ?? ''))
+        if (data.selectedOrganizationId) setCmsOrgId(String(data.selectedOrganizationId ?? ''))
       })
       .catch(() => null)
   }, [me?.platformOwner])
@@ -251,6 +272,23 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not switch organization')
     } finally {
+      setCmsOrgBusy(false)
+    }
+  }
+
+  async function openPlatformFleet() {
+    setCmsOrgBusy(true)
+    try {
+      const r = await fetch('/api/staff/platform/mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'platform', organizationId: cmsOrgId }),
+      })
+      const data = await r.json()
+      if (!r.ok) throw new Error(data.error ?? 'Could not open Platform Staff')
+      window.location.href = '/staff?view=home'
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not open Platform Staff')
       setCmsOrgBusy(false)
     }
   }
@@ -543,6 +581,20 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     return <p className="text-center py-16 text-sm text-[#5A6070]">{staffStr(staffCopy, 'dashboard.loading')}</p>
   }
 
+  if (me.platformOwner && platformMode === null) {
+    return <p className="text-center py-16 text-sm text-[#5A6070]">Loading Platform Staff…</p>
+  }
+
+  if (me.platformOwner && platformMode === 'platform') {
+    return (
+      <StaffPlatformConsole
+        me={{ email: me.email, name: me.name, boardTitle: me.boardTitle }}
+      />
+    )
+  }
+
+  const servingOrg = platformOrgs.find((o) => o.id === cmsOrgId)
+
   return (
     <StaffShell
       name={me.name}
@@ -559,13 +611,19 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
           <StaffGmailFromNotice email={me.email} />
         )}
         <StaffTrialBanner />
-        {me.platformOwner && platformOrgs.length > 0 ? (
+        {me.platformOwner && servingOrg && platformMode === 'client' ? (
+          <StaffServingOrgBanner
+            organizationName={servingOrg.name}
+            organizationId={servingOrg.id}
+          />
+        ) : null}
+        {me.platformOwner && platformOrgs.length > 0 && platformMode === 'client' ? (
           <section className="rounded-xl border border-[var(--border)] bg-[#F7F8FA] px-4 py-3 flex flex-wrap items-center gap-3">
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-[#1A1A1A]">Pavilion platform CMS</p>
+              <p className="text-sm font-semibold text-[#1A1A1A]">Pavilion platform</p>
               <p className="text-xs text-[#5A6070] whitespace-pre-line">
-                You own all customer CMS accounts.
-                Pick a school to edit their Staff site content.
+                {`Serving Client Staff for the selected school.
+Open Platform fleet for tenants, health, and support.`}
               </p>
             </div>
             <label className="text-[11px] text-[#5A6070] flex items-center gap-2">
@@ -584,6 +642,15 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
                 ))}
               </select>
             </label>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={cmsOrgBusy}
+              onClick={() => void openPlatformFleet()}
+            >
+              Open Platform fleet
+            </Button>
           </section>
         ) : null}
         {active === 'home' ? (

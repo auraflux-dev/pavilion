@@ -16,7 +16,7 @@ Marketing `/account` is Stripe billing only (HSKRG LLC). It is not a member port
 
 | Surface | Who | Purpose |
 |---------|-----|---------|
-| **Platform Staff** | `@onpavilion.com` | Serve client orgs (org switcher, CMS, support) |
+| **Platform Staff** | `@onpavilion.com` | Fleet console: tenants, connectors, support, health. Open client Staff to serve one org |
 | **Client Staff** | Buyer board | Onboarding, connectors, roles, school ops |
 | **Public site** | Visitors / parents | School-branded membership, events, programs |
 | **Family login** | Parent households | Students, membership, store card on school brand |
@@ -28,10 +28,12 @@ Marketing `/account` is Stripe billing only (HSKRG LLC). It is not a member port
 Pavilion company          Client PTO org
 ─────────────────         ─────────────────────────────
 Platform Staff  ──serve──► Client Staff (buyer home)
-                              │
-                              ├── Public school site
-                              └── Family login (parents)
+  (fleet mode)                 │
+  tenants / health             ├── Public school site
+  support / onboarding         └── Family login (parents)
 ```
+
+See [PLATFORM-STAFF.md](./PLATFORM-STAFF.md) for platform workspaces and cookies.
 
 ## Rules
 

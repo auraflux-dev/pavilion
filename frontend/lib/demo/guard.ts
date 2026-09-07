@@ -43,6 +43,7 @@ const CMS_PAGE_BUILDER_WRITE_ALLOW = new Set([
 export function isDemoJoinAllowPath(pathname: string): boolean {
   if (JOIN_ALLOW.has(pathname)) return true
   if (CMS_PAGE_BUILDER_WRITE_ALLOW.has(pathname)) return true
+  if (pathname.startsWith('/api/staff/platform/')) return true
   if (pathname.startsWith('/api/id')) return true
   if (pathname.startsWith('/api/commons')) return true
   if (pathname.startsWith('/api/webhooks/commons')) return true
@@ -58,6 +59,8 @@ const STAFF_GET_ALLOW = new Set(COMMONS_DEMO_ALLOWED_STAFF_GET)
 export function isDemoPiiPath(pathname: string): boolean {
   // Signup sheets/registrations are product Neon data (not live school CMS PII stubs).
   if (pathname.startsWith('/api/staff/signups')) return false
+  // Platform fleet APIs: org/connector flags only (no school family PII).
+  if (pathname.startsWith('/api/staff/platform/')) return false
   if (pathname.startsWith('/api/staff/') && !STAFF_GET_ALLOW.has(pathname)) return true
   if (pathname.startsWith('/api/portal/')) return true
   if (pathname.startsWith('/api/students')) return true
