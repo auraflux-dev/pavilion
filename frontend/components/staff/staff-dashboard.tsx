@@ -54,6 +54,7 @@ import { StaffNewsletterPanel } from '@/components/staff/staff-newsletter-panel'
 import { StaffNewsletterSendReportPanel } from '@/components/staff/staff-newsletter-send-report'
 import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
 import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
+import { StaffClientOnboardingPanel } from '@/components/staff/staff-client-onboarding-panel'
 import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-notice'
 import { StaffGmailFromNotice } from '@/components/staff/staff-gmail-from-notice'
 import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
@@ -602,7 +603,9 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
                 </div>
               )}
             </div>
-            {isPavilionProductPlatformPublic() ? null : (
+            {isPavilionProductPlatformPublic() ? (
+              <StaffClientOnboardingPanel onOpenWorkspace={go} />
+            ) : (
               <>
                 <StaffPersonalEmailPanel
                   initialEmail={me.personalEmail ?? ''}

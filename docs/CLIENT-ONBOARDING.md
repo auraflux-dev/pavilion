@@ -40,6 +40,7 @@ We do not auto-provision a live tenant the moment Stripe checkout completes.
 - Trial / host: `frontend/lib/crm/tenant.ts`, `/api/commons/trial/*`
 - Platform owners: `frontend/lib/crm/platform-owners.ts`
 - Connectors UI: `frontend/components/staff/staff-commons-connectors-panel.tsx`
+- **Client onboarding checklist (platform Staff home):** `frontend/components/staff/staff-client-onboarding-panel.tsx`
 - Commerce gate: `frontend/lib/demo/commerce-gate.ts`
 - Marketing start: `commons-site/app/start`
 
