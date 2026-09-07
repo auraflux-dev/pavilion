@@ -24,7 +24,7 @@ How a new Pavilion client org goes from sales to live. Buyers work in **Staff**.
 | **Payments** | Square OAuth | Other processors only if a school requires them |
 | **Board mail / calendar** | Google Workspace | **Microsoft 365 / Outlook** (roadmap) |
 | **Creative** | Canva OAuth (optional) | Upload PNG/JPG in Staff; Figma / Adobe Express later if asked |
-| **Brand** | Staff Brand editor | Paste current site URL → suggest logo/colors; or upload |
+| **Brand** | Staff Brand editor | Paste URL for a light suggest; or Inspect logo/colors on the current site and paste/upload in Brand |
 
 Onboarding is **not** “Square only.” Progress wants payments + board mail + brand. Creative stays optional.
 

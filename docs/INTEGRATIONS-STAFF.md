@@ -16,7 +16,7 @@ Connectors are configured by **client Staff** for their org. **Platform Staff** 
 | **Canva** | Client Staff | OAuth + staff Canva routes | Optional |
 | **Upload / no Canva** | Client Staff | CMS media upload | PNG/JPG in newsletter and creative flows |
 | **Figma / Adobe Express** | — | — | Later if boards ask |
-| **Brand from URL** | Client Staff | Suggest API → `cms_site_brand` | Public https URL scan (SSRF-hardened) |
+| **Brand from URL** | Client Staff | Suggest API → `cms_site_brand` | Light public https scan (SSRF-hardened). Boards can also Inspect logo/colors and paste/upload |
 | **Stripe (SaaS)** | Buyer via marketing `/start` | HSKRG Stripe (commons-site) | Software invoice only. Not parent fees |
 
 ## VIP SHMS (dedicated)

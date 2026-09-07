@@ -151,8 +151,8 @@ export function StaffSiteBrandPanel() {
       <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-3 space-y-2">
         <p className="text-xs font-semibold text-[#1A1A1A]">Pull from your current site</p>
         <p className="text-[11px] text-[#5A6070] whitespace-pre-line">
-          {`Paste your PTO or school page URL if you already have one.
-We suggest logo and theme color. Upload still works if the scan finds nothing.`}
+          {`Suggest is a light first pass. It only reads public meta tags and common logo links.
+Upload or paste values below if the scan is thin.`}
         </p>
         <div className="flex flex-wrap gap-2">
           <input
@@ -174,6 +174,17 @@ We suggest logo and theme color. Upload still works if the scan finds nothing.`}
         {fromUrlNote ? (
           <p className="text-[11px] text-[#5A6070] whitespace-pre-line">{fromUrlNote}</p>
         ) : null}
+        <div className="border-t border-[var(--border)] pt-2 space-y-1">
+          <p className="text-xs font-semibold text-[#1A1A1A]">Or pull with Inspect</p>
+          <p className="text-[11px] text-[#5A6070] whitespace-pre-line">
+            {`Open your current site in Chrome or Safari.
+1. Right-click the logo. Choose Inspect.
+2. Find the image URL (often in src= or a background-image).
+3. Paste that URL into Logo below, or download and Upload logo.
+4. For colors: Inspect a header or button. In Styles or Computed, copy the hex (like #1B4D3E).
+5. Paste into Primary (and Dark / Accent if you have them). Save brand.`}
+          </p>
+        </div>
       </div>
 
       {error ? <p className="text-sm text-[#A00]">{error}</p> : null}

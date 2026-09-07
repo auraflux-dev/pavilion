@@ -109,7 +109,7 @@ export function StaffClientOnboardingPanel({ onOpenWorkspace }: Props) {
           id: 'brand',
           title: 'School brand',
           detail:
-            'Parents should see your PTO, not Pavilion.\nPaste your current site URL and we suggest logo and colors.\nOr upload a logo and set names in Brand.',
+            'Parents should see your PTO, not Pavilion.\nSuggest from URL is a light first pass.\nOr use Inspect on your current site (steps in Brand), then upload or paste logo and colors.',
           done: hasBrand,
           primaryLabel: 'Open Brand',
           workspace: 'brand',
@@ -284,8 +284,8 @@ Pick the connectors this school uses. Not every school needs every tool.`}
               <div className="ml-8 space-y-2 rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-3">
                 <p className="text-xs font-semibold text-[#1A1A1A]">Pull from your current site</p>
                 <p className="text-[11px] text-[#5A6070] whitespace-pre-line">
-                  {`If you already have a PTO or school page, paste the URL.
-We read public logo and theme hints. You can edit everything after.`}
+                  {`Suggest is a light first pass from public page hints.
+Or open Brand for Inspect steps: right-click logo → Inspect → copy image URL and hex colors.`}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <input
