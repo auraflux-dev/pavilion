@@ -8,7 +8,8 @@ import { runVercelRobert4220, VERCEL_SCOPE } from './vercel-robert4220-run.mjs'
 
 const TARGETS = {
   'commons-pto-demo': { project: 'commons-pto-demo', cwd: '.' },
-  'commons-site': { project: 'commons-site', cwd: 'commons-site' },
+  // Vercel project Root Directory is already `commons-site` — deploy from monorepo root.
+  'commons-site': { project: 'commons-site', cwd: '.' },
   'commons-pto': { project: 'commons-pto', cwd: '.' },
 }
 
