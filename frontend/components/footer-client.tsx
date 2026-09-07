@@ -147,6 +147,7 @@ export function FooterClient({
                 variant="dark"
                 facebook={socialFacebook}
                 instagram={socialInstagram}
+                allowDefaults={mode === 'stone-hill'}
               />
               {extraSocial.map(({ icon: Icon, label, href }) => (
                 <a

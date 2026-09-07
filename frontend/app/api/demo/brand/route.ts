@@ -1,13 +1,14 @@
 /**
- * POST /api/demo/brand  { slug: 'spring-hill' | '' }
+ * POST /api/demo/brand  { slug: 'vanilla' | '' }
  * GET  /api/demo/brand  → { slug, packs: [...] }
  *
- * Sets pavilion_brand cookie on the demo app so a prospect PTO skin
- * rides the same commons-pto-demo deploy (no second trial project).
+ * Sets pavilion_brand cookie on the demo app for public preview skins only.
+ * Named prospect packs (spring-hill, etc.) are not settable on the public demo.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { PAVILION_BRAND_COOKIE } from '@/lib/crm/active-trial'
-import { knownTrialPackSlugs, trialPackForSlug } from '@/lib/crm/trial-packs'
+import { isDemoPublicBrandSlug } from '@/lib/crm/demo-public-brands'
+import { demoPickerPackSlugs, trialPackForSlug } from '@/lib/crm/trial-packs'
 import { isDemoInstance } from '@/lib/demo/instance'
 
 export const dynamic = 'force-dynamic'
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic'
 const MAX_AGE = 60 * 60 * 24 * 30
 
 function packsPublic() {
-  return knownTrialPackSlugs().map((slug) => {
+  return demoPickerPackSlugs().map((slug) => {
     const pack = trialPackForSlug(slug)
     return {
       slug,
@@ -34,16 +35,29 @@ function requestHost(req: NextRequest): string {
   )
 }
 
+function clearBrandCookie(res: NextResponse) {
+  res.cookies.set(PAVILION_BRAND_COOKIE, '', {
+    httpOnly: false,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+  })
+}
+
 export async function GET(req: NextRequest) {
   if (!isDemoInstance(requestHost(req))) {
     return NextResponse.json({ error: 'Demo only' }, { status: 404 })
   }
-  const slug = (req.cookies.get(PAVILION_BRAND_COOKIE)?.value || '').trim().toLowerCase()
-  return NextResponse.json({
+  const raw = (req.cookies.get(PAVILION_BRAND_COOKIE)?.value || '').trim().toLowerCase()
+  const slug = raw && isDemoPublicBrandSlug(raw) ? raw : ''
+  const res = NextResponse.json({
     slug: slug || null,
     packs: packsPublic(),
-    note: 'Default with no pack is Riverside sample demo. Pick a pack to brand this tour as a prospect PTO.',
+    note: 'Default is Riverside. Public demo only offers an unbranded preview. Named prospect packs are not on this host.',
   })
+  // Drop leftover Spring Hill (or other) cookies from older tours.
+  if (raw && !slug) clearBrandCookie(res)
+  return res
 }
 
 export async function POST(req: NextRequest) {
@@ -52,29 +66,25 @@ export async function POST(req: NextRequest) {
   }
   const body = (await req.json().catch(() => ({}))) as { slug?: string }
   const raw = String(body.slug ?? '').trim().toLowerCase()
-  const res = NextResponse.json({
-    ok: true,
-    slug: raw || null,
-    next: '/',
-  })
 
   if (!raw) {
-    res.cookies.set(PAVILION_BRAND_COOKIE, '', {
-      httpOnly: false,
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 0,
-    })
+    const res = NextResponse.json({ ok: true, slug: null, next: '/' })
+    clearBrandCookie(res)
     return res
   }
 
-  if (!trialPackForSlug(raw)) {
+  if (!isDemoPublicBrandSlug(raw) || !trialPackForSlug(raw)) {
     return NextResponse.json(
-      { error: `Unknown brand pack: ${raw}` },
+      { error: `Brand pack not available on the public demo: ${raw}` },
       { status: 400 },
     )
   }
 
+  const res = NextResponse.json({
+    ok: true,
+    slug: raw,
+    next: '/',
+  })
   res.cookies.set(PAVILION_BRAND_COOKIE, raw, {
     httpOnly: false,
     sameSite: 'lax',

@@ -175,7 +175,7 @@ export function ReviewJoinClient({ isDemoHost }: { isDemoHost: boolean }) {
       {packs.length ? (
         <div className="mb-8 space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-[#5A6070]">
-            Brand this tour
+            Preview skins
           </p>
           <div className="flex flex-wrap gap-2">
             <Button

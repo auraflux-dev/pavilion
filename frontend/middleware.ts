@@ -23,6 +23,7 @@ import { hasBetterAuthCookie, isCommonsPlatformHost, isDemoHostForMiddleware, is
 import { PAVILION_SURFACE_HEADER } from '@/lib/crm/product-host'
 import { commonsRequiresLogin, isCommonsPublicPath } from '@/lib/crm/private-tenant'
 import { isDemoInstance } from '@/lib/demo/instance'
+import { isDemoPublicBrandSlug } from '@/lib/crm/demo-public-brands'
 import { isCommonsDemoHiddenPath } from '@/lib/demo/commons-surface'
 import { demoPiiStub } from '@/lib/demo/seed'
 import {
@@ -143,26 +144,34 @@ export async function middleware(req: NextRequest) {
     return new NextResponse('Not found', { status: 404 })
   }
 
-  // ?brand=vanilla (or spring-hill) on the public demo → set cookie and drop the query.
+  // Public demo ?brand= only for allowlisted preview skins (never spring-hill).
   if (demo && req.method === 'GET' && !pathname.startsWith('/api/')) {
     const brand = (req.nextUrl.searchParams.get('brand') || '').trim().toLowerCase()
     if (brand) {
       const url = req.nextUrl.clone()
       url.searchParams.delete('brand')
       const res = NextResponse.redirect(url)
-      if (brand === 'riverside' || brand === 'clear' || brand === 'default') {
+      if (brand === 'riverside' || brand === 'clear' || brand === 'default' || brand === '') {
         res.cookies.set('pavilion_brand', '', {
           httpOnly: false,
           sameSite: 'lax',
           path: '/',
           maxAge: 0,
         })
-      } else {
+      } else if (isDemoPublicBrandSlug(brand)) {
         res.cookies.set('pavilion_brand', brand, {
           httpOnly: false,
           sameSite: 'lax',
           path: '/',
           maxAge: 60 * 60 * 24 * 30,
+        })
+      } else {
+        // Ignore / clear non-public packs so old ?brand=spring-hill links cannot skin the demo.
+        res.cookies.set('pavilion_brand', '', {
+          httpOnly: false,
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 0,
         })
       }
       return res

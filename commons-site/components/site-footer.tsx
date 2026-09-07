@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { PavilionMark } from '@/components/marketing/pavilion-mark'
 import { LEGAL_ENTITY, PRODUCT_NAME, PRODUCT_TAGLINE } from '@/lib/brand'
-import { CLOSE_SLOGAN } from '@/lib/marketing'
 import { CONTACT_EMAIL, DEMO_URL } from '@/lib/pricing'
 
 export function SiteFooter() {
@@ -14,26 +13,22 @@ export function SiteFooter() {
             {PRODUCT_NAME}
           </p>
           <p className="whitespace-pre-line">{`${PRODUCT_TAGLINE}\nA product of ${LEGAL_ENTITY}.`}</p>
-          <p className="text-[var(--ink)]">{CLOSE_SLOGAN}</p>
         </div>
         <div className="type-small grid grid-cols-2 gap-x-10 gap-y-2">
           <Link href="/product" className="text-[var(--ink)] hover:underline">
             Product
           </Link>
+          <Link href="/process" className="text-[var(--ink)] hover:underline">
+            Process
+          </Link>
           <Link href="/pricing" className="text-[var(--ink)] hover:underline">
             Pricing
           </Link>
-          <Link href="/gallery" className="text-[var(--ink)] hover:underline">
-            Gallery
-          </Link>
-          <Link href="/watch" className="text-[var(--ink)] hover:underline">
-            Watch
+          <Link href="/about" className="text-[var(--ink)] hover:underline">
+            About
           </Link>
           <Link href="/help" className="text-[var(--ink)] hover:underline">
             Help
-          </Link>
-          <Link href="/partners" className="text-[var(--ink)] hover:underline">
-            Partners
           </Link>
           <Link href="/account" className="text-[var(--ink)] hover:underline">
             Account

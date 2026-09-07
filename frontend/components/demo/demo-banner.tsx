@@ -54,6 +54,8 @@ export function DemoBanner() {
     window.location.assign('/')
   }
 
+  const vanilla = packs.find((p) => p.slug === 'vanilla')
+
   return (
     <div
       className="text-sm px-4 py-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-2"
@@ -61,33 +63,28 @@ export function DemoBanner() {
     >
       <span>
         {activeSlug
-          ? `Branded tour: ${brand.pto}. Same demo app. Sample data only.`
-          : `Demo: ${brand.pto}. Sample school. Clicks are preview-only.`}
+          ? `Preview: ${brand.pto}. Sample data only.`
+          : `Demo: ${brand.pto}. Sample school. Preview only.`}
       </span>
       <span className="flex flex-wrap items-center gap-3">
         <Link href="/review" className="underline font-semibold">
-          Demo join
+          Tour portals
         </Link>
-        {packs.map((p) => (
+        <button type="button" className="underline font-semibold" onClick={() => void switchLane('parent', 'paid')}>
+          Family view
+        </button>
+        <button type="button" className="underline font-semibold" onClick={() => void switchLane('both')}>
+          Staff view
+        </button>
+        {vanilla ? (
           <button
-            key={p.slug}
             type="button"
             className="underline font-semibold"
-            onClick={() => void setBrand(activeSlug === p.slug ? '' : p.slug)}
+            onClick={() => void setBrand(activeSlug === vanilla.slug ? '' : vanilla.slug)}
           >
-            {activeSlug === p.slug ? 'Back to Riverside' : `Show as ${p.pto}`}
+            {activeSlug === vanilla.slug ? 'Back to Riverside' : 'Preview unbranded'}
           </button>
-        ))}
-        <button type="button" className="underline font-semibold" onClick={() => void switchLane('both')}>
-          Open staff (no code)
-        </button>
-        <button
-          type="button"
-          className="underline font-semibold"
-          onClick={() => void switchLane('parent', 'paid')}
-        >
-          Parent tour
-        </button>
+        ) : null}
       </span>
       {switchError ? (
         <span className="w-full text-center text-xs opacity-90">{switchError}</span>

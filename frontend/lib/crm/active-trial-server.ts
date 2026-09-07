@@ -125,7 +125,11 @@ export async function getActiveBrandPack(opts?: {
         slug = ''
       }
     }
-    if (slug) return trialPackForSlug(slug)
+    if (slug) {
+      const { isDemoPublicBrandSlug } = await import('@/lib/crm/demo-public-brands')
+      if (!isDemoPublicBrandSlug(slug)) return null
+      return trialPackForSlug(slug)
+    }
   } else if (surface === 'trial') {
     const fromOrg = (await packFromSessionOrg()) || (await packFromRequestHost())
     if (fromOrg) return fromOrg

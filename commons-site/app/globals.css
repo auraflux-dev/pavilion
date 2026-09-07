@@ -218,9 +218,25 @@ body {
   animation-delay: 0.1s;
 }
 
+.surface-fade {
+  animation: surface-fade 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes surface-fade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .motion-rise,
-  .motion-rise-delay {
+  .motion-rise-delay,
+  .surface-fade {
     animation: none;
   }
 

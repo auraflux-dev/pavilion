@@ -6,6 +6,7 @@ type BrowserFrameProps = {
   priority?: boolean
   className?: string
   large?: boolean
+  hostLabel?: string
 }
 
 export function BrowserFrame({
@@ -14,6 +15,7 @@ export function BrowserFrame({
   priority = false,
   className = '',
   large = false,
+  hostLabel = 'riversidepto.demo.onpavilion.com',
 }: BrowserFrameProps) {
   return (
     <div
@@ -24,7 +26,7 @@ export function BrowserFrame({
         <span className="h-2 w-2 rounded-full bg-[#3a5a52]" aria-hidden />
         <span className="h-2 w-2 rounded-full bg-[#3a5a52]" aria-hidden />
         <span className="ml-2 flex-1 truncate rounded-full bg-[#0d1e1a] px-2.5 py-0.5 text-[10px] text-[#9bb0a8]">
-          riversidepto.demo.onpavilion.com
+          {hostLabel}
         </span>
       </div>
       <div className={`relative w-full bg-[#0d1e1a] ${large ? 'aspect-[16/11]' : 'aspect-[16/10]'}`}>

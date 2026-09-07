@@ -6,11 +6,12 @@ import {
   DEFAULT_SOCIAL_INSTAGRAM,
   resolveSocialLink,
 } from '@/lib/social/public-links'
-import { isPublicDemoInstance } from '@/lib/demo/instance'
 
 type Props = {
   facebook?: string
   instagram?: string
+  /** When false, empty URLs stay empty (demo / trials). Never fall back to SHMS profiles. */
+  allowDefaults?: boolean
   /** dark = public marketing footer; light = member/staff chrome */
   variant?: 'dark' | 'light'
   className?: string
@@ -62,20 +63,24 @@ function InstagramMark({ className, gradId }: { className?: string; gradId: stri
 export function SocialFooterLinks({
   facebook,
   instagram,
+  allowDefaults = true,
   variant = 'light',
   className,
 }: Props) {
   const igGradId = useId().replace(/:/g, '')
-  const demo = isPublicDemoInstance()
   const links = [
     {
       label: 'Facebook',
-      href: demo ? (facebook || '').trim() : resolveSocialLink(facebook, DEFAULT_SOCIAL_FACEBOOK),
+      href: allowDefaults
+        ? resolveSocialLink(facebook, DEFAULT_SOCIAL_FACEBOOK)
+        : (facebook || '').trim(),
       node: <FacebookMark className="w-full h-full block" />,
     },
     {
       label: 'Instagram',
-      href: demo ? (instagram || '').trim() : resolveSocialLink(instagram, DEFAULT_SOCIAL_INSTAGRAM),
+      href: allowDefaults
+        ? resolveSocialLink(instagram, DEFAULT_SOCIAL_INSTAGRAM)
+        : (instagram || '').trim(),
       node: <InstagramMark className="w-full h-full block" gradId={`ig-${igGradId}`} />,
     },
   ].filter((link) => link.href)
