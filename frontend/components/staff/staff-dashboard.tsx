@@ -61,11 +61,7 @@ import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-not
 import { StaffGmailFromNotice } from '@/components/staff/staff-gmail-from-notice'
 import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
-import {
-  isPublicDemoInstance,
-  isPublicPavilionBrandHost,
-  pavilionBrandOrigin,
-} from '@/lib/demo/instance'
+import { isPublicDemoInstance, isPublicPavilionBrandHost } from '@/lib/demo/instance'
 import { StaffWhatsAppQueuePanel } from '@/components/staff/staff-whatsapp-queue-panel'
 import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
 import { StaffTimesheetsPanel } from '@/components/staff/staff-timesheets-panel'
@@ -220,14 +216,8 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
       .catch((err) => setError(err instanceof Error ? err.message : 'Not authorized'))
   }, [])
 
-  // Platform Staff is a path on the Pavilion brand site (www.onpavilion.com/staff).
-  useEffect(() => {
-    if (!me?.platformOwner) return
-    if (!isPublicDemoInstance()) return
-    if (isPublicPavilionBrandHost()) return
-    const q = typeof window !== 'undefined' ? window.location.search : ''
-    window.location.replace(`${pavilionBrandOrigin()}/staff${q}`)
-  }, [me?.platformOwner])
+  // When www.onpavilion.com is on this deploy (brand surface), stay here.
+  // Do not bounce demo → www until DNS points www at commons-pto-demo.
 
   useEffect(() => {
     if (!me) return
@@ -553,18 +543,18 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
 
   if (error) {
     const onDemo = isPublicDemoInstance()
-    const onPlatformStaff = isPublicPavilionBrandHost()
+    const onBrandStaff = isPublicPavilionBrandHost()
     const title =
       errorCode === 'demo_parent_lane'
         ? 'Parent tour active'
         : errorCode === 'sign_in_required' && onDemo
           ? 'Join the demo first'
-          : onPlatformStaff
+          : onBrandStaff
             ? 'Pavilion Platform Staff'
             : staffStr(staffCopy, 'dashboard.accessRequired')
-    const detail = onPlatformStaff
+    const detail = onBrandStaff
       ? `Sign in with your @onpavilion.com account.
-This host is for Pavilion operators, not school boards.`
+This site is for Pavilion operators, not school boards.`
       : vanillaizeIfDemo(error)
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
@@ -590,10 +580,10 @@ This host is for Pavilion operators, not school boards.`
               className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-bold text-white"
               style={{ backgroundColor: 'var(--brand-green)' }}
             >
-              {onPlatformStaff ? 'Platform Staff sign in' : 'Staff sign in'}
+              {onBrandStaff ? 'Platform Staff sign in' : 'Staff sign in'}
             </Link>
           )}
-          {onPlatformStaff ? null : (
+          {onBrandStaff ? null : (
             <Link href="/member-portal" className="text-sm font-bold text-[#5A6070]">
               {staffStr(staffCopy, 'dashboard.backToPortal')}
             </Link>
