@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { PavilionMark } from '@/components/marketing/pavilion-mark'
 import { PRODUCT_NAME } from '@/lib/brand'
-import { DEMO_URL } from '@/lib/pricing'
+import { DEMO_URL, PLATFORM_STAFF_URL } from '@/lib/pricing'
 
 const primaryNav = [
   { href: '/product', label: 'Product' },
@@ -16,6 +16,7 @@ const primaryNav = [
 const moreNav = [
   { href: '/help', label: 'Help' },
   { href: '/account', label: 'Account' },
+  { href: PLATFORM_STAFF_URL, label: 'Platform Staff', external: true as const },
 ]
 
 export function SiteHeader() {
@@ -74,16 +75,27 @@ export function SiteHeader() {
       {open ? (
         <div id="mobile-nav" className="border-t border-[var(--line)] bg-[var(--paper)] md:hidden">
           <nav className="mx-auto flex max-w-6xl flex-col gap-1 px-5 py-4 text-base font-medium">
-            {[...primaryNav, ...moreNav].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-md px-2 py-3 text-[var(--ink)] hover:bg-[var(--paper-deep)]"
-                onClick={() => setOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {[...primaryNav, ...moreNav].map((item) =>
+              'external' in item && item.external ? (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-md px-2 py-3 text-[var(--ink-muted)] hover:bg-[var(--paper-deep)]"
+                  onClick={() => setOpen(false)}
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-md px-2 py-3 text-[var(--ink)] hover:bg-[var(--paper-deep)]"
+                  onClick={() => setOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ),
+            )}
             <a
               href={DEMO_URL}
               className="mt-2 rounded-md bg-[var(--ink)] px-3 py-3 text-center text-[var(--paper)]"

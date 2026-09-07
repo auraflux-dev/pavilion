@@ -18,6 +18,7 @@ const SCOPE = 'robert-4220s-projects'
 
 const DOMAINS = [
   'demo.onpavilion.com',
+  'staff.onpavilion.com',
   '*.onpavilion.com',
 ]
 
@@ -60,5 +61,5 @@ if (dryRun) {
   console.log('Also set Vercel env on commons-pto-demo (see docs/PAVILION-DEMO-TRIAL-HOSTS.md).')
 } else {
   console.log('\nDone. Confirm in Vercel → commons-pto-demo → Domains.')
-  console.log('Registrar: point demo.onpavilion.com and wildcard *.onpavilion.com to Vercel DNS.')
+  console.log('Registrar: point demo.onpavilion.com, staff.onpavilion.com, and wildcard *.onpavilion.com to Vercel DNS.')
 }

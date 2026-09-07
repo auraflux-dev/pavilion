@@ -9,7 +9,7 @@ Prospects need two clear entry points:
 1. **Demo** — always-on public sample (Riverside). Anyone can browse. Optional review code for staff/member portal depth.
 2. **Trial** — private branded workspace for a named school. Login required. Sales-provisioned only.
 
-One Next.js deploy (`commons-pto-demo` today, `demo.onpavilion.com` after DNS). Host header selects mode.
+One Next.js deploy (`commons-pto-demo`). Host header selects mode.
 
 ## Host map
 
@@ -17,9 +17,12 @@ One Next.js deploy (`commons-pto-demo` today, `demo.onpavilion.com` after DNS). 
 |------|------|------|------|
 | `demo.onpavilion.com` | Demo | Public browse. `/review` + code for staff/parent lanes | Shared Riverside sample |
 | `commons-pto-demo.vercel.app` | Demo (legacy) | Same | Same |
+| `staff.onpavilion.com` | Platform Staff | `@onpavilion.com` Staff sign in | Fleet console (Pavilion ops) |
 | `{slug}.onpavilion.com` | Trial | Better Auth login | Org-scoped CRM + CMS |
 | `*.commons-pto.org` | Trial (legacy) | Same | Same |
 | `onpavilion.com` | Marketing | N/A | `commons-site` project |
+
+`staff` is a reserved subdomain. Never treat it as a trial vanity slug.
 
 ## Code
 
@@ -39,6 +42,8 @@ PAVILION_PLATFORM=true
 NEXT_PUBLIC_PAVILION_PLATFORM=true
 PAVILION_TRIAL_DOMAIN_SUFFIX=onpavilion.com
 PAVILION_DEMO_HOST=demo.onpavilion.com
+PAVILION_PLATFORM_STAFF_HOST=staff.onpavilion.com
+NEXT_PUBLIC_PAVILION_PLATFORM_STAFF_HOST=staff.onpavilion.com
 NEXT_PUBLIC_PAVILION_DEMO_ORIGIN=https://demo.onpavilion.com
 NEXT_PUBLIC_SITE_URL=https://demo.onpavilion.com
 DEMO_JOIN_CODE=<one canonical code>
@@ -50,6 +55,7 @@ DEMO_JOIN_CODE_ALIASES=riverside-board,66988432952500a7587ff938
 | Record | Target | Project |
 |--------|--------|---------|
 | `demo.onpavilion.com` | Vercel `commons-pto-demo` | Product demo |
+| `staff.onpavilion.com` | Same Vercel project | Platform Staff (explicit alias) |
 | `*.onpavilion.com` | Same Vercel project | Trial vanity hosts |
 | `onpavilion.com` | `commons-site` | Marketing |
 
@@ -60,5 +66,6 @@ Legacy `*.commons-pto.org` can stay until trials are migrated.
 ## Middleware behavior
 
 - `demo.*` → demo guards (stub writes, review cookie for `/staff` and `/member-portal`)
+- `staff.onpavilion.com` → surface `platform`; `/` and `/review` redirect to `/staff`; no demo chrome
 - `{slug}.onpavilion.com` → login gate, host → org row, trial lock after 30 days
 - Same ship target: `node scripts/ship-pavilion.mjs --target commons-pto-demo`

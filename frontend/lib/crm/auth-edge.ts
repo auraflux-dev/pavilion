@@ -1,6 +1,7 @@
 import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 import {
   isDemoProductHost,
+  isPlatformStaffHost,
   isSharedProductHost,
   isTrialVanityHost,
   normalizeProductHost,
@@ -37,7 +38,12 @@ export function canProvisionTrials(): boolean {
   return isPavilionProductPlatform()
 }
 
-export { isSharedProductHost, isTrialVanityHost, normalizeProductHost }
+export {
+  isPlatformStaffHost,
+  isSharedProductHost,
+  isTrialVanityHost,
+  normalizeProductHost,
+}
 
 /** Temp trial host like `{slug}.onpavilion.com` (suffix from env). Edge-safe. */
 export function isVanityTrialHost(host: string): boolean {

@@ -18,3 +18,6 @@ export const DEMO_TOUR_URL = 'https://demo.onpavilion.com/review'
 
 /** Legacy Vercel host until demo.onpavilion.com DNS is live. */
 export const DEMO_URL_LEGACY = 'https://commons-pto-demo.vercel.app'
+
+/** Pavilion company Platform Staff (operators only). Not the customer demo. */
+export const PLATFORM_STAFF_URL = 'https://staff.onpavilion.com/staff'

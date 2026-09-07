@@ -8,6 +8,17 @@ Client Staff runs one school. Platform Staff (`@onpavilion.com`) runs the **flee
 
 Same `/staff` shell and workspace feel as school Staff. Different workspace catalog when the operator is in **platform mode**.
 
+## Host
+
+| Host | Who |
+|------|-----|
+| **`staff.onpavilion.com`** | Pavilion company Platform Staff (this product) |
+| `www.onpavilion.com` | Marketing. Footer / mobile menu → Platform Staff |
+| `demo.onpavilion.com` | Customer school demo. Client Staff tour only |
+
+Sign in: https://staff.onpavilion.com/staff with `@onpavilion.com`.  
+Platform owners who open `/staff` on the demo are redirected to the staff host.
+
 ## Surfaces
 
 | Mode | Who | What they see |
@@ -21,7 +32,7 @@ VIP SHMS is dedicated (`docs/CUSTOMER-SHMS-VIP.md`). It is not a normal editable
 ## Mode model
 
 ```text
-Platform Home
+Platform Home (staff.onpavilion.com)
   → Tenants → {org}
       → Connectors / Brand / Notes
       → Open client Staff
@@ -33,7 +44,7 @@ Cookies:
 - `pavilion_cms_org` — which customer CMS org writes target
 - `pavilion_platform_mode` — `platform` (fleet) or `client` (school shell)
 
-Public demo defaults to **client** mode so board tours stay school Staff. Use **Open Platform fleet** to enter the enterprise view. Real `@onpavilion.com` hosts default to **platform** mode.
+`staff.onpavilion.com` defaults to **fleet** mode. Public demo stays Client Staff for board tours. Platform owners on demo are sent to the staff host.
 
 ## Workspaces
 
@@ -50,6 +61,7 @@ Public demo defaults to **client** mode so board tours stay school Staff. Use **
 ## Code
 
 ```text
+frontend/lib/crm/product-host.ts          # PAVILION_PLATFORM_STAFF_HOST, surface "platform"
 frontend/lib/staff/platform-workspaces.ts
 frontend/lib/crm/platform-mode.ts
 frontend/components/staff/staff-platform-console.tsx

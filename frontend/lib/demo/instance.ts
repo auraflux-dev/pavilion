@@ -2,7 +2,9 @@ import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 import {
   demoOriginFromHost,
   isDemoProductHost,
+  isPlatformStaffHost,
   PAVILION_DEMO_HOST,
+  platformStaffOrigin,
 } from '@/lib/crm/product-host'
 
 /** Deployment has demo capability (env). Host still selects demo vs trial on unified stacks. */
@@ -38,6 +40,16 @@ export function isPublicDemoInstance(): boolean {
   }
   return process.env.NEXT_PUBLIC_DEMO_INSTANCE === 'true'
 }
+
+/** Client-safe. Pavilion Platform Staff host (company ops, not customer demo). */
+export function isPublicPlatformStaffHost(): boolean {
+  if (typeof window !== 'undefined') {
+    return isPlatformStaffHost(window.location.hostname)
+  }
+  return false
+}
+
+export { platformStaffOrigin }
 
 /** Node/Edge API routes on unified demo+trial must pass Host (not env-only isDemoInstance()). */
 export function hostFromRequest(req: {

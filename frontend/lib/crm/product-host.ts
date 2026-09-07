@@ -3,6 +3,7 @@
  *
  * One deploy serves:
  * - demo.onpavilion.com (public Riverside sample)
+ * - staff.onpavilion.com (Platform Staff / Pavilion brand ops)
  * - {slug}.onpavilion.com (private branded trial)
  *
  * Legacy: commons-pto-demo.vercel.app, *.commons-pto.org
@@ -22,6 +23,15 @@ export const PAVILION_DEMO_HOST = (
   .trim()
   .toLowerCase()
 
+/** Pavilion company Platform Staff. Not a customer trial slug. */
+export const PAVILION_PLATFORM_STAFF_HOST = (
+  process.env.PAVILION_PLATFORM_STAFF_HOST ||
+  process.env.NEXT_PUBLIC_PAVILION_PLATFORM_STAFF_HOST ||
+  'staff.onpavilion.com'
+)
+  .trim()
+  .toLowerCase()
+
 const LEGACY_DEMO_HOSTS = new Set([
   'commons-pto-demo.vercel.app',
   'commons-pto.vercel.app',
@@ -29,12 +39,25 @@ const LEGACY_DEMO_HOSTS = new Set([
 
 const LEGACY_TRIAL_SUFFIX = 'commons-pto.org'
 
-export type ProductSurface = 'demo' | 'trial' | 'shared' | 'other'
+export type ProductSurface = 'demo' | 'trial' | 'platform' | 'shared' | 'other'
 
 export const PAVILION_SURFACE_HEADER = 'x-pavilion-surface'
 
 export function normalizeProductHost(host: string): string {
   return host.trim().toLowerCase().split(':')[0]
+}
+
+/** Pavilion operators (@onpavilion.com). Never treat as trial vanity. */
+export function isPlatformStaffHost(host: string): boolean {
+  const h = normalizeProductHost(host)
+  if (!h) return false
+  if (h === PAVILION_PLATFORM_STAFF_HOST) return true
+  if (h === `staff.${PAVILION_TRIAL_DOMAIN_SUFFIX}`) return true
+  return false
+}
+
+export function platformStaffOrigin(): string {
+  return `https://${PAVILION_PLATFORM_STAFF_HOST}`
 }
 
 /** Marketing apex and shared product hosts are never per-tenant trial vanity. */
@@ -47,6 +70,7 @@ export function isSharedProductHost(host: string): boolean {
   if (h === 'www.shmspto.org' || h === 'shmspto.org') return true
   if (h === 'www.onpavilion.com' || h === 'onpavilion.com') return true
   if (h === PAVILION_DEMO_HOST) return true
+  if (isPlatformStaffHost(h)) return true
   if (h === PAVILION_TRIAL_DOMAIN_SUFFIX) return true
   return false
 }
@@ -55,6 +79,7 @@ export function isSharedProductHost(host: string): boolean {
 export function isDemoProductHost(host: string): boolean {
   const h = normalizeProductHost(host)
   if (!h) return false
+  if (isPlatformStaffHost(h)) return false
   if (h === PAVILION_DEMO_HOST) return true
   if (LEGACY_DEMO_HOSTS.has(h)) return true
   if (h === 'localhost' || h === '127.0.0.1') {
@@ -84,6 +109,7 @@ export function isTrialVanityHost(host: string): boolean {
 }
 
 export function productSurfaceFromHost(host: string): ProductSurface {
+  if (isPlatformStaffHost(host)) return 'platform'
   if (isDemoProductHost(host)) return 'demo'
   if (isTrialVanityHost(host)) return 'trial'
   if (isSharedProductHost(host)) return 'shared'

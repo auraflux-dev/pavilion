@@ -3,9 +3,9 @@ import 'server-only'
 import { cache } from 'react'
 import { headers } from 'next/headers'
 import {
-  isDemoProductHost,
-  isTrialVanityHost,
+  isPlatformStaffHost,
   normalizeProductHost,
+  productSurfaceFromHost,
   PAVILION_SURFACE_HEADER,
   type ProductSurface,
 } from '@/lib/crm/product-host'
@@ -25,21 +25,24 @@ function hostFromHeaders(h: Headers): string {
 export const resolveRequestSurface = cache(async (): Promise<ProductSurface> => {
   const h = await headers()
   const injected = h.get(PAVILION_SURFACE_HEADER)
-  if (injected === 'demo' || injected === 'trial' || injected === 'shared' || injected === 'other') {
+  if (
+    injected === 'demo' ||
+    injected === 'trial' ||
+    injected === 'platform' ||
+    injected === 'shared' ||
+    injected === 'other'
+  ) {
     return injected
   }
   const host = hostFromHeaders(h)
-  if (isDemoProductHost(host)) return 'demo'
-  if (isTrialVanityHost(host)) return 'trial'
-  if (!host) {
-    if (
-      (process.env.DEMO_INSTANCE === 'true' || process.env.NEXT_PUBLIC_DEMO_INSTANCE === 'true') &&
-      !isPavilionProductPlatform()
-    ) {
-      return 'demo'
-    }
-    if (isPavilionProductPlatform()) return 'shared'
+  if (host) return productSurfaceFromHost(host)
+  if (
+    (process.env.DEMO_INSTANCE === 'true' || process.env.NEXT_PUBLIC_DEMO_INSTANCE === 'true') &&
+    !isPavilionProductPlatform()
+  ) {
+    return 'demo'
   }
+  if (isPavilionProductPlatform()) return 'shared'
   return 'other'
 })
 
@@ -51,7 +54,15 @@ export async function isTrialRequestSurface(): Promise<boolean> {
   return (await resolveRequestSurface()) === 'trial'
 }
 
+export async function isPlatformRequestSurface(): Promise<boolean> {
+  return (await resolveRequestSurface()) === 'platform'
+}
+
 export async function requestHost(): Promise<string> {
   const h = await headers()
   return hostFromHeaders(h)
+}
+
+export async function isPlatformStaffRequestHost(): Promise<boolean> {
+  return isPlatformStaffHost(await requestHost())
 }

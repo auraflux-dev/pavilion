@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { PavilionMark } from '@/components/marketing/pavilion-mark'
 import { LEGAL_ENTITY, PRODUCT_NAME, PRODUCT_TAGLINE } from '@/lib/brand'
-import { CONTACT_EMAIL, DEMO_URL } from '@/lib/pricing'
+import { CONTACT_EMAIL, DEMO_URL, PLATFORM_STAFF_URL } from '@/lib/pricing'
 
 export function SiteFooter() {
   return (
@@ -35,6 +35,9 @@ export function SiteFooter() {
           </Link>
           <a href={DEMO_URL} className="text-[var(--ink)] hover:underline">
             Riverside demo
+          </a>
+          <a href={PLATFORM_STAFF_URL} className="text-[var(--ink-muted)] hover:underline">
+            Platform Staff
           </a>
           <a href={`mailto:${CONTACT_EMAIL}`} className="text-[var(--ink)] hover:underline">
             {CONTACT_EMAIL}

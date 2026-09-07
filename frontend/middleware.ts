@@ -20,7 +20,11 @@ import {
   isWriteMethod,
 } from '@/lib/demo/guard'
 import { hasBetterAuthCookie, isCommonsPlatformHost, isDemoHostForMiddleware, isSharedProductHost } from '@/lib/crm/auth-edge'
-import { PAVILION_SURFACE_HEADER } from '@/lib/crm/product-host'
+import {
+  isPlatformStaffHost,
+  PAVILION_SURFACE_HEADER,
+  productSurfaceFromHost,
+} from '@/lib/crm/product-host'
 import { commonsRequiresLogin, isCommonsPublicPath } from '@/lib/crm/private-tenant'
 import { isDemoInstance } from '@/lib/demo/instance'
 import { isDemoPublicBrandSlug } from '@/lib/crm/demo-public-brands'
@@ -76,15 +80,44 @@ export async function middleware(req: NextRequest) {
     req.headers.get('x-forwarded-host')?.split(',')[0]?.trim().toLowerCase().split(':')[0] ||
     req.headers.get('host')?.trim().toLowerCase().split(':')[0] ||
     ''
-  const demo = isDemoHostForMiddleware(host) || (!host && isDemoInstance())
-  const trialHost = isCommonsPlatformHost(host)
-  const surface = demo ? 'demo' : trialHost ? 'trial' : 'other'
+  const platformHost = isPlatformStaffHost(host)
+  const demo = !platformHost && (isDemoHostForMiddleware(host) || (!host && isDemoInstance()))
+  const trialHost = !platformHost && isCommonsPlatformHost(host)
+  const surface = host
+    ? productSurfaceFromHost(host)
+    : demo
+      ? 'demo'
+      : trialHost
+        ? 'trial'
+        : 'other'
 
   const requestHeaders = new Headers(req.headers)
   requestHeaders.set(PAVILION_SURFACE_HEADER, surface)
 
   function next(): NextResponse {
     return NextResponse.next({ request: { headers: requestHeaders } })
+  }
+
+  // Pavilion Platform Staff home. Not a school demo or trial vanity.
+  if (platformHost) {
+    if (pathname === '/' || pathname === '') {
+      const staffUrl = req.nextUrl.clone()
+      staffUrl.pathname = '/staff'
+      staffUrl.search = ''
+      return NextResponse.redirect(staffUrl)
+    }
+    // Demo / sales tour paths do not belong on the company Staff host.
+    if (
+      pathname === '/review' ||
+      pathname.startsWith('/review/') ||
+      pathname === '/trial' ||
+      pathname.startsWith('/trial/')
+    ) {
+      const staffUrl = req.nextUrl.clone()
+      staffUrl.pathname = '/staff'
+      staffUrl.search = ''
+      return NextResponse.redirect(staffUrl)
+    }
   }
 
   // Trial vanity hosts are private. Unified stack: gate by Host, not env-only commonsRequiresLogin().

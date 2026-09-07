@@ -61,7 +61,11 @@ import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-not
 import { StaffGmailFromNotice } from '@/components/staff/staff-gmail-from-notice'
 import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
-import { isPublicDemoInstance } from '@/lib/demo/instance'
+import {
+  isPublicDemoInstance,
+  isPublicPlatformStaffHost,
+  platformStaffOrigin,
+} from '@/lib/demo/instance'
 import { StaffWhatsAppQueuePanel } from '@/components/staff/staff-whatsapp-queue-panel'
 import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
 import { StaffTimesheetsPanel } from '@/components/staff/staff-timesheets-panel'
@@ -215,6 +219,15 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Not authorized'))
   }, [])
+
+  // Platform Staff belongs on staff.onpavilion.com, not the customer demo.
+  useEffect(() => {
+    if (!me?.platformOwner) return
+    if (!isPublicDemoInstance()) return
+    if (isPublicPlatformStaffHost()) return
+    const q = typeof window !== 'undefined' ? window.location.search : ''
+    window.location.replace(`${platformStaffOrigin()}/staff${q}`)
+  }, [me?.platformOwner])
 
   useEffect(() => {
     if (!me) return
@@ -540,16 +553,23 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
 
   if (error) {
     const onDemo = isPublicDemoInstance()
+    const onPlatformStaff = isPublicPlatformStaffHost()
     const title =
       errorCode === 'demo_parent_lane'
         ? 'Parent tour active'
         : errorCode === 'sign_in_required' && onDemo
           ? 'Join the demo first'
-          : staffStr(staffCopy, 'dashboard.accessRequired')
+          : onPlatformStaff
+            ? 'Pavilion Platform Staff'
+            : staffStr(staffCopy, 'dashboard.accessRequired')
+    const detail = onPlatformStaff
+      ? `Sign in with your @onpavilion.com account.
+This host is for Pavilion operators, not school boards.`
+      : vanillaizeIfDemo(error)
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold text-[#1A1A1A] mb-2">{title}</h1>
-        <p className="text-sm text-[#5A6070] mb-6 whitespace-pre-line">{vanillaizeIfDemo(error)}</p>
+        <p className="text-sm text-[#5A6070] mb-6 whitespace-pre-line">{detail}</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           {onDemo ? (
             <>
@@ -565,13 +585,19 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
               </Link>
             </>
           ) : (
-            <Link href="/auth/join?returnTo=/staff" className="text-sm font-bold" style={{ color: 'var(--brand-green)' }}>
-              Staff sign in
+            <Link
+              href="/auth/join?mode=login&returnTo=%2Fstaff"
+              className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-bold text-white"
+              style={{ backgroundColor: 'var(--brand-green)' }}
+            >
+              {onPlatformStaff ? 'Platform Staff sign in' : 'Staff sign in'}
             </Link>
           )}
-          <Link href="/member-portal" className="text-sm font-bold text-[#5A6070]">
-            {staffStr(staffCopy, 'dashboard.backToPortal')}
-          </Link>
+          {onPlatformStaff ? null : (
+            <Link href="/member-portal" className="text-sm font-bold text-[#5A6070]">
+              {staffStr(staffCopy, 'dashboard.backToPortal')}
+            </Link>
+          )}
         </div>
       </div>
     )
