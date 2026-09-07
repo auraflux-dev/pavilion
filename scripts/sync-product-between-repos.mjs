@@ -11,16 +11,20 @@
  * Emergency — port SHMS hotfix back into product (same day):
  *   node scripts/sync-product-between-repos.mjs --from-shms --apply
  *
+ * Weekly VIP intake (accept/deny buckets + board):
+ *   node scripts/shms-weekly-intake.mjs
+ *
  * --to-shms / --promote-shms  pavilion → shmspto (expected)
  * --from-shms                 shmspto → pavilion (hotfix port-back only)
  *
  * Skips Pavilion-only fixtures/demo and thin SHMS marketing wrappers by default.
  * Applying --to-shms does NOT deploy www; ship-stone-hill.mjs does (production).
  */
-import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { dirname, join, relative, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { collect, isProductPath } from './lib/shms-frontend-trees.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(__dirname, '..')
@@ -29,19 +33,6 @@ const MONO =
   process.env.MONO_ROOT?.trim() ||
   (existsSync(join(repoRoot, 'frontend', 'app')) ? repoRoot : join(homedir(), 'pavilion'))
 const SHMS = process.env.SHMS_ROOT?.trim() || join(homedir(), 'shmspto')
-
-const ROOTS = ['app', 'components', 'lib']
-const SKIP_DIR = new Set(['node_modules', '.next', 'dist', 'coverage'])
-const SKIP_FILE = new Set(['tsconfig.tsbuildinfo', 'next-env.d.ts'])
-const EXT = /\.(ts|tsx|js|jsx|mjs|css)$/
-
-/** Shared product paths (not Pavilion-only fixtures). */
-const SCHOOL_PATH_RE =
-  /^(app\/(?!api\/commons)|components\/(?!demo\/)|lib\/(?!demo\/|fixtures\/))/
-
-/** Thin SHMS marketing shells. Skip unless --include-marketing. */
-const MARKETING_WRAPPER_RE =
-  /^(components\/events\/events-page-copy|components\/fundraising\/fundraising-page-copy|components\/home\/community-banner-headline|components\/home\/volunteer-cms-copy|components\/legal\/legal-article-client|components\/membership\/membership-section-copy|components\/newsletter\/newsletter-perks|components\/surveys\/survey-eyebrow|components\/member-portal\/payment-methods-page-header)\.tsx$/
 
 const args = new Set(process.argv.slice(2))
 const fromShms = args.has('--from-shms')
@@ -58,38 +49,7 @@ if (fromShms === toShms) {
 
 if (fromShms) {
   console.warn('NOTE: --from-shms is emergency hotfix port-back (SHMS → product). Prefer authoring in pavilion.\n')
-}
-
-function walk(absRoot, base, out = []) {
-  if (!existsSync(absRoot)) return out
-  for (const name of readdirSync(absRoot)) {
-    if (SKIP_DIR.has(name) || SKIP_FILE.has(name)) continue
-    const p = join(absRoot, name)
-    const st = statSync(p)
-    if (st.isDirectory()) walk(p, base, out)
-    else if (EXT.test(name)) out.push(relative(base, p).split('\\').join('/'))
-  }
-  return out
-}
-
-function collect(frontendRoot) {
-  const set = new Set()
-  for (const r of ROOTS) {
-    for (const f of walk(join(frontendRoot, r), frontendRoot)) set.add(f)
-  }
-  return set
-}
-
-function isProductPath(path) {
-  if (!SCHOOL_PATH_RE.test(path)) return false
-  if (path.includes('loadtest') || path.includes('preview-handoff') || path.includes('preview-unlock')) {
-    return false
-  }
-  if (path.includes('staff-demo-banner') || path.includes('staff-coach-tour')) return false
-  if (path.startsWith('lib/fixtures/') || path.startsWith('lib/demo/')) return false
-  if (path.startsWith('components/demo/')) return false
-  if (!includeMarketing && MARKETING_WRAPPER_RE.test(path)) return false
-  return true
+  console.warn('For weekly accept/deny: node scripts/shms-weekly-intake.mjs\n')
 }
 
 const srcRoot = fromShms ? join(SHMS, 'frontend') : join(MONO, 'frontend')
@@ -104,8 +64,7 @@ if (!existsSync(srcRoot) || !existsSync(dstRoot)) {
 }
 
 const src = collect(srcRoot)
-const dst = collect(dstRoot)
-const candidates = [...src].filter(isProductPath).sort()
+const candidates = [...src].filter((f) => isProductPath(f, { includeMarketing })).sort()
 
 const planned = []
 for (const f of candidates) {
@@ -145,6 +104,7 @@ if (dryRun) {
     console.log('  cd ~/shmspto && node scripts/ship-stone-hill.mjs')
   } else {
     console.log('After hotfix port-back: commit pavilion + ship-pavilion if demo should match.')
+    console.log('Or use weekly intake buckets: node scripts/shms-weekly-intake.mjs')
   }
 } else {
   const stamp = {

@@ -44,6 +44,33 @@ Promote is the VIP “adoption” path. Demo ship ≠ www. Soft parity may lag; 
 - **Hotfixes** — still allowed in `~/shmspto`, then port back to pavilion (`--from-shms`) so product stays ahead  
 - **Sell motion** — shared stack for new prospects; dedicated Vercel = paid/VIP SKU (SHMS is the reference customer)
 
+## Two lanes (keep both until product is fast enough)
+
+| Lane | When | Flow |
+|------|------|------|
+| **A. Product → VIP** (future default) | Shared features every customer should get | Author pavilion → ship demo → promote → ship www |
+| **B. VIP → Product** (current survival) | School needs that cannot wait on demo QA | Ship on `shmspto` → **weekly intake** into pavilion with accept/deny |
+
+www may lead. Pavilion catches up on a schedule. That is VIP dedicated, not a broken promote model.
+
+### Weekly intake (accept / deny)
+
+```bash
+cd ~/pavilion
+node scripts/shms-weekly-intake.mjs --fetch          # ff-only pull ~/shmspto
+node scripts/shms-weekly-intake.mjs --board          # open/update HSKRG ticket
+node scripts/shms-weekly-intake.mjs --apply-accept   # copy ACCEPT only
+# review git diff → commit → ship-pavilion (NOT www)
+```
+
+| Bucket | Meaning |
+|--------|---------|
+| **Accept** | Shared portal/staff/api/lib SHMS is ahead on. Port into pavilion. |
+| **Deny** | SHMS marketing wrappers (school skin) or pavilion-ahead surfaces (`app/layout.tsx`, brand-pack/CMS markers). |
+| **Later** | Leave empty in the script; move rows in the board ticket when you want to defer productizing. |
+
+Do **not** auto-promote after intake. Lane A still requires an intentional promote + off-peak www ship.
+
 ## What we change carefully (later)
 
 | Do | Don’t |
@@ -57,4 +84,6 @@ Promote is the VIP “adoption” path. Demo ship ≠ www. Soft parity may lag; 
 - [CUSTOMERS.md](./CUSTOMERS.md)  
 - [PRODUCT-VS-CUSTOMER.md](./PRODUCT-VS-CUSTOMER.md)  
 - [CUSTOMER-LUMI.md](./CUSTOMER-LUMI.md) (Wix wall — same idea, different host)  
-- S1/S2 in [PRODUCT-BACKLOG.md](./PRODUCT-BACKLOG.md)
+- S1/S2 in [PRODUCT-BACKLOG.md](./PRODUCT-BACKLOG.md)  
+- Board wiki: `HOME/product-shms-weekly-intake`  
+- Scripts: `scripts/shms-weekly-intake.mjs`, `scripts/sync-product-between-repos.mjs`, `scripts/shms-frontend-parity.mjs`
