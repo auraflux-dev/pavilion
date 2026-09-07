@@ -2,9 +2,9 @@ import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 import {
   demoOriginFromHost,
   isDemoProductHost,
-  isPlatformStaffHost,
+  isPavilionBrandHost,
   PAVILION_DEMO_HOST,
-  platformStaffOrigin,
+  pavilionBrandOrigin,
 } from '@/lib/crm/product-host'
 
 /** Deployment has demo capability (env). Host still selects demo vs trial on unified stacks. */
@@ -41,15 +41,20 @@ export function isPublicDemoInstance(): boolean {
   return process.env.NEXT_PUBLIC_DEMO_INSTANCE === 'true'
 }
 
-/** Client-safe. Pavilion Platform Staff host (company ops, not customer demo). */
-export function isPublicPlatformStaffHost(): boolean {
+/** Client-safe. Pavilion brand site (www.onpavilion.com: marketing + /staff). */
+export function isPublicPavilionBrandHost(): boolean {
   if (typeof window !== 'undefined') {
-    return isPlatformStaffHost(window.location.hostname)
+    return isPavilionBrandHost(window.location.hostname)
   }
   return false
 }
 
-export { platformStaffOrigin }
+/** @deprecated Use isPublicPavilionBrandHost */
+export function isPublicPlatformStaffHost(): boolean {
+  return isPublicPavilionBrandHost()
+}
+
+export { pavilionBrandOrigin, pavilionBrandOrigin as platformStaffOrigin }
 
 /** Node/Edge API routes on unified demo+trial must pass Host (not env-only isDemoInstance()). */
 export function hostFromRequest(req: {
@@ -75,6 +80,7 @@ const PLATFORM_SITE = 'https://commons-pto.vercel.app'
 /** Canonical public origin. Demo/platform never publish shmspto.org in metadata. */
 export function publicSiteUrl(host?: string): string {
   const env = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '')
+  if (host && isPavilionBrandHost(host)) return pavilionBrandOrigin()
   if (host && isDemoProductHost(host)) return demoOriginFromHost(host)
   if (isDemoInstance(host)) {
     if (env && !/shmspto\.org/i.test(env)) return env

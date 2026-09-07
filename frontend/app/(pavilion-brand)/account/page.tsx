@@ -1,0 +1,61 @@
+import type { Metadata } from 'next'
+import { AccountDashboard, AccountSignInForm } from '@/components/pavilion-site/account-client'
+import { readAccountEmail } from '@/lib/pavilion-site/account'
+import { PRODUCT_NAME } from '@/lib/pavilion-site/brand'
+import { findLatestSubscriptionByEmail } from '@/lib/pavilion-site/db'
+import { CONTACT_EMAIL } from '@/lib/pavilion-site/pricing'
+
+export const metadata: Metadata = { title: 'Account' }
+
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; addon?: string }>
+}) {
+  const params = await searchParams
+  const email = await readAccountEmail()
+
+  let sub: Awaited<ReturnType<typeof findLatestSubscriptionByEmail>> = null
+  if (email) {
+    try {
+      sub = await findLatestSubscriptionByEmail(email)
+    } catch (err) {
+      console.error('account page subscription lookup failed', err)
+    }
+  }
+
+  const errorCopy: Record<string, string> = {
+    missing: 'That sign-in link was incomplete.',
+    expired: 'That sign-in link expired or was already used. Request a new one.',
+    failed: 'Sign-in failed. Request a new link.',
+  }
+
+  return (
+    <div className="mx-auto max-w-lg px-5 py-16">
+      <h1 className="type-page">Account</h1>
+      <p className="type-lede mt-4 whitespace-pre-line text-[var(--ink-muted)]">
+        {`Billing for ${PRODUCT_NAME}.\nInvoices and payment methods via HSKRG LLC on Stripe.\nYour board works in Staff, not a separate ${PRODUCT_NAME} member portal.`}
+      </p>
+
+      {params.error && errorCopy[params.error] ? (
+        <p className="mt-4 text-sm text-red-800">{errorCopy[params.error]}</p>
+      ) : null}
+
+      {email ? (
+        <AccountDashboard
+          email={email}
+          schoolName={sub?.school_name || ''}
+          status={sub?.status || 'no_subscription_row'}
+          hasCustomer={Boolean(sub?.stripe_customer_id)}
+        />
+      ) : (
+        <>
+          <AccountSignInForm />
+          <p className="mt-6 whitespace-pre-line text-sm text-[var(--ink-muted)]">
+            {`Need a hand?\n${CONTACT_EMAIL}`}
+          </p>
+        </>
+      )}
+    </div>
+  )
+}

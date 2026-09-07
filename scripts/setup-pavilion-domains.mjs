@@ -17,8 +17,9 @@ const PROJECT = process.env.PAVILION_DEMO_PROJECT || 'commons-pto-demo'
 const SCOPE = 'robert-4220s-projects'
 
 const DOMAINS = [
+  'www.onpavilion.com',
+  'onpavilion.com',
   'demo.onpavilion.com',
-  'staff.onpavilion.com',
   '*.onpavilion.com',
 ]
 
@@ -59,7 +60,9 @@ for (const domain of DOMAINS) {
 if (dryRun) {
   console.log('\nDry-run only. Re-run with --apply after DNS is ready at your registrar.')
   console.log('Also set Vercel env on commons-pto-demo (see docs/PAVILION-DEMO-TRIAL-HOSTS.md).')
+  console.log('After cutover: detach www/apex from commons-site so brand + /staff live on commons-pto-demo.')
 } else {
   console.log('\nDone. Confirm in Vercel → commons-pto-demo → Domains.')
-  console.log('Registrar: point demo.onpavilion.com, staff.onpavilion.com, and wildcard *.onpavilion.com to Vercel DNS.')
+  console.log('Registrar: point www.onpavilion.com, onpavilion.com, demo.onpavilion.com, and wildcard *.onpavilion.com to Vercel DNS (commons-pto-demo).')
+  console.log('Detach www/apex from commons-site after verifying brand + /staff on this project.')
 }

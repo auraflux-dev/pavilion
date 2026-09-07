@@ -3,7 +3,7 @@ import 'server-only'
 import { cache } from 'react'
 import { headers } from 'next/headers'
 import {
-  isPlatformStaffHost,
+  isPavilionBrandHost,
   normalizeProductHost,
   productSurfaceFromHost,
   PAVILION_SURFACE_HEADER,
@@ -26,9 +26,9 @@ export const resolveRequestSurface = cache(async (): Promise<ProductSurface> => 
   const h = await headers()
   const injected = h.get(PAVILION_SURFACE_HEADER)
   if (
+    injected === 'brand' ||
     injected === 'demo' ||
     injected === 'trial' ||
-    injected === 'platform' ||
     injected === 'shared' ||
     injected === 'other'
   ) {
@@ -54,8 +54,8 @@ export async function isTrialRequestSurface(): Promise<boolean> {
   return (await resolveRequestSurface()) === 'trial'
 }
 
-export async function isPlatformRequestSurface(): Promise<boolean> {
-  return (await resolveRequestSurface()) === 'platform'
+export async function isBrandRequestSurface(): Promise<boolean> {
+  return (await resolveRequestSurface()) === 'brand'
 }
 
 export async function requestHost(): Promise<string> {
@@ -63,6 +63,6 @@ export async function requestHost(): Promise<string> {
   return hostFromHeaders(h)
 }
 
-export async function isPlatformStaffRequestHost(): Promise<boolean> {
-  return isPlatformStaffHost(await requestHost())
+export async function isPavilionBrandRequestHost(): Promise<boolean> {
+  return isPavilionBrandHost(await requestHost())
 }

@@ -11,8 +11,10 @@ import { BrandPackShell } from '@/components/demo/brand-pack-shell'
 import { publicBrandFace } from '@/lib/demo/brand'
 import { getActiveBrandPack } from '@/lib/crm/active-trial-server'
 import { publicSiteUrl } from '@/lib/demo/instance'
+import { pavilionBrandOrigin } from '@/lib/crm/product-host'
 import { resolveCmsLayoutBrand } from '@/lib/cms/resolve-layout-brand'
 import {
+  isBrandRequestSurface,
   isDemoRequestSurface,
   isTrialRequestSurface,
   requestHost,
@@ -23,11 +25,23 @@ const _inter = Inter({ subsets: ['latin'] })
 const _merriweather = Merriweather({ subsets: ['latin'], weight: ['400', '700', '900'] })
 
 export async function generateMetadata(): Promise<Metadata> {
+  const brandSurface = await isBrandRequestSurface()
   const demo = await isDemoRequestSurface()
   const trial = await isTrialRequestSurface()
   const host = await requestHost()
   const brand = publicBrandFace()
   const siteUrl = publicSiteUrl(host)
+  if (brandSurface) {
+    return {
+      metadataBase: new URL(pavilionBrandOrigin()),
+      title: {
+        default: 'Pavilion',
+        template: '%s · Pavilion',
+      },
+      description:
+        'Pavilion. Public site and family login for parents. Staff for your board.',
+    }
+  }
   const titleDefault = `${brand.pto} | ${brand.cheer}`
   const description = demo
     ? `A vanilla PTO operating system demo: public site, family portal, and staff workspace for ${brand.school}.`

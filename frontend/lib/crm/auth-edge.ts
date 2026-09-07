@@ -1,6 +1,7 @@
 import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 import {
   isDemoProductHost,
+  isPavilionBrandHost,
   isPlatformStaffHost,
   isSharedProductHost,
   isTrialVanityHost,
@@ -39,6 +40,7 @@ export function canProvisionTrials(): boolean {
 }
 
 export {
+  isPavilionBrandHost,
   isPlatformStaffHost,
   isSharedProductHost,
   isTrialVanityHost,

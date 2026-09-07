@@ -8,16 +8,18 @@ Client Staff runs one school. Platform Staff (`@onpavilion.com`) runs the **flee
 
 Same `/staff` shell and workspace feel as school Staff. Different workspace catalog when the operator is in **platform mode**.
 
+Staff is always a **path** on the brand site (like `www.shmspto.org/staff`). No `staff.` subdomain.
+
 ## Host
 
 | Host | Who |
 |------|-----|
-| **`staff.onpavilion.com`** | Pavilion company Platform Staff (this product) |
-| `www.onpavilion.com` | Marketing. Footer / mobile menu → Platform Staff |
+| **`www.onpavilion.com/staff`** | Pavilion company Platform Staff |
+| `www.onpavilion.com` | Marketing + `/staff` (same product deploy) |
 | `demo.onpavilion.com` | Customer school demo. Client Staff tour only |
 
-Sign in: https://staff.onpavilion.com/staff with `@onpavilion.com`.  
-Platform owners who open `/staff` on the demo are redirected to the staff host.
+Sign in: https://www.onpavilion.com/staff with `@onpavilion.com`.  
+Platform owners who open `/staff` on the demo are sent to the brand site `/staff`.
 
 ## Surfaces
 
@@ -32,7 +34,7 @@ VIP SHMS is dedicated (`docs/CUSTOMER-SHMS-VIP.md`). It is not a normal editable
 ## Mode model
 
 ```text
-Platform Home (staff.onpavilion.com)
+Platform Home (www.onpavilion.com/staff)
   → Tenants → {org}
       → Connectors / Brand / Notes
       → Open client Staff
@@ -44,7 +46,7 @@ Cookies:
 - `pavilion_cms_org` — which customer CMS org writes target
 - `pavilion_platform_mode` — `platform` (fleet) or `client` (school shell)
 
-`staff.onpavilion.com` defaults to **fleet** mode. Public demo stays Client Staff for board tours. Platform owners on demo are sent to the staff host.
+Brand host defaults to **fleet** mode. Public demo stays Client Staff for board tours.
 
 ## Workspaces
 
@@ -61,11 +63,12 @@ Cookies:
 ## Code
 
 ```text
-frontend/lib/crm/product-host.ts          # PAVILION_PLATFORM_STAFF_HOST, surface "platform"
+frontend/lib/crm/product-host.ts          # isPavilionBrandHost, surface "brand"
 frontend/lib/staff/platform-workspaces.ts
 frontend/lib/crm/platform-mode.ts
 frontend/components/staff/staff-platform-console.tsx
 frontend/app/api/staff/platform/*
+frontend/app/(pavilion-brand)/            # marketing pages on brand host
 ```
 
 ## Related

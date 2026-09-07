@@ -63,8 +63,8 @@ import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
 import {
   isPublicDemoInstance,
-  isPublicPlatformStaffHost,
-  platformStaffOrigin,
+  isPublicPavilionBrandHost,
+  pavilionBrandOrigin,
 } from '@/lib/demo/instance'
 import { StaffWhatsAppQueuePanel } from '@/components/staff/staff-whatsapp-queue-panel'
 import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
@@ -220,13 +220,13 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
       .catch((err) => setError(err instanceof Error ? err.message : 'Not authorized'))
   }, [])
 
-  // Platform Staff belongs on staff.onpavilion.com, not the customer demo.
+  // Platform Staff is a path on the Pavilion brand site (www.onpavilion.com/staff).
   useEffect(() => {
     if (!me?.platformOwner) return
     if (!isPublicDemoInstance()) return
-    if (isPublicPlatformStaffHost()) return
+    if (isPublicPavilionBrandHost()) return
     const q = typeof window !== 'undefined' ? window.location.search : ''
-    window.location.replace(`${platformStaffOrigin()}/staff${q}`)
+    window.location.replace(`${pavilionBrandOrigin()}/staff${q}`)
   }, [me?.platformOwner])
 
   useEffect(() => {
@@ -553,7 +553,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
 
   if (error) {
     const onDemo = isPublicDemoInstance()
-    const onPlatformStaff = isPublicPlatformStaffHost()
+    const onPlatformStaff = isPublicPavilionBrandHost()
     const title =
       errorCode === 'demo_parent_lane'
         ? 'Parent tour active'

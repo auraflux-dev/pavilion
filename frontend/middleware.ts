@@ -21,8 +21,11 @@ import {
 } from '@/lib/demo/guard'
 import { hasBetterAuthCookie, isCommonsPlatformHost, isDemoHostForMiddleware, isSharedProductHost } from '@/lib/crm/auth-edge'
 import {
-  isPlatformStaffHost,
+  isPavilionBrandHost,
+  isReservedProductHost,
+  PAVILION_DEMO_HOST,
   PAVILION_SURFACE_HEADER,
+  pavilionBrandOrigin,
   productSurfaceFromHost,
 } from '@/lib/crm/product-host'
 import { commonsRequiresLogin, isCommonsPublicPath } from '@/lib/crm/private-tenant'
@@ -80,9 +83,13 @@ export async function middleware(req: NextRequest) {
     req.headers.get('x-forwarded-host')?.split(',')[0]?.trim().toLowerCase().split(':')[0] ||
     req.headers.get('host')?.trim().toLowerCase().split(':')[0] ||
     ''
-  const platformHost = isPlatformStaffHost(host)
-  const demo = !platformHost && (isDemoHostForMiddleware(host) || (!host && isDemoInstance()))
-  const trialHost = !platformHost && isCommonsPlatformHost(host)
+  const brandHost = isPavilionBrandHost(host)
+  const reservedHost = isReservedProductHost(host)
+  const demo =
+    !brandHost &&
+    !reservedHost &&
+    (isDemoHostForMiddleware(host) || (!host && isDemoInstance()))
+  const trialHost = !brandHost && !reservedHost && isCommonsPlatformHost(host)
   const surface = host
     ? productSurfaceFromHost(host)
     : demo
@@ -98,25 +105,59 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next({ request: { headers: requestHeaders } })
   }
 
-  // Pavilion Platform Staff home. Not a school demo or trial vanity.
-  if (platformHost) {
-    if (pathname === '/' || pathname === '') {
-      const staffUrl = req.nextUrl.clone()
-      staffUrl.pathname = '/staff'
-      staffUrl.search = ''
-      return NextResponse.redirect(staffUrl)
-    }
-    // Demo / sales tour paths do not belong on the company Staff host.
+  // Legacy staff.* subdomain → brand site /staff (portals are paths, not hosts).
+  if (reservedHost && !brandHost) {
+    const dest = new URL(`${pavilionBrandOrigin()}/staff`)
+    return NextResponse.redirect(dest)
+  }
+
+  // Pavilion brand site: marketing + /staff. School demo paths go to the demo host.
+  if (brandHost) {
     if (
       pathname === '/review' ||
       pathname.startsWith('/review/') ||
       pathname === '/trial' ||
       pathname.startsWith('/trial/')
     ) {
-      const staffUrl = req.nextUrl.clone()
-      staffUrl.pathname = '/staff'
-      staffUrl.search = ''
-      return NextResponse.redirect(staffUrl)
+      return NextResponse.redirect(new URL(`${pavilionBrandOrigin()}/staff`))
+    }
+    const brandOk =
+      pathname === '/' ||
+      pathname === '' ||
+      pathname === '/staff' ||
+      pathname.startsWith('/staff/') ||
+      pathname.startsWith('/auth/') ||
+      pathname.startsWith('/api/') ||
+      pathname === '/login' ||
+      pathname.startsWith('/login/') ||
+      pathname === '/product' ||
+      pathname.startsWith('/product/') ||
+      pathname === '/process' ||
+      pathname.startsWith('/process/') ||
+      pathname === '/pricing' ||
+      pathname.startsWith('/pricing/') ||
+      pathname === '/about' ||
+      pathname.startsWith('/about/') ||
+      pathname === '/help' ||
+      pathname.startsWith('/help/') ||
+      pathname === '/account' ||
+      pathname.startsWith('/account/') ||
+      pathname === '/gallery' ||
+      pathname.startsWith('/gallery/') ||
+      pathname === '/partners' ||
+      pathname.startsWith('/partners/') ||
+      pathname === '/watch' ||
+      pathname.startsWith('/watch/') ||
+      pathname === '/start' ||
+      pathname.startsWith('/start/') ||
+      pathname === '/thanks' ||
+      pathname.startsWith('/thanks/') ||
+      pathname.startsWith('/_next/') ||
+      pathname === '/favicon.ico'
+    if (!brandOk) {
+      const demoUrl = new URL(`https://${PAVILION_DEMO_HOST}${pathname}`)
+      demoUrl.search = req.nextUrl.search
+      return NextResponse.redirect(demoUrl)
     }
   }
 

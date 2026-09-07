@@ -1,0 +1,230 @@
+/* Scoped Pavilion marketing brand. Ink + sea glass. */
+.pavilion-brand {
+  --paper: #f7f5f0;
+  --paper-deep: #ebe6dc;
+  --ink: #0d1e1a;
+  --ink-muted: #3a4f49;
+  --accent: #0f6b5c;
+  --accent-soft: #d7ebe5;
+  --line: #d9d2c6;
+  --hero-glow: #143f38;
+
+  --text-caption: 0.75rem;
+  --text-small: 0.875rem;
+  --text-ui: 0.9375rem;
+  --text-body: 1.0625rem;
+  --text-lede: 1.125rem;
+  --leading-tight: 1.12;
+  --leading-body: 1.55;
+  --leading-lede: 1.5;
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+
+.pavilion-brand .type-display {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(2.125rem, 1.55rem + 2.4vw, 3.25rem);
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: var(--leading-tight);
+}
+
+.pavilion-brand .type-page {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(2rem, 1.6rem + 1.7vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: var(--leading-tight);
+}
+
+.pavilion-brand .type-section {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(1.75rem, 1.45rem + 1.2vw, 2.25rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.18;
+}
+
+.pavilion-brand .type-title {
+  font-size: clamp(1.25rem, 1.12rem + 0.55vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  line-height: 1.25;
+}
+
+.pavilion-brand .type-lede {
+  font-size: var(--text-lede);
+  line-height: var(--leading-lede);
+}
+
+.pavilion-brand .type-body {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+
+.pavilion-brand .type-small {
+  font-size: var(--text-small);
+  line-height: 1.45;
+}
+
+.pavilion-brand .type-ui {
+  font-size: var(--text-ui);
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.pavilion-brand .type-eyebrow {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.pavilion-brand .type-price {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(2.5rem, 2rem + 2vw, 3.25rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.pavilion-brand .hero-plane {
+  background:
+    radial-gradient(1000px 520px at 72% 8%, rgba(15, 107, 92, 0.42), transparent 58%),
+    linear-gradient(165deg, #081714 0%, #0f2d26 46%, #164038 100%);
+}
+
+.pavilion-brand .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  background: var(--ink);
+  padding: 0.8rem 1.3rem;
+  font-size: var(--text-ui);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--paper);
+  transition: background-color 150ms ease, transform 120ms ease;
+}
+
+.pavilion-brand .btn-primary:hover {
+  background: var(--accent);
+}
+
+.pavilion-brand .btn-primary:active {
+  transform: scale(0.985);
+}
+
+.pavilion-brand .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  border: 1.5px solid var(--line);
+  padding: 0.8rem 1.3rem;
+  font-size: var(--text-ui);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ink);
+  transition: background-color 150ms ease, border-color 150ms ease, transform 120ms ease;
+}
+
+.pavilion-brand .btn-secondary:hover {
+  border-color: var(--ink);
+  background: #f4f0e8;
+}
+
+.pavilion-brand .btn-secondary:active {
+  transform: scale(0.985);
+}
+
+.pavilion-brand .btn-on-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  background: #f7f5f0;
+  padding: 0.8rem 1.3rem;
+  font-size: var(--text-ui);
+  font-weight: 600;
+  line-height: 1.25;
+  color: #0d1e1a;
+  transition: background-color 150ms ease, transform 120ms ease;
+}
+
+.pavilion-brand .btn-on-dark:hover {
+  background: #ffffff;
+}
+
+.pavilion-brand .btn-on-dark-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  border: 1.5px solid rgba(247, 245, 240, 0.5);
+  padding: 0.8rem 1.3rem;
+  font-size: var(--text-ui);
+  font-weight: 600;
+  line-height: 1.25;
+  color: #f7f5f0;
+  transition: background-color 150ms ease, transform 120ms ease;
+}
+
+.pavilion-brand .btn-on-dark-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes pavilion-marketing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pavilion-brand .motion-rise {
+  animation: pavilion-marketing-rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.pavilion-brand .motion-rise-delay {
+  animation-delay: 0.1s;
+}
+
+.pavilion-brand .surface-fade {
+  animation: pavilion-surface-fade 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pavilion-surface-fade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pavilion-brand .motion-rise,
+  .pavilion-brand .motion-rise-delay,
+  .pavilion-brand .surface-fade {
+    animation: none;
+  }
+
+  .pavilion-brand .btn-primary:active,
+  .pavilion-brand .btn-secondary:active,
+  .pavilion-brand .btn-on-dark:active,
+  .pavilion-brand .btn-on-dark-outline:active {
+    transform: none;
+  }
+}
