@@ -21,6 +21,7 @@ import {
   composeNewsletterBody,
   defaultNewsletterBeats,
   emptyNewsletterBeat,
+  parseBeatsJson,
   presetLabel,
   stringifyBeatsJson,
   type NewsletterBeat,
@@ -29,7 +30,7 @@ import { buildWhatsAppGraphicShare } from '@/lib/staff/whatsapp-compose'
 import { uploadNewsletterPngFiles } from '@/lib/staff/newsletter-upload-client'
 import { NEWSLETTER_DEFAULT_CSS } from '@/lib/staff/newsletter-default-css'
 import type { NewsletterHeroMeta } from '@/lib/staff/newsletter-hero-meta'
-import { StaffNewsletterHeroPanel } from '@/components/staff/staff-newsletter-hero-panel'
+import { StaffNewsletterTemplatesPanel } from '@/components/staff/staff-newsletter-templates-panel'
 import { StaffNewsletterCssLibrary } from '@/components/staff/staff-newsletter-css-library'
 import { StaffNewsletterStep } from '@/components/staff/staff-newsletter-step'
 import { StaffNewsletterBrandingPanel } from '@/components/staff/staff-newsletter-branding-panel'
@@ -42,10 +43,32 @@ type TestGroups = {
 }
 
 /**
- * Member newsletter: free and/or paid parents via Gmail + WhatsApp grade groups + optional portal.
+ * Member newsletter composer: linear staff flow (audience → write → graphic → review → send).
  * Reuses /api/staff/membership/outreach (same roster + Gmail send as Memberships).
  */
 type NewsletterKind = 'paid' | 'scoop' | 'subscribers'
+
+const AUDIENCE_OPTIONS: {
+  id: NewsletterKind
+  title: string
+  blurb: string
+}[] = [
+  {
+    id: 'paid',
+    title: 'Paid members',
+    blurb: 'Full branded email to the paid roster. Optional portal inbox post.',
+  },
+  {
+    id: 'scoop',
+    title: 'Weekly Scoop',
+    blurb: 'Share a link with free parents (WhatsApp, portal, optional email).',
+  },
+  {
+    id: 'subscribers',
+    title: 'Footer signups',
+    blurb: 'People who subscribed on the public newsletter page. Email only.',
+  },
+]
 
 export function StaffNewsletterPanel() {
   const [emailConfigured, setEmailConfigured] = useState(false)
@@ -642,69 +665,119 @@ export function StaffNewsletterPanel() {
     }
   }
 
+  const readyForTest = Boolean(subject.trim() && body.trim())
+  const audienceLabel =
+    sendAudience === 'paid'
+      ? 'paid members'
+      : sendAudience === 'scoop'
+        ? 'Weekly Scoop (free parents)'
+        : 'footer signups'
+
   return (
     <section id="member-newsletter" className="scroll-mt-28 space-y-4">
-      <div className="rounded-xl border border-[var(--border)] bg-white px-5 py-4">
-        <h2 className="text-lg font-bold">Create newsletter</h2>
-        <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
-          Work top to bottom: audience, graphic, body, email look, then test and send.
-          {emailConfigured
-            ? ''
-            : '\nGmail send is not ready. Connect Google in Staff → Inbox (president@).'}
-        </p>
-        {isPavilionProductPlatformPublic() ? null : (
-          <p className="text-xs text-[#5A6070] mt-2">
+      <div className="rounded-xl border border-[var(--border)] bg-white px-5 py-4 space-y-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold text-[#1B2A4A]">Create a newsletter</h2>
+            <p className="text-xs text-[#5A6070] mt-1 leading-relaxed max-w-2xl">
+              Follow the steps in order. Test before every live send.
+            </p>
+          </div>
+          {isPavilionProductPlatformPublic() ? null : (
             <Link
               href="/staff?view=help&article=member-newsletter-diane"
-              className="font-semibold text-[var(--brand-green)] hover:underline"
+              className="text-xs font-semibold text-[var(--brand-green)] hover:underline shrink-0"
             >
-              How this works
+              Full walkthrough
             </Link>
-            {' · '}Canva PNG, test send, Publish to site, schedule.
-          </p>
-        )}
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2 text-[11px]">
+          <span
+            className={`rounded-full px-2.5 py-1 border ${
+              emailConfigured
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+                : 'border-amber-200 bg-amber-50 text-amber-950'
+            }`}
+          >
+            {emailConfigured
+              ? 'Gmail ready'
+              : 'Connect Google in Staff → Inbox before sending'}
+          </span>
+          {senderPreview.staffEmail ? (
+            <span className="rounded-full px-2.5 py-1 border border-[var(--border)] bg-[#FAFCF9] text-[#5A6070]">
+              From {senderPreview.name || senderPreview.staffEmail}
+            </span>
+          ) : null}
+          <span className="rounded-full px-2.5 py-1 border border-[var(--border)] bg-[#FAFCF9] text-[#5A6070]">
+            {subscriberCount} footer signup{subscriberCount === 1 ? '' : 's'}
+          </span>
+        </div>
+        <ol className="flex flex-wrap gap-2 text-[11px] text-[#5A6070]">
+          {[
+            '1 Who',
+            '2 Write',
+            '3 Graphic',
+            '4 Review list',
+            '5 Test & send',
+          ].map((label) => (
+            <li
+              key={label}
+              className="rounded-md border border-[var(--border)] bg-[#FAFCF9] px-2 py-1 font-medium text-[#1B2A4A]"
+            >
+              {label}
+            </li>
+          ))}
+        </ol>
       </div>
 
       <StaffNewsletterStep
         step={1}
         title="Who is this for?"
-        description="Pick the audience, filters, and subject line."
+        description="Pick one audience. Filters and subject come next."
         id="newsletter-step-audience"
       >
-        <label className="text-xs text-[#5A6070] block">
-          Who this is for
-          <select
-            value={sendAudience}
-            onChange={(e) => {
-              const v = e.target.value
-              const next: NewsletterKind =
-                v === 'scoop' || v === 'subscribers' || v === 'paid' ? v : 'paid'
-              setSendAudience(next)
-              if (next === 'paid' && (tier === 'all' || tier === 'free')) setTier('paid')
-              if (next === 'scoop' && !subject.trim()) setSubject(SCOOP_DEFAULT_SUBJECT)
-            }}
-            className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="paid">Paid members (full email)</option>
-            <option value="scoop">Weekly Scoop (free monthly link)</option>
-            <option value="subscribers">
-              Footer signup list only ({subscriberCount} email{subscriberCount === 1 ? '' : 's'})
-            </option>
-          </select>
-        </label>
+        <div className="grid gap-2 sm:grid-cols-3" data-help-shot="newsletter-type">
+          {AUDIENCE_OPTIONS.map((opt) => {
+            const selected = sendAudience === opt.id
+            const title =
+              opt.id === 'subscribers'
+                ? `${opt.title} (${subscriberCount})`
+                : opt.title
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => {
+                  setSendAudience(opt.id)
+                  if (opt.id === 'paid' && (tier === 'all' || tier === 'free')) setTier('paid')
+                  if (opt.id === 'scoop' && !subject.trim()) setSubject(SCOOP_DEFAULT_SUBJECT)
+                }}
+                className={`rounded-xl border px-3 py-3 text-left transition ${
+                  selected
+                    ? 'border-[var(--brand-green)] bg-[#F3F9F4] shadow-sm'
+                    : 'border-[var(--border)] bg-white hover:border-[var(--brand-green)]/50'
+                }`}
+              >
+                <span className="block text-sm font-semibold text-[#1B2A4A]">{title}</span>
+                <span className="mt-1 block text-[11px] text-[#5A6070] leading-relaxed">
+                  {opt.blurb}
+                </span>
+              </button>
+            )
+          })}
+        </div>
 
         {sendAudience === 'scoop' ? (
           <div
             data-help-shot="weekly-scoop"
             className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2"
           >
-            <p className="text-xs text-[#5A6070] whitespace-pre-line">
-              School Scoop is the school channel — PTO supplies a newsletter link.
-              Use Publish to site first, then paste that URL here (or we fall back to Canva / signup page).
-              Optionally WhatsApp free parents and post to the member portal.
+            <p className="text-xs text-[#5A6070] leading-relaxed">
+              Publish to the site first (step 5), then use that link for school Scoop, WhatsApp, and portal.
             </p>
             <label className="text-xs text-[#5A6070] block">
-              Newsletter web link (for school Scoop)
+              Newsletter web link
               <input
                 value={scoopUrl}
                 onChange={(e) => setScoopUrl(e.target.value)}
@@ -721,64 +794,17 @@ export function StaffNewsletterPanel() {
                 checked={scoopIncludeSignups}
                 onChange={(e) => setScoopIncludeSignups(e.target.checked)}
               />
-              If you email the scoop link, also include footer signups
+              When emailing the scoop link, also include footer signups
             </label>
           </div>
         ) : null}
 
-        <div className={`grid sm:grid-cols-3 gap-2 ${sendAudience === 'subscribers' ? 'opacity-50' : ''}`}>
-          <select
-            value={sendAudience === 'paid' && (tier === 'all' || tier === 'free') ? 'paid' : tier}
-            onChange={(e) => setTier(e.target.value)}
-            disabled={sendAudience === 'scoop' || sendAudience === 'subscribers'}
-            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-          >
-            {sendAudience === 'paid' ? null : <option value="all">All members (free + paid)</option>}
-            {sendAudience === 'paid' ? null : <option value="free">Free only</option>}
-            <option value="paid">Paid only</option>
-            <option value="reef">{vanillaizeIfDemo('Reef')}</option>
-            <option value="lagoon">{vanillaizeIfDemo('Lagoon')}</option>
-            <option value="tide">{vanillaizeIfDemo('Tide')}</option>
-          </select>
-          <select
-            value={grade}
-            onChange={(e) => setGrade(e.target.value)}
-            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="">Any grade (email)</option>
-            <option value="6">6th</option>
-            <option value="7">7th</option>
-            <option value="8">8th</option>
-          </select>
-          <select
-            value={waGrade}
-            onChange={(e) => setWaGrade(e.target.value)}
-            className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="all">WhatsApp: all grade groups</option>
-            <option value="6">WhatsApp: 6th</option>
-            <option value="7">WhatsApp: 7th</option>
-            <option value="8">WhatsApp: 8th</option>
-          </select>
-        </div>
-
-        <p className="text-[11px] text-[#5A6070]">
-          Grade WhatsApp links configured:{' '}
-          {[
-            waLinks.grade6 && '6th',
-            waLinks.grade7 && '7th',
-            waLinks.grade8 && '8th',
-          ]
-            .filter(Boolean)
-            .join(', ') || 'none. Add in Site settings'}
-        </p>
-
         <label className="text-xs text-[#5A6070] block">
-          Subject / headline
+          Subject line
           <input
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            placeholder={sendAudience === 'scoop' ? SCOOP_DEFAULT_SUBJECT : 'Subject / headline'}
+            placeholder={sendAudience === 'scoop' ? SCOOP_DEFAULT_SUBJECT : 'Subject parents will see'}
             className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
           />
         </label>
@@ -786,127 +812,111 @@ export function StaffNewsletterPanel() {
 
       <StaffNewsletterStep
         step={2}
-        title="Hero graphic"
-        description="Optional top PNG in the email."
-        id="newsletter-step-graphic"
-      >
-        <StaffNewsletterHeroPanel
-          heroImageUrl={heroMeta.heroImageUrl ?? ''}
-          pageImageUrls={heroMeta.pageImageUrls ?? []}
-          onChange={(meta) => {
-            setHeroMeta((prev) => ({ ...prev, ...meta }))
-            if (meta.heroImageUrl) setTrackOpens(true)
-          }}
-        />
-      </StaffNewsletterStep>
-
-      <StaffNewsletterStep
-        step={3}
-        title="Newsletter body"
-        description="Plain text or sections. Add optional section images and file attachments."
+        title="Write the message"
+        description="Plain text is fine. Optional sections keep events, asks, and CTAs organized."
         id="newsletter-step-body"
         defaultOpen
       >
-        <div data-help-shot="copy-tracking" className="space-y-2">
-        <label className="flex items-center gap-2 text-xs text-[#5A6070]">
-          <input
-            type="checkbox"
-            checked={useBeats}
-            onChange={(e) => setUseBeats(e.target.checked)}
-          />
-          Write in sections (intro, beats, sign-off). Optional PNG per section breaks up the text in email.
-        </label>
-        {useBeats ? (
-          <div
-            data-help-shot="beats"
-            className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3"
-          >
-            <StaffPlainCopyField
-              label="Intro"
-              value={intro}
-              rows={2}
-              onChange={setIntro}
-              onCommit={(next) => setIntro(normalizePlainCopy(next))}
-            />
+        <div data-help-shot="copy-tracking" className="space-y-3">
+          <label className="flex items-center gap-2 text-xs text-[#5A6070]">
             <input
-              ref={beatFileRef}
-              type="file"
-              accept="image/png"
-              className="hidden"
-              onChange={(e) => void onBeatImageSelected(e.target.files)}
+              type="checkbox"
+              checked={useBeats}
+              onChange={(e) => setUseBeats(e.target.checked)}
             />
-            {beats.map((beat, i) => {
-              const preset = NEWSLETTER_BEAT_PRESETS.find((p) => p.id === beat.preset)
-              return (
-                <div
-                  key={`beat-${i}`}
-                  className="rounded-lg border border-[var(--border)] bg-white p-3 space-y-2"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <label className="text-xs text-[#5A6070]">
-                      Section type
-                      <select
-                        value={beat.preset}
+            Write in sections (intro, Event, Ask, CTA, sign-off)
+          </label>
+
+          {useBeats ? (
+            <div
+              data-help-shot="beats"
+              className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3"
+            >
+              <StaffPlainCopyField
+                label="Intro"
+                value={intro}
+                rows={2}
+                onChange={setIntro}
+                onCommit={(next) => setIntro(normalizePlainCopy(next))}
+              />
+              <input
+                ref={beatFileRef}
+                type="file"
+                accept="image/png"
+                className="hidden"
+                onChange={(e) => void onBeatImageSelected(e.target.files)}
+              />
+              {beats.map((beat, i) => {
+                const preset = NEWSLETTER_BEAT_PRESETS.find((p) => p.id === beat.preset)
+                return (
+                  <div
+                    key={`beat-${i}`}
+                    className="rounded-lg border border-[var(--border)] bg-white p-3 space-y-2"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <label className="text-xs text-[#5A6070]">
+                        Section type
+                        <select
+                          value={beat.preset}
+                          onChange={(e) => {
+                            const next = beats.slice()
+                            next[i] = {
+                              ...next[i],
+                              preset: e.target.value as NewsletterBeat['preset'],
+                            }
+                            setBeats(next)
+                          }}
+                          className="mt-1 block border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                        >
+                          {NEWSLETTER_BEAT_PRESETS.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={beats.length <= 1}
+                        onClick={() => setBeats(beats.filter((_, idx) => idx !== i))}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                    {preset?.hint ? (
+                      <p className="text-[11px] text-[#5A6070]">{preset.hint}</p>
+                    ) : null}
+                    <label className="text-xs text-[#5A6070] block">
+                      Heading
+                      <input
+                        value={beat.heading}
                         onChange={(e) => {
                           const next = beats.slice()
-                          next[i] = {
-                            ...next[i],
-                            preset: e.target.value as NewsletterBeat['preset'],
-                          }
+                          next[i] = { ...next[i], heading: e.target.value }
                           setBeats(next)
                         }}
-                        className="mt-1 block border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-                      >
-                        {NEWSLETTER_BEAT_PRESETS.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.label}
-                          </option>
-                        ))}
-                      </select>
+                        placeholder={presetLabel(beat.preset)}
+                        className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                      />
                     </label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={beats.length <= 1}
-                      onClick={() => setBeats(beats.filter((_, idx) => idx !== i))}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                  {preset?.hint ? (
-                    <p className="text-[11px] text-[#5A6070]">{preset.hint}</p>
-                  ) : null}
-                  <label className="text-xs text-[#5A6070] block">
-                    Heading (bold in email)
-                    <input
-                      value={beat.heading}
-                      onChange={(e) => {
+                    <StaffPlainCopyField
+                      label="Body"
+                      value={beat.body}
+                      rows={3}
+                      onChange={(val) => {
                         const next = beats.slice()
-                        next[i] = { ...next[i], heading: e.target.value }
+                        next[i] = { ...next[i], body: val }
                         setBeats(next)
                       }}
-                      placeholder={presetLabel(beat.preset)}
-                      className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                      onCommit={(val) => {
+                        const next = beats.slice()
+                        next[i] = { ...next[i], body: normalizePlainCopy(val) }
+                        setBeats(next)
+                      }}
                     />
-                  </label>
-                  <StaffPlainCopyField
-                    label="Body"
-                    value={beat.body}
-                    rows={3}
-                    onChange={(val) => {
-                      const next = beats.slice()
-                      next[i] = { ...next[i], body: val }
-                      setBeats(next)
-                    }}
-                    onCommit={(val) => {
-                      const next = beats.slice()
-                      next[i] = { ...next[i], body: normalizePlainCopy(val) }
-                      setBeats(next)
-                    }}
-                  />
-                  <div className="space-y-2 pt-1 border-t border-[var(--border)]">
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap gap-2 items-center">
                       <Button
                         type="button"
                         variant="outline"
@@ -914,128 +924,86 @@ export function StaffNewsletterPanel() {
                         disabled={busy}
                         onClick={() => pickBeatImage(i)}
                       >
-                        {beat.imageUrl ? 'Replace section image' : 'Upload section image'}
+                        {beat.imageUrl ? 'Replace section PNG' : 'Add section PNG'}
                       </Button>
                       {beat.imageUrl ? (
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          disabled={busy}
                           onClick={() => clearBeatImage(i)}
                         >
                           Remove image
                         </Button>
                       ) : null}
+                      {beatUploadStatus[i] ? (
+                        <span className="text-[11px] text-[#1B6B45]">{beatUploadStatus[i]}</span>
+                      ) : null}
                     </div>
-                    <p className="text-[11px] text-[#5A6070]">
-                      PNG shows in email under the heading.
-                    </p>
-                    {beatUploadStatus[i] ? (
-                      <p className="text-xs rounded-lg px-3 py-2 bg-[#E8F3E8] text-[#1A1A1A] border border-[var(--brand-green)]/25">
-                        {beatUploadStatus[i]}
-                      </p>
-                    ) : null}
                     {beat.imageUrl ? (
-                      <div className="rounded-lg border-2 border-[var(--brand-green)]/40 bg-[#FAFCF9] p-3 space-y-2">
-                        <p className="text-xs font-semibold text-[var(--brand-green)]">
-                          ✓ Section image ready
-                        </p>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={beat.imageUrl}
-                          alt=""
-                          className="max-h-32 w-auto rounded border border-[var(--border)]"
-                        />
-                      </div>
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={beat.imageUrl} alt="" className="max-h-28 w-auto rounded" />
                     ) : null}
-                    <label className="text-xs text-[#5A6070] block">
-                      Image link (optional)
-                      <input
-                        value={beat.imageLinkUrl ?? ''}
-                        onChange={(e) => {
-                          const next = beats.slice()
-                          next[i] = { ...next[i], imageLinkUrl: e.target.value }
-                          setBeats(next)
-                        }}
-                        placeholder="https://…"
-                        className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-                      />
-                    </label>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={beats.length >= NEWSLETTER_MAX_BEATS}
+                  onClick={() => setBeats([...beats, emptyNewsletterBeat()])}
+                >
+                  Add section
+                </Button>
+              </div>
+              <StaffPlainCopyField
+                label="Sign-off"
+                value={signoff}
+                rows={2}
+                onChange={setSignoff}
+                onCommit={(next) => setSignoff(normalizePlainCopy(next))}
+              />
+            </div>
+          ) : (
+            <StaffPlainCopyField
+              label="Email body"
+              value={body}
+              rows={8}
+              placeholder={
+                sendAudience === 'scoop'
+                  ? 'Short note above the scoop link'
+                  : 'Paste links in plain text. Tracking is added on send.'
+              }
+              onChange={setBody}
+              onCommit={(next) => setBody(normalizePlainCopy(next))}
+            />
+          )}
+          <p className="text-[11px] text-[#5A6070]">{NEWSLETTER_MERGE_HINT}</p>
+
+          <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2">
+            <p className="text-sm font-semibold text-[#1A1A1A]">Attachments (optional)</p>
+            <input
+              ref={attachFileRef}
+              type="file"
+              accept=".pdf,image/png,image/jpeg"
+              className="hidden"
+              onChange={(e) => void onAttachmentSelected(e.target.files)}
+            />
             <Button
               type="button"
               variant="outline"
-              disabled={beats.length >= NEWSLETTER_MAX_BEATS}
-              onClick={() => setBeats([...beats, emptyNewsletterBeat('custom')])}
+              size="sm"
+              disabled={busy}
+              onClick={() => attachFileRef.current?.click()}
             >
-              Add section ({beats.length}/{NEWSLETTER_MAX_BEATS})
+              Attach file (PDF or image)
             </Button>
-            <StaffPlainCopyField
-              label="Sign-off"
-              value={signoff}
-              rows={2}
-              onChange={setSignoff}
-              onCommit={(next) => setSignoff(normalizePlainCopy(next))}
-            />
-          </div>
-        ) : null}
-
-        {useBeats ? (
-          <textarea
-            value={body}
-            readOnly
-            rows={8}
-            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[#F5F5F3] text-[#5A6070]"
-          />
-        ) : (
-          <StaffPlainCopyField
-            label="Newsletter body"
-            value={body}
-            rows={8}
-            hint="Press Enter for a new line. Paste links as plain text. No HTML."
-            placeholder={
-              sendAudience === 'scoop'
-                ? 'Short note above the scoop link'
-                : 'Newsletter body (paste links; UTM + tracking added on send)'
-            }
-            onChange={setBody}
-            onCommit={(next) => setBody(normalizePlainCopy(next))}
-          />
-        )}
-        <p className="text-[11px] text-[#5A6070]">{NEWSLETTER_MERGE_HINT}</p>
-
-        <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2">
-          <p className="text-sm font-semibold text-[#1A1A1A]">Attachments (optional)</p>
-          <input
-            ref={attachFileRef}
-            type="file"
-            accept=".pdf,image/png,image/jpeg"
-            className="hidden"
-            onChange={(e) => void onAttachmentSelected(e.target.files)}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={busy}
-            onClick={() => attachFileRef.current?.click()}
-          >
-            Attach file (PDF or image)
-          </Button>
-          {attachmentStatus ? (
-            <p className="text-xs rounded-lg px-3 py-2 bg-[#E8F3E8] text-[#1A1A1A] border border-[var(--brand-green)]/25">
-              {attachmentStatus}
-            </p>
-          ) : null}
-          {attachments.length ? (
-            <div className="rounded-lg border-2 border-[var(--brand-green)]/40 bg-[#FAFCF9] p-3 space-y-2">
-              <p className="text-xs font-semibold text-[var(--brand-green)]">
-                ✓ {attachments.length} attachment{attachments.length === 1 ? '' : 's'} ready
-              </p>
+            {attachmentStatus ? (
+              <p className="text-xs text-[#1B6B45]">{attachmentStatus}</p>
+            ) : null}
+            {attachments.length ? (
               <ul className="text-xs text-[#5A6070] space-y-1">
                 {attachments.map((a) => (
                   <li key={a.key} className="flex items-center gap-2">
@@ -1053,51 +1021,157 @@ export function StaffNewsletterPanel() {
                   </li>
                 ))}
               </ul>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
-        </div>
+      </StaffNewsletterStep>
+
+      <StaffNewsletterStep
+        step={3}
+        title="Add the graphic"
+        description="Design in Canva, then export or upload PNG pages for the email."
+        id="newsletter-templates"
+        defaultOpen
+      >
+        <StaffNewsletterTemplatesPanel
+          subject={subject}
+          body={body}
+          utmCampaign={utmCampaign}
+          beatsJson={beatsPayload() ?? ''}
+          canvaMeta={heroMeta}
+          onCanvaMetaChange={(meta) => {
+            setHeroMeta((prev) => ({ ...prev, ...meta }))
+            if (meta.heroImageUrl) setTrackOpens(true)
+          }}
+          onLoad={(tpl) => {
+            setSubject(tpl.subject)
+            setBody(tpl.body)
+            setUtmCampaign(tpl.utmCampaign)
+            setTemplateId(tpl.templateId)
+            setHeroMeta({
+              canvaDesignId: tpl.canvaDesignId,
+              canvaTitle: tpl.canvaTitle,
+              canvaEditUrl: tpl.canvaEditUrl,
+              canvaViewUrl: tpl.canvaViewUrl,
+              canvaThumbnailUrl: tpl.canvaThumbnailUrl,
+              heroImageUrl: tpl.heroImageUrl,
+              heroImageKey: tpl.heroImageKey,
+              pageImageUrls: tpl.pageImageUrls,
+            })
+            if (tpl.heroImageUrl) setTrackOpens(true)
+            const parsed = parseBeatsJson(tpl.beatsJson)
+            if (parsed) {
+              setUseBeats(true)
+              setIntro(parsed.intro)
+              setBeats(parsed.beats.length ? parsed.beats : defaultNewsletterBeats)
+              setSignoff(parsed.signoff)
+            }
+            setStatus(`Loaded template. Review copy, then test send.`)
+          }}
+        />
       </StaffNewsletterStep>
 
       <StaffNewsletterStep
         step={4}
-        title="Email look"
-        description="Logo, header, and footer from site settings. CSS templates are in the library below."
-        id="newsletter-branding"
-        defaultOpen={false}
+        title="Review who will get it"
+        description="Narrow the list if needed, then preview the exact recipient count."
+        id="newsletter-step-review"
       >
-        {brandingHint ? (
-          <p className="text-xs text-[#5A6070] rounded-lg bg-[#FAFCF9] border border-[var(--border)] px-3 py-2">
-            Live branding loaded: {brandingHint}
-          </p>
-        ) : null}
-        <StaffNewsletterBrandingPanel embedded />
+        <div className={`grid sm:grid-cols-3 gap-2 ${sendAudience === 'subscribers' ? 'opacity-50' : ''}`}>
+          <label className="text-xs text-[#5A6070] block">
+            Membership filter
+            <select
+              value={sendAudience === 'paid' && (tier === 'all' || tier === 'free') ? 'paid' : tier}
+              onChange={(e) => setTier(e.target.value)}
+              disabled={sendAudience === 'scoop' || sendAudience === 'subscribers'}
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+            >
+              {sendAudience === 'paid' ? null : <option value="all">All members (free + paid)</option>}
+              {sendAudience === 'paid' ? null : <option value="free">Free only</option>}
+              <option value="paid">Paid only</option>
+              <option value="reef">{vanillaizeIfDemo('Reef')}</option>
+              <option value="lagoon">{vanillaizeIfDemo('Lagoon')}</option>
+              <option value="tide">{vanillaizeIfDemo('Tide')}</option>
+            </select>
+          </label>
+          <label className="text-xs text-[#5A6070] block">
+            Grade (email)
+            <select
+              value={grade}
+              onChange={(e) => setGrade(e.target.value)}
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+            >
+              <option value="">Any grade</option>
+              <option value="6">6th</option>
+              <option value="7">7th</option>
+              <option value="8">8th</option>
+            </select>
+          </label>
+          <label className="text-xs text-[#5A6070] block">
+            WhatsApp groups
+            <select
+              value={waGrade}
+              onChange={(e) => setWaGrade(e.target.value)}
+              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+            >
+              <option value="all">All grade groups</option>
+              <option value="6">6th only</option>
+              <option value="7">7th only</option>
+              <option value="8">8th only</option>
+            </select>
+          </label>
+        </div>
+        <p className="text-[11px] text-[#5A6070]">
+          Grade WhatsApp links:{' '}
+          {[
+            waLinks.grade6 && '6th',
+            waLinks.grade7 && '7th',
+            waLinks.grade8 && '8th',
+          ]
+            .filter(Boolean)
+            .join(', ') || 'none yet — add in Site settings'}
+        </p>
+
+        {sendAudience === 'scoop' ? null : (
+          <label className="flex items-center gap-2 text-xs text-[#5A6070]">
+            <input
+              type="checkbox"
+              checked={sendAudience === 'subscribers' ? false : alsoPortal}
+              disabled={sendAudience === 'subscribers'}
+              onChange={(e) => setAlsoPortal(e.target.checked)}
+            />
+            Also post to parent portal inbox when sending email
+            {sendAudience === 'subscribers'
+              ? ' (signup list is email-only)'
+              : sendAudience === 'paid'
+                ? ' (paid parents in Messages)'
+                : ''}
+          </label>
+        )}
+
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy || !readyForTest}
+          onClick={() => void preview()}
+        >
+          Preview recipients ({audienceLabel})
+        </Button>
       </StaffNewsletterStep>
 
       <StaffNewsletterStep
         step={5}
-        title="Test, review & send"
-        description="Test to board, tune tracking, schedule, or send now."
+        title="Test, then send"
+        description="Always test first. Live send, schedule, publish, and WhatsApp stay here."
         id="newsletter-step-send"
       >
-        {senderPreview.staffEmail ? (
-          <p className="text-xs text-[#5A6070]">
-            Sending as{' '}
-            <span className="font-semibold text-[#1A1A1A]">
-              {senderPreview.name || senderPreview.staffEmail}
-            </span>{' '}
-            ({senderPreview.staffEmail})
-          </p>
-        ) : null}
-
         <div
           data-help-shot="test-send"
-          className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-3"
+          className="rounded-xl border-2 border-[var(--brand-green)]/35 bg-[#F3F9F4] p-4 space-y-3"
         >
-          <p className="text-sm font-semibold text-[#1A1A1A]">Test send</p>
-          <p className="text-xs text-[#5A6070] whitespace-pre-line">
+          <p className="text-sm font-semibold text-[#1B2A4A]">1 · Test send (required habit)</p>
+          <p className="text-xs text-[#5A6070] leading-relaxed">
             Subject is prefixed with [TEST]. Does not post to the portal or archive.
-            {'\n'}
             Add your personal Gmail under Staff → Home if “Just me” is empty.
           </p>
           <div className="grid sm:grid-cols-2 gap-2">
@@ -1108,7 +1182,7 @@ export function StaffNewsletterPanel() {
                 onChange={(e) =>
                   setTestGroup(e.target.value as 'me' | 'board' | 'board_and_custom')
                 }
-                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
               >
                 <option value="me">Just me</option>
                 <option value="board">Board test group</option>
@@ -1121,7 +1195,7 @@ export function StaffNewsletterPanel() {
                 value={testEmailsExtra}
                 onChange={(e) => setTestEmailsExtra(e.target.value)}
                 placeholder="you@gmail.com"
-                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
               />
             </label>
           </div>
@@ -1139,15 +1213,16 @@ export function StaffNewsletterPanel() {
             <Button
               type="button"
               variant="outline"
-              disabled={busy || !subject || !body}
+              disabled={busy || !readyForTest}
               onClick={() => void previewTestRecipients()}
             >
               Preview test recipients
             </Button>
             <Button
               type="button"
-              variant="outline"
-              disabled={busy || !subject || !body}
+              disabled={busy || !readyForTest || !emailConfigured}
+              className="text-white"
+              style={{ backgroundColor: 'var(--brand-green)' }}
               onClick={() => void sendTestEmail()}
             >
               Send test email
@@ -1155,62 +1230,85 @@ export function StaffNewsletterPanel() {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-2">
-          <label className="text-xs text-[#5A6070]">
-            UTM campaign (GA4)
-            <input
-              value={utmCampaign}
-              onChange={(e) => setUtmCampaign(e.target.value)}
-              placeholder="e.g. run-for-charity-2026"
-              className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
-            />
-          </label>
-          <div className="flex flex-col gap-2 justify-end text-xs text-[#5A6070]">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={trackClicks}
-                onChange={(e) => setTrackClicks(e.target.checked)}
-              />
-              Track link clicks (/r/ redirect + Staff stats)
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={trackOpens}
-                onChange={(e) => setTrackOpens(e.target.checked)}
-              />
-              Track opens (HTML + pixel when hero graphic or this is on)
-            </label>
-          </div>
+        <div className="rounded-xl border border-[var(--border)] bg-white p-4 space-y-3">
+          <p className="text-sm font-semibold text-[#1B2A4A]">2 · Publish link (school Scoop)</p>
+          <p className="text-xs text-[#5A6070] leading-relaxed">
+            Creates a public page with the same branded look and copies the URL.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy || (!subject.trim() && !body.trim() && !useBeats)}
+            onClick={() => void publishToSite()}
+          >
+            Publish to site & copy link
+          </Button>
         </div>
 
-        {sendAudience === 'scoop' ? null : (
-        <label className="flex items-center gap-2 text-xs text-[#5A6070]">
-          <input
-            type="checkbox"
-            checked={sendAudience === 'subscribers' ? false : alsoPortal}
-            disabled={sendAudience === 'subscribers'}
-            onChange={(e) => setAlsoPortal(e.target.checked)}
-          />
-          Also post to parent portal inbox when sending email (archive saves automatically)
-          {sendAudience === 'subscribers'
-            ? ' (signup list is email-only)'
-            : sendAudience === 'paid'
-              ? ' (paid parents only in Messages)'
-              : ''}
-        </label>
-        )}
+        <div
+          data-help-shot="send-actions"
+          className="rounded-xl border border-[var(--border)] bg-white p-4 space-y-3"
+        >
+          <p className="text-sm font-semibold text-[#1B2A4A]">3 · Live send</p>
+          {sendAudience === 'scoop' ? (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                disabled={busy || !readyForTest}
+                className="text-white"
+                style={{ backgroundColor: 'var(--brand-green)' }}
+                onClick={() => void openWhatsApp()}
+              >
+                Copy + open WhatsApp
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy || !readyForTest}
+                onClick={() => void postScoopToPortal()}
+              >
+                Post scoop to portal
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy || !readyForTest}
+                onClick={() => void sendEmail()}
+              >
+                Email scoop link
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                disabled={busy || !readyForTest || !emailConfigured}
+                className="text-white"
+                style={{ backgroundColor: 'var(--brand-green)' }}
+                onClick={() => void sendEmail()}
+              >
+                Send email now
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy || !readyForTest}
+                onClick={() => void openWhatsApp()}
+              >
+                Copy + open WhatsApp
+              </Button>
+            </div>
+          )}
+        </div>
 
         <div
           data-help-shot="schedule-approval"
-          className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2"
+          className="rounded-xl border border-[var(--border)] bg-[#FAFCF9] p-4 space-y-2"
         >
-          <p className="text-sm font-semibold text-[#1A1A1A]">Schedule / approval</p>
-          <p className="text-xs text-[#5A6070] whitespace-pre-line">
-            Test send stays one-click. Queue a later send here.
+          <p className="text-sm font-semibold text-[#1B2A4A]">4 · Schedule / approval</p>
+          <p className="text-xs text-[#5A6070] leading-relaxed">
             Marketing queues wait for secretary or president approval.
-            Approved jobs send at the chosen time (checked about every 15 minutes).
+            Approved jobs send near the chosen time (checked about every 15 minutes).
           </p>
           <label className="text-xs text-[#5A6070] block">
             Send at (your local time)
@@ -1218,13 +1316,13 @@ export function StaffNewsletterPanel() {
               type="datetime-local"
               value={sendAtLocal}
               onChange={(e) => setSendAtLocal(e.target.value)}
-              className="mt-1 w-full sm:w-auto border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+              className="mt-1 w-full sm:w-auto border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white"
             />
           </label>
           <Button
             type="button"
             variant="outline"
-            disabled={busy || !subject || !body || !sendAtLocal}
+            disabled={busy || !readyForTest || !sendAtLocal}
             onClick={() => void queueSend()}
           >
             {canApprove ? 'Schedule send' : 'Request approval & schedule'}
@@ -1238,7 +1336,7 @@ export function StaffNewsletterPanel() {
                   ['pending_approval', 'scheduled', 'sending', 'failed'].includes(j.status),
                 )
                 .map((j) => (
-                  <li key={j.id} className="border border-[var(--border)] rounded-lg p-2 space-y-1">
+                  <li key={j.id} className="border border-[var(--border)] rounded-lg p-2 space-y-1 bg-white">
                     <p>
                       <span className="font-semibold">{j.subject || '(no subject)'}</span>
                       {' · '}
@@ -1279,89 +1377,66 @@ export function StaffNewsletterPanel() {
           )}
         </div>
 
-        <div data-help-shot="send-actions" className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy || (!subject.trim() && !body.trim() && !useBeats)}
-            onClick={() => void publishToSite()}
+        {status ? (
+          <div
+            role="status"
+            className="rounded-xl border border-[var(--brand-green)]/30 bg-[#F3F9F4] px-4 py-3 text-sm text-[#1A1A1A] whitespace-pre-line"
           >
-            Publish to site & copy link
-          </Button>
-          {sendAudience === 'scoop' ? (
-            <>
-              <Button
-                type="button"
-                disabled={busy || (!subject && !body)}
-                className="text-white"
-                style={{ backgroundColor: 'var(--brand-green)' }}
-                onClick={() => void openWhatsApp()}
-              >
-                Copy + open WhatsApp
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy || (!subject && !body)}
-                onClick={() => void postScoopToPortal()}
-              >
-                Post scoop to portal
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy || (!subject && !body)}
-                onClick={() => void preview()}
-              >
-                Preview free + signup recipients
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy || (!subject && !body)}
-                onClick={() => void sendEmail()}
-              >
-                Email scoop link
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy || !subject || !body}
-                onClick={() => void preview()}
-              >
-                Preview recipients
-              </Button>
-              <Button
-                type="button"
-                disabled={busy || !subject || !body}
-                className="text-white"
-                style={{ backgroundColor: 'var(--brand-green)' }}
-                onClick={() => void sendEmail()}
-              >
-                Send email now
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy || (!subject && !body)}
-                onClick={() => void openWhatsApp()}
-              >
-                Copy + open WhatsApp
-              </Button>
-            </>
-          )}
-        </div>
-        {status ? <p className="text-sm text-[#1A1A1A] whitespace-pre-line">{status}</p> : null}
+            {status}
+          </div>
+        ) : null}
       </StaffNewsletterStep>
 
-      <StaffNewsletterCssLibrary
-        canEditSiteTemplates={canEditSiteCss}
-        activeCss={liveCss}
-        onApplyCss={(css) => setLiveCss(css)}
-      />
+      <details className="rounded-xl border border-[var(--border)] bg-white">
+        <summary className="cursor-pointer list-none px-5 py-4 text-sm font-semibold text-[#1B2A4A] [&::-webkit-details-marker]:hidden">
+          Optional: email look, tracking & CSS
+          <span className="ml-2 text-xs font-normal text-[#5A6070]">
+            Branding, UTM, open/click tracking, CSS library
+          </span>
+        </summary>
+        <div className="space-y-4 border-t border-[var(--border)] px-5 py-4">
+          {brandingHint ? (
+            <p className="text-xs text-[#5A6070]">Live branding: {brandingHint}</p>
+          ) : null}
+          <div id="newsletter-branding">
+            <StaffNewsletterBrandingPanel embedded />
+          </div>
+          <div className="grid sm:grid-cols-2 gap-2">
+            <label className="text-xs text-[#5A6070]">
+              UTM campaign (GA4)
+              <input
+                value={utmCampaign}
+                onChange={(e) => setUtmCampaign(e.target.value)}
+                placeholder="e.g. fall-enrichment-2026"
+                className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm"
+              />
+            </label>
+            <div className="flex flex-col gap-2 justify-end text-xs text-[#5A6070]">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={trackClicks}
+                  onChange={(e) => setTrackClicks(e.target.checked)}
+                />
+                Track link clicks
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={trackOpens}
+                  onChange={(e) => setTrackOpens(e.target.checked)}
+                />
+                Track opens (pixel; auto-on with hero graphic)
+              </label>
+            </div>
+          </div>
+          <StaffNewsletterCssLibrary
+            canEditSiteTemplates={canEditSiteCss}
+            activeCss={liveCss}
+            onApplyCss={(css) => setLiveCss(css)}
+          />
+        </div>
+      </details>
     </section>
   )
 }

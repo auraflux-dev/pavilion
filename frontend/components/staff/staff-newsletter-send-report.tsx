@@ -55,14 +55,14 @@ export function StaffNewsletterSendReportPanel() {
           .filter((row) => row.active !== false)
           .map((row) => ({
             id: String(row.id ?? ''),
-            subject: String(row.subject ?? '(no subject)'),
+            subject: String(row.subject ?? '').trim() || 'Newsletter send',
             utmCampaign: String(row.utmCampaign ?? ''),
             recipientCount: num(row.recipientCount),
             deliveredCount: num(row.deliveredCount),
             failedCount: num(row.failedCount),
             openCount: num(row.openCount),
             clickCount: num(row.clickCount),
-            sentAt: String(row.sentAt ?? ''),
+            sentAt: String(row.sentAt ?? row._createdDate ?? ''),
             sentByEmail: String(row.sentByEmail ?? ''),
             linksJson: String(row.linksJson ?? '[]'),
           }))

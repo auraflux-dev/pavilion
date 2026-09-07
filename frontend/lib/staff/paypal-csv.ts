@@ -20,8 +20,9 @@ export function classifyPaypal(type: string, name: string): string | null {
   if (/nova/.test(t)) return 'nova_math'
   if (/sponsor/.test(t)) return 'sponsorships'
   if (/ticket|event/.test(t)) return 'events_other'
-  if (/express checkout|website payment|mobile payment|invoice|payment received|mass pay/.test(t)) {
-    return 'unclassified_income'
+  // T0007 Payment received not already in Staff Payments → treat as gift/other inflow
+  if (/^t0007\b/.test(type.toLowerCase()) || /payment received|express checkout|website payment|mobile payment|invoice|mass pay/.test(t)) {
+    return 'gifts'
   }
-  return 'unclassified_income'
+  return 'gifts'
 }

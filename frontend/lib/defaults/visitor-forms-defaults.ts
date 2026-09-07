@@ -15,6 +15,22 @@ export const NEWSLETTER_SIGNUP_DEFAULTS: Record<string, string> = {
   'signup.error': 'Something went wrong. Please try again.',
 }
 
+/** Newsletter page perks (left column). */
+
+export const NEWSLETTER_PAGE_DEFAULTS: Record<string, string> = {
+  'perks.title': "What you'll get",
+  'perks.1.title': 'Event Reminders',
+  'perks.1.body': 'Never miss Dance Night, NOVA Math, PTO meetings, or any school event.',
+  'perks.2.title': 'Program Announcements',
+  'perks.2.body': 'Be first to know when enrichment program registration opens.',
+  'perks.3.title': 'Monthly Recap',
+  'perks.3.body': "A concise summary of what happened and what's coming up next month.",
+  'perks.4.title': 'Important Updates',
+  'perks.4.body': 'School store news, fundraiser launches, and board announcements.',
+  'perks.footer':
+    'No spam. Unsubscribe at any time. We send 1 to 2 emails per month.',
+}
+
 /** /contact general inquiry form. */
 
 export const CONTACT_FORM_DEFAULTS: Record<string, string> = {
@@ -70,14 +86,18 @@ export const FUNDRAISING_PAGE_DEFAULTS: Record<string, string> = {
   'hero.of': 'of',
   'hero.goalPct': '{pct}% of annual goal',
   'hero.updated': 'Updated from live totals',
+  'hero.raisedVsSpent':
+    'Raised is money in this school year. Spent below is money out so far — they will not match until year end.',
   'initiatives.eyebrow': 'By Initiative',
   'initiatives.title': 'Every Way You Can Help',
   'initiatives.body':
-    'Memberships, Cove Digital Cards, event tickets, and volunteering. It all adds up.',
+    'Memberships, Cove Digital Cards, event tickets, gifts, and volunteering. Cards below add up to Total Raised (volunteer hours are separate).',
   'allocations.eyebrow': 'Transparency',
   'allocations.title': 'Where the Funds Go',
   'allocations.body':
-    '100% of gifts support SHMS PTO programs for Stone Hill students, not the school district.',
+    'Spent so far this school year, by category. Unspent stays in the PTO bank account for instructor pay, restock, and events still ahead. 100% supports SHMS PTO programs for Stone Hill students, not the school district.',
+  'allocations.unspentLabel': 'Still available (raised − spent to date)',
+  'allocations.spentLabel': 'Spent to date',
   'sponsors.eyebrow': 'Thank you',
   'sponsors.title': 'Our sponsors',
   'sponsors.empty': 'Sponsor logos appear here when published in CMS.',

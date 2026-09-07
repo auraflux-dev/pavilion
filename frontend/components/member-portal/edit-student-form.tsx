@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Pencil, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useFormString } from '@/components/member-portal/portal-form-copy-context'
+import { CmsPortal, useFormCopyLookup } from '@/components/member-portal/portal-form-copy-context'
 
 export interface Student {
   id: string
@@ -51,7 +51,7 @@ export function EditStudentForm({
   onOpenChange,
   hideTrigger = false,
 }: Props) {
-  const t = useFormString
+  const t = useFormCopyLookup()
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
   const open = openProp ?? uncontrolledOpen
   const setOpen = (next: boolean) => {
@@ -131,7 +131,8 @@ export function EditStudentForm({
         onClick={() => setOpen(true)}
         className="text-xs font-semibold text-[var(--brand-green)] hover:underline inline-flex items-center gap-1"
       >
-        <Pencil className="w-3 h-3" /> {t('editStudent.trigger')}
+        <Pencil className="w-3 h-3" />{' '}
+        <CmsPortal k="editStudent.trigger" fallback={t('editStudent.trigger')} />
       </button>
     )
   }
@@ -147,7 +148,7 @@ export function EditStudentForm({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelCls} htmlFor={`edit-student-first-${student.id}`}>
-            {t('editStudent.firstName')}
+            <CmsPortal k="editStudent.firstName" fallback={t('editStudent.firstName')} />
           </label>
           <input
             id={`edit-student-first-${student.id}`}
@@ -159,7 +160,7 @@ export function EditStudentForm({
         </div>
         <div>
           <label className={labelCls} htmlFor={`edit-student-last-${student.id}`}>
-            {t('editStudent.lastName')}
+            <CmsPortal k="editStudent.lastName" fallback={t('editStudent.lastName')} />
           </label>
           <input
             id={`edit-student-last-${student.id}`}
@@ -171,7 +172,9 @@ export function EditStudentForm({
         </div>
       </div>
       <div>
-        <p className={labelCls}>{t('editStudent.grade')}</p>
+        <p className={labelCls}>
+          <CmsPortal k="editStudent.grade" fallback={t('editStudent.grade')} />
+        </p>
         <div className="flex gap-2">
           {grades.map((g) => (
             <button
@@ -190,18 +193,21 @@ export function EditStudentForm({
       </div>
 
       <p className="text-[11px] font-semibold uppercase tracking-wide text-[#5A6070] pt-1">
-        {t('editStudent.safetyHeading')}
+        <CmsPortal k="editStudent.safetyHeading" fallback={t('editStudent.safetyHeading')} />
       </p>
       {!(parentPhone.trim() && emergencyContact.trim() && emergencyPhone.trim() && pickupAuthorized.trim()) ? (
         <p className="text-xs font-semibold text-amber-800">
-          {t('editStudent.safetyIncomplete')}
+          <CmsPortal k="editStudent.safetyIncomplete" fallback={t('editStudent.safetyIncomplete')} />
         </p>
       ) : allergies.trim() ? (
-        <p className="text-xs text-[#5A6070]">{t('editStudent.allergyPrefix')} {allergies.trim()}</p>
+        <p className="text-xs text-[#5A6070]">
+          <CmsPortal k="editStudent.allergyPrefix" fallback={t('editStudent.allergyPrefix')} />{' '}
+          {allergies.trim()}
+        </p>
       ) : null}
       <div>
         <label className={labelCls} htmlFor={`edit-student-phone-${student.id}`}>
-          {t('editStudent.parentPhone')}
+          <CmsPortal k="editStudent.parentPhone" fallback={t('editStudent.parentPhone')} />
         </label>
         <input
           id={`edit-student-phone-${student.id}`}
@@ -212,7 +218,7 @@ export function EditStudentForm({
       </div>
       <div>
         <label className={labelCls} htmlFor={`edit-student-secondary-${student.id}`}>
-          {t('editStudent.secondaryPhone')}
+          <CmsPortal k="editStudent.secondaryPhone" fallback={t('editStudent.secondaryPhone')} />
         </label>
         <input
           id={`edit-student-secondary-${student.id}`}
@@ -224,7 +230,7 @@ export function EditStudentForm({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelCls} htmlFor={`edit-student-ec-name-${student.id}`}>
-            {t('editStudent.emergencyContact')}
+            <CmsPortal k="editStudent.emergencyContact" fallback={t('editStudent.emergencyContact')} />
           </label>
           <input
             id={`edit-student-ec-name-${student.id}`}
@@ -235,7 +241,7 @@ export function EditStudentForm({
         </div>
         <div>
           <label className={labelCls} htmlFor={`edit-student-ec-phone-${student.id}`}>
-            {t('editStudent.emergencyPhone')}
+            <CmsPortal k="editStudent.emergencyPhone" fallback={t('editStudent.emergencyPhone')} />
           </label>
           <input
             id={`edit-student-ec-phone-${student.id}`}
@@ -247,7 +253,7 @@ export function EditStudentForm({
       </div>
       <div>
         <label className={labelCls} htmlFor={`edit-student-allergies-${student.id}`}>
-          {t('editStudent.allergies')}
+          <CmsPortal k="editStudent.allergies" fallback={t('editStudent.allergies')} />
         </label>
         <input
           id={`edit-student-allergies-${student.id}`}
@@ -259,7 +265,7 @@ export function EditStudentForm({
       </div>
       <div>
         <label className={labelCls} htmlFor={`edit-student-medical-${student.id}`}>
-          {t('editStudent.medical')}
+          <CmsPortal k="editStudent.medical" fallback={t('editStudent.medical')} />
         </label>
         <input
           id={`edit-student-medical-${student.id}`}
@@ -270,7 +276,7 @@ export function EditStudentForm({
       </div>
       <div>
         <label className={labelCls} htmlFor={`edit-student-meds-${student.id}`}>
-          {t('editStudent.medications')}
+          <CmsPortal k="editStudent.medications" fallback={t('editStudent.medications')} />
         </label>
         <input
           id={`edit-student-meds-${student.id}`}
@@ -281,7 +287,7 @@ export function EditStudentForm({
       </div>
       <div>
         <label className={labelCls} htmlFor={`edit-student-pickup-${student.id}`}>
-          {t('editStudent.pickup')}
+          <CmsPortal k="editStudent.pickup" fallback={t('editStudent.pickup')} />
         </label>
         <textarea
           id={`edit-student-pickup-${student.id}`}
@@ -298,7 +304,7 @@ export function EditStudentForm({
           checked={selfRelease}
           onChange={(e) => setSelfRelease(e.target.checked)}
         />
-        {t('editStudent.selfRelease')}
+        <CmsPortal k="editStudent.selfRelease" fallback={t('editStudent.selfRelease')} />
       </label>
 
       {error ? <p role="alert" className="text-xs font-medium text-red-700">{error}</p> : null}
@@ -309,7 +315,9 @@ export function EditStudentForm({
           className="text-white text-xs"
           style={{ backgroundColor: 'var(--brand-green)' }}
         >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : t('editStudent.save')}
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+            <CmsPortal k="editStudent.save" fallback={t('editStudent.save')} />
+          )}
         </Button>
         <Button
           type="button"
@@ -317,7 +325,7 @@ export function EditStudentForm({
           className="text-xs"
           onClick={() => setOpen(false)}
         >
-          {t('editStudent.cancel')}
+          <CmsPortal k="editStudent.cancel" fallback={t('editStudent.cancel')} />
         </Button>
       </div>
     </form>

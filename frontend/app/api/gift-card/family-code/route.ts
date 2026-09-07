@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    const { requireCoveUnlocked } = await import('@/lib/onboarding-checklist')
+    const { requireCoveUnlocked } = await import('@/lib/onboarding-checklist-server')
     const gate = await requireCoveUnlocked(householdEmail)
     if (!gate.ok) {
       return NextResponse.json({
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
     if (family.length === 0) {
       return NextResponse.json({ error: 'Add a student first' }, { status: 400 })
     }
-    const { requireCoveUnlocked } = await import('@/lib/onboarding-checklist')
+    const { requireCoveUnlocked } = await import('@/lib/onboarding-checklist-server')
     const gate = await requireCoveUnlocked(householdEmail)
     if (!gate.ok) {
       return NextResponse.json({ error: gate.error, code: 'ONBOARDING_INCOMPLETE' }, { status: 403 })

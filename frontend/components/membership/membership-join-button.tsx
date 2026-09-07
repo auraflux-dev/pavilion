@@ -194,14 +194,24 @@ function JoinInner({ tierId, tierName, price }: Props) {
           onClick={startCheckout}
           disabled={relation === 'loading' || (needsShirt && !shirt)}
         >
-          {relation === 'loading' ? `Join ${tierName}` : label}
-          <ArrowRight
-            className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
-            aria-hidden="true"
-          />
+          {relation === 'loading'
+            ? `Checking ${tierName}…`
+            : needsShirt && !shirt
+              ? `Choose shirt size to unlock`
+              : label}
+          {!(needsShirt && !shirt) ? (
+            <ArrowRight
+              className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          ) : null}
         </Button>
         {needsShirt && !shirt ? (
-          <p className="text-[11px] text-[#5A6070]">Choose a design and size to continue.</p>
+          <p className="text-[11px] font-medium text-[#1B6B45]">
+            {showUpgrade
+              ? `Select a design and size above, then upgrade to ${tierName}.`
+              : 'Select a design and size above to continue.'}
+          </p>
         ) : null}
         <p className="text-[11px] text-[#5A6070]">{subtitle}</p>
       </div>

@@ -93,8 +93,12 @@ export const PROGRAM_UI_DEFAULTS: Record<string, string> = {
     'Add a student in the Member Portal first, including emergency contact and pick-up details.',
   'register.studentLabel': 'Student',
   'register.selectStudent': 'Select a student',
-  'register.couponLabel': 'Coupon code (optional)',
-  'register.couponPlaceholder': 'Enter code',
+  'register.couponLabel': 'Discount code',
+  'register.couponPlaceholder': 'Optional override',
+  'register.discountHint':
+    'Membership tier % applies automatically.\nBoard 75% Fall and Spring codes (one enrichment class each) apply automatically to the matching season — including Spring companion in a Fall+Spring cart.\nOnly paste a code here if you need to override.',
+  'register.profileHint':
+    'Registration needs parent phone, emergency contact, and authorized pick-up on the student profile. Edit those in Member Portal → Edit student.',
   'register.addToCart': 'Add to cart · {total}',
   'register.addToCartNote': 'Added to cart.\nCheck out anytime from the bag icon.',
   'register.payNow': 'Pay now · {total}',

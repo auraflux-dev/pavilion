@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Pencil, Loader2, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useFormString } from '@/components/member-portal/portal-form-copy-context'
+import { CmsPortal, useFormCopyLookup } from '@/components/member-portal/portal-form-copy-context'
 import { interpolateCopy } from '@/lib/api/portal-form-copy-shared'
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function EditAccountForm({ initialName, email, phone = '', onUpdated, onSaved }: Props) {
-  const t = useFormString
+  const t = useFormCopyLookup()
   const [open, setOpen] = useState(false)
   const parts = initialName.split(' ')
   const [firstName, setFirstName] = useState(parts[0] ?? '')
@@ -59,11 +59,11 @@ export function EditAccountForm({ initialName, email, phone = '', onUpdated, onS
         className="inline-flex items-center gap-1 text-xs font-bold text-[var(--brand-green)] hover:underline"
       >
         <Pencil className="w-3 h-3" />
-        {t('editProfile.cta')}
+        <CmsPortal k="editProfile.cta" fallback={t('editProfile.cta')} />
         {saved ? (
           <span className="inline-flex items-center gap-1 text-green-700 font-semibold">
             <CheckCircle2 className="w-3.5 h-3.5" aria-hidden />
-            {t('editProfile.saved')}
+            <CmsPortal k="editProfile.saved" fallback={t('editProfile.saved')} />
           </span>
         ) : null}
       </button>
@@ -72,7 +72,9 @@ export function EditAccountForm({ initialName, email, phone = '', onUpdated, onS
 
   return (
     <form onSubmit={handleSubmit} noValidate className="rounded-xl border border-[var(--border)] p-4 mb-4 bg-[#FAFCF9] space-y-3">
-      <p className="text-sm font-bold text-[#1A1A1A]">{t('editProfile.title')}</p>
+      <p className="text-sm font-bold text-[#1A1A1A]">
+        <CmsPortal k="editProfile.title" fallback={t('editProfile.title')} />
+      </p>
       <div className="grid grid-cols-2 gap-2">
         <input
           value={firstName}
@@ -99,15 +101,21 @@ export function EditAccountForm({ initialName, email, phone = '', onUpdated, onS
         className="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg"
       />
       <p className="text-[11px] text-[#5A6070]">
-        {interpolateCopy(t('editProfile.emailHint'), { email })}
+        <CmsPortal
+          k="editProfile.emailHint"
+          fallback={interpolateCopy(t('editProfile.emailHint'), { email })}
+          vars={{ email }}
+        />
       </p>
       {error ? <p role="alert" className="text-xs font-medium text-red-700">{error}</p> : null}
       <div className="flex gap-2">
         <Button type="submit" disabled={saving} className="text-white text-xs" style={{ backgroundColor: 'var(--brand-green)' }}>
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : t('editProfile.save')}
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+            <CmsPortal k="editProfile.save" fallback={t('editProfile.save')} />
+          )}
         </Button>
         <Button type="button" variant="outline" className="text-xs" onClick={() => setOpen(false)}>
-          {t('editProfile.cancel')}
+          <CmsPortal k="editProfile.cancel" fallback={t('editProfile.cancel')} />
         </Button>
       </div>
     </form>

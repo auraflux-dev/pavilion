@@ -475,10 +475,26 @@ export async function executeNewsletterEmail(
   if (!dryRun && newsletterSendId) {
     try {
       const client = getWixClient()
+      const existing = (await client.items
+        .get('NewsletterSends', newsletterSendId)
+        .catch(() => null)) as Record<string, unknown> | null
       await client.items.update('NewsletterSends', {
         _id: newsletterSendId,
+        subject: existing?.subject ?? null,
+        body: existing?.body ?? null,
+        linksJson: existing?.linksJson ?? null,
+        utmCampaign: existing?.utmCampaign ?? null,
+        tier: existing?.tier ?? null,
+        grade: existing?.grade ?? null,
+        recipientCount: existing?.recipientCount ?? null,
         deliveredCount: sendResult.sent,
         failedCount: sendResult.failed,
+        openCount: existing?.openCount ?? 0,
+        clickCount: existing?.clickCount ?? 0,
+        sentAt: existing?.sentAt ?? null,
+        sentByEmail: existing?.sentByEmail ?? null,
+        templateId: existing?.templateId ?? null,
+        active: existing?.active === false ? false : true,
       })
     } catch (err) {
       console.warn('[newsletter-execute] delivered counts', err)

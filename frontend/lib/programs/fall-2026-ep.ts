@@ -89,11 +89,11 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
     vendor: 'Missy Spears',
     dates: FALL_2026_TUESDAY_DATES,
     skips: 'Tue Nov 3 student holiday',
-    suggestedMailbox: 'ep-businessplan@shmspto.org',
+    suggestedMailbox: 'ep-youngentrepreneurs@shmspto.org',
   },
   {
     id: 'essay',
-    name: 'Essay Writing',
+    name: 'Essay Writing & Academic Composition',
     publicSlug: 'essay',
     cmsNameIncludes: ['essay'],
     dayOfWeek: 'Tuesday',
@@ -103,7 +103,7 @@ export const FALL_2026_EP_CLASSES: Fall2026EpClass[] = [
     vendor: 'Lumi (Andrew Martineau)',
     dates: FALL_2026_TUESDAY_DATES,
     skips: 'Tue Nov 3 student holiday',
-    suggestedMailbox: '',
+    suggestedMailbox: 'ep-essaycomposition@shmspto.org',
   },
   {
     id: 'robotics',

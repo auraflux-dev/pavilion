@@ -66,13 +66,15 @@ export type PortalCopy = {
 
 export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   paidTitle: 'Paid PTO membership active',
-  paidBody: 'Thanks for supporting SHMS PTO.\nBenefits show on each student below.',
+  paidBody: 'Thanks for supporting SHMS PTO.',
   freeTitle: 'Free parent account',
-  freeBody: 'Add students below.\nUpgrade to Reef, Lagoon, or Tide anytime.',
-  emptyTitle: 'Add your first student',
-  emptyBody: 'Programs, the store card, and membership unlock after you add a student.\nUse Add student below. It takes about a minute.',
+  freeBody:
+    'Add your students below.\nUpgrade to Reef, Lagoon, or Tide anytime.',
+  emptyTitle: 'Welcome to the SHMS PTO',
+  emptyBody:
+    'Your free parent account is ready. Add a student to track programs, Cove Digital Card balance, and paid membership status.',
   upgradeBody:
-    'Paid members get Cove credit and enrichment discounts.\nLagoon and Tide include event refreshments.',
+    'Paid members get Cove Digital Card credit, enrichment discounts, and priority enrichment registration when offered. Lagoon and Tide also include free refreshments at PTO events.',
   viewMemberships: 'View paid memberships',
 
   calendarTitle: 'Calendar & Messages',
@@ -86,10 +88,12 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   loadError: 'Could not load your portal.',
 
   calendarEmptyTitle: 'No dates yet',
-  calendarEmptyBody: 'Session times and school events show here after you enroll.',
+  calendarEmptyBody:
+    'After you enroll a student in a program, session times and school events show up here.',
   calendarEmptyCta: 'Browse programs',
   messagesEmptyTitle: 'Inbox empty',
-  messagesEmptyBody: 'Class notes and PTO updates land here.\nNeed help now? Open Portal Help from the top of this page.',
+  messagesEmptyBody:
+    'Instructors can send updates here after your student is enrolled: class reminders, location changes, and more.',
 
   memberSince: 'Member since',
   studentsLabel: 'Students',
@@ -99,11 +103,12 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   storeCardsLabel: 'Family Cove Digital Card',
   storeCardsHint: 'Current Balance',
   recentBuysLabel: 'Recent buys',
-  recentBuysHint: 'Purchases',
+  recentBuysHint: 'Payment History',
   ctaLoadCard: 'Load Cove Digital Card',
   ctaSpiritWear: 'Spirit wear',
   ctaPrograms: 'Programs',
-  purchasesEmpty: 'Membership, program, and Cove loads will list here.',
+  purchasesEmpty:
+    'Purchases from the site (memberships, programs, Cove Digital Card loads) will list here so you can see what each student is signed up for.',
 
   addStudentCta: 'Add a student',
   addStudentTitle: 'Add a student',
@@ -113,9 +118,11 @@ export const PORTAL_COPY_DEFAULTS: PortalCopy = {
   addStudentSubmit: 'Add student',
   cancel: 'Cancel',
   addStudentError: 'Could not add student. Please try again.',
-  loadCardHelp: 'Load $20, $40, $75, or any whole dollar amount.',
-  paymentMethodsTitle: 'Saved Payment Methods',
-  paymentMethodsBody: 'Optional card on file for Cove reloads and auto top-off.',
+  loadCardHelp:
+    'One family Cove Digital Card and balance. Choose $20 / $40 / $75, or enter any whole dollar amount. Pay with credit/debit card or PayPal. Saving a payment card is optional for faster reloads and auto top off.',
+  paymentMethodsTitle: 'How you pay',
+  paymentMethodsBody:
+    'Snack window: Cove Digital Card.\nOnline: credit/debit or PayPal.\nSaving a card is optional.',
 }
 
 /** Parse `key|value` lines (store-how style). Value may contain `|`. */

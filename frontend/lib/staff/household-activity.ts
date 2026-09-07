@@ -85,6 +85,43 @@ export async function openHousehold(opts: {
   return null
 }
 
+export type HouseholdSharedLogin = {
+  email: string
+  status: string
+  primaryEmail: string
+  invitedAt: string | null
+  acceptedAt: string | null
+}
+
+export async function loadHouseholdSharedLogins(household: Household): Promise<HouseholdSharedLogin[]> {
+  const { listGuardianRowsForPrimary } = await import('@/lib/family-guardians')
+  const primaries = [
+    ...new Set(
+      [household.primaryEmail, ...household.emails]
+        .map((e) => String(e || '').trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ]
+  const byKey = new Map<string, HouseholdSharedLogin>()
+  for (const primary of primaries) {
+    const rows = await listGuardianRowsForPrimary(primary)
+    for (const row of rows) {
+      if (row.status === 'revoked' || row.active === false) continue
+      const email = String(row.guardianEmail ?? '').trim().toLowerCase()
+      if (!email) continue
+      const key = `${primary}|${email}`
+      byKey.set(key, {
+        email,
+        status: String(row.status ?? ''),
+        primaryEmail: primary,
+        invitedAt: row.invitedAt ? String(row.invitedAt) : null,
+        acceptedAt: row.acceptedAt ? String(row.acceptedAt) : null,
+      })
+    }
+  }
+  return [...byKey.values()]
+}
+
 export async function loadHouseholdActivity(household: Household): Promise<{
   payments: HouseholdPaymentRow[]
   enrollments: HouseholdEnrollmentRow[]

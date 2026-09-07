@@ -46,7 +46,7 @@ export const DONATE_FORM_DEFAULTS: Record<string, string> = {
 }
 
 export const RFC_DEFAULTS: Record<string, string> = {
-  'rfc.earlyBirdBadge': 'Early bird through Aug 15 · Race day Sun Sep 13',
+  'rfc.earlyBirdBadge': 'Early bird through Aug 31 · Race day Sun Sep 13',
   'rfc.raceDayBadge': 'Race day · Sunday Sep 13',
   'rfc.eyebrow': 'Community event',
   'rfc.title': 'Run for Charity 1K & 5K',
@@ -63,8 +63,8 @@ export const RFC_DEFAULTS: Record<string, string> = {
   'rfc.raceDetails': '1K & 5K · medal, race shirt, post-race snacks',
   'rfc.pricingHeadingEarly': 'Early bird pricing',
   'rfc.pricingHeading': 'Registration pricing',
-  'rfc.earlyBirdLine': 'Adults $25 · Kids $15 · through Aug 15',
-  'rfc.afterEarlyBird': 'After Aug 15: Adults $30 · Kids $20',
+  'rfc.earlyBirdLine': '13 & under $15 · 14+ $25 · through Aug 31',
+  'rfc.afterEarlyBird': 'After Aug 31: Adults $30 · Kids $20',
   'rfc.standardLine': 'Adults $30 · Kids $20',
 }
 

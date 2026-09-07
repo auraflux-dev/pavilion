@@ -11,7 +11,7 @@ import { ProgramUiCopyBoundary } from '@/components/programs/program-ui-copy-bou
 import { PortalBusinessOwnerForm } from '@/components/member-portal/portal-business-owner-form'
 import { getActiveSponsors } from '@/lib/api/sponsors'
 import { DEFAULT_SPONSORSHIP_INBOXES, parseStaffInboxes } from '@/lib/staff/inbox'
-import { ArrowRight, Heart, TrendingUp, Users, ShoppingBag, Ticket, Star, RefreshCw, Handshake, type LucideIcon } from 'lucide-react'
+import { ArrowRight, Heart, TrendingUp, Users, ShoppingBag, Ticket, Star, RefreshCw, Handshake, Gift, type LucideIcon } from 'lucide-react'
 import { DonateBlock } from '@/components/donate/donate-block'
 import { SponsorshipPackages } from '@/components/fundraising/sponsorship-packages'
 import { FundraisingSectionNav } from '@/components/jump-nav/public-section-navs'
@@ -22,7 +22,7 @@ import { getPageSections } from '@/lib/api/page-sections'
 import { PageSectionsRenderer } from '@/components/cms/page-sections-renderer'
 
 const ICON_MAP: Record<string, LucideIcon> = {
-  Star, ShoppingBag, Users, Heart, TrendingUp, Ticket, ArrowRight, RefreshCw,
+  Star, ShoppingBag, Users, Heart, TrendingUp, Ticket, ArrowRight, RefreshCw, Gift, Handshake,
 }
 
 function normalizeFundraisingEyebrow(raw: string) {
@@ -97,6 +97,8 @@ export default async function FundraisingPage() {
     sponsorshipRaised
   const overallPct  = pct(totalRaised, ANNUAL_GOAL)
 
+  const unspent = Math.max(0, Math.round(totalRaised - allocations.totalSpent))
+
   const initiatives = [
     {
       id: 'membership',
@@ -161,10 +163,21 @@ export default async function FundraisingPage() {
       cta: 'Become a Sponsor',
     },
     {
+      id: 'other',
+      icon: Gift,
+      label: 'Other gifts & sales',
+      description:
+        'Donations, unclassified bank deposits, enrichment fees, and cash-box deposits above rung Cove cash sales (forgotten cash rings).',
+      raised: totals.other,
+      goal: goals.other,
+      href: '/fundraising#donate',
+      cta: 'Make a gift',
+    },
+    {
       id: 'volunteer',
       icon: Users,
       label: 'Volunteer Hours',
-      description: 'We track volunteer hours as a community impact metric. Every hour has a real dollar value to our school.',
+      description: 'Community impact hours logged by the board. Hours are not dollars and are not part of Total Raised above.',
       raised: volunteerHoursRaised,
       goal:   volunteerHoursGoal,
       href: '/volunteer',
@@ -198,15 +211,15 @@ export default async function FundraisingPage() {
               className="inline-block rounded-2xl px-8 py-6 text-left w-full max-w-lg"
               style={{ backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
             >
-              <div className="flex items-end gap-6 mb-4">
-                <div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-6 mb-4 min-w-0">
+                <div className="min-w-0">
                   <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-0.5">{fs('hero.totalLabel')}</p>
-                  <p className="text-4xl font-bold text-white">{fmtDollars(totalRaised)}</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-white tabular-nums break-words">{fmtDollars(totalRaised)}</p>
                 </div>
-                <div className="pb-1 text-white/40 text-lg">{fs('hero.of')}</div>
-                <div>
+                <div className="hidden sm:block pb-1 text-white/40 text-lg">{fs('hero.of')}</div>
+                <div className="min-w-0">
                   <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-0.5">{fs('hero.goalLabel')}</p>
-                  <p className="text-4xl font-bold" style={{ color: 'var(--brand-gold)' }}>{fmtDollars(ANNUAL_GOAL)}</p>
+                  <p className="text-3xl sm:text-4xl font-bold tabular-nums break-words" style={{ color: 'var(--brand-gold)' }}>{fmtDollars(ANNUAL_GOAL)}</p>
                 </div>
               </div>
               <div className="w-full bg-white/20 rounded-full h-3 mb-2">
@@ -219,15 +232,20 @@ export default async function FundraisingPage() {
                   aria-valuemax={100}
                 />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between min-w-0">
                 <p className="text-white/70 text-sm font-medium">{fs('hero.goalPct', { pct: overallPct })}</p>
-                <p className="text-white/40 text-xs flex items-center gap-1">
-                  <RefreshCw className="w-3 h-3" aria-hidden="true" />
-                  {data.fetchedAt
-                    ? `Figures as of ${data.fetchedAt.replace('T', ' ').slice(0, 16)} UTC`
-                    : 'Waiting for first Square or Plaid sync'}
+                <p className="text-white/40 text-xs flex items-center gap-1 min-w-0">
+                  <RefreshCw className="w-3 h-3 shrink-0" aria-hidden="true" />
+                  <span className="break-words">
+                    {data.fetchedAt
+                      ? `Figures as of ${data.fetchedAt.replace('T', ' ').slice(0, 16)} UTC`
+                      : 'Waiting for first Square or Plaid sync'}
+                  </span>
                 </p>
               </div>
+              <p className="text-white/55 text-xs mt-3 leading-relaxed">
+                {fs('hero.raisedVsSpent')}
+              </p>
             </div>
           </div>
         </section>
@@ -291,13 +309,15 @@ export default async function FundraisingPage() {
                     <div className="mb-4">
                       <p className="text-sm font-semibold" style={{ color: 'var(--brand-green)' }}>
                         {raisedDisplay}
-                        <span className="text-[#5A6070] font-normal"> raised</span>
+                        <span className="text-[#5A6070] font-normal">
+                          {isHrs ? ' logged' : ' raised'}
+                        </span>
                       </p>
                     </div>
 
                     {isHrs && (
                       <p className="text-xs text-[#5A6070] mb-3 italic">
-                        Hours are updated manually by the PTO board each month.
+                        Hours are updated manually by the PTO board each month. Not included in Total Raised.
                       </p>
                     )}
 
@@ -332,6 +352,20 @@ export default async function FundraisingPage() {
               <p className="text-[#5A6070] mt-3 whitespace-pre-line">
                 {fs('allocations.body')}
               </p>
+              <div className="mt-6 flex flex-col sm:flex-row sm:justify-center gap-3 sm:gap-8 text-sm">
+                <p>
+                  <span className="text-[#5A6070]">{fs('allocations.spentLabel')}: </span>
+                  <span className="font-semibold" style={{ color: 'var(--brand-green)' }}>
+                    {fmtDollars(allocations.totalSpent)}
+                  </span>
+                </p>
+                <p>
+                  <span className="text-[#5A6070]">{fs('allocations.unspentLabel')}: </span>
+                  <span className="font-semibold" style={{ color: 'var(--brand-green)' }}>
+                    {fmtDollars(unspent)}
+                  </span>
+                </p>
+              </div>
             </div>
 
             <div className="space-y-5">

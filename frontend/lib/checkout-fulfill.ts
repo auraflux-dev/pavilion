@@ -325,6 +325,7 @@ export async function resolveCheckoutIntent(
     const { enrichmentDiscountPercent } = await import('@/lib/membership-entitlements')
     const { normalizeMembershipTier } = await import('@/lib/staff/members-roster')
     const { isValidSeasonAddon } = await import('@/lib/programs/season-companion')
+    const { resolveProgramSeason, CATALOG_SEASON_LABELS } = await import('@/lib/programs/season')
     const programId = String(intent.programId ?? '').trim()
     const studentId = String(intent.studentId ?? '').trim()
     const addonIds = Array.from(
@@ -415,7 +416,8 @@ export async function resolveCheckoutIntent(
     }
     // Board 75%: one code per season — Fall code on Fall class, Spring code on Spring
     // companion (even when checking out both in one cart during Fall calendar months).
-    const primarySeason = String((program as { season?: string }).season ?? '')
+    const primarySeason = resolveProgramSeason(program)
+    const seasonLabel = CATALOG_SEASON_LABELS[primarySeason]
     const primaryApplied = await applyCheckoutDiscount({
       scope: 'program',
       listAmount: fee,
@@ -468,30 +470,43 @@ export async function resolveCheckoutIntent(
       ...(discount?.consumeId ? [discount.consumeId] : []),
       ...addonConsumeIds,
     ]
+    const seasonBit =
+      addons.length > 0
+        ? [
+            seasonLabel,
+            ...addons.map(
+              (a) =>
+                CATALOG_SEASON_LABELS[a.season as keyof typeof CATALOG_SEASON_LABELS] ||
+                a.season ||
+                'companion',
+            ),
+          ].join(' + ')
+        : seasonLabel
+    const discountBit =
+      addons.length > 0
+        ? appliedPercent > 0 || addonDiscountBits.length
+          ? ` (${[
+              appliedPercent > 0 ? `primary ${appliedPercent}%` : '',
+              ...addonDiscountBits,
+            ]
+              .filter(Boolean)
+              .join(' · ')})`
+          : ''
+        : appliedPercent > 0
+          ? ` (${appliedPercent}% discount)`
+          : ''
 
     return {
       kind,
       amount,
       amountCents: Math.round(amount * 100),
-      description:
-        addons.length > 0
-          ? `Enrichment: ${names}${
-              appliedPercent > 0 || addonDiscountBits.length
-                ? ` (${[
-                    appliedPercent > 0 ? `primary ${appliedPercent}%` : '',
-                    ...addonDiscountBits,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')})`
-                : ''
-            }`
-          : appliedPercent > 0
-            ? `Enrichment: ${program.name} (${appliedPercent}% discount)`
-            : `Enrichment: ${program.name}`,
+      description: `Enrichment: ${names} · ${seasonBit}${discountBit}`,
       customId: `pg:${programId.replace(/-/g, '').slice(0, 37)}`,
       meta: {
         programId,
         programName: program.name,
+        season: primarySeason,
+        seasonLabel,
         studentId,
         listFee: String(listFee),
         memberDiscountPercent: String(appliedPercent || 0),
@@ -829,7 +844,7 @@ export async function fulfillPaidCheckout(opts: {
     await client.items.insert('Payments', {
       programName: `Enrichment: ${resolved.meta.programName}${
         resolved.meta.addonProgramNames ? ` + ${resolved.meta.addonProgramNames}` : ''
-      }`,
+      }${resolved.meta.seasonLabel ? ` · ${resolved.meta.seasonLabel}` : ''}`,
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),

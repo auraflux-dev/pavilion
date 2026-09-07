@@ -123,7 +123,7 @@ export default function StaffInPersonCardPage() {
               <tr className="border-t border-[var(--border)]">
                 <td className="p-3 align-top font-semibold">Reef · pay with Cove</td>
                 <td className="p-3 align-top">
-                  Lookup 6-digit / passcode → ring <strong>BTSN food truck ticket</strong> ($6 each) →
+                  Lookup 6-digit / passcode → ring <strong>event food truck ticket</strong> ($6 each) →
                   deduct Cove (QR or Card on File) → then hand ticket
                 </td>
               </tr>
@@ -152,10 +152,10 @@ export default function StaffInPersonCardPage() {
             className="rounded-2xl border-2 bg-white p-5 print:border-black print:rounded-none"
             style={{ borderColor: 'var(--brand-green)' }}
           >
-            <h2 className="text-base font-bold text-[var(--brand-green)]">Events (BTSN Aug 27)</h2>
+            <h2 className="text-base font-bold text-[var(--brand-green)]">Events (Fall Family Fest · Sep 25)</h2>
             <p className="mt-2 text-sm text-[#5A6070] leading-relaxed">
               Stand owns Cove tenders. Guests pay the food truck. Reef: lookup → $6 Cove ticket
-              → hand ticket. Soft-ask Join QR. Purchases will outnumber joins.
+              → hand ticket. Lagoon/Tide: code ends in 9 → free ticket. Soft-ask Join QR.
             </p>
           </div>
         </section>

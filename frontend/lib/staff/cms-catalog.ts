@@ -805,8 +805,21 @@ export async function listCollection(collectionId: string, sortField = 'sortOrde
   }
 }
 
+function cmsDateField(v: unknown): string {
+  if (!v) return ''
+  if (typeof v === 'string') return v
+  if (typeof v === 'object' && v !== null && '$date' in v) {
+    return String((v as { $date?: string }).$date ?? '')
+  }
+  return ''
+}
+
 export function mapCmsRow(item: Record<string, unknown>, fields: CmsField[]) {
-  const out: Record<string, unknown> = { id: String(item._id ?? '') }
+  const out: Record<string, unknown> = {
+    id: String(item._id ?? ''),
+    _createdDate: cmsDateField(item._createdDate),
+    _updatedDate: cmsDateField(item._updatedDate),
+  }
   for (const f of fields) {
     const v = item[f.key]
     if (f.type === 'boolean') out[f.key] = v === true

@@ -81,6 +81,29 @@ export async function POST(req: NextRequest) {
     }
 
     const adminClient = getWixClient()
+    // If household already paid (Memberships row), stamp that tier on the new student.
+    // Otherwise checkout-before-student leaves portal showing paid without upgrade CTA.
+    let initialTier = 'free'
+    try {
+      const { pickHighestTier } = await import('@/lib/staff/members-roster')
+      const memberships = await adminClient.items
+        .query('Memberships')
+        .eq('email', primaryEmail)
+        .limit(10)
+        .find()
+      const paidTiers = (memberships.items ?? [])
+        .filter((m) => {
+          const status = String((m as { status?: string }).status ?? 'active').toLowerCase()
+          if (status === 'expired' || status === 'cancelled' || status === 'canceled') return false
+          const tier = String((m as { tier?: string }).tier ?? 'free')
+          return tier && tier !== 'free'
+        })
+        .map((m) => String((m as { tier?: string }).tier ?? 'free'))
+      if (paidTiers.length) initialTier = pickHighestTier(paidTiers)
+    } catch (err) {
+      console.warn('/api/students POST: membership lookup failed', err)
+    }
+
     const result = await adminClient.items.insert('Students', {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
@@ -88,7 +111,7 @@ export async function POST(req: NextRequest) {
       parentEmail: primaryEmail,
       parentFirstName: member?.contact?.firstName ?? '',
       parentLastName: member?.contact?.lastName ?? '',
-      membershipTier: 'free',
+      membershipTier: initialTier,
       membershipStatus: 'active',
       storeCardBalance: 0,
       discountCode: null,
@@ -133,7 +156,7 @@ export async function POST(req: NextRequest) {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         grade: grade.trim(),
-        membershipTier: 'free',
+        membershipTier: initialTier,
         membershipStatus: 'active',
         discountCode: null,
         storeCardBalance: 0,

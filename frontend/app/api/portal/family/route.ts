@@ -14,6 +14,7 @@ import { getEffectiveParentEmail } from '@/lib/staff/session'
 import { listEnrollmentsForStudent } from '@/lib/programs/enrollments'
 import { isCmsQaItem } from '@/lib/cms/is-cms-qa-item'
 import { mapPortalStudents } from '@/lib/portal/map-students'
+import { pickHighestTier } from '@/lib/staff/members-roster'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,6 +32,58 @@ function memberPayload(member: any, actorEmail: string) {
     firstName,
     lastName,
     phone: String(member?.contact?.phones?.[0]?.phone ?? '').trim(),
+  }
+}
+
+/**
+ * When staff act-as (or linked personalEmail) views another household, My Account
+ * must show that household — not the staff Wix login name/email.
+ */
+function householdMemberPayload(opts: {
+  householdEmail: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  studentRows: any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  membershipRow?: any | null
+}) {
+  const { householdEmail, studentRows, membershipRow } = opts
+  const active = studentRows.filter((raw) => raw?.archived !== true)
+  let firstName = ''
+  let lastName = ''
+  let phone = ''
+  let memberSince: string | null = null
+  for (const raw of active) {
+    if (!firstName) firstName = String(raw.parentFirstName ?? '').trim()
+    if (!lastName) lastName = String(raw.parentLastName ?? '').trim()
+    if (!phone) phone = String(raw.parentPhone ?? '').trim()
+    const created = raw._createdDate ? String(raw._createdDate) : ''
+    if (created && (!memberSince || created < memberSince)) memberSince = created
+  }
+  const membershipCreated = membershipRow?._createdDate
+    ? String(membershipRow._createdDate)
+    : ''
+  if (membershipCreated && (!memberSince || membershipCreated < memberSince)) {
+    memberSince = membershipCreated
+  }
+  const nameFromMembership = String(
+    membershipRow?.parentName ?? membershipRow?.name ?? '',
+  ).trim()
+  const memberName =
+    `${firstName} ${lastName}`.trim() || nameFromMembership || householdEmail
+  if (!firstName && nameFromMembership) {
+    const parts = nameFromMembership.split(/\s+/)
+    firstName = parts[0] ?? ''
+    lastName = parts.slice(1).join(' ')
+  }
+  return {
+    id: `household:${householdEmail}`,
+    name: memberName,
+    email: householdEmail,
+    profileImage: null as string | null,
+    memberSince,
+    firstName,
+    lastName,
+    phone,
   }
 }
 
@@ -83,6 +136,8 @@ export async function GET(req: NextRequest) {
     const effective = await getEffectiveParentEmail(req)
     const email = effective?.parentEmail ?? actorEmail
     const actingAs = Boolean(effective?.actingAs)
+    const linkedHousehold = Boolean(effective?.linkedHousehold)
+    const viewingOtherHousehold = email !== actorEmail
 
     const { listStudentsForViewer, resolvePrimaryParentEmail } = await import('@/lib/family-guardians')
     const studentRows = await listStudentsForViewer(email)
@@ -100,21 +155,49 @@ export async function GET(req: NextRequest) {
     }))
 
     // Fast path for first paint / soft refresh. Skip enrollments, payments, messages, calendar.
+    // Still load Memberships so paid households (student rows still "free") get the upgrade CTA.
     if (lite) {
+      const adminLite = getWixClient()
+      const householdEmailLite = await resolvePrimaryParentEmail(email)
+      const membershipLite = await adminLite.items
+        .query('Memberships')
+        .eq('email', householdEmailLite)
+        .limit(5)
+        .find()
+        .catch(() => ({ items: [] as Array<Record<string, unknown>> }))
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const paidFromStudentRows = studentRows.some((raw: any) => {
         if (raw.archived === true) return false
         return String(raw.membershipTier ?? 'free') !== 'free'
       })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const membershipTiers = (membershipLite.items ?? []).map((m: any) => String(m.tier ?? 'free'))
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const paidFromMemberships = membershipTiers.some((t: string) => t && t !== 'free')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const studentTiers = studentRows
+        .filter((raw: any) => raw.archived !== true)
+        .map((raw: any) => String(raw.membershipTier ?? 'free'))
+      const membershipTier = pickHighestTier([...membershipTiers, ...studentTiers])
+      const displayMember = viewingOtherHousehold
+        ? householdMemberPayload({
+            householdEmail: householdEmailLite,
+            studentRows,
+            membershipRow: membershipLite.items?.[0] ?? null,
+          })
+        : memberPayload(member, actorEmail)
       return NextResponse.json({
-        member: memberPayload(member, actorEmail),
-        accountType: paidFromStudentRows ? 'paid' : 'free',
+        member: displayMember,
+        accountType: paidFromStudentRows || paidFromMemberships ? 'paid' : 'free',
+        membershipTier,
         students: portalStudents,
         calendar: [],
         messages: [],
         purchases: [],
         studentCount: students.length,
         actingAs,
+        linkedHousehold,
+        viewingOtherHousehold,
         parentEmail: email,
         actorEmail,
         lite: true,
@@ -510,10 +593,27 @@ export async function GET(req: NextRequest) {
       }))
 
     const accountType: 'free' | 'paid' = hasPaidMembership ? 'paid' : 'free'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const membershipTier = pickHighestTier([
+      ...((membershipRes.items ?? []).map((m: any) => String(m.tier ?? 'free'))),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...studentRows
+        .filter((raw: any) => raw.archived !== true)
+        .map((raw: any) => String(raw.membershipTier ?? 'free')),
+    ])
+
+    const displayMember = viewingOtherHousehold
+      ? householdMemberPayload({
+          householdEmail,
+          studentRows,
+          membershipRow: membershipRes.items?.[0] ?? null,
+        })
+      : memberPayload(member, actorEmail)
 
     return NextResponse.json({
-      member: memberPayload(member, actorEmail),
+      member: displayMember,
       accountType,
+      membershipTier,
       students: portalStudents,
       calendar: calendarOut.slice(0, 20),
       messages: messages.slice(0, 15),
@@ -521,6 +621,8 @@ export async function GET(req: NextRequest) {
       boardPosts,
       studentCount: students.length,
       actingAs,
+      linkedHousehold,
+      viewingOtherHousehold,
       parentEmail: email,
       actorEmail,
       lite: false,

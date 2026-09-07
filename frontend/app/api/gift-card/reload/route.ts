@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
-    const { requireCoveUnlocked } = await import('@/lib/onboarding-checklist')
+    const { requireCoveUnlocked } = await import('@/lib/onboarding-checklist-server')
     const gate = await requireCoveUnlocked(householdEmail)
     if (!gate.ok) {
       return NextResponse.json(

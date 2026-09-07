@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { StaffPlaidConnect } from '@/components/staff/staff-plaid-connect'
 import { StaffReveal } from '@/components/staff/staff-reveal'
+import { StaffSellNetCalculator } from '@/components/staff/staff-sell-net-calculator'
 import {
   STAFF_FILTER_CARD,
   STAFF_FILTER_CARD_TITLE,
@@ -85,7 +86,7 @@ function trackingLabel(tracking: BudgetTracking, syncKey?: string) {
   if (tracking === 'bank') return 'Bank CSV'
   if (tracking === 'auto') return 'Staff + bank'
   if (tracking === 'skip') {
-    if (syncKey === 'cash_box_deposits') return 'Ledger only · already in POS'
+    if (syncKey === 'cash_box_deposits') return 'Ledger · excess vs POS counts'
     return 'Skipped · Staff sales'
   }
   return 'You key'
@@ -130,6 +131,13 @@ export function StaffBudgetPanel() {
 
   const [filterKey, setFilterKey] = useState('')
   const [search, setSearch] = useState('')
+  const [lastBofaCsvImportAt, setLastBofaCsvImportAt] = useState<string | null>(null)
+  const [lastBofaCsvImportBy, setLastBofaCsvImportBy] = useState<string | null>(null)
+  const [cashBox, setCashBox] = useState<{
+    deposited: number
+    rungPosCash: number
+    unexplained: number
+  } | null>(null)
 
   const applyPayload = useCallback(
     (d: {
@@ -139,6 +147,9 @@ export function StaffBudgetPanel() {
       entries?: BudgetEntry[]
       plaid?: { connected?: boolean; configured?: boolean }
       paypal?: { configured?: boolean }
+      lastBofaCsvImportAt?: string | null
+      lastBofaCsvImportBy?: string | null
+      cashBox?: { deposited: number; rungPosCash: number; unexplained: number } | null
     }) => {
       setLines(d.lines ?? [])
       setEntries(d.entries ?? [])
@@ -149,6 +160,15 @@ export function StaffBudgetPanel() {
         setPlaidConfigured(Boolean(d.plaid.configured))
       }
       if (d.paypal) setPaypalConfigured(Boolean(d.paypal.configured))
+      if ('lastBofaCsvImportAt' in d) {
+        setLastBofaCsvImportAt(d.lastBofaCsvImportAt ? String(d.lastBofaCsvImportAt) : null)
+      }
+      if ('lastBofaCsvImportBy' in d) {
+        setLastBofaCsvImportBy(d.lastBofaCsvImportBy ? String(d.lastBofaCsvImportBy) : null)
+      }
+      if ('cashBox' in d) {
+        setCashBox(d.cashBox ?? null)
+      }
     },
     [],
   )
@@ -454,9 +474,10 @@ export function StaffBudgetPanel() {
           Only CSV this page accepts. Bank of America checking → Activity → Download CSV. Only{' '}
           <strong>August 1 to July 31</strong> of this school year is used. Square and PayPal{' '}
           <strong>payouts and transfers into checking are skipped</strong> so those sales are not counted
-          twice. <strong>Counter Credit</strong> cash-box deposits land on a ledger-only line (not
-          fundraising or planning totals). Zelle, checks, ACH, Sam’s, and Amazon still import.
-          Re-importing the same file will not double-count.
+          twice. <strong>Counter Credit</strong> (teller or mobile cash-box deposit) is compared to rung Cove
+          cash sales: matched dollars stay ledger-only; any deposit above rung cash counts toward public
+          fundraising (Other) so forgotten cash rings still show up. Zelle, checks, ACH, Sam’s, and Amazon
+          still import. Re-importing the same file will not double-count.
         </p>
         <label className="inline-flex">
           <input
@@ -471,6 +492,34 @@ export function StaffBudgetPanel() {
             }}
           />
         </label>
+        <p className="text-xs text-[#5A6070]">
+          {lastBofaCsvImportAt ? (
+            <>
+              Last CSV import:{' '}
+              <strong>
+                {new Date(lastBofaCsvImportAt).toLocaleString(undefined, {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                })}
+              </strong>
+              {lastBofaCsvImportBy ? <> · {lastBofaCsvImportBy}</> : null}
+            </>
+          ) : (
+            <>No BoA CSV import recorded for {year} yet (or only older rows without a stamp).</>
+          )}
+        </p>
+        {cashBox ? (
+          <p className="text-xs text-[#5A6070]">
+            Cash box YTD: deposits {money(cashBox.deposited)} · rung Cove cash {money(cashBox.rungPosCash)} ·{' '}
+            {cashBox.unexplained > 0 ? (
+              <>
+                <strong>{money(cashBox.unexplained)} unexplained</strong> → public Other
+              </>
+            ) : (
+              <>no unexplained excess (deposit ≤ rung)</>
+            )}
+          </p>
+        ) : null}
         <p className="text-xs text-[#5A6070] pt-1">
           {paypalConfigured
             ? 'PayPal updates from the live account on Refresh (no CSV). Website PayPal checkout is already in Staff Payments; bank withdrawals to checking are skipped.'
@@ -485,13 +534,18 @@ export function StaffBudgetPanel() {
         </p>
         <p>
           <strong>Bank CSV:</strong> checking activity except Square/PayPal payouts and transfers. Counter
-          Credit cash-box deposits are ledger-only (already in POS). Amazon lands on spirit-wear restock;
-          Sam’s / Costco on snack restock. Move a row if that guess is wrong.
+          Credit is reconciled to rung Cove cash — only the excess (cash in bank never rung) raises public
+          fundraising. Amazon → spirit-wear restock; Sam’s / Costco → snack restock. Move a row if that guess
+          is wrong.
         </p>
         <p>
           <strong>Refresh:</strong> Square/PayPal <em>sales</em> (memberships, Cove, tickets) plus live PayPal
           account activity (no CSV). <strong>You key:</strong> beginning cash, sponsorships, and anything still
-          Unclassified.
+          Unclassified (those still feed the public “Other” fundraising bucket until you move them).
+        </p>
+        <p>
+          <strong>Public /fundraising:</strong> Total Raised = sales + bank gifts/Zelle/etc. It is not the same
+          as Income Actual here, and it is not “spent.” Spent is on the public Where the Funds Go section.
         </p>
       </div>
 
@@ -513,7 +567,11 @@ export function StaffBudgetPanel() {
       ) : null}
 
       {status ? (
-        <p className={`text-xs ${statusKind === 'err' ? 'text-rose-700' : 'text-[var(--brand-green)]'}`}>{status}</p>
+        <p
+          className={`text-xs whitespace-pre-wrap break-words ${statusKind === 'err' ? 'text-rose-700' : 'text-[var(--brand-green)]'}`}
+        >
+          {status}
+        </p>
       ) : null}
 
       {lines.length === 0 ? (
@@ -542,6 +600,14 @@ export function StaffBudgetPanel() {
             />
             <SummaryCard title="Net" budgeted={totals.netBudgeted} actual={totals.netActual} highlight />
           </div>
+
+          <StaffReveal
+            storageKey="staff-reveal-budget-sell-net"
+            title="Sell → net planner"
+            hint="EP contracts, Cove, events — collections vs cost by quantity"
+          >
+            <StaffSellNetCalculator />
+          </StaffReveal>
 
           <div id="budget-record" className="border border-[var(--border)] rounded-lg p-3 space-y-3">
             <h3 className="text-sm font-bold">Record activity</h3>

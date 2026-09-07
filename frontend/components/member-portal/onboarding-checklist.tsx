@@ -3,6 +3,7 @@
 import { CheckCircle2, Circle, Lock, ListChecks } from 'lucide-react'
 import type { ChecklistItem } from '@/lib/onboarding-checklist'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
+import { CmsPortal } from '@/components/member-portal/portal-form-copy-context'
 
 type Props = {
   items: ChecklistItem[]
@@ -24,7 +25,27 @@ export function OnboardingChecklist({
   onJumpStudents,
 }: Props) {
   if (complete && coveUnlocked) {
-    return null
+    return (
+      <div
+        id="portal-onboarding"
+        className="rounded-xl border border-[var(--brand-line)] bg-[#FAFCF9] px-4 py-3 mb-6 flex items-start gap-3"
+      >
+        <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'var(--brand-green)' }} />
+        <div>
+          <p className="text-sm font-bold text-[#1A1A1A]">
+            <CmsPortal k="onboarding.completeTitle" fallback="You're set up" />
+          </p>
+          <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed whitespace-pre-line">
+            <CmsPortal
+              k="onboarding.completeBody"
+              fallback={vanillaizeIfDemo(
+                'Student profiles are complete. Cove Digital Card and programs are unlocked.',
+              )}
+            />
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -43,21 +64,28 @@ export function OnboardingChecklist({
         />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-bold text-[#1A1A1A]">
-            Family setup checklist
+            <CmsPortal k="onboarding.titlePrefix" fallback="Family setup checklist" />
             <span className="font-semibold text-[#5A6070]">
               {' '}
-              · {requiredDone}/{requiredTotal} required
+              · {requiredDone}/{requiredTotal}{' '}
+              <CmsPortal k="onboarding.titleSuffix" fallback="required" />
             </span>
           </p>
           <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed whitespace-pre-line">
-            {vanillaizeIfDemo(
-              'Confirm family details below so Cove and programs unlock.',
-            )}
+            <CmsPortal
+              k="onboarding.intro"
+              fallback={vanillaizeIfDemo(
+                'You can browse anytime. Cove QR, card loads, and enrichment stay locked until you confirm family details (parent name, phone, emergency contact, pick-up).',
+              )}
+            />
           </p>
           {!coveUnlocked ? (
             <p className="text-xs font-semibold mt-2 inline-flex items-center gap-1.5 text-[#8A6400]">
               <Lock className="w-3.5 h-3.5" />
-              {vanillaizeIfDemo('The Cove Digital Card is locked until setup is complete')}
+              <CmsPortal
+                k="onboarding.coveLocked"
+                fallback={vanillaizeIfDemo('The Cove Digital Card is locked until setup is complete')}
+              />
             </p>
           ) : null}
         </div>

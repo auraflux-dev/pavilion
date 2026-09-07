@@ -4,8 +4,7 @@ import { useState } from 'react'
 import { Briefcase, CheckCircle2, Loader2, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { trackGenerateLead } from '@/lib/ga'
-import { vanillaizeIfDemo, DEMO_BRAND } from '@/lib/demo/brand'
-import { isPublicDemoInstance } from '@/lib/demo/instance'
+import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 type Props = {
   memberName?: string
@@ -66,9 +65,7 @@ export function PortalBusinessOwnerForm({
             topic: 'Business owner · membership experience',
             message: messageParts.join('\n'),
             department: 'membership-experience',
-            assignedTo: isPublicDemoInstance()
-              ? `vp-membershipexperience@${DEMO_BRAND.host}`
-              : 'vp-membershipexperience@shmspto.org',
+            assignedTo: 'vp-membershipexperience@shmspto.org',
           }),
         })
         const data = await res.json().catch(() => ({}))
@@ -221,17 +218,15 @@ export function PortalBusinessOwnerForm({
             {vanillaizeIfDemo('For SHMS PTO families')}
           </p>
           <h3 className="mt-1 text-xl font-bold text-[#1A1A1A]">
-            Own a business? We want to know you.
+            Tell us about your family business
           </h3>
-          <p className="mt-2 text-sm leading-relaxed text-[#5A6070]">
+          <p className="mt-2 text-sm leading-relaxed text-[#5A6070] whitespace-pre-line">
             {vanillaizeIfDemo(
-              'Many Stone Hill families run local businesses. Tell us yours so SHMS PTO can celebrate you in the community, connect you with other parents, and explore simple ways to help: shout-outs, event tables, or member-friendly offers.',
+              'Many Stone Hill families run local businesses.\nTell us yours so SHMS PTO can celebrate you in the community.\nShout-outs, event tables, or member-friendly offers are all options.',
             )}
           </p>
-          <p className="mt-2 text-sm leading-relaxed text-[#5A6070]">
-            Share a yes/no below. If yes, add your business details and we will email our
-            VP of Membership Experience (reply within one business day). Formal sponsorship
-            packages still go through the sponsor form above.
+          <p className="mt-2 text-sm leading-relaxed text-[#5A6070] whitespace-pre-line">
+            {`Share a yes/no below.\nIf yes, add your business details and we will email our VP of Membership Experience (reply within one business day).\nFormal sponsorship packages still go through the sponsor form above.`}
           </p>
         </div>
 
@@ -311,18 +306,15 @@ export function PortalBusinessOwnerForm({
             Membership experience
           </p>
           <h2 className="mt-0.5 text-lg font-bold text-[#1A1A1A]">
-            Own a business? We want to know you.
+            Tell us about your family business
           </h2>
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070] whitespace-pre-line">
             {vanillaizeIfDemo(
-              'Why we ask: many SHMS PTO families run local businesses, and we want to celebrate you in the school community: shout-outs, connections with other parents, and simple ways to help each other.',
+              'Why we ask: many SHMS PTO families run local businesses.\nWe celebrate you in the school community with shout-outs, parent connections, and simple ways to help each other.',
             )}
           </p>
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070]">
-            What happens next: answer yes or no below. If yes, add your business name and
-            anything you want us to know. Free and paid members welcome. We only email our
-            VP of Membership Experience when you share business details (usually within one
-            business day).
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#5A6070] whitespace-pre-line">
+            {`What happens next: answer yes or no below.\nIf yes, add your business name and anything you want us to know.\nFree and paid members welcome. We only email our VP of Membership Experience when you share business details (usually within one business day).`}
           </p>
         </div>
       </div>

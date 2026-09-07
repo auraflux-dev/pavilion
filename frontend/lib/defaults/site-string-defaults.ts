@@ -36,6 +36,7 @@ import {
   CONTACT_FORM_DEFAULTS,
   EVENTS_PAGE_DEFAULTS,
   FUNDRAISING_PAGE_DEFAULTS,
+  NEWSLETTER_PAGE_DEFAULTS,
   NEWSLETTER_SIGNUP_DEFAULTS,
 } from '@/lib/defaults/visitor-forms-defaults'
 import { PORTAL_FORM_DEFAULTS } from '@/lib/defaults/portal-form-defaults'
@@ -45,6 +46,7 @@ import {
   DONATE_FORM_DEFAULTS,
   LEGAL_SHELL_DEFAULTS,
   RFC_DEFAULTS,
+  SITE_CHROME_DEFAULTS,
   SURVEY_DEFAULTS,
   VISITOR_VIDEO_DEFAULTS,
 } from '@/lib/defaults/visitor-string-defaults'
@@ -65,4 +67,6 @@ export const SITE_STRING_DEFAULTS: Record<string, Record<string, string>> = {
   'rfc-promo': RFC_DEFAULTS,
   'legal-shell': LEGAL_SHELL_DEFAULTS,
   'survey-strings': SURVEY_DEFAULTS,
+  'site-chrome': SITE_CHROME_DEFAULTS,
+  'newsletter-page': NEWSLETTER_PAGE_DEFAULTS,
 }

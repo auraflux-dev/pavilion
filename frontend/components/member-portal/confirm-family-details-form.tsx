@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { Loader2, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
-import { useFormString } from '@/components/member-portal/portal-form-copy-context'
+import { CmsPortal, useFormCopyLookup } from '@/components/member-portal/portal-form-copy-context'
 import { interpolateCopy } from '@/lib/api/portal-form-copy-shared'
 
 type StudentSeed = {
@@ -48,7 +48,7 @@ function splitName(name: string | undefined): { first: string; last: string } {
 }
 
 export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSaved }: Props) {
-  const t = useFormString
+  const t = useFormCopyLookup()
   const seed = useMemo(() => {
     const fromStudent = students[0]
     const fromMember = splitName(member?.name)
@@ -129,20 +129,31 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSave
       <div className="flex items-start gap-3">
         <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5 text-[#8A6400]" aria-hidden />
         <div>
-          <p className="text-sm font-bold text-[#1A1A1A]">{t('confirmFamily.title')}</p>
+          <p className="text-sm font-bold text-[#1A1A1A]">
+            <CmsPortal k="confirmFamily.title" fallback={t('confirmFamily.title')} />
+          </p>
           <p className="text-xs text-[#5A6070] mt-0.5 leading-relaxed">
-            {students.length > 0
-              ? vanillaizeIfDemo(
+            {students.length > 0 ? (
+              <CmsPortal
+                k="confirmFamily.bodyWithStudents"
+                fallback={vanillaizeIfDemo(
                   interpolateCopy(t('confirmFamily.bodyWithStudents'), { count: students.length }),
-                )
-              : vanillaizeIfDemo(t('confirmFamily.bodyNoStudents'))}
+                )}
+                vars={{ count: students.length }}
+              />
+            ) : (
+              <CmsPortal
+                k="confirmFamily.bodyNoStudents"
+                fallback={vanillaizeIfDemo(t('confirmFamily.bodyNoStudents'))}
+              />
+            )}
           </p>
         </div>
       </div>
 
       <form noValidate onSubmit={handleSubmit} className="space-y-2.5 bg-white/70 rounded-lg border border-[#F0EDE8] p-3">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#5A6070]">
-          {t('confirmFamily.sectionParent')}
+          <CmsPortal k="confirmFamily.sectionParent" fallback={t('confirmFamily.sectionParent')} />
         </p>
         <div className="grid grid-cols-2 gap-2">
           <input
@@ -172,7 +183,7 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSave
         />
 
         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#5A6070] pt-1">
-          {t('confirmFamily.sectionEmergency')}
+          <CmsPortal k="confirmFamily.sectionEmergency" fallback={t('confirmFamily.sectionEmergency')} />
         </p>
         <div className="grid grid-cols-2 gap-2">
           <input
@@ -208,10 +219,14 @@ export function ConfirmFamilyDetailsForm({ students, member, onConfirmed, onSave
         >
           {saving ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('confirmFamily.submitSaving')}
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />{' '}
+              <CmsPortal k="confirmFamily.submitSaving" fallback={t('confirmFamily.submitSaving')} />
             </>
           ) : (
-            vanillaizeIfDemo(t('confirmFamily.submit'))
+            <CmsPortal
+              k="confirmFamily.submit"
+              fallback={vanillaizeIfDemo(t('confirmFamily.submit'))}
+            />
           )}
         </Button>
       </form>

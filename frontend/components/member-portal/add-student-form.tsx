@@ -5,7 +5,8 @@ import { UserPlus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { trackEvent } from '@/lib/ga'
 import type { PortalCopy } from '@/lib/defaults/portal-copy'
-import { useFormString } from '@/components/member-portal/portal-form-copy-context'
+import { CmsHub } from '@/components/cms/cms-portal-strings'
+import { CmsPortal, useFormCopyLookup } from '@/components/member-portal/portal-form-copy-context'
 
 type FormLabels = Pick<
   PortalCopy,
@@ -50,7 +51,7 @@ export function AddStudentForm({
   onOpenChange,
   variant = 'card',
 }: Props) {
-  const t = useFormString
+  const t = useFormCopyLookup()
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
   const controlled = openProp !== undefined
   const open = controlled ? openProp : uncontrolledOpen
@@ -116,19 +117,23 @@ export function AddStudentForm({
         style={{ borderColor: '#D4D4D4' }}
       >
         <UserPlus className="w-4 h-4 shrink-0" />
-        <span className="text-sm font-semibold">{labels.addStudentCta}</span>
+        <span className="text-sm font-semibold">
+          <CmsHub k="addStudentCta" fallback={labels.addStudentCta} />
+        </span>
       </button>
     )
   }
 
   return (
     <div className="bg-white rounded-2xl border border-[var(--border)] p-5 shadow-sm">
-      <h3 className="font-bold text-[#1A1A1A] mb-4">{labels.addStudentTitle}</h3>
+      <h3 className="font-bold text-[#1A1A1A] mb-4">
+        <CmsHub k="addStudentTitle" fallback={labels.addStudentTitle} />
+      </h3>
       <form noValidate onSubmit={handleSubmit} className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-semibold text-[#5A6070] mb-1">
-              {labels.firstNameLabel}
+              <CmsHub k="firstNameLabel" fallback={labels.firstNameLabel} />
             </label>
             <input
               type="text"
@@ -141,7 +146,7 @@ export function AddStudentForm({
           </div>
           <div>
             <label className="block text-xs font-semibold text-[#5A6070] mb-1">
-              {labels.lastNameLabel}
+              <CmsHub k="lastNameLabel" fallback={labels.lastNameLabel} />
             </label>
             <input
               type="text"
@@ -155,7 +160,7 @@ export function AddStudentForm({
         </div>
         <div>
           <label className="block text-xs font-semibold text-[#5A6070] mb-1">
-            {labels.gradeLabel}
+            <CmsHub k="gradeLabel" fallback={labels.gradeLabel} />
           </label>
           <div className="flex gap-2">
             {grades.map((g) => (
@@ -179,7 +184,9 @@ export function AddStudentForm({
             ))}
           </div>
           {!grade ? (
-            <p className="text-[11px] text-[#5A6070]">Select a grade, then tap Add student.</p>
+            <p className="text-[11px] text-[#5A6070]">
+              <CmsPortal k="addStudent.gradeHint" fallback={t('addStudent.gradeHint')} />
+            </p>
           ) : null}
         </div>
         {error ? <p role="alert" className="text-red-600 text-xs font-medium">{error}</p> : null}
@@ -190,7 +197,11 @@ export function AddStudentForm({
             className="flex-1 font-semibold text-white"
             style={{ backgroundColor: 'var(--brand-green)' }}
           >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : labels.addStudentSubmit}
+            {saving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <CmsHub k="addStudentSubmit" fallback={labels.addStudentSubmit} />
+            )}
           </Button>
           <Button
             type="button"
@@ -198,7 +209,7 @@ export function AddStudentForm({
             onClick={() => setOpen(false)}
             className="flex-1"
           >
-            {labels.cancel}
+            <CmsHub k="cancel" fallback={labels.cancel} />
           </Button>
         </div>
       </form>

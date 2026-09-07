@@ -4,9 +4,9 @@
  * DELETE /api/portal/guardians. Revoke { email }
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getMemberSession } from '@/lib/auth-member'
 import { checkHouseholdInviteEmail } from '@/lib/email-invite'
 import { sendMassEmail } from '@/lib/staff/mass-email'
+import { getEffectiveParentEmail } from '@/lib/staff/session'
 import { getWixClient } from '@/lib/wix-client'
 import {
   createGuardianInvite,
@@ -78,19 +78,23 @@ async function notifyPrimaryOfInvite(opts: {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await getMemberSession(req)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const effective = await getEffectiveParentEmail(req)
+  if (!effective) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const primary = await resolvePrimaryParentEmail(session.email)
-    const isPrimary = primary === session.email.trim().toLowerCase()
+    const householdEmail = effective.parentEmail.trim().toLowerCase()
+    const primary = await resolvePrimaryParentEmail(householdEmail)
+    const isPrimary = primary === householdEmail
     const rows = isPrimary ? await listGuardianRowsForPrimary(primary) : []
-    const students = await listStudentsForViewer(session.email)
+    const students = await listStudentsForViewer(householdEmail)
 
     return NextResponse.json({
-      viewerEmail: session.email.trim().toLowerCase(),
+      viewerEmail: effective.actorEmail.trim().toLowerCase(),
+      householdEmail,
       primaryParentEmail: primary,
       isPrimary,
+      actingAs: effective.actingAs,
+      linkedHousehold: effective.linkedHousehold,
       guardians: rows
         .filter((r) => r.status !== 'revoked' && r.active !== false)
         .map((r) => ({
@@ -111,19 +115,26 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getMemberSession(req)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const effective = await getEffectiveParentEmail(req)
+  if (!effective) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (effective.actingAs) {
+    return NextResponse.json(
+      { error: 'Act-as is read-only. Invite from the linked household or stop act-as.' },
+      { status: 403 },
+    )
+  }
 
   try {
-    const primary = await resolvePrimaryParentEmail(session.email)
-    if (primary !== session.email.trim().toLowerCase()) {
+    const householdEmail = effective.parentEmail.trim().toLowerCase()
+    const primary = await resolvePrimaryParentEmail(householdEmail)
+    if (primary !== householdEmail) {
       return NextResponse.json(
         { error: 'Only the primary account holder can invite other adults.' },
         { status: 403 },
       )
     }
 
-    const students = await listStudentsForViewer(session.email)
+    const students = await listStudentsForViewer(householdEmail)
     if (students.length === 0) {
       return NextResponse.json(
         { error: 'Add a student first, then invite another adult.' },
@@ -146,8 +157,8 @@ export async function POST(req: NextRequest) {
     const guardianEmail = check.email
 
     const invitedByName =
-      `${session.member?.contact?.firstName ?? ''} ${session.member?.contact?.lastName ?? ''}`.trim() ||
-      session.email
+      `${effective.session.member?.contact?.firstName ?? ''} ${effective.session.member?.contact?.lastName ?? ''}`.trim() ||
+      householdEmail
 
     const { token, expiresAt } = await createGuardianInvite({
       primaryParentEmail: primary,
@@ -207,12 +218,19 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await getMemberSession(req)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const effective = await getEffectiveParentEmail(req)
+  if (!effective) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (effective.actingAs) {
+    return NextResponse.json(
+      { error: 'Act-as is read-only. Remove shared access from the linked household or stop act-as.' },
+      { status: 403 },
+    )
+  }
 
   try {
-    const primary = await resolvePrimaryParentEmail(session.email)
-    if (primary !== session.email.trim().toLowerCase()) {
+    const householdEmail = effective.parentEmail.trim().toLowerCase()
+    const primary = await resolvePrimaryParentEmail(householdEmail)
+    if (primary !== householdEmail) {
       return NextResponse.json(
         { error: 'Only the primary account holder can remove shared portal access.' },
         { status: 403 },

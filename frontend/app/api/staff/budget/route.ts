@@ -32,9 +32,15 @@ import { hasActivePlaidItem, listActivePlaidItems, publicPlaidStatus } from '@/l
 import { plaidConfigured } from '@/lib/staff/plaid'
 import { refreshPlaidIntoBudget } from '@/lib/staff/plaid-sync'
 import { isBankOrigin } from '@/lib/staff/budget-bank'
-import { importBofaCsv } from '@/lib/staff/bofa-csv'
+import {
+  bofaCsvLastImportAtKey,
+  bofaCsvLastImportByKey,
+  importBofaCsv,
+} from '@/lib/staff/bofa-csv'
 import { refreshPaypalIntoBudget } from '@/lib/staff/paypal-sync'
 import { isPayPalConfigured } from '@/lib/paypal'
+import { getCashBoxFundraisingReconcile } from '@/lib/api/fundraising'
+import { getSiteSettings } from '@/lib/api/site-settings'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -57,13 +63,45 @@ function decorate(line: BudgetLine, entries: BudgetEntry[]) {
 
 async function payload(
   year: string,
-  extra?: { entries?: BudgetEntry[]; added?: number; updated?: number; source?: string; message?: string },
+  extra?: {
+    entries?: BudgetEntry[]
+    added?: number
+    updated?: number
+    source?: string
+    message?: string
+    lastBofaCsvImportAt?: string | null
+    lastBofaCsvImportBy?: string | null
+    cashBox?: {
+      deposited: number
+      rungPosCash: number
+      unexplained: number
+    } | null
+  },
 ) {
   const listed = await listBudgetLines(year)
   const entries = extra?.entries ?? (await listBudgetEntries(year))
   const plaidItems = plaidConfigured() ? await listActivePlaidItems() : []
   const bankConnected = plaidItems.length > 0 || entries.some((e) => isBankOrigin(e.origin))
   const lines = applyEntryTotals(listed, entries).map((line) => decorate(line, entries))
+
+  const settings = await getSiteSettings()
+  const stampedAt = settings.get(bofaCsvLastImportAtKey(year), '').trim()
+  const stampedBy = settings.get(bofaCsvLastImportByKey(year), '').trim()
+  const fallbackAt = entries
+    .filter((e) => e.origin === 'auto-bofa' && e.updatedAt)
+    .map((e) => e.updatedAt)
+    .sort()
+    .at(-1) ?? null
+  const lastBofaCsvImportAt =
+    extra?.lastBofaCsvImportAt ?? (stampedAt || fallbackAt)
+  const lastBofaCsvImportBy =
+    extra?.lastBofaCsvImportBy ?? (stampedBy || null)
+
+  const cashBox =
+    extra && 'cashBox' in extra
+      ? extra.cashBox
+      : await getCashBoxFundraisingReconcile().catch(() => null)
+
   return {
     year,
     label: year === DEFAULT_FISCAL_YEAR ? FISCAL_YEAR_LABEL : year,
@@ -74,6 +112,9 @@ async function payload(
     updated: extra?.updated,
     source: extra?.source,
     message: extra?.message,
+    lastBofaCsvImportAt,
+    lastBofaCsvImportBy,
+    cashBox,
     plaid: {
       configured: plaidConfigured(),
       ...publicPlaidStatus(plaidItems),
@@ -126,6 +167,27 @@ export async function POST(req: NextRequest) {
         actorEmail: session.email,
       })
       const entries = await listBudgetEntries(year)
+      const money = (n: number) =>
+        n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+      const cashBox = await getCashBoxFundraisingReconcile().catch(() => null)
+      let cashNote = ''
+      if (result.cashBoxDeposits > 0) {
+        cashNote = ` · Counter Credit ${money(result.cashBoxDeposits)} in this file`
+        if (cashBox && cashBox.unexplained > 0) {
+          cashNote += ` · YTD deposits ${money(cashBox.deposited)} vs rung Cove cash ${money(cashBox.rungPosCash)} → ${money(cashBox.unexplained)} unexplained counts toward public Other (forgotten cash rings)`
+        } else if (cashBox) {
+          cashNote += ` · YTD deposits ${money(cashBox.deposited)} ≤ rung Cove cash ${money(cashBox.rungPosCash)} — matched cash stays ledger-only (already in fundraising when rung); only deposit above rung cash raises the public total`
+        } else {
+          cashNote +=
+            ' · Matched deposit dollars stay ledger-only; only cash above rung Cove sales raises public fundraising'
+        }
+      }
+      const fundNote =
+        result.fundraisingInflows > 0
+          ? ` · ~${money(result.fundraisingInflows)} bank inflows can feed public fundraising (Zelle/gifts/etc.)`
+          : result.cashBoxDeposits > 0
+            ? ''
+            : ' · No new bank inflows mapped to public fundraising in this file'
       return NextResponse.json({
         ok: true,
         ...(await payload(year, {
@@ -133,7 +195,10 @@ export async function POST(req: NextRequest) {
           added: result.added,
           updated: result.updated,
           source: 'bofa',
-          message: `Imported BoA CSV (Aug to Jul school year only) · ${result.added} new, ${result.updated} already in, ${result.skippedPayouts} Square/PayPal payouts skipped (those sales stay in Staff Payments), ${result.skipped} other skipped.`,
+          lastBofaCsvImportAt: result.lastImportAt,
+          lastBofaCsvImportBy: result.lastImportBy || null,
+          message: `Imported BoA CSV (Aug to Jul school year only) · ${result.added} new, ${result.updated} already in, ${result.skippedPayouts} Square/PayPal payouts skipped (those sales stay in Staff Payments), ${result.skipped} other skipped.${cashNote}${fundNote}.`,
+          cashBox,
         })),
       })
     }

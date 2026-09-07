@@ -5,6 +5,7 @@
  * classifyBankTransaction uses Plaid signs (positive = money left), so we flip.
  */
 import { createHash } from 'node:crypto'
+import { mapBankSyncKeyForFundraising } from '@/lib/api/fundraising-classify'
 import { classifyBankTransaction, isProcessorPayout } from '@/lib/staff/plaid-classify'
 import {
   DEFAULT_FISCAL_YEAR,
@@ -17,6 +18,7 @@ import {
   persistLineActuals,
   upsertBudgetEntryByRefId,
 } from '@/lib/staff/budget-sync'
+import { upsertSiteSetting } from '@/lib/staff/cms-catalog'
 
 export type ParsedBofaRow = {
   date: string
@@ -148,11 +150,29 @@ function bofaRefId(row: ParsedBofaRow) {
   return `bofa:${hash}`
 }
 
+export function bofaCsvLastImportAtKey(fiscalYear: string) {
+  return `budget.bofaCsv.lastImportAt.${fiscalYear}`
+}
+
+export function bofaCsvLastImportByKey(fiscalYear: string) {
+  return `budget.bofaCsv.lastImportBy.${fiscalYear}`
+}
+
 export async function importBofaCsv(opts: {
   csv: string
   fiscalYear?: string
   actorEmail: string
-}): Promise<{ added: number; updated: number; skipped: number; skippedPayouts: number; rows: number }> {
+}): Promise<{
+  added: number
+  updated: number
+  skipped: number
+  skippedPayouts: number
+  rows: number
+  lastImportAt: string
+  lastImportBy: string
+  cashBoxDeposits: number
+  fundraisingInflows: number
+}> {
   const fiscalYear = opts.fiscalYear || DEFAULT_FISCAL_YEAR
   // Fundraising and this import use Aug-Jul, not the whole downloaded statement.
   const { from, to } = schoolYearWindowForFiscalYear(fiscalYear)
@@ -166,6 +186,8 @@ export async function importBofaCsv(opts: {
   let updated = 0
   let skipped = 0
   let skippedPayouts = 0
+  let cashBoxDeposits = 0
+  let fundraisingInflows = 0
 
   for (const row of parsed) {
     const t = new Date(`${row.date}T12:00:00.000Z`).getTime()
@@ -207,10 +229,42 @@ export async function importBofaCsv(opts: {
     })
     if (result === 'inserted') added += 1
     else if (result === 'updated') updated += 1
-    else skipped += 1
+    else {
+      skipped += 1
+      continue
+    }
+    if (classified.syncKey === 'cash_box_deposits' && classified.kind === 'income') {
+      cashBoxDeposits += classified.amount
+    } else if (classified.syncKey === 'sponsorships' && classified.kind === 'income') {
+      fundraisingInflows += classified.amount
+    } else if (
+      classified.kind === 'income' &&
+      mapBankSyncKeyForFundraising(classified.syncKey)
+    ) {
+      // Inflows that feed public fundraising (Zelle→shop, gifts, unclassified, etc.)
+      fundraisingInflows += classified.amount
+    }
   }
 
   const entries = await listBudgetEntries(fiscalYear)
   await persistLineActuals(fiscalYear, entries)
-  return { added, updated, skipped, skippedPayouts, rows: parsed.length }
+
+  const lastImportAt = new Date().toISOString()
+  const lastImportBy = opts.actorEmail.trim().toLowerCase()
+  await upsertSiteSetting(bofaCsvLastImportAtKey(fiscalYear), lastImportAt)
+  if (lastImportBy) {
+    await upsertSiteSetting(bofaCsvLastImportByKey(fiscalYear), lastImportBy)
+  }
+
+  return {
+    added,
+    updated,
+    skipped,
+    skippedPayouts,
+    rows: parsed.length,
+    lastImportAt,
+    lastImportBy,
+    cashBoxDeposits: Math.round(cashBoxDeposits * 100) / 100,
+    fundraisingInflows: Math.round(fundraisingInflows * 100) / 100,
+  }
 }

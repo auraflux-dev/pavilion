@@ -85,7 +85,7 @@ export function classifyBankTransaction(input: {
   if (/square.*fee|paypal fee|card processing/i.test(t)) {
     return { syncKey: 'processing', amount: abs, kind: 'expense' }
   }
-  if (/tax1099|zenwork|irs |usataxpymt|\b990\b|tax filing|bank fee|monthly service|account fee/i.test(t)) {
+  if (/tax1099|zenwork|irs |usataxpymt|\b990\b|tax filing|bank fee|monthly service|account fee|external transfer fee|transfer fee/i.test(t)) {
     return { syncKey: 'tax_bank', amount: abs, kind: 'expense' }
   }
   if (
@@ -131,10 +131,13 @@ export function classifyBankTransaction(input: {
     return { syncKey: 'comms', amount: abs, kind: 'expense' }
   }
   if (
-    /raffle|steam day|annual night|sweet treat|jump around|snack cart|rais rendezvous|scotto|domino|wegmans|nova mobile|crown trophy|gift cards for steam|dunkin/i.test(
+    /raffle|steam day|annual night|sweet treat|jump around|snack cart|rais rendezvous|scotto|domino|wegmans|nova mobile|crown trophy|gift cards for steam|dunkin|doordash|door dash/i.test(
       t,
     )
   ) {
+    return { syncKey: 'events', amount: abs, kind: 'expense' }
+  }
+  if (/transfer stone hill|stone hill middle|proforma/i.test(t)) {
     return { syncKey: 'events', amount: abs, kind: 'expense' }
   }
   if (/zelle payment to/i.test(t)) {

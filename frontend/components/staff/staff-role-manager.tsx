@@ -255,7 +255,7 @@ export function StaffRoleManager() {
         </h2>
         <p className="text-xs text-[#5A6070] whitespace-pre-line">
           {scope === 'instructors'
-            ? 'Pick an EP mailbox from the Google list (math, robotics, business plan).\nSet Instructor and tick their class.\nEssay has no EP mailbox yet. Add one in Workspace for Lumi first.'
+            ? 'Pick an EP mailbox from the Google list (math, robotics, essay composition, business plan).\nSet Instructor and tick their class.'
             : 'Pick a role for the usual toolkit, then tick any extra permissions below.\nStaff tools stay on official @' +
               (isPublicDemoInstance() ? DEMO_BRAND.host : 'shmspto.org') +
               ' accounts.\nLink a personal email for the parent portal.\nSync from Google after you create users in Admin so seats appear before first login.'}

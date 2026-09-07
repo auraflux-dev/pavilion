@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const requested = String(body.code ?? '').replace(/\D/g, '')
     const householdEmail = await resolvePrimaryParentEmail(effective.parentEmail)
 
-    const { requireCoveUnlocked } = await import('@/lib/onboarding-checklist')
+    const { requireCoveUnlocked } = await import('@/lib/onboarding-checklist-server')
     const gate = await requireCoveUnlocked(householdEmail)
     if (!gate.ok) {
       return NextResponse.json(

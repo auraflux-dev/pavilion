@@ -11,6 +11,7 @@ import {
   DONATE_FORM_DEFAULTS,
   LEGAL_SHELL_DEFAULTS,
   RFC_DEFAULTS,
+  SITE_CHROME_DEFAULTS,
   SURVEY_DEFAULTS,
   VISITOR_VIDEO_DEFAULTS,
 } from '@/lib/defaults/visitor-string-defaults'
@@ -20,6 +21,7 @@ import {
   CONTACT_FORM_DEFAULTS,
   EVENTS_PAGE_DEFAULTS,
   FUNDRAISING_PAGE_DEFAULTS,
+  NEWSLETTER_PAGE_DEFAULTS,
   NEWSLETTER_SIGNUP_DEFAULTS,
 } from '@/lib/defaults/visitor-forms-defaults'
 
@@ -164,6 +166,20 @@ export const SITE_PAGE_THEME_REGISTRY: SitePageThemeEntry[] = [
     route: '/survey/[slug]',
     fields: 'public survey submit copy',
     stringKeys: Object.keys(SURVEY_DEFAULTS),
+  },
+  {
+    page: 'site-chrome',
+    surface: 'visitor',
+    route: 'global nav + footer',
+    fields: 'nav auth labels, footer headings, newsletter strip',
+    stringKeys: Object.keys(SITE_CHROME_DEFAULTS),
+  },
+  {
+    page: 'newsletter-page',
+    surface: 'visitor',
+    route: '/newsletter',
+    fields: 'newsletter perks list',
+    stringKeys: Object.keys(NEWSLETTER_PAGE_DEFAULTS),
   },
 ]
 

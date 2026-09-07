@@ -7,6 +7,7 @@ import {
   isRunForCharitySlug,
   RUN_FOR_CHARITY_REGISTER_URL,
 } from '@/lib/run-for-charity'
+import { isFallFamilyFestSlug, FALL_FAMILY_FEST_FLYER_URL } from '@/lib/fall-family-fest'
 import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 
 import {
@@ -22,6 +23,9 @@ export { earlyBirdCallout, eventPublicPath, extractExternalRegistrationUrl }
 /** Hosted flyer when Wix Events does not return a mainImage. */
 function localFlyerUrl(slug?: string): string | undefined {
   const s = String(slug || '').toLowerCase()
+  if (isFallFamilyFestSlug(slug) || s.includes('family-fest')) {
+    return FALL_FAMILY_FEST_FLYER_URL
+  }
   if (s.includes('back-to-school-night')) return '/events/back-to-school-night-2026.jpg'
   if (isRunForCharitySlug(slug) || s.includes('run-for-charity')) {
     return '/events/run-for-charity-2026.jpg'

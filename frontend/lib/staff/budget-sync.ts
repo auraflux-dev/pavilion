@@ -82,6 +82,8 @@ export type BudgetEntry = {
   origin: BudgetEntryOrigin
   refId: string
   createdByEmail: string
+  /** Wix system time — useful for “last bank CSV touch” when no SiteSettings stamp yet */
+  updatedAt?: string
 }
 
 export const BUDGET_ENTRY_FIELDS = [
@@ -162,6 +164,7 @@ function mapEntry(row: Record<string, unknown>): BudgetEntry {
     origin,
     refId: String(row.refId ?? ''),
     createdByEmail: String(row.createdByEmail ?? ''),
+    updatedAt: String(row._updatedDate ?? row._createdDate ?? ''),
   }
 }
 
@@ -301,7 +304,7 @@ async function entryExists(refId: string): Promise<boolean> {
   return (found.items ?? []).length > 0
 }
 
-export async function insertEntry(row: Omit<BudgetEntry, 'id'>, knownRefIds?: Set<string>): Promise<boolean> {
+export async function insertEntry(row: Omit<BudgetEntry, 'id' | 'updatedAt'>, knownRefIds?: Set<string>): Promise<boolean> {
   if (row.refId && (knownRefIds?.has(row.refId) || (!knownRefIds && (await entryExists(row.refId))))) {
     return false
   }
@@ -321,7 +324,7 @@ export async function insertEntry(row: Omit<BudgetEntry, 'id'>, knownRefIds?: Se
 }
 
 export async function upsertBudgetEntryByRefId(
-  row: Omit<BudgetEntry, 'id'>,
+  row: Omit<BudgetEntry, 'id' | 'updatedAt'>,
 ): Promise<'inserted' | 'updated' | 'skipped'> {
   if (!row.refId) return 'skipped'
   await ensureBudgetEntriesCollection()

@@ -137,7 +137,7 @@ export async function recordNewsletterClick(sendId: string, linkIdx: number): Pr
   const client = getWixClient()
   const row = await client.items.get('NewsletterSends', sendId).catch(() => null)
   if (!row) return null
-  const data = row as {
+  const data = row as Record<string, unknown> & {
     linksJson?: string
     clickCount?: number
     active?: boolean
@@ -156,8 +156,21 @@ export async function recordNewsletterClick(sendId: string, linkIdx: number): Pr
 
   await client.items.update('NewsletterSends', {
     _id: sendId,
+    subject: data.subject ?? null,
+    body: data.body ?? null,
     linksJson: JSON.stringify(links),
+    utmCampaign: data.utmCampaign ?? null,
+    tier: data.tier ?? null,
+    grade: data.grade ?? null,
+    recipientCount: data.recipientCount ?? null,
+    deliveredCount: data.deliveredCount ?? null,
+    failedCount: data.failedCount ?? null,
+    openCount: data.openCount ?? null,
     clickCount: Number(data.clickCount ?? 0) + 1,
+    sentAt: data.sentAt ?? null,
+    sentByEmail: data.sentByEmail ?? null,
+    templateId: data.templateId ?? null,
+    active: true,
   })
 
   return link.url
@@ -167,11 +180,25 @@ export async function recordNewsletterOpen(sendId: string): Promise<void> {
   const client = getWixClient()
   const row = await client.items.get('NewsletterSends', sendId).catch(() => null)
   if (!row) return
-  const data = row as { openCount?: number; active?: boolean }
+  const data = row as Record<string, unknown> & { openCount?: number; active?: boolean }
   if (data.active === false) return
   await client.items.update('NewsletterSends', {
     _id: sendId,
+    subject: data.subject ?? null,
+    body: data.body ?? null,
+    linksJson: data.linksJson ?? null,
+    utmCampaign: data.utmCampaign ?? null,
+    tier: data.tier ?? null,
+    grade: data.grade ?? null,
+    recipientCount: data.recipientCount ?? null,
+    deliveredCount: data.deliveredCount ?? null,
+    failedCount: data.failedCount ?? null,
     openCount: Number(data.openCount ?? 0) + 1,
+    clickCount: data.clickCount ?? null,
+    sentAt: data.sentAt ?? null,
+    sentByEmail: data.sentByEmail ?? null,
+    templateId: data.templateId ?? null,
+    active: true,
   })
 }
 

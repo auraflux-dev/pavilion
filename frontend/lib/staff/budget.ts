@@ -188,7 +188,7 @@ export function placeholderBudgetLines(_fiscalYear = DEFAULT_FISCAL_YEAR): SeedL
       actual: 0,
       owner: 'Treasurer',
       notes:
-        'BoA Counter Credit deposits of the cash box. Ledger only. Not in planning totals or public fundraising.',
+        'BoA Counter Credit deposits of the cash box. Matched to rung Cove cash stays ledger-only; unexplained excess counts toward public Other.',
       sortOrder: 52,
     },
     {

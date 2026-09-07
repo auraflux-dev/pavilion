@@ -313,23 +313,11 @@ export function StaffNewsletterTemplatesPanel({
   const previewSrc = canvaMeta.heroImageUrl || canvaMeta.canvaThumbnailUrl
 
   return (
-    <section
-      id="newsletter-templates"
-      className="scroll-mt-28 rounded-xl border border-[var(--border)] bg-white p-5 space-y-4"
-    >
-      <div>
-        <h2 className="text-lg font-bold">Templates (Canva + copy)</h2>
-        <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
-          Design = Canva PNG + fixed SHMS header (logo + title). Multi-page Canva exports every page into the email.
-          Use sections for intro, events, reply prompts, CTAs, and sign-off. Body stays plain text (no HTML coding).
-          {'\n'}
-          Attach Canva → Export PNG or Upload PNG (optional top graphic) → write copy → test send.
-          {'\n'}
-          Each section can also have its own uploaded PNG (social / event graphic).
-          {'\n'}
-          Unsubscribe link and postal address are added to every send automatically.
-        </p>
-      </div>
+    <div id="newsletter-templates-inner" className="space-y-4">
+      <p className="text-xs text-[#5A6070] leading-relaxed">
+        Attach a Canva design and export PNG pages, or upload PNGs from Canva Download.
+        Save a template when you will reuse this graphic + copy.
+      </p>
 
       <div className="flex flex-wrap gap-2 items-end">
         <label className="flex-1 min-w-[12rem] text-xs text-[#5A6070]">
@@ -480,6 +468,6 @@ export function StaffNewsletterTemplatesPanel({
       </div>
 
       {status ? <p className="text-sm text-[#1A1A1A] whitespace-pre-line">{status}</p> : null}
-    </section>
+    </div>
   )
 }

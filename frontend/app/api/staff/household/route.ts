@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getStaffSession, requireStaffRoleOrWorkspace } from '@/lib/staff/session'
 import {
   loadHouseholdActivity,
+  loadHouseholdSharedLogins,
   openHousehold,
 } from '@/lib/staff/household-activity'
 import { normalizeAccountNumber } from '@/lib/staff/membership-account-number'
@@ -60,7 +61,10 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const activity = await loadHouseholdActivity(household)
+    const [activity, sharedLogins] = await Promise.all([
+      loadHouseholdActivity(household),
+      loadHouseholdSharedLogins(household),
+    ])
     const activeEnrollments = activity.enrollments.filter((e) => e.active)
 
     return NextResponse.json({
@@ -69,6 +73,7 @@ export async function GET(req: NextRequest) {
         accountNumber: household.accountNumber,
         emails: household.emails,
         primaryEmail: household.primaryEmail,
+        sharedLogins,
         tiers: [...new Set(household.tierCandidates.map((t) => String(t || '').trim()).filter(Boolean))],
         students: household.students.map((s) => ({
           id: String(s._id || ''),

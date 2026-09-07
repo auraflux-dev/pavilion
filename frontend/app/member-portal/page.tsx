@@ -11,6 +11,7 @@ import { getPortalFormCopy } from '@/lib/api/portal-form-copy'
 import { CONTACT_DEFAULTS } from '@/lib/defaults/page-content'
 import { PageThemeRoot, PageThemeStyles } from '@/components/site/page-theme'
 import { PortalFormCopyProvider } from '@/components/member-portal/portal-form-copy-context'
+import { RunForCharityPortalRail } from '@/components/member-portal/run-for-charity-portal-rail'
 import { MemberInlineEdit } from '@/components/site/member-inline-edit'
 import { CmsCopyBoundary } from '@/components/cms/cms-copy-boundary'
 
@@ -53,17 +54,22 @@ export default async function MemberPortalPage() {
               <PageHero content={hero} pageKey="member-portal" compact />
 
               <section className="py-10 md:py-14">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <PortalFormCopyProvider value={forms}>
-                    <MemberDashboard
-                      link6={link6}
-                      link7={link7}
-                      link8={link8}
-                      grades={grades}
-                      copy={copy}
-                      notices={notices}
-                    />
-                  </PortalFormCopyProvider>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex items-start gap-6">
+                    <div className="min-w-0 flex-1 max-w-6xl">
+                      <PortalFormCopyProvider value={forms}>
+                        <MemberDashboard
+                          link6={link6}
+                          link7={link7}
+                          link8={link8}
+                          grades={grades}
+                          copy={copy}
+                          notices={notices}
+                        />
+                      </PortalFormCopyProvider>
+                    </div>
+                    <RunForCharityPortalRail />
+                  </div>
                 </div>
               </section>
             </main>

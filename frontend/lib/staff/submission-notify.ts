@@ -342,9 +342,14 @@ export async function notifyStaffTransaction(opts: {
   ]
   if (paymentMethod) lines.push(`Payment: ${paymentMethod}`)
   if (tender.length) lines.push(...tender)
+  const seasonLabel = String(opts.meta?.seasonLabel || '').trim()
+  const seasonSlug = String(opts.meta?.season || '').trim()
+  if (seasonLabel || seasonSlug) {
+    lines.push(`Season: ${seasonLabel || seasonSlug}`)
+  }
   if (opts.meta) {
     const skip =
-      /^(cartPartsJson|cartTitles|gan|giftCardId|coveBalance|coveCents|cardCents|coveNewBalance|coveCharged|remainderDue|accountNumber|studentId|programId)$/i
+      /^(cartPartsJson|cartTitles|gan|giftCardId|coveBalance|coveCents|cardCents|coveNewBalance|coveCharged|remainderDue|accountNumber|studentId|programId|season|seasonLabel)$/i
     const desc = String(opts.description || '').trim().toLowerCase()
     for (const [k, v] of Object.entries(opts.meta)) {
       if (!v || skip.test(k)) continue

@@ -78,7 +78,7 @@ export const PAGE_CONTENT_DEFAULTS: Record<string, PageContentFields> = {
   /** Home page community strip. Wix PageContent page = home-community */
   'home-community': empty('home-community', {
     title:
-      'Fall & Spring enrichment registration is open.\nPaid members through Sep 7 · everyone Sep 8–13.',
+      'Fall & Spring enrichment registration is open.\nPaid members through Sep 7 · all parents Sep 8–13.',
     body: '',
   }),
   membership: empty('membership', {

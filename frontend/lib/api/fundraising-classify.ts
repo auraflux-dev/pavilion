@@ -3,7 +3,12 @@
  *
  * Count when cash first arrives (dues, parent load/reload, non-Cove sale).
  * Do not count: membership-bundled Cove credit, Cove card spends after any load,
- * BoA cash-box deposits (Counter Credit), Square/PayPal payouts into checking.
+ * Square/PayPal payouts into checking.
+ *
+ * BoA Counter Credit (cash_box_deposits): do not count the full deposit (would
+ * double-count rung Cove cash). Count only the unexplained excess:
+ * max(0, YTD Counter Credit − YTD cove_register_cash). That covers cash in the
+ * bank that was never rung at POS.
  *
  * POS / cove_pos sales: exclude from fundraising only when tender is Cove card.
  * Cash, Stand, Zelle, and other tenders still count.
@@ -17,7 +22,10 @@ export type FundraisingBucket =
   | 'novaMath'
   | 'other'
 
-/** Bank sync keys that stay on the budget/ledger but never feed public fundraising. */
+/**
+ * Bank sync keys that stay on the budget/ledger and never map dollar-for-dollar
+ * into public fundraising. cash_box_deposits still contribute via unexplained excess.
+ */
 export const FUNDRAISING_LEDGER_ONLY_BANK_KEYS = new Set([
   'cash_box_deposits',
   'card_payouts',
@@ -42,6 +50,28 @@ export function mapBankSyncKeyForFundraising(key: string): FundraisingBucket | n
     return 'other'
   }
   return null
+}
+
+/** True when this Payments row put physical cash in the Cove cash box. */
+export function isCashBoxPosSale(source: string, paymentMethod = ''): boolean {
+  const src = String(source ?? '').toLowerCase()
+  if (src.includes('register_cash')) return true
+  const method = String(paymentMethod ?? '').toLowerCase().trim()
+  if (
+    (method === 'cash' || method.startsWith('cash ')) &&
+    src.includes('register') &&
+    !src.includes('redeem')
+  ) {
+    return true
+  }
+  return false
+}
+
+/** Deposit dollars above rung Cove cash → count toward fundraising (usually Other). */
+export function unexplainedCashBoxForFundraising(deposited: number, rungPosCash: number): number {
+  const d = Math.round((Number(deposited) || 0) * 100) / 100
+  const r = Math.round((Number(rungPosCash) || 0) * 100) / 100
+  return Math.max(0, Math.round((d - r) * 100) / 100)
 }
 
 /**

@@ -311,10 +311,16 @@ export function filterParentRoster(
       return { ...row, students }
     })
     .filter((row) => {
-      // Keep Memberships-only paid parents, faculty, and board seats (no student rows yet)
+      // Keep Memberships-only paid / faculty / board / joined-free parents (no student rows yet).
+      // Joined free (siteJoined) includes newsletter signups we promoted to free Memberships.
       if (!includeArchived && row.students.length === 0) {
         const t = normalizeMembershipTier(row.membershipTier)
-        if (row.accountType !== 'paid' && t !== 'faculty' && !row.boardComplimentary) return false
+        const keepEmpty =
+          row.accountType === 'paid' ||
+          t === 'faculty' ||
+          row.boardComplimentary === true ||
+          (row.accountType === 'free' && row.siteJoined === true)
+        if (!keepEmpty) return false
       }
 
       // Joined free = Memberships row on new site. Legacy = directory-only free.

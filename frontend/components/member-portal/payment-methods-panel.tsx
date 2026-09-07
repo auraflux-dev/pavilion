@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CreditCard, Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { CmsPortal, useFormString } from '@/components/member-portal/portal-form-copy-context'
+import { CmsPortal, useFormCopyLookup } from '@/components/member-portal/portal-form-copy-context'
 
 type StoredCard = {
   brand: string
@@ -38,7 +38,7 @@ type PayPalButtonsApi = {
 }
 
 export function PaymentMethodsPanel() {
-  const t = useFormString
+  const t = useFormCopyLookup()
   const [busy, setBusy] = useState(true)
   const [removing, setRemoving] = useState<'card' | 'paypal' | null>(null)
   const [card, setCard] = useState<StoredCard | null>(null)

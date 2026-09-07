@@ -244,7 +244,7 @@ Printable: **/staff/in-person**
 | Portal already paid | **Store pickups** → Handed out |
 | Zelle / PayPal / phone (no Stand) | Staff → **External** |
 | Code ends in **9** | Lagoon/Tide free food ticket · no charge |
-| Reef wants food | Lookup 6-digit / passcode → ring **BTSN food truck ticket** ($6 each, SKU POS-REFRESH) → deduct Cove → hand ticket |
+| Reef wants food | Lookup 6-digit / passcode → ring **event food truck ticket** ($6 each, SKU POS-REFRESH) → deduct Cove → hand ticket |
 | Guest / non-member wants food | They pay the truck. Do not ring Stand. |
 | Membership | **Portal only** |
 
@@ -371,131 +371,111 @@ Keep MoneyMinder / bank exports with Treasurer. Do not duplicate finance ledgers
       slug: 'member-newsletter-diane',
       title: 'Member newsletter (for Diane)',
       categoryId: 'comms',
-      summary: 'Plain text plus Canva. Paid email, Weekly Scoop, test sends, schedule, WhatsApp.',
+      summary: 'Five steps: audience, write, graphic, review list, test & send. Paid email, Weekly Scoop, schedule, WhatsApp.',
       order: 3.5,
       need: 'marketing',
       body: `Watch the walkthrough video at the top of this article first.
-Then use the screenshots below. Each one matches a section in Staff → Newsletter.
+Then use Staff → **Member email & WhatsApp**. Work the numbered steps top to bottom.
 
-Open: https://www.shmspto.org/staff (Newsletter workspace)
+Open: https://www.shmspto.org/staff?view=newsletter
 
 ## What parents actually get
-- **Paid members**: the full email. SHMS header, your Canva PNG pages, then your text, then footer.
-- **Free parents (Weekly Scoop, about once a month)**: a **link**, not the full designed email. You share that link on WhatsApp, in the member portal, and optionally by email.
-- **Footer signups**: people who signed up on the public site. Email only. No portal.
+- **Paid members**: the full email (SHMS header, your PNG pages, text, footer).
+- **Weekly Scoop (free parents, about once a month)**: a **link**, shared on WhatsApp, portal, and optionally email.
+- **Footer signups**: people who subscribed on the public site. Email only. No portal.
 
-## Before you send anything
-1. Sign in as **vp-marketing@shmspto.org**
-2. **Inbox → Connect Google** if Gmail send is not ready (president@ mailbox is what actually sends)
-3. **Canva** workspace: open the Marketing folder and **Connect Canva** so PNG export works
-4. On Staff **Home**, save your **personal Gmail** so **Test send → Just me** can reach you
+## Before you send
+1. Sign in as **vp-marketing@shmspto.org** (or your marketing role)
+2. **Inbox → Connect Google** if Gmail is not ready (president@ mailbox sends)
+3. Staff → **Canva** → Connect Canva (optional; you can also Upload PNG)
+4. On Staff **Home**, save your **personal Gmail** so **Test → Just me** reaches you
 
-## Design in Canva (not in Staff)
-1. Staff → **Canva** → Open Marketing folder
-2. Make a Doc, Presentation, or email-sized design
-3. Brand files: https://www.shmspto.org/brand
-4. Put the look in Canva. Put **clickable links in the text box** in Newsletter too (those get tracking)
-
-Do not paste HTML from Canva. Do not edit the design inside Staff. Use **Edit in Canva**, then re-attach or Export PNG again.
-
-## Attach Canva and export PNG
-1. In Newsletter, paste a Canva view/edit link, or pick a recent design
-2. **Export PNG for email** (it also starts on attach if Canva is connected)
-3. Preview the graphic. Multi-page designs export **every page**: All pages stack in the email
-4. **Save current as template** if you will reuse this
+## The five steps in Staff
+1. **Who** — Paid / Weekly Scoop / Footer signups + subject
+2. **Write** — plain body or sections (intro, Event, Ask, CTA, sign-off) + optional attachments
+3. **Graphic** — Attach Canva → Export PNG, or Upload PNG; save/load templates here
+4. **Review list** — membership/grade filters → **Preview recipients**
+5. **Test & send** — test first, then publish link / send email / WhatsApp / schedule
 
 ![Templates (Canva + copy). Attach link, export PNG, multi-page preview, save template](/help/staff-newsletter/01-templates-canva.png)
 
+## Design in Canva (not inside the email body)
+1. Staff → **Canva** → Marketing folder, or design in the Canva app
+2. Brand files: https://www.shmspto.org/brand
+3. Put clickable links in the **text** box in Newsletter (those get tracking)
+4. Do not paste HTML from Canva
+
 ## Write the copy
-Type in the subject and body like a normal email.
-
-Optional: check **Write in beats**: Fill intro, Event, Ask, CTA, sign-off. Staff joins those into the body. You can still read the combined text.
-
 Personal bits you can type in subject or body:
 - {{firstName}} {{lastName}} {{name}}
 - {{tier}} {{grade}} {{email}}
 
-Example: Hi {{firstName}}, your {{tier}} membership...
-
 If a name is missing, it becomes “there”.
 
 ![Subject, body, beats, UTM, and tracking toggles](/help/staff-newsletter/06-copy-tracking.png)
+![Write in beats. Intro, Event, Ask, CTA, sign-off](/help/staff-newsletter/05-beats.png)
 
 ## Always test first
 1. Pick **Just me**, **Board**, or **Board + Site Settings test list**
 2. **Preview test recipients**, then **Send test email**
-3. Subject gets **[TEST]**: It does **not** go to the parent portal archive
+3. Subject gets **[TEST]** — it does **not** go to the portal archive
 4. Open the test inbox and click a link once so you know tracking works
 
 ![Test send. Group, preview, send test email](/help/staff-newsletter/02-test-send.png)
 
-## Choose the newsletter type
-- **Paid members (full email)**: default. Sends to paid roster only. Optional portal post for paid parents.
-- **Publish to site & copy link**: creates a public page (e.g. /newsletters/...) with the same branded HTML. Paste that URL into the **school Scoop**. Also fills the Scoop link field.
-- **Weekly Scoop helpers** (optional free-parent share): after publish, use the web link for WhatsApp / portal / optional email. Prefer the published site URL over Canva.
-- **Footer signup list only**: public form emails. No portal.
+## Audience cards
+- **Paid members**: full email to paid roster. Optional portal post.
+- **Weekly Scoop**: after **Publish to site**, share the link (WhatsApp / portal / optional email).
+- **Footer signups**: public form list only.
 
 ![Newsletter type. Paid, Weekly Scoop, or footer signups](/help/staff-newsletter/03-newsletter-type.png)
-
 ![Weekly Scoop. Link field and optional footer signups](/help/staff-newsletter/04-weekly-scoop.png)
 
-![Write in beats. Intro, Event, Ask, CTA, sign-off](/help/staff-newsletter/05-beats.png)
-
 ## Send paid email
-1. Confirm type is **Paid members**
+1. Audience = **Paid members**
 2. **Preview recipients**
-3. **Send email now**: Confirm the count. If 25 or more, type **SEND**
-4. Check **Send report** for delivered, failed, opens, clicks
+3. **Send email now** — confirm the count; if 25+, type **SEND**
+4. Check **Send report** below for delivered, failed, opens, clicks
 
 ![Send actions. Preview, Send email now, Copy + open WhatsApp](/help/staff-newsletter/08-send-actions.png)
 
+## Publish for school Scoop
+1. Finish copy + graphic
+2. **Publish to site & copy link** → https://www.shmspto.org/newsletters/...
+3. Paste into the school Scoop
+4. Optionally still **Send email now** to paid members
+
+## Weekly Scoop (free parents)
+1. Audience = Weekly Scoop
+2. Subject can stay **SHMS Weekly Scoop**
+3. Publish to site first (or paste the URL into the Scoop link field)
+4. **Copy + open WhatsApp** (PNG tab + groups)
+5. **Post scoop to portal** (free parents only)
+6. Optional **Email scoop link** after a test send
+
 ## Schedule or get approval
 1. Pick **Send at** (your local time)
-2. Marketing: **Request approval & schedule**: Secretary or president clicks **Approve**
-3. If you can approve, **Schedule send**
-4. Jobs send within about 15 minutes of that time. Cancel from the same list if needed
-
-Test sends stay one-click. They do not need this queue.
+2. Marketing: **Request approval & schedule** — secretary or president clicks **Approve**
+3. If you can approve: **Schedule send**
+4. Jobs send within about **15 minutes** of that time. Cancel from the same list if needed
 
 ![Schedule / approval. Datetime, job list, Approve or Cancel](/help/staff-newsletter/07-schedule-approval.png)
 
-## WhatsApp (including the graphic)
-WhatsApp cannot attach a file from the website.
-
-**Copy + open WhatsApp** will:
-- Copy the caption
-- Open your PNG in a new tab
-- Open the grade group invite links
-
+## WhatsApp
+**Copy + open WhatsApp** copies the caption, opens your PNG, and opens grade group links.
 In WhatsApp: attach that PNG, then paste the caption.
-
-Grade links live in **Site settings** (6th / 7th / 8th announcement links).
-
-## Publish for school Scoop
-1. Write the PTO newsletter (subject, copy/beats, Canva PNG as usual)
-2. **Publish to site & copy link** — opens nothing; copies https://www.shmspto.org/newsletters/...
-3. Paste that link into the school Scoop
-4. Optionally still **Send email now** to paid members
-
-## Weekly Scoop helpers (free parents), step by step
-1. Type = Weekly Scoop
-2. Subject can stay **SHMS Weekly Scoop**
-3. Publish to site first (or paste the web URL into the Scoop link field)
-4. **Copy + open WhatsApp** (PNG tab + groups)
-5. **Post scoop to portal** (free parents only. Paid members will not see this scoop)
-6. Optional **Email scoop link** after a test send
+Grade links live in **Site settings**.
 
 ## Send report
-After a live send, open **Send report** on the same Newsletter page.
-Refresh to see delivered, failed, opens, and top link clicks.
+After a live send, open **Send report** on the same page. Refresh for delivered, failed, opens, and top clicks.
 
 ![Send report. Delivered, failed, opens, clicks](/help/staff-newsletter/09-send-report.png)
 
 ## What not to do
 - Do not paste HTML or ask someone to “code the newsletter”
 - Do not skip **Test send**
-- Do not use Paid type for the monthly free link. Use Weekly Scoop
-- Do not expect WhatsApp to auto-attach the PNG. You attach it.
+- Do not use Paid type for the monthly free link — use Weekly Scoop
+- Do not expect WhatsApp to auto-attach the PNG
 
 Questions: president@shmspto.org`,
     },
@@ -684,7 +664,7 @@ If a parent paid but sees nothing:
 - **Reef:** includes a magnet (no shirt).
 - **Faculty ($20):** choose **magnet OR T-shirt** at checkout (not both).
 - Queued in Staff → Fulfillments. No mailing address yet (3PL later).
-- Tell members: pick up at **Back to School Night on August 27**, or email **vp-membershipexperience@shmspto.org** to coordinate.
+- Tell members: pick up at **The Cove during school days**, or email **vp-membershipexperience@shmspto.org** to coordinate.
 - Standalone **Stone Hill car magnet** is also sold in the spirit shop for $10.
 - Mark **Set aside** when inventory is pulled, then **Handed out** after handoff.
 - Marked **Handed out** by mistake? Search account # or name under **Handed out**, then **Reopen** (puts the shirt/magnet back in the pickup queue).
@@ -693,7 +673,7 @@ If a parent paid but sees nothing:
 - **Lagoon and Tide only** (not Reef).
 - Family Cove **6-digit codes for Lagoon/Tide always end in 9** (Reef and free accounts never do).
 - At food trucks / tables: parent shows the 6-digit code → volunteer checks it ends in 9 **or** looks up on Cove register (Lagoon/Tide) → record the code → hand refreshment tickets.
-- **Reef** is not free. Lookup the family (6-digit or passcode) → ring **BTSN food truck ticket** ($6 each, SKU POS-REFRESH) → deduct Cove (QR or Card on File) → **then** hand a ticket. Item is POS-only (not on /cove).
+- **Reef** is not free. Lookup the family (6-digit or passcode) → ring **event food truck ticket** ($6 each, SKU POS-REFRESH) → deduct Cove (QR or Card on File) → **then** hand a ticket. Item is POS-only (not on /cove).
 - **Guests / non-members** pay the food truck themselves. Do not ring Stand and do not hand a PTO ticket.
 - Portal Membership benefits also shows the code for Lagoon/Tide members.`,
     },
@@ -846,7 +826,7 @@ In BoA: checking → Activity → Download → **CSV** (not PDF). Upload it on t
 
 - Checks, ACH, Zelle, Sam’s, Amazon, Jumbula, insurance, and tools **do** import
 - Square and PayPal **payouts / transfers into checking are skipped** (same dollars as memberships / Cove / tickets, or the live PayPal feed)
-- **Counter Credit** (cash-box deposits) import to a **ledger-only** line. Visible in activity. Not in planning income totals or public fundraising (cash already counted when rung at POS)
+- **Counter Credit** (cash-box deposits) import to a ledger line. Matched against rung Cove cash sales: matched dollars stay out of planning/fundraising doubles; **deposit above rung cash** counts toward public fundraising (Other) so forgotten cash rings still show up.
 - Processor **fees** and card purchases (Apple, Square hardware, Adobe) still import
 - Debit charges on our own Square terminal (SQ *SHMSPTO) are skipped. Those sales already live in Staff Payments
 - Internal transfers are skipped
@@ -865,7 +845,7 @@ Same rule online and in person.
 - Count membership **dues** once. Bundled Cove credit does **not** count again.
 - Count parent-paid Cove **loads and reloads**. Do **not** count Cove card **spends** after any load (that would double-count).
 - Count POS sales paid with cash, Stand card, Zelle, etc. Do **not** count POS when tender is the Cove card.
-- Do **not** count BoA Counter Credit cash-box deposits toward fundraising.
+- BoA Counter Credit: count only **unexplained** cash (YTD deposits − YTD rung Cove cash). Matched deposits stay ledger-only.
 
 ## Using the page
 - Totals at the top: income, expense, net. Budgeted vs actual, and remaining

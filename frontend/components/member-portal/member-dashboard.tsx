@@ -52,6 +52,7 @@ import { PortalActionNotice, usePortalNotice } from './portal-action-notice'
 import { CmsPortal, usePortalFormCopy } from './portal-form-copy-context'
 import { CmsHub, CmsNotice } from '@/components/cms/cms-portal-strings'
 import { formString } from '@/lib/copy/form-string'
+import { FallFamilyFestPortalBanner } from './fall-family-fest-portal-banner'
 import { DeferredMount } from './deferred-mount'
 import {
   buildOnboardingChecklist,
@@ -178,6 +179,9 @@ export function MemberDashboard({
   const safetyGateHint = pickString(notices, 'safetyGateHint', noticeFallback('safetyGateHint'))
   const [member, setMember] = useState<MemberData['member'] | null>(null)
   const [accountType, setAccountType] = useState<'free' | 'paid'>('free')
+  const [membershipTier, setMembershipTier] = useState('free')
+  const [viewingOtherHousehold, setViewingOtherHousehold] = useState(false)
+  const [actingAsHousehold, setActingAsHousehold] = useState(false)
   const [students, setStudents] = useState<Student[]>([])
   const [calendar, setCalendar] = useState<CalendarItem[]>([])
   const [messages, setMessages] = useState<MessageItem[]>([])
@@ -261,6 +265,9 @@ export function MemberDashboard({
 
       setMember(liteData.member)
       setAccountType(liteData.accountType === 'paid' ? 'paid' : 'free')
+      setMembershipTier(String(liteData.membershipTier ?? 'free'))
+      setViewingOtherHousehold(Boolean(liteData.viewingOtherHousehold || liteData.actingAs))
+      setActingAsHousehold(Boolean(liteData.actingAs))
       setStudents(liteData.students ?? [])
       setStatus('ok')
       setHasLoaded(true)
@@ -275,6 +282,9 @@ export function MemberDashboard({
 
       setMember(familyData.member)
       setAccountType(familyData.accountType === 'paid' ? 'paid' : 'free')
+      setMembershipTier(String(familyData.membershipTier ?? 'free'))
+      setViewingOtherHousehold(Boolean(familyData.viewingOtherHousehold || familyData.actingAs))
+      setActingAsHousehold(Boolean(familyData.actingAs))
       setStudents(familyData.students ?? [])
       setCalendar(familyData.calendar ?? [])
       setMessages(familyData.messages ?? [])
@@ -425,7 +435,12 @@ export function MemberDashboard({
   const paidStudents = students.filter(
     (s) => s.membershipTier && s.membershipTier !== 'free'
   ).length
-  const householdTier = pickHighestTier(students.map((s) => s.membershipTier))
+  // Prefer Memberships collection tier (API) over student rows — checkout may create
+  // Memberships before a student is added, leaving student.membershipTier as free.
+  const householdTier = pickHighestTier([
+    membershipTier,
+    ...students.map((s) => s.membershipTier),
+  ])
   const householdTierRank = tierRank(householdTier)
   const tierDisplay = displayMembershipTier(householdTier)
   const membershipCtaHref = MEMBERSHIP_CHOOSE_PATH
@@ -558,6 +573,8 @@ export function MemberDashboard({
           </div>
         </div>
       ) : null}
+
+      <FallFamilyFestPortalBanner />
 
       {/* 2×2 quadrants. D (calendar/messages) first on mobile */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -777,16 +794,25 @@ export function MemberDashboard({
             <div className="min-w-0 flex-1">
               <p className="font-bold text-[#1A1A1A] truncate">{member.name}</p>
               <p className="text-xs text-[#5A6070] truncate">{member.email}</p>
+              {viewingOtherHousehold ? (
+                <p className="text-[11px] text-[#1B2A4A] mt-0.5">
+                  {actingAsHousehold
+                    ? 'Act-as: showing this household’s portal view.'
+                    : 'Staff linked household view.'}
+                </p>
+              ) : null}
             </div>
           </div>
 
-          <EditAccountForm
-            initialName={member.name}
-            email={member.email}
-            phone={member.phone}
-            onUpdated={handleMemberUpdated}
-            onSaved={showPortalSuccess}
-          />
+          {!viewingOtherHousehold ? (
+            <EditAccountForm
+              initialName={member.name}
+              email={member.email}
+              phone={member.phone}
+              onUpdated={handleMemberUpdated}
+              onSaved={showPortalSuccess}
+            />
+          ) : null}
 
           <div
             className="rounded-xl px-4 py-3 border mb-4"

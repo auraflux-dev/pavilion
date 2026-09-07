@@ -6,12 +6,13 @@ import { vanillaizeIfDemo } from '@/lib/demo/brand'
 
 interface Props {
   studentId: string
+  studentName: string
 }
 
 const THRESHOLD_OPTIONS = [5, 10, 15, 20]
 const RELOAD_OPTIONS = [20, 40, 75]
 
-export function GiftCardSettings({ studentId }: Props) {
+export function GiftCardSettings({ studentId, studentName }: Props) {
   const [open, setOpen] = useState(false)
   const [enabled, setEnabled] = useState(false)
   const [threshold, setThreshold] = useState(10)
@@ -78,8 +79,8 @@ export function GiftCardSettings({ studentId }: Props) {
 
       {open && (
         <div className="px-4 py-4 space-y-4 border-t border-[var(--border)]">
-          <p className="text-xs text-[#5A6070] leading-relaxed whitespace-pre-line">
-            {`Charges your saved card when balance is low.\nManage the card under Payment methods.`}
+          <p className="text-xs text-[#5A6070] leading-relaxed">
+            When {studentName}&apos;s balance reaches the threshold, Square securely charges your saved card and {vanillaizeIfDemo('loads the Cove Digital Card')}. 
           </p>
 
           {hasPaymentMethod ? (
@@ -92,7 +93,7 @@ export function GiftCardSettings({ studentId }: Props) {
               <a href="/member-portal/payment-methods" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
                 Payment methods
               </a>{' '}
-              {vanillaizeIfDemo('(or during a Cove Digital reload) before enabling auto top-off.')}
+              (or during a Cove reload) before enabling auto top-off.
             </p>
           )}
 
@@ -161,8 +162,18 @@ export function GiftCardSettings({ studentId }: Props) {
             </>
           )}
 
-          {error ? <p className="text-xs text-red-600">{error}</p> : null}
+          {error ? <p role="alert" className="text-xs text-red-600">{error}</p> : null}
+          {enabled && !hasPaymentMethod ? (
+            <p className="text-[11px] text-[#5A6070]">
+              Add a card in{' '}
+              <a href="/member-portal/payment-methods" className="font-semibold underline" style={{ color: 'var(--brand-green)' }}>
+                Payment methods
+              </a>{' '}
+              before turning on auto top-off.
+            </p>
+          ) : null}
           <button
+            type="button"
             onClick={save}
             disabled={status === 'saving' || status === 'loading' || (enabled && !hasPaymentMethod)}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-white disabled:opacity-50"

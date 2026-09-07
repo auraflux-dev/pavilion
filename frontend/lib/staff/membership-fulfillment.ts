@@ -115,6 +115,7 @@ export async function listFulfillmentQueues(): Promise<{
 
   const open: FulfillmentQueueItem[] = []
   const handedOut: FulfillmentQueueItem[] = []
+  const { buildMembershipEntitlements } = await import('@/lib/membership-entitlements')
 
   for (const rec of membershipRows) {
     const id = String(rec._id ?? '')
@@ -131,7 +132,18 @@ export async function listFulfillmentQueues(): Promise<{
     const parentLastName =
       String(rec.parentLastName ?? rec.lastName ?? '').trim() || family?.parentLastName || ''
     const studentNames = (family?.studentNames ?? []).join(', ')
-    const entitlements = parseEntitlementsJson(rec.entitlementsJson)
+    const stored = parseEntitlementsJson(rec.entitlementsJson)
+    // Faculty choose shirt XOR magnet — infer from stored entitlements so the
+    // queue does not invent a magnet when they already have a pending shirt.
+    const physicalPerk = stored.some((e) => e.kind === 'spirit_shirt')
+      ? ('spirit_shirt' as const)
+      : stored.some((e) => e.kind === 'magnet')
+        ? ('magnet' as const)
+        : null
+    const entitlements = mergePortalEntitlements(
+      stored,
+      buildMembershipEntitlements({ tier, shirtSize, physicalPerk }),
+    )
     for (const e of entitlements) {
       if (!isFulfillable(e.kind)) continue
       const item: FulfillmentQueueItem = {
@@ -300,10 +312,16 @@ export async function getMembershipEntitlements(
   const rawEnrichment = String(row.enrichmentCode ?? '').trim() || discountCode || null
   const enrichmentCode =
     stripSharedEnrichment || !tierOffersEnrichmentDiscount(tier) ? null : rawEnrichment
+  const physicalPerk = stored.some((e) => e.kind === 'spirit_shirt')
+    ? ('spirit_shirt' as const)
+    : stored.some((e) => e.kind === 'magnet')
+      ? ('magnet' as const)
+      : null
   const fresh = buildMembershipEntitlements({
     tier,
     shirtSize,
     enrichmentCode,
+    physicalPerk,
   })
   const { appendBoardEntitlements } = await import('@/lib/staff/board-enrichment-discounts')
   let entitlements = appendBoardEntitlements(row, mergePortalEntitlements(stored, fresh))

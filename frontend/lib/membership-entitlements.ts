@@ -60,9 +60,9 @@ export const SHIRT_SIZES = [
 
 export type ShirtSize = (typeof SHIRT_SIZES)[number]
 
-/** Until 3PL ships, physical perks are Back to School Night / coordinated pickup. */
+/** Until 3PL ships, physical perks are Cove pickup or coordinated email pickup. */
 export const PHYSICAL_PERK_PICKUP_NOTE =
-  'Pick up at Back to School Night on August 27, or email vp-membershipexperience@shmspto.org to coordinate pickup.'
+  'Pick up at The Cove during school days, or email vp-membershipexperience@shmspto.org to coordinate pickup.'
 
 export const EVENT_REFRESHMENTS_NOTE =
   'At PTO events, show your Family Cove 6-digit code (Lagoon and Tide codes end in 9). Volunteers record the code and hand refreshment tickets.'
@@ -265,7 +265,7 @@ export function staffMembershipPerkLines(opts: {
     )
   }
   lines.push(
-    'No mailing address yet (3PL later). Pick up at Back to School Night Aug 27, or parent emails vp-membershipexperience@shmspto.org to coordinate.',
+    'No mailing address yet (3PL later). Pick up at The Cove during school days, or parent emails vp-membershipexperience@shmspto.org to coordinate.',
   )
   return lines
 }
@@ -325,7 +325,7 @@ export function mergePortalEntitlements(
           ...f,
           status: prev.status === 'fulfilled' ? 'picked_up' : prev.status,
           detail: prev.detail || f.detail,
-          notes: prev.notes || f.notes,
+          notes: f.notes || prev.notes,
         })
         continue
       }

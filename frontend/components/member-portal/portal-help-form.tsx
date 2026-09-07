@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { vanillaizeIfDemo } from '@/lib/demo/brand'
-import { useFormString } from '@/components/member-portal/portal-form-copy-context'
+import { CmsPortal, useFormCopyLookup } from '@/components/member-portal/portal-form-copy-context'
 
 const TOPICS = [
   'Account & login',
@@ -23,7 +23,7 @@ type Props = {
 }
 
 export function PortalHelpForm({ memberName = '', compact = false }: Props) {
-  const t = useFormString
+  const t = useFormCopyLookup()
   const [topic, setTopic] = useState<(typeof TOPICS)[number]>('Account & login')
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
@@ -61,9 +61,11 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
         <div className="flex flex-col sm:flex-row sm:items-start gap-3">
           <CheckCircle2 className="w-6 h-6 shrink-0 mx-auto sm:mx-0" style={{ color: 'var(--brand-green)' }} />
           <div>
-            <p className="text-sm font-bold text-[#1A1A1A]">{t('helpForm.successTitle')}</p>
+            <p className="text-sm font-bold text-[#1A1A1A]">
+              <CmsPortal k="helpForm.successTitle" fallback={t('helpForm.successTitle')} />
+            </p>
             <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
-              {t('helpForm.successBody')}
+              <CmsPortal k="helpForm.successBody" fallback={t('helpForm.successBody')} />
             </p>
             <Button
               type="button"
@@ -72,7 +74,7 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
               className="mt-3"
               onClick={() => setStatus('idle')}
             >
-              {t('helpForm.askAnother')}
+              <CmsPortal k="helpForm.askAnother" fallback={t('helpForm.askAnother')} />
             </Button>
           </div>
         </div>
@@ -87,27 +89,35 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
       className={`rounded-xl border border-[var(--border)] bg-white space-y-4 ${compact ? 'p-4' : 'p-5 sm:p-6'}`}
     >
       <div>
-        <h3 className="text-sm font-bold text-[#1A1A1A]">{t('helpForm.title')}</h3>
-        <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">{t('helpForm.body')}</p>
+        <h3 className="text-sm font-bold text-[#1A1A1A]">
+          <CmsPortal k="helpForm.title" fallback={t('helpForm.title')} />
+        </h3>
+        <p className="text-xs text-[#5A6070] mt-1 leading-relaxed">
+          <CmsPortal k="helpForm.body" fallback={t('helpForm.body')} />
+        </p>
       </div>
 
       <label className="block text-sm">
-        <span className="font-medium text-[#1A1A1A]">{t('helpForm.topic')}</span>
+        <span className="font-medium text-[#1A1A1A]">
+          <CmsPortal k="helpForm.topic" fallback={t('helpForm.topic')} />
+        </span>
         <select
           className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm"
           value={topic}
           onChange={(e) => setTopic(e.target.value as (typeof TOPICS)[number])}
         >
-          {TOPICS.map((t) => (
-            <option key={t} value={t}>
-              {vanillaizeIfDemo(t)}
+          {TOPICS.map((topicOption) => (
+            <option key={topicOption} value={topicOption}>
+              {vanillaizeIfDemo(topicOption)}
             </option>
           ))}
         </select>
       </label>
 
       <label className="block text-sm">
-        <span className="font-medium text-[#1A1A1A]">{t('helpForm.question')}</span>
+        <span className="font-medium text-[#1A1A1A]">
+          <CmsPortal k="helpForm.question" fallback={t('helpForm.question')} />
+        </span>
         <textarea
           className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm min-h-[7rem]"
           value={message}
@@ -126,7 +136,8 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
 
       {message.trim().length > 0 && message.trim().length < 10 ? (
         <p className="text-[11px] text-[#5A6070]">
-          {t('helpForm.errorShort')} ({message.trim().length}/10).
+          <CmsPortal k="helpForm.errorShort" fallback={t('helpForm.errorShort')} /> (
+          {message.trim().length}/10).
         </p>
       ) : null}
 
@@ -139,10 +150,10 @@ export function PortalHelpForm({ memberName = '', compact = false }: Props) {
         {status === 'loading' ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            {t('helpForm.submitting')}
+            <CmsPortal k="helpForm.submitting" fallback={t('helpForm.submitting')} />
           </>
         ) : (
-          t('helpForm.submit')
+          <CmsPortal k="helpForm.submit" fallback={t('helpForm.submit')} />
         )}
       </Button>
     </form>

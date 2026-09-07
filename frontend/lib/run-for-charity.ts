@@ -57,8 +57,9 @@ export const RUN_FOR_CHARITY_RACE_DATE = '2026-09-13'
 /** Email-friendly flyer width (~791:1024). */
 export const RUN_FOR_CHARITY_RECEIPT_FLYER_WIDTH = 280
 
+/** Post early-bird race fees (matches flyer / Best Runners). */
 export function runForCharityPriceLine(): string {
-  return '$20 to $50'
+  return 'Adults $30 · Kids $20'
 }
 
 function etCalendarDate(d = new Date()): string {
@@ -95,8 +96,8 @@ export function runForCharityReceiptHtmlBlock(): string {
   const h = Math.round((w * 1024) / 791)
   return `
 <div style="margin:28px 0 8px;padding-top:20px;border-top:1px solid #E5E7EB;font-family:Arial,Helvetica,sans-serif;color:#1A1A1A">
-  <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#1B6B45">Coming up</p>
-  <p style="margin:0 0 12px;font-size:15px;font-weight:700;line-height:1.3">Run for Charity 1K &amp; 5K · Sun Sep 13</p>
+  <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#1B6B45">Run for Charity · Sep 13</p>
+  <p style="margin:0 0 12px;font-size:15px;font-weight:700;line-height:1.3">1K &amp; 5K · Adults $30 · Kids $20</p>
   <p style="margin:0 0 14px;font-size:13px;line-height:1.45;color:#4B5563">Best Runners hosts. Use school code SHMS so Stone Hill receives 100% of your registration fee.</p>
   <a href="${BEST_RUNNERS_SIGNUP_URL}" style="display:inline-block;text-decoration:none">
     <img src="${RUN_FOR_CHARITY_FLYER_IMAGE_URL}" width="${w}" height="${h}" alt="Run for Charity 1K and 5K flyer — Sunday September 13 2026 at Rock Ridge High School" style="display:block;width:${w}px;max-width:100%;height:auto;border:0;border-radius:8px" />

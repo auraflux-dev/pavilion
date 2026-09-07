@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { FALL_FAMILY_FEST_FLYER_URL } from '@/lib/fall-family-fest'
+import { ENRICHMENT_FALL_2026_FLYER_URL } from '@/lib/programs/programs-flyer'
 import { RUN_FOR_CHARITY_FLYER_PDF_URL } from '@/lib/run-for-charity'
 import { SPONSORSHIP_FLYER_PDF_URL } from '@/lib/sponsorships'
 
@@ -14,6 +16,12 @@ const REDIRECTS: Record<string, string> = {
   'sponsorship-2026-27.pdf': SPONSORSHIP_FLYER_PDF_URL,
   'sponsorship-packages-2026-27.pdf': SPONSORSHIP_FLYER_PDF_URL,
   'sponsorship.pdf': SPONSORSHIP_FLYER_PDF_URL,
+  'fall-family-fest-2026.jpg': FALL_FAMILY_FEST_FLYER_URL,
+  'fall-family-fest-flyer.jpg': FALL_FAMILY_FEST_FLYER_URL,
+  'fall-family-fest.pdf': FALL_FAMILY_FEST_FLYER_URL,
+  'enrichment-fall-2026-flyer.jpg': ENRICHMENT_FALL_2026_FLYER_URL,
+  'enrichment-fall-2026.jpg': ENRICHMENT_FALL_2026_FLYER_URL,
+  'programs-register-qr.png': '/enrichment-register-qr.png',
 }
 
 export const runtime = 'nodejs'

@@ -55,6 +55,7 @@ import { StaffNewsletterSendReportPanel } from '@/components/staff/staff-newslet
 import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar-panel'
 import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
 import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-notice'
+import { StaffGmailFromNotice } from '@/components/staff/staff-gmail-from-notice'
 import { StaffCanvaPanel } from '@/components/staff/staff-canva-panel'
 import { displayMembershipTier, vanillaizeIfDemo } from '@/lib/demo/brand'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
@@ -553,6 +554,9 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
       workspaceGroups={workspaceGroups}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {process.env.NEXT_PUBLIC_COMMONS_PLATFORM === 'true' ? null : (
+          <StaffGmailFromNotice email={me.email} />
+        )}
         <StaffTrialBanner />
         {me.platformOwner && platformOrgs.length > 0 ? (
           <section className="rounded-xl border border-[var(--border)] bg-[#F7F8FA] px-4 py-3 flex flex-wrap items-center gap-3">
@@ -1173,10 +1177,20 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
           <StaffCanvaPanel onOpenWorkspace={(id) => go(id as StaffWorkspace)} />
         ) : null}
         {active === 'newsletter' && canNewsletter ? (
-          <div className="space-y-4">
-            <StaffWhatsAppQueuePanel />
+          <div className="space-y-6">
             <StaffNewsletterPanel />
             <StaffNewsletterSendReportPanel />
+            <details className="rounded-xl border border-[var(--border)] bg-white">
+              <summary className="cursor-pointer list-none px-5 py-4 text-sm font-semibold text-[#1B2A4A] [&::-webkit-details-marker]:hidden">
+                WhatsApp message queue
+                <span className="ml-2 text-xs font-normal text-[#5A6070]">
+                  Separate from email — scheduled grade-group posts
+                </span>
+              </summary>
+              <div className="border-t border-[var(--border)] px-2 pb-4 sm:px-4">
+                <StaffWhatsAppQueuePanel />
+              </div>
+            </details>
             <StaffReveal
               storageKey="staff-reveal-newsletter-archive"
               id="newsletter-archive"

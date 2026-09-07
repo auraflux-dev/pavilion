@@ -1,6 +1,7 @@
 import { VisitorChrome } from '@/components/site/visitor-chrome'
 import { Hero } from '@/components/hero'
 import { RunForCharityPromo } from '@/components/run-for-charity-promo'
+import { FallFamilyFestPromo } from '@/components/fall-family-fest-promo'
 import { ParentVideoSection } from '@/components/videos/parent-video-section'
 import { ProgramsPreview } from '@/components/programs-preview'
 import { VolunteerSection } from '@/components/volunteer-section'
@@ -77,6 +78,7 @@ export default async function HomePage() {
     <VisitorChrome pageKey="home">
       <Hero />
       {demo || commons ? null : <RunForCharityPromo />}
+      {demo || commons ? null : <FallFamilyFestPromo />}
       <ParentVideoSection
         videoId="parent-tour"
         id="parent-tour"

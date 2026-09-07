@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Users } from 'lucide-react'
 import { trackEvent } from '@/lib/ga'
 import { normalizeInviteEmail, validateInviteEmailPair } from '@/lib/email-invite-client'
-import { useFormString } from '@/components/member-portal/portal-form-copy-context'
+import { CmsPortal, useFormCopyLookup } from '@/components/member-portal/portal-form-copy-context'
+import { PORTAL_FORM_DEFAULTS } from '@/lib/defaults/portal-form-defaults'
 
 type Guardian = {
   email: string
@@ -13,7 +14,7 @@ type Guardian = {
 }
 
 export function InviteCoParentPanel() {
-  const t = useFormString
+  const t = useFormCopyLookup()
   const [initialLoading, setInitialLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -26,6 +27,8 @@ export function InviteCoParentPanel() {
   const [suggestion, setSuggestion] = useState('')
   const [isPrimary, setIsPrimary] = useState(true)
   const [primaryParentEmail, setPrimaryParentEmail] = useState('')
+  const [householdEmail, setHouseholdEmail] = useState('')
+  const [viewerEmail, setViewerEmail] = useState('')
   const [guardians, setGuardians] = useState<Guardian[]>([])
   const [note, setNote] = useState('')
   const statusRef = useRef<HTMLParagraphElement>(null)
@@ -39,6 +42,8 @@ export function InviteCoParentPanel() {
       if (!r.ok) throw new Error(d.error ?? 'Could not load')
       setIsPrimary(Boolean(d.isPrimary))
       setPrimaryParentEmail(String(d.primaryParentEmail ?? ''))
+      setHouseholdEmail(String(d.householdEmail ?? d.primaryParentEmail ?? ''))
+      setViewerEmail(String(d.viewerEmail ?? ''))
       setGuardians(d.guardians ?? [])
       setNote(String(d.note ?? ''))
     } catch (err) {
@@ -142,9 +147,13 @@ export function InviteCoParentPanel() {
       <div className="rounded-xl border border-[var(--border)] bg-white p-4 space-y-2">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-[var(--brand-green)]" />
-          <h3 className="text-sm font-semibold text-[#1A1A1A]">{t('invite.title')}</h3>
+          <h3 className="text-sm font-semibold text-[#1A1A1A]">
+            <CmsPortal k="invite.title" fallback={t('invite.title')} />
+          </h3>
         </div>
-        <p className="text-xs text-[#5A6070]">{t('invite.loading')}</p>
+        <p className="text-xs text-[#5A6070]">
+          <CmsPortal k="invite.loading" fallback={t('invite.loading')} />
+        </p>
       </div>
     )
   }
@@ -171,9 +180,17 @@ export function InviteCoParentPanel() {
     <div className="rounded-xl border border-[var(--border)] bg-white p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Users className="h-4 w-4 text-[var(--brand-green)]" />
-        <h3 className="text-sm font-semibold text-[#1A1A1A]">{t('invite.title')}</h3>
+        <h3 className="text-sm font-semibold text-[#1A1A1A]">
+          <CmsPortal k="invite.title" fallback={t('invite.title')} />
+        </h3>
       </div>
       <p className="text-xs text-[#5A6070] leading-relaxed whitespace-pre-line">{note}</p>
+      {viewerEmail && householdEmail && viewerEmail !== householdEmail ? (
+        <p className="text-xs text-[#1B2A4A]">
+          Staff login <strong>{viewerEmail}</strong> is viewing household{' '}
+          <strong>{householdEmail}</strong>.
+        </p>
+      ) : null}
 
       {!isPrimary ? (
         <p className="text-xs text-[#1B2A4A]">
@@ -211,8 +228,14 @@ export function InviteCoParentPanel() {
             className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm"
           />
           <p className="text-[11px] text-[#5A6070] whitespace-pre-line">
-            {`They get their own login for the same students.
-We email this exact address. A mistype bounces.`}
+            <CmsPortal
+              k="invite.emailHint"
+              fallback={
+                PORTAL_FORM_DEFAULTS['invite.emailHint'] ??
+                `They get their own login for the same students.
+We email this exact address. A mistype bounces.`
+              }
+            />
           </p>
           <Button
             type="submit"
@@ -220,19 +243,31 @@ We email this exact address. A mistype bounces.`}
             className="text-white w-full sm:w-auto"
             style={{ backgroundColor: 'var(--brand-green)' }}
           >
-            {busy ? 'Sending…' : refreshing ? 'Updating list…' : t('invite.submit')}
+            {busy ? (
+              <CmsPortal k="invite.sending" fallback={t('invite.sending')} />
+            ) : refreshing ? (
+              <CmsPortal k="invite.refreshing" fallback={t('invite.refreshing')} />
+            ) : (
+              <CmsPortal k="invite.submit" fallback={t('invite.submit')} />
+            )}
           </Button>
           <StatusBanner />
           {acceptUrl ? (
             <div className="space-y-2 rounded-lg border border-[var(--border)] bg-[#FAFCF9] px-3 py-2">
-              <p className="text-[11px] font-semibold text-[#1A1A1A]">Invite link (share if email is slow)</p>
+              <p className="text-[11px] font-semibold text-[#1A1A1A]">
+                <CmsPortal k="invite.linkLabel" fallback={t('invite.linkLabel')} />
+              </p>
               <p className="text-[11px] break-all text-[#5A6070]">
                 <a href={acceptUrl} className="underline">
                   {acceptUrl}
                 </a>
               </p>
               <Button type="button" size="sm" variant="outline" onClick={() => void copyLink()}>
-                {copied ? 'Copied' : 'Copy link'}
+                {copied ? (
+                  <CmsPortal k="invite.copied" fallback="Copied" />
+                ) : (
+                  <CmsPortal k="invite.copyLink" fallback="Copy link" />
+                )}
               </Button>
             </div>
           ) : null}
@@ -266,7 +301,7 @@ We email this exact address. A mistype bounces.`}
                   disabled={busy}
                   onClick={() => void revoke(g.email)}
                 >
-                  Remove
+                  <CmsPortal k="invite.remove" fallback="Remove" />
                 </Button>
               ) : null}
             </li>
@@ -274,8 +309,14 @@ We email this exact address. A mistype bounces.`}
         </ul>
       ) : isPrimary ? (
         <p className="text-xs text-[#5A6070] whitespace-pre-line">
-          {`No shared logins yet.
-Invite a spouse, co-parent, or guardian so both see the same students.`}
+          <CmsPortal
+            k="invite.empty"
+            fallback={
+              PORTAL_FORM_DEFAULTS['invite.empty'] ??
+              `No shared logins yet.
+Invite a spouse, co-parent, or guardian so both see the same students.`
+            }
+          />
         </p>
       ) : null}
 

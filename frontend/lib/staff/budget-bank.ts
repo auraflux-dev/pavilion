@@ -15,7 +15,7 @@ export const BANK_BUDGET_LINES: Array<{
     sortOrder: 52,
     syncKey: 'cash_box_deposits',
     notes:
-      'BoA Counter Credit / mobile cash deposits. On the ledger for visibility. Not in planning totals or public fundraising. Cash already counted when rung at POS.',
+      'BoA Counter Credit / mobile cash deposits. Matched to rung Cove cash stays ledger-only. Deposit above rung cash counts toward public fundraising (Other).',
   },
   {
     kind: 'income',

@@ -3,7 +3,6 @@
  * Account creation and membership payment stay open; Cove / programs stay locked
  * until required student profile fields are filled.
  */
-import { getWixClient } from '@/lib/wix-client'
 import {
   studentSafetyComplete,
   type StudentSafety,
@@ -186,34 +185,4 @@ export function buildOnboardingChecklist(opts: {
     complete: requiredDone === required.length,
     coveUnlocked: cove.ok,
   }
-}
-
-/** Server-side student rows for Cove / onboarding gates. */
-export async function loadFamilyOnboardingStudents(
-  parentEmail: string,
-): Promise<OnboardingStudent[]> {
-  const email = parentEmail.trim().toLowerCase()
-  if (!email) return []
-  const client = getWixClient()
-  const result = await client.items.query('Students').eq('parentEmail', email).limit(100).find()
-    return ((result.items ?? []) as OnboardingStudent[])
-    .filter((s) => (s as { archived?: boolean }).archived !== true)
-    .map((s) => ({
-      ...s,
-      _id: String(s._id ?? s.id ?? ''),
-      id: String(s.id ?? s._id ?? ''),
-      parentFirstName: String(s.parentFirstName ?? ''),
-      parentLastName: String(s.parentLastName ?? ''),
-      familyProfileConfirmedAt: String(s.familyProfileConfirmedAt ?? ''),
-    }))
-}
-
-export async function requireCoveUnlocked(parentEmail: string): Promise<
-  | { ok: true; students: OnboardingStudent[] }
-  | { ok: false; error: string }
-> {
-  const students = await loadFamilyOnboardingStudents(parentEmail)
-  const gate = coveFeaturesUnlocked(students)
-  if (!gate.ok) return { ok: false, error: gate.error ?? 'Complete family setup first.' }
-  return { ok: true, students }
 }

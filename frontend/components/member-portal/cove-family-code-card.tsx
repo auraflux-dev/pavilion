@@ -4,10 +4,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { Copy, Download, Loader2, RefreshCw, Share2, Sparkles, Wallet, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CoveLogo } from '@/components/brand/cove-logo'
-import { vanillaizeIfDemo } from '@/lib/demo/brand'
-import { isPublicDemoInstance } from '@/lib/demo/instance'
 
-const PASSCODE_CALLOUT_KEY = isPublicDemoInstance() ? 'store_passcode_callout_v1' : 'shms_cove_passcode_callout_v1'
+const PASSCODE_CALLOUT_KEY = 'shms_cove_passcode_callout_v1'
 
 /**
  * Family Cove Digital Card. QR encodes Square GAN when loaded (Stand / iPad / Photos / Wallet).
@@ -123,7 +121,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Could not save passcode')
       setPasscode(d.coveFamilyPasscode)
-      setMessage(vanillaizeIfDemo('Word passcode saved. Students can say this at The Cove.'))
+      setMessage('Word passcode saved. Students can say this at The Cove.')
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save passcode')
@@ -175,13 +173,12 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
     try {
       const res = await fetch(qrUrl)
       const blob = await res.blob()
-      const filename = isPublicDemoInstance() ? `store-card-${code}.png` : `shms-cove-digital-card-${code}.png`
-      const file = new File([blob], filename, { type: 'image/png' })
+      const file = new File([blob], `shms-cove-digital-card-${code}.png`, { type: 'image/png' })
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: vanillaizeIfDemo('SHMS PTO Cove Digital Card'),
-          text: vanillaizeIfDemo('Family Cove Digital Card. Show this QR at The Cove or school events'),
+          title: 'SHMS PTO Cove Digital Card',
+          text: `Family Cove Digital Card. Show this QR at The Cove or school store`,
         })
         setMessage('Shared. Add to Photos so your student can open it at checkout')
         return
@@ -189,10 +186,10 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = filename
+      a.download = `shms-cove-digital-card-${code}.png`
       a.click()
       URL.revokeObjectURL(url)
-      setMessage(vanillaizeIfDemo('QR saved to Photos / Files. Student shows it at Square Stand or The Cove.'))
+      setMessage('QR saved to Photos / Files. Student shows it at Square Stand or Cove.')
     } catch {
       setMessage('Long-press the QR image to save it to Photos.')
     }
@@ -217,8 +214,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        const pkpassFilename = isPublicDemoInstance() ? `store-card-${code}.pkpass` : `shms-cove-${code}.pkpass`
-        a.download = pkpassFilename
+        a.download = `shms-cove-${code}.pkpass`
         a.click()
         URL.revokeObjectURL(url)
         setMessage('Apple Wallet pass downloaded. Open it to Add to Wallet.')
@@ -243,7 +239,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
       await saveQrToDevice()
       setMessage(
         d.hint ||
-          vanillaizeIfDemo('QR saved to Photos. Square Stand / iPad can scan it like a gift card. Native Wallet turns on after Litecard credentials are added.'),
+          'QR saved to Photos. Square Stand / iPad can scan it like a gift card. Native Wallet turns on after Litecard credentials are added.',
       )
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not build wallet pass')
@@ -257,7 +253,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
       <div className="flex items-center gap-2.5">
         <CoveLogo size="xs" className="w-10 h-10 shrink-0" />
         <p className="text-[10px] font-bold uppercase tracking-wider text-[#5A6070]">
-          {vanillaizeIfDemo('Family Cove Digital Card')}
+          Family Cove Digital Card
         </p>
       </div>
       {busy && !code ? (
@@ -269,7 +265,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={qrUrl}
-                alt={vanillaizeIfDemo('Cove Digital Card QR for Square Stand and The Cove')}
+                alt="Cove Digital Card QR for Square Stand and Cove"
                 width={140}
                 height={140}
                 className="rounded-lg border border-[var(--border)] bg-white"
@@ -281,9 +277,8 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
               </p>
               <p className="text-2xl font-bold font-mono tracking-[0.2em] text-[#1A1A1A]">{code}</p>
               {paidMemberCode ? (
-                <p className="text-[11px] font-bold text-[var(--brand-green)] mt-1 whitespace-pre-line">
-                  {vanillaizeIfDemo('Lagoon / Tide code (ends in 9).')}
-                  Show at event food tables.
+                <p className="text-[11px] font-bold text-[var(--brand-green)] mt-1">
+                  Lagoon/Tide member code (ends in 9). Show at event food tables for refreshment tickets
                 </p>
               ) : codeHint ? (
                 <p className="text-[11px] text-[#5A6070] mt-1">{codeHint}</p>
@@ -331,12 +326,24 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
                   </Button>
                 ) : null}
               </div>
-              <p className="text-[11px] text-[#5A6070] mt-2 leading-relaxed whitespace-pre-line">
-                {squareScanReady
-                  ? vanillaizeIfDemo('Save QR to Photos or Wallet.\nScan at The Cove or events.')
-                  : hasCard
-                    ? 'Load or refresh the card, then save QR again.'
-                    : vanillaizeIfDemo('Load money below to activate this QR for The Cove.')}
+              <p className="text-[11px] text-[#5A6070] mt-2 leading-relaxed">
+                {squareScanReady ? (
+                  <>
+                    Save this QR to <strong>Photos</strong> (or Wallet). Students open it at Cove /
+                    store / events. Square Stand and iPad scan it like a gift card.
+                  </>
+                ) : hasCard ? (
+                  <>Load or refresh the Cove Digital Card, then Save QR again.</>
+                ) : (
+                  <>
+                    <strong className="text-[#1A1A1A]">Load money</strong> to activate your phone QR
+                    for The Cove. Free accounts can use the card after a load. Paid membership is
+                    optional.{' '}
+                    <a href="/cove" className="font-bold underline" style={{ color: 'var(--brand-green)' }}>
+                      Load Cove Digital Card
+                    </a>
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -367,12 +374,13 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
                       New
                     </span>
                     <span className="text-sm font-bold text-[#1A1A1A]">
-                      {vanillaizeIfDemo('Word passcode. Easier at The Cove')}
+                      Word passcode. Easier at The Cove
                     </span>
                   </p>
-                  <p className="text-[12px] text-[#5A6070] mt-1 leading-relaxed whitespace-pre-line">
-                    Say a short word instead of six digits.
-                    Set it below once.
+                  <p className="text-[12px] text-[#5A6070] mt-1 leading-relaxed">
+                    Students can say a short word instead of six digits. We suggest your{' '}
+                    <strong>last name + first letters of your first name</strong>. Set it below once,
+                    then teach them the word.
                   </p>
                   <button
                     type="button"
@@ -484,7 +492,7 @@ export function CoveFamilyCodeCard({ refreshKey = 0 }: { refreshKey?: number }) 
       ) : (
         <p className="text-xs text-[#5A6070] mt-2 leading-relaxed">
           {message ||
-            vanillaizeIfDemo('Add a student, confirm family details, then load money to start using your Cove Digital Card.')}
+            'Add a student, confirm family details, then load money to start using your Cove Digital Card.'}
         </p>
       )}
       {error ? <p className="text-[11px] text-red-600 mt-1">{error}</p> : null}

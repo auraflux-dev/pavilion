@@ -85,16 +85,36 @@ export const PORTAL_FORM_DEFAULTS: Record<string, string> = {
 
   // Onboarding
   'onboarding.completeTitle': "You're set up",
-  'onboarding.title': 'Family setup checklist · {done}/{total} required',
+  'onboarding.completeBody':
+    'Student profiles are complete. Cove Digital Card and programs are unlocked.',
+  'onboarding.titlePrefix': 'Family setup checklist',
+  'onboarding.titleSuffix': 'required',
+  'onboarding.intro':
+    'You can browse anytime. Cove QR, card loads, and enrichment stay locked until you confirm family details (parent name, phone, emergency contact, pick-up).',
+  'onboarding.coveLocked': 'The Cove Digital Card is locked until setup is complete',
   'onboarding.lockedHint': 'Confirm family details to unlock Cove Digital Card.',
 
-  // Invite co-parent
+  // Dashboard help + WhatsApp
+  'dashboard.helpTitle': 'Member Help',
+  'dashboard.helpBody': 'Ask a question here, or open the full knowledge base.',
+  'dashboard.helpKbLink': 'Knowledge base',
+  'dashboard.whatsappJoinGrade': 'Join {grade}',
   'invite.title': 'Share portal access',
   'invite.loading': 'Loading shared logins…',
   'invite.email': 'Spouse, co-parent, or guardian email',
   'invite.confirmEmail': 'Type that email again to confirm',
   'invite.submit': 'Send invite',
   'invite.revokeConfirm': 'Remove this login link? They will lose portal access.',
+  'invite.linkLabel': 'Invite link (share if email is slow)',
+  'invite.sending': 'Sending…',
+  'invite.refreshing': 'Updating list…',
+  'invite.emailHint':
+    'They get their own login for the same students.\nWe email this exact address. A mistype bounces.',
+  'invite.copied': 'Copied',
+  'invite.copyLink': 'Copy link',
+  'invite.remove': 'Remove',
+  'invite.empty':
+    'No shared logins yet.\nInvite a spouse, co-parent, or guardian so both see the same students.',
 
   // Help form
   'helpForm.title': 'Ask the PTO',
@@ -127,5 +147,17 @@ export const PORTAL_FORM_DEFAULTS: Record<string, string> = {
   'paymentPanel.paypal': 'PayPal',
   'paymentPanel.removeCardConfirm':
     'Remove this saved card and turn off auto top-off for all students?',
-  'paymentPanel.removePaypalConfirm': 'Remove this saved PayPal account?',
+  'paymentPanel.removePaypalConfirm': 'Remove this saved PayPal from Payment methods?',
+  'paymentPanel.intro':
+    'Square stores your card securely for Cove reloads, membership, spirit wear, and enrichment.\nSave a card or PayPal here for one-tap checkout.\nSHMS PTO never keeps the full card number.',
+  'paymentPanel.unavailable':
+    'Card-on-file setup is temporarily unavailable. You can still pay by entering a card or using PayPal at checkout.',
+  'paymentPanel.loadingCardForm': 'Loading card form…',
+  'paymentPanel.paypalSaveIntro':
+    'Save PayPal here for one-tap checkout.\nOr check “Save this PayPal…” the next time you pay with PayPal.',
+  'paymentPanel.paypalLoading': 'Loading PayPal…',
+  'paymentPanel.paypalUnavailable': 'PayPal save is temporarily unavailable.',
+  'paymentPanel.cardSaved': 'Card saved for faster checkout.',
+  'paymentPanel.cardRemoved': 'Saved card removed. Auto top-off was turned off.',
+  'paymentPanel.paypalRemoved': 'Saved PayPal removed.',
 }

@@ -29,6 +29,12 @@ export function useFormString(key: string, fallback?: string): string {
   return formCopy(usePortalFormCopy(), key, fallback)
 }
 
+/** Stable lookup for event handlers — call the hook once, then use `t('key')`. */
+export function useFormCopyLookup(): (key: string, fallback?: string) => string {
+  const copy = usePortalFormCopy()
+  return (key, fallback) => formCopy(copy, key, fallback)
+}
+
 type CmsPortalProps = Omit<ComponentProps<typeof CmsString>, 'page' | 'copy'>
 
 /** Portal form string: Staff → portal-forms + admin inline edit (same key). */

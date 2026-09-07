@@ -16,6 +16,13 @@ type HouseholdPayload = {
     primaryEmail: string
     tiers: string[]
     students: Array<{ id: string; firstName: string; lastName: string; grade: string }>
+    sharedLogins?: Array<{
+      email: string
+      status: string
+      primaryEmail: string
+      invitedAt: string | null
+      acceptedAt: string | null
+    }>
   }
   enrollments: Array<{
     id: string
@@ -136,6 +143,13 @@ export function StaffHouseholdPanel({ initialQuery = '', className = '' }: Props
             {data.account.emails.length > 1 ? (
               <p className="text-xs text-[#5A6070] mt-1">
                 Household emails: {data.account.emails.join(', ')}
+              </p>
+            ) : null}
+            {data.account.sharedLogins?.length ? (
+              <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
+                {`Share portal access:\n${data.account.sharedLogins
+                  .map((g) => `${g.email} · ${g.status}`)
+                  .join('\n')}`}
               </p>
             ) : null}
             {data.account.students.length ? (

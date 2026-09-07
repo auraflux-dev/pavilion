@@ -7,7 +7,8 @@
  * Square / PayPal site checkout and Stand POS → Payments.
  * Bank of America CSV / Plaid (Staff → Budget) → PtoBudgetEntries.
  * Live PayPal Transaction Search (Refresh) → PtoBudgetEntries, skipping payouts to bank.
- * Counter Credit cash-box deposits → ledger only (cash_box_deposits), not fundraising.
+ * Counter Credit cash-box deposits: count only unexplained excess vs rung Cove cash
+ * (forgotten cash rings). Matched deposit dollars stay ledger-only.
  * Only Aug 1 to Jul 31 of the current school year.
  *
  * Volunteer hours remain manual. SiteSettings volunteerHoursRaised/Goal.
@@ -20,12 +21,16 @@ import { listBudgetEntries } from '@/lib/staff/budget-sync'
 import { DEFAULT_FISCAL_YEAR } from '@/lib/staff/budget'
 import {
   classifyFundraisingPayment,
+  isCashBoxPosSale,
   mapBankSyncKeyForFundraising,
+  unexplainedCashBoxForFundraising,
 } from '@/lib/api/fundraising-classify'
 
 export {
   classifyFundraisingPayment,
+  isCashBoxPosSale,
   mapBankSyncKeyForFundraising,
+  unexplainedCashBoxForFundraising,
   FUNDRAISING_LEDGER_ONLY_BANK_KEYS,
 } from '@/lib/api/fundraising-classify'
 
@@ -59,12 +64,22 @@ export interface InitiativeTotals {
   other: number
 }
 
+export interface CashBoxFundraisingReconcile {
+  /** YTD BoA Counter Credit / cash-box deposits. */
+  deposited: number
+  /** YTD Cove register cash sales already counted when rung. */
+  rungPosCash: number
+  /** max(0, deposited − rung). Added to public Other. */
+  unexplained: number
+}
+
 export interface FundraisingData {
   totals: InitiativeTotals
   goals: typeof GOALS_DEFAULT
   volunteerHoursRaised: number
   volunteerHoursGoal: number
   sponsorshipFromBank: number
+  cashBox: CashBoxFundraisingReconcile
   fetchedAt: string
 }
 
@@ -225,6 +240,7 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
       volunteerHoursRaised: 210,
       volunteerHoursGoal: VOLUNTEER_HOURS_GOAL_DEFAULT,
       sponsorshipFromBank: 0,
+      cashBox: { deposited: 0, rungPosCash: 0, unexplained: 0 },
       fetchedAt: await demoFundraisingFetchedAt(),
     }
   }
@@ -246,26 +262,46 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
     listBudgetEntries(fy || DEFAULT_FISCAL_YEAR).catch(() => []),
   ])
 
+  let rungPosCash = 0
   for (const raw of payments) {
+    const source = String(raw.source ?? '')
+    const paymentMethod = String(raw.paymentMethod ?? '')
+    const when = String(raw.paymentDate ?? raw._createdDate ?? '')
+    const amount = Number(raw.amount ?? 0)
+    const st = String(raw.status ?? '').toLowerCase()
+    if (
+      isCashBoxPosSale(source, paymentMethod) &&
+      inWindow(when, fromMs, toMs) &&
+      amount > 0 &&
+      !st.includes('fail') &&
+      !st.includes('refund') &&
+      !st.includes('reconcil')
+    ) {
+      rungPosCash += amount
+    }
+
     const bucket = classifyFundraisingPayment(
-      String(raw.source ?? ''),
+      source,
       String(raw.programName ?? ''),
       String(raw.status ?? ''),
-      String(raw.paymentMethod ?? ''),
+      paymentMethod,
     )
     if (!bucket) continue
-    const when = String(raw.paymentDate ?? raw._createdDate ?? '')
     if (!inWindow(when, fromMs, toMs)) continue
-    const amount = Number(raw.amount ?? 0)
     if (!(amount > 0)) continue
     totals[bucket] += amount
   }
 
   let sponsorshipFromBank = 0
+  let cashBoxDeposited = 0
   for (const entry of bankEntries) {
     if (!BANK_CSV_ORIGINS.has(entry.origin)) continue
     if (!inWindow(`${entry.occurredAt}T12:00:00.000Z`, fromMs, toMs)) continue
     if (!(entry.amount > 0)) continue
+    if (entry.lineSyncKey === 'cash_box_deposits') {
+      cashBoxDeposited += entry.amount
+      continue
+    }
     if (entry.lineSyncKey === 'sponsorships') {
       sponsorshipFromBank += entry.amount
       continue
@@ -275,12 +311,29 @@ export async function getFundraisingTotals(): Promise<FundraisingData> {
     totals[bucket] += entry.amount
   }
 
+  const unexplained = unexplainedCashBoxForFundraising(cashBoxDeposited, rungPosCash)
+  if (unexplained > 0) totals.other += unexplained
+
   return {
     totals,
     goals: settingsData.goals,
     volunteerHoursRaised: settingsData.volunteerHoursRaised,
     volunteerHoursGoal: settingsData.volunteerHoursGoal,
     sponsorshipFromBank,
+    cashBox: {
+      deposited: money(cashBoxDeposited),
+      rungPosCash: money(rungPosCash),
+      unexplained,
+    },
     fetchedAt: new Date().toISOString(),
   }
+}
+
+/** Staff Budget: YTD cash-box vs rung Cove cash (same math as public fundraising). */
+export async function getCashBoxFundraisingReconcile(): Promise<CashBoxFundraisingReconcile> {
+  if (isDemoInstance()) {
+    return { deposited: 0, rungPosCash: 0, unexplained: 0 }
+  }
+  const data = await getFundraisingTotals()
+  return data.cashBox
 }

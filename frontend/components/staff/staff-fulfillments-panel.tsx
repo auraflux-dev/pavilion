@@ -202,7 +202,7 @@ export function StaffFulfillmentsPanel({ variant = 'membership' }: Props) {
         <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
           {cove
             ? 'Membership perks only (not candy). Set aside shirt/magnet, then Handed out at handoff.\nOnline snack/spirit orders: Cove → Store pickups.\nMarked Handed out by mistake? Search below and Reopen.'
-            : 'Queue = every paid-tier membership that still owes a shirt/magnet (Reef, Lagoon, Tide, faculty, and board-seat Reef).\nMark Set aside when you pull inventory, then Handed out at The Cove or Back to School Night (Aug 27).\nMarked Handed out by mistake? Search account # or name under Handed out, then Reopen.'}
+            : 'Queue = every paid-tier membership that still owes a shirt/magnet (Reef, Lagoon, Tide, faculty, and board-seat Reef).\nMark Set aside when you pull inventory, then Handed out at The Cove or coordinated pickup (email vp-membershipexperience@shmspto.org).\nMarked Handed out by mistake? Search account # or name under Handed out, then Reopen.'}
         </p>
       </div>
 
