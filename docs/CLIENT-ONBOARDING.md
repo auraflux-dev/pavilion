@@ -10,12 +10,23 @@ How a new Pavilion client org goes from sales to live. Buyers work in **Staff**.
 1. Sales / start form → trial org + host ({slug}.onpavilion.com)
 2. Platform Staff creates or claims org (org switcher)
 3. Client Staff invite (board roles)
-4. Connectors in Client Staff: Square, Google, Canva, Plaid as needed
-5. Brand + CMS content (school skin; prune surfaces you do not offer)
-6. Unlock live commerce when Square is connected (commerce gate)
+4. Connectors in Client Staff (pick what this school uses)
+5. Brand + CMS content (URL suggest, upload, or manual)
+6. Unlock live commerce when payments connector is ready
 7. Go-live checklist
    VIP SHMS: dedicated promote path only when intentional (not this ladder)
 ```
+
+## Connector choices (not one-size)
+
+| Need | Ready now | Alternatives / later |
+|------|-----------|----------------------|
+| **Payments** | Square OAuth | Other processors only if a school requires them |
+| **Board mail / calendar** | Google Workspace | **Microsoft 365 / Outlook** (roadmap) |
+| **Creative** | Canva OAuth (optional) | Upload PNG/JPG in Staff; Figma / Adobe Express later if asked |
+| **Brand** | Staff Brand editor | Paste current site URL → suggest logo/colors; or upload |
+
+Onboarding is **not** “Square only.” Progress wants payments + board mail + brand. Creative stays optional.
 
 ## Who does what
 
@@ -23,7 +34,8 @@ How a new Pavilion client org goes from sales to live. Buyers work in **Staff**.
 |------|--------------|--------------------------------------|
 | Trial / brand pack | Review and prune | Seed trial, host, pack |
 | Board invites | Accept roles | Help if stuck |
-| Square / Google / Canva / Plaid | Connect in Staff | Guide; never store VIP school secrets on robert-4220 |
+| Connectors | Connect in Staff | Guide; never store VIP school secrets on robert-4220 |
+| Brand from URL | Paste site URL or upload | Assist if scan finds nothing |
 | CMS / pages | Edit school content | Can switch org and assist |
 | Pay (HSKRG Stripe) | Pay via /start or sales | Confirm subscription |
 | Billing day-to-day | `/account` magic link | Support |
@@ -31,7 +43,7 @@ How a new Pavilion client org goes from sales to live. Buyers work in **Staff**.
 ## Pay vs go-live
 
 Pay locks look and feel and starts the SaaS invoice.
-Go-live (parent money on school Square) waits on Staff connectors and content.
+Go-live (parent money) waits on Staff payments connector and content.
 
 We do not auto-provision a live tenant the moment Stripe checkout completes.
 
@@ -40,7 +52,8 @@ We do not auto-provision a live tenant the moment Stripe checkout completes.
 - Trial / host: `frontend/lib/crm/tenant.ts`, `/api/commons/trial/*`
 - Platform owners: `frontend/lib/crm/platform-owners.ts`
 - Connectors UI: `frontend/components/staff/staff-commons-connectors-panel.tsx`
-- **Client onboarding checklist (platform Staff home):** `frontend/components/staff/staff-client-onboarding-panel.tsx`
+- **Client onboarding checklist:** `frontend/components/staff/staff-client-onboarding-panel.tsx`
+- **Brand from URL:** `frontend/lib/staff/suggest-brand-from-url.ts`, `/api/staff/site-brand/suggest-from-url`
 - Commerce gate: `frontend/lib/demo/commerce-gate.ts`
 - Marketing start: `commons-site/app/start`
 

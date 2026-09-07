@@ -8,10 +8,15 @@ Connectors are configured by **client Staff** for their org. **Platform Staff** 
 
 | Connector | Who connects | Where tokens live today | Notes |
 |-----------|--------------|-------------------------|--------|
-| **Square** | Client Staff | `organization_connectors` + `/api/commons/square/oauth/*` | Required before live parent checkout on platform hosts |
+| **Square** | Client Staff | `organization_connectors` + `/api/commons/square/oauth/*` | Primary payments path today |
+| **Other card processors** | — | — | Only if a school cannot use Square |
+| **Google / Gmail** | Client Staff | Better Auth / workspace OAuth paths | Ready now for Inbox / Calendar / Docs |
+| **Microsoft 365** | — | — | **Roadmap** for Outlook / Teams schools |
 | **Plaid** | Client Staff | `/api/commons/plaid/*` → `organization_connectors` | Bank sync for budget |
-| **Google / Gmail** | Client Staff | Better Auth / workspace OAuth paths | Staff mail and Drive |
-| **Canva** | Client Staff | OAuth + staff Canva routes | Design inside Staff |
+| **Canva** | Client Staff | OAuth + staff Canva routes | Optional |
+| **Upload / no Canva** | Client Staff | CMS media upload | PNG/JPG in newsletter and creative flows |
+| **Figma / Adobe Express** | — | — | Later if boards ask |
+| **Brand from URL** | Client Staff | Suggest API → `cms_site_brand` | Public https URL scan (SSRF-hardened) |
 | **Stripe (SaaS)** | Buyer via marketing `/start` | HSKRG Stripe (commons-site) | Software invoice only. Not parent fees |
 
 ## VIP SHMS (dedicated)

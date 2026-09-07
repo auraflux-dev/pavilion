@@ -54,6 +54,9 @@ export function StaffSiteBrandPanel() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
+  const [fromUrl, setFromUrl] = useState('')
+  const [fromUrlBusy, setFromUrlBusy] = useState(false)
+  const [fromUrlNote, setFromUrlNote] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -95,6 +98,40 @@ export function StaffSiteBrandPanel() {
     }
   }
 
+  async function suggestFromUrl() {
+    setFromUrlBusy(true)
+    setFromUrlNote('')
+    setError('')
+    try {
+      const r = await fetch('/api/staff/site-brand/suggest-from-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: fromUrl }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error || 'Could not scan that URL')
+      const s = d.suggestion as {
+        logoUrl?: string
+        faviconUrl?: string
+        colorPrimary?: string
+        siteTitle?: string
+        notes?: string[]
+      }
+      setBrand((b) => ({
+        ...b,
+        logoUrl: s.logoUrl || b.logoUrl,
+        faviconUrl: s.faviconUrl || b.faviconUrl,
+        colorPrimary: s.colorPrimary || b.colorPrimary,
+        ptoName: b.ptoName || (s.siteTitle || '').slice(0, 80),
+      }))
+      setFromUrlNote((s.notes || []).join('\n') || 'Suggestions loaded. Review and Save brand.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not scan that URL')
+    } finally {
+      setFromUrlBusy(false)
+    }
+  }
+
   function set<K extends keyof Brand>(key: K, value: Brand[K]) {
     setBrand((b) => ({ ...b, [key]: value }))
   }
@@ -109,6 +146,34 @@ export function StaffSiteBrandPanel() {
           Logo, colors, and fonts for the visitor site.
           Cascades site-wide on demo and trial.
         </p>
+      </div>
+
+      <div className="rounded-lg border border-[var(--border)] bg-[#FAFCF9] p-3 space-y-2">
+        <p className="text-xs font-semibold text-[#1A1A1A]">Pull from your current site</p>
+        <p className="text-[11px] text-[#5A6070] whitespace-pre-line">
+          {`Paste your PTO or school page URL if you already have one.
+We suggest logo and theme color. Upload still works if the scan finds nothing.`}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <input
+            type="url"
+            className={inputClass}
+            placeholder="https://yourschoolpto.org"
+            value={fromUrl}
+            onChange={(e) => setFromUrl(e.target.value)}
+          />
+          <button
+            type="button"
+            disabled={fromUrlBusy || !fromUrl.trim()}
+            onClick={() => void suggestFromUrl()}
+            className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs font-semibold disabled:opacity-50"
+          >
+            {fromUrlBusy ? 'Scanning…' : 'Suggest from URL'}
+          </button>
+        </div>
+        {fromUrlNote ? (
+          <p className="text-[11px] text-[#5A6070] whitespace-pre-line">{fromUrlNote}</p>
+        ) : null}
       </div>
 
       {error ? <p className="text-sm text-[#A00]">{error}</p> : null}
