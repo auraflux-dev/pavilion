@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       customer_email: email,
       line_items: [{ price: commonsPriceId(), quantity: 1 }],
       success_url: `${origin}/thanks?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/start`,
+      cancel_url: `${origin}/pricing#checkout`,
       allow_promotion_codes: true,
       // Required for Stripe Tax once STRIPE_AUTOMATIC_TAX=1 and Tax registrations exist.
       billing_address_collection: 'required',

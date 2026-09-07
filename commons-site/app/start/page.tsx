@@ -1,25 +1,9 @@
 import type { Metadata } from 'next'
-import { StartForm } from '@/components/start-form'
-import { PRODUCT_NAME } from '@/lib/brand'
-import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
-import { stripeConfigured } from '@/lib/stripe'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = { title: 'Start' }
 
+/** Checkout lives on Pricing. Keep this route for old links. */
 export default function StartPage() {
-  const ready = stripeConfigured()
-  return (
-    <div className="mx-auto max-w-lg px-5 py-16">
-      <h1 className="type-page">Start</h1>
-      <p className="type-lede mt-4 whitespace-pre-line text-[var(--ink-muted)]">
-        {`${PRODUCT_NAME} for your school.\n$${COMMONS_LIST_PRICE_USD} per month on Stripe (HSKRG LLC).\nAfter pay, your board onboards in Staff.`}
-      </p>
-      {!ready ? (
-        <p className="mt-6 whitespace-pre-line rounded-md border border-[var(--line)] bg-[var(--paper-deep)] p-4 text-sm text-[var(--ink-muted)]">
-          {`Stripe checkout is not configured on this deploy yet.\nYou can still review the demo while we finish billing.`}
-        </p>
-      ) : null}
-      <StartForm />
-    </div>
-  )
+  redirect('/pricing#checkout')
 }

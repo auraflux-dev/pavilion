@@ -38,7 +38,7 @@ export function SiteFooter() {
           <Link href="/account" className="text-[var(--ink)] hover:underline">
             Account
           </Link>
-          <Link href="/start" className="text-[var(--ink)] hover:underline">
+          <Link href="/pricing" className="text-[var(--ink)] hover:underline">
             Start
           </Link>
           <a href={DEMO_URL} className="text-[var(--ink)] hover:underline">

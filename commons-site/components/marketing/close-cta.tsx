@@ -11,7 +11,7 @@ export function MarketingCloseCta() {
           <p className="type-lede whitespace-pre-line text-[#d5cec0]">{CLOSE_SUPPORT}</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link href="/start" className="btn-on-dark">
+          <Link href="/pricing" className="btn-on-dark">
             {`Start at $${COMMONS_LIST_PRICE_USD}/mo`}
           </Link>
           <a href={DEMO_URL} className="btn-on-dark-outline">

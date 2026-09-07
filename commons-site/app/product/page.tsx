@@ -18,7 +18,7 @@ export default function ProductPage() {
             {`Your board works in Staff.\nParents get your public site and family login.\nThey see your school. Not Pavilion.`}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/start" className="btn-primary">
+            <Link href="/pricing#checkout" className="btn-primary">
               {`Start at $${COMMONS_LIST_PRICE_USD}/mo`}
             </Link>
             <Link href="/pricing" className="btn-secondary">
