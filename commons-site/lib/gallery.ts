@@ -55,7 +55,7 @@ export const WATCH_ITEMS: WatchItem[] = [
   {
     id: 'overview',
     title: 'Pavilion in five minutes',
-    blurb: 'Public site, family portal, staff portal. What parents see vs what the board runs.',
+    blurb: 'Public site and family login for parents. Staff for the board.',
     duration: 'Coming soon',
     placeholder: true,
   },

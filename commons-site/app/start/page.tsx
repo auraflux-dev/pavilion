@@ -12,7 +12,7 @@ export default function StartPage() {
     <div className="mx-auto max-w-lg px-5 py-16">
       <h1 className="type-page">Start</h1>
       <p className="type-lede mt-4 whitespace-pre-line text-[var(--ink-muted)]">
-        {`${PRODUCT_NAME} for your school.\n$${COMMONS_LIST_PRICE_USD} per month on Stripe (HSKRG LLC).`}
+        {`${PRODUCT_NAME} for your school.\n$${COMMONS_LIST_PRICE_USD} per month on Stripe (HSKRG LLC).\nAfter pay, your board onboards in Staff.`}
       </p>
       {!ready ? (
         <p className="mt-6 whitespace-pre-line rounded-md border border-[var(--line)] bg-[var(--paper-deep)] p-4 text-sm text-[var(--ink-muted)]">

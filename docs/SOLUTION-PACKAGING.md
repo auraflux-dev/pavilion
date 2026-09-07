@@ -11,8 +11,12 @@ Pavilion is one product. Customers do **not** need the whole thing. Lumi needs s
 | Surface | Who | Primary routes | Shell |
 |---------|-----|----------------|-------|
 | **Website** | Public visitors | `/`, programs, events, cove, membership marketing, … | Visitor chrome |
-| **Member portal** | Families (free / paid) | `/member-portal/*` | Member shell |
-| **Staff** | Board / volunteers with roles | `/staff`, `/staff/in-person` | Staff shell |
+| **Family login** | Parent households (free / paid) | `/member-portal/*` | Member shell |
+| **Staff** | Board / volunteers with roles (SaaS buyers) | `/staff`, `/staff/in-person` | Staff shell |
+
+**Naming:** “Family login” is for **school parents**. It is not a Pavilion SaaS customer member portal.
+Buyers (the org that pays HSKRG) live in **Staff** for onboarding, connectors, and ops.
+See [PAVILION-BUYER-VS-SCHOOL-SURFACES.md](./PAVILION-BUYER-VS-SCHOOL-SURFACES.md).
 
 They are **not** three repos. They are three audience shells inside one Next app that share libraries and talk through clear seams.
 

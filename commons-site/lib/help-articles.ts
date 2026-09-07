@@ -11,51 +11,70 @@ export const HELP_ARTICLES: HelpArticle[] = [
   {
     slug: 'what-is-pavilion',
     title: `What ${PRODUCT_NAME} is`,
-    summary: 'Public site, family portal, and staff portal on your school brand.',
+    summary: 'The PTO operating system. Parents see your school. Your board works in Staff.',
     body: `${PRODUCT_NAME} is the PTO operating system.
 
-Parents see your school brand, not our product name.
-Staff run membership, events, programs, and board work from one login.
+Whom we serve: PTO and PTA boards and school community orgs.
+Parents are end users of your school brand. They are not ${PRODUCT_NAME} customers.
 
+What we do well: one branded public site, a family login for households, and Staff workspaces that survive board turnover.
 Your school keeps its own Square for parent cards and in-person sales.
+
+Why: boards turn over and tools scatter. Parents should never see the vendor.
+
+How: branded trial, then Staff onboarding (connectors and brand), then go live.
+${PRODUCT_NAME} platform Staff supports your org. Day-to-day work stays in your Staff portal.
+
 ${PRODUCT_NAME} software billing is separate, on HSKRG LLC Stripe.`,
   },
   {
     slug: 'public-family-staff',
-    title: 'Public site, family portal, and staff portal',
-    summary: 'Three surfaces. One school year login for the board.',
-    body: `Public site: membership, events, programs, and fundraising without a stitch of tools.
+    title: 'Public site, family login, and Staff',
+    summary: 'Parents use public + family login. Your board lives in Staff.',
+    body: `Public site: membership, events, programs, and fundraising on your school brand.
 
-Family portal: household, students, membership, and store card when you use one.
+Family login: household, students, membership, and store card when you use one.
+That is for parents at your school. It is not a ${PRODUCT_NAME} customer member portal.
 
-Staff portal: role workspaces, in-app Help, Google and Canva inside the board app.
+Staff portal: where your board buys and runs ${PRODUCT_NAME}.
+Onboarding, connectors (Square, Google, Canva), roles, and day-to-day ops live here.
 
-Parents never need our product name. Boards inherit one place next spring.`,
+${PRODUCT_NAME} platform Staff (@onpavilion.com) can support your org from our Staff side.
+Your board does not need a separate ${PRODUCT_NAME} member portal for billing or setup.`,
   },
   {
-    slug: 'pricing-and-addons',
-    title: 'Pricing and add-ons',
-    summary: '$399/mo core. Store and creative are optional.',
+    slug: 'pricing',
+    title: 'Pricing',
+    summary: '$399/mo core. One school. One invoice.',
     body: `${PRODUCT_NAME} is $399 per school per month on a 12-month term.
 Same price as long as you stay.
 
-Add-ons ($99/mo each when configured):
-On-site school store (window, register, family prepaid card).
-Done-for-you creative (flyers and video).
+Includes public site, family login for parents, and Staff for your board.
+
+Parent card processing stays on your school Square and is not this invoice.`,
+  },
+  {
+    slug: 'pricing-and-addons',
+    title: 'Pricing',
+    summary: '$399/mo core. One school. One invoice.',
+    body: `${PRODUCT_NAME} is $399 per school per month on a 12-month term.
+Same price as long as you stay.
+
+Includes public site, family login for parents, and Staff for your board.
 
 Parent card processing stays on your school Square and is not this invoice.`,
   },
   {
     slug: 'billing-and-account',
     title: 'Billing and invoices',
-    summary: 'Magic-link sign-in, Stripe Customer Portal, add-ons.',
+    summary: 'Magic-link /account for Stripe. School work stays in Staff.',
     body: `Use /account with the email on your ${PRODUCT_NAME} invoice.
 
 We email a one-time sign-in link.
 From there you open the Stripe billing portal for invoices, cards, and cancel.
 
-Add-ons (school store, creative) can start from /account when prices are configured.
-Otherwise email us and we add them on your subscription.`,
+/account is billing only.
+Onboarding, connectors, and school ops live in your Staff portal.`,
   },
   {
     slug: 'school-square-vs-saas',
@@ -69,14 +88,13 @@ That invoice is for the platform, not for parent checkout fees.`,
   {
     slug: 'trial-then-pay',
     title: 'Getting started after purchase',
-    summary: 'Trial first. Pay locks look and feel. Deeper work after pay.',
+    summary: 'Trial first. Staff onboarding next. Pay locks look and feel.',
     body: `Sales builds a branded private trial with your logo, colors, and school name.
 
-During the trial, the board prunes surfaces you do not offer.
-Store, spirit wear, card, programs, and more can hide so the trial feels like your PTO.
+During the trial, the board prunes surfaces you do not offer in Staff.
 
 Pay is a small start: approved look and feel, pruned set, HSKRG Stripe billing.
-Deeper onboarding happens with you after pay.
+Deeper onboarding happens in Staff: Square, Google, Canva, brand, and content.
 
 We do not auto-provision a live tenant the moment checkout completes.`,
   },
@@ -84,9 +102,9 @@ We do not auto-provision a live tenant the moment checkout completes.`,
     slug: 'day-to-day-support',
     title: 'Where to get day-to-day support',
     summary: 'Platform help here. School ops in your Staff Help.',
-    body: `This /help site is for ${PRODUCT_NAME} as a product: billing, add-ons, partners, how buying works.
+    body: `This /help site is for ${PRODUCT_NAME} as a product: billing, partners, how buying works.
 
-Day-to-day PTO ops (membership, events, register, Cove-style store how-tos) live in your school Staff and Member Help after go-live.
+Day-to-day PTO ops (membership, events, register, store how-tos) live in your school Staff Help after go-live.
 
 For platform billing questions, use /account or email hello@hskrg.com.`,
   },

@@ -78,7 +78,6 @@ export function AccountDashboard(props: {
   schoolName: string
   status: string
   hasCustomer: boolean
-  addons: { id: string; title: string; usd: number; ready: boolean }[]
 }) {
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState('')
@@ -91,28 +90,6 @@ export function AccountDashboard(props: {
       const data = (await res.json()) as { url?: string; error?: string }
       if (!res.ok || !data.url) {
         setError(data.error || 'Portal unavailable.')
-        setBusy(null)
-        return
-      }
-      window.location.href = data.url
-    } catch {
-      setError('Network error.')
-      setBusy(null)
-    }
-  }
-
-  async function buyAddon(addonId: string) {
-    setBusy(addonId)
-    setError('')
-    try {
-      const res = await fetch('/api/account/addon-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ addonId }),
-      })
-      const data = (await res.json()) as { url?: string; error?: string }
-      if (!res.ok || !data.url) {
-        setError(data.error || 'Add-on checkout unavailable.')
         setBusy(null)
         return
       }
@@ -146,7 +123,7 @@ export function AccountDashboard(props: {
       <div className="space-y-3">
         <h2 className="font-[family-name:var(--font-display)] text-2xl">Billing</h2>
         <p className="whitespace-pre-line text-sm text-[var(--ink-muted)]">
-          {`Invoices, payment method, and cancel live in Stripe.\nSold by HSKRG LLC.`}
+          {`Invoices, payment method, and cancel live in Stripe.\nSold by HSKRG LLC.\nDay-to-day school work lives in your Staff portal, not here.`}
         </p>
         <button
           type="button"
@@ -161,30 +138,6 @@ export function AccountDashboard(props: {
             No Stripe customer linked yet. If you just paid, wait a minute and refresh.
           </p>
         ) : null}
-      </div>
-
-      <div className="space-y-3">
-        <h2 className="font-[family-name:var(--font-display)] text-2xl">Add-ons</h2>
-        <ul className="space-y-4">
-          {props.addons.map((a) => (
-            <li key={a.id} className="border-t border-[var(--line)] pt-4">
-              <p className="font-semibold">{a.title}</p>
-              <p className="text-sm text-[var(--ink-muted)]">${a.usd}/mo</p>
-              <button
-                type="button"
-                disabled={busy !== null || !a.ready}
-                onClick={() => buyAddon(a.id)}
-                className="mt-2 rounded-md border border-[var(--line)] px-4 py-2 text-sm font-semibold hover:bg-[var(--paper-deep)] disabled:opacity-50"
-              >
-                {!a.ready
-                  ? 'Email us to add'
-                  : busy === a.id
-                    ? 'Opening…'
-                    : 'Add on Stripe'}
-              </button>
-            </li>
-          ))}
-        </ul>
       </div>
 
       <button type="button" onClick={logout} className="text-sm text-[var(--accent)] hover:underline">

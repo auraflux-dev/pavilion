@@ -43,6 +43,7 @@ Promote is the VIP “adoption” path. Demo ship ≠ www. Soft parity may lag; 
 - **Cadence control** — promote+ship only when Rob OKs / off-peak  
 - **Hotfixes** — still allowed in `~/shmspto`, then port back to pavilion (`--from-shms`) so product stays ahead  
 - **Sell motion** — shared stack for new prospects; dedicated Vercel = paid/VIP SKU (SHMS is the reference customer)
+- **No Pavilion-customer member portal** — SaaS buyers (boards) live in **Staff**. School **family login** stays for parents on the school brand. See [PAVILION-BUYER-VS-SCHOOL-SURFACES.md](./PAVILION-BUYER-VS-SCHOOL-SURFACES.md).
 
 ## Two lanes (keep both until product is fast enough)
 
@@ -87,3 +88,7 @@ Do **not** auto-promote after intake. Lane A still requires an intentional promo
 - S1/S2 in [PRODUCT-BACKLOG.md](./PRODUCT-BACKLOG.md)  
 - Board wiki: `HOME/product-shms-weekly-intake`  
 - Scripts: `scripts/shms-weekly-intake.mjs`, `scripts/sync-product-between-repos.mjs`, `scripts/shms-frontend-parity.mjs`
+- Buyer surfaces: [PAVILION-BUYER-VS-SCHOOL-SURFACES.md](./PAVILION-BUYER-VS-SCHOOL-SURFACES.md)
+- Onboarding: [CLIENT-ONBOARDING.md](./CLIENT-ONBOARDING.md)
+- Integrations: [INTEGRATIONS-STAFF.md](./INTEGRATIONS-STAFF.md)
+- Scale: [PRODUCT-SCALE-TO-100.md](./PRODUCT-SCALE-TO-100.md)

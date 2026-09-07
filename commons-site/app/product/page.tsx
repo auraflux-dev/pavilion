@@ -15,7 +15,7 @@ export default function ProductPage() {
           <p className="type-eyebrow text-[var(--accent)]">Product</p>
           <h1 className="type-page mt-2 text-[var(--ink)]">Run your whole PTO in one place.</h1>
           <p className="type-lede mt-4 max-w-2xl whitespace-pre-line text-[var(--ink-muted)]">
-            {`Public site. Family portal. Staff workspace.\nParents see your school. Not Pavilion.`}
+            {`Your board works in Staff.\nParents get your public site and family login.\nThey see your school. Not Pavilion.`}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/start" className="btn-primary">

@@ -3,6 +3,12 @@ import { ADDON_CREATIVE_USD, ADDON_STORE_USD } from '@/lib/pricing'
 
 export type AddonId = 'store' | 'creative'
 
+/**
+ * SaaS add-ons (store / creative) are hidden from marketing and /account for now.
+ * Keep catalog + Stripe price helpers so we can turn this back on without a rebuild of plumbing.
+ */
+export const ADDONS_PUBLIC = false
+
 export function storeAddonPriceId(): string | null {
   return process.env.STRIPE_PRICE_STORE_ID?.trim() || null
 }

@@ -2,10 +2,19 @@
 
 Pavilion is the PTO operating system.
 
-Parents see your school brand, not our product name.
-Staff run membership, events, programs, and board work from one login.
+**Whom:** PTO and PTA boards and school community orgs.
+Parents use your school brand. They are not Pavilion customers.
 
-Your school keeps its own Square for parent cards and in-person sales.
+**What we do well:** one branded public site, family login for households, and Staff workspaces that survive board turnover.
+Your school keeps its own Square.
+
+**Why:** boards turn over and tools scatter.
+Parents should never see the vendor.
+
+**How:** branded trial, then Staff onboarding (connectors and brand), then go live.
+Pavilion platform Staff supports your org.
+Day-to-day work stays in your Staff portal, not a separate Pavilion member portal.
+
 Pavilion software billing is separate, on HSKRG LLC Stripe.
 
-See also the in-app articles under `/help` (runtime source: `lib/help-articles.ts`).
+See also `/help` (runtime source: `lib/help-articles.ts`).
