@@ -8,6 +8,8 @@ export type SignupSheetSettings = {
   reminderDaysBefore?: number
   allowMultipleSlotsPerPerson?: boolean
   sendConfirmationEmail?: boolean
+  /** ISO timestamp of last auto volunteer nudge (portal inbox). */
+  lastVolunteerNudgeAt?: string
 }
 
 export type SignupSheetFieldInput = {

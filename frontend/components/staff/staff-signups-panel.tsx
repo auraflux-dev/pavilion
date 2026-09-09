@@ -61,6 +61,35 @@ export function StaffSignupsPanel() {
     void load().catch((err) => setError(err instanceof Error ? err.message : 'Load failed'))
   }, [load])
 
+  async function nudgeSheet(id: string) {
+    setBusy(true)
+    setError('')
+    setFlash('')
+    try {
+      const r = await fetch('/api/staff/signups/nudge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sheetId: id, force: true }),
+      })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.error ?? 'Nudge failed')
+      const result = d.results?.[0]
+      if (result?.nudged) {
+        setFlash(
+          `Nudge sent for “${result.title}” (${result.remainingSpots} spots still open).`,
+        )
+      } else {
+        setFlash(
+          `No nudge: ${result?.skipped || 'nothing to send'} for “${result?.title || id}”.`,
+        )
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Nudge failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function patchSheetStatus(id: string, next: 'draft' | 'published' | 'closed') {
     setBusy(true)
     setError('')
@@ -399,6 +428,17 @@ export function StaffSignupsPanel() {
                         Open
                       </Link>
                     )}
+                    {sheet.status === 'published' ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={busy}
+                        onClick={() => void nudgeSheet(sheet.id)}
+                      >
+                        Nudge
+                      </Button>
+                    ) : null}
                     <Button
                       type="button"
                       size="sm"
