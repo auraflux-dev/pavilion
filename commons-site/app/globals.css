@@ -1,76 +1,91 @@
 @import "tailwindcss";
 
-/* Locked brand: Pavilion · ink + sea glass. Cooler paper, stronger ink contrast. */
+/**
+ * Marketing = product design tokens (school / demo UI).
+ * Do not invent a second Pavilion palette here.
+ */
 :root {
-  --paper: #f7f5f0;
-  --paper-deep: #ebe6dc;
-  --ink: #0d1e1a;
-  --ink-muted: #3a4f49;
-  --accent: #0f6b5c;
-  --accent-soft: #d7ebe5;
-  --line: #d9d2c6;
-  --hero-glow: #143f38;
+  /* Product tokens (mirror frontend/app/globals.css :root) */
+  --brand-green: #085508;
+  --brand-dark: #0b3d0b;
+  --brand-gold: #ffd700;
+  --brand-warm: #f5f0e8;
+  --brand-soft: #eef6ee;
+  --brand-line: #d4e8d4;
+  --brand-mist: #f0f7f0;
+  --brand-text: #1a1a1a;
+  --background: #f5f0e8;
+  --foreground: #1a1a1a;
+  --border: #e8e4dc;
+  --muted-foreground: #5a6070;
 
-  /* Type scale — tuned for marketing readability */
-  --text-caption: 0.75rem; /* 12 */
-  --text-small: 0.875rem; /* 14 — nav, meta */
-  --text-ui: 0.9375rem; /* 15 — buttons, chips */
-  --text-body: 1.0625rem; /* 17 — default reading */
-  --text-lede: 1.125rem; /* 18 — support under headlines */
-  --leading-tight: 1.12;
+  /* Marketing aliases → product */
+  --paper: var(--background);
+  --paper-deep: var(--brand-warm);
+  --ink: var(--brand-text);
+  --ink-muted: var(--muted-foreground);
+  --accent: var(--brand-green);
+  --accent-soft: var(--brand-soft);
+  --line: var(--border);
+  --hero-glow: var(--brand-dark);
+  --font-display: var(--font-sans);
+  --font-body: var(--font-sans);
+
+  --text-caption: 0.75rem;
+  --text-small: 0.875rem;
+  --text-ui: 0.9375rem;
+  --text-body: 1rem;
+  --text-lede: 1.125rem;
+  --leading-tight: 1.15;
   --leading-body: 1.55;
   --leading-lede: 1.5;
 
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--background);
+  color: var(--foreground);
 }
 
 @theme inline {
   --color-background: var(--paper);
   --color-foreground: var(--ink);
-  --font-sans: var(--font-body);
-  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-sans);
 }
 
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--text-body);
   line-height: var(--leading-body);
 }
 
-/* Display: homepage hero claim. Caps ~52px so it does not shout over the product frame. */
 .type-display {
-  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(2.125rem, 1.55rem + 2.4vw, 3.25rem);
-  font-weight: 600;
-  letter-spacing: -0.022em;
-  line-height: var(--leading-tight);
-}
-
-/* Interior page H1s — a step under the homepage hero. */
-.type-page {
-  font-family: var(--font-display), ui-serif, Georgia, serif;
-  font-size: clamp(2rem, 1.6rem + 1.7vw, 2.75rem);
-  font-weight: 600;
+  font-weight: 800;
   letter-spacing: -0.02em;
   line-height: var(--leading-tight);
 }
 
-/* Section H2 */
+.type-page {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(2rem, 1.6rem + 1.7vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: var(--leading-tight);
+}
+
 .type-section {
-  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(1.75rem, 1.45rem + 1.2vw, 2.25rem);
-  font-weight: 600;
+  font-weight: 800;
   letter-spacing: -0.015em;
   line-height: 1.18;
 }
 
-/* Surface / card titles */
 .type-title {
   font-size: clamp(1.25rem, 1.12rem + 0.55vw, 1.5rem);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.012em;
   line-height: 1.25;
 }
@@ -97,25 +112,25 @@ body {
 }
 
 .type-eyebrow {
-  font-size: 0.8125rem; /* 13 */
-  font-weight: 600;
+  font-size: 0.8125rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   line-height: 1.35;
   text-transform: uppercase;
 }
 
 .type-price {
-  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(2.5rem, 2rem + 2vw, 3.25rem);
-  font-weight: 600;
+  font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.05;
 }
 
 .hero-plane {
   background:
-    radial-gradient(1000px 520px at 72% 8%, rgba(15, 107, 92, 0.42), transparent 58%),
-    linear-gradient(165deg, #081714 0%, #0f2d26 46%, #164038 100%);
+    radial-gradient(1000px 520px at 72% 8%, rgba(255, 215, 0, 0.18), transparent 58%),
+    linear-gradient(165deg, #0b3d0b 0%, #085508 52%, #0f4a0f 100%);
 }
 
 .btn-primary {
@@ -123,17 +138,17 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 0.375rem;
-  background: var(--ink);
+  background: var(--brand-green);
   padding: 0.8rem 1.3rem;
   font-size: var(--text-ui);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.25;
-  color: var(--paper);
+  color: #ffffff;
   transition: background-color 150ms ease, transform 120ms ease;
 }
 
 .btn-primary:hover {
-  background: var(--accent);
+  background: var(--brand-dark);
 }
 
 .btn-primary:active {
@@ -148,15 +163,15 @@ body {
   border: 1.5px solid var(--line);
   padding: 0.8rem 1.3rem;
   font-size: var(--text-ui);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.25;
   color: var(--ink);
   transition: background-color 150ms ease, border-color 150ms ease, transform 120ms ease;
 }
 
 .btn-secondary:hover {
-  border-color: var(--ink);
-  background: #f4f0e8;
+  border-color: var(--brand-green);
+  background: var(--brand-soft);
 }
 
 .btn-secondary:active {
@@ -168,17 +183,17 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 0.375rem;
-  background: #f7f5f0;
+  background: var(--brand-gold);
   padding: 0.8rem 1.3rem;
   font-size: var(--text-ui);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.25;
-  color: #0d1e1a;
+  color: var(--brand-text);
   transition: background-color 150ms ease, transform 120ms ease;
 }
 
 .btn-on-dark:hover {
-  background: #ffffff;
+  background: #ffe44d;
 }
 
 .btn-on-dark-outline {
@@ -186,12 +201,12 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 0.375rem;
-  border: 1.5px solid rgba(247, 245, 240, 0.5);
+  border: 1.5px solid rgba(245, 240, 232, 0.55);
   padding: 0.8rem 1.3rem;
   font-size: var(--text-ui);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.25;
-  color: #f7f5f0;
+  color: #f5f0e8;
   transition: background-color 150ms ease, transform 120ms ease;
 }
 

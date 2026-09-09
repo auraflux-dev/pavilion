@@ -1,21 +1,16 @@
 import type { Metadata } from 'next'
-import { Fraunces, Source_Sans_3 } from 'next/font/google'
+import { Nunito } from 'next/font/google'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
 import { PRODUCT_NAME, PRODUCT_TAGLINE } from '@/lib/brand'
 import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
 import './globals.css'
 
-const display = Fraunces({
-  variable: '--font-display',
+/** Same face as the school product UI (sell what they get). */
+const nunito = Nunito({
+  variable: '--font-sans',
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
-})
-
-const body = Source_Sans_3({
-  variable: '--font-body',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '600', '700', '800'],
 })
 
 export const metadata: Metadata = {
@@ -29,7 +24,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${display.variable} ${body.variable} min-h-screen antialiased`}>
+      <body className={`${nunito.variable} min-h-screen antialiased`}>
         <SiteHeader />
         <main>{children}</main>
         <SiteFooter />

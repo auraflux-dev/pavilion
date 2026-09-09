@@ -40,4 +40,4 @@ Pavilion defines the shared catalog. BR apps should:
 ## Related
 
 - [SOLUTION-PACKAGING.md](./SOLUTION-PACKAGING.md)
-- Marketing shell uses the **same product tokens** as school UI (`pavilion-brand.css` aliases). Sell what they get.
+- Live www is **`commons-site`** (`www.onpavilion.com`). Marketing tokens live in `commons-site/app/globals.css` and must match product (`frontend/app/globals.css`). `frontend/app/(pavilion-brand)/` is the in-app brand surface on the demo host after domain cutover.
