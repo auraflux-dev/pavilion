@@ -122,4 +122,108 @@ create table if not exists cms_custom_pages (
 
 create index if not exists cms_custom_pages_org_idx
   on cms_custom_pages (organization_id, sort_order);
+
+create table if not exists cms_community_spaces (
+  id               text primary key,
+  organization_id  text not null references organizations (id) on delete cascade,
+  kind             text not null,
+  key              text not null,
+  title            text not null,
+  sort_order       int not null default 0,
+  active           boolean not null default true,
+  updated_at       timestamptz not null default now(),
+  unique (organization_id, kind, key)
+);
+
+create index if not exists cms_community_spaces_org_idx
+  on cms_community_spaces (organization_id, sort_order);
+
+create table if not exists cms_community_posts (
+  id               text primary key,
+  organization_id  text not null references organizations (id) on delete cascade,
+  space_id         text not null references cms_community_spaces (id) on delete cascade,
+  parent_post_id   text references cms_community_posts (id) on delete cascade,
+  author_email     text not null default '',
+  author_name      text not null default '',
+  author_kind      text not null default 'parent',
+  body             text not null default '',
+  pinned           boolean not null default false,
+  hidden           boolean not null default false,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+
+create index if not exists cms_community_posts_space_idx
+  on cms_community_posts (organization_id, space_id, created_at desc);
+
+create table if not exists cms_check_ins (
+  id               text primary key,
+  organization_id  text not null references organizations (id) on delete cascade,
+  kind             text not null,
+  code             text not null,
+  label            text not null default '',
+  event_key        text not null default '',
+  checked_in_by    text not null default '',
+  checked_in_at    timestamptz not null default now(),
+  unique (organization_id, kind, code, event_key)
+);
+
+create index if not exists cms_check_ins_event_idx
+  on cms_check_ins (organization_id, event_key, checked_in_at desc);
+
+create table if not exists cms_p2p_campaigns (
+  id               text primary key,
+  organization_id  text not null references organizations (id) on delete cascade,
+  slug             text not null,
+  title            text not null,
+  story            text not null default '',
+  goal_cents       int not null default 0,
+  active           boolean not null default true,
+  updated_at       timestamptz not null default now(),
+  unique (organization_id, slug)
+);
+
+create table if not exists cms_p2p_pages (
+  id               text primary key,
+  organization_id  text not null references organizations (id) on delete cascade,
+  campaign_id      text not null references cms_p2p_campaigns (id) on delete cascade,
+  share_code       text not null,
+  owner_email      text not null default '',
+  owner_name       text not null default '',
+  blurb            text not null default '',
+  raised_cents     int not null default 0,
+  active           boolean not null default true,
+  updated_at       timestamptz not null default now(),
+  unique (organization_id, share_code)
+);
+
+create index if not exists cms_p2p_pages_campaign_idx
+  on cms_p2p_pages (organization_id, campaign_id);
+
+create table if not exists cms_collection_landings (
+  id               text primary key,
+  organization_id  text not null references organizations (id) on delete cascade,
+  slug             text not null,
+  title            text not null,
+  body             text not null default '',
+  item_label       text not null default 'Amount',
+  amount_cents     int not null default 0,
+  allow_custom     boolean not null default true,
+  active           boolean not null default true,
+  updated_at       timestamptz not null default now(),
+  unique (organization_id, slug)
+);
+
+create table if not exists cms_contractor_w9 (
+  id               text primary key,
+  organization_id  text not null references organizations (id) on delete cascade,
+  email            text not null,
+  legal_name       text not null default '',
+  tin_last4        text not null default '',
+  address_line     text not null default '',
+  w9_on_file       boolean not null default false,
+  ytd_paid_cents   int not null default 0,
+  updated_at       timestamptz not null default now(),
+  unique (organization_id, email)
+);
 `

@@ -41,7 +41,7 @@ export const STAFF_PERMISSION_GROUPS: { id: string; label: string; items: StaffW
   {
     id: 'people',
     label: 'People',
-    items: ['members', 'access', 'membership', 'tiers', 'messages', 'surveys', 'activity'],
+    items: ['members', 'access', 'membership', 'tiers', 'messages', 'community', 'surveys', 'activity'],
   },
   {
     id: 'programs',
@@ -112,6 +112,7 @@ export const WORKSPACE_ROLES: Record<StaffWorkspace, StaffRole[]> = {
   canva: ['marketing', 'admin'],
   surveys: ['marketing', 'secretary', 'wellness', 'admin'],
   messages: ['membership', 'secretary', 'programs', 'instructor', 'coordinator', 'admin'],
+  community: ['membership', 'secretary', 'marketing', 'events', 'admin'],
   minutes: ['secretary', 'admin'],
   programs: ['programs', 'instructor', 'coordinator', 'admin'],
   timesheets: ['programs', 'instructor', 'coordinator', 'admin'],

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { PortalCommunityFeed } from '@/components/member-portal/portal-community-feed'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
 import {
   PORTAL_COPY_DEFAULTS,
@@ -189,7 +190,7 @@ export function MemberDashboard({
   const [status, setStatus] = useState<'loading' | 'error' | 'ok'>('loading')
   const [refreshing, setRefreshing] = useState(false)
   const [hasLoaded, setHasLoaded] = useState(false)
-  const [familyTab, setFamilyTab] = useState<'calendar' | 'messages'>('calendar')
+  const [familyTab, setFamilyTab] = useState<'calendar' | 'messages' | 'community'>('calendar')
   const [messagesSeenAt, setMessagesSeenAt] = useState(0)
   const [dismissedActivity, setDismissedActivity] = useState(false)
   const [membershipSuccessNudge, setMembershipSuccessNudge] = useState(false)
@@ -617,10 +618,33 @@ export function MemberDashboard({
                   <span className="ml-1 opacity-80">({messages.length})</span>
                 ) : null}
               </button>
+              <button
+                type="button"
+                onClick={() => setFamilyTab('community')}
+                className={`px-2.5 py-1.5 border-l border-[var(--border)] ${
+                  familyTab === 'community' ? 'text-white' : 'text-[#5A6070] bg-white'
+                }`}
+                style={
+                  familyTab === 'community' ? { backgroundColor: 'var(--brand-green)' } : undefined
+                }
+              >
+                Community
+              </button>
             </div>
           }
         >
-          {familyTab === 'calendar' ? (
+          {familyTab === 'community' ? (
+            <PortalCommunityFeed
+              grades={Array.from(
+                new Set(
+                  students
+                    .map((s) => String(s.grade ?? '').replace(/[^0-9]/g, ''))
+                    .filter(Boolean),
+                ),
+              )}
+              authorName={member?.name || member?.email || ''}
+            />
+          ) : familyTab === 'calendar' ? (
             calendar.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
                 <CalendarDays className="w-8 h-8 mb-2 text-[#C4C0B8]" />

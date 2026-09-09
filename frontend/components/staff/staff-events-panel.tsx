@@ -204,6 +204,12 @@ export function StaffEventsPanel() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <a
+            href="/staff/check-in"
+            className="inline-flex items-center rounded-md border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold text-[#1A1A1A]"
+          >
+            Tablet check-in
+          </a>
           <Button
             type="button"
             className="text-white"
@@ -347,6 +353,14 @@ export function StaffEventsPanel() {
                 ) : null}
               </div>
               <div className="flex flex-wrap gap-2 shrink-0">
+                {e.id ? (
+                  <a
+                    href={`/staff/check-in?event=${encodeURIComponent(e.id)}`}
+                    className="inline-flex items-center rounded-md border border-[var(--border)] bg-white px-3 py-1.5 text-xs font-semibold text-[#1A1A1A]"
+                  >
+                    Check-in
+                  </a>
+                ) : null}
                 <Button type="button" variant="outline" className="text-xs" onClick={() => startEdit(e)}>
                   Edit
                 </Button>

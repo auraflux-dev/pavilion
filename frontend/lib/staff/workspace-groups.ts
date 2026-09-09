@@ -22,7 +22,7 @@ export const STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
     id: 'families',
     label: 'Families',
     blurb: 'Memberships, parent lookup, and portal messages.',
-    workspaces: ['membership', 'members', 'messages', 'tiers', 'access', 'activity'],
+    workspaces: ['membership', 'members', 'messages', 'community', 'tiers', 'access', 'activity'],
   },
   {
     id: 'programs',
@@ -84,6 +84,7 @@ export const STAFF_WORKSPACE_BLURB: Partial<Record<StaffWorkspace, string>> = {
   social: 'Facebook from Staff',
   surveys: 'Create, share, review, CSV',
   messages: 'Parent portal inbox',
+  community: 'Grade and committee feeds',
   minutes: 'Publish meeting minutes',
   programs: 'Your class: roster, attendance, nights',
   timesheets: 'Submit or approve teaching hours',

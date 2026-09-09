@@ -29,6 +29,7 @@ import { StaffCoveStockAdmin, StaffRetailPanel } from '@/components/staff/staff-
 import { StaffDiscountsPanel } from '@/components/staff/staff-discounts-panel'
 import { StaffMembershipPanel } from '@/components/staff/staff-membership-panel'
 import { StaffActivityLogPanel } from '@/components/staff/staff-activity-log-panel'
+import { StaffCommunityPanel } from '@/components/staff/staff-community-panel'
 import { StaffFulfillmentsPanel } from '@/components/staff/staff-fulfillments-panel'
 import { StaffStorePickupsPanel } from '@/components/staff/staff-store-pickups-panel'
 import { StaffSpiritWearDemandPanel } from '@/components/staff/staff-spirit-wear-demand-panel'
@@ -162,6 +163,7 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'help',
   'signups',
   'activity',
+  'community',
 ]
 
 function parseWorkspace(raw: string | null): StaffWorkspace | null {
@@ -301,6 +303,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   const canMessage = staffCanWorkspace(me, 'messages')
   const canMembership = staffCanWorkspace(me, 'membership')
   const canActivity = staffCanWorkspace(me, 'activity')
+  const canCommunity = staffCanWorkspace(me, 'community')
   const canMinutes = staffCanWorkspace(me, 'minutes')
   const canPrograms = staffCanWorkspace(me, 'programs')
   const canTimesheets = staffCanWorkspace(me, 'timesheets')
@@ -344,6 +347,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     if (canMarketing) items.push({ id: 'social', label: wsLabel('social') })
     if (canSurveys) items.push({ id: 'surveys', label: wsLabel('surveys') })
     if (canMessage) items.push({ id: 'messages', label: wsLabel('messages') })
+    if (canCommunity) items.push({ id: 'community', label: wsLabel('community') })
     if (canMinutes) items.push({ id: 'minutes', label: wsLabel('minutes') })
     if (canPrograms) items.push({ id: 'programs', label: wsLabel('programs') })
     if (canTimesheets) items.push({ id: 'timesheets', label: wsLabel('timesheets') })
@@ -394,6 +398,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     canMarketing,
     canSurveys,
     canMessage,
+    canCommunity,
     canMinutes,
     canPrograms,
     canTimesheets,
@@ -1145,6 +1150,7 @@ Open Platform fleet for tenants, health, and support.`}
           </div>
         ) : null}
         {active === 'activity' && canActivity ? <StaffActivityLogPanel /> : null}
+        {active === 'community' && canCommunity ? <StaffCommunityPanel /> : null}
         {active === 'inbox' ? <StaffWorkspaceHub tab="inbox" /> : null}
         {active === 'calendar' ? <StaffWorkspaceHub tab="calendar" /> : null}
         {active === 'docs' ? <StaffWorkspaceHub tab="docs" /> : null}
