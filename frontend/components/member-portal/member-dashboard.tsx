@@ -20,6 +20,7 @@ import {
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { PortalCommunityFeed } from '@/components/member-portal/portal-community-feed'
+import { PortalP2pPanel } from '@/components/member-portal/portal-p2p-panel'
 import { createVisitorClient } from '@/lib/wix-oauth-client'
 import {
   PORTAL_COPY_DEFAULTS,
@@ -190,7 +191,7 @@ export function MemberDashboard({
   const [status, setStatus] = useState<'loading' | 'error' | 'ok'>('loading')
   const [refreshing, setRefreshing] = useState(false)
   const [hasLoaded, setHasLoaded] = useState(false)
-  const [familyTab, setFamilyTab] = useState<'calendar' | 'messages' | 'community'>('calendar')
+  const [familyTab, setFamilyTab] = useState<'calendar' | 'messages' | 'community' | 'raise'>('calendar')
   const [messagesSeenAt, setMessagesSeenAt] = useState(0)
   const [dismissedActivity, setDismissedActivity] = useState(false)
   const [membershipSuccessNudge, setMembershipSuccessNudge] = useState(false)
@@ -630,6 +631,18 @@ export function MemberDashboard({
               >
                 Community
               </button>
+              <button
+                type="button"
+                onClick={() => setFamilyTab('raise')}
+                className={`px-2.5 py-1.5 border-l border-[var(--border)] ${
+                  familyTab === 'raise' ? 'text-white' : 'text-[#5A6070] bg-white'
+                }`}
+                style={
+                  familyTab === 'raise' ? { backgroundColor: 'var(--brand-green)' } : undefined
+                }
+              >
+                Raise
+              </button>
             </div>
           }
         >
@@ -644,6 +657,8 @@ export function MemberDashboard({
               )}
               authorName={member?.name || member?.email || ''}
             />
+          ) : familyTab === 'raise' ? (
+            <PortalP2pPanel authorName={member?.name || member?.email || ''} />
           ) : familyTab === 'calendar' ? (
             calendar.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center py-6">

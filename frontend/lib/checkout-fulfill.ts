@@ -66,6 +66,8 @@ export type CheckoutIntent = {
   useCoveBalance?: boolean
   /** Optional parent note for donations */
   note?: string
+  /** Peer-to-peer fundraising share code */
+  p2pShareCode?: string
   consents?: import('@/lib/checkout-consent').ConsentAck[]
   /** Bag checkout: one payment for many lines. */
   cartLines?: CheckoutIntent[]
@@ -562,15 +564,17 @@ export async function resolveCheckoutIntent(
       throw new Error('Enter a donation between $1 and $10,000')
     }
     const note = String(intent.note ?? '').trim().slice(0, 120)
+    const p2pShareCode = String(intent.p2pShareCode ?? '').trim().toUpperCase()
     return {
       kind,
       amount,
       amountCents: donationAmountCents(amount),
-      description: 'SHMS PTO donation',
+      description: p2pShareCode ? 'P2P fundraising gift' : 'SHMS PTO donation',
       customId: `dn:${parentEmail.replace(/[^a-zA-Z0-9]/g, '').slice(0, 37)}`,
       meta: {
         parentEmail,
         note,
+        ...(p2pShareCode ? { p2pShareCode } : {}),
       },
     }
   }
@@ -1143,8 +1147,9 @@ export async function fulfillPaidCheckout(opts: {
       paymentMethod,
     })
     const note = resolved.meta.note || ''
+    const p2pShareCode = String(resolved.meta.p2pShareCode ?? '').trim()
     await client.items.insert('Payments', {
-      programName: 'PTO Donation',
+      programName: p2pShareCode ? 'P2P Fundraising' : 'PTO Donation',
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
@@ -1155,12 +1160,25 @@ export async function fulfillPaidCheckout(opts: {
       accountNumber,
       notes: [
         note || 'General PTO donation',
+        p2pShareCode ? `p2p:${p2pShareCode}` : '',
         cove.coveCents > 0 ? `Cove $${(cove.coveCents / 100).toFixed(2)}` : '',
         cove.cardCents > 0 ? `card $${(cove.cardCents / 100).toFixed(2)}` : '',
       ]
         .filter(Boolean)
         .join(' · '),
     })
+    if (p2pShareCode) {
+      try {
+        const { resolveCmsOrganizationId } = await import('@/lib/cms/store')
+        const { creditP2pPageRaised } = await import('@/lib/p2p/store')
+        const orgId = await resolveCmsOrganizationId()
+        if (orgId) {
+          await creditP2pPageRaised(orgId, p2pShareCode, resolved.amountCents)
+        }
+      } catch (err) {
+        console.error('p2p credit failed', err)
+      }
+    }
     return confirm(
       {
         kind: 'donation',

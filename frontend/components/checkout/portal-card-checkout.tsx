@@ -90,6 +90,7 @@ export type PortalPayBody =
       kind: 'donation'
       amountCents: number
       note?: string
+      p2pShareCode?: string
       useCoveBalance?: boolean
       consents?: ConsentAck[]
     }

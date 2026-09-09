@@ -103,6 +103,7 @@ export function StaffFundraisingSectionNav() {
       eyebrow="Jump to"
       ariaLabel="Fundraising sections"
       items={[
+        { href: '#fundraising-p2p', label: 'P2P', hint: 'Personal share pages', icon: HandCoins },
         { href: '#fundraising-ctas', label: 'CTAs', hint: 'Campaign buttons', icon: HandCoins },
         { href: '#fundraising-sponsors', label: 'Sponsors', hint: 'Public list', icon: Users },
         { href: '#fundraising-goals', label: 'Goals', hint: 'Site settings', icon: Goal },

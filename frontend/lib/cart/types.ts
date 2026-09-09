@@ -27,6 +27,8 @@ export type CartLine = {
   amountCents?: number
   /** Optional note for donation lines. */
   note?: string
+  /** Peer-to-peer share page code when donating via /p2p/[code]. */
+  p2pShareCode?: string
   shirtSize?: string | null
   shirtDesign?: string | null
   shirtProductId?: string | null

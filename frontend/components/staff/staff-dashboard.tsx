@@ -30,6 +30,7 @@ import { StaffDiscountsPanel } from '@/components/staff/staff-discounts-panel'
 import { StaffMembershipPanel } from '@/components/staff/staff-membership-panel'
 import { StaffActivityLogPanel } from '@/components/staff/staff-activity-log-panel'
 import { StaffCommunityPanel } from '@/components/staff/staff-community-panel'
+import { StaffP2pPanel } from '@/components/staff/staff-p2p-panel'
 import { StaffFulfillmentsPanel } from '@/components/staff/staff-fulfillments-panel'
 import { StaffStorePickupsPanel } from '@/components/staff/staff-store-pickups-panel'
 import { StaffSpiritWearDemandPanel } from '@/components/staff/staff-spirit-wear-demand-panel'
@@ -1231,6 +1232,7 @@ Open Platform fleet for tenants, health, and support.`}
         {active === 'fundraising' && canFundraising ? (
           <div className="space-y-4">
             <StaffFundraisingSectionNav />
+            <StaffP2pPanel />
             <StaffCmsCollectionPanel
               collection="FundraisingCTAs"
               title="Fundraising CTAs"

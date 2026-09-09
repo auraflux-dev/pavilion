@@ -44,11 +44,13 @@ export function cartLineToPayBody(line: CartLine): CartPayLine | null {
     }
   }
   if (line.kind === 'donation' && line.amountCents) {
-    return {
+    const donationBody: Extract<CartPayLine, { kind: 'donation' }> = {
       kind: 'donation',
       amountCents: line.amountCents,
       note: line.note,
+      p2pShareCode: line.p2pShareCode,
     }
+    return donationBody
   }
   if (line.kind === 'store-card' && line.studentId && line.amountCents) {
     return {

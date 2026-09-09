@@ -688,8 +688,9 @@ export async function POST(req: NextRequest) {
         )
       }
       const note = String(body.note ?? '').trim().slice(0, 120)
+      const p2pShareCode = String(body.p2pShareCode ?? '').trim()
       let resolved = await resolveCheckoutIntent(
-        { kind: 'donation', amountCents, note },
+        { kind: 'donation', amountCents, note, p2pShareCode },
         session.email,
       )
       resolved = await withCoveSplit(

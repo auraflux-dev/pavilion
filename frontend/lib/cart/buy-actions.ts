@@ -4,7 +4,11 @@
 import type { CartLine } from '@/lib/cart/types'
 import { addCartLine, clearCart, setCartOpen } from '@/lib/cart/store'
 
-type LineInput = Omit<CartLine, 'id' | 'addedAt'> & { id?: string }
+type LineInput = Omit<CartLine, 'id' | 'addedAt'> & {
+  id?: string
+  /** Peer-to-peer share page when donating from /p2p/[code]. */
+  p2pShareCode?: string
+}
 type RouterLike = { push: (href: string) => void }
 
 /** Add line and open the bag drawer — parent can keep shopping. */
