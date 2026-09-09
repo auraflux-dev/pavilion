@@ -18,6 +18,7 @@ import {
   useStaffExclusiveSection,
 } from '@/components/staff/staff-exclusive-section'
 import { StaffRichEmailComposer } from '@/components/staff/staff-rich-email-composer'
+import { StaffMassSmsStub } from '@/components/staff/staff-mass-sms-stub'
 import { htmlToPlainText } from '@/lib/staff/email-html'
 import { staffInboxComposeHref } from '@/lib/staff/inbox-compose-link'
 
@@ -591,15 +592,23 @@ export function StaffMembershipPanel() {
               (including board seats that need magnets).
             </p>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!members.length}
-            onClick={exportCsv}
-            className="text-xs"
-          >
-            Export CSV
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!members.length}
+              onClick={exportCsv}
+              className="text-xs"
+            >
+              Export CSV
+            </Button>
+            <Link
+              href={`/staff/directory/print?tier=${encodeURIComponent(tier)}`}
+              className="inline-flex items-center rounded-md border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[#1A1A1A]"
+            >
+              Print / PDF
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3 xl:flex-row xl:items-stretch">
@@ -924,6 +933,11 @@ export function StaffMembershipPanel() {
             </Button>
           </div>
         </div>
+
+        <StaffMassSmsStub
+          phones={members.map((m) => m.parentPhone).filter(Boolean)}
+          defaultBody={plainBody}
+        />
 
         {status ? <p className="text-xs text-[#5A6070]">{status}</p> : null}
       </section>

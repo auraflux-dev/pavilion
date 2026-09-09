@@ -186,10 +186,23 @@ export function LiveEditorToolbar() {
               New page
             </button>
           ) : null}
+          <a
+            href="/staff?view=brand"
+            className="rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-xs font-bold text-[var(--brand-dark)]"
+          >
+            Brand
+          </a>
+          <a
+            href="/staff?view=pages"
+            className="rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-xs font-bold text-[var(--brand-dark)]"
+          >
+            Pages
+          </a>
         </div>
         {layoutEditMode ? (
           <p className="px-1 text-[10px] font-medium text-[#5A6070]">
             Drag sections, edit fields, add from the library. Changes save live.
+            Brand and Pages open deeper theme tools in Staff.
           </p>
         ) : editMode ? (
           <p className="px-1 text-[10px] font-medium text-[#5A6070]">

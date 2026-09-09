@@ -67,6 +67,7 @@ import { isPublicDemoInstance, isPublicPavilionBrandHost } from '@/lib/demo/inst
 import { StaffWhatsAppQueuePanel } from '@/components/staff/staff-whatsapp-queue-panel'
 import { StaffExpensesPanel } from '@/components/staff/staff-expenses-panel'
 import { StaffTimesheetsPanel } from '@/components/staff/staff-timesheets-panel'
+import { StaffTaxPanel } from '@/components/staff/staff-tax-panel'
 import { StaffHelpPanel } from '@/components/staff/staff-help-panel'
 import { StaffSyncFreshnessChip } from '@/components/staff/staff-sync-freshness-chip'
 import { StaffPersonalEmailPanel } from '@/components/staff/staff-personal-email-panel'
@@ -1044,7 +1045,12 @@ Open Platform fleet for tenants, health, and support.`}
             </StaffReveal>
           </div>
         ) : null}
-        {active === 'timesheets' && canTimesheets ? <StaffTimesheetsPanel /> : null}
+        {active === 'timesheets' && canTimesheets ? (
+          <div className="space-y-4">
+            <StaffTimesheetsPanel />
+            <StaffTaxPanel />
+          </div>
+        ) : null}
         {active === 'payments' && canPayments ? (
           <div className="space-y-4">
             {isPavilionProductPlatformPublic() ? (

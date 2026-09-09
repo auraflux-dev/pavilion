@@ -36,8 +36,16 @@ type SquareWallet = {
   destroy(): Promise<void>
 }
 
+type SquareAch = {
+  tokenize(options: {
+    accountHolderName: string
+    intent: 'CHARGE' | 'STORE'
+  }): Promise<SquareTokenResult>
+}
+
 type SquarePayments = {
   card(): Promise<SquareCard>
+  ach?(): Promise<SquareAch>
   paymentRequest(options: {
     countryCode: string
     currencyCode: string
@@ -178,6 +186,13 @@ export function PortalCardCheckout({
   const [googlePayReady, setGooglePayReady] = useState(false)
   /** Keep Google Pay mount sized until Square attach finishes (zero-size attach fails). */
   const [googlePayTried, setGooglePayTried] = useState(false)
+  const achEnabled =
+    typeof process !== 'undefined' &&
+    (process.env.NEXT_PUBLIC_SQUARE_ACH_ENABLED === '1' ||
+      process.env.NEXT_PUBLIC_SQUARE_ACH_ENABLED === 'true')
+  const [payRail, setPayRail] = useState<'card' | 'ach'>('card')
+  const [achName, setAchName] = useState('')
+  const achRef = useRef<SquareAch | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -549,7 +564,31 @@ export function PortalCardCheckout({
       }
       await ensureParentNameSaved()
       let sourceId = opts?.sourceId
-      if (needsCard && !useStored && !sourceId) {
+      let paymentType =
+        opts?.paymentType ??
+        (needsCard && useStored && !opts?.sourceId
+          ? 'square_card_on_file'
+          : 'square_card')
+      if (needsCard && !useStored && !sourceId && payRail === 'ach' && achEnabled) {
+        const payments = await window.Square?.payments(
+          String(config?.applicationId ?? ''),
+          String(config?.locationId ?? ''),
+        )
+        if (!payments?.ach) throw new Error('Bank payments are not available yet.')
+        achRef.current = await payments.ach()
+        const holder =
+          achName.trim() || `${firstName.trim()} ${lastName.trim()}`.trim()
+        if (!holder) throw new Error('Enter the bank account holder name.')
+        const tokenized = await achRef.current.tokenize({
+          accountHolderName: holder,
+          intent: 'CHARGE',
+        })
+        if (tokenized.status !== 'OK' || !tokenized.token) {
+          throw new Error(tokenized.errors?.[0]?.message ?? 'Bank details could not be verified.')
+        }
+        sourceId = tokenized.token
+        paymentType = 'square_wallet'
+      } else if (needsCard && !useStored && !sourceId) {
         if (!cardRef.current || !ready) throw new Error('Card form is not ready yet.')
         const tokenized = await cardRef.current.tokenize()
         if (tokenized.status !== 'OK' || !tokenized.token) {
@@ -569,8 +608,13 @@ export function PortalCardCheckout({
           lastName: lastName.trim() || undefined,
           consents: needsConsent ? consents : undefined,
           sourceId,
-          useStoredCard: needsCard && useStored && !opts?.sourceId,
-          saveCard: needsCard && !useStored && !opts?.sourceId && saveCard,
+          useStoredCard: needsCard && useStored && !opts?.sourceId && payRail !== 'ach',
+          saveCard:
+            needsCard &&
+            !useStored &&
+            !opts?.sourceId &&
+            payRail !== 'ach' &&
+            saveCard,
         }),
       })
       const data = await response.json()
@@ -588,9 +632,7 @@ export function PortalCardCheckout({
         amount,
         title,
         payBody,
-        paymentType:
-          opts?.paymentType ??
-          (useStored ? 'square_card_on_file' : 'square_card'),
+        paymentType,
       })
       onPaid?.(data)
       if (!isPage) {
@@ -897,11 +939,52 @@ export function PortalCardCheckout({
 
                   <div className="relative flex items-center gap-3 py-1">
                     <div className="flex-1 h-px bg-[var(--border)]" />
-                    <span className={sectionLabel}>Or pay with card</span>
+                    <span className={sectionLabel}>Or pay another way</span>
                     <div className="flex-1 h-px bg-[var(--border)]" />
                   </div>
 
-                  {storedCard ? (
+                  {achEnabled ? (
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className={`rounded-md px-3 py-1.5 text-xs font-semibold border ${
+                          payRail === 'card'
+                            ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                            : 'bg-white text-[#5A6070]'
+                        }`}
+                        onClick={() => setPayRail('card')}
+                      >
+                        Card
+                      </button>
+                      <button
+                        type="button"
+                        className={`rounded-md px-3 py-1.5 text-xs font-semibold border ${
+                          payRail === 'ach'
+                            ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                            : 'bg-white text-[#5A6070]'
+                        }`}
+                        onClick={() => setPayRail('ach')}
+                      >
+                        Bank account (ACH)
+                      </button>
+                    </div>
+                  ) : null}
+
+                  {achEnabled && payRail === 'ach' ? (
+                    <div className="space-y-2">
+                      <input
+                        value={achName}
+                        onChange={(e) => setAchName(e.target.value)}
+                        placeholder="Account holder name"
+                        className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm"
+                      />
+                      <p className="text-[11px] text-[#5A6070]">
+                        Square will open a secure bank verification step when you pay.
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {payRail === 'card' && storedCard ? (
                     <div className="space-y-2 rounded-xl border border-[var(--border)] px-3 py-2.5">
                       <label className="flex items-center gap-2 text-xs text-[#1A1A1A]">
                         <input
@@ -922,14 +1005,14 @@ export function PortalCardCheckout({
                     </div>
                   ) : null}
 
-                  {!useStored ? (
+                  {payRail === 'card' && !useStored ? (
                     <div
                       id={containerId}
                       className="min-h-12 rounded-xl border border-[var(--border)] bg-white px-3 py-2"
                     />
                   ) : null}
 
-                  {!useStored ? (
+                  {payRail === 'card' && !useStored ? (
                     <label className="flex items-start gap-2 text-xs text-[#5A6070]">
                       <input
                         type="checkbox"
