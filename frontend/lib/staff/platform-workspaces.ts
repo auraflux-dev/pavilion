@@ -5,6 +5,7 @@ export type PlatformWorkspace =
   | 'home'
   | 'tenants'
   | 'tenant'
+  | 'modules'
   | 'onboarding'
   | 'support'
   | 'health'
@@ -14,6 +15,7 @@ export const PLATFORM_WORKSPACE_IDS: PlatformWorkspace[] = [
   'home',
   'tenants',
   'tenant',
+  'modules',
   'onboarding',
   'support',
   'health',
@@ -24,6 +26,7 @@ export const PLATFORM_WORKSPACE_LABEL: Record<PlatformWorkspace, string> = {
   home: 'Home',
   tenants: 'Tenants',
   tenant: 'Tenant',
+  modules: 'Modules',
   onboarding: 'Onboarding',
   support: 'Support',
   health: 'Health',
@@ -42,7 +45,7 @@ export const PLATFORM_WORKSPACE_GROUPS: PlatformWorkspaceGroup[] = [
     id: 'fleet',
     label: 'Fleet',
     blurb: 'Tenants, go-live, and day-to-day platform work.',
-    workspaces: ['tenants', 'onboarding', 'support'],
+    workspaces: ['tenants', 'modules', 'onboarding', 'support'],
   },
   {
     id: 'ops',
@@ -61,6 +64,7 @@ export const PLATFORM_WORKSPACE_GROUPS: PlatformWorkspaceGroup[] = [
 export const PLATFORM_WORKSPACE_BLURB: Partial<Record<PlatformWorkspace, string>> = {
   tenants: 'Search trials and customer orgs',
   tenant: 'One org: connectors, brand, notes',
+  modules: 'Check/uncheck product modules for this org',
   onboarding: 'Sales → trial → go-live ladder',
   support: 'Cross-tenant asks (no school PII)',
   health: 'Demo deploy and connector summary',

@@ -122,7 +122,18 @@ Exact Lumi pick is a sales/ops decision; the product must support **partial** en
 | Brand packs | Skin only — **not** the same as capability packs |
 | Env `DEMO_*` / `PAVILION_*` | Hosting mode; manifests sit beside env |
 
-Registry stub: `frontend/lib/crm/capabilities.ts` (declarative IDs + presets). Wiring flags into every route is backlog **P8**.
+Legacy stub: `frontend/lib/crm/capabilities.ts` (older IDs + packs).
+
+**Runtime modules (current):** `frontend/lib/modules/catalog.ts` is the shared checklist for:
+
+| Product | Customers |
+|---------|-----------|
+| **Pavilion** (`onpavilion.com`) | Demo, trials, SHMS, Lumi packs |
+| **Business Rocket** (`businessrocket.ai`) | BR orgs + their end customers |
+
+Staff (admin / Platform) checkboxes live in **Modules** (`StaffModulesPanel`, `/api/staff/modules`). Persisted per org in `cms_org_modules`. Gate helper: `lib/modules/gate.ts` (`requireOrgModule`). Community is the first API proof gate (`portal.community` / `staff.community`).
+
+BR consumes the same catalog shape (`products: ['businessrocket']` rows + BR presets). Pavilion owns the catalog source of truth in this repo; BR app should import or mirror IDs, not invent a second menu.
 
 ## Do not
 

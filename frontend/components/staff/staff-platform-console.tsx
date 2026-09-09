@@ -12,6 +12,7 @@ import {
   parsePlatformWorkspace,
   type PlatformWorkspace,
 } from '@/lib/staff/platform-workspaces'
+import { StaffModulesPanel } from '@/components/staff/staff-modules-panel'
 
 type Me = {
   email: string
@@ -171,6 +172,7 @@ export function StaffPlatformConsole({ me }: Props) {
   const navItems: { id: PlatformWorkspace; label: string }[] = [
     { id: 'home', label: PLATFORM_WORKSPACE_LABEL.home },
     { id: 'tenants', label: PLATFORM_WORKSPACE_LABEL.tenants },
+    { id: 'modules', label: PLATFORM_WORKSPACE_LABEL.modules },
     { id: 'onboarding', label: PLATFORM_WORKSPACE_LABEL.onboarding },
     { id: 'support', label: PLATFORM_WORKSPACE_LABEL.support },
     { id: 'health', label: PLATFORM_WORKSPACE_LABEL.health },
@@ -262,6 +264,8 @@ Open a tenant to check connectors and brand, or enter Client Staff to serve that
             </div>
           </section>
         ) : null}
+
+        {active === 'modules' ? <StaffModulesPanel /> : null}
 
         {active === 'tenants' ? (
           <section className="space-y-4">

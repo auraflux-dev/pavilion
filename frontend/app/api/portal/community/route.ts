@@ -8,6 +8,7 @@ import {
   resolveCommunityOrgId,
   spacesForGrades,
 } from '@/lib/community/store'
+import { requireOrgModule } from '@/lib/modules/gate'
 
 export async function GET(req: NextRequest) {
   const session = await getMemberSession(req)
@@ -15,6 +16,8 @@ export async function GET(req: NextRequest) {
 
   const orgId = await resolveCommunityOrgId(req)
   if (!orgId) return NextResponse.json({ spaces: [], posts: [], replies: [] })
+  const mod = await requireOrgModule(orgId, 'portal.community')
+  if (mod) return mod
 
   const spaces = await ensureCommunitySpaces(orgId)
   const gradesParam = String(req.nextUrl.searchParams.get('grades') ?? '')
@@ -47,6 +50,8 @@ export async function POST(req: NextRequest) {
 
   const orgId = await resolveCommunityOrgId(req)
   if (!orgId) return NextResponse.json({ error: 'Community unavailable' }, { status: 400 })
+  const mod = await requireOrgModule(orgId, 'portal.community')
+  if (mod) return mod
 
   const body = await req.json().catch(() => ({}))
   const spaceId = String(body.spaceId ?? '').trim()

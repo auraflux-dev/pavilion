@@ -55,6 +55,7 @@ export const STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
     workspaces: [
       'pages',
       'brand',
+      'modules',
       'content',
       'pagetheme',
       'site',
@@ -98,6 +99,7 @@ export const STAFF_WORKSPACE_BLURB: Partial<Record<StaffWorkspace, string>> = {
   content: 'Page heroes & Cove / marketing copy',
   pages: 'Compose visitor pages with sections (demo/trial)',
   brand: 'Logo, colors, fonts (demo/trial)',
+  modules: 'Check/uncheck site, portal, and staff modules',
   pagetheme: 'Per-page CSS & string overrides (admin + VP Marketing)',
   site: 'Announcement, contact, goals…',
   board: 'Public /board roster',

@@ -121,6 +121,10 @@ export const CAPABILITY_CATALOG: CapabilityDef[] = [
   },
 ]
 
+/**
+ * @deprecated Prefer `lib/modules/catalog.ts` for checkable product modules
+ * (Pavilion + Business Rocket). This file remains for older pack IDs.
+ */
 /** Hosting is separate from which capabilities are on. */
 export type HostingSku = 'vip-dedicated' | 'shared-platform' | 'wix-wall' | 'demo-sample'
 

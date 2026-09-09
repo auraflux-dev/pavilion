@@ -35,7 +35,7 @@ export const STAFF_BASE_WORKSPACES: StaffWorkspace[] = [
 ]
 
 /** Admin-only. Not assignable as extras. */
-export const STAFF_ADMIN_WORKSPACES: StaffWorkspace[] = ['members', 'access']
+export const STAFF_ADMIN_WORKSPACES: StaffWorkspace[] = ['members', 'access', 'modules']
 
 export const STAFF_PERMISSION_GROUPS: { id: string; label: string; items: StaffWorkspace[] }[] = [
   {
@@ -60,6 +60,7 @@ export const STAFF_PERMISSION_GROUPS: { id: string; label: string; items: StaffW
       'content',
       'pages',
       'brand',
+      'modules',
       'pagetheme',
       'site',
       'board',
@@ -127,6 +128,7 @@ export const WORKSPACE_ROLES: Record<StaffWorkspace, StaffRole[]> = {
   content: ['marketing', 'secretary', 'retail', 'admin'],
   pages: ['marketing', 'secretary', 'admin'],
   brand: ['marketing', 'admin'],
+  modules: ['admin'],
   pagetheme: ['marketing', 'admin'],
   site: [
     'marketing',

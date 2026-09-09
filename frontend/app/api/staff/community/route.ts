@@ -9,6 +9,7 @@ import {
   setCommunityPostHidden,
   setCommunityPostPinned,
 } from '@/lib/community/store'
+import { requireOrgModule } from '@/lib/modules/gate'
 
 async function gate(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -32,6 +33,8 @@ export async function GET(req: NextRequest) {
 
   const orgId = await resolveCommunityOrgId(req)
   if (!orgId) return NextResponse.json({ spaces: [], posts: [], replies: [] })
+  const mod = await requireOrgModule(orgId, 'staff.community')
+  if (mod) return mod
 
   const spaces = await ensureCommunitySpaces(orgId)
   const spaceId = String(req.nextUrl.searchParams.get('spaceId') ?? '').trim()
@@ -53,6 +56,8 @@ export async function POST(req: NextRequest) {
 
   const orgId = await resolveCommunityOrgId(req)
   if (!orgId) return NextResponse.json({ error: 'Community unavailable' }, { status: 400 })
+  const mod = await requireOrgModule(orgId, 'staff.community')
+  if (mod) return mod
 
   const body = await req.json().catch(() => ({}))
   const action = String(body.action ?? 'post').trim()

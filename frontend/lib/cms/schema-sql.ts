@@ -226,4 +226,10 @@ create table if not exists cms_contractor_w9 (
   updated_at       timestamptz not null default now(),
   unique (organization_id, email)
 );
+
+create table if not exists cms_org_modules (
+  organization_id  text primary key references organizations (id) on delete cascade,
+  modules_json     text not null default '[]',
+  updated_at       timestamptz not null default now()
+);
 `

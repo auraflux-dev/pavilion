@@ -58,6 +58,7 @@ import { StaffCommsCalendarPanel } from '@/components/staff/staff-comms-calendar
 import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
 import { StaffClientOnboardingPanel } from '@/components/staff/staff-client-onboarding-panel'
 import { StaffPlatformConsole } from '@/components/staff/staff-platform-console'
+import { StaffModulesPanel } from '@/components/staff/staff-modules-panel'
 import { StaffServingOrgBanner } from '@/components/staff/staff-serving-org-banner'
 import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-notice'
 import { StaffGmailFromNotice } from '@/components/staff/staff-gmail-from-notice'
@@ -317,6 +318,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   const canContent = staffCanWorkspace(me, 'content')
   const canPages = staffCanWorkspace(me, 'pages')
   const canBrand = staffCanWorkspace(me, 'brand')
+  const canModules = staffCanWorkspace(me, 'modules')
   const canPageTheme = staffCanWorkspace(me, 'pagetheme')
   const canSite = staffCanWorkspace(me, 'site')
   const canBoard = staffCanWorkspace(me, 'board')
@@ -365,6 +367,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     if (canContent) items.push({ id: 'content', label: wsLabel('content') })
     if (canPages) items.push({ id: 'pages', label: wsLabel('pages') })
     if (canBrand) items.push({ id: 'brand', label: wsLabel('brand') })
+    if (canModules) items.push({ id: 'modules', label: wsLabel('modules') })
     if (canPageTheme) items.push({ id: 'pagetheme', label: wsLabel('pagetheme') })
     if (canSite) items.push({ id: 'site', label: wsLabel('site') })
     if (canBoard) items.push({ id: 'board', label: wsLabel('board') })
@@ -415,6 +418,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     canContent,
     canPages,
     canBrand,
+    canModules,
     canPageTheme,
     canSite,
     canBoard,
@@ -1163,6 +1167,7 @@ Open Platform fleet for tenants, health, and support.`}
         {active === 'docs' ? <StaffWorkspaceHub tab="docs" /> : null}
         {active === 'pages' && canPages ? <StaffPageSectionsPanel /> : null}
         {active === 'brand' && canBrand ? <StaffSiteBrandPanel /> : null}
+        {active === 'modules' && canModules ? <StaffModulesPanel /> : null}
         {active === 'content' && canContent ? (
           <div className="space-y-4">
             <StaffPageContentPanel />

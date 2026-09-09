@@ -52,6 +52,7 @@ export type StaffWorkspace =
  | 'brand'
  | 'activity'
  | 'community'
+ | 'modules'
 
 export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
  home: 'Home',
@@ -94,4 +95,5 @@ export const STAFF_WORKSPACE_LABEL: Record<StaffWorkspace, string> = {
  brand: 'Brand',
  activity: 'Activity',
  community: 'Community',
+ modules: 'Modules',
 }

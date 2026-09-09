@@ -27,7 +27,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4">
         <Link
           href="/"
-          className="flex items-center gap-2 font-[family-name:var(--font-display)] text-[1.25rem] tracking-tight text-[var(--ink)] sm:text-[1.375rem]"
+          className="flex items-center gap-2 text-[1.25rem] font-extrabold tracking-tight text-[var(--ink)] sm:text-[1.375rem]"
         >
           <PavilionMark className="h-5 w-5 text-[var(--accent)]" />
           {PRODUCT_NAME}
