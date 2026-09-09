@@ -37,6 +37,8 @@ Pavilion defines the shared catalog. BR apps should:
 - Persist enabled IDs the same way (org-scoped JSON)
 - Not fork naming (`br.scheduling`, etc. stay in this catalog)
 
+Sales / agents / DNS: **`~/businessrocket/docs/PROVISIONING.md`** and **`DNS-WILDCARD.md`**. BR site is the door; each customer gets their own org + host (white-label Pavilion).
+
 ## Related
 
 - [SOLUTION-PACKAGING.md](./SOLUTION-PACKAGING.md)
