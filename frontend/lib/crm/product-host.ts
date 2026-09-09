@@ -18,6 +18,15 @@ export const PAVILION_TRIAL_DOMAIN_SUFFIX = (
   .replace(/^\./, '')
   .toLowerCase()
 
+/** Business Rocket customer vanity hosts ({slug}.businessrocket.ai). */
+export const BR_TRIAL_DOMAIN_SUFFIX = (
+  process.env.BR_TRIAL_DOMAIN_SUFFIX ||
+  process.env.BUSINESSROCKET_TRIAL_DOMAIN_SUFFIX ||
+  'businessrocket.ai'
+)
+  .replace(/^\./, '')
+  .toLowerCase()
+
 export const PAVILION_DEMO_HOST = (
   process.env.PAVILION_DEMO_HOST || 'demo.onpavilion.com'
 )
@@ -103,6 +112,7 @@ export function isSharedProductHost(host: string): boolean {
   if (h === PAVILION_DEMO_HOST) return true
   if (isReservedProductHost(h)) return true
   if (h === PAVILION_TRIAL_DOMAIN_SUFFIX) return true
+  if (h === BR_TRIAL_DOMAIN_SUFFIX || h === `www.${BR_TRIAL_DOMAIN_SUFFIX}`) return true
   return false
 }
 
@@ -122,13 +132,25 @@ export function isDemoProductHost(host: string): boolean {
   return false
 }
 
-/** Private branded trial vanity host ({slug}.onpavilion.com or legacy *.commons-pto.org). */
+function isVanityUnderSuffix(host: string, suffix: string): boolean {
+  if (!host.endsWith(`.${suffix}`)) return false
+  if (host === suffix || host === `www.${suffix}` || host === `demo.${suffix}`) return false
+  const label = host.slice(0, -(suffix.length + 1))
+  if (!label || label.includes('.')) return false
+  if (RESERVED_TRIAL_LABELS.has(label)) return false
+  return true
+}
+
+/** Private branded trial vanity host ({slug}.onpavilion.com, {slug}.businessrocket.ai, legacy). */
 export function isTrialVanityHost(host: string): boolean {
   const h = normalizeProductHost(host)
   if (!h || isSharedProductHost(h)) return false
 
-  const suffix = PAVILION_TRIAL_DOMAIN_SUFFIX
-  if (h.endsWith(`.${suffix}`) && h !== `demo.${suffix}` && h !== PAVILION_DEMO_HOST) {
+  if (isVanityUnderSuffix(h, PAVILION_TRIAL_DOMAIN_SUFFIX) && h !== PAVILION_DEMO_HOST) {
+    return true
+  }
+
+  if (isVanityUnderSuffix(h, BR_TRIAL_DOMAIN_SUFFIX)) {
     return true
   }
 
@@ -156,7 +178,17 @@ export function demoOriginFromHost(host: string): string {
   return `https://${PAVILION_DEMO_HOST}`
 }
 
-export function trialHostForSlug(slug: string): string {
+export function trialDomainSuffixForProduct(
+  product: 'pavilion' | 'businessrocket' = 'pavilion',
+): string {
+  if (product === 'businessrocket') return BR_TRIAL_DOMAIN_SUFFIX
+  return PAVILION_TRIAL_DOMAIN_SUFFIX
+}
+
+export function trialHostForSlug(
+  slug: string,
+  product: 'pavilion' | 'businessrocket' = 'pavilion',
+): string {
   const clean = slug.trim().toLowerCase()
-  return `${clean}.${PAVILION_TRIAL_DOMAIN_SUFFIX}`
+  return `${clean}.${trialDomainSuffixForProduct(product)}`
 }

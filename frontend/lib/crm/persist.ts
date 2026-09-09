@@ -106,12 +106,20 @@ export async function persistTrialStart(opts: {
   lastName?: string
   /** Optional named pack (e.g. spring-hill). Else slug match or vanilla. */
   brandPack?: string
+  /** pavilion (default) or businessrocket white-label. */
+  product?: 'pavilion' | 'businessrocket'
+  /** Module preset id from catalog (e.g. br-starter). */
+  modulePresetId?: string
+  /** Override host suffix (e.g. businessrocket.ai). */
+  domainSuffix?: string
 }): Promise<{
   orgId: string
   slug: string
   tempHost: string
   trialEndsAt: string
   brandPackSlug: string
+  product: 'pavilion' | 'businessrocket'
+  modules: string[]
   setCookies: string[]
 }> {
   if (!commonsDbEnabled()) throw new Error('Commons database is not configured')
@@ -119,11 +127,18 @@ export async function persistTrialStart(opts: {
   const email = opts.email.trim().toLowerCase()
   const schoolName = opts.schoolName.trim()
   const slug = slugifySchool(opts.slug || schoolName)
-  if (!schoolName || schoolName.length < 3) throw new Error('Enter your school or PTO name')
+  const product = opts.product === 'businessrocket' ? 'businessrocket' : 'pavilion'
+  if (!schoolName || schoolName.length < 3) {
+    throw new Error(
+      product === 'businessrocket'
+        ? 'Enter the business or brand name'
+        : 'Enter your school or PTO name',
+    )
+  }
   if (!/^[a-z0-9][a-z0-9-]{1,39}$/.test(slug) || slug === 'riverside') {
     throw new Error('Choose a short URL slug (letters, numbers, hyphens). Not “riverside”.')
   }
-  if (!email.includes('@')) throw new Error('Enter a treasurer email')
+  if (!email.includes('@')) throw new Error('Enter an admin email')
   if ((opts.password || '').length < 8) throw new Error('Password must be at least 8 characters')
 
   const taken = await sql<{ id: string }>(`select id from organizations where slug = $1`, [slug])
@@ -132,35 +147,51 @@ export async function persistTrialStart(opts: {
   const orgId = `org_${createHash('sha256').update(`trial:${slug}:${email}`).digest('hex').slice(0, 16)}`
   const personId = `p_${createHash('sha256').update(`trial:${orgId}:${email}`).digest('hex').slice(0, 16)}`
   const suffix = (
-    process.env.PAVILION_TRIAL_DOMAIN_SUFFIX ||
-    process.env.COMMONS_TEMP_DOMAIN_SUFFIX ||
-    'onpavilion.com'
+    opts.domainSuffix ||
+    (product === 'businessrocket'
+      ? process.env.BR_TRIAL_DOMAIN_SUFFIX ||
+        process.env.BUSINESSROCKET_TRIAL_DOMAIN_SUFFIX ||
+        'businessrocket.ai'
+      : process.env.PAVILION_TRIAL_DOMAIN_SUFFIX ||
+        process.env.COMMONS_TEMP_DOMAIN_SUFFIX ||
+        'onpavilion.com')
   ).replace(/^\./, '')
   const tempHost = `${slug}.${suffix}`
   const started = new Date()
   const ends = new Date(started.getTime() + 30 * 24 * 60 * 60 * 1000)
 
+  await sql(`alter table organizations add column if not exists product text not null default 'pavilion'`)
   await sql(
     `insert into organizations
-       (id, name, slug, plan, trial_started_at, trial_ends_at, temp_host)
-     values ($1, $2, $3, 'trial', $4, $5, $6)`,
-    [orgId, schoolName, slug, started.toISOString(), ends.toISOString(), tempHost],
+       (id, name, slug, plan, trial_started_at, trial_ends_at, temp_host, product)
+     values ($1, $2, $3, 'trial', $4, $5, $6, $7)`,
+    [orgId, schoolName, slug, started.toISOString(), ends.toISOString(), tempHost, product],
   )
   await sql(
     `insert into people (id, organization_id, email, first_name, last_name)
      values ($1, $2, $3, $4, $5)`,
-    [personId, orgId, email, opts.firstName?.trim() || 'Treasurer', opts.lastName?.trim() || ''],
+    [
+      personId,
+      orgId,
+      email,
+      opts.firstName?.trim() || (product === 'businessrocket' ? 'Owner' : 'Treasurer'),
+      opts.lastName?.trim() || '',
+    ],
   )
   await sql(
     `insert into staff_assignments (person_id, role, board_title, organization_id)
-     values ($1, 'admin', 'Treasurer', $2)
+     values ($1, 'admin', $2, $3)
      on conflict (person_id, role) do update set organization_id = excluded.organization_id`,
-    [personId, orgId],
+    [
+      personId,
+      product === 'businessrocket' ? 'Owner' : 'Treasurer',
+      orgId,
+    ],
   )
 
   const auth = getAuth()
   if (!auth) throw new Error('Sign-in is not configured on this host yet')
-  const name = `${opts.firstName || 'Treasurer'} ${opts.lastName || ''}`.trim()
+  const name = `${opts.firstName || (product === 'businessrocket' ? 'Owner' : 'Treasurer')} ${opts.lastName || ''}`.trim()
   try {
     await auth.api.signUpEmail({
       body: { email, password: opts.password, name },
@@ -192,12 +223,25 @@ export async function persistTrialStart(opts: {
     brandPack: opts.brandPack,
   })
 
+  const { MODULE_PRESETS, MODULE_PRESET_BR_STARTER, MODULE_PRESET_PAVILION_TRIAL } =
+    await import('@/lib/modules/catalog')
+  const { setOrgModules } = await import('@/lib/modules/store')
+  const presetId =
+    opts.modulePresetId ||
+    (product === 'businessrocket' ? MODULE_PRESET_BR_STARTER.id : MODULE_PRESET_PAVILION_TRIAL.id)
+  const preset =
+    MODULE_PRESETS.find((p) => p.id === presetId) ||
+    (product === 'businessrocket' ? MODULE_PRESET_BR_STARTER : MODULE_PRESET_PAVILION_TRIAL)
+  const modules = await setOrgModules(orgId, [...preset.modules])
+
   return {
     orgId,
     slug,
     tempHost,
     trialEndsAt: ends.toISOString(),
     brandPackSlug: seeded.packSlug,
+    product,
+    modules,
     setCookies,
   }
 }

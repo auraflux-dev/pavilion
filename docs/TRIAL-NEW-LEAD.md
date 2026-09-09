@@ -74,6 +74,17 @@ COMMONS_TEMP_DOMAIN_SUFFIX=onpavilion.com
 | Look | Neutral colors, school name only, empty events/board/tiers | Prospect skin + sample content |
 | Demo preview | `?brand=vanilla` | `?brand=spring-hill` |
 
+## Business Rocket (phone / checkout)
+
+```bash
+# From ~/pavilion (Doppler pavilion/dev)
+bash scripts/doppler_run.sh node scripts/provision-br-org.mjs \
+  --slug acme-plumbing --name "Acme Plumbing" --email owner@acme.com --attach
+```
+
+API: `POST /api/commons/provision/br` (same provision secret).  
+Full playbook: `~/businessrocket/docs/PROVISIONING.md`.
+
 ## Checklist
 
 ```
