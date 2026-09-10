@@ -11,6 +11,7 @@ export function ReviewJoinClient({ isDemoHost }: { isDemoHost: boolean }) {
   const searchParams = useSearchParams()
   const presetCode = useMemo(() => searchParams.get('code') ?? '', [searchParams])
   const autoStaff = searchParams.get('staff') === '1'
+  const deskHint = (searchParams.get('desk') || '').trim().toLowerCase()
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
@@ -21,6 +22,7 @@ export function ReviewJoinClient({ isDemoHost }: { isDemoHost: boolean }) {
   const [packs, setPacks] = useState<Array<{ slug: string; pto: string; town: string }>>([])
   const [brandSlug, setBrandSlug] = useState<string | null>(null)
   const face = publicBrandFace()
+  const highlightPlatform = deskHint === 'platform' || deskHint === 'br'
 
   useEffect(() => {
     const presetBrand = searchParams.get('brand')
@@ -38,18 +40,13 @@ export function ReviewJoinClient({ isDemoHost }: { isDemoHost: boolean }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ slug: presetBrand }),
           })
-          window.location.replace('/review' + (presetCode ? `?code=${encodeURIComponent(presetCode)}` : ''))
+          window.location.replace(
+            '/review' + (presetCode ? `?code=${encodeURIComponent(presetCode)}` : ''),
+          )
         }
       })
       .catch(() => {})
   }, [searchParams, presetCode])
-
-  useEffect(() => {
-    if (autoStaff && isDemoHost && !busy) {
-      void openStaffQuick()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoStaff, isDemoHost])
 
   async function applyBrand(slug: string) {
     setBusy(true)
@@ -69,7 +66,7 @@ export function ReviewJoinClient({ isDemoHost }: { isDemoHost: boolean }) {
     }
   }
 
-  async function openStaffQuick() {
+  async function openSchoolClientStaff() {
     setBusy(true)
     setError(null)
     try {
@@ -79,14 +76,61 @@ export function ReviewJoinClient({ isDemoHost }: { isDemoHost: boolean }) {
         body: JSON.stringify({ lane: 'both' }),
       })
       const data = (await res.json()) as { error?: string; next?: string }
-      if (!res.ok) throw new Error(data.error || 'Could not open staff workspace')
+      if (!res.ok) throw new Error(data.error || 'Could not open school Staff')
+      await fetch('/api/staff/platform/tenants?product=pavilion').catch(() => null)
+      await fetch('/api/staff/platform/mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'client', organizationId: 'org_riverside' }),
+      }).catch(() => null)
       window.location.assign(data.next || '/staff')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not open staff workspace')
+      setError(err instanceof Error ? err.message : 'Could not open school Staff')
     } finally {
       setBusy(false)
     }
   }
+
+  async function openPlatformStaff(product: 'pavilion' | 'businessrocket' = 'pavilion') {
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/demo/switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lane: 'both' }),
+      })
+      const data = (await res.json()) as { error?: string }
+      if (!res.ok) throw new Error(data.error || 'Could not open Platform Staff')
+      await fetch('/api/staff/platform/mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'platform' }),
+      }).catch(() => null)
+      await fetch(`/api/staff/platform/tenants?product=${product}`).catch(() => null)
+      window.location.assign('/staff?view=tenants')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not open Platform Staff')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!isDemoHost || busy) return
+    if (autoStaff) {
+      void openSchoolClientStaff()
+      return
+    }
+    if (deskHint === 'platform') {
+      void openPlatformStaff('pavilion')
+      return
+    }
+    if (deskHint === 'br') {
+      void openPlatformStaff('businessrocket')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStaff, deskHint, isDemoHost])
 
   if (!isDemoHost) {
     return (
@@ -148,27 +192,69 @@ export function ReviewJoinClient({ isDemoHost }: { isDemoHost: boolean }) {
 
   return (
     <main id="main-content" className="max-w-lg mx-auto px-4 py-12 md:py-16">
-      <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--brand-green)' }}>
-        PTO operating system demo
+      <p
+        className="text-xs font-semibold uppercase tracking-wide mb-2"
+        style={{ color: 'var(--brand-green)' }}
+      >
+        Pavilion demo gate
       </p>
       <h1 className="text-3xl font-bold mb-3" style={{ color: '#1A1A1A' }}>
-        Review {face.pto}
+        Choose what to open
       </h1>
       <p className="text-sm text-[#5A6070] mb-6 leading-relaxed whitespace-pre-line">
-        Sample Riverside school. Nothing is charged or emailed.
-        {'\n'}
-        Fastest path: open the staff workspace with one click (no review code).
+        {`This page is the door into the demo.
+Pick company Platform Staff, or the sample school Client Staff.
+Nothing is charged or emailed.`}
       </p>
 
-      <div className="mb-8 rounded-xl border border-[var(--border)] bg-[#F7F8FA] p-4 space-y-3">
-        <p className="text-sm font-semibold text-[#1A1A1A]">Open staff workspace</p>
+      {error ? <p className="mb-4 text-sm text-red-700">{error}</p> : null}
+
+      <div
+        className={`mb-4 rounded-xl border p-4 space-y-3 ${
+          highlightPlatform
+            ? 'border-[var(--brand-green)] bg-[#E8F3E8]'
+            : 'border-[var(--border)] bg-[#F7F8FA]'
+        }`}
+      >
+        <p className="text-sm font-semibold text-[#1A1A1A]">1. Company Platform Staff</p>
         <p className="text-xs text-[#5A6070] whitespace-pre-line">
-          Uses the sample board profile ({DEMO_JOIN_PROFILES.staff.firstName}{' '}
-          {DEMO_JOIN_PROFILES.staff.lastName}).
-          No review code needed.
+          {`For Pavilion / Business Rocket operators.
+Opens the fleet desk. Switch Pavilion ↔ Business Rocket in the header.
+Use this after Sign out from Brand Staff.`}
         </p>
-        <Button type="button" disabled={busy} className="w-full sm:w-auto" onClick={() => void openStaffQuick()}>
-          {busy ? 'Opening…' : 'Open staff workspace (no code)'}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            disabled={busy}
+            onClick={() => void openPlatformStaff('pavilion')}
+          >
+            {busy ? 'Opening…' : 'Open Pavilion fleet'}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy}
+            onClick={() => void openPlatformStaff('businessrocket')}
+          >
+            {busy ? 'Opening…' : 'Open Business Rocket fleet'}
+          </Button>
+        </div>
+      </div>
+
+      <div className="mb-8 rounded-xl border border-[var(--border)] bg-white p-4 space-y-3">
+        <p className="text-sm font-semibold text-[#1A1A1A]">2. Sample school Client Staff</p>
+        <p className="text-xs text-[#5A6070] whitespace-pre-line">
+          {`Uses ${DEMO_JOIN_PROFILES.staff.firstName} ${DEMO_JOIN_PROFILES.staff.lastName} on ${face.pto}.
+This is the school board desk, not the company fleet.`}
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy}
+          className="w-full sm:w-auto"
+          onClick={() => void openSchoolClientStaff()}
+        >
+          {busy ? 'Opening…' : 'Open Riverside school Staff'}
         </Button>
       </div>
 
@@ -277,7 +363,6 @@ export function ReviewJoinClient({ isDemoHost }: { isDemoHost: boolean }) {
             required
           />
         </label>
-        {error ? <p className="text-sm text-red-700">{error}</p> : null}
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <Button type="submit" disabled={busy} variant="outline" className="flex-1">
             {busy ? 'Opening…' : 'Join with review code → staff'}

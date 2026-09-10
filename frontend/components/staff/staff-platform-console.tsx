@@ -259,7 +259,7 @@ export function StaffPlatformConsole({ me }: Props) {
               size="sm"
               variant="outline"
               className="h-8 text-xs"
-              onClick={() => void staffSignOut()}
+              onClick={() => void staffSignOut({ returnTo: '/review?desk=platform' })}
             >
               Sign out
             </Button>
