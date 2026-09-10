@@ -16,7 +16,15 @@ export const PAVILION_TARGETS = {
   'commons-site': {
     label: 'Pavilion marketing',
     base: 'https://onpavilion.com',
-    mustInclude: ['Pavilion', 'The operating system', 'for modern PTOs'],
+    mustInclude: [
+      'Pavilion',
+      'The operating system',
+      'for modern PTOs',
+      // BR layout markers (sticky blur nav + dark Legal footer)
+      'backdrop-blur-md',
+      'Privacy Policy',
+      'Terms of Service',
+    ],
   },
   'commons-pto': {
     label: 'Commons PTO legacy',
