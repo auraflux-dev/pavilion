@@ -91,11 +91,15 @@ import {
   groupStaffNavItems,
 } from '@/lib/staff/workspace-groups'
 import {
-  BR_BRAND_STAFF_HOME_COPY,
   BR_STAFF_WORKSPACE_GROUPS,
   brStaffWorkspaceLabel,
   filterBrCustomerStaffWorkspaces,
 } from '@/lib/staff/br-staff-surface'
+import {
+  AF_STAFF_WORKSPACE_GROUPS,
+  afStaffWorkspaceLabel,
+  filterAfCustomerStaffWorkspaces,
+} from '@/lib/staff/af-staff-surface'
 import { trackLogin } from '@/lib/ga'
 
 type StaffHome = {
@@ -115,7 +119,7 @@ type StaffMe = {
   isAdmin: boolean
   /** Pavilion platform owner: can switch customer CMS orgs */
   platformOwner?: boolean
-  product?: 'pavilion' | 'businessrocket'
+  product?: 'pavilion' | 'businessrocket' | 'auraflux'
   homes: StaffHome[]
 }
 
@@ -184,17 +188,26 @@ function parseWorkspace(raw: string | null): StaffWorkspace | null {
 export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCopy?: Record<string, string> }) {
   const { hiddenStaffWorkspaces, product } = useLiveCommerceGate()
   const [me, setMe] = useState<StaffMe | null>(null)
+  const emailLower = String(me?.email || '').toLowerCase()
   const isBr =
     product === 'businessrocket' ||
     Boolean(me?.product === 'businessrocket') ||
-    Boolean(String(me?.email || '').toLowerCase().endsWith('@businessrocket.ai'))
-  const wsLabel = (id: StaffWorkspace) =>
-    isBr ? brStaffWorkspaceLabel(id, staffWorkspaceLabel(staffCopy, id)) : staffWorkspaceLabel(staffCopy, id)
+    emailLower.endsWith('@businessrocket.ai')
+  const isAf =
+    product === 'auraflux' ||
+    Boolean(me?.product === 'auraflux') ||
+    emailLower.endsWith('@auraflux.co')
+  const wsLabel = (id: StaffWorkspace) => {
+    if (isAf) return afStaffWorkspaceLabel(id, staffWorkspaceLabel(staffCopy, id))
+    if (isBr) return brStaffWorkspaceLabel(id, staffWorkspaceLabel(staffCopy, id))
+    return staffWorkspaceLabel(staffCopy, id)
+  }
   const sc = (key: string, fallback?: string) => staffStr(staffCopy, key, fallback)
   const workspaceGroups = useMemo(() => {
+    if (isAf) return AF_STAFF_WORKSPACE_GROUPS
     if (isBr) return BR_STAFF_WORKSPACE_GROUPS
     return resolveStaffWorkspaceGroups(staffCopy)
-  }, [staffCopy, isBr])
+  }, [staffCopy, isBr, isAf])
   const router = useRouter()
   const searchParams = useSearchParams()
   const [error, setError] = useState('')
@@ -400,13 +413,21 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     items.push({ id: 'help', label: wsLabel('help') })
     const demoFiltered = filterCommonsDemoWorkspaces(items.map((i) => i.id))
     const afterHidden = filterHiddenStaffWorkspaces(demoFiltered, hiddenStaffWorkspaces)
-    const trimmed = isBr ? filterBrCustomerStaffWorkspaces(afterHidden) : afterHidden
+    const trimmed = isAf
+      ? filterAfCustomerStaffWorkspaces(afterHidden)
+      : isBr
+        ? filterBrCustomerStaffWorkspaces(afterHidden)
+        : afterHidden
     const allowed = new Set(trimmed)
     const filtered = items.filter((i) => allowed.has(i.id))
     const order = new Map<StaffWorkspace, number>()
     let rank = 0
     order.set('home', rank++)
-    const groups = isBr ? BR_STAFF_WORKSPACE_GROUPS : STAFF_WORKSPACE_GROUPS
+    const groups = isAf
+      ? AF_STAFF_WORKSPACE_GROUPS
+      : isBr
+        ? BR_STAFF_WORKSPACE_GROUPS
+        : STAFF_WORKSPACE_GROUPS
     for (const group of groups) {
       for (const id of group.workspaces) {
         if (!order.has(id)) order.set(id, rank++)
@@ -419,6 +440,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     me,
     hiddenStaffWorkspaces,
     isBr,
+    isAf,
     canMarketing,
     canSurveys,
     canMessage,
@@ -664,7 +686,10 @@ This site is for Pavilion operators, not school boards.`
             exitLabel={
               String(me.email || '')
                 .toLowerCase()
-                .endsWith('@businessrocket.ai')
+                .endsWith('@businessrocket.ai') ||
+              String(me.email || '')
+                .toLowerCase()
+                .endsWith('@auraflux.co')
                 ? 'Exit to Brand Staff'
                 : 'Exit to Platform Staff'
             }
@@ -676,14 +701,21 @@ This site is for Pavilion operators, not school boards.`
               <p className="text-sm font-semibold text-[#1A1A1A]">
                 {String(me.email || '')
                   .toLowerCase()
-                  .endsWith('@businessrocket.ai')
-                  ? 'Business Rocket'
-                  : 'Pavilion platform'}
+                  .endsWith('@auraflux.co')
+                  ? 'AuraFlux'
+                  : String(me.email || '')
+                      .toLowerCase()
+                      .endsWith('@businessrocket.ai')
+                    ? 'Business Rocket'
+                    : 'Pavilion platform'}
               </p>
               <p className="text-xs text-[#5A6070] whitespace-pre-line">
                 {String(me.email || '')
                   .toLowerCase()
-                  .endsWith('@businessrocket.ai')
+                  .endsWith('@businessrocket.ai') ||
+                String(me.email || '')
+                  .toLowerCase()
+                  .endsWith('@auraflux.co')
                   ? `Serving customer Staff for the selected org.
 Return to Brand Staff fleet for tenants, health, and support.`
                   : `Serving Client Staff for the selected school.
@@ -715,7 +747,10 @@ Open Platform fleet for tenants, health, and support.`}
             >
               {String(me.email || '')
                 .toLowerCase()
-                .endsWith('@businessrocket.ai')
+                .endsWith('@businessrocket.ai') ||
+              String(me.email || '')
+                .toLowerCase()
+                .endsWith('@auraflux.co')
                 ? 'Open Brand Staff'
                 : 'Open Platform Staff'}
             </Button>
@@ -1209,7 +1244,15 @@ Open Platform fleet for tenants, health, and support.`}
         {active === 'pages' && canPages ? <StaffPageSectionsPanel /> : null}
         {active === 'brand' && canBrand ? <StaffSiteBrandPanel /> : null}
         {active === 'modules' && canModules ? (
-          <StaffModulesPanel product={me.product === 'businessrocket' ? 'businessrocket' : 'pavilion'} />
+          <StaffModulesPanel
+            product={
+              me.product === 'auraflux'
+                ? 'auraflux'
+                : me.product === 'businessrocket'
+                  ? 'businessrocket'
+                  : 'pavilion'
+            }
+          />
         ) : null}
         {active === 'content' && canContent ? (
           <div className="space-y-4">

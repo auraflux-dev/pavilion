@@ -18,6 +18,13 @@ import {
   BR_PLATFORM_WORKSPACE_GROUPS,
   BR_PLATFORM_WORKSPACE_LABEL,
 } from '@/lib/staff/br-staff-surface'
+import {
+  AF_BRAND_STAFF_HOME_COPY,
+  AF_PLATFORM_WORKSPACE_BLURB,
+  AF_PLATFORM_WORKSPACE_GROUPS,
+  AF_PLATFORM_WORKSPACE_LABEL,
+} from '@/lib/staff/af-staff-surface'
+import type { CompanyProduct } from '@/lib/crm/platform-owners'
 import { StaffModulesPanel } from '@/components/staff/staff-modules-panel'
 import { staffSignOut } from '@/lib/staff/sign-out'
 
@@ -61,7 +68,7 @@ export function StaffPlatformConsole({ me }: Props) {
   const [query, setQuery] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const [product, setProduct] = useState<'pavilion' | 'businessrocket'>('pavilion')
+  const [product, setProduct] = useState<CompanyProduct>('pavilion')
   const [canSwitchProduct, setCanSwitchProduct] = useState(false)
   const [health, setHealth] = useState<{
     targets: { id: string; label: string; url: string; ok: boolean; note: string }[]
@@ -76,20 +83,37 @@ export function StaffPlatformConsole({ me }: Props) {
   } | null>(null)
 
   const isBr = product === 'businessrocket'
-  const brandLabel = isBr ? 'Brand Staff' : 'Platform Staff'
-  const platformGroups = isBr ? BR_PLATFORM_WORKSPACE_GROUPS : PLATFORM_WORKSPACE_GROUPS
-  const platformLabel = isBr ? BR_PLATFORM_WORKSPACE_LABEL : PLATFORM_WORKSPACE_LABEL
-  const platformBlurb = isBr ? BR_PLATFORM_WORKSPACE_BLURB : PLATFORM_WORKSPACE_BLURB
-  const signOutReturnTo = isBr ? '/review?desk=br' : '/review?desk=platform'
+  const isAf = product === 'auraflux'
+  const brandLabel = isBr || isAf ? 'Brand Staff' : 'Platform Staff'
+  const platformGroups = isAf
+    ? AF_PLATFORM_WORKSPACE_GROUPS
+    : isBr
+      ? BR_PLATFORM_WORKSPACE_GROUPS
+      : PLATFORM_WORKSPACE_GROUPS
+  const platformLabel = isAf
+    ? AF_PLATFORM_WORKSPACE_LABEL
+    : isBr
+      ? BR_PLATFORM_WORKSPACE_LABEL
+      : PLATFORM_WORKSPACE_LABEL
+  const platformBlurb = isAf
+    ? AF_PLATFORM_WORKSPACE_BLURB
+    : isBr
+      ? BR_PLATFORM_WORKSPACE_BLURB
+      : PLATFORM_WORKSPACE_BLURB
+  const signOutReturnTo = isAf
+    ? '/review?desk=af'
+    : isBr
+      ? '/review?desk=br'
+      : '/review?desk=platform'
 
-  const loadFleet = useCallback(async (nextProduct?: 'pavilion' | 'businessrocket') => {
+  const loadFleet = useCallback(async (nextProduct?: CompanyProduct) => {
     setError('')
     try {
       const qs = nextProduct ? `?product=${nextProduct}` : ''
       const r = await fetch(`/api/staff/platform/tenants${qs}`)
       const d = await r.json()
       if (!r.ok) throw new Error(d.error || 'Could not load tenants')
-      if (d.product === 'businessrocket' || d.product === 'pavilion') {
+      if (d.product === 'businessrocket' || d.product === 'pavilion' || d.product === 'auraflux') {
         setProduct(d.product)
       }
       setCanSwitchProduct(Boolean(d.canSwitchProduct))
@@ -129,7 +153,7 @@ export function StaffPlatformConsole({ me }: Props) {
     window.history.replaceState({}, '', url.toString())
   }
 
-  async function switchProduct(next: 'pavilion' | 'businessrocket') {
+  async function switchProduct(next: CompanyProduct) {
     if (next === product) return
     setBusy(true)
     await loadFleet(next)
@@ -234,7 +258,7 @@ export function StaffPlatformConsole({ me }: Props) {
                   disabled={busy}
                   onClick={() => void switchProduct('pavilion')}
                   className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
-                    !isBr ? 'bg-[#1A1A1A] text-white' : 'text-[#5A6070] hover:bg-white'
+                    product === 'pavilion' ? 'bg-[#1A1A1A] text-white' : 'text-[#5A6070] hover:bg-white'
                   }`}
                 >
                   Pavilion
@@ -248,6 +272,16 @@ export function StaffPlatformConsole({ me }: Props) {
                   }`}
                 >
                   Business Rocket
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void switchProduct('auraflux')}
+                  className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
+                    isAf ? 'bg-[#1A1A1A] text-white' : 'text-[#5A6070] hover:bg-white'
+                  }`}
+                >
+                  AuraFlux
                 </button>
               </div>
             ) : null}
@@ -287,16 +321,18 @@ export function StaffPlatformConsole({ me }: Props) {
           <section className="space-y-4">
             <div>
               <h1 className="text-2xl font-bold text-[#1A1A1A]">
-                {isBr ? 'Brand Staff' : 'Platform Home'}
+                {isBr || isAf ? 'Brand Staff' : 'Platform Home'}
               </h1>
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
-                {isBr
-                  ? BR_BRAND_STAFF_HOME_COPY
-                  : canSwitchProduct
-                    ? `Fleet view for Pavilion operators.
+                {isAf
+                  ? AF_BRAND_STAFF_HOME_COPY
+                  : isBr
+                    ? BR_BRAND_STAFF_HOME_COPY
+                    : canSwitchProduct
+                      ? `Fleet view for Pavilion operators.
 Open a tenant to check connectors and brand, or enter Client Staff to serve that school.
-On this shared demo you can also open the Business Rocket fleet from the header.`
-                    : `Fleet view for Pavilion operators.
+On this shared demo you can also open Business Rocket or AuraFlux fleets from the header.`
+                      : `Fleet view for Pavilion operators.
 Open a tenant to check connectors and brand, or enter Client Staff to serve that school.`}
               </p>
             </div>
@@ -349,13 +385,18 @@ Open a tenant to check connectors and brand, or enter Client Staff to serve that
           <section className="space-y-4">
             <div>
               <h1 className="text-2xl font-bold text-[#1A1A1A]">
-                {isBr ? 'Business Rocket tenants' : 'Tenants'}
+                {isAf ? 'AuraFlux tenants' : isBr ? 'Business Rocket tenants' : 'Tenants'}
               </h1>
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
-                {isBr
-                  ? `Business Rocket customer orgs (product=businessrocket).
-Sandbox fixture is HSKRG BR sandbox until real clients are provisioned.`
-                  : `Trials and customer orgs on the Pavilion platform.
+                {isAf
+                  ? `AuraFlux customer orgs (product=auraflux).
+Sandbox fixture is AuraFlux sandbox until real clients are provisioned.
+Brand host also serves full /member-portal.`
+                  : isBr
+                    ? `Business Rocket customer orgs (product=businessrocket).
+Sandbox fixture is HSKRG BR sandbox until real clients are provisioned.
+New builds get full Pavilion member portal. Legacy clients keep businessrocket.ai/portal.`
+                    : `Trials and customer orgs on the Pavilion platform.
 VIP SHMS is dedicated and not editable here.`}
               </p>
             </div>
@@ -401,11 +442,14 @@ VIP SHMS is dedicated and not editable here.`}
               ))}
               {!filtered.length ? (
                 <li className="p-4 text-sm text-[#5A6070] whitespace-pre-line">
-                  {isBr
-                    ? `No Business Rocket customer orgs in this fleet yet.
+                  {isAf
+                    ? `No AuraFlux customer orgs in this fleet yet.
+On demo you should see AuraFlux sandbox when fixtures are active.`
+                    : isBr
+                      ? `No Business Rocket customer orgs in this fleet yet.
 On demo you should see HSKRG BR sandbox when fixtures are active.
 Provision real clients via the BR provision API.`
-                    : `No tenants match.`}
+                      : `No tenants match.`}
                 </li>
               ) : null}
             </ul>
@@ -625,13 +669,22 @@ No parent or payment PII on this board.`}
           <section className="space-y-4">
             <h1 className="text-2xl font-bold text-[#1A1A1A]">Platform help</h1>
             <div className="rounded-xl border border-[var(--border)] bg-white p-4 text-sm space-y-3 whitespace-pre-line">
-              {isBr
+              {isAf
+                ? `${AF_BRAND_STAFF_HOME_COPY}
+
+Warp into Customers → Staff to manage a live build.
+Exit with the Serving banner to return home.
+
+AuraFlux brand host serves full /member-portal (unlike BR/Pavilion company hosts).
+Wiki: HOME/hskrg-product-surface-map`
+                : isBr
                 ? `${BR_BRAND_STAFF_HOME_COPY}
 
 Warp into Customers → Staff to manage a live build.
 Exit with the Serving banner to return home.
 
 Provision: POST /api/commons/provision/br
+New BR customers get full Pavilion portal.family. Legacy light portal stays on businessrocket.ai/portal.
 Wiki: HOME/hskrg-product-surface-map`
                 : `Platform Staff is for @onpavilion.com operators.
 

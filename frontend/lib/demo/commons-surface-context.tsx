@@ -5,6 +5,7 @@ import type { StaffWorkspace } from '@/lib/audience'
 import { setClientPavilionSurface } from '@/lib/demo/brand'
 import { COMMONS_COMMERCE_GATED_WORKSPACES } from '@/lib/demo/commons-surface'
 import { isPublicDemoInstance } from '@/lib/demo/instance'
+import type { CompanyProduct } from '@/lib/crm/platform-owners'
 
 type SurfaceState = {
   enabled: boolean
@@ -12,7 +13,7 @@ type SurfaceState = {
   loading: boolean
   note: string
   hiddenStaffWorkspaces: StaffWorkspace[]
-  product: 'pavilion' | 'businessrocket'
+  product: CompanyProduct
 }
 
 const DEFAULT: SurfaceState = {
@@ -68,7 +69,7 @@ export function CommonsSurfaceProvider({
           liveCommerce?: boolean
           note?: string
           hiddenStaffWorkspaces?: StaffWorkspace[]
-          product?: 'pavilion' | 'businessrocket'
+          product?: CompanyProduct
         }
         if (cancelled) return
         setState({
@@ -78,7 +79,10 @@ export function CommonsSurfaceProvider({
           hiddenStaffWorkspaces: Array.isArray(d.hiddenStaffWorkspaces)
             ? d.hiddenStaffWorkspaces
             : [],
-          product: d.product === 'businessrocket' ? 'businessrocket' : 'pavilion',
+          product:
+            d.product === 'businessrocket' || d.product === 'auraflux' || d.product === 'pavilion'
+              ? d.product
+              : 'pavilion',
         })
       })
       .catch(() => {
@@ -111,7 +115,7 @@ export function useLiveCommerceGate(): {
   loading: boolean
   note: string
   hiddenStaffWorkspaces: StaffWorkspace[]
-  product: 'pavilion' | 'businessrocket'
+  product: CompanyProduct
 } {
   const ctx = useContext(CommonsSurfaceContext)
   if (!ctx.enabled) {

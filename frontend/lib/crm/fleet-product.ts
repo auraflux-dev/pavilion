@@ -1,11 +1,12 @@
 /**
  * Resolve which company product's fleet a Platform / Brand Staff request should see.
- * Host wins (BR brand host → businessrocket).
- * Email brand locks the fleet for that company (BR email never sees Pavilion tenants).
+ * Host wins (BR / AuraFlux brand host).
+ * Email brand locks the fleet for that company (BR/AF email never sees other fleets).
  * Only Pavilion operators on the shared demo may override via cookie/query.
  */
 import { companyBrandFromHost } from '@/lib/crm/product-host'
 import {
+  normalizeCompanyProduct,
   platformBrandForEmail,
   platformHomeOrgId,
   type CompanyProduct,
@@ -19,12 +20,14 @@ export function parseCompanyProduct(raw: string | undefined | null): CompanyProd
   const v = String(raw || '')
     .trim()
     .toLowerCase()
-  if (v === 'businessrocket' || v === 'br') return 'businessrocket'
-  if (v === 'pavilion') return 'pavilion'
+  if (!v) return null
+  if (v === 'businessrocket' || v === 'br' || v === 'auraflux' || v === 'af' || v === 'pavilion') {
+    return normalizeCompanyProduct(v)
+  }
   return null
 }
 
-/** Whether this operator may flip Pavilion ↔ Business Rocket fleets. */
+/** Whether this operator may flip company fleets (Pavilion ↔ BR ↔ AuraFlux). */
 export function canSwitchFleetProduct(opts: {
   host?: string
   email?: string
@@ -32,9 +35,9 @@ export function canSwitchFleetProduct(opts: {
 }): boolean {
   if (opts.host && companyBrandFromHost(opts.host)) return false
   const brand = opts.email ? platformBrandForEmail(opts.email) : null
-  // Brand Staff (@businessrocket.ai) is locked to the BR fleet everywhere.
-  if (brand === 'businessrocket') return false
-  // Shared demo: Pavilion operators (and anonymous demo-gate sessions) can tour both fleets.
+  // Brand Staff emails are locked to their own fleet everywhere.
+  if (brand === 'businessrocket' || brand === 'auraflux') return false
+  // Shared demo: Pavilion operators (and anonymous demo-gate sessions) can tour fleets.
   if (opts.demo) return true
   return false
 }
@@ -52,7 +55,7 @@ export function resolveFleetProduct(opts: {
   // Email brand always wins over cookie/query for company Staff.
   if (opts.email) {
     const fromEmail = platformBrandForEmail(opts.email)
-    if (fromEmail === 'businessrocket') return 'businessrocket'
+    if (fromEmail === 'businessrocket' || fromEmail === 'auraflux') return fromEmail
     if (fromEmail === 'pavilion' && opts.override) return opts.override
     if (fromEmail) return fromEmail
   }
@@ -89,7 +92,9 @@ export function defaultSelectedOrgId(opts: {
   product: CompanyProduct
 }): string {
   if (opts.demo) {
-    return opts.product === 'businessrocket' ? 'org_hskrg_br' : 'org_riverside'
+    if (opts.product === 'businessrocket') return 'org_hskrg_br'
+    if (opts.product === 'auraflux') return 'org_af_sandbox'
+    return 'org_riverside'
   }
   return platformHomeOrgId(opts.product)
 }

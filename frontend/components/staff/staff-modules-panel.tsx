@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import type { ProductModuleDef, ProductModuleId } from '@/lib/modules/catalog'
+import type { CompanyProduct } from '@/lib/crm/platform-owners'
 
 type Preset = { id: string; label: string; notes?: string }
 
 type Props = {
-  product?: 'pavilion' | 'businessrocket'
+  product?: CompanyProduct
   canSwitchProduct?: boolean
 }
 
@@ -15,7 +16,7 @@ export function StaffModulesPanel({
   product: lockedProduct = 'pavilion',
   canSwitchProduct = false,
 }: Props) {
-  const [product, setProduct] = useState<'pavilion' | 'businessrocket'>(lockedProduct)
+  const [product, setProduct] = useState<CompanyProduct>(lockedProduct)
   const [catalog, setCatalog] = useState<ProductModuleDef[]>([])
   const [groups, setGroups] = useState<Record<string, string>>({})
   const [presets, setPresets] = useState<Preset[]>([])
@@ -113,7 +114,9 @@ export function StaffModulesPanel({
         <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
           {product === 'businessrocket'
             ? 'Check what this Business Rocket customer build includes.'
-            : 'Check what this Pavilion customer build includes.'}
+            : product === 'auraflux'
+              ? 'Check what this AuraFlux customer build includes.'
+              : 'Check what this Pavilion customer build includes.'}
         </p>
         {orgId ? (
           <p className="text-[11px] text-[#5A6070] mt-1">Org: {orgId}</p>
@@ -143,10 +146,23 @@ export function StaffModulesPanel({
             >
               Business Rocket
             </button>
+            <button
+              type="button"
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold border ${
+                product === 'auraflux' ? 'bg-[#1A1A1A] text-white' : 'bg-white text-[#5A6070]'
+              }`}
+              onClick={() => setProduct('auraflux')}
+            >
+              AuraFlux
+            </button>
           </>
         ) : (
           <span className="rounded-md border border-[var(--border)] bg-[#F7F8FA] px-3 py-1.5 text-xs font-semibold text-[#1A1A1A]">
-            {product === 'businessrocket' ? 'Business Rocket' : 'Pavilion'}
+            {product === 'businessrocket'
+              ? 'Business Rocket'
+              : product === 'auraflux'
+                ? 'AuraFlux'
+                : 'Pavilion'}
           </span>
         )}
         <Button type="button" size="sm" disabled={busy || !orgId} onClick={() => void save()}>

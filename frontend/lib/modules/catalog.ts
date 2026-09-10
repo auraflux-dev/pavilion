@@ -4,11 +4,12 @@
  * Shared shape for:
  * - onpavilion.com (Pavilion product + its school customers)
  * - businessrocket.ai (service businesses + their customers)
+ * - auraflux.co (video/agency brand + full member portal on brand)
  *
  * Runtime: org modules_json (enabled ids). Catalog is the menu; presets are defaults.
  */
 
-export type ModuleProduct = 'pavilion' | 'businessrocket'
+export type ModuleProduct = 'pavilion' | 'businessrocket' | 'auraflux'
 export type ModuleSurface = 'website' | 'portal' | 'staff' | 'connect' | 'platform'
 export type ModuleGroup =
   | 'website'
@@ -102,7 +103,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Public home',
     group: 'website',
     surfaces: ['website'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     summary: 'Visitor home and primary landing',
     codeHints: ['app/page.tsx', 'cms page sections'],
   },
@@ -111,7 +112,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Marketing pages',
     group: 'website',
     surfaces: ['website'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     summary: 'About, board, contact, volunteer, legal',
   },
   {
@@ -127,7 +128,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Events',
     group: 'website',
     surfaces: ['website', 'staff'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     summary: 'Public events + staff Events',
   },
   {
@@ -195,7 +196,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Custom pages builder',
     group: 'website',
     surfaces: ['website', 'staff'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     requires: ['staff.pages'],
     summary: 'Section canvas /p/{slug} pages',
   },
@@ -206,8 +207,9 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Family portal hub',
     group: 'portal',
     surfaces: ['portal'],
-    products: ['pavilion'],
-    summary: 'Member portal home, students, guardians',
+    products: ['pavilion', 'businessrocket', 'auraflux'],
+    summary:
+      'Full Pavilion member portal. New BR and AuraFlux builds use this. Legacy BR light portal stays on businessrocket.ai/portal.',
   },
   {
     id: 'portal.membership',
@@ -223,7 +225,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Portal inbox',
     group: 'portal',
     surfaces: ['portal', 'staff'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     requires: ['portal.family'],
     summary: 'Parent / client inbox messages',
   },
@@ -286,7 +288,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Staff messages',
     group: 'staff',
     surfaces: ['staff'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     summary: 'Send portal inbox notes',
   },
   {
@@ -327,7 +329,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Staff CMS / site settings',
     group: 'staff',
     surfaces: ['staff', 'website'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     summary: 'Page copy, nav, site settings',
   },
   {
@@ -335,7 +337,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Staff page sections',
     group: 'staff',
     surfaces: ['staff'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     summary: 'Live section canvas and page list',
   },
   {
@@ -343,7 +345,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Staff brand',
     group: 'staff',
     surfaces: ['staff'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     summary: 'Logo, colors, fonts',
   },
   {
@@ -452,7 +454,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Staff help',
     group: 'staff',
     surfaces: ['staff'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     summary: 'In-app help and KB',
   },
 
@@ -495,7 +497,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Gmail send',
     group: 'connect',
     surfaces: ['connect'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     summary: 'Workspace Gmail for outreach',
   },
   {
@@ -513,7 +515,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Shared-stack trial tenancy',
     group: 'platform',
     surfaces: ['platform'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     summary: 'Host→org trials (not VIP dedicated)',
   },
   {
@@ -521,7 +523,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Platform fleet console',
     group: 'platform',
     surfaces: ['platform'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
     summary: 'Owner console for tenants and health',
   },
 
@@ -553,11 +555,12 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
   },
   {
     id: 'br.client_portal',
-    label: 'Client portal',
+    label: 'Client portal (legacy light)',
     group: 'portal',
     surfaces: ['portal'],
     products: ['businessrocket'],
-    summary: 'Client login hub (BR equivalent of family portal)',
+    summary:
+      'Legacy light portal for older BR clients on the company host. New builds use portal.family (full Pavilion member portal).',
   },
 ]
 
@@ -641,11 +644,11 @@ export const MODULE_PRESET_BR_STARTER: ModulePreset = {
     'site.marketing_pages',
     'site.events',
     'site.custom_pages',
-    'br.client_portal',
+    'portal.family',
+    'portal.messages',
     'br.scheduling',
     'br.invoices',
     'br.crm_pipeline',
-    'portal.messages',
     'staff.cms',
     'staff.pages',
     'staff.brand',
@@ -655,6 +658,31 @@ export const MODULE_PRESET_BR_STARTER: ModulePreset = {
     'connect.gmail',
     'platform.trial',
   ],
+  notes:
+    'New BR customers get full Pavilion member portal (portal.family). Legacy clients keep businessrocket.ai/portal.',
+}
+
+export const MODULE_PRESET_AF_STARTER: ModulePreset = {
+  id: 'af-starter',
+  label: 'AuraFlux starter',
+  product: 'auraflux',
+  modules: [
+    'site.home',
+    'site.marketing_pages',
+    'site.events',
+    'site.custom_pages',
+    'portal.family',
+    'portal.messages',
+    'staff.cms',
+    'staff.pages',
+    'staff.brand',
+    'staff.messages',
+    'staff.help',
+    'connect.gmail',
+    'platform.trial',
+    'platform.fleet',
+  ],
+  notes: 'AuraFlux brand Staff fleet + full member portal on auraflux.co and customer hosts.',
 }
 
 export const MODULE_PRESETS: ModulePreset[] = [
@@ -662,6 +690,7 @@ export const MODULE_PRESETS: ModulePreset[] = [
   MODULE_PRESET_PAVILION_TRIAL,
   MODULE_PRESET_SHMS_VIP,
   MODULE_PRESET_BR_STARTER,
+  MODULE_PRESET_AF_STARTER,
 ]
 
 export function modulesForProduct(product: ModuleProduct): ProductModuleDef[] {

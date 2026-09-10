@@ -6,6 +6,7 @@ import 'server-only'
 import { sqlForOrg } from '@/lib/crm/tenant'
 import { pavilionCmsEnabled, resolveCmsOrganizationId } from '@/lib/cms/store'
 import {
+  MODULE_PRESET_AF_STARTER,
   MODULE_PRESET_BR_STARTER,
   MODULE_PRESET_PAVILION_DEMO,
   MODULE_PRESET_PAVILION_TRIAL,
@@ -14,25 +15,27 @@ import {
 } from '@/lib/modules/catalog'
 import { isDemoInstance, isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import { commonsDbEnabled, sql } from '@/lib/crm/db'
+import {
+  normalizeCompanyProduct,
+  type CompanyProduct,
+} from '@/lib/crm/platform-owners'
 
-async function orgProduct(orgId: string): Promise<'pavilion' | 'businessrocket'> {
+async function orgProduct(orgId: string): Promise<CompanyProduct> {
   if (!commonsDbEnabled()) return 'pavilion'
   try {
     const found = await sql<{ product: string | null }>(
       `select coalesce(product, 'pavilion') as product from organizations where id = $1 limit 1`,
       [orgId],
     )
-    return found.rows[0]?.product === 'businessrocket' ? 'businessrocket' : 'pavilion'
+    return normalizeCompanyProduct(found.rows[0]?.product)
   } catch {
     return 'pavilion'
   }
 }
 
-function fallbackModules(
-  product: 'pavilion' | 'businessrocket',
-  demo: boolean,
-): ProductModuleId[] {
+function fallbackModules(product: CompanyProduct, demo: boolean): ProductModuleId[] {
   if (product === 'businessrocket') return [...MODULE_PRESET_BR_STARTER.modules]
+  if (product === 'auraflux') return [...MODULE_PRESET_AF_STARTER.modules]
   if (demo) return [...MODULE_PRESET_PAVILION_DEMO.modules]
   return [...MODULE_PRESET_PAVILION_TRIAL.modules]
 }

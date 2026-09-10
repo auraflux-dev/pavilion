@@ -4,7 +4,7 @@
  */
 import { commonsDbEnabled, sql } from '@/lib/crm/db'
 import { connectorMeta } from '@/lib/crm/connectors'
-import { listCustomerOrganizations, type PlatformOrgOption } from '@/lib/crm/platform-owners'
+import { listCustomerOrganizations, type CompanyProduct, type PlatformOrgOption } from '@/lib/crm/platform-owners'
 import { listOrgsForLifecycle } from '@/lib/crm/org-plan'
 
 export type PlatformTenant = PlatformOrgOption & {
@@ -26,7 +26,7 @@ function isVipReadonly(org: { slug: string; plan: string }): boolean {
 
 export async function listPlatformTenants(opts?: {
   demo?: boolean
-  product?: 'pavilion' | 'businessrocket'
+  product?: CompanyProduct
 }): Promise<PlatformTenant[]> {
   const orgs = await listCustomerOrganizations({
     demo: opts?.demo,
@@ -91,7 +91,7 @@ export async function listPlatformTenants(opts?: {
 
 export async function getPlatformTenant(
   organizationId: string,
-  opts?: { demo?: boolean; product?: 'pavilion' | 'businessrocket' },
+  opts?: { demo?: boolean; product?: CompanyProduct },
 ): Promise<PlatformTenant | null> {
   const all = await listPlatformTenants(opts)
   return all.find((t) => t.id === organizationId) || null
@@ -99,7 +99,7 @@ export async function getPlatformTenant(
 
 export async function platformFleetAttention(opts?: {
   demo?: boolean
-  product?: 'pavilion' | 'businessrocket'
+  product?: CompanyProduct
 }): Promise<
   { id: string; label: string; organizationId: string; tone: 'warn' | 'info' }[]
 > {

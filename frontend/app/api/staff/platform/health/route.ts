@@ -48,22 +48,39 @@ export async function GET(req: NextRequest) {
             note: 'Company marketing + Brand Staff path. Apex may still be WordPress until cutover.',
           },
         ]
-      : [
-          {
-            id: 'commons-pto-demo',
-            label: 'commons-pto-demo',
-            url: 'https://commons-pto-demo.vercel.app',
-            ok: true,
-            note: 'Product demo host. Confirm with ship check after deploys.',
-          },
-          {
-            id: 'commons-site',
-            label: 'onpavilion.com',
-            url: 'https://onpavilion.com',
-            ok: true,
-            note: 'Marketing. Separate ship target.',
-          },
-        ]
+      : product === 'auraflux'
+        ? [
+            {
+              id: 'commons-pto-demo',
+              label: 'commons-pto-demo',
+              url: 'https://commons-pto-demo.vercel.app',
+              ok: true,
+              note: 'Product engine. AuraFlux Brand Staff and customer hosts attach here.',
+            },
+            {
+              id: 'auraflux-brand',
+              label: 'auraflux.co',
+              url: 'https://www.auraflux.co',
+              ok: true,
+              note: 'Company marketing + Brand Staff + full /member-portal on brand.',
+            },
+          ]
+        : [
+            {
+              id: 'commons-pto-demo',
+              label: 'commons-pto-demo',
+              url: 'https://commons-pto-demo.vercel.app',
+              ok: true,
+              note: 'Product demo host. Confirm with ship check after deploys.',
+            },
+            {
+              id: 'commons-site',
+              label: 'onpavilion.com',
+              url: 'https://onpavilion.com',
+              ok: true,
+              note: 'Marketing. Separate ship target.',
+            },
+          ]
 
   return NextResponse.json({
     product,
@@ -78,6 +95,8 @@ export async function GET(req: NextRequest) {
     vipNote:
       product === 'businessrocket'
         ? 'BR Brand Staff manages businessrocket product orgs only.'
-        : 'SHMS VIP is not managed from this health board.',
+        : product === 'auraflux'
+          ? 'AuraFlux Brand Staff manages auraflux product orgs only. Brand host serves /member-portal.'
+          : 'SHMS VIP is not managed from this health board.',
   })
 }

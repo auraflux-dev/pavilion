@@ -22,7 +22,7 @@ export function ReviewJoinClient({ isDemoHost }: { isDemoHost: boolean }) {
   const [packs, setPacks] = useState<Array<{ slug: string; pto: string; town: string }>>([])
   const [brandSlug, setBrandSlug] = useState<string | null>(null)
   const face = publicBrandFace()
-  const highlightPlatform = deskHint === 'platform' || deskHint === 'br'
+  const highlightPlatform = deskHint === 'platform' || deskHint === 'br' || deskHint === 'af'
 
   useEffect(() => {
     const presetBrand = searchParams.get('brand')
@@ -91,7 +91,7 @@ export function ReviewJoinClient({ isDemoHost }: { isDemoHost: boolean }) {
     }
   }
 
-  async function openPlatformStaff(product: 'pavilion' | 'businessrocket' = 'pavilion') {
+  async function openPlatformStaff(product: 'pavilion' | 'businessrocket' | 'auraflux' = 'pavilion') {
     setBusy(true)
     setError(null)
     try {
@@ -128,6 +128,10 @@ export function ReviewJoinClient({ isDemoHost }: { isDemoHost: boolean }) {
     }
     if (deskHint === 'br') {
       void openPlatformStaff('businessrocket')
+      return
+    }
+    if (deskHint === 'af') {
+      void openPlatformStaff('auraflux')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoStaff, deskHint, isDemoHost])
@@ -218,9 +222,10 @@ Nothing is charged or emailed.`}
       >
         <p className="text-sm font-semibold text-[#1A1A1A]">1. Company Staff</p>
         <p className="text-xs text-[#5A6070] whitespace-pre-line">
-          {`Two separate fleets.
+          {`Three separate fleets.
 Pavilion Platform Staff manages Pavilion schools.
 Business Rocket Brand Staff manages BR customers only.
+AuraFlux Brand Staff manages AuraFlux customers only.
 Your login email picks the fleet.`}
         </p>
         <div className="flex flex-wrap gap-2">
@@ -237,7 +242,15 @@ Your login email picks the fleet.`}
             disabled={busy}
             onClick={() => void openPlatformStaff('businessrocket')}
           >
-            {busy ? 'Opening…' : 'Open Brand Staff'}
+            {busy ? 'Opening…' : 'Open BR Brand Staff'}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy}
+            onClick={() => void openPlatformStaff('auraflux')}
+          >
+            {busy ? 'Opening…' : 'Open AuraFlux Brand Staff'}
           </Button>
         </div>
       </div>

@@ -34,9 +34,12 @@ export async function GET(req: NextRequest) {
   const g = await gate(req)
   if ('error' in g && g.error) return g.error
 
-  const product = (String(req.nextUrl.searchParams.get('product') ?? 'pavilion').trim() ||
-    'pavilion') as ModuleProduct
-  const catalog = modulesForProduct(product === 'businessrocket' ? 'businessrocket' : 'pavilion')
+  const productRaw = String(req.nextUrl.searchParams.get('product') ?? 'pavilion').trim() || 'pavilion'
+  const product: ModuleProduct =
+    productRaw === 'businessrocket' || productRaw === 'auraflux' || productRaw === 'pavilion'
+      ? productRaw
+      : 'pavilion'
+  const catalog = modulesForProduct(product)
   const orgId = await resolveModulesOrgId(req)
   const enabled = orgId
     ? await getOrgModules(orgId)

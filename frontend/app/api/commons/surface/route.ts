@@ -10,14 +10,19 @@ import { companyBrandFromHost } from '@/lib/crm/product-host'
 import { platformBrandForEmail } from '@/lib/crm/platform-owners'
 import { resolveFleetProduct } from '@/lib/crm/fleet-product'
 import { BR_PTO_FAT_WORKSPACES } from '@/lib/staff/br-staff-surface'
+import { AF_PTO_FAT_WORKSPACES } from '@/lib/staff/af-staff-surface'
 import { getStaffSession } from '@/lib/staff/session'
 import { commonsDbEnabled, sql } from '@/lib/crm/db'
 import { organizationIdFromHostHeader } from '@/lib/crm/tenant'
-import { PLATFORM_CMS_ORG_COOKIE } from '@/lib/crm/platform-owners'
+import {
+  PLATFORM_CMS_ORG_COOKIE,
+  normalizeCompanyProduct,
+  type CompanyProduct,
+} from '@/lib/crm/platform-owners'
 
 export const dynamic = 'force-dynamic'
 
-async function resolveOrgProduct(orgId: string | null): Promise<'pavilion' | 'businessrocket' | null> {
+async function resolveOrgProduct(orgId: string | null): Promise<CompanyProduct | null> {
   if (!orgId || !commonsDbEnabled()) return null
   try {
     const found = await sql<{ product: string | null }>(
@@ -25,7 +30,7 @@ async function resolveOrgProduct(orgId: string | null): Promise<'pavilion' | 'bu
       [orgId],
     )
     const p = found.rows[0]?.product
-    return p === 'businessrocket' ? 'businessrocket' : p ? 'pavilion' : null
+    return p ? normalizeCompanyProduct(p) : null
   } catch {
     return null
   }
@@ -53,11 +58,18 @@ export async function GET(req: NextRequest) {
   const baseHidden = filterSurfaceWorkspaces(
     demo ? COMMONS_DEMO_HIDDEN_WORKSPACES : gate.liveCommerce ? [] : COMMONS_COMMERCE_GATED_WORKSPACES,
   )
-  const hiddenStaffWorkspaces =
+  const fat =
     product === 'businessrocket'
-      ? filterSurfaceWorkspaces([...baseHidden, ...BR_PTO_FAT_WORKSPACES])
-      : baseHidden
+      ? BR_PTO_FAT_WORKSPACES
+      : product === 'auraflux'
+        ? AF_PTO_FAT_WORKSPACES
+        : []
+  const hiddenStaffWorkspaces = fat.length
+    ? filterSurfaceWorkspaces([...baseHidden, ...fat])
+    : baseHidden
 
+  const brandHost = companyBrandFromHost(host)
+  const emailBrand = platformBrandForEmail(email)
   return NextResponse.json({
     liveCommerce: gate.liveCommerce,
     reason: gate.reason,
@@ -65,6 +77,8 @@ export async function GET(req: NextRequest) {
     hiddenStaffWorkspaces,
     demo,
     product,
-    brandStaff: product === 'businessrocket' && Boolean(companyBrandFromHost(host) || platformBrandForEmail(email)),
+    brandStaff:
+      (product === 'businessrocket' || product === 'auraflux') &&
+      Boolean(brandHost === product || emailBrand === product),
   })
 }

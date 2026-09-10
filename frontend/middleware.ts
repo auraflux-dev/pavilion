@@ -23,6 +23,7 @@ import { hasBetterAuthCookie, isCommonsPlatformHost, isDemoHostForMiddleware, is
 import {
   companyBrandFromHost,
   companyBrandOrigin,
+  isAuraFluxBrandHost,
   isBusinessRocketBrandHost,
   isCompanyBrandHost,
   isLegacyStaffSubdomainHost,
@@ -116,10 +117,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(dest)
   }
 
-  // Company brand site (Pavilion or Business Rocket): marketing + /staff only.
-  // Never serve member portal on the company host.
+  // Company brand site:
+  // - Pavilion + Business Rocket: marketing + /staff (no member portal on brand)
+  // - AuraFlux: marketing + /staff + full /member-portal on brand
   if (brandHost) {
-    if (pathname === '/member-portal' || pathname.startsWith('/member-portal/')) {
+    const aurafluxBrand = isAuraFluxBrandHost(host) || brandProduct === 'auraflux'
+    if (
+      !aurafluxBrand &&
+      (pathname === '/member-portal' || pathname.startsWith('/member-portal/'))
+    ) {
       return NextResponse.redirect(new URL('/', req.url))
     }
     if (
@@ -135,6 +141,8 @@ export async function middleware(req: NextRequest) {
       pathname === '' ||
       pathname === '/staff' ||
       pathname.startsWith('/staff/') ||
+      (aurafluxBrand &&
+        (pathname === '/member-portal' || pathname.startsWith('/member-portal/'))) ||
       pathname.startsWith('/auth/') ||
       pathname.startsWith('/api/') ||
       pathname === '/login' ||
@@ -174,8 +182,12 @@ export async function middleware(req: NextRequest) {
       pathname.startsWith('/_next/') ||
       pathname === '/favicon.ico'
     if (!brandOk) {
-      // Pavilion brand: school demos live on demo host. BR brand: stay on company site.
-      if (isBusinessRocketBrandHost(host) || brandProduct === 'businessrocket') {
+      // Pavilion brand: school demos live on demo host. BR/AF brand: stay on company site.
+      if (
+        isBusinessRocketBrandHost(host) ||
+        brandProduct === 'businessrocket' ||
+        aurafluxBrand
+      ) {
         const home = new URL('/', req.url)
         return NextResponse.redirect(home)
       }

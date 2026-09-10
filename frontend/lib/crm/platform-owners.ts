@@ -1,6 +1,6 @@
 /**
  * Platform owners — overarching CMS admins for company Staff.
- * Pavilion: @onpavilion.com · Business Rocket: @businessrocket.ai
+ * Pavilion: @onpavilion.com · Business Rocket: @businessrocket.ai · AuraFlux: @auraflux.co
  * Customer staff stay per-org; platform owners can switch org and warp into client Staff.
  *
  * Brand Staff is Platform Staff on the company host — never a dressed-up customer org.
@@ -10,12 +10,23 @@ import { isDemoInstance } from '@/lib/demo/instance'
 
 export const PLATFORM_STAFF_EMAIL_DOMAIN = 'onpavilion.com'
 export const BR_PLATFORM_STAFF_EMAIL_DOMAIN = 'businessrocket.ai'
+export const AF_PLATFORM_STAFF_EMAIL_DOMAIN = 'auraflux.co'
 export const PLATFORM_OWNER_PRIMARY_EMAIL = `robert@${PLATFORM_STAFF_EMAIL_DOMAIN}`
 export const BR_PLATFORM_OWNER_PRIMARY_EMAIL = `robert@${BR_PLATFORM_STAFF_EMAIL_DOMAIN}`
+export const AF_PLATFORM_OWNER_PRIMARY_EMAIL = `robert@${AF_PLATFORM_STAFF_EMAIL_DOMAIN}`
 /** Cookie: which customer org a platform owner is editing CMS for. */
 export const PLATFORM_CMS_ORG_COOKIE = 'pavilion_cms_org'
 
-export type CompanyProduct = 'pavilion' | 'businessrocket'
+export type CompanyProduct = 'pavilion' | 'businessrocket' | 'auraflux'
+
+export function normalizeCompanyProduct(raw: string | null | undefined): CompanyProduct {
+  const v = String(raw || '')
+    .trim()
+    .toLowerCase()
+  if (v === 'businessrocket' || v === 'br') return 'businessrocket'
+  if (v === 'auraflux' || v === 'af') return 'auraflux'
+  return 'pavilion'
+}
 
 export const PLATFORM_OWNERS_SQL = `
 create table if not exists platform_owners (
@@ -30,20 +41,24 @@ export function isPlatformStaffEmail(email: string): boolean {
   const normalized = email.trim().toLowerCase()
   return (
     normalized.endsWith(`@${PLATFORM_STAFF_EMAIL_DOMAIN}`) ||
-    normalized.endsWith(`@${BR_PLATFORM_STAFF_EMAIL_DOMAIN}`)
+    normalized.endsWith(`@${BR_PLATFORM_STAFF_EMAIL_DOMAIN}`) ||
+    normalized.endsWith(`@${AF_PLATFORM_STAFF_EMAIL_DOMAIN}`)
   )
 }
 
 export function platformBrandForEmail(email: string): CompanyProduct | null {
   const normalized = email.trim().toLowerCase()
   if (normalized.endsWith(`@${BR_PLATFORM_STAFF_EMAIL_DOMAIN}`)) return 'businessrocket'
+  if (normalized.endsWith(`@${AF_PLATFORM_STAFF_EMAIL_DOMAIN}`)) return 'auraflux'
   if (normalized.endsWith(`@${PLATFORM_STAFF_EMAIL_DOMAIN}`)) return 'pavilion'
   return null
 }
 
 /** Platform home org id for company Staff CMS (not a customer). */
 export function platformHomeOrgId(product: CompanyProduct): string {
-  return product === 'businessrocket' ? 'org_businessrocket' : 'org_pavilion'
+  if (product === 'businessrocket') return 'org_businessrocket'
+  if (product === 'auraflux') return 'org_auraflux'
+  return 'org_pavilion'
 }
 
 export async function isPlatformOwnerEmail(
@@ -57,6 +72,7 @@ export async function isPlatformOwnerEmail(
     demo &&
     (normalized === PLATFORM_OWNER_PRIMARY_EMAIL ||
       normalized === BR_PLATFORM_OWNER_PRIMARY_EMAIL ||
+      normalized === AF_PLATFORM_OWNER_PRIMARY_EMAIL ||
       isPlatformStaffEmail(normalized))
   ) {
     return true
@@ -82,18 +98,18 @@ export async function ensurePlatformOwnerSeed(): Promise<void> {
   await sql(PLATFORM_OWNERS_SQL)
   await sql(`alter table organizations add column if not exists product text not null default 'pavilion'`)
 
-  await sql(
-    `insert into platform_owners (email, name, active)
-     values ($1, 'Robert Gregory', true)
-     on conflict (email) do update set name = excluded.name, active = true`,
-    [PLATFORM_OWNER_PRIMARY_EMAIL],
-  )
-  await sql(
-    `insert into platform_owners (email, name, active)
-     values ($1, 'Robert Gregory', true)
-     on conflict (email) do update set name = excluded.name, active = true`,
-    [BR_PLATFORM_OWNER_PRIMARY_EMAIL],
-  )
+  for (const [email, name] of [
+    [PLATFORM_OWNER_PRIMARY_EMAIL, 'Robert Gregory'],
+    [BR_PLATFORM_OWNER_PRIMARY_EMAIL, 'Robert Gregory'],
+    [AF_PLATFORM_OWNER_PRIMARY_EMAIL, 'Robert Gregory'],
+  ] as const) {
+    await sql(
+      `insert into platform_owners (email, name, active)
+       values ($1, $2, true)
+       on conflict (email) do update set name = excluded.name, active = true`,
+      [email, name],
+    )
+  }
 
   // Pavilion product org (platform home CMS — not a customer)
   await sql(
@@ -153,6 +169,41 @@ export async function ensurePlatformOwnerSeed(): Promise<void> {
        plan = excluded.plan,
        product = excluded.product`,
   )
+
+  // AuraFlux company org (platform home — Brand Staff + brand member portal)
+  await sql(
+    `insert into organizations (id, name, slug, plan, product)
+     values ('org_auraflux', 'AuraFlux', 'auraflux', 'platform', 'auraflux')
+     on conflict (id) do update set
+       name = excluded.name,
+       slug = excluded.slug,
+       plan = excluded.plan,
+       product = excluded.product`,
+  )
+  await sql(
+    `insert into people (id, organization_id, email, first_name, last_name)
+     values ('p_robert_af', 'org_auraflux', $1, 'Robert', 'Gregory')
+     on conflict (id) do update set email = excluded.email, organization_id = excluded.organization_id`,
+    [AF_PLATFORM_OWNER_PRIMARY_EMAIL],
+  )
+  await sql(
+    `insert into staff_assignments (person_id, role, board_title, organization_id)
+     values ('p_robert_af', 'admin', 'AuraFlux Brand Staff', 'org_auraflux')
+     on conflict (person_id, role) do update set
+       board_title = excluded.board_title,
+       organization_id = excluded.organization_id`,
+  )
+
+  // Demo AF customer sandbox
+  await sql(
+    `insert into organizations (id, name, slug, plan, product)
+     values ('org_af_sandbox', 'AuraFlux sandbox', 'af-sandbox', 'trial', 'auraflux')
+     on conflict (id) do update set
+       name = excluded.name,
+       slug = excluded.slug,
+       plan = excluded.plan,
+       product = excluded.product`,
+  )
 }
 
 export type PlatformOrgOption = {
@@ -165,7 +216,7 @@ export type PlatformOrgOption = {
 
 export async function listCustomerOrganizations(opts?: {
   demo?: boolean
-  /** When set, only orgs for that company product (BR brand Staff fleet). */
+  /** When set, only orgs for that company product (brand Staff fleet). */
   product?: CompanyProduct
   /** Include platform home orgs (plan=platform). Default false for fleet warp lists. */
   includePlatformHome?: boolean
@@ -205,6 +256,20 @@ export async function listCustomerOrganizations(opts?: {
           plan: 'platform',
           product: 'businessrocket',
         },
+        {
+          id: 'org_af_sandbox',
+          name: 'AuraFlux sandbox',
+          slug: 'af-sandbox',
+          plan: 'trial',
+          product: 'auraflux',
+        },
+        {
+          id: 'org_auraflux',
+          name: 'AuraFlux',
+          slug: 'auraflux',
+          plan: 'platform',
+          product: 'auraflux',
+        },
       ]
       return demoOrgs.filter((o) => {
         if (product && o.product !== product) return false
@@ -226,7 +291,7 @@ export async function listCustomerOrganizations(opts?: {
     `select id, name, slug, coalesce(plan, '') as plan, coalesce(product, 'pavilion') as product
        from organizations
       order by
-        case when id in ('org_pavilion', 'org_businessrocket') then 0 else 1 end,
+        case when id in ('org_pavilion', 'org_businessrocket', 'org_auraflux') then 0 else 1 end,
         name asc
       limit 200`,
   )
@@ -237,7 +302,7 @@ export async function listCustomerOrganizations(opts?: {
       name: r.name,
       slug: r.slug,
       plan: r.plan || 'demo',
-      product: (r.product === 'businessrocket' ? 'businessrocket' : 'pavilion') as CompanyProduct,
+      product: normalizeCompanyProduct(r.product),
     }))
     .filter((o) => {
       if (product && o.product !== product) return false

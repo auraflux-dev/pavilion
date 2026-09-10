@@ -4,8 +4,9 @@
  * One deploy serves:
  * - www.onpavilion.com / onpavilion.com (Pavilion brand: marketing + /staff)
  * - www.businessrocket.ai / businessrocket.ai (BR brand: marketing + /staff, no member portal)
+ * - www.auraflux.co / auraflux.co (AuraFlux brand: marketing + /staff + full member portal)
  * - demo.onpavilion.com (public Riverside sample)
- * - {slug}.onpavilion.com / {slug}.businessrocket.ai (private branded trial)
+ * - {slug}.onpavilion.com / {slug}.businessrocket.ai / {slug}.auraflux.co (private branded trial)
  *
  * Legacy: commons-pto-demo.vercel.app, *.commons-pto.org
  * Reserved: staff.* is never a trial slug (not a product host).
@@ -24,6 +25,15 @@ export const BR_TRIAL_DOMAIN_SUFFIX = (
   process.env.BR_TRIAL_DOMAIN_SUFFIX ||
   process.env.BUSINESSROCKET_TRIAL_DOMAIN_SUFFIX ||
   'businessrocket.ai'
+)
+  .replace(/^\./, '')
+  .toLowerCase()
+
+/** AuraFlux customer vanity hosts ({slug}.auraflux.co). */
+export const AF_TRIAL_DOMAIN_SUFFIX = (
+  process.env.AF_TRIAL_DOMAIN_SUFFIX ||
+  process.env.AURAFLUX_TRIAL_DOMAIN_SUFFIX ||
+  'auraflux.co'
 )
   .replace(/^\./, '')
   .toLowerCase()
@@ -52,6 +62,15 @@ export const BR_BRAND_HOST = (
   .trim()
   .toLowerCase()
 
+/** AuraFlux company brand site (marketing + Brand Staff + member portal). */
+export const AF_BRAND_HOST = (
+  process.env.AF_BRAND_HOST ||
+  process.env.NEXT_PUBLIC_AF_BRAND_HOST ||
+  'www.auraflux.co'
+)
+  .trim()
+  .toLowerCase()
+
 const LEGACY_DEMO_HOSTS = new Set([
   'commons-pto-demo.vercel.app',
   'commons-pto.vercel.app',
@@ -60,7 +79,7 @@ const LEGACY_DEMO_HOSTS = new Set([
 const LEGACY_TRIAL_SUFFIX = 'commons-pto.org'
 
 /** Reserved first labels under the trial suffix. Never treat as trial vanity. */
-const RESERVED_TRIAL_LABELS = new Set(['demo', 'staff', 'www', 'mail', 'api'])
+const RESERVED_TRIAL_LABELS = new Set(['demo', 'staff', 'www', 'mail', 'api', 'app'])
 
 export type ProductSurface = 'brand' | 'demo' | 'trial' | 'shared' | 'other'
 
@@ -94,14 +113,31 @@ export function isBusinessRocketBrandHost(host: string): boolean {
   return false
 }
 
-/** Either company brand surface (Pavilion or Business Rocket). */
+/** AuraFlux company marketing + Brand Staff + full member portal on brand. */
+export function isAuraFluxBrandHost(host: string): boolean {
+  const h = normalizeProductHost(host)
+  if (!h) return false
+  if (h === AF_BRAND_HOST) return true
+  if (h === 'www.auraflux.co' || h === 'auraflux.co') return true
+  if (h === `www.${AF_TRIAL_DOMAIN_SUFFIX}` || h === AF_TRIAL_DOMAIN_SUFFIX) {
+    return true
+  }
+  return false
+}
+
+/** Either company brand surface (Pavilion, Business Rocket, or AuraFlux). */
 export function isCompanyBrandHost(host: string): boolean {
-  return isPavilionBrandHost(host) || isBusinessRocketBrandHost(host)
+  return (
+    isPavilionBrandHost(host) || isBusinessRocketBrandHost(host) || isAuraFluxBrandHost(host)
+  )
 }
 
 /** Which company brand owns this host (for Staff copy + fleet filter). */
-export function companyBrandFromHost(host: string): 'pavilion' | 'businessrocket' | null {
+export function companyBrandFromHost(
+  host: string,
+): 'pavilion' | 'businessrocket' | 'auraflux' | null {
   if (isBusinessRocketBrandHost(host)) return 'businessrocket'
+  if (isAuraFluxBrandHost(host)) return 'auraflux'
   if (isPavilionBrandHost(host)) return 'pavilion'
   return null
 }
@@ -122,9 +158,18 @@ export function businessRocketBrandOrigin(): string {
   return `https://${host}`
 }
 
+/** Canonical origin for AuraFlux brand (marketing + /staff + member portal). */
+export function auraFluxBrandOrigin(): string {
+  const host = AF_BRAND_HOST.startsWith('www.')
+    ? AF_BRAND_HOST
+    : `www.${AF_TRIAL_DOMAIN_SUFFIX}`
+  return `https://${host}`
+}
+
 /** Brand Staff origin for the given host (falls back to Pavilion). */
 export function companyBrandOrigin(host?: string): string {
   if (host && isBusinessRocketBrandHost(host)) return businessRocketBrandOrigin()
+  if (host && isAuraFluxBrandHost(host)) return auraFluxBrandOrigin()
   return pavilionBrandOrigin()
 }
 
@@ -137,7 +182,11 @@ export function platformStaffOrigin(): string {
 export function isReservedProductHost(host: string): boolean {
   const h = normalizeProductHost(host)
   if (!h) return false
-  for (const suffix of [PAVILION_TRIAL_DOMAIN_SUFFIX, BR_TRIAL_DOMAIN_SUFFIX]) {
+  for (const suffix of [
+    PAVILION_TRIAL_DOMAIN_SUFFIX,
+    BR_TRIAL_DOMAIN_SUFFIX,
+    AF_TRIAL_DOMAIN_SUFFIX,
+  ]) {
     if (!h.endsWith(`.${suffix}`)) continue
     const label = h.slice(0, -(suffix.length + 1))
     if (RESERVED_TRIAL_LABELS.has(label)) return true
@@ -152,7 +201,11 @@ export function isReservedProductHost(host: string): boolean {
 export function isLegacyStaffSubdomainHost(host: string): boolean {
   const h = normalizeProductHost(host)
   if (!h) return false
-  for (const suffix of [PAVILION_TRIAL_DOMAIN_SUFFIX, BR_TRIAL_DOMAIN_SUFFIX]) {
+  for (const suffix of [
+    PAVILION_TRIAL_DOMAIN_SUFFIX,
+    BR_TRIAL_DOMAIN_SUFFIX,
+    AF_TRIAL_DOMAIN_SUFFIX,
+  ]) {
     if (h === `staff.${suffix}`) return true
   }
   return false
@@ -176,6 +229,8 @@ export function isSharedProductHost(host: string): boolean {
   if (isReservedProductHost(h)) return true
   if (h === PAVILION_TRIAL_DOMAIN_SUFFIX) return true
   if (h === BR_TRIAL_DOMAIN_SUFFIX || h === `www.${BR_TRIAL_DOMAIN_SUFFIX}`) return true
+  if (h === AF_TRIAL_DOMAIN_SUFFIX || h === `www.${AF_TRIAL_DOMAIN_SUFFIX}`) return true
+  if (h === 'app.auraflux.co') return true
   return false
 }
 
@@ -217,6 +272,10 @@ export function isTrialVanityHost(host: string): boolean {
     return true
   }
 
+  if (isVanityUnderSuffix(h, AF_TRIAL_DOMAIN_SUFFIX)) {
+    return true
+  }
+
   if (h.endsWith(`.${LEGACY_TRIAL_SUFFIX}`) || h === LEGACY_TRIAL_SUFFIX) {
     return true
   }
@@ -242,15 +301,16 @@ export function demoOriginFromHost(host: string): string {
 }
 
 export function trialDomainSuffixForProduct(
-  product: 'pavilion' | 'businessrocket' = 'pavilion',
+  product: 'pavilion' | 'businessrocket' | 'auraflux' = 'pavilion',
 ): string {
   if (product === 'businessrocket') return BR_TRIAL_DOMAIN_SUFFIX
+  if (product === 'auraflux') return AF_TRIAL_DOMAIN_SUFFIX
   return PAVILION_TRIAL_DOMAIN_SUFFIX
 }
 
 export function trialHostForSlug(
   slug: string,
-  product: 'pavilion' | 'businessrocket' = 'pavilion',
+  product: 'pavilion' | 'businessrocket' | 'auraflux' = 'pavilion',
 ): string {
   const clean = slug.trim().toLowerCase()
   return `${clean}.${trialDomainSuffixForProduct(product)}`
