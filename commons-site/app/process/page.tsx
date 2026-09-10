@@ -10,7 +10,7 @@ export default function ProcessPage() {
   return (
     <>
       <section className="border-b border-zinc-200 bg-zinc-50">
-        <div className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 pb-4 pt-10 sm:px-6 md:pb-6 md:pt-12 lg:px-8">
           <div className="badge-micro mb-5">{PROCESS.eyebrow}</div>
           <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
             {PROCESS.headline}
