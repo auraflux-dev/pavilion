@@ -178,7 +178,11 @@ export const PROCESS = {
     },
     {
       title: '2. Brand a private trial',
-      body: 'We apply your logo, colors, and school name.\nYour board logs in on a private host.',
+      body: `We apply your logo, colors, and school name.
+Your board logs in on a private host.
+Setup takes under 30 minutes for a single board officer.
+Bring your domain, logo, and colors.
+No IT department required.`,
     },
     {
       title: '3. Prune what you do not offer',
@@ -186,7 +190,10 @@ export const PROCESS = {
     },
     {
       title: '4. Pay and go live',
-      body: 'Lock look and feel, then deepen onboarding.\nSquare stays yours for parent cards and sales.',
+      body: `Lock look and feel, then deepen onboarding.
+Square stays yours for parent cards and sales.
+Board approval friendly:
+Run your 14-day trial with your executive committee, connect your school Square, and activate when ready.`,
     },
   ],
 } as const
