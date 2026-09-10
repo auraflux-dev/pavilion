@@ -1,9 +1,11 @@
 import { redirect } from 'next/navigation'
+import { DEMO_URL } from '@/lib/pricing'
 
 /**
- * Interim: www still deploys from commons-site until DNS attaches
- * www.onpavilion.com to commons-pto-demo. Then /staff is native there.
+ * One Platform Staff door for operators.
+ * Not linked from marketing. Bookmark www.onpavilion.com/staff.
+ * Auth on the product host allows @onpavilion.com only.
  */
 export default function StaffPathRedirect() {
-  redirect('https://commons-pto-demo.vercel.app/staff')
+  redirect(`${DEMO_URL}/staff`)
 }
