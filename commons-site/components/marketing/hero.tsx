@@ -17,14 +17,17 @@ export function MarketingHero() {
           <h1 className="max-w-xl whitespace-pre-line font-sans text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-[3.25rem]">
             {HERO_HEADLINE}
           </h1>
-          <div className="copy-stack mt-6 text-lg font-normal leading-relaxed text-slate-600 sm:text-xl">
+          <div className="copy-stack mt-4 mb-6 text-base font-normal leading-relaxed text-slate-600 md:text-lg">
             {supportLines.map((line) => (
-              <p key={line} className="copy-stack__line text-lg font-normal leading-relaxed text-slate-600">
+              <p
+                key={line}
+                className="copy-stack__line text-base font-normal leading-relaxed text-slate-600 md:text-lg"
+              >
                 {line}
               </p>
             ))}
           </div>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3">
             <Link
               href="/pricing#checkout"
               className="rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-800"

@@ -16,7 +16,7 @@ const primaryNav = [
 ]
 
 const ctaClass =
-  'inline-flex rounded-lg bg-[var(--brand-primary)] px-4 py-2 text-sm font-medium tracking-wide text-white shadow-sm transition-all hover:bg-[var(--brand-dark)]'
+  'inline-flex rounded-xl bg-emerald-800 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-emerald-900'
 
 export function SiteHeader() {
   return (
