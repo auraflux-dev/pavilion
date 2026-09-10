@@ -10,22 +10,20 @@ export const metadata: Metadata = { title: 'Product' }
 export default function ProductPage() {
   return (
     <>
-      <section className="border-b border-[var(--line)] bg-[var(--paper)]">
+      <section className="border-b border-zinc-200 bg-zinc-50">
         <div className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
-          <div className="mb-5 inline-block rounded-full bg-[var(--brand-mist)] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--ink-muted)] ring-1 ring-[var(--brand-line)]">
-            Product
-          </div>
-          <h1 className="max-w-3xl whitespace-pre-line font-sans text-4xl font-bold tracking-tight text-[var(--brand-text)] sm:text-5xl">
+          <div className="badge-micro mb-5">Product</div>
+          <h1 className="max-w-3xl whitespace-pre-line text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
             {`What boards run
 in one place.`}
           </h1>
-          <p className="mt-4 max-w-2xl whitespace-pre-line text-base font-normal leading-relaxed text-[var(--ink-muted)] sm:text-lg">
+          <p className="mt-4 max-w-2xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
             {`Your board works in Staff.
 Parents get your public site and family login.
 They see your school. Not Pavilion.`}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/pricing#checkout" className="btn-primary !px-5 !py-3">
+            <Link href="/pricing#checkout" className="btn-primary">
               {`Start at $${COMMONS_LIST_PRICE_USD}/mo`}
             </Link>
             <Link href="/pricing" className="btn-secondary">

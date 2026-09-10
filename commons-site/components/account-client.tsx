@@ -43,30 +43,28 @@ export function AccountSignInForm() {
 
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-4">
-      <label className="block text-sm">
+      <label className="block text-sm text-slate-900">
         <span className="font-medium">Email on your {PRODUCT_NAME} invoice</span>
         <input
           required
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 w-full rounded-md border border-[var(--line)] bg-white px-3 py-2"
+          className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-slate-900"
         />
       </label>
       {error ? <p className="text-sm text-red-800">{error}</p> : null}
       {message ? (
-        <p className="whitespace-pre-line text-sm text-[var(--ink-muted)]">{message}</p>
+        <p className="whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
+          {message}
+        </p>
       ) : null}
       {devLink ? (
-        <p className="break-all text-xs text-[var(--accent)]">
+        <p className="break-all text-xs text-emerald-900">
           Dev link: <a href={devLink}>{devLink}</a>
         </p>
       ) : null}
-      <button
-        type="submit"
-        disabled={busy}
-        className="rounded-md bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-[var(--paper)] hover:bg-[var(--accent)] disabled:opacity-60"
-      >
+      <button type="submit" disabled={busy} className="btn-primary disabled:opacity-60">
         {busy ? 'Sending…' : 'Email me a sign-in link'}
       </button>
     </form>
@@ -107,13 +105,15 @@ export function AccountDashboard(props: {
 
   return (
     <div className="mt-8 space-y-8">
-      <div className="rounded-lg border border-[var(--line)] bg-[var(--paper-deep)] p-5">
-        <p className="text-sm text-[var(--ink-muted)]">Signed in as</p>
-        <p className="font-semibold">{props.email}</p>
+      <div className="card-surface">
+        <p className="text-base font-normal leading-relaxed text-slate-600">Signed in as</p>
+        <p className="text-lg font-semibold text-slate-900">{props.email}</p>
         {props.schoolName ? (
-          <p className="mt-2 text-sm text-[var(--ink-muted)]">{props.schoolName}</p>
+          <p className="mt-2 text-base font-normal leading-relaxed text-slate-600">
+            {props.schoolName}
+          </p>
         ) : null}
-        <p className="mt-1 text-xs uppercase tracking-wide text-[var(--ink-muted)]">
+        <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-emerald-900">
           Status: {props.status || 'unknown'}
         </p>
       </div>
@@ -121,26 +121,32 @@ export function AccountDashboard(props: {
       {error ? <p className="text-sm text-red-800">{error}</p> : null}
 
       <div className="space-y-3">
-        <h2 className="font-[family-name:var(--font-display)] text-2xl">Billing</h2>
-        <p className="whitespace-pre-line text-sm text-[var(--ink-muted)]">
-          {`Invoices, payment method, and cancel live in Stripe.\nSold by HSKRG LLC.\nDay-to-day school work lives in your Staff portal, not here.`}
+        <h2 className="text-lg font-semibold text-slate-900">Billing</h2>
+        <p className="whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
+          {`Invoices, payment method, and cancel live in Stripe.
+Sold by HSKRG LLC.
+Day-to-day school work lives in your Staff portal, not here.`}
         </p>
         <button
           type="button"
           disabled={busy !== null || !props.hasCustomer}
           onClick={openPortal}
-          className="rounded-md bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-[var(--paper)] hover:bg-[var(--accent)] disabled:opacity-60"
+          className="btn-primary disabled:opacity-60"
         >
           {busy === 'portal' ? 'Opening…' : 'Open billing portal'}
         </button>
         {!props.hasCustomer ? (
-          <p className="text-sm text-[var(--ink-muted)]">
+          <p className="text-base font-normal leading-relaxed text-slate-600">
             No Stripe customer linked yet. If you just paid, wait a minute and refresh.
           </p>
         ) : null}
       </div>
 
-      <button type="button" onClick={logout} className="text-sm text-[var(--accent)] hover:underline">
+      <button
+        type="button"
+        onClick={logout}
+        className="text-sm font-semibold text-emerald-900 hover:underline"
+      >
         Sign out
       </button>
     </div>

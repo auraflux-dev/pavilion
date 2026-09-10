@@ -12,18 +12,18 @@ export function MarketingSurfaceFrames({
   withAnchors = false,
 }: SurfaceFramesProps) {
   return (
-    <section className="bg-[var(--paper)] py-16 md:py-24">
+    <section className="bg-zinc-50 py-16 md:py-24">
       <div className="mx-auto max-w-6xl px-5">
-        <h2 className="font-sans text-3xl font-bold tracking-tight text-[var(--brand-text)] sm:text-4xl">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 md:text-4xl">
           Public. Family. Staff.
         </h2>
-        <p className="mt-4 max-w-2xl whitespace-pre-line text-base font-normal leading-relaxed text-[var(--ink-muted)] sm:text-lg">
+        <p className="mt-4 max-w-2xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
           {`What each surface includes.\nSame product. Same brand. Different jobs.`}
         </p>
         <div className="mt-12 space-y-16">
           {SURFACES.map((surface, i) => {
             const title = linkToProduct ? (
-              <Link href={surface.href} className="hover:text-[var(--brand-primary)]">
+              <Link href={surface.href} className="hover:text-emerald-900">
                 {surface.title}
               </Link>
             ) : (
@@ -39,35 +39,34 @@ export function MarketingSurfaceFrames({
                 }`}
               >
                 <div className={`card-surface ${reverse ? 'lg:order-2' : ''}`}>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-primary)]">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-emerald-900">
                     {surface.tagline}
                   </p>
-                  <h3 className="mt-2 text-xl font-bold tracking-tight text-[var(--brand-text)]">{title}</h3>
-                  <p className="mt-3 whitespace-pre-line text-base font-normal leading-relaxed text-[var(--ink-muted)]">
+                  <h3 className="mt-2 text-lg font-semibold text-slate-900">{title}</h3>
+                  <p className="mt-3 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
                     {surface.body}
                   </p>
                   <ul className="mt-5 grid gap-2 sm:grid-cols-2">
                     {surface.benefits.map((benefit) => (
                       <li
                         key={benefit}
-                        className="flex gap-2 text-sm font-normal leading-relaxed text-[var(--ink-muted)]"
+                        className="flex gap-2 text-base font-normal leading-relaxed text-slate-600"
                       >
-                        <span
-                          className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--brand-primary)]"
-                          aria-hidden
-                        />
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-900" aria-hidden />
                         <span>{benefit}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div className={reverse ? 'lg:order-1' : undefined}>
-                  <BrowserFrame
-                    src={surface.imageSrc}
-                    alt={surface.imageAlt}
-                    hostLabel={surface.hostLabel}
-                    large={surface.id === 'staff'}
-                  />
+                  <div className="overflow-hidden rounded-2xl border border-zinc-200/90 bg-white p-2 shadow-sm">
+                    <BrowserFrame
+                      src={surface.imageSrc}
+                      alt={surface.imageAlt}
+                      hostLabel={surface.hostLabel}
+                      large={surface.id === 'staff'}
+                    />
+                  </div>
                 </div>
               </div>
             )

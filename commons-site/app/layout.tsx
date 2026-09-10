@@ -6,7 +6,7 @@ import { PRODUCT_NAME, PRODUCT_TAGLINE } from '@/lib/brand'
 import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
 import './globals.css'
 
-/** Same face family as Business Rocket marketing; Pavilion colors + copy stay. */
+/** Single sans family for all marketing type (paired with Business Rocket). */
 const sans = Plus_Jakarta_Sans({
   variable: '--font-jakarta',
   subsets: ['latin'],
@@ -23,8 +23,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`${sans.variable} ${sans.className} min-h-screen antialiased`}>
+    <html lang="en" className={`${sans.variable} font-sans`}>
+      <body className={`${sans.className} min-h-screen bg-zinc-50 font-sans text-slate-900 antialiased`}>
         <SiteHeader />
         <main>{children}</main>
         <SiteFooter />

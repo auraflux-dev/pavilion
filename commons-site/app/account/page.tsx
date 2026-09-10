@@ -32,9 +32,13 @@ export default async function AccountPage({
 
   return (
     <div className="mx-auto max-w-lg px-5 py-16">
-      <h1 className="type-page">Account</h1>
-      <p className="type-lede mt-4 whitespace-pre-line text-[var(--ink-muted)]">
-        {`Billing for ${PRODUCT_NAME}.\nInvoices and payment methods via HSKRG LLC on Stripe.\nYour board works in Staff, not a separate ${PRODUCT_NAME} member portal.`}
+      <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
+        Account
+      </h1>
+      <p className="mt-4 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
+        {`Billing for ${PRODUCT_NAME}.
+Invoices and payment methods via HSKRG LLC on Stripe.
+Your board works in Staff, not a separate ${PRODUCT_NAME} member portal.`}
       </p>
 
       {params.error && errorCopy[params.error] ? (
@@ -51,8 +55,9 @@ export default async function AccountPage({
       ) : (
         <>
           <AccountSignInForm />
-          <p className="mt-6 whitespace-pre-line text-sm text-[var(--ink-muted)]">
-            {`Need a hand?\n${CONTACT_EMAIL}`}
+          <p className="mt-6 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
+            {`Need a hand?
+${CONTACT_EMAIL}`}
           </p>
         </>
       )}

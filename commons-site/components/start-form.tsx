@@ -39,40 +39,40 @@ export function StartForm() {
 
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-5">
-      <label className="block text-sm">
+      <label className="block text-sm text-slate-900">
         <span className="font-medium">School or PTO name</span>
         <input
           required
           value={schoolName}
           onChange={(e) => setSchoolName(e.target.value)}
-          className="mt-1 w-full rounded-md border border-[var(--line)] bg-white px-3 py-2"
+          className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-slate-900"
         />
       </label>
-      <label className="block text-sm">
+      <label className="block text-sm text-slate-900">
         <span className="font-medium">City</span>
         <input
           required
           value={city}
           onChange={(e) => setCity(e.target.value)}
-          className="mt-1 w-full rounded-md border border-[var(--line)] bg-white px-3 py-2"
+          className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-slate-900"
         />
       </label>
-      <label className="block text-sm">
+      <label className="block text-sm text-slate-900">
         <span className="font-medium">Work email</span>
         <input
           required
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 w-full rounded-md border border-[var(--line)] bg-white px-3 py-2"
+          className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-slate-900"
         />
       </label>
-      <label className="block text-sm">
+      <label className="block text-sm text-slate-900">
         <span className="font-medium">Your role</span>
         <select
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          className="mt-1 w-full rounded-md border border-[var(--line)] bg-white px-3 py-2"
+          className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-slate-900"
         >
           {ROLES.map((r) => (
             <option key={r} value={r}>
@@ -84,15 +84,14 @@ export function StartForm() {
       {error ? (
         <p className="whitespace-pre-line text-sm text-red-800">{error}</p>
       ) : null}
-      <button
-        type="submit"
-        disabled={busy}
-        className="rounded-md bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-[var(--paper)] hover:bg-[var(--accent)] disabled:opacity-60"
-      >
+      <button type="submit" disabled={busy} className="btn-primary disabled:opacity-60">
         {busy ? 'Opening Stripe…' : `Continue to Stripe · $${COMMONS_LIST_PRICE_USD}/mo`}
       </button>
-      <p className="whitespace-pre-line text-xs text-[var(--ink-muted)]">
-        {`You will pay on Stripe for ${PRODUCT_NAME} software.\nYour school still uses its own Square for parent cards and in-person sales.\nWe email you next steps within one business day.\nTenant setup is provisioned by HSKRG after pay. Not automatic at checkout.`}
+      <p className="whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
+        {`You will pay on Stripe for ${PRODUCT_NAME} software.
+Your school still uses its own Square for parent cards and in-person sales.
+We email you next steps within one business day.
+Tenant setup is provisioned by HSKRG after pay. Not automatic at checkout.`}
       </p>
     </form>
   )

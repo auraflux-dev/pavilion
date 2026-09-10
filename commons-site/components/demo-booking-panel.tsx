@@ -13,23 +13,21 @@ export function DemoBookingPanel({ bare = false }: { bare?: boolean }) {
     <>
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-[var(--ink-muted)]">
+          <div className="text-xs font-semibold uppercase tracking-wider text-emerald-900">
             Live calendar
           </div>
-          <h3 className="mt-1 font-sans text-lg font-bold tracking-tight text-[var(--brand-text)]">
-            Pick a demo time
-          </h3>
+          <h3 className="mt-1 text-lg font-semibold text-slate-900">Pick a demo time</h3>
         </div>
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex text-sm font-semibold text-[var(--brand-primary)] underline decoration-[var(--brand-line)] underline-offset-2 hover:decoration-[var(--brand-primary)]"
+          className="inline-flex text-sm font-semibold text-emerald-900 underline decoration-zinc-300 underline-offset-2 hover:decoration-emerald-900"
         >
           Open in new tab →
         </a>
       </div>
-      <div className="min-h-[680px] w-full overflow-hidden rounded-xl border border-[var(--brand-line)]/80 bg-white">
+      <div className="min-h-[680px] w-full overflow-hidden rounded-xl border border-zinc-200/90 bg-white">
         <iframe
           title="Book a Pavilion demo"
           src={embedUrl}

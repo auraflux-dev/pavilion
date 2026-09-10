@@ -9,15 +9,13 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <section className="bg-[var(--brand-mist)] py-16 md:py-24">
+    <section className="bg-zinc-50 py-16 md:py-24">
       <div className="mx-auto max-w-3xl px-5">
-        <div className="mb-5 inline-block rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--ink-muted)] ring-1 ring-[var(--brand-line)]">
-          Legal
-        </div>
-        <h1 className="font-sans text-3xl font-bold tracking-tight text-[var(--brand-text)] sm:text-4xl">
+        <div className="badge-micro mb-5">Legal</div>
+        <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
           Privacy Policy
         </h1>
-        <div className="card-surface mt-8 space-y-4 text-base font-normal leading-relaxed text-[var(--ink-muted)]">
+        <div className="card-surface mt-8 space-y-4 text-base font-normal leading-relaxed text-slate-600">
           <p>
             {PRODUCT_NAME} is a product of {LEGAL_ENTITY}. This page summarizes how we handle
             information you share through onpavilion.com marketing and checkout.
@@ -28,12 +26,12 @@ export default function PrivacyPage() {
           </p>
           <p>
             Questions:{' '}
-            <a className="font-semibold text-[var(--brand-primary)] hover:underline" href={`mailto:${CONTACT_EMAIL}`}>
+            <a className="font-semibold text-emerald-900 hover:underline" href={`mailto:${CONTACT_EMAIL}`}>
               {CONTACT_EMAIL}
             </a>
           </p>
           <p>
-            <Link href="/terms" className="font-semibold text-[var(--brand-primary)] hover:underline">
+            <Link href="/terms" className="font-semibold text-emerald-900 hover:underline">
               Terms of Service
             </Link>
           </p>

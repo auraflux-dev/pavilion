@@ -11,15 +11,13 @@ export default function ContactPage() {
   const hasCalendar = Boolean(getDemoBookingUrl())
 
   return (
-    <section className="bg-[var(--brand-mist)] py-16 md:py-24">
+    <section className="bg-zinc-50 py-16 md:py-24">
       <div className="mx-auto max-w-3xl px-5">
-        <div className="mb-5 inline-block rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--ink-muted)] ring-1 ring-[var(--brand-line)]">
-          Book a demo
-        </div>
-        <h1 className="font-sans text-4xl font-bold tracking-tight text-[var(--brand-text)] sm:text-5xl">
+        <div className="badge-micro mb-5">Book a demo</div>
+        <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
           Talk with us about {PRODUCT_NAME} for your school.
         </h1>
-        <p className="mt-4 whitespace-pre-line text-base font-normal leading-relaxed text-[var(--ink-muted)] sm:text-lg">
+        <p className="mt-4 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
           {`We will walk your board through Staff, the public site, and family login.
 Or start with the product demo on your own time.`}
         </p>
@@ -29,12 +27,12 @@ Or start with the product demo on your own time.`}
             <DemoBookingPanel />
           ) : (
             <div className="card-surface space-y-3">
-              <p className="text-base font-normal leading-relaxed text-[var(--ink-muted)]">
+              <p className="text-base font-normal leading-relaxed text-slate-600">
                 Email us to book a walkthrough. Include your school name and a good time window.
               </p>
               <a
                 href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`${PRODUCT_NAME} demo request`)}`}
-                className="btn-primary !px-5 !py-3"
+                className="btn-primary"
               >
                 Email {CONTACT_EMAIL}
               </a>
@@ -42,7 +40,7 @@ Or start with the product demo on your own time.`}
           )}
 
           <div className="card-surface">
-            <p className="text-sm font-semibold text-[var(--brand-text)]">Prefer to look first?</p>
+            <p className="text-lg font-semibold text-slate-900">Prefer to look first?</p>
             <div className="mt-3 flex flex-wrap gap-3">
               <a href={DEMO_URL} className="btn-secondary">
                 Try the demo

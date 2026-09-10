@@ -8,20 +8,24 @@ export const metadata: Metadata = { title: 'Help' }
 export default function HelpIndexPage() {
   return (
     <div className="mx-auto max-w-3xl px-5 py-16">
-      <h1 className="type-page">Help</h1>
-      <p className="type-lede mt-4 whitespace-pre-line text-[var(--ink-muted)]">
-        {`${PRODUCT_NAME} for creators and boards.\nThis is platform help, not a school ops knowledge base.`}
+      <div className="badge-micro mb-5">Help</div>
+      <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
+        Help
+      </h1>
+      <p className="mt-4 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
+        {`${PRODUCT_NAME} for creators and boards.
+This is platform help, not a school ops knowledge base.`}
       </p>
-      <ul className="mt-10 space-y-6">
+      <ul className="mt-10 space-y-4">
         {HELP_ARTICLES.map((a) => (
-          <li key={a.slug} className="border-t border-[var(--line)] pt-4">
+          <li key={a.slug} className="card-surface">
             <Link
               href={`/help/${a.slug}`}
-              className="font-[family-name:var(--font-display)] text-xl text-[var(--ink)] hover:text-[var(--accent)]"
+              className="text-lg font-semibold text-slate-900 hover:text-emerald-900"
             >
               {a.title}
             </Link>
-            <p className="mt-1 text-sm text-[var(--ink-muted)]">{a.summary}</p>
+            <p className="mt-1 text-base font-normal leading-relaxed text-slate-600">{a.summary}</p>
           </li>
         ))}
       </ul>

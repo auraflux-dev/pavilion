@@ -4,21 +4,27 @@ import { COMMONS_LIST_PRICE_USD, DEMO_URL } from '@/lib/pricing'
 
 export function MarketingCloseCta() {
   return (
-    <section className="hero-plane border-t border-[var(--brand-dark)]">
+    <section className="border-t border-emerald-950 bg-emerald-950">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-5 py-16 sm:py-20 md:flex-row md:items-end md:justify-between">
         <div className="max-w-xl space-y-4">
-          <p className="whitespace-pre-line font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <p className="whitespace-pre-line text-2xl font-bold tracking-tight text-white md:text-4xl">
             {CLOSE_SLOGAN}
           </p>
-          <p className="whitespace-pre-line text-base font-normal leading-relaxed text-[#e8f0e8] sm:text-lg">
+          <p className="whitespace-pre-line text-base font-normal leading-relaxed text-emerald-100">
             {CLOSE_SUPPORT}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link href="/pricing#checkout" className="btn-on-dark px-5 py-3">
+          <Link
+            href="/pricing#checkout"
+            className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-emerald-950 shadow-sm transition-colors hover:bg-zinc-100"
+          >
             {`Start at $${COMMONS_LIST_PRICE_USD}/mo`}
           </Link>
-          <a href={DEMO_URL} className="btn-on-dark-outline px-5 py-3">
+          <a
+            href={DEMO_URL}
+            className="rounded-xl border border-white/40 bg-transparent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+          >
             Try the demo
           </a>
         </div>

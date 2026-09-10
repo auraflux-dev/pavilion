@@ -22,11 +22,15 @@ export default async function HelpArticlePage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-16">
-      <Link href="/help" className="text-sm text-[var(--accent)] hover:underline">
+      <Link href="/help" className="text-sm font-semibold text-emerald-900 hover:underline">
         All help
       </Link>
-      <h1 className="mt-4 font-[family-name:var(--font-display)] text-4xl">{article.title}</h1>
-      <p className="mt-8 whitespace-pre-line text-[var(--ink-muted)]">{article.body}</p>
+      <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
+        {article.title}
+      </h1>
+      <p className="mt-8 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
+        {article.body}
+      </p>
     </div>
   )
 }
