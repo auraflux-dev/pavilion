@@ -110,6 +110,8 @@ export async function persistTrialStart(opts: {
   product?: 'pavilion' | 'businessrocket'
   /** Module preset id from catalog (e.g. br-starter). */
   modulePresetId?: string
+  /** Explicit module ids. Wins over modulePresetId when non-empty. */
+  modules?: string[]
   /** Override host suffix (e.g. businessrocket.ai). */
   domainSuffix?: string
 }): Promise<{
@@ -120,6 +122,7 @@ export async function persistTrialStart(opts: {
   brandPackSlug: string
   product: 'pavilion' | 'businessrocket'
   modules: string[]
+  modulePresetId: string | null
   setCookies: string[]
 }> {
   if (!commonsDbEnabled()) throw new Error('Commons database is not configured')
@@ -223,16 +226,29 @@ export async function persistTrialStart(opts: {
     brandPack: opts.brandPack,
   })
 
-  const { MODULE_PRESETS, MODULE_PRESET_BR_STARTER, MODULE_PRESET_PAVILION_TRIAL } =
+  const { MODULE_PRESETS, MODULE_PRESET_BR_STARTER, MODULE_PRESET_PAVILION_TRIAL, sanitizeEnabledModules } =
     await import('@/lib/modules/catalog')
   const { setOrgModules } = await import('@/lib/modules/store')
-  const presetId =
-    opts.modulePresetId ||
-    (product === 'businessrocket' ? MODULE_PRESET_BR_STARTER.id : MODULE_PRESET_PAVILION_TRIAL.id)
-  const preset =
-    MODULE_PRESETS.find((p) => p.id === presetId) ||
-    (product === 'businessrocket' ? MODULE_PRESET_BR_STARTER : MODULE_PRESET_PAVILION_TRIAL)
-  const modules = await setOrgModules(orgId, [...preset.modules])
+  const explicit = Array.isArray(opts.modules)
+    ? opts.modules.map((m) => String(m).trim()).filter(Boolean)
+    : []
+  let modulePresetId: string | null = null
+  let moduleList: string[]
+  if (explicit.length > 0) {
+    moduleList = sanitizeEnabledModules(explicit as import('@/lib/modules/catalog').ProductModuleId[])
+  } else {
+    modulePresetId =
+      opts.modulePresetId ||
+      (product === 'businessrocket' ? MODULE_PRESET_BR_STARTER.id : MODULE_PRESET_PAVILION_TRIAL.id)
+    const preset =
+      MODULE_PRESETS.find((p) => p.id === modulePresetId) ||
+      (product === 'businessrocket' ? MODULE_PRESET_BR_STARTER : MODULE_PRESET_PAVILION_TRIAL)
+    moduleList = [...preset.modules]
+  }
+  const modules = await setOrgModules(
+    orgId,
+    moduleList as import('@/lib/modules/catalog').ProductModuleId[],
+  )
 
   return {
     orgId,
@@ -242,6 +258,7 @@ export async function persistTrialStart(opts: {
     brandPackSlug: seeded.packSlug,
     product,
     modules,
+    modulePresetId,
     setCookies,
   }
 }

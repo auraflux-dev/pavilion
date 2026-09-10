@@ -1,17 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { persistTrialStart } from '@/lib/crm/persist'
 import { canProvisionTrials } from '@/lib/crm/auth-edge'
-import { MODULE_PRESET_BR_STARTER } from '@/lib/modules/catalog'
+import {
+  MODULE_GROUP_LABEL,
+  MODULE_PRESET_BR_STARTER,
+  MODULE_PRESETS,
+  modulesForProduct,
+} from '@/lib/modules/catalog'
 
 export const dynamic = 'force-dynamic'
 
 /**
  * Business Rocket provision door.
- * Creates a Pavilion org with product=businessrocket, BR starter modules,
- * and temp host {slug}.businessrocket.ai.
+ * Creates a Pavilion org with product=businessrocket and temp host {slug}.businessrocket.ai.
  *
- * Auth: same COMMONS_PROVISION_SECRET as /api/commons/trial/start
- * (header x-commons-provision-key, ?key=, or body.provisionKey).
+ * Modules:
+ * - body.modules: string[] (exact checklist; wins when non-empty)
+ * - else body.modulePresetId (default br-starter)
+ *
+ * GET (same secret): BR catalog + presets for agents to pick modules.
+ *
+ * Auth: COMMONS_PROVISION_SECRET (header x-commons-provision-key, ?key=, or body.provisionKey).
  */
 function provisionKeyOk(req: NextRequest, bodyKey?: string): boolean {
   const expected = process.env.COMMONS_PROVISION_SECRET?.trim()
@@ -19,6 +28,23 @@ function provisionKeyOk(req: NextRequest, bodyKey?: string): boolean {
   const header = req.headers.get('x-commons-provision-key')?.trim()
   const query = req.nextUrl.searchParams.get('key')?.trim()
   return header === expected || query === expected || bodyKey === expected
+}
+
+export async function GET(req: NextRequest) {
+  if (!canProvisionTrials()) {
+    return NextResponse.json({ ok: false, error: 'Provision unavailable on this host' }, { status: 503 })
+  }
+  if (!provisionKeyOk(req)) {
+    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
+  }
+  return NextResponse.json({
+    ok: true,
+    product: 'businessrocket',
+    catalog: modulesForProduct('businessrocket'),
+    groups: MODULE_GROUP_LABEL,
+    presets: MODULE_PRESETS.filter((p) => p.product === 'businessrocket'),
+    defaultPresetId: MODULE_PRESET_BR_STARTER.id,
+  })
 }
 
 export async function POST(req: NextRequest) {
@@ -44,6 +70,7 @@ export async function POST(req: NextRequest) {
     provisionKey?: string
     brandPack?: string
     modulePresetId?: string
+    modules?: string[]
     customDomain?: string
   }
 
@@ -55,6 +82,9 @@ export async function POST(req: NextRequest) {
   }
 
   const businessName = (body.businessName || body.schoolName || '').trim()
+  const explicitModules = Array.isArray(body.modules)
+    ? body.modules.map((m) => String(m).trim()).filter(Boolean)
+    : []
 
   try {
     const started = await persistTrialStart({
@@ -67,7 +97,11 @@ export async function POST(req: NextRequest) {
       lastName: body.lastName,
       brandPack: body.brandPack,
       product: 'businessrocket',
-      modulePresetId: body.modulePresetId || MODULE_PRESET_BR_STARTER.id,
+      modulePresetId:
+        explicitModules.length > 0
+          ? undefined
+          : body.modulePresetId || MODULE_PRESET_BR_STARTER.id,
+      modules: explicitModules.length > 0 ? explicitModules : undefined,
     })
 
     let customDomain = ''
@@ -97,7 +131,7 @@ export async function POST(req: NextRequest) {
       trialEndsAt: started.trialEndsAt,
       brandPackSlug: started.brandPackSlug,
       modules: started.modules,
-      modulePresetId: body.modulePresetId || MODULE_PRESET_BR_STARTER.id,
+      modulePresetId: started.modulePresetId,
       next: loginUrl,
     })
     for (const cookie of started.setCookies) {

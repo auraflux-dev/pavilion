@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
     product?: 'pavilion' | 'businessrocket'
     modulePresetId?: string
     domainSuffix?: string
+    modules?: string[]
   }
 
   if (!provisionKeyOk(req, body.provisionKey)) {
@@ -49,6 +50,9 @@ export async function POST(req: NextRequest) {
     )
   }
   try {
+    const explicitModules = Array.isArray(body.modules)
+      ? body.modules.map((m) => String(m).trim()).filter(Boolean)
+      : []
     const started = await persistTrialStart({
       req,
       schoolName: body.schoolName || '',
@@ -61,6 +65,7 @@ export async function POST(req: NextRequest) {
       product: body.product,
       modulePresetId: body.modulePresetId,
       domainSuffix: body.domainSuffix,
+      modules: explicitModules.length > 0 ? explicitModules : undefined,
     })
     const loginUrl = `https://${started.tempHost}/login`
     const res = NextResponse.json({
@@ -72,6 +77,7 @@ export async function POST(req: NextRequest) {
       brandPackSlug: started.brandPackSlug,
       product: started.product,
       modules: started.modules,
+      modulePresetId: started.modulePresetId,
       next: loginUrl,
     })
     for (const cookie of started.setCookies) {

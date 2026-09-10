@@ -28,16 +28,32 @@ const name = flag('--name', flag('--school', 'Business Rocket customer'))
 const email = flag('--email', `owner-${slug || 'br'}@businessrocket.ai`)
 const customDomain = flag('--custom')
 const brandPack = flag('--brand')
+const modulePreset = flag('--preset')
+const modulesFile = flag('--modules-file')
+const modulesCsv = flag('--modules')
 const attach = args.includes('--attach')
 
 if (!/^[a-z0-9][a-z0-9-]{1,39}$/.test(slug) || slug === 'riverside') {
   console.error(
-    'Usage: node scripts/provision-br-org.mjs --slug <slug> --name "…" --email … [--attach] [--custom www.example.com]',
+    'Usage: node scripts/provision-br-org.mjs --slug <slug> --name "…" --email … [--modules id,id|--modules-file path.json] [--preset br-starter] [--attach] [--custom www.example.com]',
   )
   process.exit(1)
 }
 
 const password = randomBytes(12).toString('base64url').slice(0, 16)
+
+/** @type {string[] | undefined} */
+let modules
+if (modulesFile) {
+  const raw = JSON.parse(readFileSync(modulesFile, 'utf8'))
+  modules = Array.isArray(raw) ? raw.map(String) : Array.isArray(raw.modules) ? raw.modules.map(String) : null
+  if (!modules?.length) {
+    console.error('--modules-file must be a JSON array or { "modules": [...] }')
+    process.exit(1)
+  }
+} else if (modulesCsv) {
+  modules = modulesCsv.split(',').map((s) => s.trim()).filter(Boolean)
+}
 
 function parseEnvFile(filePath) {
   const map = {}
@@ -124,6 +140,8 @@ const start = await fetch('https://demo.onpavilion.com/api/commons/provision/br'
     provisionKey,
     brandPack: brandPack || undefined,
     customDomain: customDomain || undefined,
+    modulePresetId: modules?.length ? undefined : modulePreset || undefined,
+    modules: modules?.length ? modules : undefined,
   }),
 })
 const body = await start.json()
