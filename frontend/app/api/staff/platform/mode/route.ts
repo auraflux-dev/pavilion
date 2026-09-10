@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
   }
   const demo = isDemoInstanceFromRequest(req)
   const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
-  const product = resolveFleetProductFromRequest(req, email)
+  const product = resolveFleetProductFromRequest(req, email, { demo })
   const mode = resolvePlatformMode(req.cookies.get(PLATFORM_MODE_COOKIE)?.value, {
     publicDemo: demo,
   })
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     const mode: PlatformMode = rawMode === 'client' ? 'client' : 'platform'
     const demo = isDemoInstanceFromRequest(req)
     const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
-    const product = resolveFleetProductFromRequest(req, email)
+    const product = resolveFleetProductFromRequest(req, email, { demo })
     const orgs = await listCustomerOrganizations({
       demo,
       product,

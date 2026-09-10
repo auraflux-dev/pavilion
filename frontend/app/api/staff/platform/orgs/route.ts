@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
   }
   const demo = isDemoInstanceFromRequest(req)
   const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
-  const product = resolveFleetProductFromRequest(req, email)
+  const product = resolveFleetProductFromRequest(req, email, { demo })
   const orgs = await listCustomerOrganizations({
     demo,
     product,
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     const organizationId = requireOrganizationId(String(body.organizationId ?? '').trim())
     const demo = isDemoInstanceFromRequest(req)
     const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
-    const product = resolveFleetProductFromRequest(req, email)
+    const product = resolveFleetProductFromRequest(req, email, { demo })
     const orgs = await listCustomerOrganizations({
       demo,
       product,

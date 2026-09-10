@@ -4,8 +4,11 @@ import { isPlatformOwnerEmail, PLATFORM_CMS_ORG_COOKIE } from '@/lib/crm/platfor
 import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import { listPlatformTenants, platformFleetAttention } from '@/lib/crm/platform-tenants'
 import { PLATFORM_MODE_COOKIE, resolvePlatformMode } from '@/lib/crm/platform-mode'
+import { isSecure } from '@/lib/auth-cookies'
 import {
   defaultSelectedOrgId,
+  FLEET_PRODUCT_COOKIE,
+  parseCompanyProduct,
   resolveFleetProductFromRequest,
 } from '@/lib/crm/fleet-product'
 
@@ -27,7 +30,7 @@ export async function GET(req: NextRequest) {
   }
   const demo = isDemoInstanceFromRequest(req)
   const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
-  const product = resolveFleetProductFromRequest(req, email)
+  const product = resolveFleetProductFromRequest(req, email, { demo })
   const tenants = await listPlatformTenants({ demo, product })
   const attention = await platformFleetAttention({ demo, product })
   const mode = resolvePlatformMode(req.cookies.get(PLATFORM_MODE_COOKIE)?.value, {
@@ -36,11 +39,23 @@ export async function GET(req: NextRequest) {
   const selected =
     req.cookies.get(PLATFORM_CMS_ORG_COOKIE)?.value?.trim() ||
     defaultSelectedOrgId({ demo, product })
-  return NextResponse.json({
+  const res = NextResponse.json({
     mode,
     product,
     selectedOrganizationId: selected,
     tenants,
     attention,
+    canSwitchProduct: demo || Boolean(email),
   })
+  const requested = parseCompanyProduct(req.nextUrl.searchParams.get('product'))
+  if (requested) {
+    res.cookies.set(FLEET_PRODUCT_COOKIE, requested, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: isSecure(),
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30,
+    })
+  }
+  return res
 }

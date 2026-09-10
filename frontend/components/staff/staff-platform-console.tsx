@@ -13,6 +13,7 @@ import {
   type PlatformWorkspace,
 } from '@/lib/staff/platform-workspaces'
 import { StaffModulesPanel } from '@/components/staff/staff-modules-panel'
+import { staffSignOut } from '@/lib/staff/sign-out'
 
 type Me = {
   email: string
@@ -71,10 +72,11 @@ export function StaffPlatformConsole({ me }: Props) {
   const brandLabel = isBr ? 'Business Rocket Staff' : 'Platform Staff'
   const ownerDomain = isBr ? '@businessrocket.ai' : '@onpavilion.com'
 
-  const loadFleet = useCallback(async () => {
+  const loadFleet = useCallback(async (nextProduct?: 'pavilion' | 'businessrocket') => {
     setError('')
     try {
-      const r = await fetch('/api/staff/platform/tenants')
+      const qs = nextProduct ? `?product=${nextProduct}` : ''
+      const r = await fetch(`/api/staff/platform/tenants${qs}`)
       const d = await r.json()
       if (!r.ok) throw new Error(d.error || 'Could not load tenants')
       if (d.product === 'businessrocket' || d.product === 'pavilion') {
@@ -114,6 +116,14 @@ export function StaffPlatformConsole({ me }: Props) {
       url.searchParams.delete('org')
     }
     window.history.replaceState({}, '', url.toString())
+  }
+
+  async function switchProduct(next: 'pavilion' | 'businessrocket') {
+    if (next === product) return
+    setBusy(true)
+    await loadFleet(next)
+    setBusy(false)
+    go('tenants')
   }
 
   useEffect(() => {
@@ -201,22 +211,59 @@ export function StaffPlatformConsole({ me }: Props) {
             </p>
             <p className="text-xs text-[#5A6070]">{me.email}</p>
           </div>
-          <nav className="flex flex-wrap gap-1" aria-label="Platform workspaces">
-            {navItems.map((item) => (
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              className="inline-flex rounded-lg border border-[var(--border)] p-0.5 bg-[#F7F8FA]"
+              role="group"
+              aria-label="Fleet product"
+            >
               <button
-                key={item.id}
                 type="button"
-                onClick={() => go(item.id)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
-                  active === item.id || (active === 'tenant' && item.id === 'tenants')
-                    ? 'bg-[var(--brand-green)] text-white'
-                    : 'text-[#1A1A1A] hover:bg-[#F0F2F5]'
+                disabled={busy}
+                onClick={() => void switchProduct('pavilion')}
+                className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
+                  !isBr ? 'bg-[#1A1A1A] text-white' : 'text-[#5A6070] hover:bg-white'
                 }`}
               >
-                {item.label}
+                Pavilion
               </button>
-            ))}
-          </nav>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void switchProduct('businessrocket')}
+                className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
+                  isBr ? 'bg-[#1A1A1A] text-white' : 'text-[#5A6070] hover:bg-white'
+                }`}
+              >
+                Business Rocket
+              </button>
+            </div>
+            <nav className="flex flex-wrap gap-1" aria-label="Platform workspaces">
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => go(item.id)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                    active === item.id || (active === 'tenant' && item.id === 'tenants')
+                      ? 'bg-[var(--brand-green)] text-white'
+                      : 'text-[#1A1A1A] hover:bg-[#F0F2F5]'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-8 text-xs"
+              onClick={() => void staffSignOut()}
+            >
+              Sign out
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -235,7 +282,8 @@ export function StaffPlatformConsole({ me }: Props) {
 Open a customer org, then warp into their Staff to edit brand, CMS, and connectors.
 Member portals stay on the customer host — never on businessrocket.ai.`
                   : `Fleet view for Pavilion operators.
-Open a tenant to check connectors and brand, or enter Client Staff to serve that school.`}
+Open a tenant to check connectors and brand, or enter Client Staff to serve that school.
+Use Pavilion / Business Rocket in the header to switch fleets on this shared demo.`}
               </p>
             </div>
             {attention.length > 0 ? (
@@ -284,11 +332,13 @@ Open a tenant to check connectors and brand, or enter Client Staff to serve that
         {active === 'tenants' ? (
           <section className="space-y-4">
             <div>
-              <h1 className="text-2xl font-bold text-[#1A1A1A]">Tenants</h1>
+              <h1 className="text-2xl font-bold text-[#1A1A1A]">
+                {isBr ? 'Business Rocket tenants' : 'Tenants'}
+              </h1>
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
                 {isBr
                   ? `Business Rocket customer orgs (product=businessrocket).
-Provisioned via POST /api/commons/provision/br — not a second Staff app.`
+Sandbox fixture is HSKRG BR sandbox until real clients are provisioned.`
                   : `Trials and customer orgs on the Pavilion platform.
 VIP SHMS is dedicated and not editable here.`}
               </p>
@@ -334,7 +384,13 @@ VIP SHMS is dedicated and not editable here.`}
                 </li>
               ))}
               {!filtered.length ? (
-                <li className="p-4 text-sm text-[#5A6070]">No tenants match.</li>
+                <li className="p-4 text-sm text-[#5A6070] whitespace-pre-line">
+                  {isBr
+                    ? `No Business Rocket customer orgs in this fleet yet.
+On demo you should see HSKRG BR sandbox when fixtures are active.
+Provision real clients via the BR provision API.`
+                    : `No tenants match.`}
+                </li>
               ) : null}
             </ul>
           </section>

@@ -5,6 +5,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { TOKENS_COOKIE } from '@/lib/auth-cookies'
 import { DEMO_REVIEW_COOKIE } from '@/lib/demo/cookie'
+import { FLEET_PRODUCT_COOKIE } from '@/lib/crm/fleet-product'
+import { PLATFORM_CMS_ORG_COOKIE } from '@/lib/crm/platform-owners'
+import { PLATFORM_MODE_COOKIE } from '@/lib/crm/platform-mode'
 import { organizationIdFromRequest } from '@/lib/crm/tenant'
 import {
   ACTIVITY_CORRELATION_COOKIE,
@@ -40,15 +43,17 @@ export async function POST(req: NextRequest) {
   }
 
   const res = NextResponse.json({ ok: true })
-  res.cookies.set(TOKENS_COOKIE, '', {
-    httpOnly: true,
-    maxAge: 0,
-    path: '/',
-  })
-  res.cookies.set(DEMO_REVIEW_COOKIE, '', {
-    httpOnly: true,
-    maxAge: 0,
-    path: '/',
-  })
+  const clear = (name: string) => {
+    res.cookies.set(name, '', {
+      httpOnly: true,
+      maxAge: 0,
+      path: '/',
+    })
+  }
+  clear(TOKENS_COOKIE)
+  clear(DEMO_REVIEW_COOKIE)
+  clear(PLATFORM_MODE_COOKIE)
+  clear(PLATFORM_CMS_ORG_COOKIE)
+  clear(FLEET_PRODUCT_COOKIE)
   return res
 }

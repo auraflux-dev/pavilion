@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
   }
   const demo = isDemoInstanceFromRequest(req)
   const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
-  const product = resolveFleetProductFromRequest(req, email)
+  const product = resolveFleetProductFromRequest(req, email, { demo })
   const tenants = await listPlatformTenants({ demo, product })
   const editable = tenants.filter((t) => !t.vipReadonly && t.plan !== 'platform')
   const withSquare = editable.filter((t) => t.squareConnected).length

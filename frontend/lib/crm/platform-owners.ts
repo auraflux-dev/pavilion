@@ -142,6 +142,17 @@ export async function ensurePlatformOwnerSeed(): Promise<void> {
        board_title = excluded.board_title,
        organization_id = excluded.organization_id`,
   )
+
+  // Demo BR customer sandbox (fleet list; not platform home)
+  await sql(
+    `insert into organizations (id, name, slug, plan, product)
+     values ('org_hskrg_br', 'HSKRG BR sandbox', 'hskrg-br', 'trial', 'businessrocket')
+     on conflict (id) do update set
+       name = excluded.name,
+       slug = excluded.slug,
+       plan = excluded.plan,
+       product = excluded.product`,
+  )
 }
 
 export type PlatformOrgOption = {
