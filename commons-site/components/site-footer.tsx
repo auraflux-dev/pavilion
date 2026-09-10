@@ -13,8 +13,8 @@ const explore = [
 ]
 
 const legal = [
-  { href: '/privacy', label: 'Privacy' },
-  { href: '/terms', label: 'Terms' },
+  { href: '/privacy', label: 'Privacy Policy' },
+  { href: '/terms', label: 'Terms of Service' },
   { href: '/help', label: 'Help' },
 ]
 
