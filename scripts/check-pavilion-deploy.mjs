@@ -15,7 +15,8 @@ export const PAVILION_TARGETS = {
   },
   'commons-site': {
     label: 'Pavilion marketing',
-    base: 'https://onpavilion.com',
+    base: 'https://www.onpavilion.com',
+    altBase: 'https://onpavilion.com',
     mustInclude: [
       'Pavilion',
       'The operating system',
@@ -25,6 +26,10 @@ export const PAVILION_TARGETS = {
       'Privacy Policy',
       'Terms of Service',
     ],
+    /** Extra path checks so copy-only ships cannot false-pass on stale homepage alone. */
+    pathMustInclude: {
+      '/pricing': ['PTO Annual Plan', 'Unlimited parents, volunteers, and chairs', 'invoice billing via ACH'],
+    },
   },
   'commons-pto': {
     label: 'Commons PTO legacy',
@@ -75,6 +80,21 @@ if (cfg.altBase) {
     for (const needle of cfg.mustInclude) {
       if (!altRes.body.toLowerCase().includes(needle.toLowerCase())) {
         issues.push(`missing "${needle}" on ${cfg.altBase}`)
+      }
+    }
+  }
+}
+
+if (cfg.pathMustInclude) {
+  for (const [path, needles] of Object.entries(cfg.pathMustInclude)) {
+    const pathRes = curl(`${cfg.base}${path}`)
+    if (!pathRes.ok) {
+      issues.push(`fetch failed (${cfg.base}${path})`)
+      continue
+    }
+    for (const needle of needles) {
+      if (!pathRes.body.toLowerCase().includes(needle.toLowerCase())) {
+        issues.push(`missing "${needle}" on ${cfg.base}${path}`)
       }
     }
   }

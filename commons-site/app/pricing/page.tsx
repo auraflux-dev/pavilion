@@ -35,8 +35,8 @@ export default function PricingPage() {
 
   return (
     <div className="bg-zinc-50">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-start gap-8 px-4 pb-16 pt-8 sm:px-6 lg:grid-cols-12 lg:px-8">
-        <div className="lg:col-span-12">
+      <div className="mx-auto max-w-7xl px-4 pb-16 pt-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
           <span className="mb-4 inline-block rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-900">
             Pricing
           </span>
@@ -50,45 +50,47 @@ $${COMMONS_LIST_PRICE_USD} per school per month.
           </p>
         </div>
 
-        <div className="relative rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-xl md:p-8 lg:col-span-7">
-          <span className="mb-4 inline-block rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-900">
-            PTO Annual Plan
-          </span>
-          <p className="flex items-baseline gap-1">
-            <span className="text-5xl font-bold text-slate-900">${COMMONS_LIST_PRICE_USD}</span>
-            <span className="text-xl font-normal text-slate-500">/mo</span>
-          </p>
-          <p className="mb-6 text-sm font-medium text-slate-700">
-            ${year.toLocaleString()} / year billed annually. Lock in your rate for life.
-          </p>
-          <ul className="space-y-3">
-            {FEATURES.map((feature) => (
-              <li
-                key={feature}
-                className="flex gap-2.5 text-sm font-medium leading-relaxed text-slate-700 md:text-base"
-              >
-                <CheckIcon />
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div
-          id="checkout"
-          className="scroll-mt-24 rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-lg md:p-8 lg:col-span-5"
-        >
-          <h2 className="mb-2 text-xl font-bold text-slate-900">Get started with Pavilion</h2>
-          <p className="text-base font-normal leading-relaxed text-slate-700">
-            Lock in your school&apos;s workspace for the upcoming year.
-          </p>
-          {!ready ? (
-            <p className="mt-4 whitespace-pre-line rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm font-normal leading-relaxed text-slate-600">
-              {`Online signup is not open on this site yet.
-You can still book a demo or email us to start.`}
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-start gap-8 lg:grid-cols-12">
+          <div className="relative rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-xl md:p-8 lg:col-span-7">
+            <span className="mb-4 inline-block rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-900">
+              PTO Annual Plan
+            </span>
+            <p className="flex items-baseline gap-1">
+              <span className="text-5xl font-bold text-slate-900">${COMMONS_LIST_PRICE_USD}</span>
+              <span className="text-xl font-normal text-slate-500">/mo</span>
             </p>
-          ) : null}
-          <StartForm />
+            <p className="mb-6 text-sm font-medium text-slate-700">
+              ${year.toLocaleString()} / year billed annually. Lock in your rate for life.
+            </p>
+            <ul className="space-y-3">
+              {FEATURES.map((feature) => (
+                <li
+                  key={feature}
+                  className="flex gap-2.5 text-sm font-medium leading-relaxed text-slate-700 md:text-base"
+                >
+                  <CheckIcon />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div
+            id="checkout"
+            className="scroll-mt-24 rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-lg md:p-8 lg:col-span-5"
+          >
+            <h2 className="mb-2 text-xl font-bold text-slate-900">Get started with Pavilion</h2>
+            <p className="text-base font-normal leading-relaxed text-slate-700">
+              Lock in your school&apos;s workspace for the upcoming year.
+            </p>
+            {!ready ? (
+              <p className="mt-4 whitespace-pre-line rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm font-normal leading-relaxed text-slate-600">
+                {`Online signup is not open on this site yet.
+You can still book a demo or email us to start.`}
+              </p>
+            ) : null}
+            <StartForm />
+          </div>
         </div>
       </div>
     </div>
