@@ -10,75 +10,102 @@ const explore = [
   { href: '/pricing', label: 'Pricing' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
+]
+
+const legal = [
+  { href: '/privacy', label: 'Privacy' },
+  { href: '/terms', label: 'Terms' },
   { href: '/help', label: 'Help' },
-  { href: DEMO_URL, label: 'Demo', external: true },
 ]
 
 export function SiteFooter() {
   return (
-    <footer className="bg-emerald-950 text-white">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-6 py-12 md:grid-cols-4">
-        <div className="space-y-3">
-          <Link href="/" className="inline-flex items-center gap-2.5">
-            <PavilionMark className="h-9 w-9 shrink-0 text-emerald-300" />
-            <span className="text-sm font-semibold uppercase tracking-wider text-white">
-              {PRODUCT_NAME}
-            </span>
-          </Link>
-          <div className="text-xs font-normal leading-relaxed text-emerald-100/80">{PRODUCT_TAGLINE}</div>
-          <div className="text-xs font-medium text-emerald-200/70">© Pavilion. All rights reserved.</div>
+    <footer className="border-t border-emerald-900 bg-emerald-950 text-white">
+      <div className="mx-auto max-w-6xl px-6 py-12">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-12 md:gap-8">
+          <div className="md:col-span-5">
+            <Link href="/" className="inline-flex items-center gap-2.5">
+              <PavilionMark className="h-9 w-9 shrink-0 text-emerald-300" />
+              <span className="text-sm font-semibold uppercase tracking-wider text-white">
+                {PRODUCT_NAME}
+              </span>
+            </Link>
+            <p className="mt-3 max-w-xs text-sm font-normal leading-relaxed text-emerald-100/80">
+              {PRODUCT_TAGLINE}
+            </p>
+          </div>
+
+          <div className="md:col-span-2">
+            <div className="text-xs font-semibold uppercase tracking-wider text-emerald-100">
+              Explore
+            </div>
+            <ul className="mt-3 space-y-2">
+              {explore.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="text-sm text-emerald-100/80 transition-colors hover:text-white"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="md:col-span-2">
+            <div className="text-xs font-semibold uppercase tracking-wider text-emerald-100">
+              Contact
+            </div>
+            <ul className="mt-3 space-y-2">
+              <li>
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="text-sm text-emerald-100/80 transition-colors hover:text-white"
+                >
+                  {CONTACT_EMAIL}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={DEMO_URL}
+                  className="text-sm text-emerald-100/80 transition-colors hover:text-white"
+                >
+                  Demo
+                </a>
+              </li>
+              <li>
+                <Link
+                  href="/account"
+                  className="text-sm text-emerald-100/80 transition-colors hover:text-white"
+                >
+                  Account
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div className="md:col-span-3">
+            <div className="text-xs font-semibold uppercase tracking-wider text-emerald-100">
+              Legal
+            </div>
+            <ul className="mt-3 space-y-2">
+              {legal.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="text-sm text-emerald-100/80 transition-colors hover:text-white"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        <div className="space-y-2.5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-emerald-100">Explore</div>
-          {explore.map((item) =>
-            item.external ? (
-              <a
-                key={item.href}
-                href={item.href}
-                className="block text-sm text-emerald-100/80 transition-colors hover:text-white"
-              >
-                {item.label}
-              </a>
-            ) : (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block text-sm text-emerald-100/80 transition-colors hover:text-white"
-              >
-                {item.label}
-              </Link>
-            ),
-          )}
-        </div>
-
-        <div className="space-y-2.5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-emerald-100">Contact</div>
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
-            className="block text-sm text-emerald-100/80 transition-colors hover:text-white"
-          >
-            {CONTACT_EMAIL}
-          </a>
-          <Link
-            href="/account"
-            className="block text-sm text-emerald-100/80 transition-colors hover:text-white"
-          >
-            Account
-          </Link>
-        </div>
-
-        <div className="space-y-2.5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-emerald-100">Legal</div>
-          <Link href="/privacy" className="block text-sm text-emerald-100/80 transition-colors hover:text-white">
-            Privacy Policy
-          </Link>
-          <Link href="/terms" className="block text-sm text-emerald-100/80 transition-colors hover:text-white">
-            Terms of Service
-          </Link>
-          <Link href="/help" className="block text-sm text-emerald-100/80 transition-colors hover:text-white">
-            Help center
-          </Link>
+        <div className="mt-10 border-t border-white/10 pt-6 text-xs font-medium text-emerald-200/70">
+          © Pavilion. All rights reserved.
         </div>
       </div>
     </footer>

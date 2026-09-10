@@ -151,15 +151,15 @@ export const ABOUT = {
   points: [
     {
       title: 'Built for school boards',
-      body: 'Your board software invoice is separate from parent payments.\nFamilies keep checking out on your school Square.',
+      body: 'Your board software invoice stays separate from parent payments.\nFamilies keep checking out on your school Square.',
     },
     {
-      title: 'White-labeled for schools',
+      title: 'Your school brand in front',
       body: 'Families see your PTO name, colors, and domain.\nThey should not need to learn a vendor brand to join.',
     },
     {
       title: 'Proven with live boards',
-      body: 'We refine the product with real PTO seasons.\nSchools go live when their board is ready.',
+      body: 'We refine the product with real PTO seasons.\nSchools launch when their board is ready.',
     },
   ],
 } as const
