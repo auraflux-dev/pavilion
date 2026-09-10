@@ -46,7 +46,7 @@ Or start with the product demo on your own time.`}
                 Try the demo
               </a>
               <Link href="/pricing#checkout" className="btn-secondary">
-                Start at checkout
+                Get started
               </Link>
             </div>
           </div>

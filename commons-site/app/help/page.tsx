@@ -14,7 +14,8 @@ export default function HelpIndexPage() {
       </h1>
       <p className="mt-4 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
         {`${PRODUCT_NAME} for creators and boards.
-This is platform help, not a school ops knowledge base.`}
+Billing, buying, and product how-tos.
+Day-to-day school ops live in your Staff Help after you launch.`}
       </p>
       <ul className="mt-10 space-y-4">
         {HELP_ARTICLES.map((a) => (

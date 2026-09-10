@@ -64,7 +64,7 @@ export function SiteFooter() {
             href={PLATFORM_STAFF_URL}
             className="block text-sm text-emerald-100/80 transition-colors hover:text-white"
           >
-            Platform Staff
+            Staff sign-in
           </a>
           <Link
             href="/account"

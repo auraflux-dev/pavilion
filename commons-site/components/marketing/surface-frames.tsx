@@ -18,7 +18,7 @@ export function MarketingSurfaceFrames({
           Public. Family. Staff.
         </h2>
         <p className="mb-8 mt-4 max-w-2xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-600 md:text-lg">
-          {`What each surface includes.\nSame product. Same brand. Different jobs.`}
+          {`What each place includes.\nSame product. Same brand. Different jobs.`}
         </p>
         <div className="space-y-16">
           {SURFACES.map((surface, i) => {

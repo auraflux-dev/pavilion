@@ -18,7 +18,7 @@ export function MarketingSurfaceTour({ linkToProduct = false }: SurfaceTourProps
   return (
     <section className="bg-zinc-50 py-16 md:py-24" id="surfaces">
       <div className="mx-auto max-w-6xl px-5">
-        <div className="badge-micro mb-5">Three surfaces</div>
+        <div className="badge-micro mb-5">Three places</div>
         <h2 className="max-w-3xl text-2xl font-bold tracking-tight text-slate-900 md:text-4xl">
           Public. Family. Staff.
         </h2>
@@ -28,7 +28,7 @@ export function MarketingSurfaceTour({ linkToProduct = false }: SurfaceTourProps
 
         <div
           role="tablist"
-          aria-label="Product surfaces"
+          aria-label="Public, family, and staff"
           className="relative z-20 mt-10 flex flex-col gap-2 sm:flex-row sm:flex-wrap"
         >
           {SURFACES.map((surface, index) => {

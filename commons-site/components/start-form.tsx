@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { PRODUCT_NAME } from '@/lib/brand'
 import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
 
 const ROLES = ['President', 'Treasurer', 'VP / board', 'Other']
 
 const fieldClass =
-  'mt-1 w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-800'
+  'mb-4 mt-1 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-800'
 
 export function StartForm() {
   const [schoolName, setSchoolName] = useState('')
@@ -29,7 +28,7 @@ export function StartForm() {
       })
       const data = (await res.json()) as { url?: string; error?: string }
       if (!res.ok || !data.url) {
-        setError(data.error || 'Checkout unavailable right now.')
+        setError(data.error || 'Signup unavailable right now.')
         setBusy(false)
         return
       }
@@ -41,64 +40,62 @@ export function StartForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-6 space-y-4">
-      <label className="block text-sm font-medium text-slate-900">
+    <form onSubmit={onSubmit} className="mt-6">
+      <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-700">
         School or PTO name
-        <input
-          required
-          value={schoolName}
-          onChange={(e) => setSchoolName(e.target.value)}
-          className={fieldClass}
-        />
       </label>
-      <label className="block text-sm font-medium text-slate-900">
+      <input
+        required
+        value={schoolName}
+        onChange={(e) => setSchoolName(e.target.value)}
+        className={fieldClass}
+      />
+      <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-700">
         City
-        <input
-          required
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          className={fieldClass}
-        />
       </label>
-      <label className="block text-sm font-medium text-slate-900">
+      <input
+        required
+        value={city}
+        onChange={(e) => setCity(e.target.value)}
+        className={fieldClass}
+      />
+      <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-700">
         Work email
-        <input
-          required
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className={fieldClass}
-        />
       </label>
-      <label className="block text-sm font-medium text-slate-900">
+      <input
+        required
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className={fieldClass}
+      />
+      <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-700">
         Your role
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className={fieldClass}
-        >
-          {ROLES.map((r) => (
-            <option key={r} value={r}>
-              {r}
-            </option>
-          ))}
-        </select>
       </label>
+      <select
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+        className={fieldClass}
+      >
+        {ROLES.map((r) => (
+          <option key={r} value={r}>
+            {r}
+          </option>
+        ))}
+      </select>
       {error ? (
-        <p className="whitespace-pre-line text-sm text-red-800">{error}</p>
+        <p className="mb-3 whitespace-pre-line text-sm text-red-800">{error}</p>
       ) : null}
       <button
         type="submit"
         disabled={busy}
-        className="mt-4 w-full rounded-xl bg-emerald-900 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-emerald-950 disabled:opacity-60"
+        className="mt-2 w-full rounded-xl bg-emerald-900 py-3.5 text-base font-semibold text-white shadow-md transition-colors hover:bg-emerald-950 disabled:opacity-60"
       >
-        {busy ? 'Opening Stripe…' : `Continue to Stripe · $${COMMONS_LIST_PRICE_USD}/mo`}
+        {busy ? 'Securing workspace…' : `Secure Your Workspace · $${COMMONS_LIST_PRICE_USD}/mo`}
       </button>
-      <p className="whitespace-pre-line text-sm font-normal leading-relaxed text-slate-600">
-        {`You will pay on Stripe for ${PRODUCT_NAME} software.
-Your school still uses its own Square for parent cards and in-person sales.
-We email you next steps within one business day.
-Tenant setup is provisioned by HSKRG after pay. Not automatic at checkout.`}
+      <p className="mt-4 text-sm font-normal leading-relaxed text-slate-600">
+        Instant access to Staff. Parent payments connect directly to your school&apos;s existing
+        Square account.
       </p>
     </form>
   )

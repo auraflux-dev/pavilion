@@ -69,7 +69,7 @@ export const WATCH_ITEMS: WatchItem[] = [
   {
     id: 'billing',
     title: 'Pay and /account',
-    blurb: 'Pavilion billing on HSKRG Stripe. Invoices and add-ons without mixing school Square.',
+    blurb: 'How boards pay for Pavilion and manage invoices, separate from school Square sales.',
     duration: 'Coming soon',
     placeholder: true,
   },

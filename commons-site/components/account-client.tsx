@@ -123,8 +123,7 @@ export function AccountDashboard(props: {
       <div className="space-y-3">
         <h2 className="text-lg font-semibold text-slate-900">Billing</h2>
         <p className="whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
-          {`Invoices, payment method, and cancel live in Stripe.
-Sold by HSKRG LLC.
+          {`Invoices, payment method, and cancel live in your billing portal.
 Day-to-day school work lives in your Staff portal, not here.`}
         </p>
         <button
@@ -137,7 +136,7 @@ Day-to-day school work lives in your Staff portal, not here.`}
         </button>
         {!props.hasCustomer ? (
           <p className="text-base font-normal leading-relaxed text-slate-600">
-            No Stripe customer linked yet. If you just paid, wait a minute and refresh.
+            No billing account linked yet. If you just paid, wait a minute and refresh.
           </p>
         ) : null}
       </div>

@@ -11,8 +11,8 @@ export default function ThanksPage() {
         Thank you
       </h1>
       <p className="mt-4 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
-        {`If you finished Stripe checkout, we have your school on the list.
-HSKRG will email you within one business day with next steps.`}
+        {`We have your school on the list.
+We will email you within one business day with next steps.`}
       </p>
       <p className="mt-6 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
         {`While you wait, walk the product demo as a board member.`}

@@ -20,7 +20,7 @@ export async function POST() {
     return NextResponse.json(
       {
         error:
-          'No Stripe customer on this account yet. Finish checkout or email us if you already paid.',
+          'No billing account linked yet. Finish signup or email us if you already paid.',
       },
       { status: 404 },
     )
@@ -33,12 +33,12 @@ export async function POST() {
       return_url: `${siteOrigin()}/account`,
     })
     if (!session.url) {
-      return NextResponse.json({ error: 'Stripe did not return a portal URL.' }, { status: 502 })
+      return NextResponse.json({ error: 'Could not open billing portal. Try again or email us.' }, { status: 502 })
     }
     return NextResponse.json({ url: session.url })
   } catch (err) {
     console.error('billing portal failed', err)
-    const message = err instanceof Error ? err.message : 'Stripe error'
+    const message = err instanceof Error ? err.message : 'Billing portal unavailable. Try again.'
     return NextResponse.json({ error: message }, { status: 502 })
   }
 }

@@ -22,10 +22,11 @@ Your school keeps its own Square for parent cards and in-person sales.
 
 Why: boards turn over and tools scatter. Parents should never see the vendor.
 
-How: branded trial, then Staff onboarding (connectors and brand), then go live.
-${PRODUCT_NAME} platform Staff supports your org. Day-to-day work stays in your Staff portal.
+How: branded trial, then Staff setup for tools and brand, then go live.
+Pavilion support stays with your board after launch.
+Day-to-day work stays in your Staff portal.
 
-${PRODUCT_NAME} software billing is separate, on HSKRG LLC Stripe.`,
+${PRODUCT_NAME} software billing is separate from your school Square.`,
   },
   {
     slug: 'public-family-staff',
@@ -37,9 +38,9 @@ Family login: household, students, membership, and store card when you use one.
 That is for parents at your school. It is not a ${PRODUCT_NAME} customer member portal.
 
 Staff portal: where your board buys and runs ${PRODUCT_NAME}.
-Onboarding, connectors (Square, Google, Canva), roles, and day-to-day ops live here.
+Setup, tools (Square, Google, Canva), roles, and day-to-day ops live here.
 
-${PRODUCT_NAME} platform Staff (@onpavilion.com) can support your org from our Staff side.
+Our team can support your org from our side when you need help.
 Your board does not need a separate ${PRODUCT_NAME} member portal for billing or setup.`,
   },
   {
@@ -67,46 +68,46 @@ Parent card processing stays on your school Square and is not this invoice.`,
   {
     slug: 'billing-and-account',
     title: 'Billing and invoices',
-    summary: 'Magic-link /account for Stripe. School work stays in Staff.',
+    summary: 'Sign in at /account for invoices. School work stays in Staff.',
     body: `Use /account with the email on your ${PRODUCT_NAME} invoice.
 
 We email a one-time sign-in link.
-From there you open the Stripe billing portal for invoices, cards, and cancel.
+From there you manage invoices, cards, and cancel in your billing portal.
 
 /account is billing only.
-Onboarding, connectors, and school ops live in your Staff portal.`,
+Setup and school ops live in your Staff portal.`,
   },
   {
     slug: 'school-square-vs-saas',
-    title: `Square at your school vs Stripe for ${PRODUCT_NAME}`,
+    title: `Square at your school vs ${PRODUCT_NAME} billing`,
     summary: 'Two money paths. Do not mix them.',
     body: `Parent memberships, store cards, and in-person sales stay on your school Square.
 
-${PRODUCT_NAME} software is $399 per month on HSKRG LLC Stripe.
-That invoice is for the platform, not for parent checkout fees.`,
+${PRODUCT_NAME} software is $399 per month on a separate board invoice.
+That invoice is for your workspace, not for parent payment fees.`,
   },
   {
     slug: 'trial-then-pay',
     title: 'Getting started after purchase',
-    summary: 'Trial first. Staff onboarding next. Pay locks look and feel.',
-    body: `Sales builds a branded private trial with your logo, colors, and school name.
+    summary: 'Trial first. Staff setup next. Pay locks look and feel.',
+    body: `We start with a branded private trial with your logo, colors, and school name.
 
-During the trial, the board prunes surfaces you do not offer in Staff.
+During the trial, the board turns off areas you do not offer.
 
-Pay is a small start: approved look and feel, pruned set, HSKRG Stripe billing.
-Deeper onboarding happens in Staff: Square, Google, Canva, brand, and content.
+Paying locks in approved look and feel and your annual board license.
+Deeper setup happens in Staff: Square, Google, Canva, brand, and content.
 
-We do not auto-provision a live tenant the moment checkout completes.`,
+Your live school workspace is set up with you after purchase. It is not instant the moment you pay.`,
   },
   {
     slug: 'day-to-day-support',
     title: 'Where to get day-to-day support',
-    summary: 'Platform help here. School ops in your Staff Help.',
+    summary: 'Product help here. School ops in your Staff Help.',
     body: `This /help site is for ${PRODUCT_NAME} as a product: billing, partners, how buying works.
 
-Day-to-day PTO ops (membership, events, register, store how-tos) live in your school Staff Help after go-live.
+Day-to-day PTO ops (membership, events, register, store how-tos) live in your school Staff Help after you launch.
 
-For platform billing questions, use /account or email hello@hskrg.com.`,
+For billing questions, use /account or email hello@hskrg.com.`,
   },
   {
     slug: 'partners',

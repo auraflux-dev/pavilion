@@ -37,8 +37,8 @@ export default async function AccountPage({
       </h1>
       <p className="mt-4 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
         {`Billing for ${PRODUCT_NAME}.
-Invoices and payment methods via HSKRG LLC on Stripe.
-Your board works in Staff, not a separate ${PRODUCT_NAME} member portal.`}
+Manage invoices and payment methods for your school workspace.
+Your board works in Staff, not a separate member portal.`}
       </p>
 
       {params.error && errorCopy[params.error] ? (

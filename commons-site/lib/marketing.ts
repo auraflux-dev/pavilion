@@ -17,7 +17,7 @@ export const STORY = {
   who: `${PRODUCT_NAME} is the PTO operating system.`,
   what: 'One branded public site, family login for households, and Staff workspaces that survive board turnover.\nYour school keeps its Square.',
   why: 'Boards turn over. Tools scatter.\nParents should never see the vendor.',
-  how: 'Branded trial. Staff onboarding for connectors and brand. Go live.\nPavilion platform Staff supports your org.',
+  how: 'Branded trial. Staff setup for tools and brand. Go live.\nPavilion support stays with your board after launch.',
 } as const
 
 export const PILLARS = [
@@ -39,7 +39,7 @@ export const PILLARS = [
   {
     id: 'streamline',
     title: 'Streamline',
-    body: 'Staff is where your board lives: onboarding, connectors, and ops.',
+    body: 'Staff is where your board lives: setup, tools, and day-to-day ops.',
   },
 ] as const
 
@@ -150,8 +150,8 @@ export const ABOUT = {
     `${PRODUCT_NAME} is the operating system for PTOs, PTAs, and school communities.\nWe keep the school brand in front of parents, and the board tools in one place.`,
   points: [
     {
-      title: 'Product of HSKRG LLC',
-      body: 'Software billing is separate from your school Square.\nParents keep checking out on your school account.',
+      title: 'Built for school boards',
+      body: 'Your board software invoice is separate from parent payments.\nFamilies keep checking out on your school Square.',
     },
     {
       title: 'White-labeled for schools',
@@ -159,7 +159,7 @@ export const ABOUT = {
     },
     {
       title: 'Proven with live boards',
-      body: 'The product ships first on Pavilion demo and trials.\nCustomer schools promote when ready.',
+      body: 'We refine the product with real PTO seasons.\nSchools go live when their board is ready.',
     },
   ],
 } as const
@@ -172,7 +172,7 @@ export const PROCESS = {
   steps: [
     {
       title: '1. Tour the demo',
-      body: 'See public, family, and staff on the sample school.\nClick through real surfaces, not slides.',
+      body: 'See public, family, and staff on the sample school.\nClick through the real product, not slides.',
     },
     {
       title: '2. Brand a private trial',

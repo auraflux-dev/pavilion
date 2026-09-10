@@ -11,10 +11,10 @@ Your school keeps its own Square.
 **Why:** boards turn over and tools scatter.
 Parents should never see the vendor.
 
-**How:** branded trial, then Staff onboarding (connectors and brand), then go live.
-Pavilion platform Staff supports your org.
+**How:** branded trial, then Staff setup for tools and brand, then go live.
+Pavilion support stays with your board after launch.
 Day-to-day work stays in your Staff portal, not a separate Pavilion member portal.
 
-Pavilion software billing is separate, on HSKRG LLC Stripe.
+Pavilion software billing is separate from your school Square.
 
-See also `/help` (runtime source: `lib/help-articles.ts`).
+See also `/help`.

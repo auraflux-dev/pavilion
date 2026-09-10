@@ -15,7 +15,7 @@ type Body = {
 export async function POST(req: NextRequest) {
   if (!stripeConfigured()) {
     return NextResponse.json(
-      { error: 'Stripe checkout is not configured yet.' },
+      { error: 'Online signup is not available right now.' },
       { status: 503 },
     )
   }
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (!session.url) {
-      return NextResponse.json({ error: 'Stripe did not return a checkout URL.' }, { status: 502 })
+      return NextResponse.json({ error: 'Could not start signup. Try again or email us.' }, { status: 502 })
     }
 
     try {
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: session.url })
   } catch (err) {
     console.error('stripe checkout.sessions.create failed', err)
-    const message = err instanceof Error ? err.message : 'Stripe error'
+    const message = err instanceof Error ? err.message : 'Signup failed. Try again.'
     return NextResponse.json({ error: message }, { status: 502 })
   }
 }
