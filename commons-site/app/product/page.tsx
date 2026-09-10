@@ -11,13 +11,13 @@ export default function ProductPage() {
   return (
     <>
       <section className="border-b border-zinc-200 bg-zinc-50">
-        <div className="mx-auto max-w-7xl px-4 pb-8 pt-10 sm:px-6 md:pt-14 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 pb-4 pt-10 sm:px-6 md:pb-6 md:pt-12 lg:px-8">
           <div className="badge-micro mb-5">Product</div>
           <h1 className="max-w-3xl whitespace-pre-line text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
             {`What boards run
 in one place.`}
           </h1>
-          <p className="mt-4 mb-6 max-w-2xl whitespace-pre-line text-lg font-normal leading-relaxed text-slate-600">
+          <p className="mt-4 mb-6 max-w-2xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-600 md:text-lg">
             {`Your board works in Staff.
 Parents get your public site and family login.
 They see your school. Not Pavilion.`}
