@@ -17,5 +17,23 @@ export function getDemoBookingUrl(): string | null {
   }
 }
 
+/**
+ * iframe-friendly booking URL. Cal.com prefers `embed=true` so chrome stays minimal.
+ */
+export function getDemoBookingEmbedUrl(): string | null {
+  const url = getDemoBookingUrl()
+  if (!url) return null
+  try {
+    const u = new URL(url)
+    if (u.hostname === 'cal.com' || u.hostname.endsWith('.cal.com')) {
+      if (!u.searchParams.has('embed')) u.searchParams.set('embed', 'true')
+      if (!u.searchParams.has('theme')) u.searchParams.set('theme', 'light')
+    }
+    return u.toString()
+  } catch {
+    return url
+  }
+}
+
 /** Internal fallback when calendar URL is not configured. */
 export const DEMO_BOOKING_FALLBACK_HREF = '/contact' as const

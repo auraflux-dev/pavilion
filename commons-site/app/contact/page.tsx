@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { DemoBookingLink } from '@/components/demo-booking-link'
+import { DemoBookingPanel } from '@/components/demo-booking-panel'
 import { PRODUCT_NAME } from '@/lib/brand'
 import { getDemoBookingUrl } from '@/lib/demo-booking'
 import { CONTACT_EMAIL, DEMO_URL } from '@/lib/pricing'
@@ -24,16 +24,11 @@ export default function ContactPage() {
 Or start with the Riverside demo on your own time.`}
         </p>
 
-        <div className="card-surface mt-10 space-y-6">
+        <div className="mt-10 space-y-6">
           {hasCalendar ? (
-            <div className="space-y-3">
-              <p className="text-base font-normal leading-relaxed text-[var(--ink-muted)]">
-                Pick a time on the calendar. We will confirm by email.
-              </p>
-              <DemoBookingLink className="btn-primary !px-5 !py-3">Open calendar</DemoBookingLink>
-            </div>
+            <DemoBookingPanel />
           ) : (
-            <div className="space-y-3">
+            <div className="card-surface space-y-3">
               <p className="text-base font-normal leading-relaxed text-[var(--ink-muted)]">
                 Email us to book a walkthrough. Include your school name and a good time window.
               </p>
@@ -46,7 +41,7 @@ Or start with the Riverside demo on your own time.`}
             </div>
           )}
 
-          <div className="border-t border-[var(--line)] pt-6">
+          <div className="card-surface">
             <p className="text-sm font-semibold text-[var(--brand-text)]">Prefer to look first?</p>
             <div className="mt-3 flex flex-wrap gap-3">
               <a href={DEMO_URL} className="btn-secondary">
