@@ -20,6 +20,9 @@ $${COMMONS_LIST_PRICE_USD} per school per month.
       </p>
 
       <div className="mt-10 rounded-lg border border-[var(--line)] bg-[var(--paper-deep)] p-6">
+        <span className="mb-4 inline-block rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-900">
+          PTO Annual Plan
+        </span>
         <p className="type-price text-[var(--ink)]">
           ${COMMONS_LIST_PRICE_USD}
           <span className="type-title font-normal text-[var(--ink-muted)]">/mo</span>
@@ -28,6 +31,7 @@ $${COMMONS_LIST_PRICE_USD} per school per month.
         <ul className="type-body mt-6 space-y-2 text-[var(--ink)]">
           <li>Public site and family login for parents on your school brand</li>
           <li>Staff portal for your board: onboarding, connectors, and day-to-day work</li>
+          <li>Unlimited parents, volunteers, and chairs with zero per-user fees</li>
           <li>Domain and Google connect in Staff onboarding</li>
           <li>No separate setup invoice</li>
           <li>Parent card fees stay on your school Square</li>

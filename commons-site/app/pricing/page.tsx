@@ -8,6 +8,7 @@ export const metadata: Metadata = { title: 'Pricing' }
 const FEATURES = [
   'Public site and family login for parents on your school brand',
   'Staff portal for your board: setup, tools, and day-to-day work',
+  'Unlimited parents, volunteers, and chairs with zero per-user fees',
   'Domain and Google connect in Staff setup',
   'No separate setup invoice',
   'Parent card fees stay on your school Square',
@@ -51,7 +52,7 @@ $${COMMONS_LIST_PRICE_USD} per school per month.
 
         <div className="relative rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-xl md:p-8 lg:col-span-7">
           <span className="mb-4 inline-block rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-900">
-            Annual Board License
+            PTO Annual Plan
           </span>
           <p className="flex items-baseline gap-1">
             <span className="text-5xl font-bold text-slate-900">${COMMONS_LIST_PRICE_USD}</span>

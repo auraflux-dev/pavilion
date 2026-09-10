@@ -93,9 +93,10 @@ export function StartForm() {
       >
         {busy ? 'Securing workspace…' : `Secure Your Workspace · $${COMMONS_LIST_PRICE_USD}/mo`}
       </button>
-      <p className="mt-4 text-sm font-normal leading-relaxed text-slate-700">
-        Instant access to Staff. Parent payments connect directly to your school&apos;s existing
-        Square account.
+      <p className="mt-4 whitespace-pre-line text-sm font-normal leading-relaxed text-slate-700">
+        {`Instant access to Staff.
+Parent payments connect directly to your school's existing Square account.
+Need invoice billing via ACH or check? Contact us for PO setup.`}
       </p>
     </form>
   )
