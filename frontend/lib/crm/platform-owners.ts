@@ -1,12 +1,15 @@
 /**
- * Pavilion platform owners — overarching CMS admins (@onpavilion.com).
- * Customer staff stay per-org; platform owners can switch org and edit any customer CMS.
+ * Platform owners — overarching CMS admins for company Staff.
+ * Pavilion: @onpavilion.com · Business Rocket: @businessrocket.ai
+ * Customer staff stay per-org; platform owners can switch org and warp into client Staff.
  */
 import { commonsDbEnabled, sql } from '@/lib/crm/db'
 import { isDemoInstance } from '@/lib/demo/instance'
 
 export const PLATFORM_STAFF_EMAIL_DOMAIN = 'onpavilion.com'
+export const BR_PLATFORM_STAFF_EMAIL_DOMAIN = 'businessrocket.ai'
 export const PLATFORM_OWNER_PRIMARY_EMAIL = `robert@${PLATFORM_STAFF_EMAIL_DOMAIN}`
+export const BR_PLATFORM_OWNER_PRIMARY_EMAIL = `robert@${BR_PLATFORM_STAFF_EMAIL_DOMAIN}`
 /** Cookie: which customer org a platform owner is editing CMS for. */
 export const PLATFORM_CMS_ORG_COOKIE = 'pavilion_cms_org'
 
@@ -20,7 +23,18 @@ create table if not exists platform_owners (
 `
 
 export function isPlatformStaffEmail(email: string): boolean {
-  return email.trim().toLowerCase().endsWith(`@${PLATFORM_STAFF_EMAIL_DOMAIN}`)
+  const normalized = email.trim().toLowerCase()
+  return (
+    normalized.endsWith(`@${PLATFORM_STAFF_EMAIL_DOMAIN}`) ||
+    normalized.endsWith(`@${BR_PLATFORM_STAFF_EMAIL_DOMAIN}`)
+  )
+}
+
+export function platformBrandForEmail(email: string): 'pavilion' | 'businessrocket' | null {
+  const normalized = email.trim().toLowerCase()
+  if (normalized.endsWith(`@${BR_PLATFORM_STAFF_EMAIL_DOMAIN}`)) return 'businessrocket'
+  if (normalized.endsWith(`@${PLATFORM_STAFF_EMAIL_DOMAIN}`)) return 'pavilion'
+  return null
 }
 
 export async function isPlatformOwnerEmail(
@@ -30,7 +44,12 @@ export async function isPlatformOwnerEmail(
   const normalized = email.trim().toLowerCase()
   if (!normalized) return false
   const demo = opts?.demo ?? isDemoInstance()
-  if (demo && (normalized === PLATFORM_OWNER_PRIMARY_EMAIL || normalized.endsWith('@onpavilion.com'))) {
+  if (
+    demo &&
+    (normalized === PLATFORM_OWNER_PRIMARY_EMAIL ||
+      normalized === BR_PLATFORM_OWNER_PRIMARY_EMAIL ||
+      isPlatformStaffEmail(normalized))
+  ) {
     return true
   }
   if (!commonsDbEnabled()) {
@@ -45,7 +64,7 @@ export async function isPlatformOwnerEmail(
   } catch {
     // table may not exist yet mid-migrate
   }
-  // @onpavilion.com is the platform staff domain even before a row exists
+  // Company staff domains are platform owners even before a row exists
   return isPlatformStaffEmail(normalized)
 }
 
