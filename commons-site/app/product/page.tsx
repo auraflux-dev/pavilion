@@ -10,20 +10,22 @@ export const metadata: Metadata = { title: 'Product' }
 export default function ProductPage() {
   return (
     <>
-      <section className="border-b border-[var(--line)] bg-[var(--paper)]">
+      <section className="border-b border-zinc-200 bg-white">
         <div className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
-          <p className="type-eyebrow text-[var(--accent)]">Product</p>
-          <h1 className="type-page mt-2 whitespace-pre-line text-[var(--ink)]">
+          <div className="mb-5 inline-block rounded-full bg-zinc-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-zinc-500 ring-1 ring-zinc-200">
+            Product
+          </div>
+          <h1 className="max-w-3xl whitespace-pre-line font-sans text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
             {`What boards run
 in one place.`}
           </h1>
-          <p className="type-lede mt-4 max-w-2xl whitespace-pre-line text-[var(--ink-muted)]">
+          <p className="mt-4 max-w-2xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-700 sm:text-lg">
             {`Your board works in Staff.
 Parents get your public site and family login.
 They see your school. Not Pavilion.`}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/pricing#checkout" className="btn-primary">
+            <Link href="/pricing#checkout" className="btn-primary !px-5 !py-3">
               {`Start at $${COMMONS_LIST_PRICE_USD}/mo`}
             </Link>
             <Link href="/pricing" className="btn-secondary">

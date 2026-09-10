@@ -32,18 +32,20 @@ const icons: Record<(typeof PILLARS)[number]['id'], ReactNode> = {
 
 export function MarketingPillars() {
   return (
-    <section className="border-y border-[var(--line)] bg-[var(--paper-deep)]">
-      <div className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
-        <h2 className="type-section max-w-xl text-[var(--ink)]">What boards get done</h2>
-        <p className="type-lede mt-3 max-w-xl whitespace-pre-line text-[var(--ink-muted)]">
+    <section className="bg-zinc-50 py-16 md:py-24">
+      <div className="mx-auto max-w-6xl px-5">
+        <h2 className="max-w-xl font-sans text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          What boards get done
+        </h2>
+        <p className="mt-3 max-w-xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-700 sm:text-lg">
           {`Four jobs that used to live in five tools.\nNow they live in one place.`}
         </p>
-        <ul className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {PILLARS.map((pillar) => (
-            <li key={pillar.id} className="border-t border-[var(--line)] pt-5">
-              <div className="mb-3 text-[var(--accent)]">{icons[pillar.id]}</div>
-              <h3 className="text-[1.0625rem] font-semibold text-[var(--ink)]">{pillar.title}</h3>
-              <p className="type-small mt-2 text-[var(--ink-muted)]">{pillar.body}</p>
+            <li key={pillar.id} className="card-surface">
+              <div className="mb-3 text-[var(--brand-primary)]">{icons[pillar.id]}</div>
+              <h3 className="text-base font-semibold text-slate-900">{pillar.title}</h3>
+              <p className="mt-2 text-sm font-normal leading-relaxed text-slate-700">{pillar.body}</p>
             </li>
           ))}
         </ul>

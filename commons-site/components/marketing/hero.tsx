@@ -5,25 +5,51 @@ import { BrowserFrame } from '@/components/marketing/browser-frame'
 
 export function MarketingHero() {
   const front = SURFACES[0]
+  const supportLines = HERO_SUPPORT.split('\n').filter(Boolean)
 
   return (
-    <section className="hero-plane relative overflow-hidden text-[#f5f0e8]">
-      <div className="relative z-10 mx-auto grid max-w-6xl gap-10 px-5 pb-16 pt-16 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center lg:gap-12 lg:pb-24 lg:pt-20">
-        <div className="motion-rise flex flex-col justify-center gap-5 sm:gap-6">
-          <p className="type-eyebrow text-[var(--accent-soft)]">{HERO_EYEBROW}</p>
-          <h1 className="type-display max-w-xl whitespace-pre-line">{HERO_HEADLINE}</h1>
-          <p className="type-lede max-w-md whitespace-pre-line text-[#e8f0e8]">{HERO_SUPPORT}</p>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/pricing#checkout" className="btn-on-dark">
+    <section
+      className="surface-dark border-b border-slate-800 bg-slate-900 pt-14 pb-16 md:pt-20 md:pb-24"
+      aria-label="Welcome"
+    >
+      <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 lg:grid-cols-12 lg:gap-12">
+        <div className="motion-rise lg:col-span-6">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5">
+            <span
+              className="h-2 w-2 animate-pulse rounded-full bg-[var(--brand-accent)]"
+              aria-hidden
+            />
+            <span className="text-xs font-semibold uppercase tracking-wider text-white/90">
+              {HERO_EYEBROW}
+            </span>
+          </div>
+          <h1 className="max-w-xl whitespace-pre-line font-sans text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-[3.25rem]">
+            {HERO_HEADLINE}
+          </h1>
+          <div className="copy-stack mt-6 text-lg text-slate-300 sm:text-xl">
+            {supportLines.map((line) => (
+              <p key={line} className="copy-stack__line">
+                {line}
+              </p>
+            ))}
+          </div>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/pricing#checkout"
+              className="rounded-lg bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition-all hover:bg-slate-100"
+            >
               {`Start at $${COMMONS_LIST_PRICE_USD}/mo`}
             </Link>
-            <a href={DEMO_URL} className="btn-on-dark-outline">
+            <a
+              href={DEMO_URL}
+              className="rounded-lg border border-white/40 px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10"
+            >
               Try the Riverside demo
             </a>
           </div>
         </div>
 
-        <div className="motion-rise motion-rise-delay mx-auto w-full max-w-xl lg:max-w-none">
+        <div className="motion-rise motion-rise-delay mx-auto w-full max-w-xl lg:col-span-6 lg:max-w-none">
           <BrowserFrame
             src={front.imageSrc}
             alt={front.imageAlt}
