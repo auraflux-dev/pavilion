@@ -661,6 +661,13 @@ This site is for Pavilion operators, not school boards.`
           <StaffServingOrgBanner
             organizationName={servingOrg.name}
             organizationId={servingOrg.id}
+            exitLabel={
+              String(me.email || '')
+                .toLowerCase()
+                .endsWith('@businessrocket.ai')
+                ? 'Exit to Brand Staff'
+                : 'Exit to Platform Staff'
+            }
           />
         ) : null}
         {me.platformOwner && platformOrgs.length > 0 && platformMode === 'client' ? (
@@ -706,7 +713,11 @@ Open Platform fleet for tenants, health, and support.`}
               disabled={cmsOrgBusy}
               onClick={() => void openPlatformFleet()}
             >
-              Open Platform fleet
+              {String(me.email || '')
+                .toLowerCase()
+                .endsWith('@businessrocket.ai')
+                ? 'Open Brand Staff'
+                : 'Open Platform Staff'}
             </Button>
           </section>
         ) : null}
@@ -1197,7 +1208,9 @@ Open Platform fleet for tenants, health, and support.`}
         {active === 'docs' ? <StaffWorkspaceHub tab="docs" /> : null}
         {active === 'pages' && canPages ? <StaffPageSectionsPanel /> : null}
         {active === 'brand' && canBrand ? <StaffSiteBrandPanel /> : null}
-        {active === 'modules' && canModules ? <StaffModulesPanel /> : null}
+        {active === 'modules' && canModules ? (
+          <StaffModulesPanel product={me.product === 'businessrocket' ? 'businessrocket' : 'pavilion'} />
+        ) : null}
         {active === 'content' && canContent ? (
           <div className="space-y-4">
             <StaffPageContentPanel />

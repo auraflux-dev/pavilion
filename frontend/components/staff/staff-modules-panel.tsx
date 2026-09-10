@@ -6,8 +6,16 @@ import type { ProductModuleDef, ProductModuleId } from '@/lib/modules/catalog'
 
 type Preset = { id: string; label: string; notes?: string }
 
-export function StaffModulesPanel() {
-  const [product, setProduct] = useState<'pavilion' | 'businessrocket'>('pavilion')
+type Props = {
+  product?: 'pavilion' | 'businessrocket'
+  canSwitchProduct?: boolean
+}
+
+export function StaffModulesPanel({
+  product: lockedProduct = 'pavilion',
+  canSwitchProduct = false,
+}: Props) {
+  const [product, setProduct] = useState<'pavilion' | 'businessrocket'>(lockedProduct)
   const [catalog, setCatalog] = useState<ProductModuleDef[]>([])
   const [groups, setGroups] = useState<Record<string, string>>({})
   const [presets, setPresets] = useState<Preset[]>([])
@@ -15,6 +23,10 @@ export function StaffModulesPanel() {
   const [orgId, setOrgId] = useState<string | null>(null)
   const [status, setStatus] = useState('')
   const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    setProduct(lockedProduct)
+  }, [lockedProduct])
 
   const load = useCallback(async () => {
     setStatus('')
@@ -99,8 +111,9 @@ export function StaffModulesPanel() {
       <div>
         <h2 className="text-lg font-bold text-[#1A1A1A]">Modules</h2>
         <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
-          Check what this customer build includes.
-          Same catalog shape for Pavilion and Business Rocket.
+          {product === 'businessrocket'
+            ? 'Check what this Business Rocket customer build includes.'
+            : 'Check what this Pavilion customer build includes.'}
         </p>
         {orgId ? (
           <p className="text-[11px] text-[#5A6070] mt-1">Org: {orgId}</p>
@@ -110,24 +123,32 @@ export function StaffModulesPanel() {
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
-        <button
-          type="button"
-          className={`rounded-md px-3 py-1.5 text-xs font-semibold border ${
-            product === 'pavilion' ? 'bg-[#1A1A1A] text-white' : 'bg-white text-[#5A6070]'
-          }`}
-          onClick={() => setProduct('pavilion')}
-        >
-          Pavilion
-        </button>
-        <button
-          type="button"
-          className={`rounded-md px-3 py-1.5 text-xs font-semibold border ${
-            product === 'businessrocket' ? 'bg-[#1A1A1A] text-white' : 'bg-white text-[#5A6070]'
-          }`}
-          onClick={() => setProduct('businessrocket')}
-        >
-          Business Rocket
-        </button>
+        {canSwitchProduct ? (
+          <>
+            <button
+              type="button"
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold border ${
+                product === 'pavilion' ? 'bg-[#1A1A1A] text-white' : 'bg-white text-[#5A6070]'
+              }`}
+              onClick={() => setProduct('pavilion')}
+            >
+              Pavilion
+            </button>
+            <button
+              type="button"
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold border ${
+                product === 'businessrocket' ? 'bg-[#1A1A1A] text-white' : 'bg-white text-[#5A6070]'
+              }`}
+              onClick={() => setProduct('businessrocket')}
+            >
+              Business Rocket
+            </button>
+          </>
+        ) : (
+          <span className="rounded-md border border-[var(--border)] bg-[#F7F8FA] px-3 py-1.5 text-xs font-semibold text-[#1A1A1A]">
+            {product === 'businessrocket' ? 'Business Rocket' : 'Pavilion'}
+          </span>
+        )}
         <Button type="button" size="sm" disabled={busy || !orgId} onClick={() => void save()}>
           Save for org
         </Button>

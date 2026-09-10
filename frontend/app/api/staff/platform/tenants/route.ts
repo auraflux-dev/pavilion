@@ -8,6 +8,7 @@ import { isSecure } from '@/lib/auth-cookies'
 import {
   defaultSelectedOrgId,
   FLEET_PRODUCT_COOKIE,
+  canSwitchFleetProduct,
   parseCompanyProduct,
   resolveFleetProductFromRequest,
 } from '@/lib/crm/fleet-product'
@@ -39,16 +40,21 @@ export async function GET(req: NextRequest) {
   const selected =
     req.cookies.get(PLATFORM_CMS_ORG_COOKIE)?.value?.trim() ||
     defaultSelectedOrgId({ demo, product })
+  const canSwitch = canSwitchFleetProduct({
+    host: req.headers.get('host') || undefined,
+    email,
+    demo,
+  })
   const res = NextResponse.json({
     mode,
     product,
     selectedOrganizationId: selected,
     tenants,
     attention,
-    canSwitchProduct: demo || Boolean(email),
+    canSwitchProduct: canSwitch,
   })
   const requested = parseCompanyProduct(req.nextUrl.searchParams.get('product'))
-  if (requested) {
+  if (requested && canSwitch) {
     res.cookies.set(FLEET_PRODUCT_COOKIE, requested, {
       httpOnly: true,
       sameSite: 'lax',

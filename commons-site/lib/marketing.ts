@@ -15,7 +15,7 @@ export const HERO_SUPPORT =
 export const STORY = {
   whom: 'PTO and PTA boards and school community orgs.\nParents use your brand. They are not Pavilion customers.',
   who: `${PRODUCT_NAME} is the PTO operating system.`,
-  what: 'One branded public site, family login for households, and Staff workspaces that survive board turnover.\nYour school keeps its Square.',
+  what: 'One branded public site, family login for households, and Staff workspaces that survive board turnover.\nYour school keeps its Square with 0% Pavilion transaction fees.',
   why: 'Boards turn over. Tools scatter.\nParents should never see the vendor.',
   how: 'Branded trial. Staff setup for tools and brand. Go live.\nPavilion support stays with your board after launch.',
 } as const
@@ -139,6 +139,10 @@ export const BOARD_HANDOFF = {
     {
       title: 'One-click seat change',
       body: 'Incoming board members pick up the role.\nOutgoing access closes without a scavenger hunt.',
+    },
+    {
+      title: 'Instant volunteer setup',
+      body: 'Committee chairs jump straight into pre-configured role queues without managing permissions.',
     },
   ],
 } as const

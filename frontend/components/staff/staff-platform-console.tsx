@@ -62,6 +62,7 @@ export function StaffPlatformConsole({ me }: Props) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [product, setProduct] = useState<'pavilion' | 'businessrocket'>('pavilion')
+  const [canSwitchProduct, setCanSwitchProduct] = useState(false)
   const [health, setHealth] = useState<{
     targets: { id: string; label: string; url: string; ok: boolean; note: string }[]
     connectors: {
@@ -76,10 +77,10 @@ export function StaffPlatformConsole({ me }: Props) {
 
   const isBr = product === 'businessrocket'
   const brandLabel = isBr ? 'Brand Staff' : 'Platform Staff'
-  const ownerDomain = isBr ? '@businessrocket.ai' : '@onpavilion.com'
   const platformGroups = isBr ? BR_PLATFORM_WORKSPACE_GROUPS : PLATFORM_WORKSPACE_GROUPS
   const platformLabel = isBr ? BR_PLATFORM_WORKSPACE_LABEL : PLATFORM_WORKSPACE_LABEL
   const platformBlurb = isBr ? BR_PLATFORM_WORKSPACE_BLURB : PLATFORM_WORKSPACE_BLURB
+  const signOutReturnTo = isBr ? '/review?desk=br' : '/review?desk=platform'
 
   const loadFleet = useCallback(async (nextProduct?: 'pavilion' | 'businessrocket') => {
     setError('')
@@ -91,6 +92,7 @@ export function StaffPlatformConsole({ me }: Props) {
       if (d.product === 'businessrocket' || d.product === 'pavilion') {
         setProduct(d.product)
       }
+      setCanSwitchProduct(Boolean(d.canSwitchProduct))
       setTenants(Array.isArray(d.tenants) ? d.tenants : [])
       setAttention(Array.isArray(d.attention) ? d.attention : [])
       setSelectedOrgId(String(d.selectedOrganizationId || ''))
@@ -221,32 +223,34 @@ export function StaffPlatformConsole({ me }: Props) {
             <p className="text-xs text-[#5A6070]">{me.email}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <div
-              className="inline-flex rounded-lg border border-[var(--border)] p-0.5 bg-[#F7F8FA]"
-              role="group"
-              aria-label="Fleet product"
-            >
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void switchProduct('pavilion')}
-                className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
-                  !isBr ? 'bg-[#1A1A1A] text-white' : 'text-[#5A6070] hover:bg-white'
-                }`}
+            {canSwitchProduct ? (
+              <div
+                className="inline-flex rounded-lg border border-[var(--border)] p-0.5 bg-[#F7F8FA]"
+                role="group"
+                aria-label="Fleet product"
               >
-                Pavilion
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void switchProduct('businessrocket')}
-                className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
-                  isBr ? 'bg-[#1A1A1A] text-white' : 'text-[#5A6070] hover:bg-white'
-                }`}
-              >
-                Business Rocket
-              </button>
-            </div>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void switchProduct('pavilion')}
+                  className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
+                    !isBr ? 'bg-[#1A1A1A] text-white' : 'text-[#5A6070] hover:bg-white'
+                  }`}
+                >
+                  Pavilion
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void switchProduct('businessrocket')}
+                  className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
+                    isBr ? 'bg-[#1A1A1A] text-white' : 'text-[#5A6070] hover:bg-white'
+                  }`}
+                >
+                  Business Rocket
+                </button>
+              </div>
+            ) : null}
             <nav className="flex flex-wrap gap-1" aria-label="Platform workspaces">
               {navItems.map((item) => (
                 <button
@@ -268,7 +272,7 @@ export function StaffPlatformConsole({ me }: Props) {
               size="sm"
               variant="outline"
               className="h-8 text-xs"
-              onClick={() => void staffSignOut({ returnTo: '/review?desk=platform' })}
+              onClick={() => void staffSignOut({ returnTo: signOutReturnTo })}
             >
               Sign out
             </Button>
@@ -288,9 +292,12 @@ export function StaffPlatformConsole({ me }: Props) {
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
                 {isBr
                   ? BR_BRAND_STAFF_HOME_COPY
-                  : `Fleet view for Pavilion operators.
+                  : canSwitchProduct
+                    ? `Fleet view for Pavilion operators.
 Open a tenant to check connectors and brand, or enter Client Staff to serve that school.
-Use Pavilion / Business Rocket in the header to switch fleets on this shared demo.`}
+On this shared demo you can also open the Business Rocket fleet from the header.`
+                    : `Fleet view for Pavilion operators.
+Open a tenant to check connectors and brand, or enter Client Staff to serve that school.`}
               </p>
             </div>
             {attention.length > 0 ? (
@@ -334,7 +341,9 @@ Use Pavilion / Business Rocket in the header to switch fleets on this shared dem
           </section>
         ) : null}
 
-        {active === 'modules' ? <StaffModulesPanel /> : null}
+        {active === 'modules' ? (
+          <StaffModulesPanel product={product} canSwitchProduct={canSwitchProduct} />
+        ) : null}
 
         {active === 'tenants' ? (
           <section className="space-y-4">

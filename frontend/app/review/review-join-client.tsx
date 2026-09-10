@@ -203,7 +203,7 @@ export function ReviewJoinClient({ isDemoHost }: { isDemoHost: boolean }) {
       </h1>
       <p className="text-sm text-[#5A6070] mb-6 leading-relaxed whitespace-pre-line">
         {`This page is the door into the demo.
-Pick company Platform Staff, or the sample school Client Staff.
+Pick company Staff for a product fleet, or the sample school Client Staff.
 Nothing is charged or emailed.`}
       </p>
 
@@ -216,11 +216,12 @@ Nothing is charged or emailed.`}
             : 'border-[var(--border)] bg-[#F7F8FA]'
         }`}
       >
-        <p className="text-sm font-semibold text-[#1A1A1A]">1. Company Platform Staff</p>
+        <p className="text-sm font-semibold text-[#1A1A1A]">1. Company Staff</p>
         <p className="text-xs text-[#5A6070] whitespace-pre-line">
-          {`For Pavilion / Business Rocket operators.
-Opens the fleet desk. Switch Pavilion ↔ Business Rocket in the header.
-Use this after Sign out from Brand Staff.`}
+          {`Two separate fleets.
+Pavilion Platform Staff manages Pavilion schools.
+Business Rocket Brand Staff manages BR customers only.
+Your login email picks the fleet.`}
         </p>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -228,7 +229,7 @@ Use this after Sign out from Brand Staff.`}
             disabled={busy}
             onClick={() => void openPlatformStaff('pavilion')}
           >
-            {busy ? 'Opening…' : 'Open Pavilion fleet'}
+            {busy ? 'Opening…' : 'Open Pavilion Platform Staff'}
           </Button>
           <Button
             type="button"
@@ -236,7 +237,7 @@ Use this after Sign out from Brand Staff.`}
             disabled={busy}
             onClick={() => void openPlatformStaff('businessrocket')}
           >
-            {busy ? 'Opening…' : 'Open Business Rocket fleet'}
+            {busy ? 'Opening…' : 'Open Brand Staff'}
           </Button>
         </div>
       </div>

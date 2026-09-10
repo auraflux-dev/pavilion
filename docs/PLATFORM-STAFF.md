@@ -25,9 +25,13 @@ Platform owners who open `/staff` on the demo are sent to the brand site `/staff
 
 | Mode | Who | What they see |
 |------|-----|----------------|
-| **Platform mode** | Platform owners | Fleet Home, Tenants, Onboarding, Support, Health, Help |
-| **Serving client** | Platform owners after Open client Staff | School Client Staff for the selected org, with Serving banner |
+| **Platform mode (Pavilion)** | `@onpavilion.com` | Pavilion fleet only (unless shared demo dual-tour toggle) |
+| **Brand Staff (Business Rocket)** | `@businessrocket.ai` | BR fleet only (`product=businessrocket`). No Pavilion tenants. No fleet toggle. |
+| **Serving client** | Either, after Open client Staff | Client Staff for one org under that product |
 | **Client Staff** | Buyer board | Unchanged school ops |
+
+Email domain locks the brand. Host locks on `www.businessrocket.ai` / `www.onpavilion.com`.
+Customer orgs are stored with `organizations.product` so sold sites stay under that brand.
 
 VIP SHMS is dedicated (`docs/CUSTOMER-SHMS-VIP.md`). It is not a normal editable trial in the Tenants list.
 

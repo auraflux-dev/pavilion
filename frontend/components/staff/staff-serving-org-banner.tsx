@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Amber banner when a platform owner is serving Client Staff for one org.
+ * Amber banner when a company Staff operator is serving Client Staff for one org.
  */
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -9,9 +9,15 @@ import { Button } from '@/components/ui/button'
 type Props = {
   organizationName: string
   organizationId: string
+  /** Brand Staff vs Platform Staff exit label. */
+  exitLabel?: string
 }
 
-export function StaffServingOrgBanner({ organizationName, organizationId }: Props) {
+export function StaffServingOrgBanner({
+  organizationName,
+  organizationId,
+  exitLabel = 'Exit to company Staff',
+}: Props) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -44,7 +50,7 @@ CMS writes use this school. Exit when finished.`}
         {error ? <p className="text-xs text-amber-900 mt-1">{error}</p> : null}
       </div>
       <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void exitToPlatform()}>
-        {busy ? 'Exiting…' : 'Exit to Platform'}
+        {busy ? 'Exiting…' : exitLabel}
       </Button>
     </section>
   )
