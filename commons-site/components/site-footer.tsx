@@ -8,6 +8,7 @@ const explore = [
   { href: '/process', label: 'Process' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Book a demo' },
   { href: '/help', label: 'Help' },
   { href: DEMO_URL, label: 'Riverside demo', external: true },
 ]

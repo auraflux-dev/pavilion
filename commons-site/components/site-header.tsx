@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { DemoBookingLink } from '@/components/demo-booking-link'
 import { PavilionMark } from '@/components/marketing/pavilion-mark'
 import { PRODUCT_NAME } from '@/lib/brand'
 import { DEMO_URL, PLATFORM_STAFF_URL } from '@/lib/pricing'
@@ -15,9 +16,13 @@ const primaryNav = [
 
 const moreNav = [
   { href: '/help', label: 'Help' },
+  { href: '/contact', label: 'Contact' },
   { href: '/account', label: 'Account' },
   { href: PLATFORM_STAFF_URL, label: 'Platform Staff', external: true as const },
 ]
+
+const ctaClass =
+  'rounded-lg bg-[var(--brand-primary)] px-4 py-2 text-sm font-medium tracking-wide text-white shadow-sm transition-all hover:bg-[var(--brand-dark)]'
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false)
@@ -30,14 +35,14 @@ export function SiteHeader() {
           <span className="font-sans text-xl font-bold tracking-tight text-[var(--brand-primary)] sm:text-2xl">
             {PRODUCT_NAME}
           </span>
-          <span className="hidden rounded-full border border-[var(--line)] bg-[var(--brand-mist)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-muted)] sm:inline-block">
+          <span className="hidden rounded-full border border-[var(--line)] bg-[var(--brand-mist)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-muted)] lg:inline-block">
             PTO OS
           </span>
         </Link>
 
         <div className="flex items-center gap-4 sm:gap-6">
           <nav
-            className="hidden items-center gap-6 text-sm font-medium text-[var(--ink-muted)] md:flex sm:gap-8"
+            className="hidden items-center gap-5 text-sm font-medium text-[var(--ink-muted)] md:flex lg:gap-8"
             aria-label="Primary"
           >
             {primaryNav.map((item) => (
@@ -49,14 +54,17 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            <a
+              href={DEMO_URL}
+              className="transition-colors hover:text-[var(--brand-primary)]"
+            >
+              Demo
+            </a>
           </nav>
 
-          <a
-            href={DEMO_URL}
-            className="hidden rounded-lg bg-[var(--brand-primary)] px-4 py-2 text-sm font-medium tracking-wide text-white shadow-sm transition-all hover:bg-[var(--brand-dark)] sm:inline-flex"
-          >
-            Try the demo
-          </a>
+          <DemoBookingLink className={`hidden sm:inline-flex ${ctaClass}`}>
+            Book a Demo
+          </DemoBookingLink>
 
           <button
             type="button"
@@ -91,9 +99,12 @@ export function SiteHeader() {
             {item.label}
           </Link>
         ))}
-        <a href={DEMO_URL} className="whitespace-nowrap font-semibold text-[var(--brand-primary)]">
+        <a href={DEMO_URL} className="whitespace-nowrap hover:text-[var(--brand-primary)]">
           Demo
         </a>
+        <DemoBookingLink className="whitespace-nowrap font-semibold text-[var(--brand-primary)]">
+          Book
+        </DemoBookingLink>
       </nav>
 
       {open ? (
@@ -122,11 +133,17 @@ export function SiteHeader() {
             )}
             <a
               href={DEMO_URL}
-              className="mt-2 rounded-lg bg-[var(--brand-primary)] px-3 py-3 text-center text-white"
+              className="rounded-lg px-2 py-3 text-[var(--brand-text)] hover:bg-[var(--brand-mist)]"
               onClick={() => setOpen(false)}
             >
-              Try the demo
+              Try the Riverside demo
             </a>
+            <DemoBookingLink
+              className={`mt-2 inline-flex justify-center ${ctaClass} !px-3 !py-3`}
+              onClick={() => setOpen(false)}
+            >
+              Book a Demo
+            </DemoBookingLink>
           </nav>
         </div>
       ) : null}
