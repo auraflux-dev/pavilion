@@ -8,14 +8,14 @@ export function MarketingHero() {
   const supportLines = HERO_SUPPORT.split('\n').filter(Boolean)
 
   return (
-    <section className="border-b border-zinc-200 bg-zinc-50 pt-14 pb-16 md:pt-20 md:pb-24" aria-label="Welcome">
-      <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 lg:grid-cols-12 lg:gap-12">
+    <section className="border-b border-zinc-200 bg-zinc-50 pb-16 md:pb-24" aria-label="Welcome">
+      <div className="mx-auto grid w-full max-w-7xl items-center gap-10 px-4 pt-12 sm:px-6 md:pt-16 lg:grid-cols-12 lg:gap-12 lg:px-8">
         <div className="motion-rise lg:col-span-6">
           <div className="badge-micro mb-6">{HERO_EYEBROW}</div>
-          <h1 className="max-w-xl whitespace-pre-line text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
+          <h1 className="mb-4 block whitespace-pre-line text-4xl font-bold leading-[1.15] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
             {HERO_HEADLINE}
           </h1>
-          <div className="copy-stack mt-4 mb-6 text-base font-normal leading-relaxed text-slate-600">
+          <div className="copy-stack mb-6 text-base font-normal leading-relaxed text-slate-600">
             {supportLines.map((line) => (
               <p key={line} className="copy-stack__line text-base font-normal leading-relaxed text-slate-600">
                 {line}
