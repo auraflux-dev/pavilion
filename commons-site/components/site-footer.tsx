@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { PavilionMark } from '@/components/marketing/pavilion-mark'
-import { LEGAL_ENTITY, PRODUCT_NAME, PRODUCT_TAGLINE } from '@/lib/brand'
+import { PRODUCT_NAME, PRODUCT_TAGLINE } from '@/lib/brand'
 import { CONTACT_EMAIL, DEMO_URL, PLATFORM_STAFF_URL } from '@/lib/pricing'
 
 const explore = [
@@ -26,7 +26,7 @@ export function SiteFooter() {
             </span>
           </Link>
           <div className="text-xs font-normal leading-relaxed text-emerald-100/80">{PRODUCT_TAGLINE}</div>
-          <div className="text-xs font-medium text-emerald-200/70">A product of {LEGAL_ENTITY}.</div>
+          <div className="text-xs font-medium text-emerald-200/70">© Pavilion. All rights reserved.</div>
         </div>
 
         <div className="space-y-2.5">
