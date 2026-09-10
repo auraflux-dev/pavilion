@@ -12,20 +12,20 @@ export type GalleryItem = {
 export const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 'riverside',
-    title: 'Riverside demo',
+    title: 'Demo',
     kind: 'demo',
-    blurb: 'Public demo board tour.\nVanilla school brand for prospects.',
+    blurb: 'Public demo board tour.\nSample school brand for prospects.',
     href: 'https://demo.onpavilion.com',
     imageSrc: '/gallery/riverside-public.jpg',
-    imageAlt: 'Riverside Elementary PTO public homepage',
+    imageAlt: 'Sample school public homepage',
     galleryImages: [
       {
         src: '/gallery/riverside-member.jpg',
-        alt: 'Riverside family membership tiers',
+        alt: 'Sample school family membership tiers',
       },
       {
         src: '/gallery/riverside-staff.jpg',
-        alt: 'Riverside staff portal home',
+        alt: 'Sample school staff portal home',
       },
     ],
   },

@@ -35,7 +35,7 @@ export function MarketingHero() {
               {`Start at $${COMMONS_LIST_PRICE_USD}/mo`}
             </Link>
             <a href={DEMO_URL} className="btn-on-dark-outline px-5 py-3">
-              Try the Riverside demo
+              Try the demo
             </a>
           </div>
         </div>

@@ -15,7 +15,7 @@ export function BrowserFrame({
   priority = false,
   className = '',
   large = false,
-  hostLabel = 'riversidepto.demo.onpavilion.com',
+  hostLabel = 'demo.onpavilion.com',
 }: BrowserFrameProps) {
   return (
     <div

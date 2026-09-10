@@ -21,7 +21,7 @@ export default function ContactPage() {
         </h1>
         <p className="mt-4 whitespace-pre-line text-base font-normal leading-relaxed text-[var(--ink-muted)] sm:text-lg">
           {`We will walk your board through Staff, the public site, and family login.
-Or start with the Riverside demo on your own time.`}
+Or start with the product demo on your own time.`}
         </p>
 
         <div className="mt-10 space-y-6">
@@ -45,7 +45,7 @@ Or start with the Riverside demo on your own time.`}
             <p className="text-sm font-semibold text-[var(--brand-text)]">Prefer to look first?</p>
             <div className="mt-3 flex flex-wrap gap-3">
               <a href={DEMO_URL} className="btn-secondary">
-                Try the Riverside demo
+                Try the demo
               </a>
               <Link href="/pricing#checkout" className="btn-secondary">
                 Start at checkout

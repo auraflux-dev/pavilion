@@ -22,7 +22,7 @@ export default function AboutPage() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a href={DEMO_URL} className="btn-primary !px-5 !py-3">
-              Try the Riverside demo
+              Try the demo
             </a>
             <Link href="/pricing" className="btn-secondary">
               {`Start at $${COMMONS_LIST_PRICE_USD}/mo`}

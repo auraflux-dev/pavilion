@@ -12,7 +12,7 @@ export default function ThanksPage() {
         {`If you finished Stripe checkout, we have your school on the list.\nHSKRG will email you within one business day with next steps.`}
       </p>
       <p className="mt-6 whitespace-pre-line text-sm text-[var(--ink-muted)]">
-        {`While you wait, walk the Riverside demo as a board member.`}
+        {`While you wait, walk the product demo as a board member.`}
       </p>
       <div className="mt-8 flex flex-wrap gap-3">
         <a

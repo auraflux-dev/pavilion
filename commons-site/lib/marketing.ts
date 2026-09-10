@@ -61,7 +61,7 @@ export const SURFACES = [
       'News and announcements',
     ],
     imageSrc: '/gallery/riverside-public.jpg',
-    imageAlt: 'Riverside demo public site homepage',
+    imageAlt: 'Sample school public site homepage',
     href: '/product#public',
     hostLabel: 'demo.onpavilion.com',
   },
@@ -82,7 +82,7 @@ export const SURFACES = [
       'Purchase history',
     ],
     imageSrc: '/gallery/riverside-member.jpg',
-    imageAlt: 'Riverside demo family membership page',
+    imageAlt: 'Sample school family membership page',
     href: '/product#member',
     hostLabel: 'demo.onpavilion.com/membership',
   },
@@ -105,7 +105,7 @@ export const SURFACES = [
       'Board seats and handoff',
     ],
     imageSrc: '/gallery/riverside-staff.jpg',
-    imageAlt: 'Riverside demo staff home with workspace tiles',
+    imageAlt: 'Sample school staff home with workspace tiles',
     href: '/product#staff',
     hostLabel: 'demo.onpavilion.com/staff',
   },
@@ -171,7 +171,7 @@ export const PROCESS = {
     'A clear path from first look to a board-ready school year.\nNo second product to learn midstream.',
   steps: [
     {
-      title: '1. Tour Riverside',
+      title: '1. Tour the demo',
       body: 'See public, family, and staff on the sample school.\nClick through real surfaces, not slides.',
     },
     {
@@ -192,4 +192,4 @@ export const PROCESS = {
 export const CLOSE_SLOGAN = 'Ready when your board is.'
 
 export const CLOSE_SUPPORT =
-  'Start with a branded trial.\nOnboard in Staff.\nOr tour the Riverside demo first.'
+  'Start with a branded trial.\nOnboard in Staff.\nOr tour the product demo first.'

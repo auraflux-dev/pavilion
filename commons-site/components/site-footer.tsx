@@ -11,7 +11,7 @@ const explore = [
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
   { href: '/help', label: 'Help' },
-  { href: DEMO_URL, label: 'Riverside demo', external: true },
+  { href: DEMO_URL, label: 'Demo', external: true },
 ]
 
 export function SiteFooter() {
