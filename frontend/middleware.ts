@@ -25,6 +25,7 @@ import {
   companyBrandOrigin,
   isBusinessRocketBrandHost,
   isCompanyBrandHost,
+  isLegacyStaffSubdomainHost,
   isReservedProductHost,
   PAVILION_DEMO_HOST,
   PAVILION_SURFACE_HEADER,
@@ -109,7 +110,8 @@ export async function middleware(req: NextRequest) {
   }
 
   // Legacy staff.* subdomain → brand site /staff (portals are paths, not hosts).
-  if (reservedHost && !brandHost) {
+  // Do not treat demo.* / www.* reserved labels as staff hosts.
+  if (isLegacyStaffSubdomainHost(host) && !brandHost) {
     const dest = new URL(`${companyBrandOrigin(host)}/staff`)
     return NextResponse.redirect(dest)
   }

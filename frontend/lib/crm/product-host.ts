@@ -145,6 +145,19 @@ export function isReservedProductHost(host: string): boolean {
   return false
 }
 
+/**
+ * Legacy staff.* host only. Demo / www / mail reserved labels stay on their own hosts.
+ * Do not redirect demo.onpavilion.com through this path.
+ */
+export function isLegacyStaffSubdomainHost(host: string): boolean {
+  const h = normalizeProductHost(host)
+  if (!h) return false
+  for (const suffix of [PAVILION_TRIAL_DOMAIN_SUFFIX, BR_TRIAL_DOMAIN_SUFFIX]) {
+    if (h === `staff.${suffix}`) return true
+  }
+  return false
+}
+
 /** @deprecated Prefer isCompanyBrandHost. Kept for call-site migration. */
 export function isPlatformStaffHost(host: string): boolean {
   return isCompanyBrandHost(host) || isReservedProductHost(host)
