@@ -23,28 +23,28 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-200/80 bg-white/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-[var(--line)]/80 bg-[var(--brand-warm)]/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3">
           <PavilionMark className="h-9 w-9 shrink-0 text-[var(--brand-primary)] sm:h-10 sm:w-10" />
           <span className="font-sans text-xl font-bold tracking-tight text-[var(--brand-primary)] sm:text-2xl">
             {PRODUCT_NAME}
           </span>
-          <span className="hidden rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 sm:inline-block">
+          <span className="hidden rounded-full border border-[var(--line)] bg-[var(--brand-mist)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-muted)] sm:inline-block">
             PTO OS
           </span>
         </Link>
 
         <div className="flex items-center gap-4 sm:gap-6">
           <nav
-            className="hidden items-center gap-6 text-sm font-medium text-zinc-700 md:flex sm:gap-8"
+            className="hidden items-center gap-6 text-sm font-medium text-[var(--ink-muted)] md:flex sm:gap-8"
             aria-label="Primary"
           >
             {primaryNav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="transition-colors hover:text-zinc-900"
+                className="transition-colors hover:text-[var(--brand-primary)]"
               >
                 {item.label}
               </Link>
@@ -63,7 +63,7 @@ export function SiteHeader() {
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? 'Close menu' : 'Open menu'}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-800 md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--line)] text-[var(--brand-text)] md:hidden"
             onClick={() => setOpen((v) => !v)}
           >
             <span className="sr-only">Menu</span>
@@ -83,11 +83,11 @@ export function SiteHeader() {
       </div>
 
       <nav
-        className="flex gap-4 overflow-x-auto border-t border-zinc-200/80 px-4 py-2 text-sm font-medium text-zinc-600 md:hidden"
+        className="flex gap-4 overflow-x-auto border-t border-[var(--line)]/80 px-4 py-2 text-sm font-medium text-[var(--ink-muted)] md:hidden"
         aria-label="Primary mobile"
       >
         {primaryNav.map((item) => (
-          <Link key={item.href} href={item.href} className="whitespace-nowrap hover:text-zinc-900">
+          <Link key={item.href} href={item.href} className="whitespace-nowrap hover:text-[var(--brand-primary)]">
             {item.label}
           </Link>
         ))}
@@ -97,14 +97,14 @@ export function SiteHeader() {
       </nav>
 
       {open ? (
-        <div id="mobile-nav" className="border-t border-zinc-200 bg-white md:hidden">
+        <div id="mobile-nav" className="border-t border-[var(--line)] bg-white md:hidden">
           <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 text-sm font-medium">
             {[...primaryNav, ...moreNav].map((item) =>
               'external' in item && item.external ? (
                 <a
                   key={item.href}
                   href={item.href}
-                  className="rounded-lg px-2 py-3 text-zinc-600 hover:bg-zinc-50"
+                  className="rounded-lg px-2 py-3 text-[var(--ink-muted)] hover:bg-[var(--brand-mist)]"
                   onClick={() => setOpen(false)}
                 >
                   {item.label}
@@ -113,7 +113,7 @@ export function SiteHeader() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="rounded-lg px-2 py-3 text-zinc-800 hover:bg-zinc-50"
+                  className="rounded-lg px-2 py-3 text-[var(--brand-text)] hover:bg-[var(--brand-mist)]"
                   onClick={() => setOpen(false)}
                 >
                   {item.label}

@@ -9,15 +9,15 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <section className="bg-zinc-50 py-16 md:py-24">
+    <section className="bg-[var(--brand-mist)] py-16 md:py-24">
       <div className="mx-auto max-w-3xl px-5">
-        <div className="mb-5 inline-block rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-zinc-500 ring-1 ring-zinc-200">
+        <div className="mb-5 inline-block rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--ink-muted)] ring-1 ring-[var(--brand-line)]">
           Legal
         </div>
-        <h1 className="font-sans text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="font-sans text-3xl font-bold tracking-tight text-[var(--brand-text)] sm:text-4xl">
           Terms of Service
         </h1>
-        <div className="card-surface mt-8 space-y-4 text-base font-normal leading-relaxed text-slate-700">
+        <div className="card-surface mt-8 space-y-4 text-base font-normal leading-relaxed text-[var(--ink-muted)]">
           <p>
             {PRODUCT_NAME} software and related services are provided by {LEGAL_ENTITY}. Use of the
             product is subject to your subscription agreement and these site terms.

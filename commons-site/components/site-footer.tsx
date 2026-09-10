@@ -14,7 +14,7 @@ const explore = [
 
 export function SiteFooter() {
   return (
-    <footer className="bg-slate-950 text-white">
+    <footer className="bg-[var(--brand-dark)] text-[#f5f0e8]">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-6 py-12 md:grid-cols-4">
         <div className="space-y-3">
           <Link href="/" className="inline-flex items-center gap-2.5">
@@ -23,18 +23,18 @@ export function SiteFooter() {
               {PRODUCT_NAME}
             </span>
           </Link>
-          <div className="text-xs font-normal leading-relaxed text-slate-400">{PRODUCT_TAGLINE}</div>
-          <div className="text-xs font-medium text-slate-500">A product of {LEGAL_ENTITY}.</div>
+          <div className="text-xs font-normal leading-relaxed text-[#c8dcc8]">{PRODUCT_TAGLINE}</div>
+          <div className="text-xs font-medium text-[#9bb89b]">A product of {LEGAL_ENTITY}.</div>
         </div>
 
         <div className="space-y-2.5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-200">Explore</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-[#eef6ee]">Explore</div>
           {explore.map((item) =>
             item.external ? (
               <a
                 key={item.href}
                 href={item.href}
-                className="block text-sm text-slate-300 transition-colors hover:text-white"
+                className="block text-sm text-[#c8dcc8] transition-colors hover:text-white"
               >
                 {item.label}
               </a>
@@ -42,7 +42,7 @@ export function SiteFooter() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="block text-sm text-slate-300 transition-colors hover:text-white"
+                className="block text-sm text-[#c8dcc8] transition-colors hover:text-white"
               >
                 {item.label}
               </Link>
@@ -51,44 +51,44 @@ export function SiteFooter() {
         </div>
 
         <div className="space-y-2.5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-200">Contact</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-[#eef6ee]">Contact</div>
           <a
             href={`mailto:${CONTACT_EMAIL}`}
-            className="block text-sm text-slate-300 transition-colors hover:text-white"
+            className="block text-sm text-[#c8dcc8] transition-colors hover:text-white"
           >
             {CONTACT_EMAIL}
           </a>
           <a
             href={PLATFORM_STAFF_URL}
-            className="block text-sm text-slate-300 transition-colors hover:text-white"
+            className="block text-sm text-[#c8dcc8] transition-colors hover:text-white"
           >
             Platform Staff
           </a>
           <Link
             href="/account"
-            className="block text-sm text-slate-300 transition-colors hover:text-white"
+            className="block text-sm text-[#c8dcc8] transition-colors hover:text-white"
           >
             Account
           </Link>
         </div>
 
         <div className="space-y-2.5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-200">Legal</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-[#eef6ee]">Legal</div>
           <Link
             href="/privacy"
-            className="block text-sm text-slate-300 transition-colors hover:text-white"
+            className="block text-sm text-[#c8dcc8] transition-colors hover:text-white"
           >
             Privacy Policy
           </Link>
           <Link
             href="/terms"
-            className="block text-sm text-slate-300 transition-colors hover:text-white"
+            className="block text-sm text-[#c8dcc8] transition-colors hover:text-white"
           >
             Terms of Service
           </Link>
           <Link
             href="/help"
-            className="block text-sm text-slate-300 transition-colors hover:text-white"
+            className="block text-sm text-[#c8dcc8] transition-colors hover:text-white"
           >
             Help center
           </Link>

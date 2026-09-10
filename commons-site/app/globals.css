@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 /**
- * Marketing design system: Business Rocket layout patterns.
- * Pavilion brand: forest green primary, gold accent, Pavilion copy.
+ * BR layout patterns + Pavilion product brand colors.
+ * Green #085508 · Gold #FFD700 · Cream #F5F0E8 (mirror frontend globals).
  */
 :root {
   --brand-primary: #085508;
@@ -10,20 +10,20 @@
   --brand-accent: #ffd700;
   --brand-warm: #f5f0e8;
   --brand-soft: #eef6ee;
-  --brand-line: #e5e7eb;
-  --brand-mist: #f9fafb;
-  --brand-text: #111827;
+  --brand-line: #d4e8d4;
+  --brand-mist: #f0f7f0;
+  --brand-text: #1a1a1a;
 
-  --paper: #ffffff;
-  --paper-deep: #f9fafb;
-  --ink: #111827;
-  --ink-muted: #4b5563;
+  --paper: var(--brand-warm);
+  --paper-deep: var(--brand-mist);
+  --ink: var(--brand-text);
+  --ink-muted: #5a6070;
   --accent: var(--brand-primary);
   --accent-soft: #d4e8d4;
-  --line: #e5e7eb;
+  --line: #e8e4dc;
 
-  --background: #ffffff;
-  --foreground: #111827;
+  --background: var(--brand-warm);
+  --foreground: var(--brand-text);
   --primary: var(--brand-primary);
   --primary-foreground: #ffffff;
   --radius: 0.5rem;
@@ -51,15 +51,15 @@ h3 {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.025em;
-  color: #111827;
+  color: var(--brand-text);
 }
 
 p {
-  color: #4b5563;
+  color: #5a6070;
   line-height: 1.625;
 }
 
-/* Legacy type scale aliases (inner pages still use these class names) */
+/* Legacy type scale aliases */
 .type-display {
   font-size: clamp(2.125rem, 1.55rem + 2.4vw, 3.25rem);
   font-weight: 700;
@@ -128,26 +128,43 @@ p {
   line-height: 1.05;
 }
 
+/* Forest green dark surface (BR structure slot; Pavilion color) */
+.surface-dark,
+.hero-plane {
+  color: #f5f0e8;
+}
+
+.hero-plane {
+  background:
+    radial-gradient(1000px 520px at 72% 8%, rgba(255, 215, 0, 0.18), transparent 58%),
+    linear-gradient(165deg, #0b3d0b 0%, #085508 52%, #0f4a0f 100%);
+}
+
 .surface-dark {
-  color: #ffffff;
+  background: var(--brand-dark);
 }
 
 .surface-dark h1,
 .surface-dark h2,
-.surface-dark h3 {
+.surface-dark h3,
+.hero-plane h1,
+.hero-plane h2,
+.hero-plane h3 {
   color: #ffffff;
 }
 
-.surface-dark p {
-  color: #cbd5e1;
+.surface-dark p,
+.hero-plane p {
+  color: #e8f0e8;
 }
 
 .surface-panel {
-  color: #0f172a;
+  color: var(--brand-text);
 }
 
-.surface-dark .surface-panel p {
-  color: #0f172a;
+.surface-dark .surface-panel p,
+.hero-plane .surface-panel p {
+  color: var(--brand-text);
 }
 
 .copy-stack {
@@ -162,7 +179,6 @@ p {
   line-height: 1.55;
 }
 
-/* Shared marketing utilities (BR structure, Pavilion green) */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -171,7 +187,7 @@ p {
   background: var(--brand-primary);
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.01em;
   color: #ffffff;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
@@ -187,12 +203,12 @@ p {
   align-items: center;
   justify-content: center;
   border-radius: 0.5rem;
-  border: 1px solid #e4e4e7;
+  border: 1.5px solid var(--line);
   background: #ffffff;
   padding: 0.75rem 1.25rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #18181b;
+  color: var(--brand-text);
   transition: background-color 150ms ease, border-color 150ms ease;
 }
 
@@ -201,22 +217,23 @@ p {
   background: var(--brand-soft);
 }
 
+/* Gold primary on green dark surfaces */
 .btn-on-dark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 0.5rem;
-  background: #ffffff;
+  background: var(--brand-accent);
   padding: 0.75rem 1.25rem;
   font-size: 0.875rem;
-  font-weight: 600;
-  color: #0f172a;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  font-weight: 700;
+  color: var(--brand-text);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
   transition: background-color 150ms ease;
 }
 
 .btn-on-dark:hover {
-  background: #f1f5f9;
+  background: #ffe44d;
 }
 
 .btn-on-dark-outline {
@@ -224,21 +241,21 @@ p {
   align-items: center;
   justify-content: center;
   border-radius: 0.5rem;
-  border: 1px solid rgb(255 255 255 / 0.4);
+  border: 1.5px solid rgba(245, 240, 232, 0.55);
   padding: 0.75rem 1.25rem;
   font-size: 0.875rem;
-  font-weight: 600;
-  color: #ffffff;
+  font-weight: 700;
+  color: #f5f0e8;
   transition: background-color 150ms ease;
 }
 
 .btn-on-dark-outline:hover {
-  background: rgb(255 255 255 / 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .card-surface {
   border-radius: 1rem;
-  border: 1px solid rgb(228 228 231 / 0.9);
+  border: 1px solid rgb(212 232 212 / 0.9);
   background: #ffffff;
   padding: 1.5rem;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);

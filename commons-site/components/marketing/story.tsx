@@ -11,14 +11,14 @@ export function MarketingStory() {
   ] as const
 
   return (
-    <section className="bg-zinc-50 py-16 md:py-24" aria-labelledby="story-heading">
+    <section className="bg-[var(--brand-mist)] py-16 md:py-24" aria-labelledby="story-heading">
       <div className="mx-auto max-w-6xl px-5">
-        <div className="mb-5 inline-block rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-zinc-500 ring-1 ring-zinc-200">
+        <div className="mb-5 inline-block rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--ink-muted)] ring-1 ring-[var(--brand-line)]">
           Clear picture
         </div>
         <h2
           id="story-heading"
-          className="max-w-3xl font-sans text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl"
+          className="max-w-3xl font-sans text-3xl font-bold tracking-tight text-[var(--brand-text)] sm:text-4xl"
         >
           Who Pavilion is for
         </h2>
@@ -28,7 +28,7 @@ export function MarketingStory() {
               <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-primary)]">
                 {b.label}
               </p>
-              <p className="mt-3 whitespace-pre-line text-base font-normal leading-relaxed text-slate-700">
+              <p className="mt-3 whitespace-pre-line text-base font-normal leading-relaxed text-[var(--ink-muted)]">
                 {b.body}
               </p>
             </div>
