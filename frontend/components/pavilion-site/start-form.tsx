@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { PRODUCT_NAME } from '@/lib/pavilion-site/brand'
 import { COMMONS_LIST_PRICE_USD } from '@/lib/pavilion-site/pricing'
 
 const ROLES = ['President', 'Treasurer', 'VP / board', 'Other']
