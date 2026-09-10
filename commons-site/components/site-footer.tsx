@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { PavilionMark } from '@/components/marketing/pavilion-mark'
 import { PRODUCT_NAME, PRODUCT_TAGLINE } from '@/lib/brand'
-import { CONTACT_EMAIL, DEMO_URL, PLATFORM_STAFF_URL } from '@/lib/pricing'
+import { CONTACT_EMAIL, DEMO_URL } from '@/lib/pricing'
 
 const explore = [
   { href: '/', label: 'Home' },
@@ -59,12 +59,6 @@ export function SiteFooter() {
             className="block text-sm text-emerald-100/80 transition-colors hover:text-white"
           >
             {CONTACT_EMAIL}
-          </a>
-          <a
-            href={PLATFORM_STAFF_URL}
-            className="block text-sm text-emerald-100/80 transition-colors hover:text-white"
-          >
-            Staff sign-in
           </a>
           <Link
             href="/account"

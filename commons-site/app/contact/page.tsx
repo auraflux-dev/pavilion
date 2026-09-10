@@ -17,7 +17,7 @@ export default function ContactPage() {
         <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
           Talk with us about {PRODUCT_NAME} for your school.
         </h1>
-        <p className="mt-4 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
+        <p className="mt-3 mb-6 max-w-xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-600 md:text-lg">
           {`We will walk your board through Staff, the public site, and family login.
 Or start with the product demo on your own time.`}
         </p>

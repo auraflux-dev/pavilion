@@ -107,7 +107,7 @@ Your live school workspace is set up with you after purchase. It is not instant 
 
 Day-to-day PTO ops (membership, events, register, store how-tos) live in your school Staff Help after you launch.
 
-For billing questions, use /account or email hello@hskrg.com.`,
+For billing questions, use /account or email hello@onpavilion.com.`,
   },
   {
     slug: 'partners',

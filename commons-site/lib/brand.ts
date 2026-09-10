@@ -8,7 +8,7 @@
 export const PRODUCT_NAME = 'Pavilion'
 export const LEGAL_ENTITY = 'HSKRG LLC'
 export const PRODUCT_TAGLINE = 'The PTO operating system.'
-export const CONTACT_EMAIL = 'hello@hskrg.com'
+export const CONTACT_EMAIL = 'hello@onpavilion.com'
 export const PRODUCT_DOMAIN = 'onpavilion.com'
 
 /** Locked color direction: forest green + gold. */
