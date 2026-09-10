@@ -1,11 +1,13 @@
 /**
  * Public demo booking URL (Cal.com, Calendly, Google Appointment Schedule, etc.).
- * Set NEXT_PUBLIC_DEMO_BOOKING_URL on commons-site (Vercel + local).
- * When unset, Book a Demo CTAs fall back to /contact.
+ * Override with NEXT_PUBLIC_DEMO_BOOKING_URL on commons-site if needed.
+ * Default is the Pavilion Cal.com demo event.
  */
+export const DEFAULT_DEMO_BOOKING_URL =
+  'https://cal.com/robert-gregory-grfbze/demo' as const
+
 export function getDemoBookingUrl(): string | null {
-  const raw = process.env.NEXT_PUBLIC_DEMO_BOOKING_URL?.trim()
-  if (!raw) return null
+  const raw = process.env.NEXT_PUBLIC_DEMO_BOOKING_URL?.trim() || DEFAULT_DEMO_BOOKING_URL
   try {
     const u = new URL(raw)
     if (u.protocol !== 'https:') return null
