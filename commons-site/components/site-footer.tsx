@@ -4,11 +4,12 @@ import { LEGAL_ENTITY, PRODUCT_NAME, PRODUCT_TAGLINE } from '@/lib/brand'
 import { CONTACT_EMAIL, DEMO_URL, PLATFORM_STAFF_URL } from '@/lib/pricing'
 
 const explore = [
+  { href: '/', label: 'Home' },
   { href: '/product', label: 'Product' },
   { href: '/process', label: 'Process' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Book a demo' },
+  { href: '/contact', label: 'Contact' },
   { href: '/help', label: 'Help' },
   { href: DEMO_URL, label: 'Riverside demo', external: true },
 ]
