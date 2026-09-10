@@ -31,11 +31,11 @@ export default function AboutPage() {
           </Link>
         </div>
 
-        <ul className="grid gap-4 md:grid-cols-3">
+        <ul className="grid gap-4 md:grid-cols-3 md:items-stretch">
           {ABOUT.points.map((point) => (
             <li
               key={point.title}
-              className="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm"
+              className="flex h-full flex-col rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm"
             >
               <h2 className="mb-2 text-lg font-semibold text-slate-900">{point.title}</h2>
               <p className="whitespace-pre-line text-sm font-normal leading-relaxed text-slate-600 md:text-base">
