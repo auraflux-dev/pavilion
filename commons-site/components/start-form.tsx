@@ -6,6 +6,9 @@ import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
 
 const ROLES = ['President', 'Treasurer', 'VP / board', 'Other']
 
+const fieldClass =
+  'mt-1 w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-800'
+
 export function StartForm() {
   const [schoolName, setSchoolName] = useState('')
   const [city, setCity] = useState('')
@@ -38,41 +41,41 @@ export function StartForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-8 space-y-5">
-      <label className="block text-sm text-slate-900">
-        <span className="font-medium">School or PTO name</span>
+    <form onSubmit={onSubmit} className="mt-6 space-y-4">
+      <label className="block text-sm font-medium text-slate-900">
+        School or PTO name
         <input
           required
           value={schoolName}
           onChange={(e) => setSchoolName(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-slate-900"
+          className={fieldClass}
         />
       </label>
-      <label className="block text-sm text-slate-900">
-        <span className="font-medium">City</span>
+      <label className="block text-sm font-medium text-slate-900">
+        City
         <input
           required
           value={city}
           onChange={(e) => setCity(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-slate-900"
+          className={fieldClass}
         />
       </label>
-      <label className="block text-sm text-slate-900">
-        <span className="font-medium">Work email</span>
+      <label className="block text-sm font-medium text-slate-900">
+        Work email
         <input
           required
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-slate-900"
+          className={fieldClass}
         />
       </label>
-      <label className="block text-sm text-slate-900">
-        <span className="font-medium">Your role</span>
+      <label className="block text-sm font-medium text-slate-900">
+        Your role
         <select
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-slate-900"
+          className={fieldClass}
         >
           {ROLES.map((r) => (
             <option key={r} value={r}>
@@ -84,10 +87,14 @@ export function StartForm() {
       {error ? (
         <p className="whitespace-pre-line text-sm text-red-800">{error}</p>
       ) : null}
-      <button type="submit" disabled={busy} className="btn-primary disabled:opacity-60">
+      <button
+        type="submit"
+        disabled={busy}
+        className="mt-4 w-full rounded-xl bg-emerald-900 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-emerald-950 disabled:opacity-60"
+      >
         {busy ? 'Opening Stripe…' : `Continue to Stripe · $${COMMONS_LIST_PRICE_USD}/mo`}
       </button>
-      <p className="whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
+      <p className="whitespace-pre-line text-sm font-normal leading-relaxed text-slate-600">
         {`You will pay on Stripe for ${PRODUCT_NAME} software.
 Your school still uses its own Square for parent cards and in-person sales.
 We email you next steps within one business day.
