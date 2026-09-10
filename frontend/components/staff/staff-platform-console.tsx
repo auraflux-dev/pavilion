@@ -12,6 +12,12 @@ import {
   parsePlatformWorkspace,
   type PlatformWorkspace,
 } from '@/lib/staff/platform-workspaces'
+import {
+  BR_BRAND_STAFF_HOME_COPY,
+  BR_PLATFORM_WORKSPACE_BLURB,
+  BR_PLATFORM_WORKSPACE_GROUPS,
+  BR_PLATFORM_WORKSPACE_LABEL,
+} from '@/lib/staff/br-staff-surface'
 import { StaffModulesPanel } from '@/components/staff/staff-modules-panel'
 import { staffSignOut } from '@/lib/staff/sign-out'
 
@@ -69,8 +75,11 @@ export function StaffPlatformConsole({ me }: Props) {
   } | null>(null)
 
   const isBr = product === 'businessrocket'
-  const brandLabel = isBr ? 'Business Rocket Staff' : 'Platform Staff'
+  const brandLabel = isBr ? 'Brand Staff' : 'Platform Staff'
   const ownerDomain = isBr ? '@businessrocket.ai' : '@onpavilion.com'
+  const platformGroups = isBr ? BR_PLATFORM_WORKSPACE_GROUPS : PLATFORM_WORKSPACE_GROUPS
+  const platformLabel = isBr ? BR_PLATFORM_WORKSPACE_LABEL : PLATFORM_WORKSPACE_LABEL
+  const platformBlurb = isBr ? BR_PLATFORM_WORKSPACE_BLURB : PLATFORM_WORKSPACE_BLURB
 
   const loadFleet = useCallback(async (nextProduct?: 'pavilion' | 'businessrocket') => {
     setError('')
@@ -188,13 +197,13 @@ export function StaffPlatformConsole({ me }: Props) {
   }, [tenants, query])
 
   const navItems: { id: PlatformWorkspace; label: string }[] = [
-    { id: 'home', label: PLATFORM_WORKSPACE_LABEL.home },
-    { id: 'tenants', label: PLATFORM_WORKSPACE_LABEL.tenants },
-    { id: 'modules', label: PLATFORM_WORKSPACE_LABEL.modules },
-    { id: 'onboarding', label: PLATFORM_WORKSPACE_LABEL.onboarding },
-    { id: 'support', label: PLATFORM_WORKSPACE_LABEL.support },
-    { id: 'health', label: PLATFORM_WORKSPACE_LABEL.health },
-    { id: 'help', label: PLATFORM_WORKSPACE_LABEL.help },
+    { id: 'home', label: platformLabel.home },
+    { id: 'tenants', label: platformLabel.tenants },
+    { id: 'modules', label: platformLabel.modules },
+    { id: 'onboarding', label: platformLabel.onboarding },
+    { id: 'support', label: platformLabel.support },
+    { id: 'health', label: platformLabel.health },
+    { id: 'help', label: platformLabel.help },
   ]
 
   return (
@@ -274,13 +283,11 @@ export function StaffPlatformConsole({ me }: Props) {
           <section className="space-y-4">
             <div>
               <h1 className="text-2xl font-bold text-[#1A1A1A]">
-                {isBr ? 'Business Rocket Staff' : 'Platform Home'}
+                {isBr ? 'Brand Staff' : 'Platform Home'}
               </h1>
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
                 {isBr
-                  ? `Fleet view for Business Rocket operators (${ownerDomain}).
-Open a customer org, then warp into their Staff to edit brand, CMS, and connectors.
-Member portals stay on the customer host — never on businessrocket.ai.`
+                  ? BR_BRAND_STAFF_HOME_COPY
                   : `Fleet view for Pavilion operators.
 Open a tenant to check connectors and brand, or enter Client Staff to serve that school.
 Use Pavilion / Business Rocket in the header to switch fleets on this shared demo.`}
@@ -307,7 +314,7 @@ Use Pavilion / Business Rocket in the header to switch fleets on this shared dem
               <p className="text-sm text-[#5A6070]">No fleet blockers right now.</p>
             )}
             <div className="grid gap-3 sm:grid-cols-2">
-              {PLATFORM_WORKSPACE_GROUPS.map((group) => (
+              {platformGroups.map((group) => (
                 <div
                   key={group.id}
                   className="rounded-xl border border-[var(--border)] bg-white p-4 space-y-2"
@@ -317,7 +324,7 @@ Use Pavilion / Business Rocket in the header to switch fleets on this shared dem
                   <div className="flex flex-wrap gap-2 pt-1">
                     {group.workspaces.map((id) => (
                       <Button key={id} type="button" size="sm" variant="outline" onClick={() => go(id)}>
-                        {PLATFORM_WORKSPACE_LABEL[id]}
+                        {platformLabel[id]}
                       </Button>
                     ))}
                   </div>
@@ -610,15 +617,13 @@ No parent or payment PII on this board.`}
             <h1 className="text-2xl font-bold text-[#1A1A1A]">Platform help</h1>
             <div className="rounded-xl border border-[var(--border)] bg-white p-4 text-sm space-y-3 whitespace-pre-line">
               {isBr
-                ? `${brandLabel} is for ${ownerDomain} operators.
+                ? `${BR_BRAND_STAFF_HOME_COPY}
 
-Warp into a customer org’s Staff to edit Brand, Pages, and connectors.
-Exit with the Serving banner to return to the fleet.
+Warp into Customers → Staff to manage a live build.
+Exit with the Serving banner to return home.
 
-Customer create path: POST /api/commons/provision/br (BR calls pavilion-provision.ts).
-Member portals exist only on customer hosts — never on the company brand.
-
-See wiki HOME/hskrg-product-surface-map.`
+Provision: POST /api/commons/provision/br
+Wiki: HOME/hskrg-product-surface-map`
                 : `Platform Staff is for @onpavilion.com operators.
 
 Enter client Staff to edit Brand, Pages, and connectors as that school.
@@ -632,7 +637,7 @@ VIP SHMS: promote from pavilion only when intentional. Never put treasurer secre
 See docs/PLATFORM-STAFF.md and docs/CLIENT-ONBOARDING.md.`}
             </div>
             <p className="text-xs text-[#5A6070]">
-              {PLATFORM_WORKSPACE_BLURB.help}
+              {platformBlurb.help}
             </p>
           </section>
         ) : null}

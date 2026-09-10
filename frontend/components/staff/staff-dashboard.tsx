@@ -90,6 +90,12 @@ import {
   STAFF_WORKSPACE_GROUPS,
   groupStaffNavItems,
 } from '@/lib/staff/workspace-groups'
+import {
+  BR_BRAND_STAFF_HOME_COPY,
+  BR_STAFF_WORKSPACE_GROUPS,
+  brStaffWorkspaceLabel,
+  filterBrCustomerStaffWorkspaces,
+} from '@/lib/staff/br-staff-surface'
 import { trackLogin } from '@/lib/ga'
 
 type StaffHome = {
@@ -109,6 +115,7 @@ type StaffMe = {
   isAdmin: boolean
   /** Pavilion platform owner: can switch customer CMS orgs */
   platformOwner?: boolean
+  product?: 'pavilion' | 'businessrocket'
   homes: StaffHome[]
 }
 
@@ -175,12 +182,21 @@ function parseWorkspace(raw: string | null): StaffWorkspace | null {
 }
 
 export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCopy?: Record<string, string> }) {
-  const wsLabel = (id: StaffWorkspace) => staffWorkspaceLabel(staffCopy, id)
+  const { hiddenStaffWorkspaces, product } = useLiveCommerceGate()
+  const [me, setMe] = useState<StaffMe | null>(null)
+  const isBr =
+    product === 'businessrocket' ||
+    Boolean(me?.product === 'businessrocket') ||
+    Boolean(String(me?.email || '').toLowerCase().endsWith('@businessrocket.ai'))
+  const wsLabel = (id: StaffWorkspace) =>
+    isBr ? brStaffWorkspaceLabel(id, staffWorkspaceLabel(staffCopy, id)) : staffWorkspaceLabel(staffCopy, id)
   const sc = (key: string, fallback?: string) => staffStr(staffCopy, key, fallback)
-  const workspaceGroups = useMemo(() => resolveStaffWorkspaceGroups(staffCopy), [staffCopy])
+  const workspaceGroups = useMemo(() => {
+    if (isBr) return BR_STAFF_WORKSPACE_GROUPS
+    return resolveStaffWorkspaceGroups(staffCopy)
+  }, [staffCopy, isBr])
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [me, setMe] = useState<StaffMe | null>(null)
   const [error, setError] = useState('')
   const [errorCode, setErrorCode] = useState('')
   const [query, setQuery] = useState('')
@@ -330,7 +346,6 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   const canWellness = staffCanWorkspace(me, 'wellness')
   const canNewsletter = staffCanWorkspace(me, 'newsletter')
   const canComms = staffCanWorkspace(me, 'comms')
-  const { hiddenStaffWorkspaces } = useLiveCommerceGate()
 
   const navItems = useMemo(() => {
     if (!me) return []
@@ -384,12 +399,15 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     }
     items.push({ id: 'help', label: wsLabel('help') })
     const demoFiltered = filterCommonsDemoWorkspaces(items.map((i) => i.id))
-    const allowed = new Set(filterHiddenStaffWorkspaces(demoFiltered, hiddenStaffWorkspaces))
+    const afterHidden = filterHiddenStaffWorkspaces(demoFiltered, hiddenStaffWorkspaces)
+    const trimmed = isBr ? filterBrCustomerStaffWorkspaces(afterHidden) : afterHidden
+    const allowed = new Set(trimmed)
     const filtered = items.filter((i) => allowed.has(i.id))
     const order = new Map<StaffWorkspace, number>()
     let rank = 0
     order.set('home', rank++)
-    for (const group of STAFF_WORKSPACE_GROUPS) {
+    const groups = isBr ? BR_STAFF_WORKSPACE_GROUPS : STAFF_WORKSPACE_GROUPS
+    for (const group of groups) {
       for (const id of group.workspaces) {
         if (!order.has(id)) order.set(id, rank++)
       }
@@ -400,6 +418,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   }, [
     me,
     hiddenStaffWorkspaces,
+    isBr,
     canMarketing,
     canSurveys,
     canMessage,

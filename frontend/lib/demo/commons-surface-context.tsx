@@ -12,6 +12,7 @@ type SurfaceState = {
   loading: boolean
   note: string
   hiddenStaffWorkspaces: StaffWorkspace[]
+  product: 'pavilion' | 'businessrocket'
 }
 
 const DEFAULT: SurfaceState = {
@@ -20,6 +21,7 @@ const DEFAULT: SurfaceState = {
   loading: false,
   note: '',
   hiddenStaffWorkspaces: [],
+  product: 'pavilion',
 }
 
 const CommonsSurfaceContext = createContext<SurfaceState>(DEFAULT)
@@ -40,19 +42,20 @@ export function CommonsSurfaceProvider({
   const [state, setState] = useState<Omit<SurfaceState, 'enabled'>>(() =>
     enabled
       ? {
-          // Fail closed while loading: no live commerce, money workspaces hidden.
           liveCommerce: false,
           loading: true,
           note: isPublicDemoInstance()
             ? 'Sample school.\nLive checkout and card loads stay off here.'
             : 'Checking store connection…',
           hiddenStaffWorkspaces: [...COMMONS_COMMERCE_GATED_WORKSPACES],
+          product: 'pavilion',
         }
       : {
           liveCommerce: true,
           loading: false,
           note: '',
           hiddenStaffWorkspaces: [],
+          product: 'pavilion',
         },
   )
 
@@ -65,6 +68,7 @@ export function CommonsSurfaceProvider({
           liveCommerce?: boolean
           note?: string
           hiddenStaffWorkspaces?: StaffWorkspace[]
+          product?: 'pavilion' | 'businessrocket'
         }
         if (cancelled) return
         setState({
@@ -74,11 +78,11 @@ export function CommonsSurfaceProvider({
           hiddenStaffWorkspaces: Array.isArray(d.hiddenStaffWorkspaces)
             ? d.hiddenStaffWorkspaces
             : [],
+          product: d.product === 'businessrocket' ? 'businessrocket' : 'pavilion',
         })
       })
       .catch(() => {
         if (!cancelled) {
-          // Fail closed on surface fetch errors.
           setState({
             liveCommerce: false,
             loading: false,
@@ -86,6 +90,7 @@ export function CommonsSurfaceProvider({
               ? 'Sample school.\nLive checkout and card loads stay off here.'
               : 'Could not confirm store connection. Money tools stay off until this loads.',
             hiddenStaffWorkspaces: [...COMMONS_COMMERCE_GATED_WORKSPACES],
+            product: 'pavilion',
           })
         }
       })
@@ -106,15 +111,23 @@ export function useLiveCommerceGate(): {
   loading: boolean
   note: string
   hiddenStaffWorkspaces: StaffWorkspace[]
+  product: 'pavilion' | 'businessrocket'
 } {
   const ctx = useContext(CommonsSurfaceContext)
   if (!ctx.enabled) {
-    return { allowed: true, loading: false, note: '', hiddenStaffWorkspaces: [] }
+    return {
+      allowed: true,
+      loading: false,
+      note: '',
+      hiddenStaffWorkspaces: [],
+      product: 'pavilion',
+    }
   }
   return {
     allowed: ctx.liveCommerce,
     loading: ctx.loading,
     note: ctx.note,
     hiddenStaffWorkspaces: ctx.hiddenStaffWorkspaces,
+    product: ctx.product,
   }
 }

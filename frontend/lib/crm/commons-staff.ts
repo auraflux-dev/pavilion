@@ -17,6 +17,7 @@ export async function loadCommonsStaffJson(req: Request): Promise<{
   platformOwner: boolean
   homes: { role: StaffRole; title: string; owns: string; thisWeek: string[] }[]
   commons: true
+  product: 'pavilion' | 'businessrocket'
 } | null> {
   if (!isCommonsPlatformHost() || !commonsDbEnabled()) return null
   const auth = getAuth()
@@ -57,12 +58,15 @@ export async function loadCommonsStaffJson(req: Request): Promise<{
         email
       : session.user.name || email
   const boardTitle = platformOwner
-    ? 'Pavilion platform owner'
+    ? email.endsWith('@businessrocket.ai')
+      ? 'Business Rocket Brand Staff'
+      : 'Pavilion platform owner'
     : found.rows[0]?.board_title || 'Staff'
   const homes = roles.map((role) => ({
     role,
     ...ROLE_HOME_COPY[role],
   }))
+  const product = email.endsWith('@businessrocket.ai') ? 'businessrocket' : 'pavilion'
   return {
     email,
     sessionEmail: email,
@@ -75,6 +79,7 @@ export async function loadCommonsStaffJson(req: Request): Promise<{
     platformOwner: Boolean(platformOwner),
     homes,
     commons: true,
+    product,
   }
 }
 

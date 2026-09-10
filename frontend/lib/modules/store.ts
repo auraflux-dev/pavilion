@@ -6,12 +6,36 @@ import 'server-only'
 import { sqlForOrg } from '@/lib/crm/tenant'
 import { pavilionCmsEnabled, resolveCmsOrganizationId } from '@/lib/cms/store'
 import {
+  MODULE_PRESET_BR_STARTER,
   MODULE_PRESET_PAVILION_DEMO,
   MODULE_PRESET_PAVILION_TRIAL,
   sanitizeEnabledModules,
   type ProductModuleId,
 } from '@/lib/modules/catalog'
 import { isDemoInstance, isDemoInstanceFromRequest } from '@/lib/demo/instance'
+import { commonsDbEnabled, sql } from '@/lib/crm/db'
+
+async function orgProduct(orgId: string): Promise<'pavilion' | 'businessrocket'> {
+  if (!commonsDbEnabled()) return 'pavilion'
+  try {
+    const found = await sql<{ product: string | null }>(
+      `select coalesce(product, 'pavilion') as product from organizations where id = $1 limit 1`,
+      [orgId],
+    )
+    return found.rows[0]?.product === 'businessrocket' ? 'businessrocket' : 'pavilion'
+  } catch {
+    return 'pavilion'
+  }
+}
+
+function fallbackModules(
+  product: 'pavilion' | 'businessrocket',
+  demo: boolean,
+): ProductModuleId[] {
+  if (product === 'businessrocket') return [...MODULE_PRESET_BR_STARTER.modules]
+  if (demo) return [...MODULE_PRESET_PAVILION_DEMO.modules]
+  return [...MODULE_PRESET_PAVILION_TRIAL.modules]
+}
 
 export async function ensureOrgModulesSchema(orgId: string): Promise<void> {
   if (!pavilionCmsEnabled()) return
@@ -27,7 +51,8 @@ export async function ensureOrgModulesSchema(orgId: string): Promise<void> {
 }
 
 export async function getOrgModules(orgId: string): Promise<ProductModuleId[]> {
-  if (!pavilionCmsEnabled()) return [...MODULE_PRESET_PAVILION_DEMO.modules]
+  const product = await orgProduct(orgId)
+  if (!pavilionCmsEnabled()) return fallbackModules(product, isDemoInstance())
   await ensureOrgModulesSchema(orgId)
   const res = await sqlForOrg<{ modules_json: string }>(
     orgId,
@@ -35,9 +60,7 @@ export async function getOrgModules(orgId: string): Promise<ProductModuleId[]> {
     [orgId],
   )
   const raw = res.rows[0]?.modules_json
-  const fallback = isDemoInstance()
-    ? [...MODULE_PRESET_PAVILION_DEMO.modules]
-    : [...MODULE_PRESET_PAVILION_TRIAL.modules]
+  const fallback = fallbackModules(product, isDemoInstance())
   if (!raw) return fallback
   try {
     const parsed = JSON.parse(raw) as string[]
