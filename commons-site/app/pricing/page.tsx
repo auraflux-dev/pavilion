@@ -42,7 +42,7 @@ export default function PricingPage() {
           <h1 className="mb-3 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
             Pricing
           </h1>
-          <p className="mb-2 max-w-xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-600 md:text-lg">
+          <p className="mb-2 max-w-xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-700 md:text-lg">
             {`One number.
 $${COMMONS_LIST_PRICE_USD} per school per month.
 12-month term. Same price as long as you stay.`}
@@ -57,7 +57,7 @@ $${COMMONS_LIST_PRICE_USD} per school per month.
             <span className="text-5xl font-bold text-slate-900">${COMMONS_LIST_PRICE_USD}</span>
             <span className="text-xl font-normal text-slate-500">/mo</span>
           </p>
-          <p className="mb-6 text-sm font-medium text-slate-600">
+          <p className="mb-6 text-sm font-medium text-slate-700">
             ${year.toLocaleString()} / year billed annually. Lock in your rate for life.
           </p>
           <ul className="space-y-3">
@@ -78,7 +78,7 @@ $${COMMONS_LIST_PRICE_USD} per school per month.
           className="scroll-mt-24 rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-lg md:p-8 lg:col-span-5"
         >
           <h2 className="mb-2 text-xl font-bold text-slate-900">Get started with Pavilion</h2>
-          <p className="text-base font-normal leading-relaxed text-slate-600">
+          <p className="text-base font-normal leading-relaxed text-slate-700">
             Lock in your school&apos;s workspace for the upcoming year.
           </p>
           {!ready ? (

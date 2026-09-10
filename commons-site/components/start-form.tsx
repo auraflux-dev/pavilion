@@ -6,7 +6,7 @@ import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
 const ROLES = ['President', 'Treasurer', 'VP / board', 'Other']
 
 const fieldClass =
-  'mb-4 mt-1 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-800'
+  'mb-4 mt-1 w-full rounded-xl border border-zinc-300 bg-zinc-100 px-4 py-2.5 text-sm text-slate-900 focus:border-emerald-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-800'
 
 export function StartForm() {
   const [schoolName, setSchoolName] = useState('')
@@ -93,7 +93,7 @@ export function StartForm() {
       >
         {busy ? 'Securing workspace…' : `Secure Your Workspace · $${COMMONS_LIST_PRICE_USD}/mo`}
       </button>
-      <p className="mt-4 text-sm font-normal leading-relaxed text-slate-600">
+      <p className="mt-4 text-sm font-normal leading-relaxed text-slate-700">
         Instant access to Staff. Parent payments connect directly to your school&apos;s existing
         Square account.
       </p>
