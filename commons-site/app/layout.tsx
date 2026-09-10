@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
+import { GoogleAnalytics } from '@/components/google-analytics'
 import { PRODUCT_NAME, PRODUCT_TAGLINE } from '@/lib/brand'
 import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
 import './globals.css'
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <SiteHeader />
         <main>{children}</main>
         <SiteFooter />
+        <GoogleAnalytics />
       </body>
     </html>
   )

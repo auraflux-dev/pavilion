@@ -2,9 +2,9 @@
  * Mirror of frontend/lib/demo/review-links.ts and ops pricing.
  * Keep demo origin in sync when changing hosts.
  */
-import { CONTACT_EMAIL } from '@/lib/pavilion-site/brand'
+import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_E164 } from '@/lib/pavilion-site/brand'
 
-export { CONTACT_EMAIL }
+export { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_E164 }
 
 export const COMMONS_LIST_PRICE_USD = 399
 export const ADDON_STORE_USD = 99

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { DemoBookingPanel } from '@/components/demo-booking-panel'
 import { PRODUCT_NAME } from '@/lib/brand'
 import { getDemoBookingUrl } from '@/lib/demo-booking'
-import { CONTACT_EMAIL, DEMO_URL } from '@/lib/pricing'
+import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_E164, DEMO_URL } from '@/lib/pricing'
 
 export const metadata: Metadata = { title: 'Book a demo' }
 
@@ -23,6 +23,21 @@ Or start with the product demo on your own time.`}
         </p>
 
         <div className="mt-10 space-y-6">
+          <div className="card-surface space-y-3">
+            <p className="text-lg font-semibold text-slate-900">Call or text</p>
+            <p className="text-base font-normal leading-relaxed text-slate-600">
+              Same number as AuraFlux. Call or SMS anytime.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <a href={`tel:${CONTACT_PHONE_E164}`} className="btn-primary">
+                Call {CONTACT_PHONE_DISPLAY}
+              </a>
+              <a href={`sms:${CONTACT_PHONE_E164}`} className="btn-secondary">
+                Text {CONTACT_PHONE_DISPLAY}
+              </a>
+            </div>
+          </div>
+
           {hasCalendar ? (
             <DemoBookingPanel />
           ) : (

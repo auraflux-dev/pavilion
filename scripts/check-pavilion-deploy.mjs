@@ -29,6 +29,9 @@ export const PAVILION_TARGETS = {
     /** Extra path checks so copy-only ships cannot false-pass on stale homepage alone. */
     pathMustInclude: {
       '/pricing': ['PTO Annual Plan', 'Unlimited parents, volunteers, and chairs', 'invoice billing via ACH'],
+      '/contact': ['+1 (571) 600-2835', 'tel:+15716002835'],
+      '/api/health': ['"ok":true', 'commons-site'],
+      '/.well-known/security.txt': ['hello@onpavilion.com', 'tel:+15716002835'],
     },
   },
   'commons-pto': {

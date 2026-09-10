@@ -6,6 +6,9 @@ import { CONTACT_EMAIL } from '@/lib/brand'
 
 export { CONTACT_EMAIL }
 
+/** Re-export phone for footer/contact. */
+export { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_E164 } from '@/lib/brand'
+
 export const COMMONS_LIST_PRICE_USD = 399
 export const ADDON_STORE_USD = 99
 export const ADDON_CREATIVE_USD = 99

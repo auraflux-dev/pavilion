@@ -1,7 +1,12 @@
 import Link from 'next/link'
 import { PavilionMark } from '@/components/pavilion-site/marketing/pavilion-mark'
 import { LEGAL_ENTITY, PRODUCT_NAME, PRODUCT_TAGLINE } from '@/lib/pavilion-site/brand'
-import { CONTACT_EMAIL, DEMO_URL } from '@/lib/pavilion-site/pricing'
+import {
+  CONTACT_EMAIL,
+  CONTACT_PHONE_DISPLAY,
+  CONTACT_PHONE_E164,
+  DEMO_URL,
+} from '@/lib/pavilion-site/pricing'
 
 export function SiteFooter() {
   return (
@@ -41,6 +46,12 @@ export function SiteFooter() {
           </Link>
           <a href={`mailto:${CONTACT_EMAIL}`} className="text-[var(--ink)] hover:underline">
             {CONTACT_EMAIL}
+          </a>
+          <a href={`tel:${CONTACT_PHONE_E164}`} className="text-[var(--ink)] hover:underline">
+            {CONTACT_PHONE_DISPLAY}
+          </a>
+          <a href={`sms:${CONTACT_PHONE_E164}`} className="text-[var(--ink)] hover:underline">
+            Text or SMS
           </a>
         </div>
       </div>

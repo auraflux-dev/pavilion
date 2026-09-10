@@ -1,0 +1,5 @@
+Contact: mailto:hello@onpavilion.com
+Contact: tel:+15716002835
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://www.onpavilion.com/.well-known/security.txt
