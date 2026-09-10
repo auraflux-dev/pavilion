@@ -10,6 +10,10 @@ import { isSecure } from '@/lib/auth-cookies'
 import { requireOrganizationId } from '@/lib/crm/tenant'
 import { PLATFORM_MODE_COOKIE, resolvePlatformMode, type PlatformMode } from '@/lib/crm/platform-mode'
 import { writePlatformActivity } from '@/lib/ops/platform-activity'
+import {
+  defaultSelectedOrgId,
+  resolveFleetProductFromRequest,
+} from '@/lib/crm/fleet-product'
 
 async function gatePlatform(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -23,17 +27,20 @@ async function gatePlatform(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  if (!(await gatePlatform(req))) {
+  const session = await gatePlatform(req)
+  if (!session) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   const demo = isDemoInstanceFromRequest(req)
+  const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
+  const product = resolveFleetProductFromRequest(req, email)
   const mode = resolvePlatformMode(req.cookies.get(PLATFORM_MODE_COOKIE)?.value, {
     publicDemo: demo,
   })
   const selected =
     req.cookies.get(PLATFORM_CMS_ORG_COOKIE)?.value?.trim() ||
-    (demo ? 'org_riverside' : 'org_pavilion')
-  return NextResponse.json({ mode, selectedOrganizationId: selected })
+    defaultSelectedOrgId({ demo, product })
+  return NextResponse.json({ mode, product, selectedOrganizationId: selected })
 }
 
 export async function POST(req: NextRequest) {
@@ -46,7 +53,13 @@ export async function POST(req: NextRequest) {
     const rawMode = String(body.mode ?? 'platform').trim().toLowerCase()
     const mode: PlatformMode = rawMode === 'client' ? 'client' : 'platform'
     const demo = isDemoInstanceFromRequest(req)
-    const orgs = await listCustomerOrganizations({ demo })
+    const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
+    const product = resolveFleetProductFromRequest(req, email)
+    const orgs = await listCustomerOrganizations({
+      demo,
+      product,
+      includePlatformHome: false,
+    })
     let organizationId =
       String(body.organizationId ?? '').trim() ||
       req.cookies.get(PLATFORM_CMS_ORG_COOKIE)?.value?.trim() ||
@@ -58,6 +71,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unknown organization' }, { status: 400 })
       }
       const target = orgs.find((o) => o.id === organizationId)!
+      if (target.plan === 'platform') {
+        return NextResponse.json(
+          { error: 'Cannot warp into company platform home. Pick a customer org.' },
+          { status: 400 },
+        )
+      }
       if (
         target.plan === 'vip' ||
         target.slug === 'shms' ||
@@ -71,7 +90,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
     await writePlatformActivity({
       category: 'ops',
       action: mode === 'client' ? 'platform_enter_client_staff' : 'platform_exit_to_fleet',
@@ -80,12 +98,13 @@ export async function POST(req: NextRequest) {
       outcome: 'ok',
       route: '/api/staff/platform/mode',
       organizationId: organizationId || undefined,
-      detail: `mode=${mode}`,
+      detail: `mode=${mode};product=${product}`,
     })
 
     const res = NextResponse.json({
       ok: true,
       mode,
+      product,
       organizationId: organizationId || null,
     })
     res.cookies.set(PLATFORM_MODE_COOKIE, mode, {

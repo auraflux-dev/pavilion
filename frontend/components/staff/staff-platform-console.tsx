@@ -54,6 +54,7 @@ export function StaffPlatformConsole({ me }: Props) {
   const [query, setQuery] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [product, setProduct] = useState<'pavilion' | 'businessrocket'>('pavilion')
   const [health, setHealth] = useState<{
     targets: { id: string; label: string; url: string; ok: boolean; note: string }[]
     connectors: {
@@ -66,12 +67,19 @@ export function StaffPlatformConsole({ me }: Props) {
     vipNote: string
   } | null>(null)
 
+  const isBr = product === 'businessrocket'
+  const brandLabel = isBr ? 'Business Rocket Staff' : 'Platform Staff'
+  const ownerDomain = isBr ? '@businessrocket.ai' : '@onpavilion.com'
+
   const loadFleet = useCallback(async () => {
     setError('')
     try {
       const r = await fetch('/api/staff/platform/tenants')
       const d = await r.json()
       if (!r.ok) throw new Error(d.error || 'Could not load tenants')
+      if (d.product === 'businessrocket' || d.product === 'pavilion') {
+        setProduct(d.product)
+      }
       setTenants(Array.isArray(d.tenants) ? d.tenants : [])
       setAttention(Array.isArray(d.attention) ? d.attention : [])
       setSelectedOrgId(String(d.selectedOrganizationId || ''))
@@ -185,7 +193,7 @@ export function StaffPlatformConsole({ me }: Props) {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wide text-[#5A6070]">
-              Platform Staff
+              {brandLabel}
             </p>
             <p className="text-sm font-bold text-[#1A1A1A]">
               {me.name}
@@ -218,9 +226,15 @@ export function StaffPlatformConsole({ me }: Props) {
         {active === 'home' ? (
           <section className="space-y-4">
             <div>
-              <h1 className="text-2xl font-bold text-[#1A1A1A]">Platform Home</h1>
+              <h1 className="text-2xl font-bold text-[#1A1A1A]">
+                {isBr ? 'Business Rocket Staff' : 'Platform Home'}
+              </h1>
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
-                {`Fleet view for Pavilion operators.
+                {isBr
+                  ? `Fleet view for Business Rocket operators (${ownerDomain}).
+Open a customer org, then warp into their Staff to edit brand, CMS, and connectors.
+Member portals stay on the customer host — never on businessrocket.ai.`
+                  : `Fleet view for Pavilion operators.
 Open a tenant to check connectors and brand, or enter Client Staff to serve that school.`}
               </p>
             </div>
@@ -272,7 +286,10 @@ Open a tenant to check connectors and brand, or enter Client Staff to serve that
             <div>
               <h1 className="text-2xl font-bold text-[#1A1A1A]">Tenants</h1>
               <p className="text-sm text-[#5A6070] mt-1 whitespace-pre-line">
-                {`Trials and customer orgs on the Pavilion platform.
+                {isBr
+                  ? `Business Rocket customer orgs (product=businessrocket).
+Provisioned via POST /api/commons/provision/br — not a second Staff app.`
+                  : `Trials and customer orgs on the Pavilion platform.
 VIP SHMS is dedicated and not editable here.`}
               </p>
             </div>
@@ -310,7 +327,7 @@ VIP SHMS is dedicated and not editable here.`}
                         disabled={busy}
                         onClick={() => void enterClientStaff(t.id)}
                       >
-                        Open client Staff
+                        Warp into Staff
                       </Button>
                     ) : null}
                   </div>
@@ -345,7 +362,7 @@ VIP SHMS is dedicated and not editable here.`}
                   disabled={busy}
                   onClick={() => void enterClientStaff(tenantDetail.id)}
                 >
-                  {busy ? 'Opening…' : 'Open client Staff'}
+                  {busy ? 'Opening…' : 'Warp into Staff'}
                 </Button>
               ) : null}
             </div>
@@ -420,7 +437,7 @@ Suggest-from-URL is a light pass. Use Inspect steps in Brand when thin.`}
                     disabled={busy}
                     onClick={() => void enterClientStaff(tenantDetail.id)}
                   >
-                    Open Brand via client Staff
+                    Open Brand via Staff warp
                   </Button>
                 ) : null}
               </div>
@@ -466,7 +483,7 @@ Client boards finish connectors in their Staff. You track gaps here.`}
             <h1 className="text-2xl font-bold text-[#1A1A1A]">Support</h1>
             <p className="text-sm text-[#5A6070] whitespace-pre-line">
               {`Cross-tenant asks without live school PII.
-Use Tenants → Open client Staff for hands-on help.
+Use Tenants → Warp into Staff for hands-on help.
 Billing invoices stay on marketing /account (Stripe).`}
             </p>
             <ul className="rounded-xl border border-[var(--border)] bg-white divide-y divide-[var(--border)]">
@@ -536,7 +553,17 @@ No parent or payment PII on this board.`}
           <section className="space-y-4">
             <h1 className="text-2xl font-bold text-[#1A1A1A]">Platform help</h1>
             <div className="rounded-xl border border-[var(--border)] bg-white p-4 text-sm space-y-3 whitespace-pre-line">
-              {`Platform Staff is for @onpavilion.com operators.
+              {isBr
+                ? `${brandLabel} is for ${ownerDomain} operators.
+
+Warp into a customer org’s Staff to edit Brand, Pages, and connectors.
+Exit with the Serving banner to return to the fleet.
+
+Customer create path: POST /api/commons/provision/br (BR calls pavilion-provision.ts).
+Member portals exist only on customer hosts — never on the company brand.
+
+See wiki HOME/hskrg-product-surface-map.`
+                : `Platform Staff is for @onpavilion.com operators.
 
 Enter client Staff to edit Brand, Pages, and connectors as that school.
 Exit with the Serving banner to return to the fleet.

@@ -26,6 +26,8 @@ function allowedOrigins(): string[] {
     set.add(`https://${process.env.PAVILION_DEMO_HOST || 'demo.onpavilion.com'}`)
     set.add('https://onpavilion.com')
     set.add('https://www.onpavilion.com')
+    set.add('https://businessrocket.ai')
+    set.add('https://www.businessrocket.ai')
   }
   if (process.env.NODE_ENV !== 'production') {
     set.add('http://localhost:3000')

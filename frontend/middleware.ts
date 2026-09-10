@@ -21,11 +21,13 @@ import {
 } from '@/lib/demo/guard'
 import { hasBetterAuthCookie, isCommonsPlatformHost, isDemoHostForMiddleware, isSharedProductHost } from '@/lib/crm/auth-edge'
 import {
-  isPavilionBrandHost,
+  companyBrandFromHost,
+  companyBrandOrigin,
+  isBusinessRocketBrandHost,
+  isCompanyBrandHost,
   isReservedProductHost,
   PAVILION_DEMO_HOST,
   PAVILION_SURFACE_HEADER,
-  pavilionBrandOrigin,
   productSurfaceFromHost,
 } from '@/lib/crm/product-host'
 import { commonsRequiresLogin, isCommonsPublicPath } from '@/lib/crm/private-tenant'
@@ -83,7 +85,8 @@ export async function middleware(req: NextRequest) {
     req.headers.get('x-forwarded-host')?.split(',')[0]?.trim().toLowerCase().split(':')[0] ||
     req.headers.get('host')?.trim().toLowerCase().split(':')[0] ||
     ''
-  const brandHost = isPavilionBrandHost(host)
+  const brandHost = isCompanyBrandHost(host)
+  const brandProduct = companyBrandFromHost(host)
   const reservedHost = isReservedProductHost(host)
   const demo =
     !brandHost &&
@@ -107,19 +110,23 @@ export async function middleware(req: NextRequest) {
 
   // Legacy staff.* subdomain → brand site /staff (portals are paths, not hosts).
   if (reservedHost && !brandHost) {
-    const dest = new URL(`${pavilionBrandOrigin()}/staff`)
+    const dest = new URL(`${companyBrandOrigin(host)}/staff`)
     return NextResponse.redirect(dest)
   }
 
-  // Pavilion brand site: marketing + /staff. School demo paths go to the demo host.
+  // Company brand site (Pavilion or Business Rocket): marketing + /staff only.
+  // Never serve member portal on the company host.
   if (brandHost) {
+    if (pathname === '/member-portal' || pathname.startsWith('/member-portal/')) {
+      return NextResponse.redirect(new URL('/', req.url))
+    }
     if (
       pathname === '/review' ||
       pathname.startsWith('/review/') ||
       pathname === '/trial' ||
       pathname.startsWith('/trial/')
     ) {
-      return NextResponse.redirect(new URL(`${pavilionBrandOrigin()}/staff`))
+      return NextResponse.redirect(new URL(`${companyBrandOrigin(host)}/staff`))
     }
     const brandOk =
       pathname === '/' ||
@@ -136,6 +143,14 @@ export async function middleware(req: NextRequest) {
       pathname.startsWith('/process/') ||
       pathname === '/pricing' ||
       pathname.startsWith('/pricing/') ||
+      pathname === '/services' ||
+      pathname.startsWith('/services/') ||
+      pathname === '/work' ||
+      pathname.startsWith('/work/') ||
+      pathname === '/story' ||
+      pathname.startsWith('/story/') ||
+      pathname === '/contact' ||
+      pathname.startsWith('/contact/') ||
       pathname === '/about' ||
       pathname.startsWith('/about/') ||
       pathname === '/help' ||
@@ -152,9 +167,16 @@ export async function middleware(req: NextRequest) {
       pathname.startsWith('/start/') ||
       pathname === '/thanks' ||
       pathname.startsWith('/thanks/') ||
+      pathname === '/terms' ||
+      pathname.startsWith('/terms/') ||
       pathname.startsWith('/_next/') ||
       pathname === '/favicon.ico'
     if (!brandOk) {
+      // Pavilion brand: school demos live on demo host. BR brand: stay on company site.
+      if (isBusinessRocketBrandHost(host) || brandProduct === 'businessrocket') {
+        const home = new URL('/', req.url)
+        return NextResponse.redirect(home)
+      }
       const demoUrl = new URL(`https://${PAVILION_DEMO_HOST}${pathname}`)
       demoUrl.search = req.nextUrl.search
       return NextResponse.redirect(demoUrl)

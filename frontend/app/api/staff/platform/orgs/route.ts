@@ -8,6 +8,10 @@ import {
 import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import { isSecure } from '@/lib/auth-cookies'
 import { requireOrganizationId } from '@/lib/crm/tenant'
+import {
+  defaultSelectedOrgId,
+  resolveFleetProductFromRequest,
+} from '@/lib/crm/fleet-product'
 
 async function gatePlatform(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -21,34 +25,49 @@ async function gatePlatform(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  if (!(await gatePlatform(req))) {
+  const session = await gatePlatform(req)
+  if (!session) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   const demo = isDemoInstanceFromRequest(req)
-  const orgs = await listCustomerOrganizations({ demo })
+  const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
+  const product = resolveFleetProductFromRequest(req, email)
+  const orgs = await listCustomerOrganizations({
+    demo,
+    product,
+    includePlatformHome: true,
+  })
   const selected =
     req.cookies.get(PLATFORM_CMS_ORG_COOKIE)?.value?.trim() ||
-    (demo ? 'org_riverside' : 'org_pavilion')
+    defaultSelectedOrgId({ demo, product })
   return NextResponse.json({
     platformOwner: true,
+    product,
     selectedOrganizationId: selected,
     organizations: orgs,
   })
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await gatePlatform(req))) {
+  const session = await gatePlatform(req)
+  if (!session) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   try {
     const body = await req.json()
     const organizationId = requireOrganizationId(String(body.organizationId ?? '').trim())
     const demo = isDemoInstanceFromRequest(req)
-    const orgs = await listCustomerOrganizations({ demo })
+    const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
+    const product = resolveFleetProductFromRequest(req, email)
+    const orgs = await listCustomerOrganizations({
+      demo,
+      product,
+      includePlatformHome: true,
+    })
     if (!orgs.some((o) => o.id === organizationId)) {
       return NextResponse.json({ error: 'Unknown organization' }, { status: 400 })
     }
-    const res = NextResponse.json({ ok: true, organizationId })
+    const res = NextResponse.json({ ok: true, organizationId, product })
     res.cookies.set(PLATFORM_CMS_ORG_COOKIE, organizationId, {
       httpOnly: true,
       sameSite: 'lax',

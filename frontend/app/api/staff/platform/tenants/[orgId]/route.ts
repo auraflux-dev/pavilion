@@ -4,6 +4,7 @@ import { isPlatformOwnerEmail, PLATFORM_CMS_ORG_COOKIE } from '@/lib/crm/platfor
 import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import { getPlatformTenant } from '@/lib/crm/platform-tenants'
 import { requireOrganizationId } from '@/lib/crm/tenant'
+import { resolveFleetProductFromRequest } from '@/lib/crm/fleet-product'
 
 async function gatePlatform(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -19,7 +20,8 @@ async function gatePlatform(req: NextRequest) {
 type Ctx = { params: Promise<{ orgId: string }> }
 
 export async function GET(req: NextRequest, ctx: Ctx) {
-  if (!(await gatePlatform(req))) {
+  const session = await gatePlatform(req)
+  if (!session) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   const { orgId: raw } = await ctx.params
@@ -30,12 +32,15 @@ export async function GET(req: NextRequest, ctx: Ctx) {
     return NextResponse.json({ error: 'Invalid organization' }, { status: 400 })
   }
   const demo = isDemoInstanceFromRequest(req)
-  const tenant = await getPlatformTenant(orgId, { demo })
+  const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
+  const product = resolveFleetProductFromRequest(req, email)
+  const tenant = await getPlatformTenant(orgId, { demo, product })
   if (!tenant) {
     return NextResponse.json({ error: 'Unknown organization' }, { status: 404 })
   }
   const selected = req.cookies.get(PLATFORM_CMS_ORG_COOKIE)?.value?.trim() || ''
   return NextResponse.json({
+    product,
     tenant,
     selectedOrganizationId: selected,
     notes: [

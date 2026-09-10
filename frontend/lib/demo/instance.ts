@@ -1,6 +1,8 @@
 import { isPavilionProductPlatform } from '@/lib/crm/platform-env'
 import {
+  businessRocketBrandOrigin,
   demoOriginFromHost,
+  isBusinessRocketBrandHost,
   isDemoProductHost,
   isPavilionBrandHost,
   PAVILION_DEMO_HOST,
@@ -49,12 +51,29 @@ export function isPublicPavilionBrandHost(): boolean {
   return false
 }
 
+/** Client-safe. Business Rocket brand site (www.businessrocket.ai: marketing + /staff). */
+export function isPublicBusinessRocketBrandHost(): boolean {
+  if (typeof window !== 'undefined') {
+    return isBusinessRocketBrandHost(window.location.hostname)
+  }
+  return false
+}
+
+/** Client-safe. Either company brand host. */
+export function isPublicCompanyBrandHost(): boolean {
+  return isPublicPavilionBrandHost() || isPublicBusinessRocketBrandHost()
+}
+
 /** @deprecated Use isPublicPavilionBrandHost */
 export function isPublicPlatformStaffHost(): boolean {
   return isPublicPavilionBrandHost()
 }
 
-export { pavilionBrandOrigin, pavilionBrandOrigin as platformStaffOrigin }
+export {
+  pavilionBrandOrigin,
+  pavilionBrandOrigin as platformStaffOrigin,
+  businessRocketBrandOrigin,
+}
 
 /** Node/Edge API routes on unified demo+trial must pass Host (not env-only isDemoInstance()). */
 export function hostFromRequest(req: {
@@ -80,6 +99,7 @@ const PLATFORM_SITE = 'https://commons-pto.vercel.app'
 /** Canonical public origin. Demo/platform never publish shmspto.org in metadata. */
 export function publicSiteUrl(host?: string): string {
   const env = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '')
+  if (host && isBusinessRocketBrandHost(host)) return businessRocketBrandOrigin()
   if (host && isPavilionBrandHost(host)) return pavilionBrandOrigin()
   if (host && isDemoProductHost(host)) return demoOriginFromHost(host)
   if (isDemoInstance(host)) {

@@ -4,6 +4,7 @@ import { isPlatformOwnerEmail } from '@/lib/crm/platform-owners'
 import { isDemoInstanceFromRequest } from '@/lib/demo/instance'
 import { listPlatformTenants } from '@/lib/crm/platform-tenants'
 import { commonsDbEnabled } from '@/lib/crm/db'
+import { resolveFleetProductFromRequest } from '@/lib/crm/fleet-product'
 
 async function gatePlatform(req: NextRequest) {
   const session = await getStaffSession(req)
@@ -17,32 +18,56 @@ async function gatePlatform(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  if (!(await gatePlatform(req))) {
+  const session = await gatePlatform(req)
+  if (!session) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   const demo = isDemoInstanceFromRequest(req)
-  const tenants = await listPlatformTenants({ demo })
+  const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
+  const product = resolveFleetProductFromRequest(req, email)
+  const tenants = await listPlatformTenants({ demo, product })
   const editable = tenants.filter((t) => !t.vipReadonly && t.plan !== 'platform')
   const withSquare = editable.filter((t) => t.squareConnected).length
   const withoutSquare = editable.length - withSquare
 
+  const targets =
+    product === 'businessrocket'
+      ? [
+          {
+            id: 'commons-pto-demo',
+            label: 'commons-pto-demo',
+            url: 'https://commons-pto-demo.vercel.app',
+            ok: true,
+            note: 'Product engine. BR company /staff and customer hosts attach here.',
+          },
+          {
+            id: 'businessrocket-brand',
+            label: 'businessrocket.ai',
+            url: 'https://www.businessrocket.ai',
+            ok: true,
+            note: 'Company marketing + Brand Staff path. Apex may still be WordPress until cutover.',
+          },
+        ]
+      : [
+          {
+            id: 'commons-pto-demo',
+            label: 'commons-pto-demo',
+            url: 'https://commons-pto-demo.vercel.app',
+            ok: true,
+            note: 'Product demo host. Confirm with ship check after deploys.',
+          },
+          {
+            id: 'commons-site',
+            label: 'onpavilion.com',
+            url: 'https://onpavilion.com',
+            ok: true,
+            note: 'Marketing. Separate ship target.',
+          },
+        ]
+
   return NextResponse.json({
-    targets: [
-      {
-        id: 'commons-pto-demo',
-        label: 'commons-pto-demo',
-        url: 'https://commons-pto-demo.vercel.app',
-        ok: true,
-        note: 'Product demo host. Confirm with ship check after deploys.',
-      },
-      {
-        id: 'commons-site',
-        label: 'onpavilion.com',
-        url: 'https://onpavilion.com',
-        ok: true,
-        note: 'Marketing. Separate ship target.',
-      },
-    ],
+    product,
+    targets,
     connectors: {
       dbEnabled: commonsDbEnabled(),
       orgsEditable: editable.length,
@@ -50,6 +75,9 @@ export async function GET(req: NextRequest) {
       orgsWithoutSquare: withoutSquare,
       orgsWithPlaid: editable.filter((t) => t.plaidConnected).length,
     },
-    vipNote: 'SHMS VIP is not managed from this health board.',
+    vipNote:
+      product === 'businessrocket'
+        ? 'BR Brand Staff manages businessrocket product orgs only.'
+        : 'SHMS VIP is not managed from this health board.',
   })
 }

@@ -30,22 +30,32 @@ export function createCommonsAuth() {
         `https://${process.env.PAVILION_DEMO_HOST || 'demo.onpavilion.com'}`,
         'https://onpavilion.com',
         'https://www.onpavilion.com',
+        'https://businessrocket.ai',
+        'https://www.businessrocket.ai',
         'https://commons-pto-demo.vercel.app',
         'https://commons-pto.vercel.app',
       ]
       if (!request) return base
       const origin = request.headers.get('origin') || ''
-      const suffix = (
+      const pavilionSuffix = (
         process.env.PAVILION_TRIAL_DOMAIN_SUFFIX ||
         process.env.COMMONS_TEMP_DOMAIN_SUFFIX ||
         'onpavilion.com'
       )
         .replace(/^\./, '')
         .toLowerCase()
+      const brSuffix = (
+        process.env.BR_TRIAL_DOMAIN_SUFFIX ||
+        process.env.BUSINESSROCKET_TRIAL_DOMAIN_SUFFIX ||
+        'businessrocket.ai'
+      )
+        .replace(/^\./, '')
+        .toLowerCase()
+      const suffixes = [pavilionSuffix, brSuffix]
       try {
         if (origin) {
           const host = new URL(origin).hostname.toLowerCase()
-          if (host === suffix || host.endsWith(`.${suffix}`)) {
+          if (suffixes.some((suffix) => host === suffix || host.endsWith(`.${suffix}`))) {
             return [...base, origin]
           }
         }
@@ -56,7 +66,7 @@ export function createCommonsAuth() {
         request.headers.get('x-forwarded-host')?.split(',')[0]?.trim().toLowerCase().split(':')[0] ||
         request.headers.get('host')?.trim().toLowerCase().split(':')[0] ||
         ''
-      if (host && (host === suffix || host.endsWith(`.${suffix}`))) {
+      if (host && suffixes.some((suffix) => host === suffix || host.endsWith(`.${suffix}`))) {
         return [...base, `https://${host}`]
       }
       return base

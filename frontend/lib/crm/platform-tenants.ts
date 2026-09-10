@@ -24,8 +24,15 @@ function isVipReadonly(org: { slug: string; plan: string }): boolean {
   return plan === 'vip' || slug === 'shms' || slug === 'shmspto' || slug.includes('stone-hill')
 }
 
-export async function listPlatformTenants(opts?: { demo?: boolean }): Promise<PlatformTenant[]> {
-  const orgs = await listCustomerOrganizations(opts)
+export async function listPlatformTenants(opts?: {
+  demo?: boolean
+  product?: 'pavilion' | 'businessrocket'
+}): Promise<PlatformTenant[]> {
+  const orgs = await listCustomerOrganizations({
+    demo: opts?.demo,
+    product: opts?.product,
+    includePlatformHome: false,
+  })
   const lifecycle = commonsDbEnabled() ? await listOrgsForLifecycle() : []
   const byId = new Map(lifecycle.map((o) => [o.id, o]))
 
@@ -84,13 +91,16 @@ export async function listPlatformTenants(opts?: { demo?: boolean }): Promise<Pl
 
 export async function getPlatformTenant(
   organizationId: string,
-  opts?: { demo?: boolean },
+  opts?: { demo?: boolean; product?: 'pavilion' | 'businessrocket' },
 ): Promise<PlatformTenant | null> {
   const all = await listPlatformTenants(opts)
   return all.find((t) => t.id === organizationId) || null
 }
 
-export async function platformFleetAttention(opts?: { demo?: boolean }): Promise<
+export async function platformFleetAttention(opts?: {
+  demo?: boolean
+  product?: 'pavilion' | 'businessrocket'
+}): Promise<
   { id: string; label: string; organizationId: string; tone: 'warn' | 'info' }[]
 > {
   const tenants = await listPlatformTenants(opts)

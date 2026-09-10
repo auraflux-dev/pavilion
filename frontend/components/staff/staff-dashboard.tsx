@@ -647,9 +647,20 @@ This site is for Pavilion operators, not school boards.`
         {me.platformOwner && platformOrgs.length > 0 && platformMode === 'client' ? (
           <section className="rounded-xl border border-[var(--border)] bg-[#F7F8FA] px-4 py-3 flex flex-wrap items-center gap-3">
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-[#1A1A1A]">Pavilion platform</p>
+              <p className="text-sm font-semibold text-[#1A1A1A]">
+                {String(me.email || '')
+                  .toLowerCase()
+                  .endsWith('@businessrocket.ai')
+                  ? 'Business Rocket'
+                  : 'Pavilion platform'}
+              </p>
               <p className="text-xs text-[#5A6070] whitespace-pre-line">
-                {`Serving Client Staff for the selected school.
+                {String(me.email || '')
+                  .toLowerCase()
+                  .endsWith('@businessrocket.ai')
+                  ? `Serving customer Staff for the selected org.
+Return to Brand Staff fleet for tenants, health, and support.`
+                  : `Serving Client Staff for the selected school.
 Open Platform fleet for tenants, health, and support.`}
               </p>
             </div>
