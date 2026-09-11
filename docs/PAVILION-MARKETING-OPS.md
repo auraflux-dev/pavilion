@@ -7,9 +7,14 @@
 | Channel | Value |
 |---------|--------|
 | Email | `hello@onpavilion.com` |
-| Call / SMS | `+1 (571) 600-2835` (`tel:+15716002835`). Same number as AuraFlux. |
+| Call / SMS | `+1 (571) 600-2835` (`tel:+15716002835`) |
 
-## GA4
+## DNS
+
+`onpavilion.com` is on **Vercel DNS** (`ns1.vercel-dns.com` / `ns2.vercel-dns.com`), not Cloudflare.
+Registrar: Name.com. Wildcard trial hosts need Vercel nameservers (DNS-01).
+
+Cloudflare R2 is used for **SHMS CMS backups**, not Pavilion marketing DNS.
 
 Set on Vercel project **commons-site** (Production):
 

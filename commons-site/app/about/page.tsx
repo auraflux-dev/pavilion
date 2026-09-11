@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { DemoBookingLink } from '@/components/demo-booking-link'
 import { ABOUT } from '@/lib/marketing'
-import { COMMONS_LIST_PRICE_USD, DEMO_URL } from '@/lib/pricing'
+import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
 
 export const metadata: Metadata = { title: 'About' }
 
@@ -19,12 +20,9 @@ export default function AboutPage() {
           {ABOUT.support}
         </p>
         <div className="mb-12 flex flex-wrap gap-3 md:mb-14">
-          <a
-            href={DEMO_URL}
-            className="rounded-xl bg-emerald-900 px-5 py-2.5 font-semibold text-white shadow-sm transition-colors hover:bg-emerald-950"
-          >
-            Try the demo
-          </a>
+          <DemoBookingLink className="rounded-xl bg-emerald-900 px-5 py-2.5 font-semibold text-white shadow-sm transition-colors hover:bg-emerald-950">
+            Book a demo
+          </DemoBookingLink>
           <Link
             href="/pricing"
             className="rounded-xl border border-zinc-300 bg-white px-5 py-2.5 font-semibold text-slate-800 transition-colors hover:bg-zinc-100"

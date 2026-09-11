@@ -1,6 +1,7 @@
 import Link from 'next/link'
+import { DemoBookingLink } from '@/components/demo-booking-link'
 import { CLOSE_SLOGAN, CLOSE_SUPPORT } from '@/lib/marketing'
-import { COMMONS_LIST_PRICE_USD, DEMO_URL } from '@/lib/pricing'
+import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
 
 export function MarketingCloseCta() {
   return (
@@ -21,12 +22,9 @@ export function MarketingCloseCta() {
           >
             {`Start at $${COMMONS_LIST_PRICE_USD}/mo`}
           </Link>
-          <a
-            href={DEMO_URL}
-            className="rounded-xl border border-white/40 bg-transparent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
-          >
-            Try the demo
-          </a>
+          <DemoBookingLink className="rounded-xl border border-white/40 bg-transparent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10">
+            Book a demo
+          </DemoBookingLink>
         </div>
       </div>
     </section>

@@ -1,4 +1,4 @@
-import { DEMO_URL } from '@/lib/pricing'
+import { DemoBookingLink } from '@/components/demo-booking-link'
 
 /** Minimal product UI previews for Process steps. No emojis. */
 
@@ -10,7 +10,7 @@ export function ProcessTourCard() {
         <span className="h-2 w-2 rounded-full bg-zinc-300" aria-hidden />
         <span className="h-2 w-2 rounded-full bg-zinc-300" aria-hidden />
         <span className="ml-2 flex-1 truncate rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] text-zinc-500">
-          demo.onpavilion.com
+          Book a live walkthrough
         </span>
       </div>
       <div className="space-y-3 p-4">
@@ -23,12 +23,9 @@ export function ProcessTourCard() {
           <div className="h-14 rounded-lg bg-zinc-200/70" />
         </div>
         <div className="flex justify-center pt-2">
-          <a
-            href={DEMO_URL}
-            className="inline-flex rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-900"
-          >
-            Start Interactive Tour
-          </a>
+          <DemoBookingLink className="inline-flex rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-900">
+            Book a demo
+          </DemoBookingLink>
         </div>
       </div>
     </div>

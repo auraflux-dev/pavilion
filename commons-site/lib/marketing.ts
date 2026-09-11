@@ -166,8 +166,8 @@ export const PROCESS = {
     'A clear path from first look to a school-ready year.\nNo second product to learn midstream.',
   steps: [
     {
-      title: '1. Tour the demo',
-      body: 'See public, family, and staff on the sample school.\nClick through the real product, not slides.',
+      title: '1. Book a live walkthrough',
+      body: 'We walk public, family, and staff on the sample school.\nReal product, not slides.',
     },
     {
       title: '2. Brand a private trial',
@@ -189,4 +189,4 @@ Square stays yours for parent cards and sales.`,
 export const CLOSE_SLOGAN = 'Ready when your team is.'
 
 export const CLOSE_SUPPORT =
-  'Start with a branded trial.\nOnboard in Staff.\nOr tour the product demo first.'
+  'Start with a branded trial.\nOnboard in Staff.\nOr book a live walkthrough first.'

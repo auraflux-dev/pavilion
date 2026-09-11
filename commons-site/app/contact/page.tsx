@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { DemoBookingLink } from '@/components/demo-booking-link'
 import { DemoBookingPanel } from '@/components/demo-booking-panel'
 import { PRODUCT_NAME } from '@/lib/brand'
 import { getDemoBookingUrl } from '@/lib/demo-booking'
-import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_E164, DEMO_URL } from '@/lib/pricing'
+import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_E164 } from '@/lib/pricing'
 
 export const metadata: Metadata = { title: 'Book a demo' }
 
@@ -100,9 +101,7 @@ Invite your principal, co-chairs, or treasurer directly to the invite.`}
           <div className="card-surface">
             <p className="text-lg font-semibold text-slate-900">Prefer to look first?</p>
             <div className="mt-3 flex flex-wrap gap-3">
-              <a href={DEMO_URL} className="btn-secondary">
-                Try the demo
-              </a>
+              <DemoBookingLink className="btn-secondary">Book a demo time</DemoBookingLink>
               <Link href="/pricing#checkout" className="btn-secondary">
                 Get started
               </Link>

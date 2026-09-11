@@ -1,6 +1,7 @@
 import Link from 'next/link'
+import { DemoBookingLink } from '@/components/demo-booking-link'
 import { HERO_EYEBROW, HERO_HEADLINE, HERO_SUPPORT, SURFACES } from '@/lib/marketing'
-import { COMMONS_LIST_PRICE_USD, DEMO_URL } from '@/lib/pricing'
+import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
 import { BrowserFrame } from '@/components/marketing/browser-frame'
 
 export function MarketingHero() {
@@ -28,9 +29,7 @@ export function MarketingHero() {
             <Link href="/pricing#checkout" className="btn-primary">
               {`Start at $${COMMONS_LIST_PRICE_USD}/mo`}
             </Link>
-            <a href={DEMO_URL} className="btn-secondary">
-              Try the demo
-            </a>
+            <DemoBookingLink className="btn-secondary">Book a demo</DemoBookingLink>
           </div>
         </div>
 

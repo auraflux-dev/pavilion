@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { DemoBookingLink } from '@/components/demo-booking-link'
 import { MarketingCloseCta } from '@/components/marketing/close-cta'
 import { PROCESS_STEP_VISUALS } from '@/components/marketing/process-step-visuals'
 import { PROCESS } from '@/lib/marketing'
-import { COMMONS_LIST_PRICE_USD, DEMO_URL } from '@/lib/pricing'
+import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
 
 export const metadata: Metadata = { title: 'Our process' }
 
@@ -22,9 +23,7 @@ export default function ProcessPage() {
             {PROCESS.support}
           </p>
           <div className="flex flex-wrap gap-3">
-            <a href={DEMO_URL} className="btn-primary">
-              Start with the demo
-            </a>
+            <DemoBookingLink className="btn-primary">Book a demo</DemoBookingLink>
             <Link href="/pricing" className="btn-secondary">
               {`Start at $${COMMONS_LIST_PRICE_USD}/mo`}
             </Link>

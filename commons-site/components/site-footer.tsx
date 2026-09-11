@@ -1,7 +1,8 @@
 import Link from 'next/link'
+import { DemoBookingLink } from '@/components/demo-booking-link'
 import { PavilionMark } from '@/components/marketing/pavilion-mark'
 import { PRODUCT_NAME, PRODUCT_TAGLINE } from '@/lib/brand'
-import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_E164, DEMO_URL } from '@/lib/pricing'
+import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_E164 } from '@/lib/pricing'
 
 const explore = [
   { href: '/', label: 'Home' },
@@ -83,12 +84,9 @@ export function SiteFooter() {
                 </a>
               </li>
               <li>
-                <a
-                  href={DEMO_URL}
-                  className="text-sm text-emerald-100/80 transition-colors hover:text-white"
-                >
-                  Demo
-                </a>
+                <DemoBookingLink className="text-sm text-emerald-100/80 transition-colors hover:text-white">
+                  Book a demo
+                </DemoBookingLink>
               </li>
               <li>
                 <Link

@@ -12,7 +12,6 @@ type DemoBookingLinkProps = {
 
 /**
  * Book-a-demo CTA. Uses NEXT_PUBLIC_DEMO_BOOKING_URL when set; otherwise /contact.
- * Product tour stays on DEMO_URL via separate "Try the demo" links.
  */
 export function DemoBookingLink({
   children,

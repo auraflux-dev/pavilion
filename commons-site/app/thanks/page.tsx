@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { DEMO_URL } from '@/lib/pricing'
+import { DemoBookingLink } from '@/components/demo-booking-link'
 
 export const metadata: Metadata = { title: 'Thanks' }
 
@@ -15,12 +15,11 @@ export default function ThanksPage() {
 We will email you within one business day with next steps.`}
       </p>
       <p className="mt-6 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
-        {`While you wait, walk the product demo as a board member.`}
+        {`While you wait, book a live walkthrough.
+We will show Staff, the public site, and family login.`}
       </p>
       <div className="mt-8 flex flex-wrap gap-3">
-        <a href={DEMO_URL} className="btn-primary">
-          Open the demo
-        </a>
+        <DemoBookingLink className="btn-primary">Book a demo</DemoBookingLink>
         <Link href="/" className="btn-secondary">
           Back home
         </Link>
