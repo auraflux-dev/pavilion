@@ -18,12 +18,12 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200/60 bg-zinc-50/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-          <PavilionMark className="h-9 w-9 shrink-0 text-emerald-900 sm:h-10 sm:w-10" />
-          <span className="font-sans text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-            {PRODUCT_NAME}
-          </span>
-          <span className="badge-micro hidden sm:inline-flex">PTO OS</span>
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-lg font-semibold text-zinc-900"
+        >
+          <PavilionMark className="h-8 w-8 shrink-0 text-emerald-900" />
+          <span className="tracking-tight">{PRODUCT_NAME}</span>
         </Link>
 
         <div className="flex items-center gap-4 sm:gap-6">

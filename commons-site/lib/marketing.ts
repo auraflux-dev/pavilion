@@ -11,15 +11,6 @@ export const HERO_HEADLINE =
 export const HERO_SUPPORT =
   'Your team works in Staff.\nParents get your public site and family login.\nThey see your school. Not Pavilion.'
 
-/** Who / what / why / how / whom for marketing clarity. */
-export const STORY = {
-  whom: 'PTO and PTA boards and school community orgs.\nParents use your brand. They are not Pavilion customers.',
-  who: `${PRODUCT_NAME} is the PTO operating system.`,
-  what: 'One branded public site, family login for households, and Staff workspaces that survive annual team handoffs.\nYour school keeps its Square with 0% Pavilion transaction fees.',
-  why: 'Officers turn over. Tools scatter.\nParents should never see the vendor.',
-  how: 'Branded trial. Staff setup for tools and brand. Go live.\nPavilion support stays with your school after launch.',
-} as const
-
 export const PILLARS = [
   {
     id: 'engage',
