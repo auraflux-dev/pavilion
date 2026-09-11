@@ -3,6 +3,7 @@ import { pavilionCmsEnabled } from '@/lib/cms/store'
 import {
   listMarketingBlogPosts,
   marketingBlogOrgId,
+  seedMarketingBlogIfEmpty,
 } from '@/lib/cms/marketing-blog'
 
 export const revalidate = 60
@@ -16,6 +17,7 @@ export async function GET() {
     const { ensureCommonsReady } = await import('@/lib/crm/migrate')
     await ensureCommonsReady()
     const orgId = marketingBlogOrgId()
+    await seedMarketingBlogIfEmpty(orgId)
     const posts = await listMarketingBlogPosts(orgId, { activeOnly: true })
     return NextResponse.json({
       posts: posts.map((p) => ({
