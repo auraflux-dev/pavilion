@@ -8,7 +8,9 @@
  *   UPTIMEROBOT_API_KEY=xxx node scripts/setup-uptimerobot-pavilion.mjs
  *
  * Store the key in Doppler project `pavilion` / config `dev` as UPTIMEROBOT_API_KEY.
+ * Ops notes: HSKRG wiki HOME/product-pavilion-marketing-ops
  */
+
 const API_KEY = process.env.UPTIMEROBOT_API_KEY
 if (!API_KEY) {
   console.error('Set UPTIMEROBOT_API_KEY')
