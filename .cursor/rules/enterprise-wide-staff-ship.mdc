@@ -1,0 +1,26 @@
+---
+description: Enterprise-wide features must ship across Brand Staff / products, not one surface only
+alwaysApply: true
+---
+
+# Enterprise-wide Staff and product ships
+
+When a change is something the **whole enterprise** would need or benefit from (shared Staff tooling, CMS patterns, platform ops, content editors, auth gates, and similar), do **not** ship it to only one brand or one marketing site.
+
+## Required ship path
+
+1. **Author in the main shared product app** (`~/pavilion` / commons-pto-demo Staff + APIs) first.
+2. **Expose it on every applicable Brand / Platform Staff surface** (Pavilion, Business Rocket, AuraFlux), product-scoped when content or orgs differ.
+3. **Pull into that company’s marketing site and customers when applicable** (commons-site, Business Rocket web, customer promote / SHMS) so the feature is usable end-to-end, not stuck on demo alone.
+
+## Do not confuse with customer Client Staff
+
+School / client **Client Staff** gets enterprise capabilities when they apply to customer builds (for example Blog), gated by **Modules** check/uncheck so Brand Staff can turn them on or off per org.
+
+Company-only fleet ops stay on **Brand / Platform Staff**.
+
+## Anti-patterns (forbidden)
+
+- Building shared Brand Staff tooling only for Pavilion Platform mode and leaving BR/AF without it
+- Shipping Staff CRUD without a public/read path for the site that should consume it (when applicable)
+- Treating a demo-only deploy as “done for the enterprise” when sister brands or customer trees also need the same capability

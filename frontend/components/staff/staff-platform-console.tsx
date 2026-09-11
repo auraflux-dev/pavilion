@@ -229,9 +229,7 @@ export function StaffPlatformConsole({ me }: Props) {
     { id: 'modules', label: platformLabel.modules },
     { id: 'onboarding', label: platformLabel.onboarding },
     { id: 'support', label: platformLabel.support },
-    ...(isBr || isAf
-      ? []
-      : [{ id: 'blog' as const, label: platformLabel.blog }]),
+    { id: 'blog', label: platformLabel.blog },
     { id: 'health', label: platformLabel.health },
     { id: 'help', label: platformLabel.help },
   ]
@@ -598,7 +596,7 @@ Client boards finish connectors in their Staff. You track gaps here.`}
           </section>
         ) : null}
 
-        {active === 'blog' && !isBr && !isAf ? <StaffMarketingBlogPanel /> : null}
+        {active === 'blog' ? <StaffMarketingBlogPanel product={product} /> : null}
 
         {active === 'support' ? (
           <section className="space-y-4">

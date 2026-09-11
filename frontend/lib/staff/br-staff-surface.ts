@@ -64,6 +64,7 @@ export const BR_CUSTOMER_STAFF_ALLOWLIST: StaffWorkspace[] = [
   'comms',
   'payments',
   'reports',
+  'blog',
 ]
 
 const BR_ALLOW = new Set<StaffWorkspace>(BR_CUSTOMER_STAFF_ALLOWLIST)
@@ -88,6 +89,7 @@ export const BR_STAFF_WORKSPACE_LABEL: Partial<Record<StaffWorkspace, string>> =
   site: 'Site settings',
   nav: 'Nav & footer',
   modules: 'Modules',
+  blog: 'Blog',
   projects: 'Projects',
   events: 'Events',
   payments: 'Payments',
@@ -108,7 +110,7 @@ export const BR_STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
     id: 'website',
     label: 'Website',
     blurb: 'Their marketing site — brand, pages, settings.',
-    workspaces: ['brand', 'pages', 'content', 'pagetheme', 'site', 'nav', 'modules'],
+    workspaces: ['brand', 'pages', 'content', 'pagetheme', 'site', 'nav', 'modules', 'blog'],
   },
   {
     id: 'clients',

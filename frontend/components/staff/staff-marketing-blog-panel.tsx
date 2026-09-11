@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { StaffPlainCopyField } from '@/components/staff/staff-plain-copy-field'
 import { normalizePlainCopy } from '@/lib/copy/plain-staff-copy'
+import type { CompanyProduct } from '@/lib/crm/platform-owners'
 
 type BlogPost = {
   id: string
@@ -37,7 +38,12 @@ function slugify(title: string): string {
     .slice(0, 80)
 }
 
-export function StaffMarketingBlogPanel() {
+type Props = {
+  /** Brand Staff fleet product. Omits for Client Staff (uses serving org). */
+  product?: CompanyProduct
+}
+
+export function StaffMarketingBlogPanel({ product }: Props) {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -46,10 +52,14 @@ export function StaffMarketingBlogPanel() {
   const [slugTouched, setSlugTouched] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
 
+  const apiUrl = product
+    ? `/api/staff/marketing-blog?product=${encodeURIComponent(product)}`
+    : '/api/staff/marketing-blog'
+
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const r = await fetch('/api/staff/marketing-blog')
+      const r = await fetch(apiUrl)
       const d = await r.json()
       if (!r.ok) throw new Error(d.error ?? 'Load failed')
       setPosts(d.posts ?? [])
@@ -58,7 +68,7 @@ export function StaffMarketingBlogPanel() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [apiUrl])
 
   useEffect(() => {
     void load()
@@ -102,7 +112,7 @@ export function StaffMarketingBlogPanel() {
         bodyMarkdown: normalizePlainCopy(form.bodyMarkdown),
         active: form.active,
       }
-      const r = await fetch('/api/staff/marketing-blog', {
+      const r = await fetch(apiUrl, {
         method: editing ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -123,7 +133,7 @@ export function StaffMarketingBlogPanel() {
     setBusy(true)
     setStatus('')
     try {
-      const r = await fetch('/api/staff/marketing-blog', {
+      const r = await fetch(apiUrl, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: post.id, active: !post.active }),
@@ -141,10 +151,10 @@ export function StaffMarketingBlogPanel() {
   return (
     <section className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-[#1A1A1A]">Marketing blog</h1>
+        <h1 className="text-2xl font-bold text-[#1A1A1A]">Blog</h1>
         <p className="mt-1 text-sm text-[#5A6070] whitespace-pre-line">
-          {`Posts on www.onpavilion.com/blog.
-Published rows go live on the marketing site within about a minute.
+          {`Posts on your public /blog.
+Brand Staff can turn this off under Modules (Public blog + Staff blog editor).
 Use Markdown for the body.`}
         </p>
       </div>
@@ -230,7 +240,7 @@ Use Markdown for the body.`}
             checked={form.active}
             onChange={(e) => setForm((f) => ({ ...f, active: e.target.checked }))}
           />
-          Published on www.onpavilion.com/blog
+          Published on public /blog
         </label>
 
         <Button

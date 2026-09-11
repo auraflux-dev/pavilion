@@ -71,6 +71,7 @@ export const STAFF_PERMISSION_GROUPS: { id: string; label: string; items: StaffW
       'comms',
       'canva',
       'minutes',
+      'blog',
     ],
   },
   {
@@ -148,6 +149,7 @@ export const WORKSPACE_ROLES: Record<StaffWorkspace, StaffRole[]> = {
   fundraising: ['treasurer', 'programs', 'marketing', 'admin'],
   wellness: ['wellness', 'events', 'admin'],
   newsletter: ['marketing', 'secretary', 'membership', 'admin'],
+  blog: ['marketing', 'admin'],
   comms: ['marketing', 'secretary', 'membership', 'events', 'admin'],
   reports: ['programs', 'retail', 'treasurer', 'membership', 'events', 'admin'],
   signups: ['events', 'secretary', 'admin'],

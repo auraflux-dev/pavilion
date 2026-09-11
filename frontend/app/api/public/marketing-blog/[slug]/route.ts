@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { pavilionCmsEnabled } from '@/lib/cms/store'
 import {
   getMarketingBlogPost,
   marketingBlogOrgId,
+  parseMarketingBlogProduct,
   seedMarketingBlogIfEmpty,
 } from '@/lib/cms/marketing-blog'
 
@@ -10,8 +11,8 @@ export const revalidate = 60
 
 type Ctx = { params: Promise<{ slug: string }> }
 
-/** Public single published Pavilion marketing blog post. */
-export async function GET(_req: Request, ctx: Ctx) {
+/** Public single published marketing blog post. ?product=pavilion|businessrocket|auraflux */
+export async function GET(req: NextRequest, ctx: Ctx) {
   const { slug } = await ctx.params
   if (!pavilionCmsEnabled()) {
     return NextResponse.json({ error: 'Unavailable' }, { status: 503 })
@@ -19,8 +20,9 @@ export async function GET(_req: Request, ctx: Ctx) {
   try {
     const { ensureCommonsReady } = await import('@/lib/crm/migrate')
     await ensureCommonsReady()
-    const orgId = marketingBlogOrgId()
-    await seedMarketingBlogIfEmpty(orgId)
+    const product = parseMarketingBlogProduct(req.nextUrl.searchParams.get('product'))
+    const orgId = marketingBlogOrgId(product)
+    await seedMarketingBlogIfEmpty(orgId, product)
     const post = await getMarketingBlogPost(slug, orgId, { activeOnly: true })
     if (!post) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json({
@@ -34,6 +36,7 @@ export async function GET(_req: Request, ctx: Ctx) {
         bodyMarkdown: post.bodyMarkdown,
       },
       source: 'cms',
+      product,
     })
   } catch {
     return NextResponse.json({ error: 'Unavailable' }, { status: 500 })

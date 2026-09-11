@@ -70,7 +70,7 @@ export const PLATFORM_WORKSPACE_BLURB: Partial<Record<PlatformWorkspace, string>
   modules: 'Check/uncheck product modules for this org',
   onboarding: 'Sales → trial → go-live ladder',
   support: 'Cross-tenant asks (no school PII)',
-  blog: 'Pavilion marketing posts on www.onpavilion.com/blog',
+  blog: 'Marketing blog for this product (check Modules per customer to enable)',
   health: 'Demo deploy and connector summary',
   help: 'Platform knowledge base',
 }

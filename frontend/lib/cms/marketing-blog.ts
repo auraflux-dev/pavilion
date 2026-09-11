@@ -1,18 +1,26 @@
 import 'server-only'
 
 /**
- * Pavilion marketing blog posts (www.onpavilion.com/blog).
- * Stored in cms_collection_items for org_pavilion.
+ * Org-scoped marketing blog posts (Staff Blog + public /blog when enabled).
+ * Stored in cms_collection_items collection MarketingBlogPosts.
  */
 import { randomUUID } from 'crypto'
 import { sqlForOrg } from '@/lib/crm/tenant'
-import { platformHomeOrgId } from '@/lib/crm/platform-owners'
+import {
+  platformHomeOrgId,
+  type CompanyProduct,
+  normalizeCompanyProduct,
+} from '@/lib/crm/platform-owners'
 import { MARKETING_BLOG_SEED } from '@/lib/cms/marketing-blog-seed'
 
 export const MARKETING_BLOG_COLLECTION = 'MarketingBlogPosts'
 
-export function marketingBlogOrgId(): string {
-  return platformHomeOrgId('pavilion')
+export function marketingBlogOrgId(product: CompanyProduct = 'pavilion'): string {
+  return platformHomeOrgId(normalizeCompanyProduct(product))
+}
+
+export function parseMarketingBlogProduct(raw: string | null | undefined): CompanyProduct {
+  return normalizeCompanyProduct(raw)
 }
 
 export type MarketingBlogPost = {
@@ -82,7 +90,7 @@ function rowToPost(row: CollectionRow): MarketingBlogPost | null {
 }
 
 export async function listMarketingBlogPosts(
-  orgId: string = marketingBlogOrgId(),
+  orgId: string,
   opts?: { activeOnly?: boolean },
 ): Promise<MarketingBlogPost[]> {
   const activeOnly = opts?.activeOnly === true
@@ -103,7 +111,7 @@ export async function listMarketingBlogPosts(
 
 export async function getMarketingBlogPost(
   slug: string,
-  orgId: string = marketingBlogOrgId(),
+  orgId: string,
   opts?: { activeOnly?: boolean },
 ): Promise<MarketingBlogPost | null> {
   const safe = slug.replace(/[^a-z0-9-]/gi, '')
@@ -125,7 +133,7 @@ export async function upsertMarketingBlogPost(
     active?: boolean
     sortOrder?: number
   },
-  orgId: string = marketingBlogOrgId(),
+  orgId: string,
 ): Promise<MarketingBlogPost> {
   const slug = String(input.slug || '')
     .trim()
@@ -183,7 +191,7 @@ export async function upsertMarketingBlogPost(
 export async function setMarketingBlogPostActive(
   id: string,
   active: boolean,
-  orgId: string = marketingBlogOrgId(),
+  orgId: string,
 ): Promise<void> {
   const postId = String(id ?? '').trim()
   if (!postId) throw new Error('id required')
@@ -198,8 +206,13 @@ export async function setMarketingBlogPostActive(
 
 /** Seed the three launch posts when the collection is empty. */
 export async function seedMarketingBlogIfEmpty(
-  orgId: string = marketingBlogOrgId(),
+  orgId: string,
+  product: CompanyProduct = 'pavilion',
 ): Promise<{ seeded: number }> {
+  // Only Pavilion home org gets the launch seed. Other orgs start empty.
+  if (product !== 'pavilion' || orgId !== marketingBlogOrgId('pavilion')) {
+    return { seeded: 0 }
+  }
   const existing = await listMarketingBlogPosts(orgId, { activeOnly: false })
   if (existing.length > 0) return { seeded: 0 }
   let seeded = 0
@@ -221,4 +234,10 @@ export async function seedMarketingBlogIfEmpty(
     seeded += 1
   }
   return { seeded }
+}
+
+export function marketingBlogPublicSite(product: CompanyProduct): string {
+  if (product === 'businessrocket') return 'https://www.businessrocket.ai/blog'
+  if (product === 'auraflux') return 'https://www.auraflux.co/blog'
+  return 'https://www.onpavilion.com/blog'
 }

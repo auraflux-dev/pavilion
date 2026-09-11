@@ -166,7 +166,7 @@ async function fetchCmsPosts(): Promise<{ ok: true; posts: BlogPost[] } | { ok: 
     try {
       const ctrl = new AbortController()
       const timer = setTimeout(() => ctrl.abort(), FETCH_MS)
-      const res = await fetch(`${base}/api/public/marketing-blog`, {
+      const res = await fetch(`${base}/api/public/marketing-blog?product=pavilion`, {
         next: { revalidate: 60 },
         signal: ctrl.signal,
       })
@@ -194,7 +194,7 @@ async function fetchCmsPost(
     try {
       const ctrl = new AbortController()
       const timer = setTimeout(() => ctrl.abort(), FETCH_MS)
-      const res = await fetch(`${base}/api/public/marketing-blog/${encodeURIComponent(slug)}`, {
+      const res = await fetch(`${base}/api/public/marketing-blog/${encodeURIComponent(slug)}?product=pavilion`, {
         next: { revalidate: 60 },
         signal: ctrl.signal,
       })

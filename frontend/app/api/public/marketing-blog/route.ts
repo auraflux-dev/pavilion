@@ -1,23 +1,25 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { pavilionCmsEnabled } from '@/lib/cms/store'
 import {
   listMarketingBlogPosts,
   marketingBlogOrgId,
+  parseMarketingBlogProduct,
   seedMarketingBlogIfEmpty,
 } from '@/lib/cms/marketing-blog'
 
 export const revalidate = 60
 
-/** Public list of published Pavilion marketing blog posts for www.onpavilion.com. */
-export async function GET() {
+/** Public list of published marketing blog posts. ?product=pavilion|businessrocket|auraflux */
+export async function GET(req: NextRequest) {
   if (!pavilionCmsEnabled()) {
     return NextResponse.json({ posts: [], source: 'unavailable' })
   }
   try {
     const { ensureCommonsReady } = await import('@/lib/crm/migrate')
     await ensureCommonsReady()
-    const orgId = marketingBlogOrgId()
-    await seedMarketingBlogIfEmpty(orgId)
+    const product = parseMarketingBlogProduct(req.nextUrl.searchParams.get('product'))
+    const orgId = marketingBlogOrgId(product)
+    await seedMarketingBlogIfEmpty(orgId, product)
     const posts = await listMarketingBlogPosts(orgId, { activeOnly: true })
     return NextResponse.json({
       posts: posts.map((p) => ({
@@ -30,6 +32,7 @@ export async function GET() {
         bodyMarkdown: p.bodyMarkdown,
       })),
       source: 'cms',
+      product,
     })
   } catch {
     return NextResponse.json({ posts: [], source: 'error' }, { status: 500 })

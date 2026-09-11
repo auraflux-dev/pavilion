@@ -35,6 +35,7 @@ export type ProductModuleId =
   | 'site.donate'
   | 'site.p2p'
   | 'site.custom_pages'
+  | 'site.blog'
   // Portal
   | 'portal.family'
   | 'portal.membership'
@@ -54,6 +55,7 @@ export type ProductModuleId =
   | 'staff.cms'
   | 'staff.pages'
   | 'staff.brand'
+  | 'staff.blog'
   | 'staff.comms'
   | 'staff.newsletter'
   | 'staff.retail'
@@ -199,6 +201,15 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     products: ['pavilion', 'businessrocket', 'auraflux'],
     requires: ['staff.pages'],
     summary: 'Section canvas /p/{slug} pages',
+  },
+  {
+    id: 'site.blog',
+    label: 'Public blog',
+    group: 'website',
+    surfaces: ['website', 'staff'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
+    summary: 'Public /blog index and posts for this org',
+    codeHints: ['cms MarketingBlogPosts', 'Staff Blog workspace'],
   },
 
   // —— Portal ——
@@ -347,6 +358,16 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     surfaces: ['staff'],
     products: ['pavilion', 'businessrocket', 'auraflux'],
     summary: 'Logo, colors, fonts',
+  },
+  {
+    id: 'staff.blog',
+    label: 'Staff blog editor',
+    group: 'staff',
+    surfaces: ['staff', 'website'],
+    products: ['pavilion', 'businessrocket', 'auraflux'],
+    requires: ['site.blog'],
+    summary: 'Create and publish posts for this org’s public /blog',
+    codeHints: ['StaffMarketingBlogPanel', '/api/staff/marketing-blog'],
   },
   {
     id: 'staff.comms',
@@ -603,6 +624,7 @@ export const MODULE_PRESET_PAVILION_TRIAL: ModulePreset = {
     'site.membership_public',
     'site.signups',
     'site.custom_pages',
+    'site.blog',
     'portal.family',
     'portal.membership',
     'portal.messages',
@@ -617,6 +639,7 @@ export const MODULE_PRESET_PAVILION_TRIAL: ModulePreset = {
     'staff.cms',
     'staff.pages',
     'staff.brand',
+    'staff.blog',
     'staff.help',
     'staff.check_in',
     'staff.directory_print',
@@ -644,6 +667,7 @@ export const MODULE_PRESET_BR_STARTER: ModulePreset = {
     'site.marketing_pages',
     'site.events',
     'site.custom_pages',
+    'site.blog',
     'portal.family',
     'portal.messages',
     'br.scheduling',
@@ -652,6 +676,7 @@ export const MODULE_PRESET_BR_STARTER: ModulePreset = {
     'staff.cms',
     'staff.pages',
     'staff.brand',
+    'staff.blog',
     'staff.messages',
     'staff.help',
     'connect.square',
@@ -671,11 +696,13 @@ export const MODULE_PRESET_AF_STARTER: ModulePreset = {
     'site.marketing_pages',
     'site.events',
     'site.custom_pages',
+    'site.blog',
     'portal.family',
     'portal.messages',
     'staff.cms',
     'staff.pages',
     'staff.brand',
+    'staff.blog',
     'staff.messages',
     'staff.help',
     'connect.gmail',

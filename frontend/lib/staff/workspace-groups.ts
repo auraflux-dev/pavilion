@@ -51,7 +51,7 @@ export const STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
   {
     id: 'site',
     label: 'Website',
-    blurb: 'Page copy, settings, board, nav, FAQ, minutes.',
+    blurb: 'Page copy, settings, board, nav, FAQ, minutes, blog.',
     workspaces: [
       'pages',
       'brand',
@@ -64,6 +64,7 @@ export const STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
       'faq',
       'wellness',
       'minutes',
+      'blog',
     ],
   },
   {
@@ -87,6 +88,7 @@ export const STAFF_WORKSPACE_BLURB: Partial<Record<StaffWorkspace, string>> = {
   messages: 'Parent portal inbox',
   community: 'Grade and committee feeds',
   minutes: 'Publish meeting minutes',
+  blog: 'Public /blog posts for this org',
   programs: 'Your class: roster, attendance, nights',
   timesheets: 'Submit or approve teaching hours',
   payments: 'Payments, refunds, and reconciliation',

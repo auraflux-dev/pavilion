@@ -59,6 +59,7 @@ import { StaffOnboardingPanel } from '@/components/staff/staff-onboarding-panel'
 import { StaffClientOnboardingPanel } from '@/components/staff/staff-client-onboarding-panel'
 import { StaffPlatformConsole } from '@/components/staff/staff-platform-console'
 import { StaffModulesPanel } from '@/components/staff/staff-modules-panel'
+import { StaffMarketingBlogPanel } from '@/components/staff/staff-marketing-blog-panel'
 import { StaffServingOrgBanner } from '@/components/staff/staff-serving-org-banner'
 import { StaffWalkthroughNotice } from '@/components/staff/staff-walkthrough-notice'
 import { StaffGmailFromNotice } from '@/components/staff/staff-gmail-from-notice'
@@ -149,6 +150,7 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'surveys',
   'messages',
   'minutes',
+  'blog',
   'programs',
   'payments',
   'budget',
@@ -161,6 +163,10 @@ const WORKSPACE_IDS: StaffWorkspace[] = [
   'calendar',
   'docs',
   'content',
+  'pages',
+  'brand',
+  'modules',
+  'pagetheme',
   'site',
   'board',
   'nav',
@@ -235,6 +241,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   const [cmsOrgId, setCmsOrgId] = useState('')
   const [cmsOrgBusy, setCmsOrgBusy] = useState(false)
   const [platformMode, setPlatformMode] = useState<'platform' | 'client' | null>(null)
+  const [blogModuleOn, setBlogModuleOn] = useState(true)
 
   useEffect(() => {
     fetch('/api/staff/me')
@@ -249,6 +256,18 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Not authorized'))
   }, [])
+
+  useEffect(() => {
+    if (!me) return
+    fetch('/api/staff/modules')
+      .then(async (r) => {
+        const data = await r.json().catch(() => ({}))
+        if (!r.ok) return
+        const enabled = Array.isArray(data.enabled) ? data.enabled : []
+        setBlogModuleOn(enabled.includes('staff.blog'))
+      })
+      .catch(() => null)
+  }, [me, cmsOrgId])
 
   // When www.onpavilion.com is on this deploy (brand surface), stay here.
   // Do not bounce demo → www until DNS points www at commons-pto-demo.
@@ -359,6 +378,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
   const canWellness = staffCanWorkspace(me, 'wellness')
   const canNewsletter = staffCanWorkspace(me, 'newsletter')
   const canComms = staffCanWorkspace(me, 'comms')
+  const canBlog = staffCanWorkspace(me, 'blog') && blogModuleOn
 
   const navItems = useMemo(() => {
     if (!me) return []
@@ -407,6 +427,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     if (canComms) items.push({ id: 'comms', label: wsLabel('comms') })
     if (canMarketing) items.push({ id: 'canva', label: wsLabel('canva') })
     if (canNewsletter) items.push({ id: 'newsletter', label: wsLabel('newsletter') })
+    if (canBlog) items.push({ id: 'blog', label: wsLabel('blog') })
     if (staffCanWorkspace(me, 'reports')) {
       items.push({ id: 'reports', label: wsLabel('reports') })
     }
@@ -470,6 +491,7 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
     canWellness,
     canComms,
     canNewsletter,
+    canBlog,
     staffCopy,
   ])
 
@@ -1397,6 +1419,7 @@ Open Platform fleet for tenants, health, and support.`}
             </StaffReveal>
           </div>
         ) : null}
+        {active === 'blog' && canBlog ? <StaffMarketingBlogPanel /> : null}
         {active === 'expenses' ? (
           <div className="space-y-4">
             <StaffExpensesSectionNav />
