@@ -39,7 +39,13 @@ Or start with the product demo on your own time.`}
           </div>
 
           {hasCalendar ? (
-            <DemoBookingPanel />
+            <div className="space-y-3">
+              <p className="max-w-xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-600 md:text-lg">
+                {`Board-friendly scheduling:
+Feel free to add your principal, board officers, or committee chairs directly to the invite.`}
+              </p>
+              <DemoBookingPanel />
+            </div>
           ) : (
             <div className="card-surface space-y-3">
               <p className="text-base font-normal leading-relaxed text-slate-600">
@@ -64,6 +70,10 @@ Or start with the product demo on your own time.`}
                 Get started
               </Link>
             </div>
+            <p className="mt-4 whitespace-pre-line text-sm font-normal leading-relaxed text-slate-600">
+              {`Need materials for your next board meeting?
+We send an executive summary and financial deck ahead of your call.`}
+            </p>
           </div>
         </div>
       </div>
