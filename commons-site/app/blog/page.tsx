@@ -46,9 +46,14 @@ export default function BlogIndexPage() {
               href={`/blog/${featured.slug}`}
               className="card-surface block border-emerald-200 bg-emerald-50/40 transition-colors hover:bg-emerald-50/70"
             >
-              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
-                Featured · {formatDate(featured.date)} · {featured.minutes} min
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-emerald-200/60 bg-white px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-900">
+                  {featured.category}
+                </span>
+                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                  Featured · {formatDate(featured.date)} · {featured.minutes} min
+                </p>
+              </div>
               <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
                 {featured.title}
               </h2>
@@ -61,9 +66,14 @@ export default function BlogIndexPage() {
           <div className="grid gap-4 md:grid-cols-2">
             {rest.map((post) => (
               <Link key={post.slug} href={`/blog/${post.slug}`} className="card-surface block">
-                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
-                  {formatDate(post.date)} · {post.minutes} min
-                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-emerald-200/60 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-900">
+                    {post.category}
+                  </span>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    {formatDate(post.date)} · {post.minutes} min
+                  </p>
+                </div>
                 <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-900">
                   {post.title}
                 </h2>

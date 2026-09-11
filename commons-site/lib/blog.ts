@@ -1,58 +1,143 @@
+import 'server-only'
+import fs from 'node:fs'
+import path from 'node:path'
+
 export type BlogPost = {
   slug: string
   title: string
   excerpt: string
   date: string
+  category: string
   minutes: number
-  body: string[]
+  /** Raw markdown body (no frontmatter). */
+  markdown: string
+  /** Simple HTML for article body. */
+  html: string
 }
 
-export const BLOG_POSTS: BlogPost[] = [
-  {
-    slug: 'survive-pto-officer-turnover',
-    title: 'How PTOs keep history when officers change every June',
-    excerpt:
-      'Role-based workspaces keep budgets, Drive folders, and volunteer queues with the school instead of a personal Gmail account.',
-    date: '2026-09-01',
-    minutes: 4,
-    body: [
-      'Every June, a new slate of officers inherits a pile of shared passwords and leftover folders.',
-      'Pavilion treats the role as the owner. Incoming chairs pick up files, context, and Staff queues without a scavenger hunt.',
-      'Parents keep the same public site and family login. Only Staff seats change.',
-    ],
-  },
-  {
-    slug: 'three-surfaces-one-school-brand',
-    title: 'Public site, family login, and Staff: one brand for your school',
-    excerpt:
-      'Parents should never see the vendor. Your PTO needs a front door, a household login, and a place officers actually work.',
-    date: '2026-08-18',
-    minutes: 5,
-    body: [
-      'A brochure site is not enough when membership, programs, and volunteer shifts live in three other tools.',
-      'Pavilion keeps the public site, family login, and Staff portal on your school brand.',
-      'Your team works in Staff. Parents see the school. Not Pavilion.',
-    ],
-  },
-  {
-    slug: 'branded-trial-before-you-buy',
-    title: 'Why a branded trial beats a slideshow demo',
-    excerpt:
-      'Walk your officers through a private host with your logo and colors before you commit to the annual plan.',
-    date: '2026-08-04',
-    minutes: 3,
-    body: [
-      'Cold product tours ask boards to imagine their school on someone else’s brand.',
-      'A branded trial applies your colors and name first. Your team logs in on a private host.',
-      'Book a live walkthrough and we configure that trial with you.',
-    ],
-  },
-] satisfies BlogPost[]
+const BLOG_DIR = path.join(process.cwd(), 'content', 'blog')
+
+function parseFrontmatter(raw: string): { data: Record<string, string>; body: string } {
+  const trimmed = raw.replace(/^\uFEFF/, '')
+  if (!trimmed.startsWith('---')) {
+    return { data: {}, body: trimmed.trim() }
+  }
+  const end = trimmed.indexOf('\n---', 3)
+  if (end === -1) {
+    return { data: {}, body: trimmed.trim() }
+  }
+  const matter = trimmed.slice(3, end).trim()
+  const body = trimmed.slice(end + 4).trim()
+  const data: Record<string, string> = {}
+  for (const line of matter.split('\n')) {
+    const idx = line.indexOf(':')
+    if (idx === -1) continue
+    const key = line.slice(0, idx).trim()
+    let value = line.slice(idx + 1).trim()
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1)
+    }
+    data[key] = value
+  }
+  return { data, body }
+}
+
+/** Minimal markdown → HTML for blog posts (paragraphs, headings, bold, links, lists). */
+export function markdownToHtml(md: string): string {
+  const lines = md.replace(/\r\n/g, '\n').split('\n')
+  const blocks: string[] = []
+  let paragraph: string[] = []
+  let listItems: string[] = []
+
+  const flushParagraph = () => {
+    if (!paragraph.length) return
+    const text = inline(paragraph.join(' ').trim())
+    if (text) blocks.push(`<p>${text}</p>`)
+    paragraph = []
+  }
+
+  const flushList = () => {
+    if (!listItems.length) return
+    blocks.push(`<ul>${listItems.map((item) => `<li>${inline(item)}</li>`).join('')}</ul>`)
+    listItems = []
+  }
+
+  const inline = (text: string) =>
+    text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" rel="noopener noreferrer">$1</a>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+
+  for (const line of lines) {
+    const heading = /^(#{1,3})\s+(.+)$/.exec(line)
+    if (heading) {
+      flushParagraph()
+      flushList()
+      const level = heading[1].length
+      blocks.push(`<h${level}>${inline(heading[2].trim())}</h${level}>`)
+      continue
+    }
+    const list = /^[-*]\s+(.+)$/.exec(line)
+    if (list) {
+      flushParagraph()
+      listItems.push(list[1].trim())
+      continue
+    }
+    if (!line.trim()) {
+      flushParagraph()
+      flushList()
+      continue
+    }
+    flushList()
+    paragraph.push(line.trim())
+  }
+  flushParagraph()
+  flushList()
+  return blocks.join('\n')
+}
+
+function loadPostFromFile(filePath: string): BlogPost | null {
+  const slug = path.basename(filePath, '.md')
+  const raw = fs.readFileSync(filePath, 'utf8')
+  const { data, body } = parseFrontmatter(raw)
+  const title = data.title?.trim()
+  const date = data.date?.trim()
+  const category = data.category?.trim()
+  const excerpt = data.excerpt?.trim()
+  if (!title || !date || !category || !excerpt) return null
+  const minutes = Number.parseInt(data.minutes || '3', 10)
+  return {
+    slug,
+    title,
+    date,
+    category,
+    excerpt,
+    minutes: Number.isFinite(minutes) && minutes > 0 ? minutes : 3,
+    markdown: body,
+    html: markdownToHtml(body),
+  }
+}
 
 export function getAllPosts(): BlogPost[] {
-  return [...BLOG_POSTS].sort((a, b) => (a.date < b.date ? 1 : -1))
+  if (!fs.existsSync(BLOG_DIR)) return []
+  return fs
+    .readdirSync(BLOG_DIR)
+    .filter((name) => name.endsWith('.md'))
+    .map((name) => loadPostFromFile(path.join(BLOG_DIR, name)))
+    .filter((post): post is BlogPost => Boolean(post))
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
 }
 
 export function getPost(slug: string): BlogPost | undefined {
-  return BLOG_POSTS.find((post) => post.slug === slug)
+  const safe = slug.replace(/[^a-z0-9-]/gi, '')
+  if (!safe || safe !== slug) return undefined
+  const filePath = path.join(BLOG_DIR, `${safe}.md`)
+  if (!fs.existsSync(filePath)) return undefined
+  return loadPostFromFile(filePath) ?? undefined
 }

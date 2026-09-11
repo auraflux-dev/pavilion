@@ -41,7 +41,11 @@ export const PAVILION_TARGETS = {
         'www.shmspto.org',
         'Stone Hill Middle School PTO',
       ],
-      '/blog': ['Continuity, launch, and school brand ops'],
+      '/blog': ['Continuity, launch, and school brand ops', 'Continuity'],
+      '/blog/survive-pto-officer-turnover': [
+        'How PTOs keep history when officers change every June',
+        'Continuity',
+      ],
       '/api/health': ['"ok":true', 'commons-site'],
       '/.well-known/security.txt': ['hello@onpavilion.com', 'tel:+15716002835'],
     },
