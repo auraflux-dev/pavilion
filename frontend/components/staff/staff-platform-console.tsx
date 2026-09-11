@@ -26,6 +26,7 @@ import {
 } from '@/lib/staff/af-staff-surface'
 import type { CompanyProduct } from '@/lib/crm/platform-owners'
 import { StaffModulesPanel } from '@/components/staff/staff-modules-panel'
+import { StaffMarketingBlogPanel } from '@/components/staff/staff-marketing-blog-panel'
 import { staffSignOut } from '@/lib/staff/sign-out'
 
 type Me = {
@@ -228,6 +229,9 @@ export function StaffPlatformConsole({ me }: Props) {
     { id: 'modules', label: platformLabel.modules },
     { id: 'onboarding', label: platformLabel.onboarding },
     { id: 'support', label: platformLabel.support },
+    ...(isBr || isAf
+      ? []
+      : [{ id: 'blog' as const, label: platformLabel.blog }]),
     { id: 'health', label: platformLabel.health },
     { id: 'help', label: platformLabel.help },
   ]
@@ -593,6 +597,8 @@ Client boards finish connectors in their Staff. You track gaps here.`}
             </Button>
           </section>
         ) : null}
+
+        {active === 'blog' && !isBr && !isAf ? <StaffMarketingBlogPanel /> : null}
 
         {active === 'support' ? (
           <section className="space-y-4">

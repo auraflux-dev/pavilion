@@ -175,6 +175,7 @@ export const AF_PLATFORM_WORKSPACE_LABEL: Record<PlatformWorkspace, string> = {
   modules: 'Modules',
   onboarding: 'Launch',
   support: 'Support',
+  blog: 'Blog',
   health: 'Health',
   help: 'Help',
 }

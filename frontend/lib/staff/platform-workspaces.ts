@@ -8,6 +8,7 @@ export type PlatformWorkspace =
   | 'modules'
   | 'onboarding'
   | 'support'
+  | 'blog'
   | 'health'
   | 'help'
 
@@ -18,6 +19,7 @@ export const PLATFORM_WORKSPACE_IDS: PlatformWorkspace[] = [
   'modules',
   'onboarding',
   'support',
+  'blog',
   'health',
   'help',
 ]
@@ -29,6 +31,7 @@ export const PLATFORM_WORKSPACE_LABEL: Record<PlatformWorkspace, string> = {
   modules: 'Modules',
   onboarding: 'Onboarding',
   support: 'Support',
+  blog: 'Blog',
   health: 'Health',
   help: 'Help',
 }
@@ -45,7 +48,7 @@ export const PLATFORM_WORKSPACE_GROUPS: PlatformWorkspaceGroup[] = [
     id: 'fleet',
     label: 'Fleet',
     blurb: 'Tenants, go-live, and day-to-day platform work.',
-    workspaces: ['tenants', 'modules', 'onboarding', 'support'],
+    workspaces: ['tenants', 'modules', 'onboarding', 'support', 'blog'],
   },
   {
     id: 'ops',
@@ -67,6 +70,7 @@ export const PLATFORM_WORKSPACE_BLURB: Partial<Record<PlatformWorkspace, string>
   modules: 'Check/uncheck product modules for this org',
   onboarding: 'Sales → trial → go-live ladder',
   support: 'Cross-tenant asks (no school PII)',
+  blog: 'Pavilion marketing posts on www.onpavilion.com/blog',
   health: 'Demo deploy and connector summary',
   help: 'Platform knowledge base',
 }

@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAllPosts } from '@/lib/blog'
 
+export const revalidate = 60
+
 export const metadata: Metadata = {
   title: 'Blog',
   description: 'Guides for PTO and school community leaders running public, family, and Staff surfaces.',
@@ -19,8 +21,8 @@ function formatDate(iso: string) {
   }
 }
 
-export default function BlogIndexPage() {
-  const posts = getAllPosts()
+export default async function BlogIndexPage() {
+  const posts = await getAllPosts()
   const [featured, ...rest] = posts
 
   return (

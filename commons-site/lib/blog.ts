@@ -1,6 +1,7 @@
 import 'server-only'
 import fs from 'node:fs'
 import path from 'node:path'
+import { DEMO_URL, DEMO_URL_LEGACY } from '@/lib/pricing'
 
 export type BlogPost = {
   slug: string
@@ -16,6 +17,17 @@ export type BlogPost = {
 }
 
 const BLOG_DIR = path.join(process.cwd(), 'content', 'blog')
+const FETCH_MS = 2500
+
+type CmsPost = {
+  slug: string
+  title: string
+  date: string
+  category: string
+  excerpt: string
+  minutes: number
+  bodyMarkdown: string
+}
 
 function parseFrontmatter(raw: string): { data: Record<string, string>; body: string } {
   const trimmed = raw.replace(/^\uFEFF/, '')
@@ -102,6 +114,20 @@ export function markdownToHtml(md: string): string {
   return blocks.join('\n')
 }
 
+function cmsToPost(row: CmsPost): BlogPost {
+  const minutes = Number(row.minutes)
+  return {
+    slug: row.slug,
+    title: row.title,
+    date: row.date,
+    category: row.category,
+    excerpt: row.excerpt,
+    minutes: Number.isFinite(minutes) && minutes > 0 ? minutes : 3,
+    markdown: row.bodyMarkdown || '',
+    html: markdownToHtml(row.bodyMarkdown || ''),
+  }
+}
+
 function loadPostFromFile(filePath: string): BlogPost | null {
   const slug = path.basename(filePath, '.md')
   const raw = fs.readFileSync(filePath, 'utf8')
@@ -124,7 +150,7 @@ function loadPostFromFile(filePath: string): BlogPost | null {
   }
 }
 
-export function getAllPosts(): BlogPost[] {
+function getMarkdownPosts(): BlogPost[] {
   if (!fs.existsSync(BLOG_DIR)) return []
   return fs
     .readdirSync(BLOG_DIR)
@@ -134,9 +160,69 @@ export function getAllPosts(): BlogPost[] {
     .sort((a, b) => (a.date < b.date ? 1 : -1))
 }
 
-export function getPost(slug: string): BlogPost | undefined {
+async function fetchCmsPosts(): Promise<{ ok: true; posts: BlogPost[] } | { ok: false }> {
+  const bases = [DEMO_URL, DEMO_URL_LEGACY]
+  for (const base of bases) {
+    try {
+      const ctrl = new AbortController()
+      const timer = setTimeout(() => ctrl.abort(), FETCH_MS)
+      const res = await fetch(`${base}/api/public/marketing-blog`, {
+        next: { revalidate: 60 },
+        signal: ctrl.signal,
+      })
+      clearTimeout(timer)
+      if (!res.ok) continue
+      const data = (await res.json()) as { posts?: CmsPost[]; source?: string }
+      if (data.source === 'unavailable' || data.source === 'error') continue
+      const posts = (data.posts ?? [])
+        .filter((p) => p?.slug && p?.title && p?.date && p?.category && p?.excerpt)
+        .map(cmsToPost)
+        .sort((a, b) => (a.date < b.date ? 1 : -1))
+      return { ok: true, posts }
+    } catch {
+      // try next base / fall back to markdown
+    }
+  }
+  return { ok: false }
+}
+
+async function fetchCmsPost(
+  slug: string,
+): Promise<{ ok: true; post: BlogPost | null } | { ok: false }> {
+  const bases = [DEMO_URL, DEMO_URL_LEGACY]
+  for (const base of bases) {
+    try {
+      const ctrl = new AbortController()
+      const timer = setTimeout(() => ctrl.abort(), FETCH_MS)
+      const res = await fetch(`${base}/api/public/marketing-blog/${encodeURIComponent(slug)}`, {
+        next: { revalidate: 60 },
+        signal: ctrl.signal,
+      })
+      clearTimeout(timer)
+      if (res.status === 404) return { ok: true, post: null }
+      if (!res.ok) continue
+      const data = (await res.json()) as { post?: CmsPost }
+      if (!data.post?.slug) continue
+      return { ok: true, post: cmsToPost(data.post) }
+    } catch {
+      // try next
+    }
+  }
+  return { ok: false }
+}
+
+/** Prefer Pavilion CMS (via demo public API). Fall back to content/blog/*.md. */
+export async function getAllPosts(): Promise<BlogPost[]> {
+  const cms = await fetchCmsPosts()
+  if (cms.ok) return cms.posts
+  return getMarkdownPosts()
+}
+
+export async function getPost(slug: string): Promise<BlogPost | undefined> {
   const safe = slug.replace(/[^a-z0-9-]/gi, '')
   if (!safe || safe !== slug) return undefined
+  const cms = await fetchCmsPost(safe)
+  if (cms.ok) return cms.post ?? undefined
   const filePath = path.join(BLOG_DIR, `${safe}.md`)
   if (!fs.existsSync(filePath)) return undefined
   return loadPostFromFile(filePath) ?? undefined

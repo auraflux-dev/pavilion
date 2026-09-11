@@ -4,15 +4,19 @@ import { notFound } from 'next/navigation'
 import { DemoBookingLink } from '@/components/demo-booking-link'
 import { getAllPosts, getPost } from '@/lib/blog'
 
+export const revalidate = 60
+export const dynamicParams = true
+
 type Props = { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }))
+  const posts = await getAllPosts()
+  return posts.map((post) => ({ slug: post.slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const post = getPost(slug)
+  const post = await getPost(slug)
   if (!post) return { title: 'Blog' }
   return {
     title: post.title,
@@ -40,7 +44,7 @@ function formatDate(iso: string) {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params
-  const post = getPost(slug)
+  const post = await getPost(slug)
   if (!post) notFound()
 
   return (
