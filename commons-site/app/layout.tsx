@@ -20,6 +20,10 @@ export const metadata: Metadata = {
     template: `%s · ${PRODUCT_NAME}`,
   },
   description: `${PRODUCT_NAME}. ${PRODUCT_TAGLINE} Public site and family login for parents. Staff for your team. $${COMMONS_LIST_PRICE_USD} per month.`,
+  icons: {
+    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+    apple: [{ url: '/apple-icon.svg', type: 'image/svg+xml' }],
+  },
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
