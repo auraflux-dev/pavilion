@@ -7,9 +7,12 @@ import { PRODUCT_NAME } from '@/lib/brand'
 
 const primaryNav = [
   { href: '/', label: 'Home' },
+  { href: '/solutions', label: 'Solutions' },
   { href: '/product', label: 'Product' },
   { href: '/process', label: 'Process' },
   { href: '/pricing', label: 'Pricing' },
+  { href: '/work', label: 'Work' },
+  { href: '/blog', label: 'Blog' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]
@@ -28,7 +31,7 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-4 sm:gap-6">
           <nav
-            className="hidden items-center gap-5 text-sm font-medium text-slate-600 md:flex lg:gap-7"
+            className="hidden items-center gap-3 text-sm font-medium text-slate-600 md:flex lg:gap-5"
             aria-label="Primary"
           >
             {primaryNav.map((item) => (

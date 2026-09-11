@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { PricingFaq } from '@/components/marketing/pricing-faq'
 import { StartForm } from '@/components/start-form'
 import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
 import { stripeConfigured } from '@/lib/stripe'
@@ -96,6 +97,8 @@ You can still book a demo or email us to start.`}
           <StartForm />
         </div>
       </div>
+
+      <PricingFaq />
     </div>
   )
 }

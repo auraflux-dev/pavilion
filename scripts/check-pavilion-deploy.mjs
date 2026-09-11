@@ -28,8 +28,15 @@ export const PAVILION_TARGETS = {
     ],
     /** Extra path checks so copy-only ships cannot false-pass on stale homepage alone. */
     pathMustInclude: {
-      '/pricing': ['PTO Annual Plan', 'Unlimited parents, volunteers, and chairs', 'invoice billing via ACH'],
-      '/contact': ['+1 (571) 600-2835', 'tel:+15716002835'],
+      '/pricing': [
+        'PTO Annual Plan',
+        'Unlimited parents, volunteers, and chairs',
+        'Questions school leaders ask first',
+      ],
+      '/contact': ['+1 (571) 600-2835', 'tel:+15716002835', 'Book a demo'],
+      '/solutions': ['Solutions by organization type', 'Three parts. One school brand'],
+      '/work': ['Proof patterns for school community groups'],
+      '/blog': ['Continuity, launch, and school brand ops'],
       '/api/health': ['"ok":true', 'commons-site'],
       '/.well-known/security.txt': ['hello@onpavilion.com', 'tel:+15716002835'],
     },

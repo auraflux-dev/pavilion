@@ -1,11 +1,10 @@
 import Link from 'next/link'
 import { DemoBookingLink } from '@/components/demo-booking-link'
-import { HERO_EYEBROW, HERO_HEADLINE, HERO_SUPPORT, SURFACES } from '@/lib/marketing'
+import { HeroOsPreview } from '@/components/marketing/hero-os-preview'
+import { HERO_EYEBROW, HERO_HEADLINE, HERO_SUPPORT } from '@/lib/marketing'
 import { COMMONS_LIST_PRICE_USD } from '@/lib/pricing'
-import { BrowserFrame } from '@/components/marketing/browser-frame'
 
 export function MarketingHero() {
-  const front = SURFACES[0]
   const supportLines = HERO_SUPPORT.split('\n').filter(Boolean)
 
   return (
@@ -34,15 +33,7 @@ export function MarketingHero() {
         </div>
 
         <div className="motion-rise motion-rise-delay lg:col-span-6">
-          <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-zinc-200/90 bg-white p-2 shadow-xl">
-            <BrowserFrame
-              src={front.imageSrc}
-              alt={front.imageAlt}
-              hostLabel={front.hostLabel}
-              priority
-              large
-            />
-          </div>
+          <HeroOsPreview />
         </div>
       </div>
     </section>

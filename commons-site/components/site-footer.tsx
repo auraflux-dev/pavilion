@@ -6,9 +6,12 @@ import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_E164 } from '@/lib/
 
 const explore = [
   { href: '/', label: 'Home' },
+  { href: '/solutions', label: 'Solutions' },
   { href: '/product', label: 'Product' },
   { href: '/process', label: 'Process' },
   { href: '/pricing', label: 'Pricing' },
+  { href: '/work', label: 'Work' },
+  { href: '/blog', label: 'Blog' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]
