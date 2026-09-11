@@ -35,10 +35,11 @@ export function MarketingPillars() {
     <section className="bg-zinc-50 py-16 md:py-24">
       <div className="mx-auto max-w-6xl px-5">
         <h2 className="max-w-xl text-2xl font-bold tracking-tight text-slate-900 md:text-4xl">
-          What boards get done
+          What your PTO gets done
         </h2>
-        <p className="mt-3 max-w-xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
-          {`Four jobs that used to live in five tools.\nNow they live in one place.`}
+        <p className="mt-3 mb-6 max-w-2xl text-base font-normal leading-relaxed whitespace-pre-line text-slate-600 md:text-lg">
+          {`Four jobs that used to live in five tools.
+Now they live in one place.`}
         </p>
         <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {PILLARS.map((pillar) => (

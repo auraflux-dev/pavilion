@@ -5,11 +5,13 @@ export function MarketingBoardHandoff() {
     <section className="border-y border-zinc-200 bg-zinc-50 py-16 md:py-24" id="board-handoff">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 lg:grid-cols-2 lg:items-center lg:gap-14">
         <div>
-          <div className="badge-micro mb-5">{BOARD_HANDOFF.eyebrow}</div>
+          <span className="mb-4 inline-block rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-900">
+            {BOARD_HANDOFF.eyebrow}
+          </span>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 md:text-4xl">
             {BOARD_HANDOFF.headline}
           </h2>
-          <p className="mt-4 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600">
+          <p className="mt-3 mb-6 max-w-2xl text-base font-normal leading-relaxed whitespace-pre-line text-slate-600 md:text-lg">
             {BOARD_HANDOFF.support}
           </p>
           <ul className="mt-8 space-y-4">

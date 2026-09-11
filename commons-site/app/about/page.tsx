@@ -9,11 +9,13 @@ export default function AboutPage() {
   return (
     <div className="bg-zinc-50">
       <div className="mx-auto max-w-6xl px-5 pt-16 pb-16 sm:pt-20 sm:pb-20">
-        <div className="badge-micro mb-5">{ABOUT.eyebrow}</div>
+        <span className="mb-4 inline-block rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-900">
+          {ABOUT.eyebrow}
+        </span>
         <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
           {ABOUT.headline}
         </h1>
-        <p className="mt-3 mb-6 max-w-xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-600 md:text-lg">
+        <p className="mt-3 mb-6 max-w-2xl text-base font-normal leading-relaxed whitespace-pre-line text-slate-600 md:text-lg">
           {ABOUT.support}
         </p>
         <div className="mb-12 flex flex-wrap gap-3 md:mb-14">

@@ -13,12 +13,14 @@ export default function ContactPage() {
   return (
     <section className="bg-zinc-50 py-16 md:py-24">
       <div className="mx-auto max-w-3xl px-5">
-        <div className="badge-micro mb-5">Book a demo</div>
+        <span className="mb-4 inline-block rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-900">
+          Book a demo
+        </span>
         <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
           Talk with us about {PRODUCT_NAME} for your school.
         </h1>
-        <p className="mt-3 mb-6 max-w-xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-600 md:text-lg">
-          {`We will walk your board through Staff, the public site, and family login.
+        <p className="mt-3 mb-6 max-w-2xl text-base font-normal leading-relaxed whitespace-pre-line text-slate-600 md:text-lg">
+          {`We will walk your team through Staff, the public site, and family login.
 Or start with the product demo on your own time.`}
         </p>
 
@@ -40,9 +42,9 @@ Or start with the product demo on your own time.`}
 
           {hasCalendar ? (
             <div className="space-y-3">
-              <p className="max-w-xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-600 md:text-lg">
-                {`Board-friendly scheduling:
-Feel free to add your principal, board officers, or committee chairs directly to the invite.`}
+              <p className="max-w-2xl text-base font-normal leading-relaxed whitespace-pre-line text-slate-600 md:text-lg">
+                {`Easy team scheduling:
+Invite your principal, co-chairs, or treasurer directly to the invite.`}
               </p>
               <DemoBookingPanel />
             </div>
@@ -71,8 +73,8 @@ Feel free to add your principal, board officers, or committee chairs directly to
               </Link>
             </div>
             <p className="mt-4 whitespace-pre-line text-sm font-normal leading-relaxed text-slate-600">
-              {`Need materials for your next board meeting?
-We send an executive summary and financial deck ahead of your call.`}
+              {`Need materials for your executive team?
+We send a summary deck ahead of your call.`}
             </p>
           </div>
         </div>

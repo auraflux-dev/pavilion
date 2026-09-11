@@ -9,15 +9,15 @@ export const HERO_HEADLINE =
   'The operating system\nfor modern PTOs.'
 
 export const HERO_SUPPORT =
-  'Your board works in Staff.\nParents get your public site and family login.\nThey see your school. Not Pavilion.'
+  'Your team works in Staff.\nParents get your public site and family login.\nThey see your school. Not Pavilion.'
 
 /** Who / what / why / how / whom for marketing clarity. */
 export const STORY = {
   whom: 'PTO and PTA boards and school community orgs.\nParents use your brand. They are not Pavilion customers.',
   who: `${PRODUCT_NAME} is the PTO operating system.`,
-  what: 'One branded public site, family login for households, and Staff workspaces that survive board turnover.\nYour school keeps its Square with 0% Pavilion transaction fees.',
-  why: 'Boards turn over. Tools scatter.\nParents should never see the vendor.',
-  how: 'Branded trial. Staff setup for tools and brand. Go live.\nPavilion support stays with your board after launch.',
+  what: 'One branded public site, family login for households, and Staff workspaces that survive annual team handoffs.\nYour school keeps its Square with 0% Pavilion transaction fees.',
+  why: 'Officers turn over. Tools scatter.\nParents should never see the vendor.',
+  how: 'Branded trial. Staff setup for tools and brand. Go live.\nPavilion support stays with your school after launch.',
 } as const
 
 export const PILLARS = [
@@ -39,7 +39,7 @@ export const PILLARS = [
   {
     id: 'streamline',
     title: 'Streamline',
-    body: 'Staff is where your board lives: setup, tools, and day-to-day ops.',
+    body: 'Staff is where your team lives: setup, tools, and day-to-day ops.',
   },
 ] as const
 
@@ -57,7 +57,7 @@ export const SURFACES = [
       'Events calendar and RSVPs',
       'Volunteer openings',
       'Fundraising and donate',
-      'Board and meetings pages',
+      'Meetings and bylaws pages',
       'News and announcements',
     ],
     imageSrc: '/gallery/riverside-public.jpg',
@@ -90,8 +90,8 @@ export const SURFACES = [
     id: 'staff',
     title: 'Staff portal',
     shortLabel: '3. Staff',
-    tagline: 'The board working desk.',
-    body: 'Where your board buys and runs Pavilion.\nOnboarding, Square, Google, Canva, and day-to-day work live here.',
+    tagline: 'The team working desk.',
+    body: 'Where your officers buy and run Pavilion.\nOnboarding, Square, Google, Canva, and day-to-day work live here.',
     benefits: [
       'Membership roster and renewals',
       'Programs and enrichment ops',
@@ -102,7 +102,7 @@ export const SURFACES = [
       'Website and form queues',
       'Google Drive and Canva by role',
       'Reports and year history',
-      'Board seats and handoff',
+      'Officer seats and handoff',
     ],
     imageSrc: '/gallery/riverside-staff.jpg',
     imageAlt: 'Sample school staff home with workspace tiles',
@@ -123,14 +123,14 @@ export const AUDIENCES = [
 ] as const
 
 export const BOARD_HANDOFF = {
-  eyebrow: 'Board handoff',
-  headline: 'Built to survive annual board turnover.',
+  eyebrow: 'Team handoff',
+  headline: 'Built to survive annual team handoffs.',
   support:
     'Roles hold the tools.\nNot personal Gmail accounts and a shared password list.',
   points: [
     {
       title: 'Role inherits the workspace',
-      body: 'Treasurer, President, and committee seats keep Drive folders, Canva, and Staff tools when the person changes.',
+      body: 'When officers step down, incoming chairs inherit past files, context, and configurations instantly.',
     },
     {
       title: 'History stays put',
@@ -138,7 +138,7 @@ export const BOARD_HANDOFF = {
     },
     {
       title: 'One-click seat change',
-      body: 'Incoming board members pick up the role.\nOutgoing access closes without a scavenger hunt.',
+      body: 'Incoming officers pick up the role.\nOutgoing access closes without a scavenger hunt.',
     },
     {
       title: 'Instant volunteer setup',
@@ -172,7 +172,7 @@ export const PROCESS = {
   eyebrow: 'Our process',
   headline: 'Tour. Brand. Prune. Pay.',
   support:
-    'A clear path from first look to a board-ready school year.\nNo second product to learn midstream.',
+    'A clear path from first look to a school-ready year.\nNo second product to learn midstream.',
   steps: [
     {
       title: '1. Tour the demo',
@@ -180,7 +180,7 @@ export const PROCESS = {
     },
     {
       title: '2. Brand a private trial',
-      body: 'We apply your logo, colors, and school name.\nYour board logs in on a private host.',
+      body: 'We apply your logo, colors, and school name.\nYour team logs in on a private host.',
     },
     {
       title: '3. Prune what you do not offer',
@@ -188,12 +188,14 @@ export const PROCESS = {
     },
     {
       title: '4. Pay and go live',
-      body: 'Lock look and feel, then deepen onboarding.\nSquare stays yours for parent cards and sales.',
+      body: `Simple team sign-off:
+Run your 14-day trial with your executive team, connect your school Square, and activate when ready.
+Square stays yours for parent cards and sales.`,
     },
   ],
 } as const
 
-export const CLOSE_SLOGAN = 'Ready when your board is.'
+export const CLOSE_SLOGAN = 'Ready when your team is.'
 
 export const CLOSE_SUPPORT =
   'Start with a branded trial.\nOnboard in Staff.\nOr tour the product demo first.'

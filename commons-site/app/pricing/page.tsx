@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'Pricing' }
 
 const FEATURES = [
   'Public site and family login for parents on your school brand',
-  'Staff portal for your board: setup, tools, and day-to-day work',
+  'Staff portal for your team: setup, tools, and day-to-day work',
   'Unlimited parents, volunteers, and chairs with zero per-user fees',
   'Domain and Google connect in Staff setup',
   'No separate setup invoice',
@@ -39,17 +39,15 @@ export default function PricingPage() {
         <span className="mb-4 inline-block rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-900">
           Pricing
         </span>
-        <h1 className="mb-3 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
-          Pricing
-        </h1>
-        <p className="mb-2 max-w-xl whitespace-pre-line text-base font-normal leading-relaxed text-slate-700 md:text-lg">
+        <h1 className="text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">Pricing</h1>
+        <p className="mt-3 mb-6 max-w-2xl text-base font-normal leading-relaxed whitespace-pre-line text-slate-600 md:text-lg">
           {`One number.
 $${COMMONS_LIST_PRICE_USD} per school per month.
 12-month term. Same price as long as you stay.`}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-7xl mx-auto pt-6 pb-16 px-4">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-start gap-8 px-4 pb-16 pt-6 lg:grid-cols-12">
         <div className="relative rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-xl md:p-8 lg:col-span-7">
           <span className="mb-4 inline-block rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-900">
             PTO Annual Plan
@@ -59,7 +57,7 @@ $${COMMONS_LIST_PRICE_USD} per school per month.
             <span className="text-xl font-normal text-slate-500">/mo</span>
           </p>
           <p className="mb-6 text-sm font-medium text-slate-700">
-            ${year.toLocaleString()} / year billed annually. Lock in your rate for life.
+            ${year.toLocaleString()} / year billed annually. Lock in your school rate for life.
           </p>
           <ul className="space-y-3">
             {FEATURES.map((feature) => (
@@ -68,7 +66,14 @@ $${COMMONS_LIST_PRICE_USD} per school per month.
                 className="flex gap-2.5 text-sm font-medium leading-relaxed text-slate-700 md:text-base"
               >
                 <CheckIcon />
-                <span>{feature}</span>
+                <span className="flex flex-wrap items-center gap-2">
+                  {feature}
+                  {feature.includes('school Square') ? (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/60 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-900">
+                      Direct Square Sync
+                    </span>
+                  ) : null}
+                </span>
               </li>
             ))}
           </ul>

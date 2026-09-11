@@ -11,13 +11,15 @@ export function MarketingHero() {
     <section className="border-b border-zinc-200 bg-zinc-50 pb-16 md:pb-24" aria-label="Welcome">
       <div className="mx-auto grid w-full max-w-7xl items-center gap-10 px-4 pt-12 sm:px-6 md:pt-16 lg:grid-cols-12 lg:gap-12 lg:px-8">
         <div className="motion-rise lg:col-span-6">
-          <div className="badge-micro mb-6">{HERO_EYEBROW}</div>
+          <div className="mb-4 inline-block rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-900">
+            {HERO_EYEBROW}
+          </div>
           <h1 className="mb-4 block whitespace-pre-line text-4xl font-bold leading-[1.15] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
             {HERO_HEADLINE}
           </h1>
-          <div className="copy-stack mb-6 text-base font-normal leading-relaxed text-slate-600">
+          <div className="mb-6 max-w-2xl space-y-1 text-base font-normal leading-relaxed text-slate-600 md:text-lg">
             {supportLines.map((line) => (
-              <p key={line} className="copy-stack__line text-base font-normal leading-relaxed text-slate-600">
+              <p key={line} className="text-base font-normal leading-relaxed text-slate-600 md:text-lg">
                 {line}
               </p>
             ))}

@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     default: PRODUCT_NAME,
     template: `%s · ${PRODUCT_NAME}`,
   },
-  description: `${PRODUCT_NAME}. ${PRODUCT_TAGLINE} Public site and family login for parents. Staff for your board. $${COMMONS_LIST_PRICE_USD} per month.`,
+  description: `${PRODUCT_NAME}. ${PRODUCT_TAGLINE} Public site and family login for parents. Staff for your team. $${COMMONS_LIST_PRICE_USD} per month.`,
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
