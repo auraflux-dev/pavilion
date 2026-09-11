@@ -28,14 +28,49 @@ Or start with the product demo on your own time.`}
           <div className="card-surface space-y-3">
             <p className="text-lg font-semibold text-slate-900">Call or text</p>
             <p className="text-base font-normal leading-relaxed text-slate-600">
-              Same number as AuraFlux. Call or SMS anytime.
+              Reach us by phone or text anytime.
             </p>
             <div className="flex flex-wrap gap-3">
-              <a href={`tel:${CONTACT_PHONE_E164}`} className="btn-primary">
-                Call {CONTACT_PHONE_DISPLAY}
+              <a
+                href={`tel:${CONTACT_PHONE_E164}`}
+                className="btn-primary inline-flex items-center gap-2"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.5 5.5c0-.8.7-1.5 1.5-1.5h2.2c.6 0 1.1.4 1.3 1l.8 2.4c.2.5 0 1.1-.4 1.4L7.3 10.5a12.5 12.5 0 0 0 6.2 6.2l1.7-1.6c.3-.4.9-.6 1.4-.4l2.4.8c.6.2 1 .7 1 1.3V20c0 .8-.7 1.5-1.5 1.5C9.9 21.5 2.5 14.1 2.5 5.5Z"
+                  />
+                </svg>
+                <span>Call {CONTACT_PHONE_DISPLAY}</span>
               </a>
-              <a href={`sms:${CONTACT_PHONE_E164}`} className="btn-secondary">
-                Text {CONTACT_PHONE_DISPLAY}
+              <a
+                href={`sms:${CONTACT_PHONE_E164}`}
+                className="btn-secondary inline-flex items-center gap-2"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-3.5 3v-3H6.5A2.5 2.5 0 0 1 4 13.5v-7Z"
+                  />
+                  <path strokeLinecap="round" d="M8 9h8M8 12h5" />
+                </svg>
+                <span>Text {CONTACT_PHONE_DISPLAY}</span>
               </a>
             </div>
           </div>
