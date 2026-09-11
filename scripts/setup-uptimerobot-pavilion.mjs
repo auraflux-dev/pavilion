@@ -1,8 +1,13 @@
 /**
  * Create UptimeRobot HTTPS monitors for Pavilion marketing (onpavilion.com).
  *
- * Usage:
+ * Usage (preferred):
+ *   ./scripts/doppler_run.sh node scripts/setup-uptimerobot-pavilion.mjs
+ *
+ * Or:
  *   UPTIMEROBOT_API_KEY=xxx node scripts/setup-uptimerobot-pavilion.mjs
+ *
+ * Store the key in Doppler project `pavilion` / config `dev` as UPTIMEROBOT_API_KEY.
  */
 const API_KEY = process.env.UPTIMEROBOT_API_KEY
 if (!API_KEY) {
