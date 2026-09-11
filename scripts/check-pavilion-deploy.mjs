@@ -36,11 +36,7 @@ export const PAVILION_TARGETS = {
       ],
       '/contact': ['+1 (571) 600-2835', 'tel:+15716002835', 'Book a demo'],
       '/solutions': ['Solutions by organization type', 'Three parts. One school brand'],
-      '/work': [
-        'Pavilion work for school community groups',
-        'Stone Hill Middle School PTO',
-        'Lumi Education',
-      ],
+      '/work': ['Proof patterns for school community groups'],
       '/blog': ['Continuity, launch, and school brand ops'],
       '/api/health': ['"ok":true', 'commons-site'],
       '/.well-known/security.txt': ['hello@onpavilion.com', 'tel:+15716002835'],
