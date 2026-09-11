@@ -31,6 +31,7 @@ export const PAVILION_TARGETS = {
       '/pricing': [
         'PTO Annual Plan',
         'Unlimited parents, volunteers, and chairs',
+        'invoice billing via ACH',
         'Questions school leaders ask first',
       ],
       '/contact': ['+1 (571) 600-2835', 'tel:+15716002835', 'Book a demo'],
