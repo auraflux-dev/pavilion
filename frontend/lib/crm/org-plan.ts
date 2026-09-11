@@ -6,7 +6,7 @@ function orgIdOrThrow(orgId: string | null | undefined): string {
   return id
 }
 
-export type OrgPlan = 'demo' | 'trial' | 'locked' | 'active'
+export type OrgPlan = 'demo' | 'trial' | 'locked' | 'active' | 'platform'
 
 export type OrgBilling = {
   id: string
@@ -21,8 +21,10 @@ export type OrgBilling = {
 
 const HOLD_DAYS = 30
 
+const PLATFORM_HOME_ORG_IDS = new Set(['org_pavilion', 'org_businessrocket', 'org_auraflux'])
+
 export function writesAllowed(plan: OrgPlan, trialEndsAt: string | null): boolean {
-  if (plan === 'active') return true
+  if (plan === 'active' || plan === 'platform') return true
   if (plan === 'demo') return false
   if (plan === 'locked') return false
   if (plan === 'trial') {
@@ -70,7 +72,11 @@ export async function assertOrgWritable(orgId: string): Promise<OrgBilling> {
   // Sample product demo (commons-pto-demo) owns Neon product data (signups, Pavilion CMS).
   // Do not treat it like an expired trial tenant.
   const { isDemoInstance } = await import('@/lib/demo/instance')
-  if (isDemoInstance() || writesAllowed(org.plan, org.trialEndsAt)) {
+  if (
+    PLATFORM_HOME_ORG_IDS.has(org.id) ||
+    isDemoInstance() ||
+    writesAllowed(org.plan, org.trialEndsAt)
+  ) {
     return org
   }
   const err = new Error('Trial ended. Data stays for 30 days. Subscribe to keep writing.')

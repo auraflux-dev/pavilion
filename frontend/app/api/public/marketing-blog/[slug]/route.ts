@@ -3,7 +3,6 @@ import { pavilionCmsEnabled } from '@/lib/cms/store'
 import {
   getMarketingBlogPost,
   marketingBlogOrgId,
-  seedMarketingBlogIfEmpty,
 } from '@/lib/cms/marketing-blog'
 
 export const revalidate = 60
@@ -20,7 +19,6 @@ export async function GET(_req: Request, ctx: Ctx) {
     const { ensureCommonsReady } = await import('@/lib/crm/migrate')
     await ensureCommonsReady()
     const orgId = marketingBlogOrgId()
-    await seedMarketingBlogIfEmpty(orgId)
     const post = await getMarketingBlogPost(slug, orgId, { activeOnly: true })
     if (!post) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json({
