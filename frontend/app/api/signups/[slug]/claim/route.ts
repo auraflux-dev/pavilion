@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { commonsDbEnabled } from '@/lib/crm/db'
+import { appDbEnabled } from '@/lib/crm/db'
 import {
   MissingOrganizationIdError,
   organizationFromHostHeader,
   organizationIdFromRequest,
 } from '@/lib/crm/tenant'
+import { getStaffSession } from '@/lib/staff/session'
 import { sendSignupConfirmationEmail } from '@/lib/signups/confirm-email'
 import { claimSignupSlots } from '@/lib/signups/registrations'
 import { resolvePublishedSignupSheet } from '@/lib/signups/sheets'
@@ -25,7 +26,7 @@ async function resolveOrg(req: NextRequest): Promise<string | null> {
 }
 
 export async function POST(req: NextRequest, ctx: Ctx) {
-  if (!commonsDbEnabled()) {
+  if (!appDbEnabled()) {
     return NextResponse.json({ error: 'Not available' }, { status: 503 })
   }
   const { slug } = await ctx.params
@@ -35,7 +36,29 @@ export async function POST(req: NextRequest, ctx: Ctx) {
     if (!sheet) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
     const body = (await req.json()) as ClaimSignupInput
-    const claimed = await claimSignupSlots(sheet.organizationId, sheet, body)
+    const requireStaff = sheet.settings.requireStaffIdentity !== false
+    let claimInput = body
+    if (requireStaff) {
+      const session = await getStaffSession(req)
+      if (!session?.staff) {
+        return NextResponse.json(
+          { error: 'Sign in with your board email to claim a slot' },
+          { status: 401 },
+        )
+      }
+      const staffName =
+        session.staff.name.trim() ||
+        session.staff.boardTitle.trim() ||
+        session.staff.email.split('@')[0] ||
+        'Board member'
+      claimInput = {
+        ...body,
+        name: staffName,
+        email: session.staff.email,
+        phone: body.phone || '',
+      }
+    }
+    const claimed = await claimSignupSlots(sheet.organizationId, sheet, claimInput)
 
     const origin = new URL(req.url).origin
     const confirmUrl = `${origin}/signups/${encodeURIComponent(sheet.slug)}/confirm?token=${encodeURIComponent(claimed.confirmationToken)}`

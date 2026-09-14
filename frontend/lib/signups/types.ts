@@ -8,8 +8,8 @@ export type SignupSheetSettings = {
   reminderDaysBefore?: number
   allowMultipleSlotsPerPerson?: boolean
   sendConfirmationEmail?: boolean
-  /** ISO timestamp of last auto volunteer nudge (portal inbox). */
-  lastVolunteerNudgeAt?: string
+  /** When true (default), claims use staff session email/name — no public form. */
+  requireStaffIdentity?: boolean
 }
 
 export type SignupSheetFieldInput = {
@@ -57,6 +57,11 @@ export type SignupSheetField = {
   sortOrder: number
 }
 
+export type SignupSlotClaimant = {
+  name: string
+  email: string
+}
+
 export type SignupSlot = {
   id: string
   sheetId: string
@@ -69,6 +74,8 @@ export type SignupSlot = {
   quantityClaimed: number
   itemUnit: string
   sortOrder: number
+  /** Active sign-ups for this slot (public transparency). */
+  claimants?: SignupSlotClaimant[]
 }
 
 export type SignupSheet = {
@@ -116,8 +123,8 @@ export type ClaimSlotInput = {
 }
 
 export type ClaimSignupInput = {
-  name: string
-  email: string
+  name?: string
+  email?: string
   phone?: string
   customAnswers?: Record<string, string>
   slots: ClaimSlotInput[]

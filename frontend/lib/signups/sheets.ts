@@ -341,8 +341,24 @@ export async function resolvePublishedSignupSheet(
   slug: string,
   orgId: string | null,
 ): Promise<SignupSheet | null> {
-  if (orgId) return getPublishedSignupSheetBySlug(orgId, slug)
-  return getPublishedSignupSheetPublic(slug)
+  const sheet = orgId
+    ? await getPublishedSignupSheetBySlug(orgId, slug)
+    : await getPublishedSignupSheetPublic(slug)
+  if (!sheet) return null
+  return attachSignupClaimants(sheet)
+}
+
+/** Attach active claimant name/email onto each slot for public sheets. */
+export async function attachSignupClaimants(sheet: SignupSheet): Promise<SignupSheet> {
+  const { listClaimantsBySheet } = await import('@/lib/signups/registrations')
+  const bySlot = await listClaimantsBySheet(sheet.organizationId, sheet.id)
+  return {
+    ...sheet,
+    slots: sheet.slots.map((slot) => ({
+      ...slot,
+      claimants: bySlot.get(slot.id) || [],
+    })),
+  }
 }
 
 export async function updateSignupSheetStatus(

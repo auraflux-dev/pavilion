@@ -28,8 +28,8 @@ export async function claimSignupSlots(
   await ensureCommonsReady()
   if (sheet.status !== 'published') throw new Error('This sign-up sheet is not open')
 
-  const name = input.name.trim()
-  const email = input.email.trim().toLowerCase()
+  const name = String(input.name || '').trim()
+  const email = String(input.email || '').trim().toLowerCase()
   const phone = (input.phone || '').trim()
   if (!name) throw new Error('Name is required')
   if (!email || !email.includes('@')) throw new Error('Valid email is required')
@@ -42,11 +42,12 @@ export async function claimSignupSlots(
     throw new Error('Only one slot per person on this sheet')
   }
 
+  const staffIdentity = sheet.settings.requireStaffIdentity !== false
   for (const field of sheet.fields) {
     if (!field.required) continue
     if (field.fieldKey === 'name' || field.fieldKey === 'email') continue
     if (field.fieldKey === 'phone') {
-      if (!phone) throw new Error(`${field.label} is required`)
+      if (!staffIdentity && !phone) throw new Error(`${field.label} is required`)
       continue
     }
     const val = String(input.customAnswers?.[field.fieldKey] ?? '').trim()
@@ -213,4 +214,35 @@ export async function getRegistrationsByToken(
     confirmationToken: row.confirmation_token,
     createdAt: row.created_at.toISOString(),
   }))
+}
+
+/** Active claimants grouped by slot for public transparency. */
+export async function listClaimantsBySheet(
+  orgId: string,
+  sheetId: string,
+): Promise<Map<string, { name: string; email: string }[]>> {
+  await ensureCommonsReady()
+  const { sqlForOrg } = await import('@/lib/crm/tenant')
+  const found = await sqlForOrg<{
+    slot_id: string
+    participant_name: string
+    participant_email: string
+  }>(
+    orgId,
+    `select slot_id, participant_name, participant_email
+       from signup_registrations
+      where sheet_id = $1 and cancelled_at is null
+      order by created_at`,
+    [sheetId],
+  )
+  const bySlot = new Map<string, { name: string; email: string }[]>()
+  for (const row of found.rows) {
+    const list = bySlot.get(row.slot_id) || []
+    list.push({
+      name: String(row.participant_name || '').trim() || 'Board member',
+      email: String(row.participant_email || '').trim().toLowerCase(),
+    })
+    bySlot.set(row.slot_id, list)
+  }
+  return bySlot
 }

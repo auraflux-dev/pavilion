@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
-import { commonsDbEnabled } from '@/lib/crm/db'
+import { NextRequest } from 'next/server'
+import { appDbEnabled } from '@/lib/crm/db'
 import {
   MissingOrganizationIdError,
   organizationFromHostHeader,
@@ -9,13 +10,14 @@ import {
 } from '@/lib/crm/tenant'
 import { SignupClaimForm } from '@/components/signups/signup-claim-form'
 import { resolvePublishedSignupSheet } from '@/lib/signups/sheets'
+import { getStaffSession } from '@/lib/staff/session'
 
 export const dynamic = 'force-dynamic'
 
 type Props = { params: Promise<{ slug: string }> }
 
 async function loadSheet(slug: string) {
-  if (!commonsDbEnabled()) return null
+  if (!appDbEnabled()) return null
   const hdrs = await headers()
   const req = new Request('http://local/signups', { headers: hdrs })
   let orgId: string | null = null
@@ -37,7 +39,22 @@ export default async function SignupPublicPage({ params }: Props) {
   const slots = sheet.slots.map((s) => ({
     ...s,
     quantityRemaining: Math.max(0, s.quantityNeeded - s.quantityClaimed),
+    claimants: s.claimants || [],
   }))
+
+  const hdrs = await headers()
+  const staffReq = new NextRequest('http://local/signups', { headers: hdrs })
+  const staffSession = await getStaffSession(staffReq)
+  const actor = staffSession?.staff
+    ? {
+        name:
+          staffSession.staff.name.trim() ||
+          staffSession.staff.boardTitle.trim() ||
+          staffSession.staff.email.split('@')[0] ||
+          'Board member',
+        email: staffSession.staff.email,
+      }
+    : null
 
   return (
     <main className="min-h-screen bg-[#F7F5F0] px-4 py-10">
@@ -55,7 +72,13 @@ export default async function SignupPublicPage({ params }: Props) {
           ) : null}
         </div>
 
-        <SignupClaimForm slug={sheet.slug} fields={sheet.fields} slots={slots} />
+        <SignupClaimForm
+          slug={sheet.slug}
+          fields={sheet.fields}
+          slots={slots}
+          actor={actor}
+          requireStaffIdentity={sheet.settings.requireStaffIdentity !== false}
+        />
 
         <p className="text-center text-sm text-[#5A6070]">
           <Link href="/" className="underline">

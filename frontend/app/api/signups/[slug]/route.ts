@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { commonsDbEnabled } from '@/lib/crm/db'
+import { appDbEnabled } from '@/lib/crm/db'
 import { MissingOrganizationIdError, organizationFromHostHeader, organizationIdFromRequest } from '@/lib/crm/tenant'
 import { resolvePublishedSignupSheet } from '@/lib/signups/sheets'
 
@@ -9,7 +9,7 @@ type Ctx = { params: Promise<{ slug: string }> }
 
 /** Public read for published sign-up sheets (participant flow builds on this). */
 export async function GET(req: NextRequest, ctx: Ctx) {
-  if (!commonsDbEnabled()) {
+  if (!appDbEnabled()) {
     return NextResponse.json({ error: 'Not available' }, { status: 503 })
   }
   const { slug } = await ctx.params
@@ -44,6 +44,10 @@ export async function GET(req: NextRequest, ctx: Ctx) {
           quantityClaimed: s.quantityClaimed,
           quantityRemaining: Math.max(0, s.quantityNeeded - s.quantityClaimed),
           itemUnit: s.itemUnit,
+          claimants: (s.claimants || []).map((c) => ({
+            name: c.name,
+            email: c.email,
+          })),
         })),
       },
     })
