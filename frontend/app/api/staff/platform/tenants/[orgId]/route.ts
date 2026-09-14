@@ -49,3 +49,32 @@ export async function GET(req: NextRequest, ctx: Ctx) {
     ],
   })
 }
+
+/** PATCH { currency: 'CAD' | 'USD' } — Brand Staff sets org display/billing currency. */
+export async function PATCH(req: NextRequest, ctx: Ctx) {
+  const session = await gatePlatform(req)
+  if (!session) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  const { orgId: raw } = await ctx.params
+  let orgId: string
+  try {
+    orgId = requireOrganizationId(raw)
+  } catch {
+    return NextResponse.json({ error: 'Invalid organization' }, { status: 400 })
+  }
+  const body = (await req.json().catch(() => null)) as { currency?: string } | null
+  const rawCurrency = String(body?.currency || '')
+    .trim()
+    .toUpperCase()
+  if (rawCurrency !== 'CAD' && rawCurrency !== 'USD') {
+    return NextResponse.json({ error: 'currency must be CAD or USD' }, { status: 400 })
+  }
+  const { setOrgCurrency } = await import('@/lib/crm/org-currency')
+  const currency = await setOrgCurrency(orgId, rawCurrency)
+  const demo = isDemoInstanceFromRequest(req)
+  const email = String(session.staff?.email || session.email || '').trim().toLowerCase()
+  const product = resolveFleetProductFromRequest(req, email)
+  const tenant = await getPlatformTenant(orgId, { demo, product })
+  return NextResponse.json({ ok: true, currency, tenant })
+}

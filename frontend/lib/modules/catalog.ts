@@ -59,6 +59,7 @@ export type ProductModuleId =
   | 'staff.comms'
   | 'staff.newsletter'
   | 'staff.retail'
+  | 'staff.discounts'
   | 'staff.pos'
   | 'staff.finance'
   | 'staff.budget'
@@ -146,17 +147,17 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'School store / retail',
     group: 'commerce',
     surfaces: ['website', 'staff'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion'],
     requires: ['connect.square'],
     summary: 'Cove / catalog / cart checkout',
   },
   {
     id: 'site.membership_public',
-    label: 'Public membership join',
+    label: 'Public plans / join',
     group: 'website',
     surfaces: ['website'],
-    products: ['pavilion'],
-    summary: 'Join / tiers marketing and checkout entry',
+    products: ['pavilion', 'businessrocket'],
+    summary: 'Public plans & add-ons join / checkout entry (PTO: membership)',
   },
   {
     id: 'site.signups',
@@ -180,7 +181,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Donate',
     group: 'commerce',
     surfaces: ['website', 'portal'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion'],
     requires: ['connect.square'],
     summary: 'Flexible donation checkout',
   },
@@ -189,7 +190,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Peer-to-peer fundraising',
     group: 'commerce',
     surfaces: ['website', 'portal', 'staff'],
-    products: ['pavilion', 'businessrocket'],
+    products: ['pavilion'],
     requires: ['site.donate'],
     summary: 'Campaigns + personal /p2p share pages',
   },
@@ -224,12 +225,12 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
   },
   {
     id: 'portal.membership',
-    label: 'Portal membership',
+    label: 'Portal plans & add-ons',
     group: 'portal',
     surfaces: ['portal', 'staff'],
-    products: ['pavilion'],
+    products: ['pavilion', 'businessrocket'],
     requires: ['portal.family'],
-    summary: 'Tiers, benefits, renewals in portal + staff',
+    summary: 'Plans, add-ons, tiers, renewals in portal + staff (PTO: membership)',
   },
   {
     id: 'portal.messages',
@@ -280,11 +281,11 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
   // —— Staff ——
   {
     id: 'staff.membership',
-    label: 'Staff membership',
+    label: 'Staff plans & add-ons',
     group: 'staff',
     surfaces: ['staff'],
-    products: ['pavilion'],
-    summary: 'Roster, invite, outreach',
+    products: ['pavilion', 'businessrocket'],
+    summary: 'Manage plans, add-ons, invites (PTO: membership roster)',
   },
   {
     id: 'staff.members',
@@ -393,7 +394,16 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     surfaces: ['staff'],
     products: ['pavilion'],
     requires: ['site.retail'],
-    summary: 'Stock, pickups, discounts',
+    summary: 'Stock, pickups, Cove ops',
+  },
+  {
+    id: 'staff.discounts',
+    label: 'Discount codes',
+    group: 'commerce',
+    surfaces: ['staff'],
+    products: ['pavilion', 'businessrocket'],
+    summary: 'Named percent discount codes — no retail store required',
+    codeHints: ['StaffDiscountsPanel', '/api/staff/discounts', 'staff workspace discounts'],
   },
   {
     id: 'staff.pos',
@@ -417,7 +427,7 @@ export const MODULE_CATALOG: ProductModuleDef[] = [
     label: 'Budget',
     group: 'finance',
     surfaces: ['staff'],
-    products: ['pavilion'],
+    products: ['pavilion', 'businessrocket'],
     requires: ['connect.plaid'],
     summary: 'Budget lines and bank sync',
   },
@@ -670,6 +680,7 @@ export const MODULE_PRESET_BR_STARTER: ModulePreset = {
     'site.blog',
     'portal.family',
     'portal.messages',
+    'portal.membership',
     'br.scheduling',
     'br.invoices',
     'br.crm_pipeline',
@@ -678,13 +689,17 @@ export const MODULE_PRESET_BR_STARTER: ModulePreset = {
     'staff.brand',
     'staff.blog',
     'staff.messages',
+    'staff.membership',
+    'staff.members',
+    'staff.finance',
+    'staff.discounts',
     'staff.help',
     'connect.square',
     'connect.gmail',
     'platform.trial',
   ],
   notes:
-    'New BR customers get full Pavilion member portal (portal.family). Legacy clients keep businessrocket.ai/portal.',
+    'BR starter: plans/addons, payments, discount codes. No retail/donate/programs. Currency CAD by default (org.currency). Legacy lite portal stays on businessrocket.ai/portal.',
 }
 
 export const MODULE_PRESET_AF_STARTER: ModulePreset = {

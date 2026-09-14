@@ -12,6 +12,7 @@ export type PlatformTenant = PlatformOrgOption & {
   customDomain: string
   brandPackSlug: string
   trialEndsAt: string | null
+  currency: 'CAD' | 'USD'
   squareConnected: boolean
   plaidConnected: boolean
   vipReadonly: boolean
@@ -65,6 +66,7 @@ export async function listPlatformTenants(opts?: {
       customDomain: life?.customDomain || '',
       brandPackSlug: '',
       trialEndsAt: life?.trialEndsAt || null,
+      currency: org.product === 'businessrocket' ? 'CAD' : 'USD',
       squareConnected,
       plaidConnected,
       vipReadonly,
@@ -74,15 +76,31 @@ export async function listPlatformTenants(opts?: {
 
   if (commonsDbEnabled()) {
     try {
-      const packs = await sql<{ id: string; brand_pack_slug: string | null }>(
-        `select id, brand_pack_slug from organizations`,
+      const { ensureOrgCurrencyColumn, normalizeOrgCurrency, defaultCurrencyForProduct } =
+        await import('@/lib/crm/org-currency')
+      await ensureOrgCurrencyColumn()
+      const packs = await sql<{ id: string; brand_pack_slug: string | null; currency: string | null }>(
+        `select id, brand_pack_slug, currency from organizations`,
       )
       const packById = new Map(packs.rows.map((r) => [r.id, r.brand_pack_slug || '']))
+      const currencyById = new Map(packs.rows.map((r) => [r.id, r.currency]))
       for (const t of out) {
         t.brandPackSlug = packById.get(t.id) || ''
+        const stored = currencyById.get(t.id)
+        t.currency = normalizeOrgCurrency(stored, defaultCurrencyForProduct(t.product))
       }
     } catch {
-      /* ignore */
+      try {
+        const packs = await sql<{ id: string; brand_pack_slug: string | null }>(
+          `select id, brand_pack_slug from organizations`,
+        )
+        const packById = new Map(packs.rows.map((r) => [r.id, r.brand_pack_slug || '']))
+        for (const t of out) {
+          t.brandPackSlug = packById.get(t.id) || ''
+        }
+      } catch {
+        /* ignore */
+      }
     }
   }
 

@@ -105,6 +105,7 @@ async function payload(
   return {
     year,
     label: year === DEFAULT_FISCAL_YEAR ? FISCAL_YEAR_LABEL : year,
+    currency: await resolveBudgetCurrency(),
     lines,
     summary: summarizeBudget(lines),
     entries,
@@ -124,6 +125,24 @@ async function payload(
     },
     bankConnected,
   }
+}
+
+async function resolveBudgetCurrency() {
+  try {
+    const { headers } = await import('next/headers')
+    const h = await headers()
+    const host = h.get('x-forwarded-host') || h.get('host') || ''
+    const { organizationIdFromHostHeader } = await import('@/lib/crm/tenant')
+    const { getOrgCurrency } = await import('@/lib/crm/org-currency')
+    const fake = new Request(`https://${host || 'localhost'}`, {
+      headers: { host, 'x-forwarded-host': host },
+    })
+    const orgId = await organizationIdFromHostHeader(fake)
+    if (orgId) return await getOrgCurrency(orgId)
+  } catch {
+    /* demo / single-tenant */
+  }
+  return 'USD'
 }
 
 export async function GET(req: NextRequest) {

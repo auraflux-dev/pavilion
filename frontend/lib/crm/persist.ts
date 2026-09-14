@@ -164,11 +164,14 @@ export async function persistTrialStart(opts: {
   const ends = new Date(started.getTime() + 30 * 24 * 60 * 60 * 1000)
 
   await sql(`alter table organizations add column if not exists product text not null default 'pavilion'`)
+  await sql(`alter table organizations add column if not exists currency text not null default 'USD'`)
+  const { defaultCurrencyForProduct } = await import('@/lib/crm/org-currency')
+  const currency = defaultCurrencyForProduct(product)
   await sql(
     `insert into organizations
-       (id, name, slug, plan, trial_started_at, trial_ends_at, temp_host, product)
-     values ($1, $2, $3, 'trial', $4, $5, $6, $7)`,
-    [orgId, schoolName, slug, started.toISOString(), ends.toISOString(), tempHost, product],
+       (id, name, slug, plan, trial_started_at, trial_ends_at, temp_host, product, currency)
+     values ($1, $2, $3, 'trial', $4, $5, $6, $7, $8)`,
+    [orgId, schoolName, slug, started.toISOString(), ends.toISOString(), tempHost, product, currency],
   )
   await sql(
     `insert into people (id, organization_id, email, first_name, last_name)

@@ -1,5 +1,5 @@
 /**
- * Business Rocket Staff surfaces — agency Brand Staff + lean customer Staff.
+ * Business Rocket Staff surfaces — agency Brand Staff + customer Staff.
  *
  * Brand Staff (company /staff, @businessrocket.ai) is BR’s home base:
  * 1. Grow the customer base (sales → provision → launch)
@@ -7,37 +7,33 @@
  * 3. Support them when something breaks or they need help in their portals
  * 4. See and manage client activity after go-live (warp into any build)
  *
- * Customer Staff (on their host) is trimmed: website + portal users + messages —
- * not PTO/school tools (membership families, Cove, volunteers, board minutes).
+ * Customer Staff (on their host): shared product capacity with BR labels.
+ * Hide only surfaces that do not apply to BR service businesses — not because
+ * the first implementation was PTO-named.
  */
 import type { StaffWorkspace } from '@/lib/audience'
 import type { PlatformWorkspace, PlatformWorkspaceGroup } from '@/lib/staff/platform-workspaces'
 import type { StaffWorkspaceGroup } from '@/lib/staff/workspace-groups'
 
-/** School/PTO workspaces hidden on every BR product Staff surface. */
+/**
+ * Hard-hidden on every BR product Staff surface.
+ * Locked product decisions: no programs catalog, Cove retail, fundraising/donate,
+ * board minutes, volunteer ops, or school wellness.
+ */
 export const BR_PTO_FAT_WORKSPACES: StaffWorkspace[] = [
   'programs',
-  'timesheets',
-  'volunteers',
-  'signups',
-  'wellness',
-  'membership',
-  'tiers',
-  'community',
-  'fundraising',
   'retail',
-  'discounts',
+  'fundraising',
   'minutes',
-  'board',
-  'faq',
-  'budget',
-  'expenses',
-  'surveys',
+  'volunteers',
+  'wellness',
 ]
 
 /**
- * Customer Staff allowlist — what a BR client’s own Staff needs after launch.
- * Brand Staff warping into that org uses the same lean catalog.
+ * Customer Staff allowlist — what a BR client’s own Staff can open after launch.
+ * Brand Staff warping into that org uses the same catalog.
+ *
+ * Plans/addons = membership + tiers; Team = board; discounts without retail.
  */
 export const BR_CUSTOMER_STAFF_ALLOWLIST: StaffWorkspace[] = [
   'home',
@@ -47,6 +43,7 @@ export const BR_CUSTOMER_STAFF_ALLOWLIST: StaffWorkspace[] = [
   'pagetheme',
   'site',
   'nav',
+  'faq',
   'messages',
   'help',
   'access',
@@ -64,6 +61,16 @@ export const BR_CUSTOMER_STAFF_ALLOWLIST: StaffWorkspace[] = [
   'comms',
   'payments',
   'reports',
+  'budget',
+  'expenses',
+  'discounts',
+  'membership',
+  'tiers',
+  'surveys',
+  'signups',
+  'timesheets',
+  'community',
+  'board',
   'blog',
 ]
 
@@ -88,11 +95,23 @@ export const BR_STAFF_WORKSPACE_LABEL: Partial<Record<StaffWorkspace, string>> =
   content: 'Page copy',
   site: 'Site settings',
   nav: 'Nav & footer',
+  faq: 'FAQs',
   modules: 'Modules',
   blog: 'Blog',
   projects: 'Projects',
   events: 'Events',
   payments: 'Payments',
+  reports: 'Reports',
+  budget: 'Budget',
+  expenses: 'Expenses',
+  discounts: 'Discount codes',
+  membership: 'Plans & add-ons',
+  tiers: 'Plan tiers',
+  surveys: 'Surveys',
+  signups: 'Sign-up sheets',
+  timesheets: 'Timesheets',
+  community: 'Community',
+  board: 'Team',
   newsletter: 'Newsletter',
   social: 'Social',
   canva: 'Canva',
@@ -110,19 +129,25 @@ export const BR_STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
     id: 'website',
     label: 'Website',
     blurb: 'Their marketing site — brand, pages, settings.',
-    workspaces: ['brand', 'pages', 'content', 'pagetheme', 'site', 'nav', 'modules', 'blog'],
+    workspaces: ['brand', 'pages', 'content', 'pagetheme', 'site', 'nav', 'faq', 'modules', 'blog'],
   },
   {
     id: 'clients',
     label: 'Portal & team',
-    blurb: 'Client portal users, their Staff accounts, messages to BR.',
-    workspaces: ['messages', 'members', 'access', 'activity'],
+    blurb: 'Client portal users, their Staff accounts, Team roster, messages to BR.',
+    workspaces: ['messages', 'members', 'access', 'board', 'activity', 'community'],
+  },
+  {
+    id: 'plans',
+    label: 'Plans',
+    blurb: 'Subscription plans, add-ons, and tiers.',
+    workspaces: ['membership', 'tiers'],
   },
   {
     id: 'workspace',
     label: 'Workspace',
-    blurb: 'Mail, calendar, docs, delivery projects.',
-    workspaces: ['inbox', 'calendar', 'docs', 'projects', 'events'],
+    blurb: 'Mail, calendar, docs, delivery, events, surveys, sheets.',
+    workspaces: ['inbox', 'calendar', 'docs', 'projects', 'events', 'surveys', 'signups', 'timesheets'],
   },
   {
     id: 'marketing',
@@ -132,9 +157,9 @@ export const BR_STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
   },
   {
     id: 'billing',
-    label: 'Billing',
-    blurb: 'Payments when connected.',
-    workspaces: ['payments', 'reports'],
+    label: 'Billing & books',
+    blurb: 'Payments, reports, budget, expenses, discount codes — no retail store.',
+    workspaces: ['payments', 'reports', 'budget', 'expenses', 'discounts'],
   },
   {
     id: 'help',
@@ -188,7 +213,7 @@ export const BR_PLATFORM_WORKSPACE_LABEL: Record<PlatformWorkspace, string> = {
 
 export const BR_PLATFORM_WORKSPACE_BLURB: Partial<Record<PlatformWorkspace, string>> = {
   tenants: 'Every client build — site, portal, Staff. Warp in anytime.',
-  tenant: 'One client: host, modules, brand, activity, warp',
+  tenant: 'One client: host, modules, brand, currency, activity, warp',
   modules: 'What this client gets from us',
   onboarding: 'Sale → provision → launch checklist',
   support: 'Help queue across customers',

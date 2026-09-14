@@ -69,8 +69,13 @@ function summarizeBudget(lines: BudgetLine[]): Summary {
   }
 }
 
-const money = (n: number) =>
-  (Number(n) || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+let budgetDisplayCurrency = 'USD'
+
+const money = (n: number, currency = budgetDisplayCurrency) =>
+  (Number(n) || 0).toLocaleString(currency === 'CAD' ? 'en-CA' : 'en-US', {
+    style: 'currency',
+    currency: currency === 'CAD' ? 'CAD' : 'USD',
+  })
 
 function originLabel(origin: string) {
   if (origin === 'auto-plaid' || origin === 'auto-bofa') return 'Bank · BoA'
@@ -144,6 +149,7 @@ export function StaffBudgetPanel() {
       lines?: BudgetLine[]
       summary?: Summary
       label?: string
+      currency?: string
       entries?: BudgetEntry[]
       plaid?: { connected?: boolean; configured?: boolean }
       paypal?: { configured?: boolean }
@@ -155,6 +161,9 @@ export function StaffBudgetPanel() {
       setEntries(d.entries ?? [])
       setSummary(d.summary ?? summarizeBudget(d.lines ?? []))
       if (d.label) setLabel(d.label)
+      if (d.currency) {
+        budgetDisplayCurrency = d.currency === 'CAD' ? 'CAD' : 'USD'
+      }
       if (d.plaid) {
         setPlaidConnected(Boolean(d.plaid.connected))
         setPlaidConfigured(Boolean(d.plaid.configured))
