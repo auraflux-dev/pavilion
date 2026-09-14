@@ -288,17 +288,48 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
       setPlatformMode('client')
       return
     }
+    const params = new URLSearchParams(window.location.search)
+    const view = String(params.get('view') || '').trim().toLowerCase()
+    const fleetViews = new Set([
+      'home',
+      'tenants',
+      'tenant',
+      'modules',
+      'onboarding',
+      'support',
+      'health',
+      'help',
+      'blog',
+    ])
+    // Deep-links from businessrocket.ai/staff/fleet?view=… must open Brand Staff, not Client Staff.
+    const forceFleet = fleetViews.has(view) || Boolean(params.get('org')?.trim())
+
     fetch('/api/staff/platform/mode')
       .then(async (r) => {
         const data = await r.json()
         if (!r.ok) {
-          setPlatformMode(isPublicDemoInstance() ? 'client' : 'platform')
+          setPlatformMode(forceFleet || !isPublicDemoInstance() ? 'platform' : 'client')
           return
         }
-        setPlatformMode(data.mode === 'client' ? 'client' : 'platform')
+        let mode: 'platform' | 'client' = data.mode === 'client' ? 'client' : 'platform'
+        if (forceFleet && mode === 'client') {
+          try {
+            await fetch('/api/staff/platform/mode', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ mode: 'platform' }),
+            })
+            mode = 'platform'
+          } catch {
+            mode = 'platform'
+          }
+        }
+        setPlatformMode(mode)
         if (data.selectedOrganizationId) setCmsOrgId(String(data.selectedOrganizationId))
       })
-      .catch(() => setPlatformMode(isPublicDemoInstance() ? 'client' : 'platform'))
+      .catch(() =>
+        setPlatformMode(forceFleet || !isPublicDemoInstance() ? 'platform' : 'client'),
+      )
   }, [me?.platformOwner])
 
   useEffect(() => {

@@ -337,6 +337,16 @@ On this shared demo you can also open Business Rocket or AuraFlux fleets from th
                       : `Fleet view for Pavilion operators.
 Open a tenant to check connectors and brand, or enter Client Staff to serve that school.`}
               </p>
+              {isBr ? (
+                <p className="mt-3 text-sm">
+                  <a
+                    href="https://businessrocket.ai/staff"
+                    className="font-semibold text-[var(--brand-green)] underline-offset-2 hover:underline"
+                  >
+                    ← Company Staff home on businessrocket.ai
+                  </a>
+                </p>
+              ) : null}
             </div>
             {attention.length > 0 ? (
               <div className="rounded-xl border border-[var(--brand-green)]/25 bg-[#E8F3E8] p-4 space-y-2">
