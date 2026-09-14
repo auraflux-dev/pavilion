@@ -47,18 +47,29 @@ export async function withCoveSplit(
   }
 
   const card = resolveFamilyGiftCard(family)
-  let live = Number(card.balance) || 0
+  // Tender math must use live Square balance only. CMS storeCardBalance can be
+  // stale while the GAN is dead — that charged the card, then redeem failed and
+  // auto-refunded (parents saw “refunds” with no enrollment).
+  let live = 0
+  let squareBalanceOk = false
   if (card.gan) {
     try {
       live = await getGiftCardBalance(card.gan)
+      squareBalanceOk = true
     } catch {
-      // Keep CMS balance so checkout still offers the opt-in.
+      if (useCove) {
+        throw new Error(
+          'Your Cove Digital Card could not be verified. Uncheck “Use Cove balance” and pay by card, or contact treasurer@shmspto.org to relink the card.',
+        )
+      }
+      live = 0
     }
   }
 
+  const displayBalance = squareBalanceOk ? live : Number(card.balance) || 0
   const baseMeta = {
     ...resolved.meta,
-    coveBalance: String(live),
+    coveBalance: String(displayBalance),
     accountNumber,
   }
 
@@ -74,7 +85,7 @@ export async function withCoveSplit(
     }
   }
 
-  if (!card.gan || live <= 0) {
+  if (!card.gan || !squareBalanceOk || live <= 0) {
     return {
       ...resolved,
       meta: {
