@@ -8,7 +8,7 @@ export type SignupSheetSettings = {
   reminderDaysBefore?: number
   allowMultipleSlotsPerPerson?: boolean
   sendConfirmationEmail?: boolean
-  /** When true (default), claims use staff session email/name — no public form. */
+  /** When true, only signed-in staff may claim. Default: guests OK; staff auto-fills when present. */
   requireStaffIdentity?: boolean
 }
 
@@ -58,6 +58,7 @@ export type SignupSheetField = {
 }
 
 export type SignupSlotClaimant = {
+  registrationId: string
   name: string
   email: string
 }

@@ -42,7 +42,7 @@ export async function claimSignupSlots(
     throw new Error('Only one slot per person on this sheet')
   }
 
-  const staffIdentity = sheet.settings.requireStaffIdentity !== false
+  const staffIdentity = sheet.settings.requireStaffIdentity === true
   for (const field of sheet.fields) {
     if (!field.required) continue
     if (field.fieldKey === 'name' || field.fieldKey === 'email') continue
@@ -220,29 +220,85 @@ export async function getRegistrationsByToken(
 export async function listClaimantsBySheet(
   orgId: string,
   sheetId: string,
-): Promise<Map<string, { name: string; email: string }[]>> {
+): Promise<Map<string, { registrationId: string; name: string; email: string }[]>> {
   await ensureCommonsReady()
   const { sqlForOrg } = await import('@/lib/crm/tenant')
   const found = await sqlForOrg<{
+    id: string
     slot_id: string
     participant_name: string
     participant_email: string
   }>(
     orgId,
-    `select slot_id, participant_name, participant_email
+    `select id, slot_id, participant_name, participant_email
        from signup_registrations
       where sheet_id = $1 and cancelled_at is null
       order by created_at`,
     [sheetId],
   )
-  const bySlot = new Map<string, { name: string; email: string }[]>()
+  const bySlot = new Map<string, { registrationId: string; name: string; email: string }[]>()
   for (const row of found.rows) {
     const list = bySlot.get(row.slot_id) || []
     list.push({
+      registrationId: row.id,
       name: String(row.participant_name || '').trim() || 'Board member',
       email: String(row.participant_email || '').trim().toLowerCase(),
     })
     bySlot.set(row.slot_id, list)
   }
   return bySlot
+}
+
+/** Soft-cancel a registration owned by the given email (or any staff cancelling their own). */
+export async function cancelSignupRegistration(
+  orgId: string,
+  sheetId: string,
+  registrationId: string,
+  participantEmail: string,
+): Promise<{ slotId: string; quantity: number }> {
+  await ensureCommonsReady()
+  const email = participantEmail.trim().toLowerCase()
+  if (!email.includes('@')) throw new Error('Email is required to cancel')
+
+  let slotId = ''
+  let quantity = 0
+
+  await withOrgClient(orgId, async (client) => {
+    const found = await client.query<{
+      id: string
+      slot_id: string
+      quantity: number
+      participant_email: string
+      cancelled_at: Date | null
+    }>(
+      `select id, slot_id, quantity, participant_email, cancelled_at
+         from signup_registrations
+        where id = $1 and sheet_id = $2
+        for update`,
+      [registrationId, sheetId],
+    )
+    const row = found.rows[0]
+    if (!row) throw new Error('Sign-up not found')
+    if (row.cancelled_at) throw new Error('Already cancelled')
+    if (String(row.participant_email || '').trim().toLowerCase() !== email) {
+      throw new Error('That sign-up belongs to a different email')
+    }
+
+    await client.query(
+      `update signup_registrations
+          set cancelled_at = now(), updated_at = now()
+        where id = $1`,
+      [registrationId],
+    )
+    await client.query(
+      `update signup_slots
+          set quantity_claimed = greatest(0, quantity_claimed - $1)
+        where id = $2`,
+      [row.quantity, row.slot_id],
+    )
+    slotId = row.slot_id
+    quantity = row.quantity
+  })
+
+  return { slotId, quantity }
 }

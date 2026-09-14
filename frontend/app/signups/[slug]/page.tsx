@@ -76,8 +76,11 @@ export default async function SignupPublicPage({ params }: Props) {
           slug={sheet.slug}
           fields={sheet.fields}
           slots={slots}
+          location={sheet.location}
+          sheetTitle={sheet.title}
+          timezone={sheet.timezone}
           actor={actor}
-          requireStaffIdentity={sheet.settings.requireStaffIdentity !== false}
+          requireStaffIdentity={sheet.settings.requireStaffIdentity === true}
         />
 
         <p className="text-center text-sm text-[#5A6070]">

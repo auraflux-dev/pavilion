@@ -45,6 +45,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
           quantityRemaining: Math.max(0, s.quantityNeeded - s.quantityClaimed),
           itemUnit: s.itemUnit,
           claimants: (s.claimants || []).map((c) => ({
+            registrationId: c.registrationId,
             name: c.name,
             email: c.email,
           })),

@@ -36,16 +36,10 @@ export async function POST(req: NextRequest, ctx: Ctx) {
     if (!sheet) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
     const body = (await req.json()) as ClaimSignupInput
-    const requireStaff = sheet.settings.requireStaffIdentity !== false
+    const requireStaff = sheet.settings.requireStaffIdentity === true
+    const session = await getStaffSession(req)
     let claimInput = body
-    if (requireStaff) {
-      const session = await getStaffSession(req)
-      if (!session?.staff) {
-        return NextResponse.json(
-          { error: 'Sign in with your board email to claim a slot' },
-          { status: 401 },
-        )
-      }
+    if (session?.staff) {
       const staffName =
         session.staff.name.trim() ||
         session.staff.boardTitle.trim() ||
@@ -57,6 +51,11 @@ export async function POST(req: NextRequest, ctx: Ctx) {
         email: session.staff.email,
         phone: body.phone || '',
       }
+    } else if (requireStaff) {
+      return NextResponse.json(
+        { error: 'Sign in with your board email to claim a slot' },
+        { status: 401 },
+      )
     }
     const claimed = await claimSignupSlots(sheet.organizationId, sheet, claimInput)
 
@@ -74,8 +73,11 @@ export async function POST(req: NextRequest, ctx: Ctx) {
       confirmPath: `/signups/${sheet.slug}/confirm?token=${claimed.confirmationToken}`,
       registrations: claimed.registrations.map((r) => ({
         id: r.id,
+        slotId: r.slotId,
         slotTitle: r.slotTitle,
         quantity: r.quantity,
+        participantName: r.participantName,
+        participantEmail: r.participantEmail,
       })),
       email: mail,
     })

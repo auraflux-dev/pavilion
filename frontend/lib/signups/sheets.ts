@@ -356,7 +356,11 @@ export async function attachSignupClaimants(sheet: SignupSheet): Promise<SignupS
     ...sheet,
     slots: sheet.slots.map((slot) => ({
       ...slot,
-      claimants: bySlot.get(slot.id) || [],
+      claimants: (bySlot.get(slot.id) || []).map((c) => ({
+        registrationId: c.registrationId,
+        name: c.name,
+        email: c.email,
+      })),
     })),
   }
 }
