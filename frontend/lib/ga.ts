@@ -64,6 +64,46 @@ export function trackEvent(name: string, params?: Record<string, unknown>) {
   window.gtag('event', name, params)
 }
 
+const GA_USER_ID_PREFIX = 'pavilion-ga4-uid:v1:'
+
+function gaMeasurementId() {
+  return process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() || ''
+}
+
+/**
+ * Stable non-PII GA4 user_id from Wix/member id (never email/name).
+ * SHA-256 hex truncated — same person across sessions/devices when logged in.
+ */
+export async function gaUserIdFromMemberId(memberId: string): Promise<string | null> {
+  const id = String(memberId || '').trim()
+  if (!id) return null
+  if (typeof crypto === 'undefined' || !crypto.subtle) return null
+  try {
+    const bytes = new TextEncoder().encode(`${GA_USER_ID_PREFIX}${id}`)
+    const digest = await crypto.subtle.digest('SHA-256', bytes)
+    const hex = Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+    return `u_${hex.slice(0, 32)}`
+  } catch {
+    return null
+  }
+}
+
+/** Attach or clear GA4 user_id without sending an extra page_view. */
+export function setGaUserId(userId: string | null) {
+  if (typeof window === 'undefined') return
+  const measurementId = gaMeasurementId()
+  if (!measurementId || typeof window.gtag !== 'function') return
+  if (userId) {
+    window.gtag('set', { user_id: userId })
+    window.gtag('config', measurementId, { user_id: userId, send_page_view: false })
+  } else {
+    window.gtag('set', { user_id: null })
+    window.gtag('config', measurementId, { user_id: null, send_page_view: false })
+  }
+}
+
 export function markPendingAuth(method: string, action: 'login' | 'sign_up') {
   if (typeof window === 'undefined') return
   try {
