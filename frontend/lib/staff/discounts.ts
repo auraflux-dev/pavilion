@@ -27,7 +27,7 @@ export function normalizeCode(raw: string): string {
 export function clampDiscountPercent(n: number): number {
   const p = Math.round(Number(n))
   if (!Number.isFinite(p)) throw new Error('Invalid percent')
-  if (p < 5 || p > 75) throw new Error('Percent must be between 5 and 75')
+  if (p < 5 || p > 100) throw new Error('Percent must be between 5 and 100')
   return p
 }
 
@@ -73,7 +73,7 @@ export async function resolveTierDiscountPercent(parentEmail: string): Promise<{
   }
   const cms = await getMembershipTierById(tierId)
   const fromCms = Number(cms?.discountPercent ?? 0)
-  if (fromCms >= 5 && fromCms <= 75) return { percent: fromCms, tierId }
+  if (fromCms >= 5 && fromCms <= 100) return { percent: fromCms, tierId }
   const defaults: Record<string, number> = {
     reef: 10,
     ruby: 10,

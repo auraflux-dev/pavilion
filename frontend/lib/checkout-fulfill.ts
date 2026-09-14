@@ -66,8 +66,6 @@ export type CheckoutIntent = {
   useCoveBalance?: boolean
   /** Optional parent note for donations */
   note?: string
-  /** Peer-to-peer fundraising share code */
-  p2pShareCode?: string
   consents?: import('@/lib/checkout-consent').ConsentAck[]
   /** Bag checkout: one payment for many lines. */
   cartLines?: CheckoutIntent[]
@@ -403,7 +401,7 @@ export async function resolveCheckoutIntent(
     } catch {
       // optional
     }
-    // Board gifted Reef: no auto SHMSREEF10 (they use 75% season board codes). Lagoon/Tide upgrades keep %.
+    // Board gifted Reef: no auto SHMSREEF10 (they use 100% season board codes). Lagoon/Tide upgrades keep %.
     const stripShared =
       boardComplimentary && (tier === 'reef' || tier === 'ruby')
     const percent = stripShared ? 0 : enrichmentDiscountPercent(tier)
@@ -416,7 +414,7 @@ export async function resolveCheckoutIntent(
         )
       }
     }
-    // Board 75%: one code per season — Fall code on Fall class, Spring code on Spring
+    // Board 100%: one code per season — Fall code on Fall class, Spring code on Spring
     // companion (even when checking out both in one cart during Fall calendar months).
     const primarySeason = resolveProgramSeason(program)
     const seasonLabel = CATALOG_SEASON_LABELS[primarySeason]
@@ -564,17 +562,15 @@ export async function resolveCheckoutIntent(
       throw new Error('Enter a donation between $1 and $10,000')
     }
     const note = String(intent.note ?? '').trim().slice(0, 120)
-    const p2pShareCode = String(intent.p2pShareCode ?? '').trim().toUpperCase()
     return {
       kind,
       amount,
       amountCents: donationAmountCents(amount),
-      description: p2pShareCode ? 'P2P fundraising gift' : 'SHMS PTO donation',
+      description: 'SHMS PTO donation',
       customId: `dn:${parentEmail.replace(/[^a-zA-Z0-9]/g, '').slice(0, 37)}`,
       meta: {
         parentEmail,
         note,
-        ...(p2pShareCode ? { p2pShareCode } : {}),
       },
     }
   }
@@ -623,12 +619,15 @@ async function applyCoveTenderFromResolved(opts: {
   coveCents: number
   cardCents: number
   coveNewBalance: string
+  gan: string
+  giftCardId: string
 }> {
   const coveCents = Math.round(Number(opts.resolved.meta.coveCents ?? 0) || 0)
   const cardCents = Math.round(
     Number(opts.resolved.meta.cardCents ?? opts.resolved.amountCents) || 0,
   )
   const gan = String(opts.resolved.meta.gan ?? '').trim()
+  const giftCardId = String(opts.resolved.meta.giftCardId ?? '').trim()
   let coveNewBalance = ''
   if (coveCents > 0) {
     if (!gan) throw new Error('Cove Digital Card is missing for this split payment')
@@ -650,7 +649,46 @@ async function applyCoveTenderFromResolved(opts: {
       : coveCents > 0 && cardCents <= 0
         ? 'Cove Digital Card'
         : opts.paymentMethod
-  return { methodNote, coveCents, cardCents, coveNewBalance }
+  return { methodNote, coveCents, cardCents, coveNewBalance, gan, giftCardId }
+}
+
+/** Put Cove dollars back when fulfill fails after redeem (card may already be refunded). */
+async function restoreCoveTenderAfterFailedFulfill(opts: {
+  parentEmail: string
+  transactionId: string
+  gan: string
+  giftCardId?: string
+  coveCents: number
+}) {
+  const coveCents = Math.round(Number(opts.coveCents) || 0)
+  const gan = String(opts.gan ?? '').trim()
+  if (coveCents < 1 || !gan) return
+  try {
+    const activity = await loadGiftCard(
+      gan,
+      coveCents,
+      `${opts.transactionId}-cvr`.slice(0, 45),
+      [`cove-restore-${opts.transactionId}`],
+    )
+    const newBalance = activity?.giftCardBalanceMoney
+      ? Number(activity.giftCardBalanceMoney.amount) / 100
+      : null
+    if (newBalance != null) {
+      await syncFamilyStoreCard({
+        parentEmail: opts.parentEmail,
+        gan,
+        giftCardId: opts.giftCardId,
+        balanceDollars: newBalance,
+      })
+    }
+  } catch (restoreErr) {
+    console.error('[checkout-fulfill] Cove restore after failed fulfill', {
+      transactionId: opts.transactionId,
+      coveCents,
+      ganPrefix: gan.slice(0, 4),
+      restoreErr,
+    })
+  }
 }
 
 export async function fulfillPaidCheckout(opts: {
@@ -701,10 +739,14 @@ export async function fulfillPaidCheckout(opts: {
     const coveCents = Math.round(Number(resolved.meta.coveCents ?? 0) || 0)
     const cardCents = Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0)
     const gan = String(resolved.meta.gan ?? '').trim()
+    const giftCardId = String(resolved.meta.giftCardId ?? '').trim()
     let coveNewBalance = ''
+    let coveRedeemed = false
+    try {
     if (coveCents > 0) {
       if (!gan) throw new Error('Cove Digital Card is missing for this split payment')
       const activity = await redeemGiftCard(gan, coveCents, `${transactionId}-cove`)
+      coveRedeemed = true
       const newBalance = activity?.giftCardBalanceMoney
         ? Number(activity.giftCardBalanceMoney.amount) / 100
         : 0
@@ -770,6 +812,17 @@ export async function fulfillPaidCheckout(opts: {
         .replace(/Enrichment:\s*/gi, '')
         .trim() || resolved.description
     const bagDescription = cartNotifyDescription(parts, resolved.description)
+    const bagProgramIds = parts
+      .filter((p) => p.kind === 'program')
+      .flatMap((p) => [
+        String(p.meta.programId ?? '').trim(),
+        ...String(p.meta.addonProgramIds ?? '')
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+      ])
+      .filter(Boolean)
+    const uniqueBagProgramIds = [...new Set(bagProgramIds)]
 
     if (notifyKind === 'program' || parts.some((p) => p.kind === 'program')) {
       try {
@@ -801,6 +854,12 @@ export async function fulfillPaidCheckout(opts: {
           programName: bagProgramName.slice(0, 160),
           cartCount: String(parts.length),
           cartTitles: String(resolved.meta.cartTitles ?? '').slice(0, 160),
+          ...(uniqueBagProgramIds[0]
+            ? { programId: uniqueBagProgramIds[0] }
+            : {}),
+          ...(uniqueBagProgramIds.length > 1
+            ? { addonProgramIds: uniqueBagProgramIds.slice(1).join(',') }
+            : {}),
         },
         extras: {
           lines: results,
@@ -810,6 +869,18 @@ export async function fulfillPaidCheckout(opts: {
         } as Record<string, unknown>,
       },
     )
+    } catch (err) {
+      if (coveRedeemed) {
+        await restoreCoveTenderAfterFailedFulfill({
+          parentEmail,
+          transactionId,
+          gan,
+          giftCardId,
+          coveCents,
+        })
+      }
+      throw err
+    }
   }
 
   if (resolved.kind === 'program') {
@@ -819,6 +890,7 @@ export async function fulfillPaidCheckout(opts: {
       transactionId,
       paymentMethod,
     })
+    try {
     const enrolled = await enrollInProgram({
       parentEmail,
       programId: resolved.meta.programId,
@@ -912,6 +984,18 @@ export async function fulfillPaidCheckout(opts: {
         } as Record<string, unknown>,
       },
     )
+    } catch (err) {
+      if (cove.coveCents > 0) {
+        await restoreCoveTenderAfterFailedFulfill({
+          parentEmail,
+          transactionId,
+          gan: cove.gan,
+          giftCardId: cove.giftCardId,
+          coveCents: cove.coveCents,
+        })
+      }
+      throw err
+    }
   }
 
   if (resolved.kind === 'membership') {
@@ -1084,6 +1168,7 @@ export async function fulfillPaidCheckout(opts: {
       transactionId,
       paymentMethod,
     })
+    try {
     const { recordEventTicketSale } = await import('@/lib/events/tickets')
     const quantity = Math.max(1, Number(resolved.meta.quantity ?? 1) || 1)
     await recordEventTicketSale({
@@ -1137,6 +1222,18 @@ export async function fulfillPaidCheckout(opts: {
         },
       },
     )
+    } catch (err) {
+      if (cove.coveCents > 0) {
+        await restoreCoveTenderAfterFailedFulfill({
+          parentEmail,
+          transactionId,
+          gan: cove.gan,
+          giftCardId: cove.giftCardId,
+          coveCents: cove.coveCents,
+        })
+      }
+      throw err
+    }
   }
 
   if (resolved.kind === 'donation') {
@@ -1146,10 +1243,10 @@ export async function fulfillPaidCheckout(opts: {
       transactionId,
       paymentMethod,
     })
+    try {
     const note = resolved.meta.note || ''
-    const p2pShareCode = String(resolved.meta.p2pShareCode ?? '').trim()
     await client.items.insert('Payments', {
-      programName: p2pShareCode ? 'P2P Fundraising' : 'PTO Donation',
+      programName: 'PTO Donation',
       amount: resolved.amount,
       status: 'Paid',
       paymentDate: new Date().toISOString(),
@@ -1160,25 +1257,12 @@ export async function fulfillPaidCheckout(opts: {
       accountNumber,
       notes: [
         note || 'General PTO donation',
-        p2pShareCode ? `p2p:${p2pShareCode}` : '',
         cove.coveCents > 0 ? `Cove $${(cove.coveCents / 100).toFixed(2)}` : '',
         cove.cardCents > 0 ? `card $${(cove.cardCents / 100).toFixed(2)}` : '',
       ]
         .filter(Boolean)
         .join(' · '),
     })
-    if (p2pShareCode) {
-      try {
-        const { resolveCmsOrganizationId } = await import('@/lib/cms/store')
-        const { creditP2pPageRaised } = await import('@/lib/p2p/store')
-        const orgId = await resolveCmsOrganizationId()
-        if (orgId) {
-          await creditP2pPageRaised(orgId, p2pShareCode, resolved.amountCents)
-        }
-      } catch (err) {
-        console.error('p2p credit failed', err)
-      }
-    }
     return confirm(
       {
         kind: 'donation',
@@ -1201,6 +1285,18 @@ export async function fulfillPaidCheckout(opts: {
         },
       },
     )
+    } catch (err) {
+      if (cove.coveCents > 0) {
+        await restoreCoveTenderAfterFailedFulfill({
+          parentEmail,
+          transactionId,
+          gan: cove.gan,
+          giftCardId: cove.giftCardId,
+          coveCents: cove.coveCents,
+        })
+      }
+      throw err
+    }
   }
 
   const studentId = resolved.meta.studentId

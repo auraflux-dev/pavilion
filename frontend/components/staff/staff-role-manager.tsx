@@ -190,7 +190,7 @@ export function StaffRoleManager() {
         | undefined
       setStatus(
         perks?.fallCode
-          ? `Staff access saved. Board Reef + 75% codes: ${perks.fallCode} / ${perks.springCode}${perks.enrichmentCode ? ` · ${perks.enrichmentCode}` : ''}.`
+          ? `Staff access saved. Board Reef + 100% codes: ${perks.fallCode} / ${perks.springCode}${perks.enrichmentCode ? ` · ${perks.enrichmentCode}` : ''}.`
           : 'Staff access saved.',
       )
     } catch (err) {
@@ -506,7 +506,7 @@ export function StaffRoleManager() {
             <span className="font-medium">Grant board seat perks</span>
             <span className="block text-[11px] text-[#5A6070] whitespace-pre-line">
               Complimentary Reef on the personal email above.
-              Plus 75% off 1 enrichment program for Fall and 1 for Spring.
+              Plus 100% off 1 enrichment program for Fall and 1 for Spring.
               Magnet fulfillment stays on Membership → Fulfillments.
             </span>
           </span>

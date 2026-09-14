@@ -34,9 +34,13 @@ export const PROGRAM_UI_DEFAULTS: Record<string, string> = {
   'landing.hideCurriculum': 'Hide curriculum',
   'landing.copyLink': 'Copy class link',
   'landing.linkCopied': 'Link copied',
+  'landing.copyCurriculumLink': 'Copy curriculum link',
+  'landing.curriculumLinkCopied': 'Curriculum link copied',
+  'landing.shareableCurriculum': 'Shareable curriculum page',
   'landing.fallScheduleLink': 'Fall 2026 schedule',
   'landing.springScheduleLink': 'Spring 2027 schedule',
   'landing.curriculumHeading': 'Curriculum',
+  'landing.weekAnchorLabel': 'Week {week}',
   'landing.videoUnsupported': 'Your browser does not support embedded video.',
   'landing.noVideoTitle': 'Class video coming soon',
   'landing.noVideoBody':
@@ -58,7 +62,7 @@ export const PROGRAM_UI_DEFAULTS: Record<string, string> = {
   'companion.spring.card.eyebrow': 'Spring 2027',
   'companion.spring.card.body':
     'Full Spring program.\nSame night and instructor.\nAdd at Fall checkout or register Spring on its own{feeLine}',
-  'companion.spring.card.feeLine': '\n{fee}',
+  'companion.spring.card.feeLine': '{fee}',
   'companion.spring.card.link': 'Spring 2027 details',
   'companion.fall.card.eyebrow': 'Fall 2026',
   'companion.fall.card.body':
@@ -96,7 +100,7 @@ export const PROGRAM_UI_DEFAULTS: Record<string, string> = {
   'register.couponLabel': 'Discount code',
   'register.couponPlaceholder': 'Optional override',
   'register.discountHint':
-    'Membership tier % applies automatically.\nBoard 75% Fall and Spring codes (one enrichment class each) apply automatically to the matching season — including Spring companion in a Fall+Spring cart.\nOnly paste a code here if you need to override.',
+    'Membership tier % applies automatically.\nBoard 100% Fall and Spring codes (one enrichment class each) apply automatically to the matching season — including Spring companion in a Fall+Spring cart.\nOnly paste a code here if you need to override.',
   'register.profileHint':
     'Registration needs parent phone, emergency contact, and authorized pick-up on the student profile. Edit those in Member Portal → Edit student.',
   'register.addToCart': 'Add to cart · {total}',

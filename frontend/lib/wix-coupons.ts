@@ -29,8 +29,8 @@ export async function createWixPercentCoupon(input: CreateWixCouponInput): Promi
  code: string
 }> {
  const percent = Math.round(input.percentOffRate)
- if (percent < 5 || percent > 75) {
- throw new Error('Discount percent must be between 5 and 75')
+ if (percent < 5 || percent > 100) {
+ throw new Error('Discount percent must be between 5 and 100')
  }
   const code = input.code.trim().toUpperCase().replace(/\s+/g, '')
  if (!code || code.length > 20) {

@@ -1,5 +1,5 @@
 /**
- * Board seat package: complimentary Reef + 75% off one enrichment program per season.
+ * Board seat package: complimentary Reef + 100% off one enrichment program per season.
  * No SHMSREEF10 (that is for paying Reef families).
  * Applied to the board member's personal (parent portal) email. not @shmspto.org.
  */
@@ -15,7 +15,7 @@ export type BoardSeatBenefitsResult = {
   enrichmentCode: string | null
 }
 
-/** Grant free Reef + Fall/Spring board 75% EP codes on a personal email. */
+/** Grant free Reef + Fall/Spring board 100% EP codes on a personal email. */
 export async function grantBoardSeatBenefits(opts: {
   parentEmail: string
   displayName?: string
@@ -40,7 +40,7 @@ export async function grantBoardSeatBenefits(opts: {
   })
 
   // Board seat: complimentary Reef for portal access/perks, but not SHMSREEF10.
-  // Season 75% codes are the enrichment benefit.
+  // Season 100% codes are the enrichment benefit.
   try {
     const { clearEnrichmentCodeFromFamily } = await import('@/lib/staff/enrichment-codes')
     await clearEnrichmentCodeFromFamily(parentEmail)

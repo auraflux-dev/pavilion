@@ -242,7 +242,7 @@ export async function POST(req: NextRequest) {
     if (wantBoardPerks) {
       if (!isAdmin) {
         return NextResponse.json(
-          { error: 'Only the president can grant board seat Reef + 75% enrichment perks.' },
+          { error: 'Only the president can grant board seat Reef + 100% enrichment perks.' },
           { status: 403 },
         )
       }
@@ -250,7 +250,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             error:
-              'Link a personal parent email before granting board seat Reef + 75% enrichment perks.',
+              'Link a personal parent email before granting board seat Reef + 100% enrichment perks.',
           },
           { status: 400 },
         )

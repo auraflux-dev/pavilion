@@ -1,6 +1,6 @@
 /**
  * Apply DiscountCodes on Square/PayPal checkout (Wix coupon records, our charge).
- * Board 75% codes: one enrichment program per season (Fall BRD75F / Spring BRD75S).
+ * Board season codes: one enrichment program per season (Fall BRD100F / Spring BRD100S; legacy BRD75*).
  * Spirit codes: Cove catalog only.
  */
 import { getWixClient } from '@/lib/wix-client'
@@ -52,7 +52,7 @@ function seasonExpirationMs(season: 'fall' | 'spring'): number {
 export function discountScopeForCode(code: string, membershipTier: string): DiscountScope {
   const c = code.trim().toUpperCase()
   const t = membershipTier.trim().toLowerCase()
-  if (t === 'board' || c.startsWith('BRD75')) return 'program'
+  if (t === 'board' || c.startsWith('BRD100') || c.startsWith('BRD75')) return 'program'
   if (PROGRAM_TIERS.has(t)) return 'program'
   if (c.startsWith('SHMSREEF') || c.startsWith('SHMSLAGOON') || c.startsWith('SHMSTIDE')) {
     return 'program'
@@ -62,8 +62,8 @@ export function discountScopeForCode(code: string, membershipTier: string): Disc
 
 function boardCodeExpired(code: string): boolean {
   const c = code.trim().toUpperCase()
-  if (c.startsWith('BRD75F')) return Date.now() > seasonExpirationMs('fall')
-  if (c.startsWith('BRD75S')) return Date.now() > seasonExpirationMs('spring')
+  if (c.startsWith('BRD100F') || c.startsWith('BRD75F')) return Date.now() > seasonExpirationMs('fall')
+  if (c.startsWith('BRD100S') || c.startsWith('BRD75S')) return Date.now() > seasonExpirationMs('spring')
   return false
 }
 
@@ -89,16 +89,16 @@ export function boardSeasonFromProgramSeason(
 
 function boardCodeSeason(code: string): 'fall' | 'spring' | null {
   const c = code.trim().toUpperCase()
-  if (c.startsWith('BRD75F')) return 'fall'
-  if (c.startsWith('BRD75S')) return 'spring'
+  if (c.startsWith('BRD100F') || c.startsWith('BRD75F')) return 'fall'
+  if (c.startsWith('BRD100S') || c.startsWith('BRD75S')) return 'spring'
   return null
 }
 
-/** Unused board 75% code for this household and season (program season, else calendar). */
+/** Unused board season code for this household and season (program season, else calendar). */
 export async function resolveUnusedBoardDiscountCode(opts: {
   parentEmail: string
   accountEmails?: string[]
-  /** Prefer the program's season so Spring EP gets BRD75S even during Fall calendar months. */
+  /** Prefer the program's season so Spring EP gets BRD100S even during Fall calendar months. */
   season?: 'fall' | 'spring' | null
 }): Promise<string | null> {
   const emails = [
@@ -156,7 +156,7 @@ export async function applyCheckoutDiscount(opts: {
   accountEmails?: string[]
   /** Program only: automatic membership tier % when no better coupon. */
   tierPercent?: number
-  /** Program season so Fall/Spring board 75% codes apply to the matching class. */
+  /** Program season so Fall/Spring board codes apply to the matching class. */
   programSeason?: string | null
 }): Promise<{ amount: number; discount: AppliedCheckoutDiscount | null; error?: string }> {
   const listAmount = money(opts.listAmount)

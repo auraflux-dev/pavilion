@@ -19,7 +19,7 @@ type DiscountRow = {
 
 /**
  * Staff → Discounts (Digital & Retail Sales / VP digital sales).
- * Creates named Wix coupon codes (5 to 75%) and issues tier-based codes to members.
+ * Creates named Wix coupon codes (5 to 100%) and issues tier-based codes to members.
  */
 export function StaffDiscountsPanel() {
   const [codes, setCodes] = useState<DiscountRow[]>([])
@@ -157,7 +157,7 @@ export function StaffDiscountsPanel() {
         <div>
           <h2 className="text-lg font-bold">Discount codes</h2>
           <p className="text-xs text-[#5A6070]">
-            Create named percent-off codes (5 to 75%) for enrichment programs and retail checkout later.
+            Create named percent-off codes (5 to 100%) for enrichment programs and retail checkout later.
             Codes never apply to membership or Cove Digital Card purchases. Issue personal codes for
             onboarding emails after membership purchase. Percent follows their paid tier (
             <code className="text-[11px]">discountPercent</code> on Membership Tiers), or override
@@ -186,11 +186,11 @@ export function StaffDiscountsPanel() {
             />
           </label>
           <label className="block text-xs font-bold text-[#5A6070]">
-            Percent off (5 to 75)
+            Percent off (5 to 100)
             <input
               type="number"
               min={5}
-              max={75}
+              max={100}
               value={percent}
               onChange={(e) => setPercent(Number(e.target.value))}
               className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-normal"
@@ -216,7 +216,7 @@ export function StaffDiscountsPanel() {
           />
         </label>
         <Button
-          disabled={busy || !code || percent < 5 || percent > 75}
+          disabled={busy || !code || percent < 5 || percent > 100}
           onClick={() => void createNamed()}
           className="text-white"
           style={{ backgroundColor: 'var(--brand-green)' }}
@@ -274,7 +274,7 @@ export function StaffDiscountsPanel() {
             <input
               type="number"
               min={5}
-              max={75}
+              max={100}
               value={issuePercent}
               onChange={(e) => setIssuePercent(e.target.value)}
               placeholder="Tier default"

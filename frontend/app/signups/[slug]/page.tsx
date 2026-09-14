@@ -58,7 +58,7 @@ export default async function SignupPublicPage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-[#F7F5F0] px-4 py-10">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         <div className="rounded-xl border border-[var(--border,#E5E2DC)] bg-white p-6 shadow-sm">
           <p className="text-xs uppercase tracking-wide text-[#5A6070]">Sign-up sheet</p>
           <h1 className="text-2xl font-semibold text-[#1A1A1A] mt-1">{sheet.title}</h1>

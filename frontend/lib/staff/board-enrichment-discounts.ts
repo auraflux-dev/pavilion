@@ -1,5 +1,5 @@
 /**
- * Board benefit: 75% off one enrichment program per season (Fall + Spring).
+ * Board benefit: 100% off one enrichment program per season (Fall + Spring).
  * Personal Wix coupon per member, usageLimit 1 each.
  */
 import { getWixClient } from '@/lib/wix-client'
@@ -13,7 +13,7 @@ import {
   type MembershipEntitlement,
 } from '@/lib/membership-entitlements'
 
-const BOARD_DISCOUNT_PERCENT = 75
+const BOARD_DISCOUNT_PERCENT = 100
 
 function boardCodeSuffix(email: string): string {
   let h = 0
@@ -34,7 +34,7 @@ function seasonExpirationMs(season: 'fall' | 'spring'): number {
 
 function boardCouponCode(email: string, season: 'fall' | 'spring'): string {
   const suffix = boardCodeSuffix(email)
-  const prefix = season === 'fall' ? 'BRD75F' : 'BRD75S'
+  const prefix = season === 'fall' ? 'BRD100F' : 'BRD100S'
   return `${prefix}${suffix}`.slice(0, 20)
 }
 
@@ -45,8 +45,8 @@ function boardEntitlement(
   const kind = season === 'fall' ? 'board_enrichment_fall' : 'board_enrichment_spring'
   const label =
     season === 'fall'
-      ? '75% off 1 enrichment program (Fall season)'
-      : '75% off 1 enrichment program (Spring season)'
+      ? '100% off 1 enrichment program (Fall season)'
+      : '100% off 1 enrichment program (Spring season)'
   const when = season === 'fall' ? 'Fall 2026 enrichment registration' : 'Spring 2027 enrichment registration'
   return {
     kind,
@@ -86,7 +86,7 @@ async function ensureBoardSeasonCoupon(opts: {
 
   const seasonLabel = opts.season === 'fall' ? 'Fall' : 'Spring'
   const wix = await createWixPercentCoupon({
-    name: `Board 75% · ${seasonLabel} · ${opts.displayName || email}`,
+    name: `Board 100% · ${seasonLabel} · ${opts.displayName || email}`,
     code,
     percentOffRate: percent,
     usageLimit: 1,
@@ -96,20 +96,20 @@ async function ensureBoardSeasonCoupon(opts: {
 
   const inserted = await client.items.insert('DiscountCodes', {
     code: wix.code,
-    name: `Board 75% · ${seasonLabel}`,
+    name: `Board 100% · ${seasonLabel}`,
     percent,
     active: true,
     issuedToEmail: email,
     membershipTier: 'board',
     wixCouponId: wix.id,
     usageLimit: 1,
-    note: `Board seat · 75% off one enrichment program · ${seasonLabel} season · ${email}`,
+    note: `Board seat · 100% off one enrichment program · ${seasonLabel} season · ${email}`,
   })
 
   return {
     id: String(inserted._id ?? ''),
     code: wix.code,
-    name: `Board 75% · ${seasonLabel}`,
+    name: `Board 100% · ${seasonLabel}`,
     percent,
     active: true,
     issuedToEmail: email,
@@ -121,7 +121,7 @@ async function ensureBoardSeasonCoupon(opts: {
   }
 }
 
-/** Issue Fall + Spring 75% board codes and store on Memberships + entitlementsJson. */
+/** Issue Fall + Spring 100% board codes and store on Memberships + entitlementsJson. */
 export async function issueBoardEnrichmentDiscounts(opts: {
   parentEmail: string
   displayName?: string
