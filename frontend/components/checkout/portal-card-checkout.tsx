@@ -326,6 +326,12 @@ export function PortalCardCheckout({
     ? Number(quote?.cardDollars ?? (productAwaitingQuote ? 0 : due))
     : due
   const coveDue = coveSplitKind ? Number(quote?.coveDollars ?? 0) : 0
+  const coveCovering = coveDue >= 0.01
+  const discountCovering =
+    !coveCovering &&
+    (Number(quote?.discountPercent ?? 0) > 0 ||
+      Boolean(String(quote?.discountCode ?? '').trim()) ||
+      (quote != null && due < amount - 0.009))
   const needsCard = !productAwaitingQuote && cardDue >= 1
   const nameReady = !needsName || (firstName.trim().length > 0 && lastName.trim().length > 0)
 
@@ -686,7 +692,7 @@ export function PortalCardCheckout({
   const upgradeCredit =
     listAmount > due + 0.001 ? Math.round((listAmount - due) * 100) / 100 : 0
   const totalDueNow = needsCard ? cardDue : 0
-  const showBreakdown = coveDue > 0 || upgradeCredit > 0 || Boolean(quote?.discountPercent)
+  const showBreakdown = coveDue > 0 || upgradeCredit > 0 || discountCovering || Boolean(quote?.discountPercent)
   const sectionLabel = 'text-[10px] font-semibold uppercase tracking-wide text-[#5A6070]'
 
   const coveOptIn =
@@ -788,7 +794,13 @@ export function PortalCardCheckout({
               <p className="text-xl font-bold tabular-nums" style={{ color: 'var(--brand-green)' }}>
                 ${totalDueNow.toFixed(2)}
                 <span className="ml-1.5 text-xs font-semibold text-[#5A6070]">
-                  {needsCard ? 'due now' : 'covered by Cove'}
+                  {needsCard
+                    ? 'due now'
+                    : coveCovering
+                      ? 'covered by Cove'
+                      : discountCovering
+                        ? 'covered by discount'
+                        : 'due now'}
                 </span>
               </p>
             </div>
@@ -1030,7 +1042,11 @@ export function PortalCardCheckout({
                 </div>
               ) : (
                 <p className="text-xs text-[#5A6070]">
-                  This total is covered by your Cove Digital Card. Confirm below to finish.
+                  {coveCovering
+                    ? 'This total is covered by your Cove Digital Card. Confirm below to finish.'
+                    : discountCovering
+                      ? 'This total is covered by your discount code. Confirm below to finish enrollment.'
+                      : 'Nothing left to charge. Confirm below to finish.'}
                 </p>
               )}
             </>
@@ -1109,7 +1125,11 @@ export function PortalCardCheckout({
                     <CreditCard className="w-4 h-4 mr-2" />
                     {needsCard
                       ? `Pay $${totalDueNow.toFixed(2)} with card`
-                      : `Confirm · Cove $${due.toFixed(2)}`}
+                      : coveCovering
+                        ? `Confirm · Cove $${due.toFixed(2)}`
+                        : discountCovering
+                          ? `Confirm · $${due.toFixed(2)} (discount applied)`
+                          : `Confirm · $${due.toFixed(2)}`}
                   </>
                 )}
               </Button>

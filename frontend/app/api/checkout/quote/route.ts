@@ -280,8 +280,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         kind,
         amount: resolved.amount,
-        listAmount: resolved.amount,
+        listAmount: (() => {
+          try {
+            const parts = JSON.parse(String(resolved.meta.cartPartsJson ?? '[]')) as Array<{
+              amount?: number
+              meta?: Record<string, string>
+            }>
+            const list = parts.reduce((sum, p) => {
+              const lineList = Number(p.meta?.listFee ?? p.meta?.listPrice ?? 0)
+              return sum + (lineList > 0 ? lineList : Number(p.amount ?? 0) || 0)
+            }, 0)
+            return list > 0 ? Math.round(list * 100) / 100 : resolved.amount
+          } catch {
+            return resolved.amount
+          }
+        })(),
         name: resolved.description,
+        discountCode: String(resolved.meta.discountCode ?? ''),
+        discountPercent: (() => {
+          try {
+            const parts = JSON.parse(String(resolved.meta.cartPartsJson ?? '[]')) as Array<{
+              meta?: Record<string, string>
+            }>
+            return parts.reduce((max, p) => {
+              const pct = Number(p.meta?.memberDiscountPercent ?? p.meta?.discountPercent ?? 0) || 0
+              return Math.max(max, pct)
+            }, 0)
+          } catch {
+            return 0
+          }
+        })(),
         coveDollars: Math.round(Number(resolved.meta.coveCents ?? 0) || 0) / 100,
         cardDollars: Math.round(Number(resolved.meta.cardCents ?? resolved.amountCents) || 0) / 100,
         coveBalance: Number(resolved.meta.coveBalance ?? 0) || 0,

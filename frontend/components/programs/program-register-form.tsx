@@ -20,6 +20,7 @@ import {
 } from '@/lib/programs/registration-access-shared'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { gaSurface, trackEvent } from '@/lib/ga'
+import { setStoredCouponCode } from '@/lib/start-checkout'
 import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
 import { resolveProgramSeason } from '@/lib/programs/season'
 import { programPublicPath } from '@/lib/programs/public-path'
@@ -78,6 +79,9 @@ export function ProgramRegisterForm({
   const [consents, setConsents] = useState<ConsentAck[] | null>(null)
   const [consentComplete, setConsentComplete] = useState(false)
   const [couponCode, setCouponCode] = useState('')
+  const [quotedAmount, setQuotedAmount] = useState<number | null>(null)
+  const [quoteBusy, setQuoteBusy] = useState(false)
+  const [couponError, setCouponError] = useState('')
   const [addCompanion, setAddCompanion] = useState(false)
   const [cartNote, setCartNote] = useState('')
   const cart = useCart()
@@ -99,6 +103,9 @@ export function ProgramRegisterForm({
       ? companion
       : null
   const checkoutTotal = fee + (springAddon ? Number(springAddon.fee ?? 0) : 0)
+  const displayTotal = quotedAmount != null ? quotedAmount : checkoutTotal
+  const hasLiveDiscount =
+    quotedAmount != null && quotedAmount < checkoutTotal - 0.009
 
   const onConsentChange = useCallback((acks: ConsentAck[] | null, complete: boolean) => {
     setConsents(acks)
@@ -125,18 +132,68 @@ export function ProgramRegisterForm({
       .finally(() => setLoading(false))
   }, [program.registrationOpen])
 
+  useEffect(() => {
+    if (!studentId || fee <= 0 || feeTbd) {
+      setQuotedAmount(null)
+      setCouponError('')
+      setQuoteBusy(false)
+      return
+    }
+    let cancelled = false
+    const timer = setTimeout(async () => {
+      setQuoteBusy(true)
+      try {
+        const res = await fetch('/api/checkout/quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            kind: 'program',
+            programId: program._id,
+            studentId,
+            couponCode: couponCode.trim() || undefined,
+            addonProgramIds: springAddon?._id ? [springAddon._id] : undefined,
+            useCoveBalance: false,
+          }),
+        })
+        const data = await res.json()
+        if (cancelled) return
+        if (!res.ok) {
+          setCouponError(String(data.error || 'Could not apply that code.'))
+          setQuotedAmount(null)
+          return
+        }
+        setCouponError('')
+        setQuotedAmount(Number(data.amount))
+      } catch {
+        if (!cancelled) {
+          setCouponError('Could not price this enrollment.')
+          setQuotedAmount(null)
+        }
+      } finally {
+        if (!cancelled) setQuoteBusy(false)
+      }
+    }, 350)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [studentId, couponCode, springAddon?._id, program._id, fee, feeTbd])
+
   function addProgramLine() {
     const title = springAddon
       ? `${displayProgramName(program.name)} + ${displayProgramName(springAddon.name)}`
       : displayProgramName(program.name)
+    const code = couponCode.trim().toUpperCase() || undefined
+    if (code) setStoredCouponCode(code)
     cart.add({
       kind: 'program',
       title,
-      amount: checkoutTotal,
+      amount: displayTotal,
       href: programPublicPath(program),
       programId: program._id,
       addonProgramIds: springAddon?._id ? [springAddon._id] : undefined,
       studentId: studentId || undefined,
+      couponCode: code,
     })
   }
 
@@ -235,12 +292,25 @@ export function ProgramRegisterForm({
                 <P k="register.tuitionTbd" />
               ) : fee <= 0 ? (
                 <P k="register.free" />
+              ) : hasLiveDiscount ? (
+                <>
+                  <span className="text-[#5A6070] line-through font-semibold mr-2">
+                    ${checkoutTotal.toFixed(2)}
+                  </span>
+                  ${displayTotal.toFixed(2)}
+                </>
               ) : springAddon ? (
-                <P k="register.fallPlusSpring" vars={{ total: `$${checkoutTotal.toFixed(2)}` }} />
+                <P k="register.fallPlusSpring" vars={{ total: `$${displayTotal.toFixed(2)}` }} />
               ) : (
-                <P k="register.feeOnly" vars={{ total: `$${fee.toFixed(2)}` }} />
+                <P k="register.feeOnly" vars={{ total: `$${displayTotal.toFixed(2)}` }} />
               )}
             </p>
+            {quoteBusy && studentId && fee > 0 && !feeTbd ? (
+              <p className="text-[11px] text-[#5A6070] mt-1 flex items-center gap-1.5">
+                <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />
+                Updating price…
+              </p>
+            ) : null}
             {!feeTbd && fee > 0 && String(program.memberDiscountNote ?? '').trim() ? (
               <p className="text-xs text-[#5A6070] mt-1 whitespace-pre-line">
                 {String(program.memberDiscountNote).trim()}
@@ -344,9 +414,19 @@ export function ProgramRegisterForm({
                   autoComplete="off"
                   className="mt-1 w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-mono tracking-wide uppercase"
                 />
-                <span className="mt-1.5 block text-[11px] font-normal text-[#5A6070] whitespace-pre-line">
-                  <P k="register.discountHint" />
-                </span>
+                {couponError ? (
+                  <span className="mt-1.5 block text-[11px] font-normal text-red-600">
+                    {couponError}
+                  </span>
+                ) : hasLiveDiscount ? (
+                  <span className="mt-1.5 block text-[11px] font-normal text-green-700">
+                    Discount applied — you pay ${displayTotal.toFixed(2)} at checkout.
+                  </span>
+                ) : (
+                  <span className="mt-1.5 block text-[11px] font-normal text-[#5A6070] whitespace-pre-line">
+                    <P k="register.discountHint" />
+                  </span>
+                )}
               </label>
             ) : null}
 
@@ -361,7 +441,7 @@ export function ProgramRegisterForm({
               <Button
                 type="button"
                 variant="outline"
-                disabled={!studentId || feeTbd}
+                disabled={!studentId || feeTbd || Boolean(couponError)}
                 className="w-full font-bold"
                 onClick={() => {
                   addProgramLine()
@@ -370,7 +450,7 @@ export function ProgramRegisterForm({
                   cart.setOpen(true)
                 }}
               >
-                <P k="register.addToCart" vars={{ total: `$${checkoutTotal.toFixed(2)}` }} inlineTarget />
+                <P k="register.addToCart" vars={{ total: `$${displayTotal.toFixed(2)}` }} inlineTarget />
               </Button>
               <Button
                 type="button"
@@ -389,6 +469,7 @@ export function ProgramRegisterForm({
                   busy ||
                   !studentId ||
                   feeTbd ||
+                  Boolean(couponError) ||
                   (fee <= 0 && !consentComplete)
                 }
                 className="w-full text-white font-bold"
@@ -397,7 +478,7 @@ export function ProgramRegisterForm({
                 {busy ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : fee > 0 && !feeTbd ? (
-                  <P k="register.payNow" vars={{ total: `$${checkoutTotal.toFixed(2)}` }} inlineTarget />
+                  <P k="register.payNow" vars={{ total: `$${displayTotal.toFixed(2)}` }} inlineTarget />
                 ) : (
                   <P k="register.complete" inlineTarget />
                 )}
@@ -433,7 +514,7 @@ export function ProgramLandingCheckout({
   )
   return (
     <div
-      id="register"
+      id="enroll"
       className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm scroll-mt-28"
     >
       {comingSoon ? (

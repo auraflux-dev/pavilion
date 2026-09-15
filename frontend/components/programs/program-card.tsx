@@ -290,10 +290,14 @@ export function ProgramCard({ program, companion = null }: ProgramCardProps) {
           </p>
         ) : null}
 
-        {companion ? <SpringCompanionOffer companion={companion} variant="card" /> : null}
+        {companion ? (
+          <div className="mb-4">
+            <SpringCompanionOffer companion={companion} variant="card" />
+          </div>
+        ) : null}
 
         {program.registrationOpen ? (
-          <>
+          <div className="space-y-2">
             <MemberGate label="Register for this program">
               <Button
                 className="w-full font-semibold text-white group"
@@ -307,12 +311,12 @@ export function ProgramCard({ program, companion = null }: ProgramCardProps) {
                 />
               </Button>
             </MemberGate>
-            <Button className="w-full font-semibold mt-2" variant="outline" asChild>
+            <Button className="w-full font-semibold" variant="outline" asChild>
               <Link href={programPublicPath(program)}>{ui(uiCopy, 'catalog.learnMore')}</Link>
             </Button>
-          </>
+          </div>
         ) : (
-          <>
+          <div className="space-y-2">
             <Button
               className="w-full font-semibold text-white"
               style={{ backgroundColor: colors.accent }}
@@ -323,12 +327,12 @@ export function ProgramCard({ program, companion = null }: ProgramCardProps) {
                 <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
               </Link>
             </Button>
-            <Button className="w-full font-semibold mt-2" variant="outline" disabled>
+            <Button className="w-full font-semibold" variant="outline" disabled>
               {comingSoon
                 ? ui(uiCopy, 'catalog.registrationOpensSoon')
                 : ui(uiCopy, 'catalog.registrationClosed')}
             </Button>
-          </>
+          </div>
         )}
       </div>
 
