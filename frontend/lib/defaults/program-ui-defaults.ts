@@ -11,6 +11,9 @@ export const PROGRAM_UI_DEFAULTS: Record<string, string> = {
   'catalog.closed': 'Closed',
   'catalog.comingSoon': 'Coming Soon',
   'catalog.registerNow': 'Register Now',
+  'catalog.registerFallNow': 'Register for Fall',
+  'catalog.registerFallHint':
+    'Register enrolls Fall 2026 — not Spring. Learn about Spring in the note above, or add it at Fall checkout.',
   'catalog.learnMore': 'Learn more',
   'catalog.registrationOpensSoon': 'Registration opens soon',
   'catalog.registrationClosed': 'Registration closed',
@@ -47,11 +50,11 @@ export const PROGRAM_UI_DEFAULTS: Record<string, string> = {
     'A short intro from the instructor will land here.\nUntil then, use the summary and curriculum on the left.',
 
   // Spring companion on Fall landing / catalog / checkout (optional add-on)
-  'companion.spring.landing.eyebrow': 'Spring 2027',
+  'companion.spring.landing.eyebrow': 'Also available · Spring 2027',
   'companion.spring.landing.body':
-    'Spring is its own semester with a separate landing page.\nSame night and instructor as Fall.\nAdd Spring at Fall checkout, or register Spring later{feeLine}',
+    'This page registers Fall.\nSpring is a separate semester (same night and instructor).\nAdd Spring at Fall checkout, or enroll Spring later{feeLine}',
   'companion.spring.landing.feeLine': '\n{fee}',
-  'companion.spring.landing.link': 'View Spring 2027 class',
+  'companion.spring.landing.link': 'Learn more about Spring 2027',
   'companion.fall.landing.eyebrow': 'Fall 2026',
   'companion.fall.landing.body':
     'Fall is its own semester with a separate landing page.\nRegister Fall first to add Spring in one checkout{feeLine}',
@@ -59,11 +62,13 @@ export const PROGRAM_UI_DEFAULTS: Record<string, string> = {
   'companion.fall.landing.link': 'View Fall 2026 class',
 
   // Companion catalog card
-  'companion.spring.card.eyebrow': 'Spring 2027',
+  'companion.spring.card.eyebrow': 'Also available · Spring 2027',
   'companion.spring.card.body':
-    'Full Spring program.\nSame night and instructor.\nAdd at Fall checkout or register Spring on its own{feeLine}',
-  'companion.spring.card.feeLine': '{fee}',
-  'companion.spring.card.link': 'Spring 2027 details',
+    'Same night and instructor as Fall.\nRegister below enrolls Fall — not this Spring class.\nAdd Spring at Fall checkout, or enroll Spring later{feeLine}',
+  'companion.spring.card.feeLine': '\n{fee}',
+  'companion.spring.card.link': 'Learn more about Spring 2027',
+  'companion.spring.card.registerNote':
+    'Register below is for Fall 2026. Spring is a separate semester.',
   'companion.fall.card.eyebrow': 'Fall 2026',
   'companion.fall.card.body':
     'Full Fall program.\nRegister Fall first to bundle Spring at checkout{feeLine}',
@@ -79,10 +84,11 @@ export const PROGRAM_UI_DEFAULTS: Record<string, string> = {
   'companion.checkout.springLabel': 'Also add Spring 2027{feeSuffix}',
   'companion.checkout.springFeeSuffix': ' · {fee}',
   'companion.checkout.springBody':
-    '{name}\nOptional add-on.\nSame night.\nOne checkout for Fall and Spring.',
+    '{name}\nOptional add-on — this checkout is for Fall.\nSame night.\nCheck the box to add Spring in one payment.',
 
   // Registration form
   'register.heading': 'Register for {name}',
+  'register.headingFall': 'Register for Fall · {name}',
   'register.tuitionTbd': 'Tuition TBD',
   'register.free': 'Free',
   'register.fallPlusSpring': '{total}\nFall + Spring',

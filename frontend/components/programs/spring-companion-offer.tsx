@@ -34,7 +34,9 @@ function companionFeeLabel(companion: Program): string {
 
 function feeLine(copy: Record<string, string>, key: string, fee: string): string {
   if (!fee) return ''
-  return ui(copy, key, { fee })
+  const line = ui(copy, key, { fee }).replace(/^\s+/, '')
+  // Always separate fee from the preceding word (CMS overrides sometimes omit space/newline).
+  return line ? ` ${line}` : ''
 }
 
 export function SpringCompanionOffer({
@@ -58,16 +60,19 @@ export function SpringCompanionOffer({
             {ui(copy, 'companion.spring.card.eyebrow')}
           </p>
           <p className="mt-1 text-sm text-[#1A1A1A] font-semibold leading-snug">{name}</p>
-          <p className="mt-0.5 text-xs text-[#5A6070] whitespace-pre-line">
+          <p className="mt-1.5 text-xs font-bold text-[#1A1A1A] leading-snug">
+            {ui(copy, 'companion.spring.card.registerNote')}
+          </p>
+          <p className="mt-1 text-xs text-[#5A6070] whitespace-pre-line">
             {ui(copy, 'companion.spring.card.body', {
               feeLine: feeLine(copy, 'companion.spring.card.feeLine', fee),
             })}
           </p>
           <Link
             href={href}
-            className="mt-1.5 inline-block text-xs font-semibold text-[var(--brand-green)] hover:underline"
+            className="mt-2 inline-flex items-center text-xs font-bold text-[var(--brand-green)] hover:underline"
           >
-            {ui(copy, 'companion.spring.card.link')}
+            {ui(copy, 'companion.spring.card.link')} →
           </Link>
         </div>
       )
@@ -142,6 +147,9 @@ export function SpringCompanionOffer({
           {ui(copy, 'companion.spring.landing.eyebrow')}
         </p>
         <p className="text-base font-bold text-[#1A1A1A] leading-snug">{name}</p>
+        <p className="text-sm font-bold text-[#1A1A1A] leading-snug">
+          {ui(copy, 'companion.spring.card.registerNote')}
+        </p>
         <p className="text-sm text-[#5A6070] whitespace-pre-line">
           {ui(copy, 'companion.spring.landing.body', {
             feeLine: feeLine(copy, 'companion.spring.landing.feeLine', fee),
@@ -149,9 +157,9 @@ export function SpringCompanionOffer({
         </p>
         <Link
           href={href}
-          className="text-sm font-semibold text-[var(--brand-green)] hover:underline"
+          className="text-sm font-bold text-[var(--brand-green)] hover:underline"
         >
-          {ui(copy, 'companion.spring.landing.link')}
+          {ui(copy, 'companion.spring.landing.link')} →
         </Link>
       </aside>
     )

@@ -274,8 +274,16 @@ export function ProgramRegisterForm({
     }
   }
 
+  const registeringFallWithSpring =
+    companion &&
+    resolveProgramSeason(program) === 'fall-2026' &&
+    resolveProgramSeason(companion) === 'spring-2027'
   const title = heading ?? (
-    <P k="register.heading" vars={{ name: program.name }} />
+    registeringFallWithSpring ? (
+      <P k="register.headingFall" vars={{ name: program.name }} />
+    ) : (
+      <P k="register.heading" vars={{ name: program.name }} />
+    )
   )
 
   return (

@@ -19,6 +19,7 @@ import { ProgramRegisterModal } from '@/components/programs/program-register-mod
 import { SpringCompanionOffer } from '@/components/programs/spring-companion-offer'
 import { useProgramUiCopy, ui } from '@/components/programs/program-ui-copy-context'
 import { ProgramSpotsLeft } from '@/components/programs/program-spots-left'
+import { resolveProgramSeason } from '@/lib/programs/season'
 
 interface ProgramCardProps {
   program: Program
@@ -85,8 +86,10 @@ function programCopy(html: string): { lead: string; bullets: string[] } {
 
 export function ProgramCard({ program, companion = null }: ProgramCardProps) {
   const uiCopy = useProgramUiCopy()
-  const colors = getColors(program.category)
   const [registerOpen, setRegisterOpen] = useState(false)
+  const colors = CATEGORY_COLORS[program.category ?? ''] ?? CATEGORY_COLORS.default
+  const springCompanion =
+    companion && resolveProgramSeason(companion) === 'spring-2027' ? companion : null
   const comingSoon = !program.registrationOpen && (program.featured || hasTag(program, 'coming-soon'))
   const feeTbd = hasTag(program, 'fee-tbd')
   const phase = getRegistrationPhase(program)
@@ -298,13 +301,20 @@ export function ProgramCard({ program, companion = null }: ProgramCardProps) {
 
         {program.registrationOpen ? (
           <div className="space-y-2">
-            <MemberGate label="Register for this program">
+            {springCompanion ? (
+              <p className="text-[11px] font-semibold text-[#1A1A1A] leading-snug">
+                {ui(uiCopy, 'catalog.registerFallHint')}
+              </p>
+            ) : null}
+            <MemberGate label={springCompanion ? 'Register for Fall' : 'Register for this program'}>
               <Button
                 className="w-full font-semibold text-white group"
                 style={{ backgroundColor: colors.accent }}
                 onClick={() => setRegisterOpen(true)}
               >
-                {ui(uiCopy, 'catalog.registerNow')}
+                {springCompanion
+                  ? ui(uiCopy, 'catalog.registerFallNow')
+                  : ui(uiCopy, 'catalog.registerNow')}
                 <ArrowRight
                   className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-0.5"
                   aria-hidden="true"
