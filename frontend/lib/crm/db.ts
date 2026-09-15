@@ -15,6 +15,9 @@ export function commonsDbEnabled(): boolean {
   return Boolean(process.env.DATABASE_URL?.trim()) && isCommonsPlatform()
 }
 
+/** Alias used by public signup routes. Same gate as commonsDbEnabled. */
+export const appDbEnabled = commonsDbEnabled
+
 export function getPool(): Pool | null {
   if (!commonsDbEnabled()) return null
   if (!pool) {
