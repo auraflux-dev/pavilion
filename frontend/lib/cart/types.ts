@@ -29,6 +29,7 @@ export type CartLine = {
   note?: string
   /** Peer-to-peer share page code when donating via /p2p/[code]. */
   p2pShareCode?: string
+  couponCode?: string
   shirtSize?: string | null
   shirtDesign?: string | null
   shirtProductId?: string | null

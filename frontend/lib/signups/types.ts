@@ -8,6 +8,7 @@ export type SignupSheetSettings = {
   reminderDaysBefore?: number
   allowMultipleSlotsPerPerson?: boolean
   sendConfirmationEmail?: boolean
+  lastVolunteerNudgeAt?: string | null
   /** When true, only signed-in staff may claim. Default: guests OK; staff auto-fills when present. */
   requireStaffIdentity?: boolean
 }
