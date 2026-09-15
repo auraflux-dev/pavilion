@@ -66,6 +66,8 @@ export type CheckoutIntent = {
   useCoveBalance?: boolean
   /** Optional parent note for donations */
   note?: string
+  /** Peer-to-peer fundraising share code */
+  p2pShareCode?: string
   consents?: import('@/lib/checkout-consent').ConsentAck[]
   /** Bag checkout: one payment for many lines. */
   cartLines?: CheckoutIntent[]
