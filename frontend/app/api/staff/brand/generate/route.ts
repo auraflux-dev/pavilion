@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     } else {
       await updateKit(workspaceId, kitId, { inputs: enriched, status: 'draft' })
     }
-    const result = await BrandAiService.generateFollowups(enriched)
+    const result = await BrandAiService.generateFollowups(enriched, gated.gate.product)
     await updateKit(workspaceId, kitId, {
       followups: result.followups,
       status: 'refining',
@@ -65,7 +65,11 @@ export async function POST(req: NextRequest) {
     kitId = kit.id
   }
 
-  const generated = await BrandAiService.generateStrategy({ inputs: enriched, followups })
+  const generated = await BrandAiService.generateStrategy({
+    inputs: enriched,
+    followups,
+    product: gated.gate.product,
+  })
   const updated = await updateKit(
     workspaceId,
     kitId,

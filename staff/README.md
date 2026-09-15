@@ -66,3 +66,14 @@ BR Social uses direct Meta Graph (Composio off). Port later into `/staff?view=so
 ## Client Staff visual brand
 
 `/staff?view=brand` remains logo/colors (`StaffSiteBrandPanel`). Strategy kits live at `/staff?view=strategy`.
+
+## Fork 3 — AuraFlux creator growth (shared lane)
+
+Do **not** fork this into an AuraFlux-only Business Rocket copy. Same Staff platform; product hint drives Brand AI:
+
+- Fleet product / `workspaceId=auraflux` → creator/production prompts (peaks→Shorts, Twitch→TikTok, Opus/Eklipse/Vizard compares)
+- Growth JSON includes SEO pillars + SMM + Ads hooks (Ads UI still stub)
+- Public SEO polish for auraflux.co lives in `cwn-production/marketing` — not `auraflux-api`
+- SMOKE: see **AuraFlux host** section in `staff/SMOKE.md`
+
+Upstream map: Business Rocket `docs/STAFF_PLATFORM.md`.

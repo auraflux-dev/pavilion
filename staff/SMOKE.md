@@ -33,8 +33,22 @@ Run on commons-pto-demo as a platform owner (`@onpavilion.com` or demo admin).
 - [ ] `composio: false`, `dataForSeo: false`
 - [ ] Database on when `DATABASE_URL` is set
 
+## AuraFlux host (Fork 3)
+
+Run on the AuraFlux Brand Staff host as a platform owner (`@auraflux.co` or demo admin).
+Use `?workspaceId=auraflux` if the fleet product is ambiguous.
+
+- [ ] `/staff/seo` and `/staff?view=seo` open SEO for workspace `auraflux`
+- [ ] Crawl origin defaults toward `https://www.auraflux.co` / `auraflux.co`
+- [ ] `/staff/brand` → strategy; generate placeholder kit without OpenAI
+- [ ] Kit growth SEO pillars are creator-specific (peaks/Shorts/compares) — not PTO/PTA
+- [ ] Approve → `GET /api/staff/brand/active?workspaceId=auraflux` returns the kit
+- [ ] Diagnostics: `composio: false`
+- [ ] Social / Ads remain Coming soon stubs
+
 ## Do not
 
 - Mix treasurer Vercel
 - Enable Composio
 - Treat this demo ship as www.shmspto.org
+- Fork Business Rocket Staff into an AuraFlux-only copy — extend this shared Pavilion lane

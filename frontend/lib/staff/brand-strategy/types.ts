@@ -36,6 +36,7 @@ export type BrandOutputJson = {
   growth: {
     seo: { pillars: { name: string; intent: string; notes: string }[] }
     smm: { notes: string; angles: string[] }
+    ads?: { notes: string; hooks: string[] }
   }
 }
 
@@ -99,6 +100,10 @@ export function renderBrandMarkdown(s: BrandOutputJson, inputs: BrandKitInputs):
     '## Social later',
     s.growth.smm.notes,
     ...s.growth.smm.angles.map((a) => `- ${a}`),
+    '',
+    '## Ads later',
+    s.growth.ads?.notes || 'Ads lane stub.',
+    ...(s.growth.ads?.hooks || []).map((h) => `- ${h}`),
     '',
   ].join('\n')
 }
