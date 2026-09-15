@@ -151,6 +151,12 @@ export const AF_PLATFORM_WORKSPACE_GROUPS: PlatformWorkspaceGroup[] = [
     workspaces: ['tenants', 'onboarding', 'modules'],
   },
   {
+    id: 'marketing',
+    label: 'Marketing tools',
+    blurb: 'SEO and brand strategy. Social and Ads later.',
+    workspaces: ['seo', 'strategy', 'blog', 'social-growth', 'ads'],
+  },
+  {
     id: 'serve',
     label: 'Serve',
     blurb: 'Help when something breaks or they need a hand in their portals.',
@@ -159,8 +165,8 @@ export const AF_PLATFORM_WORKSPACE_GROUPS: PlatformWorkspaceGroup[] = [
   {
     id: 'ops',
     label: 'Ops',
-    blurb: 'Fleet health and deploy checks.',
-    workspaces: ['health'],
+    blurb: 'Fleet health and SEO/brand env probes.',
+    workspaces: ['health', 'diagnostics'],
   },
   {
     id: 'help',
@@ -178,6 +184,11 @@ export const AF_PLATFORM_WORKSPACE_LABEL: Record<PlatformWorkspace, string> = {
   onboarding: 'Launch',
   support: 'Support',
   blog: 'Blog',
+  seo: 'SEO',
+  strategy: 'Brand',
+  diagnostics: 'Diagnostics',
+  'social-growth': 'Social',
+  ads: 'Ads',
   health: 'Health',
   help: 'Help',
 }
@@ -188,6 +199,11 @@ export const AF_PLATFORM_WORKSPACE_BLURB: Partial<Record<PlatformWorkspace, stri
   modules: 'What this client gets from us',
   onboarding: 'Sale → provision → launch checklist',
   support: 'Help queue across customers',
+  seo: 'Search Console and crawl for this fleet',
+  strategy: 'Brand kits. Approve to activate.',
+  diagnostics: 'SEO and brand env probes',
+  'social-growth': 'Coming soon. Direct Meta later.',
+  ads: 'Coming soon.',
   health: 'Deploy and connector health',
   help: 'Brand Staff playbook',
 }

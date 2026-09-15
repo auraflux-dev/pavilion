@@ -300,6 +300,11 @@ export function StaffDashboard({ staffCopy = STAFF_PORTAL_DEFAULTS }: { staffCop
       'health',
       'help',
       'blog',
+      'seo',
+      'strategy',
+      'diagnostics',
+      'social-growth',
+      'ads',
     ])
     // Deep-links from businessrocket.ai/staff/fleet?view=… must open Brand Staff, not Client Staff.
     const forceFleet = fleetViews.has(view) || Boolean(params.get('org')?.trim())

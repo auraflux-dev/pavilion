@@ -5,6 +5,7 @@ import { CRM_SCHEMA_SQL } from '@/lib/crm/schema-sql'
 import { CRM_PLATFORM_SQL } from '@/lib/crm/schema-platform-sql'
 import { SIGNUPS_SCHEMA_SQL } from '@/lib/signups/schema-sql'
 import { CMS_SCHEMA_SQL } from '@/lib/cms/schema-sql'
+import { SEO_BRAND_SCHEMA_SQL } from '@/lib/staff/seo-brand-schema'
 import { PLATFORM_OWNERS_SQL, ensurePlatformOwnerSeed } from '@/lib/crm/platform-owners'
 import { riversideSnapshot } from '@/lib/crm/riverside'
 import { isDemoInstance } from '@/lib/demo/instance'
@@ -27,6 +28,7 @@ async function migrateAndSeed(): Promise<void> {
   await sql(CRM_PLATFORM_SQL)
   await sql(SIGNUPS_SCHEMA_SQL)
   await applyCmsSchema()
+  await applySeoBrandSchema()
   await sql(PLATFORM_OWNERS_SQL)
   await ensurePlatformOwnerSeed()
   const auth = getAuth()
@@ -36,6 +38,23 @@ async function migrateAndSeed(): Promise<void> {
     await runMigrations()
   }
   if (isDemoInstance()) await seedRiverside()
+}
+
+async function applySeoBrandSchema(): Promise<void> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await sql(SEO_BRAND_SCHEMA_SQL)
+      return
+    } catch (err) {
+      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: unknown }).code) : ''
+      const msg = err instanceof Error ? err.message : String(err)
+      if (code === '23505' || /already exists/i.test(msg)) {
+        if (attempt === 2) return
+        continue
+      }
+      throw err
+    }
+  }
 }
 
 /** Tolerate concurrent create-table races from parallel Next workers. */

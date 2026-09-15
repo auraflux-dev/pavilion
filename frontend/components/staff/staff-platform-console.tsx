@@ -27,6 +27,10 @@ import {
 import type { CompanyProduct } from '@/lib/crm/platform-owners'
 import { StaffModulesPanel } from '@/components/staff/staff-modules-panel'
 import { StaffMarketingBlogPanel } from '@/components/staff/staff-marketing-blog-panel'
+import { StaffSeoPanel } from '@/components/staff/staff-seo-panel'
+import { StaffBrandStrategyPanel } from '@/components/staff/staff-brand-strategy-panel'
+import { StaffSeoDiagnosticsPanel } from '@/components/staff/staff-seo-diagnostics-panel'
+import { StaffComingSoonPanel } from '@/components/staff/staff-coming-soon-panel'
 import { staffSignOut } from '@/lib/staff/sign-out'
 
 type Me = {
@@ -230,6 +234,8 @@ export function StaffPlatformConsole({ me }: Props) {
     { id: 'onboarding', label: platformLabel.onboarding },
     { id: 'support', label: platformLabel.support },
     { id: 'blog', label: platformLabel.blog },
+    { id: 'seo', label: platformLabel.seo },
+    { id: 'strategy', label: platformLabel.strategy },
     { id: 'health', label: platformLabel.health },
     { id: 'help', label: platformLabel.help },
   ]
@@ -607,6 +613,24 @@ Client boards finish connectors in their Staff. You track gaps here.`}
         ) : null}
 
         {active === 'blog' ? <StaffMarketingBlogPanel product={product} /> : null}
+        {active === 'seo' ? <StaffSeoPanel /> : null}
+        {active === 'strategy' ? <StaffBrandStrategyPanel /> : null}
+        {active === 'diagnostics' ? <StaffSeoDiagnosticsPanel /> : null}
+        {active === 'social-growth' ? (
+          <StaffComingSoonPanel
+            title="Social"
+            body={`PTO Facebook groups are approval-heavy.
+Phase 2 will port Business Rocket’s direct-Meta Social (no Composio).
+Until then, Client Staff still has Canva and newsletter.`}
+          />
+        ) : null}
+        {active === 'ads' ? (
+          <StaffComingSoonPanel
+            title="Ads"
+            body={`Paid ads are not in this phase.
+The BR Ads lane will port later with the same workspace model.`}
+          />
+        ) : null}
 
         {active === 'support' ? (
           <section className="space-y-4">
