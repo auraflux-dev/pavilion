@@ -170,7 +170,7 @@ export const BR_STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
 ]
 
 /**
- * Brand Staff fleet — home base to grow BR, launch clients, support them.
+ * Brand Staff home — grow BR, launch clients, support them.
  */
 export const BR_PLATFORM_WORKSPACE_GROUPS: PlatformWorkspaceGroup[] = [
   {
@@ -194,7 +194,7 @@ export const BR_PLATFORM_WORKSPACE_GROUPS: PlatformWorkspaceGroup[] = [
   {
     id: 'ops',
     label: 'Ops',
-    blurb: 'Fleet health and SEO/brand env probes.',
+    blurb: 'Health and SEO/brand env probes.',
     workspaces: ['health', 'diagnostics'],
   },
   {
@@ -223,12 +223,12 @@ export const BR_PLATFORM_WORKSPACE_LABEL: Record<PlatformWorkspace, string> = {
 }
 
 export const BR_PLATFORM_WORKSPACE_BLURB: Partial<Record<PlatformWorkspace, string>> = {
-  tenants: 'Every client build — site, portal, Staff. Warp in anytime.',
-  tenant: 'One client: host, modules, brand, currency, activity, warp',
+  tenants: 'Every client build — site, portal, Staff. Open client Staff on their domain.',
+  tenant: 'One client: host, modules, brand, currency, activity, open client Staff',
   modules: 'What this client gets from us',
   onboarding: 'Sale → provision → launch checklist',
   support: 'Help queue across customers',
-  seo: 'Search Console and crawl for this fleet',
+  seo: 'Search Console and crawl for this brand',
   strategy: 'Brand kits. Approve to activate.',
   diagnostics: 'SEO and brand env probes',
   'social-growth': 'Coming soon on this host. Full Social stays on businessrocket.ai for now.',

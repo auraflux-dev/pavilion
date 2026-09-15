@@ -141,7 +141,7 @@ export const AF_STAFF_WORKSPACE_GROUPS: StaffWorkspaceGroup[] = [
 ]
 
 /**
- * Brand Staff fleet .  home base to grow AF, launch clients, support them.
+ * Brand Staff home — grow AF, launch clients, support them.
  */
 export const AF_PLATFORM_WORKSPACE_GROUPS: PlatformWorkspaceGroup[] = [
   {
@@ -165,7 +165,7 @@ export const AF_PLATFORM_WORKSPACE_GROUPS: PlatformWorkspaceGroup[] = [
   {
     id: 'ops',
     label: 'Ops',
-    blurb: 'Fleet health and SEO/brand env probes.',
+    blurb: 'Health and SEO/brand env probes.',
     workspaces: ['health', 'diagnostics'],
   },
   {
@@ -199,7 +199,7 @@ export const AF_PLATFORM_WORKSPACE_BLURB: Partial<Record<PlatformWorkspace, stri
   modules: 'What this client gets from us',
   onboarding: 'Sale → provision → launch checklist',
   support: 'Help queue across customers',
-  seo: 'Search Console and crawl for this fleet',
+  seo: 'Search Console and crawl for this brand',
   strategy: 'Brand kits. Approve to activate.',
   diagnostics: 'SEO and brand env probes',
   'social-growth': 'Coming soon. Direct Meta later.',

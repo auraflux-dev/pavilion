@@ -4,6 +4,9 @@
 
 ## Why
 
+HSKRG shared platform: brand and customer domains run this app (skin + modules). Do not bounce operators to demo for day-to-day Brand Staff. See businessrocket `docs/HSKRG_PLATFORM.md` and wiki `HOME/hskrg-platform-brand-customer-hosts`.
+
+
 Client Staff runs one school. Platform Staff (`@onpavilion.com`) runs the **fleet**: trials, connectors, brand gaps, support, and health.
 
 Same `/staff` shell and workspace feel as school Staff. Different workspace catalog when the operator is in **platform mode**.

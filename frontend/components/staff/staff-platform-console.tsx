@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Platform Staff fleet console. Same /staff entry as Client Staff; different catalog.
+ * Brand / Platform Staff console. Same /staff entry as Client Staff; different catalog.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -201,6 +201,29 @@ export function StaffPlatformConsole({ me }: Props) {
     setBusy(true)
     setError('')
     try {
+      let tenant = tenantDetail?.id === organizationId ? tenantDetail : null
+      if (!tenant) {
+        const tr = await fetch(`/api/staff/platform/tenants/${encodeURIComponent(organizationId)}`)
+        const td = await tr.json()
+        if (tr.ok && td.tenant) tenant = td.tenant as Tenant
+      }
+      const hostRaw = String(tenant?.customDomain || tenant?.tempHost || '')
+        .trim()
+        .toLowerCase()
+        .replace(/^https?:\/\//, '')
+        .replace(/\/$/, '')
+      const useCustomerHost =
+        Boolean(hostRaw) &&
+        !tenant?.vipReadonly &&
+        !hostRaw.includes('localhost') &&
+        !hostRaw.endsWith('.vercel.app')
+
+      if (useCustomerHost) {
+        // Land on the customer domain so client Staff/member stay on their host.
+        window.location.href = `https://${hostRaw}/api/staff/platform/handoff?organizationId=${encodeURIComponent(organizationId)}&view=home`
+        return
+      }
+
       const r = await fetch('/api/staff/platform/mode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -259,7 +282,7 @@ export function StaffPlatformConsole({ me }: Props) {
               <div
                 className="inline-flex rounded-lg border border-[var(--border)] p-0.5 bg-[#F7F8FA]"
                 role="group"
-                aria-label="Fleet product"
+                aria-label="Brand product"
               >
                 <button
                   type="button"
@@ -337,10 +360,10 @@ export function StaffPlatformConsole({ me }: Props) {
                   : isBr
                     ? BR_BRAND_STAFF_HOME_COPY
                     : canSwitchProduct
-                      ? `Fleet view for Pavilion operators.
+                      ? `Brand home for Pavilion operators.
 Open a tenant to check connectors and brand, or enter Client Staff to serve that school.
-On this shared demo you can also open Business Rocket or AuraFlux fleets from the header.`
-                      : `Fleet view for Pavilion operators.
+On this shared demo you can also open Business Rocket or AuraFlux Brand Staff from the header.`
+                      : `Brand home for Pavilion operators.
 Open a tenant to check connectors and brand, or enter Client Staff to serve that school.`}
               </p>
               {isBr ? (
@@ -372,7 +395,7 @@ Open a tenant to check connectors and brand, or enter Client Staff to serve that
                 </ul>
               </div>
             ) : (
-              <p className="text-sm text-[#5A6070]">No fleet blockers right now.</p>
+              <p className="text-sm text-[#5A6070]">No customer blockers right now.</p>
             )}
             <div className="grid gap-3 sm:grid-cols-2">
               {platformGroups.map((group) => (
@@ -461,10 +484,10 @@ VIP SHMS is dedicated and not editable here.`}
               {!filtered.length ? (
                 <li className="p-4 text-sm text-[#5A6070] whitespace-pre-line">
                   {isAf
-                    ? `No AuraFlux customer orgs in this fleet yet.
+                    ? `No AuraFlux customer orgs yet.
 On demo you should see AuraFlux sandbox when fixtures are active.`
                     : isBr
-                      ? `No Business Rocket customer orgs in this fleet yet.
+                      ? `No Business Rocket customer orgs yet.
 On demo you should see HSKRG BR sandbox when fixtures are active.
 Provision real clients via the BR provision API.`
                       : `No tenants match.`}
@@ -542,7 +565,7 @@ Provision real clients via the BR provision API.`
                 {tenantDetail.vipReadonly ? (
                   <p className="text-amber-800 whitespace-pre-line">
                     {`VIP / dedicated school.
-Serve from the SHMS customer tree, not this fleet console.`}
+Serve from the SHMS customer tree, not this Brand Staff console.`}
                   </p>
                 ) : null}
               </div>
@@ -571,7 +594,7 @@ Suggest-from-URL is a light pass. Use Inspect steps in Brand when thin.`}
                     disabled={busy}
                     onClick={() => void enterClientStaff(tenantDetail.id)}
                   >
-                    Open Brand via Staff warp
+                    Open client Brand Staff
                   </Button>
                 ) : null}
               </div>
@@ -653,7 +676,7 @@ Billing invoices stay on marketing /account (Stripe).`}
                 </li>
               ))}
               {!attention.length ? (
-                <li className="p-3 text-sm text-[#5A6070]">No open fleet items.</li>
+                <li className="p-3 text-sm text-[#5A6070]">No open customer items.</li>
               ) : null}
             </ul>
           </section>
@@ -727,7 +750,7 @@ Wiki: HOME/hskrg-product-surface-map`
                 : `Platform Staff is for @onpavilion.com operators.
 
 Enter client Staff to edit Brand, Pages, and connectors as that school.
-Exit with the Serving banner to return to the fleet.
+Exit with the Serving banner to return to Brand home.
 
 Brand suggest-from-URL is light. Teach boards Inspect:
 right-click logo → copy image URL; Inspect colors → paste hex.

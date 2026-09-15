@@ -775,9 +775,9 @@ This site is for Pavilion operators, not school boards.`
                   .toLowerCase()
                   .endsWith('@auraflux.co')
                   ? `Serving customer Staff for the selected org.
-Return to Brand Staff fleet for tenants, health, and support.`
+Return to Brand home for customers, health, and support.`
                   : `Serving Client Staff for the selected school.
-Open Platform fleet for tenants, health, and support.`}
+Open Platform Staff for customers, health, and support.`}
               </p>
             </div>
             <label className="text-[11px] text-[#5A6070] flex items-center gap-2">

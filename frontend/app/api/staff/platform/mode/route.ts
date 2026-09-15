@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
 
     await writePlatformActivity({
       category: 'ops',
-      action: mode === 'client' ? 'platform_enter_client_staff' : 'platform_exit_to_fleet',
+      action: mode === 'client' ? 'platform_enter_client_staff' : 'platform_exit_to_brand_home',
       actorKind: 'staff',
       email,
       outcome: 'ok',
